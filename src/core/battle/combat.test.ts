@@ -1196,8 +1196,8 @@ describe('特殊能力と勝率の整合性', () => {
         { abilityId: 'areaAttack', name: '範囲攻撃' },
       ] as Enemy['abilities'],
     })
-    const baseRate = winRate('base', party, baseEnemy, 40)
-    const areaRate = winRate('area', party, strongEnemy, 40)
+    const baseRate = winRate('base', party, baseEnemy, 100)
+    const areaRate = winRate('area', party, strongEnemy, 100)
     expect(areaRate).toBeLessThan(baseRate)
     expect(baseRate - areaRate).toBeLessThan(0.5)
   })

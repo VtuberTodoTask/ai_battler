@@ -60,6 +60,8 @@ export interface BattleUnit {
   isAlive: boolean
   escaped: boolean
   statusEffects: StatusEffect[]
+  usedAbilities: Set<string>
+  isSummoned: boolean
 }
 
 export function createAdventurerUnit(adv: Adventurer): BattleUnit {
@@ -96,6 +98,8 @@ export function createAdventurerUnit(adv: Adventurer): BattleUnit {
     isAlive: startHp > 0,
     escaped: false,
     statusEffects: [],
+    usedAbilities: new Set<string>(),
+    isSummoned: false,
   }
 }
 
@@ -135,6 +139,8 @@ export function createEnemyUnit(enemy: Enemy): BattleUnit {
     isAlive: startHp > 0,
     escaped: false,
     statusEffects: [],
+    usedAbilities: new Set<string>(),
+    isSummoned: false,
   }
 }
 

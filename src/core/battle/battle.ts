@@ -23,7 +23,6 @@ import {
 } from './battleState.ts'
 import {
   addStatus,
-  calculateHitChance,
   calculateWeaponDamage,
   getAbilityNumeric,
   hasAbility,
@@ -70,6 +69,7 @@ interface BattleState {
   enemyInitBonus: number
   deadAdventurers: Set<string>
   injuries: InjuryResult[]
+  abilityUsage: Record<string, number>
   context: BattleContext
   leaderTargetId?: string
 }
@@ -400,13 +400,22 @@ function resolveAction(
       'combat',
       'healBlock',
       `${unit.name}が${action.target.name}に治療妨害を仕掛けた。`,
-      { actorId: unit.id, targetIds: [action.target.id] },
+      {
+        actorId: unit.id,
+        targetIds: [action.target.id],
+        metadata: { abilityId: action.abilityId },
+      },
     )
     return
   }
 
   if (action.action === 'revive') {
     if (!action.target || action.target.isAlive || action.target.escaped) return
+    if (action.abilityId) {
+      unit.usedAbilities.add(action.abilityId)
+      state.abilityUsage[action.abilityId] =
+        (state.abilityUsage[action.abilityId] ?? 0) + 1
+    }
     const heal = getAbilityNumeric(unit, 'reviveHeal', 10)
     action.target.isAlive = true
     action.target.hp = clamp(heal, 1, action.target.maxHp)
@@ -417,12 +426,21 @@ function resolveAction(
       'combat',
       'revive',
       `${unit.name}が${action.target.name}を蘇生させた。+${action.target.hp} HP`,
-      { actorId: unit.id, targetIds: [action.target.id] },
+      {
+        actorId: unit.id,
+        targetIds: [action.target.id],
+        metadata: { abilityId: action.abilityId },
+      },
     )
     return
   }
 
   if (action.action === 'summon') {
+    if (action.abilityId) {
+      unit.usedAbilities.add(action.abilityId)
+      state.abilityUsage[action.abilityId] =
+        (state.abilityUsage[action.abilityId] ?? 0) + 1
+    }
     const count = getAbilityNumeric(unit, 'summonCount', 2)
     const summoned: BattleUnit[] = []
     for (let i = 0; i < count && state.enemies.length < 12; i++) {
@@ -435,6 +453,7 @@ function resolveAction(
         tier: 'minion',
       })
       const summonedUnit = createEnemyUnit(enemy)
+      summonedUnit.isSummoned = true
       state.enemies.push(summonedUnit)
       summoned.push(summonedUnit)
     }
@@ -443,7 +462,11 @@ function resolveAction(
       'combat',
       'summon',
       `${unit.name}が${summoned.length}体の仲間を召喚した。`,
-      { actorId: unit.id, targetIds: summoned.map((e) => e.id) },
+      {
+        actorId: unit.id,
+        targetIds: summoned.map((e) => e.id),
+        metadata: { abilityId: action.abilityId },
+      },
     )
     return
   }
@@ -559,13 +582,7 @@ function resolveAttack(
     actorId: attacker.id,
     targetIds: [defender.id],
     roll: result.roll,
-    successChance: calculateHitChance(
-      attacker,
-      defender,
-      skill,
-      defenderSkill,
-      modifier,
-    ),
+    successChance: result.successChance,
     damage: result.damageDealt,
     statusApplied: result.statusApplied,
   })
@@ -706,8 +723,12 @@ function processStartOfRound(state: BattleState): void {
   }
 
   if (!state.ended && shouldEnemyRetreat(state.enemies, state.party)) {
-    const enemy = getAliveEnemies(state)[0]
-    if (enemy) attemptRetreat(state, enemy)
+    const alive = getAliveEnemies(state)
+    for (const enemy of alive) {
+      if (enemy.species !== 'undead' && enemy.species !== 'construct') {
+        attemptRetreat(state, enemy)
+      }
+    }
   }
 }
 
@@ -888,6 +909,7 @@ export function runBattle(
     enemyInitBonus: 0,
     deadAdventurers: new Set<string>(),
     injuries: [],
+    abilityUsage: {},
     context: options?.context ?? getDefaultContext(),
   }
 
@@ -966,6 +988,7 @@ export function runBattle(
     discoveredWeaknesses: [...state.discoveredWeaknesses],
     partyDamageDealt: state.partyDamageDealt,
     enemyDamageDealt: state.enemyDamageDealt,
+    abilityUsage: state.abilityUsage,
     contactResult: state.contact,
     retreatResult: state.retreat,
     logs: state.logs,

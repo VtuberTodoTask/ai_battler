@@ -166,8 +166,7 @@ function selectAllyForHeal(
   allies: BattleUnit[],
 ): BattleUnit | undefined {
   const altruism = personalityValue(healer, 'altruism')
-  const greed = personalityValue(healer, 'greed')
-  const threshold = 0.5 - altruism * 0.03 + greed * 0.02
+  const threshold = 0.5 - altruism * 0.03
   const wounded = allies.filter(
     (u) => u.isAlive && !u.escaped && u.hp < u.maxHp * threshold,
   )
@@ -217,7 +216,7 @@ export function decideAdventurerAction(
   const discipline = personality?.discipline ?? 0
 
   const retreatHpThreshold =
-    0.25 - bravery * 0.015 + caution * 0.015 + greed * 0.01 - discipline * 0.01
+    0.25 - bravery * 0.015 + caution * 0.015 - greed * 0.015 - discipline * 0.01
 
   if (unit.role === 'healer') {
     const downed = selectWoundedForRescue(unit, state.party)
@@ -316,7 +315,7 @@ export function decideAdventurerAction(
 }
 
 function findDeadAlly(enemies: BattleUnit[]): BattleUnit | undefined {
-  return enemies.find((e) => !e.isAlive && !e.escaped)
+  return enemies.find((e) => !e.isAlive && !e.escaped && !e.isSummoned)
 }
 
 function findHealerTarget(party: BattleUnit[]): BattleUnit | undefined {
@@ -366,6 +365,8 @@ export function decideEnemyAction(
       if (!def) continue
 
       if (def.effects.reviveHeal !== undefined) {
+        if (unit.isSummoned || unit.usedAbilities.has(ability.abilityId))
+          continue
         const dead = findDeadAlly(state.enemies)
         if (dead) {
           return {
@@ -377,6 +378,8 @@ export function decideEnemyAction(
       }
 
       if (def.effects.summonCount !== undefined) {
+        if (unit.isSummoned || unit.usedAbilities.has(ability.abilityId))
+          continue
         const aliveEnemies = getAliveEnemies(state)
         if (aliveEnemies.length < 12) {
           return { action: 'summon', abilityId: ability.abilityId }

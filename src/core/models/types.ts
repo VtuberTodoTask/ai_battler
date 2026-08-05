@@ -335,6 +335,7 @@ export interface BattleResult {
   discoveredWeaknesses: string[]
   partyDamageDealt: number
   enemyDamageDealt: number
+  abilityUsage: Record<string, number>
   contactResult: ContactResult
   retreatResult?: RetreatResult
   logs: BattleLogEntry[]

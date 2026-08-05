@@ -108,12 +108,12 @@ export function shouldPartyRetreat(
     30 +
     traitModifier -
     bravery * 1.5 +
-    caution * 1.0 +
-    greed * 0.5 -
+    caution * 1.0 -
+    greed * 0.8 -
     discipline * 0.5
 
   const retreatHpThreshold =
-    0.25 - bravery * 0.015 + caution * 0.015 + greed * 0.01 - discipline * 0.01
+    0.25 - bravery * 0.015 + caution * 0.015 - greed * 0.015 - discipline * 0.01
 
   if (incapacitated >= total * 0.5) return true
   if (!healerAlive && hasWounded) return true
@@ -138,10 +138,10 @@ export function shouldEnemyRetreat(
 ): boolean {
   const alive = getAliveEnemies({ enemies } as { enemies: BattleUnit[] })
   if (alive.length === 0) return false
-  const mindless = alive.some(
+  const allMindless = alive.every(
     (e) => e.species === 'undead' || e.species === 'construct',
   )
-  if (mindless) return false
+  if (allMindless) return false
 
   const total = enemies.length
   const incapacitated = enemies.filter((e) => !e.isAlive || e.escaped).length
@@ -156,7 +156,7 @@ export function shouldEnemyRetreat(
     (a, b) => b.skills.leadership - a.skills.leadership,
   )[0]
   const leaderDead = allLeader !== undefined && !allLeader.isAlive
-  const commanderLossPenalty =
+  const commanderLossBonus =
     leaderDead &&
     alive.some((e) =>
       e.weaknesses?.some((w) => w.weaknessId === 'commanderLoss'),
@@ -164,11 +164,9 @@ export function shouldEnemyRetreat(
       ? 15
       : 0
 
-  if (commanderLossPenalty > 0) {
-    if (avg <= threshold * 0.3 - commanderLossPenalty) return true
-  }
+  if (avg <= threshold * 0.3 + commanderLossBonus) return true
 
-  if (avg <= threshold * 0.6) return true
+  if (avg <= threshold * 0.6 + commanderLossBonus) return true
 
   return false
 }

@@ -14,6 +14,7 @@ export interface ActionResult {
   critical: boolean
   fumble: boolean
   roll: number
+  successChance: number
   damage: number
   damageDealt: number
   statusApplied?: string[]
@@ -83,20 +84,30 @@ export function hasAbility(unit: BattleUnit, abilityId: string): boolean {
   return unit.abilities?.some((a) => a.abilityId === abilityId) ?? false
 }
 
-export function getAbilityNumeric(
-  unit: BattleUnit,
-  key: string,
-  defaultValue = 0,
-): number {
-  let total = defaultValue
+function collectAbilityNumericValues(unit: BattleUnit, key: string): number[] {
+  const values: number[] = []
   unit.abilities?.forEach((a) => {
     const def = ABILITY_MAP[a.abilityId]
     const v = def?.effects[key]
-    if (typeof v === 'number') total += v
+    if (typeof v === 'number') values.push(v)
     else if (typeof v === 'string' && !Number.isNaN(Number(v)))
-      total += Number(v)
+      values.push(Number(v))
   })
-  return total
+  return values
+}
+
+export function sumAbilityNumeric(unit: BattleUnit, key: string): number {
+  const values = collectAbilityNumericValues(unit, key)
+  return values.reduce((a, b) => a + b, 0)
+}
+
+export function getAbilityNumeric(
+  unit: BattleUnit,
+  key: string,
+  fallback = 0,
+): number {
+  const values = collectAbilityNumericValues(unit, key)
+  return values.length > 0 ? values.reduce((a, b) => a + b, 0) : fallback
 }
 
 export function getAbilityBoolean(unit: BattleUnit, key: string): boolean {
@@ -277,6 +288,7 @@ export function rollAttack(
       critical,
       fumble,
       roll,
+      successChance: chance,
       damage: 0,
       damageDealt: 0,
       message: `${attacker.name} missed`,
@@ -377,6 +389,7 @@ export function rollAttack(
     critical,
     fumble,
     roll,
+    successChance: chance,
     damage: raw,
     damageDealt: final,
     statusApplied: appliedStatuses,
