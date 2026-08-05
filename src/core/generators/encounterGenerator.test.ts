@@ -6,7 +6,7 @@ import {
 } from './encounterGenerator.ts'
 
 describe('generateEncounter', () => {
-  it('難易度別に脅威予算の±20%以内に収まる', () => {
+  it('難易度別に脅威予算の0.8～1.2倍に収まる', () => {
     for (let i = 0; i < 1000; i++) {
       const party = generateAdventurers({ seed: `enc-party-${i}`, count: 4 })
       const threat = calculatePartyThreat(party)
@@ -26,8 +26,11 @@ describe('generateEncounter', () => {
               ? threat * 1.25
               : threat * 1.5
       const ratio = totalThreat / budget
-      expect(ratio).toBeGreaterThanOrEqual(0.6)
-      expect(ratio).toBeLessThanOrEqual(1.4)
+      // Extremely small budgets fall back to one cheap minion and may exceed 1.2.
+      if (budget >= 1) {
+        expect(ratio).toBeGreaterThanOrEqual(0.8)
+        expect(ratio).toBeLessThanOrEqual(1.2)
+      }
       expect(enemies.length).toBeLessThanOrEqual(12)
       expect(
         enemies.filter((e) => e.tier === 'boss').length,

@@ -5,14 +5,46 @@ import {
 } from './battleState.ts'
 import { hasStatus } from './actions.ts'
 import { ABILITY_MAP } from '../../data/enemyData.ts'
+import { Personality } from '../models/types.ts'
 
 export type ActionType =
-  'attack' | 'ranged' | 'magic' | 'heal' | 'guard' | 'support' | 'retreat'
+  | 'attack'
+  | 'ranged'
+  | 'magic'
+  | 'heal'
+  | 'guard'
+  | 'support'
+  | 'retreat'
+  | 'revive'
+  | 'summon'
+  | 'healBlock'
+  | 'flank'
 
 export interface DecidedAction {
   action: ActionType
   target?: BattleUnit
   spellElement?: string
+  isFlank?: boolean
+  abilityId?: string
+}
+
+interface AiState {
+  party: BattleUnit[]
+  enemies: BattleUnit[]
+  round: number
+  leaderTargetId?: string
+}
+
+function getPersonality(unit: BattleUnit): Personality | undefined {
+  const original = unit.original
+  if (original && 'personality' in original) {
+    return (original as { personality: Personality }).personality
+  }
+  return undefined
+}
+
+function personalityValue(unit: BattleUnit, key: keyof Personality): number {
+  return getPersonality(unit)?.[key] ?? 0
 }
 
 function lowestHp(units: BattleUnit[]): BattleUnit | undefined {
@@ -59,18 +91,49 @@ function roleTarget(units: BattleUnit[], role: string): BattleUnit | undefined {
   return units.find((u) => u.isAlive && !u.escaped && u.role === role)
 }
 
+function knownWeaknessTarget(units: BattleUnit[]): BattleUnit | undefined {
+  return units.find((u) => u.isAlive && u.weaknesses?.some((w) => w.known))
+}
+
+function tauntTarget(units: BattleUnit[]): BattleUnit | undefined {
+  return units.find(
+    (u) =>
+      u.isAlive &&
+      !u.escaped &&
+      u.abilities?.some((a) => {
+        const def = ABILITY_MAP[a.abilityId]
+        return def?.effects.taunt === 1 || def?.effects.taunt === true
+      }),
+  )
+}
+
 function selectEnemyTargetForAdventurer(
   unit: BattleUnit,
   enemies: BattleUnit[],
+  leaderTargetId?: string,
 ): BattleUnit | undefined {
   const alive = enemies.filter((e) => e.isAlive && !e.escaped)
   if (alive.length === 0) return undefined
+
+  const discipline = personalityValue(unit, 'discipline')
+  if (leaderTargetId && discipline > 0) {
+    const leaderTarget = alive.find((e) => e.id === leaderTargetId)
+    if (leaderTarget) return leaderTarget
+  }
+
+  const taunt = tauntTarget(alive)
+  if (taunt) return taunt
+
   switch (unit.role) {
     case 'vanguard':
       return lowestHp(alive) ?? highestThreat(alive) ?? alive[0]
     case 'guardian':
       return highestThreat(alive) ?? alive[0]
     case 'scout': {
+      const rearWeak = alive.find((e) =>
+        e.weaknesses?.some((w) => w.weaknessId === 'rearAttack' && w.known),
+      )
+      if (rearWeak) return rearWeak
       const controller = alive.find(
         (e) =>
           e.behavior?.targetPreference === 'healer' ||
@@ -87,10 +150,8 @@ function selectEnemyTargetForAdventurer(
       return flying ?? lowestHp(alive) ?? alive[0]
     }
     case 'mage': {
-      const withWeakness = alive.find(
-        (e) => e.weaknesses && e.weaknesses.length > 0,
-      )
-      return withWeakness ?? highestThreat(alive) ?? alive[0]
+      const withKnownWeakness = knownWeaknessTarget(alive)
+      return withKnownWeakness ?? highestThreat(alive) ?? alive[0]
     }
     case 'healer':
     case 'support':
@@ -104,8 +165,11 @@ function selectAllyForHeal(
   healer: BattleUnit,
   allies: BattleUnit[],
 ): BattleUnit | undefined {
+  const altruism = personalityValue(healer, 'altruism')
+  const greed = personalityValue(healer, 'greed')
+  const threshold = 0.5 - altruism * 0.03 + greed * 0.02
   const wounded = allies.filter(
-    (u) => u.isAlive && !u.escaped && u.hp < u.maxHp * 0.5,
+    (u) => u.isAlive && !u.escaped && u.hp < u.maxHp * threshold,
   )
   if (wounded.length === 0) return undefined
   return wounded.reduce((a, b) => (a.hp / a.maxHp < b.hp / b.maxHp ? a : b))
@@ -124,28 +188,55 @@ function selectAllyForGuard(
   )
 }
 
+function selectWoundedForRescue(
+  unit: BattleUnit,
+  allies: BattleUnit[],
+): BattleUnit | undefined {
+  const altruism = personalityValue(unit, 'altruism')
+  if (altruism <= 0) return undefined
+  const down = allies.find((u) => !u.isAlive && !u.escaped && u.hp > -20)
+  return down
+}
+
 export function decideAdventurerAction(
   unit: BattleUnit,
-  state: { party: BattleUnit[]; enemies: BattleUnit[]; round: number },
+  state: AiState,
 ): DecidedAction {
   const enemies = getAliveEnemies(state)
   const allies = getAliveAdventurers(state)
   if (enemies.length === 0 || allies.length === 0) return { action: 'retreat' }
 
   const hpRatio = unit.hp / unit.maxHp
+  const personality = getPersonality(unit)
+
+  const bravery = personality?.bravery ?? 0
+  const caution = personality?.caution ?? 0
+  const cooperation = personality?.cooperation ?? 0
+  const altruism = personality?.altruism ?? 0
+  const greed = personality?.greed ?? 0
+  const discipline = personality?.discipline ?? 0
+
+  const retreatHpThreshold =
+    0.25 - bravery * 0.015 + caution * 0.015 + greed * 0.01 - discipline * 0.01
 
   if (unit.role === 'healer') {
+    const downed = selectWoundedForRescue(unit, state.party)
+    if (downed && altruism > 0 && unit.mp >= 3) {
+      return { action: 'heal', target: downed }
+    }
     const target = selectAllyForHeal(unit, allies)
     if (target && unit.mp >= 3) return { action: 'heal', target }
     const poisoned = allies.find(
       (u) => hasStatus(u, 'poisoned') || hasStatus(u, 'bleeding'),
     )
     if (poisoned && unit.mp >= 3) return { action: 'heal', target: poisoned }
-    if (unit.role === 'healer' && unit.mp >= 3 && allies.length > 0) {
-      const low = allies.find((u) => u.hp < u.maxHp)
-      if (low) return { action: 'heal', target: low }
-    }
-    const enemy = selectEnemyTargetForAdventurer(unit, enemies)
+    const low = allies.find((u) => u.hp < u.maxHp)
+    if (low && unit.mp >= 3) return { action: 'heal', target: low }
+    const enemy = selectEnemyTargetForAdventurer(
+      unit,
+      enemies,
+      state.leaderTargetId,
+    )
     if (enemy) return { action: 'attack', target: enemy }
     return { action: 'retreat' }
   }
@@ -153,48 +244,90 @@ export function decideAdventurerAction(
   if (unit.role === 'support') {
     const lowMorale = allies.find((u) => u.morale < 40)
     if (lowMorale) return { action: 'support', target: lowMorale }
-    const wounded = selectAllyForGuard(unit, allies)
-    if (wounded) return { action: 'guard', target: wounded }
-    const enemy = selectEnemyTargetForAdventurer(unit, enemies)
+    if (cooperation > 0 || altruism > 0 || caution > 0) {
+      const wounded = selectAllyForGuard(unit, allies)
+      if (wounded && unit.hp / unit.maxHp > 0.3)
+        return { action: 'guard', target: wounded }
+    }
+    const enemy = selectEnemyTargetForAdventurer(
+      unit,
+      enemies,
+      state.leaderTargetId,
+    )
     if (enemy) return { action: 'attack', target: enemy }
     return { action: 'retreat' }
   }
 
   if (unit.role === 'guardian') {
-    const wounded = selectAllyForGuard(unit, allies)
-    if (wounded && unit.hp / unit.maxHp > 0.3)
-      return { action: 'guard', target: wounded }
+    if (cooperation > 0 || caution > 0) {
+      const wounded = selectAllyForGuard(unit, allies)
+      if (wounded && unit.hp / unit.maxHp > 0.3)
+        return { action: 'guard', target: wounded }
+    }
   }
 
   if (unit.role === 'mage') {
-    if (unit.mp >= 5 && enemies.length >= 2) {
-      return { action: 'magic', target: enemies[0] }
-    }
-    const target = selectEnemyTargetForAdventurer(unit, enemies)
+    const target = selectEnemyTargetForAdventurer(
+      unit,
+      enemies,
+      state.leaderTargetId,
+    )
     if (target && unit.mp >= 5) return { action: 'magic', target }
   }
 
-  if (hpRatio < 0.25 && unit.role !== 'guardian') {
+  if (unit.role === 'scout') {
+    const rearWeak = enemies.find((e) =>
+      e.weaknesses?.some((w) => w.weaknessId === 'rearAttack' && w.known),
+    )
+    if (rearWeak) return { action: 'flank', target: rearWeak, isFlank: true }
+  }
+
+  if (hpRatio < retreatHpThreshold && unit.role !== 'guardian') {
     if (unit.role === 'ranger') {
-      const enemy = selectEnemyTargetForAdventurer(unit, enemies)
+      const enemy = selectEnemyTargetForAdventurer(
+        unit,
+        enemies,
+        state.leaderTargetId,
+      )
       if (enemy) return { action: 'ranged', target: enemy }
     }
     return { action: 'retreat' }
   }
 
   if (unit.role === 'ranger' && unit.equipment?.weapon?.kind === 'ranged') {
-    const target = selectEnemyTargetForAdventurer(unit, enemies)
+    const target = selectEnemyTargetForAdventurer(
+      unit,
+      enemies,
+      state.leaderTargetId,
+    )
     if (target) return { action: 'ranged', target }
   }
 
-  const target = selectEnemyTargetForAdventurer(unit, enemies)
-  if (target) return { action: 'attack', target }
+  const target = selectEnemyTargetForAdventurer(
+    unit,
+    enemies,
+    state.leaderTargetId,
+  )
+  if (target) {
+    if (unit.role === 'scout') return { action: 'flank', target, isFlank: true }
+    return { action: 'attack', target }
+  }
   return { action: 'retreat' }
+}
+
+function findDeadAlly(enemies: BattleUnit[]): BattleUnit | undefined {
+  return enemies.find((e) => !e.isAlive && !e.escaped)
+}
+
+function findHealerTarget(party: BattleUnit[]): BattleUnit | undefined {
+  return party.find(
+    (u) => u.isAlive && (u.role === 'healer' || u.role === 'support'),
+  )
 }
 
 export function decideEnemyAction(
   unit: BattleUnit,
-  state: { party: BattleUnit[]; enemies: BattleUnit[]; round: number },
+  state: AiState,
 ): DecidedAction {
   const party = getAliveAdventurers(state)
   if (party.length === 0) return { action: 'retreat' }
@@ -225,15 +358,45 @@ export function decideEnemyAction(
       target = party[0]
   }
 
-  if (
-    unit.behavior?.usesAbilitiesFirst &&
-    unit.abilities &&
-    unit.abilities.length > 0
-  ) {
-    const ability = unit.abilities[0]
-    const def = ABILITY_MAP[ability.abilityId]
-    if (def?.effects.healBlock || def?.effects.fearChance) {
-      return { action: 'magic', target }
+  const abilities = unit.abilities ?? []
+
+  if (unit.behavior?.usesAbilitiesFirst && abilities.length > 0) {
+    for (const ability of abilities) {
+      const def = ABILITY_MAP[ability.abilityId]
+      if (!def) continue
+
+      if (def.effects.reviveHeal !== undefined) {
+        const dead = findDeadAlly(state.enemies)
+        if (dead) {
+          return {
+            action: 'revive',
+            target: dead,
+            abilityId: ability.abilityId,
+          }
+        }
+      }
+
+      if (def.effects.summonCount !== undefined) {
+        const aliveEnemies = getAliveEnemies(state)
+        if (aliveEnemies.length < 12) {
+          return { action: 'summon', abilityId: ability.abilityId }
+        }
+      }
+
+      if (def.effects.healBlock === 1 || def.effects.healBlock === true) {
+        const healer = findHealerTarget(party)
+        if (healer) {
+          return {
+            action: 'healBlock',
+            target: healer,
+            abilityId: ability.abilityId,
+          }
+        }
+      }
+
+      if (def.effects.fearChance !== undefined) {
+        return { action: 'magic', target, abilityId: ability.abilityId }
+      }
     }
   }
 

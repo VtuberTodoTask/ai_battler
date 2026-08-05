@@ -142,18 +142,20 @@ export interface AbilityInstance {
   name: string
 }
 
+export type WeaknessEffect =
+  | 'damage'
+  | 'defenseDown'
+  | 'stunChance'
+  | 'disable'
+  | 'moraleDown'
+  | 'fleeChance'
+
 export interface WeaknessDefinition {
   id: string
   name: string
   element?: ElementType
   multiplier?: number
-  effect?:
-    | 'damage'
-    | 'defenseDown'
-    | 'stunChance'
-    | 'disable'
-    | 'moraleDown'
-    | 'fleeChance'
+  effect?: WeaknessEffect
 }
 
 export interface WeaknessInstance {
@@ -180,7 +182,15 @@ export interface StatusEffect {
 }
 
 export type StatusEffectType =
-  'poisoned' | 'bleeding' | 'stunned' | 'weakened' | 'guarded' | 'frightened'
+  | 'poisoned'
+  | 'bleeding'
+  | 'stunned'
+  | 'weakened'
+  | 'guarded'
+  | 'frightened'
+  | 'healBlocked'
+  | 'stealthed'
+  | 'defenseDown'
 
 export interface Adventurer {
   id: string
@@ -242,13 +252,30 @@ export interface EncounterGenerationOptions {
 export type ContactResultType =
   'greatSuccess' | 'success' | 'failure' | 'greatFailure'
 
+export interface ContactEffects {
+  firstRoundHitBonus?: number
+  initiativeBonus?: number
+  enemyInitiativeBonus?: number
+  initialDamage?: number
+  moralePenalty?: number
+  stunnedEnemies?: number
+  side?: 'party' | 'enemy'
+}
+
 export interface ContactResult {
   type: ContactResultType
   partyScouting: number
   enemyStealth: number
   successChance: number
   roll: number
-  effects: Record<string, unknown>
+  effects: ContactEffects
+}
+
+export interface BattleContext {
+  lighting: 'dark' | 'bright' | 'normal'
+  noise: number
+  water: boolean
+  smoke: boolean
 }
 
 export type BattleOutcome =
@@ -288,6 +315,10 @@ export interface InjuryResult {
   survivalRoll: number
   survivalChance: number
   category: 'light' | 'serious' | 'critical' | 'permanentInjury' | 'dead'
+}
+
+export interface BattleOptions {
+  context?: BattleContext
 }
 
 export interface BattleResult {

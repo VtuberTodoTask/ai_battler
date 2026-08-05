@@ -6,6 +6,7 @@ import {
 import { TRAIT_MAP } from '../../data/traits.ts'
 import { ADVENTURER_THREAT } from '../balance/constants.ts'
 import { clamp } from '../util.ts'
+import { Personality } from '../models/types.ts'
 
 export function adjustMorale(unit: BattleUnit, delta: number): void {
   unit.morale = clamp(unit.morale + delta, 0, 100)
@@ -17,7 +18,15 @@ export function onAllyIncapacitated(
   isLeader = false,
 ): void {
   if (fallen.isAdventurer === unit.isAdventurer) {
-    adjustMorale(unit, isLeader ? -15 : -8)
+    const leaderPenalty = isLeader ? -20 : -10
+    adjustMorale(unit, leaderPenalty)
+
+    if (isLeader && !fallen.isAdventurer) {
+      const commanderLoss = unit.weaknesses?.some(
+        (w) => w.weaknessId === 'commanderLoss',
+      )
+      if (commanderLoss) adjustMorale(unit, -15)
+    }
   }
 }
 
@@ -51,6 +60,23 @@ export function getLeader(party: BattleUnit[]): BattleUnit | undefined {
     .sort((a, b) => b.skills.leadership - a.skills.leadership)[0]
 }
 
+export function getEnemyLeader(enemies: BattleUnit[]): BattleUnit | undefined {
+  return enemies
+    .filter((u) => u.isAlive && !u.escaped)
+    .sort((a, b) => b.skills.leadership - a.skills.leadership)[0]
+}
+
+function personalityMod(
+  unit: BattleUnit | undefined,
+  key: keyof Personality,
+): number {
+  const original = unit?.original
+  if (original && 'personality' in original) {
+    return (original as { personality: Personality }).personality[key] ?? 0
+  }
+  return 0
+}
+
 export function shouldPartyRetreat(
   party: BattleUnit[],
   enemies: BattleUnit[],
@@ -66,17 +92,33 @@ export function shouldPartyRetreat(
   const hpRatio = partyTotalHpRatio(party)
   const avgMorale = averagePartyMorale(party)
   const leader = getLeader(party)
-  const thresholdModifier =
+
+  const traitModifier =
     leader?.traits?.reduce((sum, t) => {
       const effect = TRAIT_MAP[t.traitId]?.effects?.retreatThresholdModifier
       return sum + (typeof effect === 'number' ? effect : 0)
     }, 0) ?? 0
-  const threshold = 30 + thresholdModifier
+
+  const bravery = personalityMod(leader, 'bravery')
+  const caution = personalityMod(leader, 'caution')
+  const greed = personalityMod(leader, 'greed')
+  const discipline = personalityMod(leader, 'discipline')
+
+  const moraleThreshold =
+    30 +
+    traitModifier -
+    bravery * 1.5 +
+    caution * 1.0 +
+    greed * 0.5 -
+    discipline * 0.5
+
+  const retreatHpThreshold =
+    0.25 - bravery * 0.015 + caution * 0.015 + greed * 0.01 - discipline * 0.01
 
   if (incapacitated >= total * 0.5) return true
   if (!healerAlive && hasWounded) return true
-  if (hpRatio <= 0.25) return true
-  if (avgMorale <= threshold) return true
+  if (hpRatio <= retreatHpThreshold) return true
+  if (avgMorale <= moraleThreshold) return true
 
   const enemyThreat = getAliveEnemies({ enemies } as {
     enemies: BattleUnit[]
@@ -109,6 +151,23 @@ export function shouldEnemyRetreat(
   const threshold =
     alive.reduce((sum, e) => sum + (e.behavior?.retreatThreshold ?? 25), 0) /
     alive.length
+
+  const allLeader = [...enemies].sort(
+    (a, b) => b.skills.leadership - a.skills.leadership,
+  )[0]
+  const leaderDead = allLeader !== undefined && !allLeader.isAlive
+  const commanderLossPenalty =
+    leaderDead &&
+    alive.some((e) =>
+      e.weaknesses?.some((w) => w.weaknessId === 'commanderLoss'),
+    )
+      ? 15
+      : 0
+
+  if (commanderLossPenalty > 0) {
+    if (avg <= threshold * 0.3 - commanderLossPenalty) return true
+  }
+
   if (avg <= threshold * 0.6) return true
 
   return false
@@ -122,7 +181,23 @@ export function calculateRetreatChance(
   const avgWil = average(pursuers.map((u) => u.stats.wil))
   const avgDex = average(pursuers.map((u) => u.stats.dex))
   const enemyPursuit = Math.max(0, (avgDex - retreater.stats.dex) / 2)
-  return clamp(5, 95, leadership + retreater.stats.wil - avgWil - enemyPursuit)
+
+  const bravery = personalityMod(retreater, 'bravery')
+  const caution = personalityMod(retreater, 'caution')
+  const discipline = personalityMod(retreater, 'discipline')
+  const greed = personalityMod(retreater, 'greed')
+
+  const chance =
+    leadership +
+    retreater.stats.wil -
+    avgWil -
+    enemyPursuit +
+    bravery * 2 +
+    discipline * 1 -
+    caution * 2 -
+    greed * 1
+
+  return clamp(chance, 5, 95)
 }
 
 function average(values: number[]): number {

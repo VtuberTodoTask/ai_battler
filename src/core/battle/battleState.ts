@@ -63,12 +63,13 @@ export interface BattleUnit {
 }
 
 export function createAdventurerUnit(adv: Adventurer): BattleUnit {
+  const startHp = adv.currentHp ?? adv.maxHp
   return {
     id: adv.id,
     name: adv.name,
     isAdventurer: true,
     original: deepClone(adv),
-    hp: adv.maxHp,
+    hp: startHp,
     maxHp: adv.maxHp,
     mp: adv.maxMp,
     maxMp: adv.maxMp,
@@ -77,7 +78,7 @@ export function createAdventurerUnit(adv: Adventurer): BattleUnit {
     skills: { ...adv.skills },
     role: adv.role,
     rank: adv.rank,
-    traits: [...adv.traits],
+    traits: deepClone(adv.traits),
     abilities: undefined,
     weaknesses: undefined,
     behavior: undefined,
@@ -92,19 +93,20 @@ export function createAdventurerUnit(adv: Adventurer): BattleUnit {
         }
       : undefined,
     initiative: 0,
-    isAlive: true,
+    isAlive: startHp > 0,
     escaped: false,
     statusEffects: [],
   }
 }
 
 export function createEnemyUnit(enemy: Enemy): BattleUnit {
+  const startHp = enemy.currentHp ?? enemy.maxHp
   return {
     id: enemy.id,
     name: enemy.name,
     isAdventurer: false,
     original: deepClone(enemy),
-    hp: enemy.maxHp,
+    hp: startHp,
     maxHp: enemy.maxHp,
     mp: 0,
     maxMp: 0,
@@ -115,8 +117,8 @@ export function createEnemyUnit(enemy: Enemy): BattleUnit {
     rank: enemy.rank,
     species: enemy.species,
     traits: undefined,
-    abilities: [...enemy.abilities],
-    weaknesses: [...enemy.weaknesses],
+    abilities: deepClone(enemy.abilities),
+    weaknesses: deepClone(enemy.weaknesses),
     behavior: { ...enemy.behavior },
     threatCost: enemy.threatCost,
     equipment: enemy.equipment
@@ -130,7 +132,7 @@ export function createEnemyUnit(enemy: Enemy): BattleUnit {
         }
       : undefined,
     initiative: 0,
-    isAlive: true,
+    isAlive: startHp > 0,
     escaped: false,
     statusEffects: [],
   }

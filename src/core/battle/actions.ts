@@ -1,8 +1,13 @@
 import { SeededRng } from '../rng/seededRng.ts'
 import { clamp } from '../util.ts'
 import { BattleUnit } from './battleState.ts'
-import { WEAKNESS_MAP } from '../../data/enemyData.ts'
+import { ABILITY_MAP, WEAKNESS_MAP } from '../../data/enemyData.ts'
 import { MAX_HIT_CHANCE, MIN_HIT_CHANCE } from '../balance/constants.ts'
+import {
+  BattleContext,
+  StatusEffectType,
+  WeaknessInstance,
+} from '../models/types.ts'
 
 export interface ActionResult {
   hit: boolean
@@ -13,6 +18,16 @@ export interface ActionResult {
   damageDealt: number
   statusApplied?: string[]
   message: string
+}
+
+export interface AttackOptions {
+  modifier?: number
+  critMultiplier?: number
+  context?: BattleContext
+  attackType?: 'melee' | 'ranged' | 'magic'
+  isFlank?: boolean
+  firstRoundHitBonus?: number
+  swarmAllyCount?: number
 }
 
 export function hasStatus(unit: BattleUnit, type: string): boolean {
@@ -37,13 +52,7 @@ export function addStatus(
     return
   }
   unit.statusEffects.push({
-    type: type as
-      | 'poisoned'
-      | 'bleeding'
-      | 'stunned'
-      | 'weakened'
-      | 'guarded'
-      | 'frightened',
+    type: type as StatusEffectType,
     duration,
     value,
     sourceId: sourceId ?? 'system',
@@ -60,7 +69,44 @@ export function getSkill(
   if (hasStatus(unit, 'frightened')) value -= 5
   if (hasStatus(unit, 'guarded'))
     value += unit.statusEffects.find((e) => e.type === 'guarded')?.value ?? 5
+  if (
+    (skill === 'defense' || skill === 'defenseMagic') &&
+    hasStatus(unit, 'defenseDown')
+  ) {
+    value -=
+      unit.statusEffects.find((e) => e.type === 'defenseDown')?.value ?? 5
+  }
   return clamp(value, 1, 200)
+}
+
+export function hasAbility(unit: BattleUnit, abilityId: string): boolean {
+  return unit.abilities?.some((a) => a.abilityId === abilityId) ?? false
+}
+
+export function getAbilityNumeric(
+  unit: BattleUnit,
+  key: string,
+  defaultValue = 0,
+): number {
+  let total = defaultValue
+  unit.abilities?.forEach((a) => {
+    const def = ABILITY_MAP[a.abilityId]
+    const v = def?.effects[key]
+    if (typeof v === 'number') total += v
+    else if (typeof v === 'string' && !Number.isNaN(Number(v)))
+      total += Number(v)
+  })
+  return total
+}
+
+export function getAbilityBoolean(unit: BattleUnit, key: string): boolean {
+  return (
+    unit.abilities?.some((a) => {
+      const def = ABILITY_MAP[a.abilityId]
+      const v = def?.effects[key]
+      return v === true || v === 1 || v === 'true'
+    }) ?? false
+  )
 }
 
 export function calculateHitChance(
@@ -75,6 +121,106 @@ export function calculateHitChance(
   return clamp(50 + atk - def + modifier, MIN_HIT_CHANCE, MAX_HIT_CHANCE)
 }
 
+function isWeaknessKnownForAttacker(
+  attacker: BattleUnit,
+  weakness: WeaknessInstance,
+): boolean {
+  if (attacker.isAdventurer) return weakness.known
+  // Enemies do not have adventurer weaknesses, but treat them as known if used.
+  return true
+}
+
+function applyWeaknessEffects(
+  rng: SeededRng,
+  attacker: BattleUnit,
+  defender: BattleUnit,
+  attackType: 'melee' | 'ranged' | 'magic',
+  context: BattleContext,
+  isFlank: boolean,
+  element: string,
+): { multiplier: number; statuses: string[] } {
+  let multiplier = 1
+  const statuses: string[] = []
+
+  if (!defender.weaknesses) return { multiplier, statuses }
+
+  for (const w of defender.weaknesses) {
+    if (!isWeaknessKnownForAttacker(attacker, w)) continue
+    const def = WEAKNESS_MAP[w.weaknessId]
+    if (!def) continue
+
+    if (def.element && def.element === element) {
+      multiplier = Math.max(multiplier, def.multiplier ?? 1.5)
+    }
+    if (def.id === 'rearAttack' && isFlank && def.multiplier) {
+      multiplier = Math.max(multiplier, def.multiplier)
+    }
+
+    if (!def.effect) continue
+
+    switch (def.effect) {
+      case 'defenseDown': {
+        if (def.id === 'water' && context.water) {
+          const value = Math.round((def.multiplier ?? 1.2) * 5)
+          addStatus(defender, 'defenseDown', 2, value, attacker.id)
+          statuses.push('defenseDown')
+        }
+        break
+      }
+      case 'stunChance': {
+        const condition =
+          (def.id === 'brightLight' && context.lighting === 'bright') ||
+          (def.id === 'smoke' && context.smoke) ||
+          (def.id === 'flightImpairment' &&
+            attackType === 'ranged' &&
+            hasAbility(defender, 'flight'))
+        if (condition) {
+          const chance = Math.round((def.multiplier ?? 1.2) * 20)
+          if (rng.chance(chance)) {
+            addStatus(defender, 'stunned', 1, 0, attacker.id)
+            statuses.push('stunned')
+          }
+        }
+        break
+      }
+      case 'fleeChance': {
+        if (def.id === 'loudNoise' && context.noise >= 50) {
+          const chance = Math.round((def.multiplier ?? 1.2) * 20)
+          if (rng.chance(chance)) {
+            addStatus(defender, 'frightened', 2, 5, attacker.id)
+            statuses.push('frightened')
+          }
+        }
+        break
+      }
+      case 'disable': {
+        if (
+          def.id === 'flightImpairment' &&
+          attackType === 'ranged' &&
+          hasAbility(defender, 'flight')
+        ) {
+          const chance = Math.round((def.multiplier ?? 1.2) * 20)
+          if (rng.chance(chance)) {
+            addStatus(defender, 'stunned', 1, 0, attacker.id)
+            statuses.push('stunned')
+          }
+        }
+        break
+      }
+      case 'moraleDown': {
+        // commanderLoss is triggered by leader death, handled in morale.
+        break
+      }
+      case 'damage': {
+        if (def.multiplier) multiplier = Math.max(multiplier, def.multiplier)
+        break
+      }
+    }
+  }
+
+  return { multiplier, statuses }
+}
+
 export function rollAttack(
   rng: SeededRng,
   attacker: BattleUnit,
@@ -83,15 +229,41 @@ export function rollAttack(
   defenderSkill: keyof BattleUnit['skills'],
   damageBase: number,
   element: string,
-  modifier = 0,
-  critMultiplier = 1.5,
+  options: AttackOptions = {},
 ): ActionResult {
+  const {
+    modifier = 0,
+    critMultiplier = 1.5,
+    context = {
+      lighting: 'normal',
+      noise: 0,
+      water: false,
+      smoke: false,
+    },
+    attackType = 'melee',
+    isFlank = false,
+    firstRoundHitBonus = 0,
+    swarmAllyCount = 0,
+  } = options
+
+  let hitModifier = modifier
+  if (firstRoundHitBonus > 0 && attacker.isAdventurer) {
+    hitModifier += firstRoundHitBonus
+  }
+  if (attackType === 'melee' && hasAbility(defender, 'flight')) {
+    const evadeValue = getAbilityNumeric(defender, 'evadeMelee', 1)
+    hitModifier -= evadeValue * 40
+  }
+  if (hasStatus(attacker, 'stealthed')) hitModifier += 10
+  if (hasStatus(attacker, 'frightened')) hitModifier -= 5
+  if (hasStatus(defender, 'frightened')) hitModifier += 5
+
   const chance = calculateHitChance(
     attacker,
     defender,
     attackerSkill,
     defenderSkill,
-    modifier,
+    hitModifier,
   )
   const roll = rng.d100()
   const criticalThreshold = Math.max(1, Math.floor(chance / 5))
@@ -119,51 +291,84 @@ export function rollAttack(
     reduction +=
       defender.statusEffects.find((e) => e.type === 'guarded')?.value ?? 3
   }
+
+  const physicalReduction = getAbilityNumeric(defender, 'physicalReduction', 0)
+  const magicReduction = getAbilityNumeric(defender, 'magicReduction', 0)
   if (
-    defender.abilities?.some((a) => a.abilityId === 'physicalResist') &&
-    element === 'physical'
+    attackType !== 'magic' &&
+    element === 'physical' &&
+    physicalReduction > 0
   ) {
-    reduction += 4
+    reduction += physicalReduction
   }
-  if (
-    defender.abilities?.some((a) => a.abilityId === 'magicResist') &&
-    element !== 'physical'
-  ) {
-    reduction += 5
+  if (attackType === 'magic' && magicReduction > 0) {
+    reduction += magicReduction
   }
 
-  let multiplier = 1
-  const weakness = defender.weaknesses?.find((w) => {
-    const def = WEAKNESS_MAP[w.weaknessId]
-    return def?.element === element || (def?.id === 'rearAttack' && false)
-  })
-  if (weakness) {
-    const def = WEAKNESS_MAP[weakness.weaknessId]
-    multiplier = def?.multiplier ?? 1.5
+  if (
+    attackType !== 'magic' &&
+    !isFlank &&
+    hasAbility(defender, 'frontDefense')
+  ) {
+    reduction += getAbilityNumeric(defender, 'frontReduction', 0)
   }
+
+  const weaknessResult = applyWeaknessEffects(
+    rng,
+    attacker,
+    defender,
+    attackType,
+    context,
+    isFlank,
+    element,
+  )
+  const multiplier = weaknessResult.multiplier
+  const appliedStatuses = [...weaknessResult.statuses]
 
   let final = Math.max(1, raw - reduction) * multiplier
   if (critical) final *= critMultiplier
-  final = Math.max(1, Math.round(final))
 
+  if (context.lighting === 'dark' && hasAbility(attacker, 'darknessBoost')) {
+    final += getAbilityNumeric(attacker, 'darkAttackBonus', 0)
+  }
+  if (hasAbility(attacker, 'swarmCoordination') && swarmAllyCount > 0) {
+    final += getAbilityNumeric(attacker, 'swarmBonus', 0) * swarmAllyCount
+  }
+
+  final = Math.max(1, Math.round(final))
   defender.hp -= final
-  const statuses: string[] = []
-  if (attacker.abilities?.some((a) => a.abilityId === 'poisonAttack')) {
-    if (rng.chance(30)) {
-      addStatus(defender, 'poisoned', 3, 3, attacker.id)
-      statuses.push('poisoned')
+
+  const poisonChance = getAbilityNumeric(attacker, 'poisonChance', 0)
+  if (hasAbility(attacker, 'poisonAttack') && poisonChance > 0) {
+    if (rng.chance(Math.round(poisonChance * 100))) {
+      addStatus(
+        defender,
+        'poisoned',
+        3,
+        getAbilityNumeric(attacker, 'poisonDamage', 3),
+        attacker.id,
+      )
+      appliedStatuses.push('poisoned')
     }
   }
-  if (attacker.abilities?.some((a) => a.abilityId === 'bleedAttack')) {
-    if (rng.chance(30)) {
-      addStatus(defender, 'bleeding', 3, 3, attacker.id)
-      statuses.push('bleeding')
+  const bleedChance = getAbilityNumeric(attacker, 'bleedChance', 0)
+  if (hasAbility(attacker, 'bleedAttack') && bleedChance > 0) {
+    if (rng.chance(Math.round(bleedChance * 100))) {
+      addStatus(
+        defender,
+        'bleeding',
+        3,
+        getAbilityNumeric(attacker, 'bleedDamage', 3),
+        attacker.id,
+      )
+      appliedStatuses.push('bleeding')
     }
   }
-  if (attacker.abilities?.some((a) => a.abilityId === 'fear')) {
-    if (rng.chance(25)) {
+  const fearChance = getAbilityNumeric(attacker, 'fearChance', 0)
+  if (hasAbility(attacker, 'fear') && fearChance > 0) {
+    if (rng.chance(Math.round(fearChance * 100))) {
       addStatus(defender, 'frightened', 3, 5, attacker.id)
-      statuses.push('frightened')
+      appliedStatuses.push('frightened')
     }
   }
 
@@ -174,7 +379,7 @@ export function rollAttack(
     roll,
     damage: raw,
     damageDealt: final,
-    statusApplied: statuses,
+    statusApplied: appliedStatuses,
     message: `${attacker.name} hit ${defender.name} for ${final} damage`,
   }
 }
@@ -236,6 +441,7 @@ export function healUnit(
   target: BattleUnit,
   power: number,
 ): number {
+  if (hasStatus(target, 'healBlocked')) return 0
   const amount = Math.min(
     target.maxHp - target.hp,
     Math.max(1, Math.round(power)),
