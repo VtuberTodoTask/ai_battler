@@ -287,6 +287,32 @@ export type BattleOutcome =
   | 'totalLoss'
   | 'stalemate'
 
+export type RetreatTriggerReason =
+  | 'halfIncapacitated'
+  | 'healerLostWithWounded'
+  | 'lowPartyHp'
+  | 'lowMorale'
+  | 'overwhelmed'
+  | 'manualAction'
+
+export interface RetreatDiagnostic {
+  reason: RetreatTriggerReason
+  round: number
+  success: boolean
+  successChance: number
+  roll: number
+  aliveCount: number
+  incapacitatedCount: number
+  healerAlive: boolean
+  partyHpRatio: number
+  averageMorale: number
+  moraleThreshold: number
+  retreatHpThreshold: number
+  partyThreat: number
+  enemyThreat: number
+  matchedReasons: RetreatTriggerReason[]
+}
+
 export interface RetreatResult {
   side: 'party' | 'enemy'
   success: boolean
@@ -338,6 +364,7 @@ export interface BattleResult {
   abilityUsage: Record<string, number>
   contactResult: ContactResult
   retreatResult?: RetreatResult
+  retreatDiagnostic?: RetreatDiagnostic
   logs: BattleLogEntry[]
 }
 

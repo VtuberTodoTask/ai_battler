@@ -6,7 +6,11 @@ import {
 import { TRAIT_MAP } from '../../data/traits.ts'
 import { ADVENTURER_THREAT } from '../balance/constants.ts'
 import { clamp } from '../util.ts'
-import { Personality } from '../models/types.ts'
+import {
+  Personality,
+  RetreatDiagnostic,
+  RetreatTriggerReason,
+} from '../models/types.ts'
 
 export function adjustMorale(unit: BattleUnit, delta: number): void {
   unit.morale = clamp(unit.morale + delta, 0, 100)
@@ -77,11 +81,16 @@ function personalityMod(
   return 0
 }
 
-export function shouldPartyRetreat(
+export interface PartyRetreatEvaluation {
+  should: boolean
+  diagnostic: RetreatDiagnostic
+}
+
+export function evaluatePartyRetreat(
   party: BattleUnit[],
   enemies: BattleUnit[],
-  _round: number,
-): boolean {
+  round: number,
+): PartyRetreatEvaluation {
   const alive = getAliveAdventurers({ party } as { party: BattleUnit[] })
   const total = party.length
   const incapacitated = party.filter((u) => !u.isAlive || u.escaped).length
@@ -115,11 +124,6 @@ export function shouldPartyRetreat(
   const retreatHpThreshold =
     0.25 - bravery * 0.015 + caution * 0.015 - greed * 0.015 - discipline * 0.01
 
-  if (incapacitated >= total * 0.5) return true
-  if (!healerAlive && hasWounded) return true
-  if (hpRatio <= retreatHpThreshold) return true
-  if (avgMorale <= moraleThreshold) return true
-
   const enemyThreat = getAliveEnemies({ enemies } as {
     enemies: BattleUnit[]
   }).reduce((sum, e) => sum + (e.threatCost ?? 1), 0)
@@ -127,9 +131,44 @@ export function shouldPartyRetreat(
     const rank = (u.original as { rank: keyof typeof ADVENTURER_THREAT }).rank
     return sum + ADVENTURER_THREAT[rank]
   }, 0)
-  if (enemyThreat >= partyThreat * 2 && partyThreat > 0) return true
 
-  return false
+  const matchedReasons: RetreatTriggerReason[] = []
+  if (incapacitated >= total * 0.5) matchedReasons.push('halfIncapacitated')
+  if (!healerAlive && hasWounded) matchedReasons.push('healerLostWithWounded')
+  if (hpRatio <= retreatHpThreshold) matchedReasons.push('lowPartyHp')
+  if (avgMorale <= moraleThreshold) matchedReasons.push('lowMorale')
+  if (enemyThreat >= partyThreat * 2 && partyThreat > 0)
+    matchedReasons.push('overwhelmed')
+
+  const should = matchedReasons.length > 0
+
+  const diagnostic: RetreatDiagnostic = {
+    reason: matchedReasons[0] ?? 'manualAction',
+    round,
+    success: false,
+    successChance: 0,
+    roll: 0,
+    aliveCount: alive.length,
+    incapacitatedCount: incapacitated,
+    healerAlive,
+    partyHpRatio: hpRatio,
+    averageMorale: avgMorale,
+    moraleThreshold,
+    retreatHpThreshold,
+    partyThreat,
+    enemyThreat,
+    matchedReasons,
+  }
+
+  return { should, diagnostic }
+}
+
+export function shouldPartyRetreat(
+  party: BattleUnit[],
+  enemies: BattleUnit[],
+  round: number,
+): boolean {
+  return evaluatePartyRetreat(party, enemies, round).should
 }
 
 export function shouldEnemyRetreat(

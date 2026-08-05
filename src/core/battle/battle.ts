@@ -10,6 +10,7 @@ import {
   Enemy,
   EnemySpecies,
   InjuryResult,
+  RetreatDiagnostic,
   RetreatResult,
 } from '../models/types.ts'
 import { clamp } from '../util.ts'
@@ -39,11 +40,11 @@ import {
 import {
   adjustMorale,
   calculateRetreatChance,
+  evaluatePartyRetreat,
   getEnemyLeader,
   getLeader,
   onAllyIncapacitated,
   shouldEnemyRetreat,
-  shouldPartyRetreat,
 } from './morale.ts'
 import { generateEnemy } from '../generators/enemyGenerator.ts'
 
@@ -70,6 +71,7 @@ export interface BattleState {
   deadAdventurers: Set<string>
   injuries: InjuryResult[]
   abilityUsage: Record<string, number>
+  retreatDiagnostic?: RetreatDiagnostic
   context: BattleContext
   leaderTargetId?: string
 }
@@ -389,7 +391,20 @@ function resolveAction(
   action: DecidedAction,
 ): void {
   if (action.action === 'retreat') {
-    attemptRetreat(state, unit)
+    if (state.retreat || state.ended) return
+    const partyRetreat = evaluatePartyRetreat(
+      state.party,
+      state.enemies,
+      state.round,
+    )
+    const diagnostic = partyRetreat.should
+      ? partyRetreat.diagnostic
+      : {
+          ...partyRetreat.diagnostic,
+          reason: 'manualAction' as const,
+          matchedReasons: ['manualAction' as const],
+        }
+    attemptRetreat(state, unit, diagnostic)
     return
   }
 
@@ -680,7 +695,11 @@ function resolveAttack(
   if (hasStatus(attacker, 'stealthed')) removeStatus(attacker, 'stealthed')
 }
 
-function attemptRetreat(state: BattleState, unit: BattleUnit): void {
+function attemptRetreat(
+  state: BattleState,
+  unit: BattleUnit,
+  diagnostic?: RetreatDiagnostic,
+): void {
   if (unit.isAdventurer) {
     if (state.retreat || state.ended) return
     const leader = getLeader(state.party) ?? unit
@@ -688,6 +707,14 @@ function attemptRetreat(state: BattleState, unit: BattleUnit): void {
     const roll = state.rng.d100()
     const success = roll <= chance
     state.retreat = { side: 'party', success, roll, chance }
+    if (diagnostic) {
+      state.retreatDiagnostic = {
+        ...diagnostic,
+        success,
+        successChance: chance,
+        roll,
+      }
+    }
     log(
       state,
       'retreat',
@@ -732,9 +759,14 @@ function attemptRetreat(state: BattleState, unit: BattleUnit): void {
 function processStartOfRound(state: BattleState): void {
   state.leaderTargetId = undefined
 
-  if (shouldPartyRetreat(state.party, state.enemies, state.round)) {
+  const partyRetreat = evaluatePartyRetreat(
+    state.party,
+    state.enemies,
+    state.round,
+  )
+  if (partyRetreat.should && !state.retreat) {
     const leader = getLeader(state.party) ?? getAliveAdventurers(state)[0]
-    if (leader) attemptRetreat(state, leader)
+    if (leader) attemptRetreat(state, leader, partyRetreat.diagnostic)
   }
 
   if (!state.ended && shouldEnemyRetreat(state.enemies, state.party)) {
@@ -1006,6 +1038,7 @@ export function runBattle(
     abilityUsage: state.abilityUsage,
     contactResult: state.contact,
     retreatResult: state.retreat,
+    retreatDiagnostic: state.retreatDiagnostic,
     logs: state.logs,
   }
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { generateAdventurer } from '../generators/adventurerGenerator.ts'
+import { generateEnemy } from '../generators/enemyGenerator.ts'
 import {
   generateEncounter,
   calculatePartyThreat,
@@ -99,5 +100,18 @@ describe('runBattle', () => {
     const dRate = winRate('D')
     expect(bRate).toBeGreaterThan(cRate)
     expect(cRate).toBeGreaterThan(dRate)
+  })
+
+  it('個別撤退が manualAction として記録される', () => {
+    const party = balancedParty('C', 'manual-adv')
+    party[0].currentHp = party[0].maxHp * 0.1
+    const enemy = generateEnemy('manual-enemy', {
+      rank: 'E',
+      species: 'beast',
+      archetype: 'assault',
+    })
+    const result = runBattle('manual-seed', party, [enemy])
+    expect(result.retreatDiagnostic).toBeDefined()
+    expect(result.retreatDiagnostic?.matchedReasons).toContain('manualAction')
   })
 })

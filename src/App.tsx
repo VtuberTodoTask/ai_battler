@@ -1,15 +1,21 @@
 import { useState } from 'react'
-import { Adventurer, BattleResult, Enemy } from './core/models/types.ts'
+import {
+  Adventurer,
+  BattleResult,
+  BattleOutcome,
+  Enemy,
+} from './core/models/types.ts'
 import {
   generateAdventurer,
   generateAdventurers,
 } from './core/generators/adventurerGenerator.ts'
 import { generateEnemy } from './core/generators/enemyGenerator.ts'
-import {
-  calculatePartyThreat,
-  generateEncounter,
-} from './core/generators/encounterGenerator.ts'
+import { generateEncounter } from './core/generators/encounterGenerator.ts'
 import { runBattle } from './core/battle/battle.ts'
+import {
+  runSimulation,
+  type SimulationSummary,
+} from './core/battle/simulation.ts'
 import './App.css'
 
 const RANKS = ['E', 'D', 'C', 'B', 'A', 'S'] as const
@@ -70,18 +76,25 @@ export default function App() {
   const [battleResult, setBattleResult] = useState<BattleResult | null>(null)
 
   // Simulation
-  const [simRank, setSimRank] = useState<(typeof RANKS)[number]>('C')
+  const [simRank, setSimRank] = useState<(typeof RANKS)[number]>('S')
   const [simDifficulty, setSimDifficulty] =
     useState<(typeof DIFFICULTIES)[number]>('normal')
-  const [simCount, setSimCount] = useState(100)
+  const [simCount, setSimCount] = useState(1000)
+  const [simMode, setSimMode] = useState<'fixed' | 'random'>('fixed')
+  const [simRoleMode, setSimRoleMode] = useState<'fixed' | 'random'>('fixed')
+  const [simEnsureHealer, setSimEnsureHealer] = useState(true)
+  const [simAllowDuplicate, setSimAllowDuplicate] = useState(false)
   const [simRunning, setSimRunning] = useState(false)
-  const [simResult, setSimResult] = useState<{
-    wins: number
-    retreats: number
-    defeats: number
-    others: number
-    avgRounds: number
-  } | null>(null)
+  const [simResult, setSimResult] = useState<SimulationSummary | null>(null)
+  const OUTCOME_LABELS: Record<BattleOutcome, string> = {
+    victory: '勝利',
+    costlyVictory: '重傷勝利',
+    partialVictory: '部分勝利',
+    retreat: '撤退',
+    defeat: '敗北',
+    totalLoss: '全滅',
+    stalemate: '膠着',
+  }
 
   return (
     <div className="app">
@@ -436,61 +449,62 @@ export default function App() {
                 onChange={(e) => setSimCount(Number(e.target.value))}
               />
             </label>
+            <label>
+              モード
+              <select
+                value={simMode}
+                onChange={(e) =>
+                  setSimMode(e.target.value as 'fixed' | 'random')
+                }
+              >
+                <option value="fixed">固定対戦</option>
+                <option value="random">ランダム総合</option>
+              </select>
+            </label>
+            <label>
+              ロール構成
+              <select
+                value={simRoleMode}
+                onChange={(e) =>
+                  setSimRoleMode(e.target.value as 'fixed' | 'random')
+                }
+              >
+                <option value="fixed">固定ロール</option>
+                <option value="random">完全ランダム</option>
+              </select>
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={simEnsureHealer}
+                onChange={(e) => setSimEnsureHealer(e.target.checked)}
+              />
+              治療役必須
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={simAllowDuplicate}
+                onChange={(e) => setSimAllowDuplicate(e.target.checked)}
+              />
+              重複ロール許可
+            </label>
             <button
               disabled={simRunning}
               onClick={async () => {
                 setSimRunning(true)
                 setTimeout(() => {
-                  let wins = 0
-                  let retreats = 0
-                  let defeats = 0
-                  let others = 0
-                  let totalRounds = 0
-                  const roles: ('vanguard' | 'ranger' | 'mage' | 'healer')[] = [
-                    'vanguard',
-                    'ranger',
-                    'mage',
-                    'healer',
-                  ]
-                  const simParty = roles.map((role, i) =>
-                    generateAdventurer({
-                      seed: `sim-${simRank}-${role}-${i}`,
-                      rank: simRank,
-                      role,
-                    }),
-                  )
-                  const enemies = generateEncounter({
-                    seed: `sim-enc-${simRank}-${simDifficulty}`,
-                    partyThreat: calculatePartyThreat(simParty),
+                  const summary = runSimulation({
+                    rank: simRank,
                     difficulty: simDifficulty,
+                    count: simCount,
+                    mode: simMode,
+                    roleMode: simRoleMode,
+                    ensureHealer: simEnsureHealer,
+                    allowDuplicateRoles: simAllowDuplicate,
+                    seed: `sim-${simRank}-${simDifficulty}`,
                   })
-                  for (let i = 0; i < simCount; i++) {
-                    const result = runBattle(
-                      `sim-battle-${i}`,
-                      simParty,
-                      enemies,
-                    )
-                    totalRounds += result.rounds
-                    if (
-                      result.outcome === 'victory' ||
-                      result.outcome === 'costlyVictory'
-                    )
-                      wins++
-                    else if (result.outcome === 'retreat') retreats++
-                    else if (
-                      result.outcome === 'defeat' ||
-                      result.outcome === 'totalLoss'
-                    )
-                      defeats++
-                    else others++
-                  }
-                  setSimResult({
-                    wins,
-                    retreats,
-                    defeats,
-                    others,
-                    avgRounds: totalRounds / simCount,
-                  })
+                  setSimResult(summary)
                   setSimRunning(false)
                 }, 10)
               }}
@@ -501,20 +515,84 @@ export default function App() {
           {simRunning && <p>計算中…</p>}
           {simResult && (
             <div className="card">
-              <p>
-                勝利: {simResult.wins} (
-                {((simResult.wins / simCount) * 100).toFixed(1)}%)
-              </p>
-              <p>
-                撤退: {simResult.retreats} (
-                {((simResult.retreats / simCount) * 100).toFixed(1)}%)
-              </p>
-              <p>
-                敗北: {simResult.defeats} (
-                {((simResult.defeats / simCount) * 100).toFixed(1)}%)
-              </p>
-              <p>その他: {simResult.others}</p>
+              <div className="outcome-grid">
+                {(
+                  [
+                    'victory',
+                    'costlyVictory',
+                    'partialVictory',
+                    'retreat',
+                    'defeat',
+                    'totalLoss',
+                    'stalemate',
+                  ] as BattleOutcome[]
+                ).map((outcome) => (
+                  <p key={outcome}>
+                    {OUTCOME_LABELS[outcome]}: {simResult.outcomes[outcome]} (
+                    {(
+                      (simResult.outcomes[outcome] / simResult.count) *
+                      100
+                    ).toFixed(1)}
+                    %)
+                  </p>
+                ))}
+              </div>
               <p>平均ラウンド: {simResult.avgRounds.toFixed(1)}</p>
+              <p>平均敵数: {simResult.avgEnemyCount.toFixed(1)}</p>
+              <p>平均敵脅威点: {simResult.avgEnemyThreat.toFixed(1)}</p>
+              <p>平均パーティ脅威点: {simResult.avgPartyThreat.toFixed(1)}</p>
+              <p>脅威比: {simResult.avgThreatRatio.toFixed(2)}</p>
+              <details>
+                <summary>
+                  撤退診断 ({' '}
+                  {Object.values(simResult.retreatReasons).reduce(
+                    (sum, r) => sum + (r?.count ?? 0),
+                    0,
+                  )}{' '}
+                  件)
+                </summary>
+                <div>
+                  <p>
+                    撤退成功: {(simResult.retreatSuccessRate * 100).toFixed(1)}%
+                  </p>
+                  <p>
+                    平均撤退ラウンド:{' '}
+                    {simResult.avgRetreatRound?.toFixed(1) ?? 'なし'}
+                  </p>
+                  <p>
+                    治療役喪失撤退率:{' '}
+                    {(simResult.healerIncapRetreatRate * 100).toFixed(1)}%
+                  </p>
+                  <p>撤退理由:</p>
+                  <ul>
+                    {Object.entries(simResult.retreatReasons).map(
+                      ([reason, data]) => (
+                        <li key={reason}>
+                          {reason}: {data?.count} (
+                          {(data?.percentage
+                            ? data.percentage * 100
+                            : 0
+                          ).toFixed(1)}
+                          %)
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                </div>
+              </details>
+              <details>
+                <summary>接敵結果別勝率</summary>
+                <ul>
+                  {Object.entries(simResult.contactResultStats).map(
+                    ([type, data]) => (
+                      <li key={type}>
+                        {type}: {data?.count} 戦 / 勝率{' '}
+                        {((data?.winRate ?? 0) * 100).toFixed(1)}%
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </details>
             </div>
           )}
         </section>
