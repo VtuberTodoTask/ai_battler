@@ -454,7 +454,7 @@ export function healUnit(
   target: BattleUnit,
   power: number,
 ): number {
-  if (hasStatus(target, 'healBlocked')) return 0
+  if (!target.isAlive || hasStatus(target, 'healBlocked')) return 0
   const amount = Math.min(
     target.maxHp - target.hp,
     Math.max(1, Math.round(power)),

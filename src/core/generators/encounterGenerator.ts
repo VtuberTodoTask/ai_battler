@@ -58,7 +58,7 @@ function pickSpecies(
   return rng.pick(pool)
 }
 
-function generateEnemyForTarget(
+export function generateEnemyForTarget(
   seed: string,
   remaining: number,
   remainingSlots: number,
@@ -88,7 +88,10 @@ function generateEnemyForTarget(
   }
 
   // Fallback to the cheapest possible enemy.
-  const cheapest = RANK_TIER_COMBOS.find((c) => allowBoss || c.tier !== 'boss')
+  const eligible = RANK_TIER_COMBOS.filter(
+    (c) => allowBoss || c.tier !== 'boss',
+  )
+  const cheapest = [...eligible].sort((a, b) => a.baseCost - b.baseCost)[0]
   if (!cheapest) return undefined
   const enemy = generateEnemy(`${seed}-cheapest`, {
     rank: cheapest.rank,
@@ -139,7 +142,7 @@ function tryDowngradeLast(
   return next
 }
 
-function tryAddMinion(
+export function tryAddMinion(
   enemies: Enemy[],
   budget: number,
   seed: string,

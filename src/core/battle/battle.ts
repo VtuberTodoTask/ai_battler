@@ -345,7 +345,7 @@ function resolveAction(
   }
 
   if (action.action === 'heal') {
-    if (!action.target) return
+    if (!action.target || !action.target.isAlive) return
     if (unit.mp < 3) {
       const enemy = getAliveEnemies(state)[0]
       if (enemy) resolveAttack(state, unit, enemy)
@@ -454,6 +454,8 @@ function resolveAction(
       })
       const summonedUnit = createEnemyUnit(enemy)
       summonedUnit.isSummoned = true
+      summonedUnit.usedAbilities.add('revive')
+      summonedUnit.usedAbilities.add('summon')
       state.enemies.push(summonedUnit)
       summoned.push(summonedUnit)
     }
@@ -551,9 +553,6 @@ function resolveAttack(
     const bonus = state.contact.effects.firstRoundHitBonus
     if (bonus) modifier += bonus
   }
-  if (hasStatus(attacker, 'frightened')) modifier -= 5
-  if (hasStatus(defender, 'frightened')) modifier += 5
-
   const swarmAllyCount = getSwarmAllyCount(state, attacker)
 
   const result = rollAttack(

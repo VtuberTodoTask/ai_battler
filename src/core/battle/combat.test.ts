@@ -1116,28 +1116,58 @@ describe('性格反映', () => {
     expect(braveChance).toBeGreaterThan(cowardChance)
   })
 
-  it('altruism が負傷仲間の救助に影響する', () => {
-    const base = makeAdventurer('base', 'healer')
-    const healer = createAdventurerUnit(
-      makeAdventurer('altruism', 'healer', {
-        personality: { ...base.personality, altruism: 3 },
+  it('altruism が高い治療役ほど早い段階で味方を治療する', () => {
+    const high = createAdventurerUnit(
+      makeAdventurer('altruism-high', 'healer', {
+        personality: { altruism: 3 } as Partial<Personality>,
+        currentMp: 10,
       }),
     )
-    const down = createAdventurerUnit(
-      makeAdventurer('down', 'vanguard', { currentHp: -5, maxHp: 50 }),
+    const low = createAdventurerUnit(
+      makeAdventurer('altruism-low', 'healer', {
+        personality: { altruism: -3 } as Partial<Personality>,
+        currentMp: 10,
+      }),
+    )
+    const wounded = createAdventurerUnit(
+      makeAdventurer('altruism-wounded', 'vanguard', {
+        currentHp: 28,
+        maxHp: 50,
+      }),
     )
     const healthy = createAdventurerUnit(
-      makeAdventurer('healthy', 'ranger', { currentHp: 50, maxHp: 50 }),
+      makeAdventurer('altruism-healthy', 'ranger', {
+        currentHp: 50,
+        maxHp: 50,
+      }),
     )
-    const action = decideAdventurerAction(
-      healer,
-      aiState(
-        [healer, down, healthy],
-        [createEnemyUnit(makeEnemy('altr-enemy'))],
-      ),
+    const enemy = createEnemyUnit(makeEnemy('altr-enemy'))
+    const highAction = decideAdventurerAction(
+      high,
+      aiState([high, wounded, healthy], [enemy]),
     )
-    expect(action.action).toBe('heal')
-    expect(action.target?.id).toBe(down.id)
+    const lowAction = decideAdventurerAction(
+      low,
+      aiState([low, wounded, healthy], [enemy]),
+    )
+    expect(highAction.action).toBe('heal')
+    expect(highAction.target?.id).toBe(wounded.id)
+    expect(lowAction.action).toBe('attack')
+  })
+
+  it('heal は戦闘不能者を対象にしない', () => {
+    const healer = createAdventurerUnit(
+      makeAdventurer('healer-dead', 'healer', { currentMp: 10 }),
+    )
+    const down = createAdventurerUnit(
+      makeAdventurer('down-target', 'vanguard', {
+        currentHp: -5,
+        maxHp: 50,
+      }),
+    )
+    const amount = healUnit(healer, down, 20)
+    expect(amount).toBe(0)
+    expect(down.hp).toBe(-5)
   })
 
   it('discipline が指揮対象の追従に影響する', () => {

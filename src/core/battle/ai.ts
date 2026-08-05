@@ -6,6 +6,7 @@ import {
 import { hasStatus } from './actions.ts'
 import { ABILITY_MAP } from '../../data/enemyData.ts'
 import { Personality } from '../models/types.ts'
+import { clamp } from '../util.ts'
 
 export type ActionType =
   | 'attack'
@@ -166,7 +167,7 @@ function selectAllyForHeal(
   allies: BattleUnit[],
 ): BattleUnit | undefined {
   const altruism = personalityValue(healer, 'altruism')
-  const threshold = 0.5 - altruism * 0.03
+  const threshold = clamp(0.5 + altruism * 0.03, 0.35, 0.7)
   const wounded = allies.filter(
     (u) => u.isAlive && !u.escaped && u.hp < u.maxHp * threshold,
   )
@@ -185,16 +186,6 @@ function selectAllyForGuard(
     wounded[0] ??
     allies.find((u) => u.isAlive && !u.escaped && u.id !== guard.id)
   )
-}
-
-function selectWoundedForRescue(
-  unit: BattleUnit,
-  allies: BattleUnit[],
-): BattleUnit | undefined {
-  const altruism = personalityValue(unit, 'altruism')
-  if (altruism <= 0) return undefined
-  const down = allies.find((u) => !u.isAlive && !u.escaped && u.hp > -20)
-  return down
 }
 
 export function decideAdventurerAction(
@@ -219,17 +210,15 @@ export function decideAdventurerAction(
     0.25 - bravery * 0.015 + caution * 0.015 - greed * 0.015 - discipline * 0.01
 
   if (unit.role === 'healer') {
-    const downed = selectWoundedForRescue(unit, state.party)
-    if (downed && altruism > 0 && unit.mp >= 3) {
-      return { action: 'heal', target: downed }
-    }
     const target = selectAllyForHeal(unit, allies)
     if (target && unit.mp >= 3) return { action: 'heal', target }
     const poisoned = allies.find(
       (u) => hasStatus(u, 'poisoned') || hasStatus(u, 'bleeding'),
     )
     if (poisoned && unit.mp >= 3) return { action: 'heal', target: poisoned }
-    const low = allies.find((u) => u.hp < u.maxHp)
+    const low = allies.find(
+      (u) => u.isAlive && !u.escaped && u.hp < u.maxHp * 0.3,
+    )
     if (low && unit.mp >= 3) return { action: 'heal', target: low }
     const enemy = selectEnemyTargetForAdventurer(
       unit,

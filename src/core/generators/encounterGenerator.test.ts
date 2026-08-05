@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import { SeededRng } from '../rng/seededRng.ts'
+import type { EnemySpecies } from '../models/types.ts'
 import { generateAdventurers } from './adventurerGenerator.ts'
 import {
   generateEncounter,
+  generateEnemyForTarget,
+  tryAddMinion,
   calculatePartyThreat,
 } from './encounterGenerator.ts'
 
@@ -102,5 +106,60 @@ describe('generateEncounter', () => {
       const ids = enemies.map((e) => e.id)
       expect(new Set(ids).size).toBe(ids.length)
     }
+  })
+
+  it('bossAllowed=false かつ高予算でもボスを生成しない', () => {
+    const enemies = generateEncounter({
+      seed: 'boss-false-high',
+      partyThreat: 100,
+      difficulty: 'normal',
+      bossAllowed: false,
+      maxEnemyCount: 12,
+    })
+    expect(enemies.some((e) => e.tier === 'boss')).toBe(false)
+    const total = enemies.reduce((sum, e) => sum + e.threatCost, 0)
+    const budget = 100
+    const ratio = total / budget
+    expect(ratio).toBeGreaterThanOrEqual(0.8)
+    expect(ratio).toBeLessThanOrEqual(1.2)
+  })
+
+  it('generateEnemyForTarget は allowBoss=false でボスを返さない', () => {
+    const enemy = generateEnemyForTarget(
+      'direct-boss-false',
+      100,
+      1,
+      'beast',
+      'assault',
+      false,
+    )
+    expect(enemy).toBeDefined()
+    expect(enemy!.tier).not.toBe('boss')
+  })
+
+  it('tryAddMinion を複数回呼んでもシードと ID が一意', () => {
+    const rng = new SeededRng('multi-fill')
+    const speciesSet: EnemySpecies[] = []
+    let enemies: ReturnType<typeof tryAddMinion> = []
+    for (let i = 0; i < 5; i++) {
+      const next = tryAddMinion(
+        enemies,
+        10,
+        'multi-fill',
+        speciesSet,
+        undefined,
+        rng,
+        0,
+      )
+      if (!next) break
+      enemies = next
+      if (!speciesSet.includes(enemies[enemies.length - 1].species)) {
+        speciesSet.push(enemies[enemies.length - 1].species)
+      }
+    }
+    expect(enemies.length).toBeGreaterThan(1)
+    const ids = enemies.map((e) => e.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(ids.every((id) => id.includes('-fill-'))).toBe(true)
   })
 })

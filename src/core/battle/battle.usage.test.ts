@@ -192,4 +192,180 @@ describe('蘇生・召喚の使用制限', () => {
     expect(action.action).toBe('revive')
     expect(action.target?.id).toBe(normalDead.id)
   })
+
+  it('同一召喚者が複数ラウンド生存し summon は 1 回だけ', () => {
+    const summoner = makeEnemy('multi-summoner', {
+      maxHp: 1000,
+      currentHp: 1000,
+      threatCost: 1,
+      stats: { str: 1, con: 100, dex: 0, int: 1, per: 1, wil: 100, soc: 1 },
+      skills: {
+        melee: 0,
+        ranged: 1,
+        defense: 1,
+        tactics: 1,
+        attackMagic: 0,
+        defenseMagic: 1,
+        healing: 0,
+        scouting: 0,
+        stealth: 0,
+        trapDetection: 0,
+        trapDisarm: 0,
+        survival: 0,
+        monsterKnowledge: 0,
+        firstAid: 0,
+        leadership: 0,
+      },
+      abilities: [{ abilityId: 'summon', name: '召喚' }],
+      behavior: { usesAbilitiesFirst: true } as unknown as EnemyBehavior,
+      morale: 100,
+    })
+    const adv = makeAdventurer('multi-adv', {
+      maxHp: 1000,
+      currentHp: 1000,
+      maxMp: 100,
+      currentMp: 100,
+      morale: 100,
+      stats: { str: 0, con: 100, dex: 1, int: 1, per: 1, wil: 100, soc: 1 },
+      skills: {
+        melee: 1,
+        ranged: 0,
+        defense: 1,
+        tactics: 1,
+        attackMagic: 0,
+        defenseMagic: 1,
+        healing: 1,
+        scouting: 1,
+        stealth: 0,
+        trapDetection: 0,
+        trapDisarm: 0,
+        survival: 0,
+        monsterKnowledge: 0,
+        firstAid: 0,
+        leadership: 100,
+      },
+      equipment: {
+        weapon: { id: 'w', name: 'W', kind: 'melee', damage: 0 },
+        armor: { id: 'a', name: 'A', reduction: 0 },
+      },
+      personality: {
+        bravery: 3,
+        caution: 0,
+        cooperation: 0,
+        discipline: 0,
+        altruism: 0,
+        greed: 0,
+      },
+    })
+    const result = runBattle('multi-summon', [adv], [summoner])
+    const summonLogs = result.logs.filter(
+      (l) => l.actionType === 'summon' && l.actorId === summoner.id,
+    )
+    expect(summonLogs.length).toBeLessThanOrEqual(1)
+    expect(result.rounds).toBeGreaterThanOrEqual(2)
+    expect(result.survivingEnemies.includes(summoner.id)).toBe(true)
+  })
+
+  it('蘇生者が蘇生後も複数ラウンド生存し revive は 1 回だけ', () => {
+    const reviver = makeEnemy('multi-reviver', {
+      maxHp: 1000,
+      currentHp: 1000,
+      threatCost: 1,
+      stats: { str: 1, con: 100, dex: 0, int: 1, per: 1, wil: 100, soc: 1 },
+      skills: {
+        melee: 0,
+        ranged: 1,
+        defense: 1,
+        tactics: 1,
+        attackMagic: 0,
+        defenseMagic: 1,
+        healing: 0,
+        scouting: 0,
+        stealth: 0,
+        trapDetection: 0,
+        trapDisarm: 0,
+        survival: 0,
+        monsterKnowledge: 0,
+        firstAid: 0,
+        leadership: 0,
+      },
+      abilities: [{ abilityId: 'revive', name: '蘇生' }],
+      behavior: { usesAbilitiesFirst: true } as unknown as EnemyBehavior,
+      morale: 100,
+    })
+    const dead = makeEnemy('multi-dead', {
+      currentHp: 0,
+      maxHp: 10,
+      abilities: [],
+    })
+    const other = makeEnemy('multi-other', {
+      maxHp: 1000,
+      currentHp: 1000,
+      threatCost: 1,
+      stats: { str: 1, con: 100, dex: 0, int: 1, per: 1, wil: 100, soc: 1 },
+      skills: {
+        melee: 0,
+        ranged: 1,
+        defense: 1,
+        tactics: 1,
+        attackMagic: 0,
+        defenseMagic: 1,
+        healing: 0,
+        scouting: 0,
+        stealth: 0,
+        trapDetection: 0,
+        trapDisarm: 0,
+        survival: 0,
+        monsterKnowledge: 0,
+        firstAid: 0,
+        leadership: 0,
+      },
+      abilities: [],
+      morale: 100,
+    })
+    const adv = makeAdventurer('multi-rev-adv', {
+      maxHp: 1000,
+      currentHp: 1000,
+      maxMp: 100,
+      currentMp: 100,
+      morale: 100,
+      stats: { str: 0, con: 100, dex: 1, int: 1, per: 1, wil: 100, soc: 1 },
+      skills: {
+        melee: 1,
+        ranged: 0,
+        defense: 1,
+        tactics: 1,
+        attackMagic: 0,
+        defenseMagic: 1,
+        healing: 1,
+        scouting: 1,
+        stealth: 0,
+        trapDetection: 0,
+        trapDisarm: 0,
+        survival: 0,
+        monsterKnowledge: 0,
+        firstAid: 0,
+        leadership: 100,
+      },
+      equipment: {
+        weapon: { id: 'w', name: 'W', kind: 'melee', damage: 0 },
+        armor: { id: 'a', name: 'A', reduction: 0 },
+      },
+      personality: {
+        bravery: 3,
+        caution: 0,
+        cooperation: 0,
+        discipline: 0,
+        altruism: 0,
+        greed: 0,
+      },
+    })
+    const result = runBattle('multi-revive', [adv], [reviver, dead, other])
+    const reviveLogs = result.logs.filter(
+      (l) => l.actionType === 'revive' && l.actorId === reviver.id,
+    )
+    expect(reviveLogs.length).toBeLessThanOrEqual(1)
+    expect(result.rounds).toBeGreaterThanOrEqual(2)
+    expect(result.survivingEnemies.includes(reviver.id)).toBe(true)
+  })
 })

@@ -245,6 +245,33 @@ describe('rollAttack successChance', () => {
     )
   })
 
+  it('暗闇（darknessBoost）の BattleContext でも successChance は一致する', () => {
+    const { adv, enemy } = makeUnits()
+    adv.abilities = [{ abilityId: 'darknessBoost', name: '暗闇強化' }]
+    const rng = new FakeRng()
+    rng.hit = 1
+    const result = rollAttack(
+      rng,
+      adv,
+      enemy,
+      'melee',
+      'defense',
+      8,
+      'physical',
+      {
+        attackType: 'melee',
+        context: {
+          lighting: 'dark',
+          noise: 0,
+          water: false,
+          smoke: false,
+        },
+      },
+    )
+    const expected = calculateHitChance(adv, enemy, 'melee', 'defense', 0)
+    expect(result.successChance).toBe(expected)
+  })
+
   it('frontDefense と weakness effect は命中判定に影響を与えない', () => {
     const { adv, enemy } = makeUnits()
     enemy.abilities = [{ abilityId: 'frontDefense', name: '正面防御' }]
