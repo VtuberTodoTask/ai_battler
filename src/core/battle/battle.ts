@@ -51,7 +51,7 @@ function getDefaultContext(): BattleContext {
   return { lighting: 'normal', noise: 0, water: false, smoke: false }
 }
 
-interface BattleState {
+export interface BattleState {
   seed: string
   rng: SeededRng
   party: BattleUnit[]
@@ -334,6 +334,55 @@ function handleUnitDeath(state: BattleState, unit: BattleUnit): void {
   )
 }
 
+export function executeSummon(
+  state: BattleState,
+  unit: BattleUnit,
+  action: DecidedAction,
+): number {
+  const count = getAbilityNumeric(unit, 'summonCount', 2)
+  const aliveCount = getAliveEnemies(state).length
+  const availableSlots = Math.max(0, 12 - aliveCount)
+  const actualCount = Math.min(count, availableSlots)
+  if (actualCount <= 0) return 0
+
+  const summoned: BattleUnit[] = []
+  for (let i = 0; i < actualCount; i++) {
+    const seed = `${state.seed}-summon-${state.round}-${unit.id}-${i}-${state.enemies.length}`
+    const species: EnemySpecies = (unit.species as EnemySpecies) ?? 'beast'
+    const enemy = generateEnemy(seed, {
+      rank: 'E',
+      species,
+      archetype: 'swarm',
+      tier: 'minion',
+    })
+    const summonedUnit = createEnemyUnit(enemy)
+    summonedUnit.isSummoned = true
+    summonedUnit.usedAbilities.add('revive')
+    summonedUnit.usedAbilities.add('summon')
+    state.enemies.push(summonedUnit)
+    summoned.push(summonedUnit)
+  }
+
+  if (action.abilityId) {
+    unit.usedAbilities.add(action.abilityId)
+    state.abilityUsage[action.abilityId] =
+      (state.abilityUsage[action.abilityId] ?? 0) + 1
+  }
+
+  log(
+    state,
+    'combat',
+    'summon',
+    `${unit.name}が${summoned.length}体の仲間を召喚した。`,
+    {
+      actorId: unit.id,
+      targetIds: summoned.map((e) => e.id),
+      metadata: { abilityId: action.abilityId },
+    },
+  )
+  return actualCount
+}
+
 function resolveAction(
   state: BattleState,
   unit: BattleUnit,
@@ -436,40 +485,7 @@ function resolveAction(
   }
 
   if (action.action === 'summon') {
-    if (action.abilityId) {
-      unit.usedAbilities.add(action.abilityId)
-      state.abilityUsage[action.abilityId] =
-        (state.abilityUsage[action.abilityId] ?? 0) + 1
-    }
-    const count = getAbilityNumeric(unit, 'summonCount', 2)
-    const summoned: BattleUnit[] = []
-    for (let i = 0; i < count && state.enemies.length < 12; i++) {
-      const seed = `${state.seed}-summon-${state.round}-${unit.id}-${i}`
-      const species: EnemySpecies = (unit.species as EnemySpecies) ?? 'beast'
-      const enemy = generateEnemy(seed, {
-        rank: 'E',
-        species,
-        archetype: 'swarm',
-        tier: 'minion',
-      })
-      const summonedUnit = createEnemyUnit(enemy)
-      summonedUnit.isSummoned = true
-      summonedUnit.usedAbilities.add('revive')
-      summonedUnit.usedAbilities.add('summon')
-      state.enemies.push(summonedUnit)
-      summoned.push(summonedUnit)
-    }
-    log(
-      state,
-      'combat',
-      'summon',
-      `${unit.name}が${summoned.length}体の仲間を召喚した。`,
-      {
-        actorId: unit.id,
-        targetIds: summoned.map((e) => e.id),
-        metadata: { abilityId: action.abilityId },
-      },
-    )
+    executeSummon(state, unit, action)
     return
   }
 

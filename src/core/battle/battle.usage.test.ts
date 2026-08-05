@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { generateAdventurer } from '../generators/adventurerGenerator.ts'
 import { generateEnemy } from '../generators/enemyGenerator.ts'
 import { generateAdventurers } from '../generators/adventurerGenerator.ts'
-import { runBattle } from './battle.ts'
+import { SeededRng } from '../rng/seededRng.ts'
+import { runBattle, executeSummon, type BattleState } from './battle.ts'
 import { createAdventurerUnit, createEnemyUnit } from './battleState.ts'
 import { decideEnemyAction } from './ai.ts'
 import type {
@@ -367,5 +368,129 @@ describe('蘇生・召喚の使用制限', () => {
     expect(reviveLogs.length).toBeLessThanOrEqual(1)
     expect(result.rounds).toBeGreaterThanOrEqual(2)
     expect(result.survivingEnemies.includes(reviver.id)).toBe(true)
+  })
+})
+
+function makeSummonTestState(
+  summoner: ReturnType<typeof createEnemyUnit>,
+  extras: ReturnType<typeof createEnemyUnit>[],
+): BattleState {
+  return {
+    seed: 'summon-test',
+    rng: new SeededRng('summon-test'),
+    party: [],
+    enemies: [summoner, ...extras],
+    round: 1,
+    logs: [],
+    contact: {
+      type: 'success',
+      partyScouting: 0,
+      enemyStealth: 0,
+      successChance: 50,
+      roll: 50,
+      effects: {},
+    },
+    discoveredWeaknesses: new Set(),
+    partyDamageDealt: 0,
+    enemyDamageDealt: 0,
+    ended: false,
+    partyInitBonus: 0,
+    enemyInitBonus: 0,
+    deadAdventurers: new Set(),
+    injuries: [],
+    abilityUsage: {},
+    context: {
+      lighting: 'normal',
+      noise: 0,
+      water: false,
+      smoke: false,
+    },
+  }
+}
+
+describe('召喚上限の回帰テスト', () => {
+  it('敵12体のうち1体が死亡している場合、1体以上召喚できる', () => {
+    const summoner = createEnemyUnit(
+      makeEnemy('summon-cap-summoner', {
+        abilities: [{ abilityId: 'summon', name: '召喚' }],
+        behavior: { usesAbilitiesFirst: true } as unknown as EnemyBehavior,
+      }),
+    )
+    const enemies: ReturnType<typeof createEnemyUnit>[] = []
+    for (let i = 0; i < 10; i++) {
+      enemies.push(createEnemyUnit(makeEnemy(`summon-cap-alive-${i}`)))
+    }
+    enemies.push(
+      createEnemyUnit(makeEnemy('summon-cap-dead', { currentHp: 0 })),
+    )
+    const state = makeSummonTestState(summoner, enemies)
+    const summoned = executeSummon(state, summoner, {
+      action: 'summon',
+      abilityId: 'summon',
+    })
+    expect(summoned).toBeGreaterThanOrEqual(1)
+    expect(state.enemies.filter((e) => e.isAlive && !e.escaped).length).toBe(12)
+    expect(summoner.usedAbilities.has('summon')).toBe(true)
+    expect(state.abilityUsage.summon).toBe(1)
+    const summonLog = state.logs.find((l) => l.actionType === 'summon')
+    expect(summonLog).toBeDefined()
+    expect(summonLog!.result).toContain('1体')
+  })
+
+  it('生存敵が12体の場合、AIは召喚を選択しない', () => {
+    const summoner = createEnemyUnit(
+      makeEnemy('summon-full-summoner', {
+        abilities: [{ abilityId: 'summon', name: '召喚' }],
+        behavior: { usesAbilitiesFirst: true } as unknown as EnemyBehavior,
+      }),
+    )
+    const enemies: ReturnType<typeof createEnemyUnit>[] = []
+    for (let i = 0; i < 11; i++) {
+      enemies.push(createEnemyUnit(makeEnemy(`summon-full-${i}`)))
+    }
+    const party = [createAdventurerUnit(makeAdventurer('summon-full-adv'))]
+    const action = decideEnemyAction(
+      summoner,
+      aiState(party, [summoner, ...enemies]),
+    )
+    expect(action.action).not.toBe('summon')
+  })
+
+  it('召喚可能枠が0の場合、能力を消費しない', () => {
+    const summoner = createEnemyUnit(
+      makeEnemy('summon-zero-summoner', {
+        abilities: [{ abilityId: 'summon', name: '召喚' }],
+      }),
+    )
+    const enemies: ReturnType<typeof createEnemyUnit>[] = []
+    for (let i = 0; i < 11; i++) {
+      enemies.push(createEnemyUnit(makeEnemy(`summon-zero-${i}`)))
+    }
+    const state = makeSummonTestState(summoner, enemies)
+    const beforeLogs = state.logs.length
+    const summoned = executeSummon(state, summoner, {
+      action: 'summon',
+      abilityId: 'summon',
+    })
+    expect(summoned).toBe(0)
+    expect(summoner.usedAbilities.has('summon')).toBe(false)
+    expect(state.abilityUsage.summon).toBeUndefined()
+    expect(state.logs.length).toBe(beforeLogs)
+  })
+
+  it('召喚ログに0体召喚が記録されない', () => {
+    const summoner = createEnemyUnit(
+      makeEnemy('summon-no-log-summoner', {
+        abilities: [{ abilityId: 'summon', name: '召喚' }],
+      }),
+    )
+    const enemies: ReturnType<typeof createEnemyUnit>[] = []
+    for (let i = 0; i < 11; i++) {
+      enemies.push(createEnemyUnit(makeEnemy(`summon-no-log-${i}`)))
+    }
+    const state = makeSummonTestState(summoner, enemies)
+    executeSummon(state, summoner, { action: 'summon', abilityId: 'summon' })
+    const summonLog = state.logs.find((l) => l.actionType === 'summon')
+    expect(summonLog).toBeUndefined()
   })
 })

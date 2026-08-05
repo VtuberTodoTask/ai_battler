@@ -3,7 +3,7 @@ import {
   getAliveAdventurers,
   getAliveEnemies,
 } from './battleState.ts'
-import { hasStatus } from './actions.ts'
+import { getAbilityNumeric, hasStatus } from './actions.ts'
 import { ABILITY_MAP } from '../../data/enemyData.ts'
 import { Personality } from '../models/types.ts'
 import { clamp } from '../util.ts'
@@ -370,7 +370,9 @@ export function decideEnemyAction(
         if (unit.isSummoned || unit.usedAbilities.has(ability.abilityId))
           continue
         const aliveEnemies = getAliveEnemies(state)
-        if (aliveEnemies.length < 12) {
+        const availableSlots = 12 - aliveEnemies.length
+        const summonCount = getAbilityNumeric(unit, 'summonCount', 2)
+        if (availableSlots > 0 && summonCount > 0) {
           return { action: 'summon', abilityId: ability.abilityId }
         }
       }
