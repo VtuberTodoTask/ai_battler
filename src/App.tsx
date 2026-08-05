@@ -560,6 +560,18 @@ export default function App() {
                     {simResult.avgRetreatRound?.toFixed(1) ?? 'なし'}
                   </p>
                   <p>
+                    撤退時平均パーティHP:{' '}
+                    {simResult.avgPartyHpOnRetreat !== null
+                      ? `${(simResult.avgPartyHpOnRetreat * 100).toFixed(1)}%`
+                      : 'なし'}
+                  </p>
+                  <p>
+                    撤退時平均士気:{' '}
+                    {simResult.avgMoraleOnRetreat !== null
+                      ? simResult.avgMoraleOnRetreat.toFixed(1)
+                      : 'なし'}
+                  </p>
+                  <p>
                     治療役喪失撤退率:{' '}
                     {(simResult.healerIncapRetreatRate * 100).toFixed(1)}%
                   </p>
@@ -578,6 +590,37 @@ export default function App() {
                       ),
                     )}
                   </ul>
+                  <p>個人別撤退提案回数:</p>
+                  <ul>
+                    {Object.entries(simResult.individualProposalCounts).map(
+                      ([id, count]) => (
+                        <li key={id}>
+                          {id}: {count} 回
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                  <p>ロール別撤退提案率:</p>
+                  <ul>
+                    {Object.entries(simResult.roleProposalRates).map(
+                      ([role, rate]) => (
+                        <li key={role}>
+                          {role}: {((rate ?? 0) * 100).toFixed(1)}%
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                  <p>撤退試行回数別成功率:</p>
+                  <ul>
+                    {Object.entries(simResult.retreatAttemptsByCount).map(
+                      ([attempts, data]) => (
+                        <li key={attempts}>
+                          {attempts} 回試行: {data.count} 戦 / 成功率{' '}
+                          {(data.rate * 100).toFixed(1)}%
+                        </li>
+                      ),
+                    )}
+                  </ul>
                 </div>
               </details>
               <details>
@@ -588,6 +631,32 @@ export default function App() {
                       <li key={type}>
                         {type}: {data?.count} 戦 / 勝率{' '}
                         {((data?.winRate ?? 0) * 100).toFixed(1)}%
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </details>
+              <details>
+                <summary>敵編成別勝率</summary>
+                <ul>
+                  {Object.entries(simResult.enemyCompositionStats).map(
+                    ([comp, data]) => (
+                      <li key={comp}>
+                        {comp}: {data.count} 戦 / 勝率{' '}
+                        {((data.winRate ?? 0) * 100).toFixed(1)}%
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </details>
+              <details>
+                <summary>敵特殊能力別有利結果率</summary>
+                <ul>
+                  {Object.entries(simResult.enemyAbilityStats).map(
+                    ([ability, data]) => (
+                      <li key={ability}>
+                        {ability}: {data.count} 戦 / 有利結果率{' '}
+                        {((data.winRate ?? 0) * 100).toFixed(1)}%
                       </li>
                     ),
                   )}

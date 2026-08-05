@@ -399,6 +399,8 @@ function makeSummonTestState(
     deadAdventurers: new Set(),
     injuries: [],
     abilityUsage: {},
+    retreatAttempts: [],
+    lastRetreatRound: -2,
     context: {
       lighting: 'normal',
       noise: 0,

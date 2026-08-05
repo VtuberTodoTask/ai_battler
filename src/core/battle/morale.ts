@@ -93,7 +93,7 @@ export function evaluatePartyRetreat(
 ): PartyRetreatEvaluation {
   const alive = getAliveAdventurers({ party } as { party: BattleUnit[] })
   const total = party.length
-  const incapacitated = party.filter((u) => !u.isAlive || u.escaped).length
+  const incapacitated = party.filter((u) => !u.isAlive && !u.escaped).length
   const healerAlive = party.some(
     (u) => u.role === 'healer' && u.isAlive && !u.escaped,
   )
@@ -133,7 +133,7 @@ export function evaluatePartyRetreat(
   }, 0)
 
   const matchedReasons: RetreatTriggerReason[] = []
-  if (incapacitated >= total * 0.5) matchedReasons.push('halfIncapacitated')
+  if (incapacitated > total / 2) matchedReasons.push('halfIncapacitated')
   if (!healerAlive && hasWounded) matchedReasons.push('healerLostWithWounded')
   if (hpRatio <= retreatHpThreshold) matchedReasons.push('lowPartyHp')
   if (avgMorale <= moraleThreshold) matchedReasons.push('lowMorale')
@@ -143,7 +143,7 @@ export function evaluatePartyRetreat(
   const should = matchedReasons.length > 0
 
   const diagnostic: RetreatDiagnostic = {
-    reason: matchedReasons[0] ?? 'manualAction',
+    reason: matchedReasons[0] ?? 'memberProposal',
     round,
     success: false,
     successChance: 0,

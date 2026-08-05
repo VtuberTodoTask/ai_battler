@@ -9,6 +9,7 @@ import {
   type ContactResultType,
   type Enemy,
   type RetreatTriggerReason,
+  type TrialFingerprint,
 } from '../models/types.ts'
 import { generateAdventurer } from '../generators/adventurerGenerator.ts'
 import {
@@ -79,6 +80,13 @@ export interface SimulationSummary {
   avgEnemyThreat: number
   avgPartyThreat: number
   avgThreatRatio: number
+  fingerprints: TrialFingerprint[]
+  individualProposalCounts: Record<string, number>
+  roleProposalRates: Partial<Record<AdventurerRole, number>>
+  retreatAttemptsByCount: Record<
+    string,
+    { count: number; success: number; rate: number }
+  >
   rawResults?: BattleResult[]
 }
 
@@ -239,6 +247,14 @@ export function runSimulation(options: SimulationOptions): SimulationSummary {
   let totalThreatRatio = 0
 
   const rawResults: BattleResult[] = []
+  const fingerprints: TrialFingerprint[] = []
+  const individualProposalCounts: Record<string, number> = {}
+  const roleProposalCounts: Partial<Record<AdventurerRole, number>> = {}
+  const roleOccurrences: Partial<Record<AdventurerRole, number>> = {}
+  const retreatAttemptsByCount: Record<
+    string,
+    { count: number; success: number; rate: number }
+  > = {}
 
   let fixedParty: Adventurer[] | undefined
   let fixedEncounter: Enemy[] | undefined
@@ -268,6 +284,8 @@ export function runSimulation(options: SimulationOptions): SimulationSummary {
             difficulty: options.difficulty,
           })
 
+    const compKey = enemyCompositionKey(enemies)
+
     const result = runBattle(
       `${seed}-battle-${i}`,
       party,
@@ -279,6 +297,47 @@ export function runSimulation(options: SimulationOptions): SimulationSummary {
     totalRounds += result.rounds
     outcomes[result.outcome]++
 
+    const fingerprint: TrialFingerprint = {
+      partyIds: party.map((a) => a.id),
+      partyRoles: party.map((a) => a.role),
+      enemyIds: enemies.map((e) => e.id),
+      enemyComposition: compKey,
+    }
+    fingerprints.push(fingerprint)
+
+    for (const a of party) {
+      roleOccurrences[a.role] = (roleOccurrences[a.role] ?? 0) + 1
+    }
+
+    const attemptCountKey = String(result.retreatAttempts?.length ?? 0)
+    if (!retreatAttemptsByCount[attemptCountKey]) {
+      retreatAttemptsByCount[attemptCountKey] = {
+        count: 0,
+        success: 0,
+        rate: 0,
+      }
+    }
+    retreatAttemptsByCount[attemptCountKey].count++
+    if (result.outcome === 'retreat') {
+      retreatAttemptsByCount[attemptCountKey].success++
+    }
+
+    for (const attempt of result.retreatAttempts ?? []) {
+      if (
+        attempt.proposerId &&
+        (attempt.reason === 'memberProposal' ||
+          attempt.reason === 'criticalMember')
+      ) {
+        individualProposalCounts[attempt.proposerId] =
+          (individualProposalCounts[attempt.proposerId] ?? 0) + 1
+        if (attempt.proposerRole) {
+          roleProposalCounts[attempt.proposerRole as AdventurerRole] =
+            (roleProposalCounts[attempt.proposerRole as AdventurerRole] ?? 0) +
+            1
+        }
+      }
+    }
+
     totalEnemyCount += enemies.length
     const enemyThreat = enemies.reduce((sum, e) => sum + e.threatCost, 0)
     totalEnemyThreat += enemyThreat
@@ -287,7 +346,6 @@ export function runSimulation(options: SimulationOptions): SimulationSummary {
 
     addCategory(contactResultStats, result.contactResult.type, result)
 
-    const compKey = enemyCompositionKey(enemies)
     addCategory(enemyCompositionStats, compKey, result)
 
     for (const abilityId of enemyAbilityIds(enemies)) {
@@ -347,6 +405,17 @@ export function runSimulation(options: SimulationOptions): SimulationSummary {
     outcomePercentages[key] = count === 0 ? 0 : value / count
   }
 
+  const roleProposalRates: Partial<Record<AdventurerRole, number>> = {}
+  for (const role of ADVENTURER_ROLES) {
+    const proposals = roleProposalCounts[role] ?? 0
+    const occurrences = roleOccurrences[role] ?? 0
+    roleProposalRates[role] = occurrences === 0 ? 0 : proposals / occurrences
+  }
+
+  for (const summary of Object.values(retreatAttemptsByCount)) {
+    summary.rate = summary.count === 0 ? 0 : summary.success / summary.count
+  }
+
   return {
     count,
     outcomes,
@@ -370,6 +439,10 @@ export function runSimulation(options: SimulationOptions): SimulationSummary {
     avgEnemyThreat: count === 0 ? 0 : totalEnemyThreat / count,
     avgPartyThreat: count === 0 ? 0 : totalPartyThreat / count,
     avgThreatRatio: count === 0 ? 0 : totalThreatRatio / count,
+    fingerprints,
+    individualProposalCounts,
+    roleProposalRates,
+    retreatAttemptsByCount,
     rawResults,
   }
 }

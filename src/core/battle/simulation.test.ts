@@ -29,6 +29,34 @@ describe('runSimulation', () => {
     expect(ids.size).toBe(summary.count)
     expect(summary.avgEnemyCount).toBeGreaterThan(0)
     expect(summary.avgPartyThreat).toBeGreaterThan(0)
+
+    const partyIds = new Set(summary.fingerprints.flatMap((f) => f.partyIds))
+    const partyRoles = new Set(
+      summary.fingerprints.flatMap((f) => f.partyRoles),
+    )
+    const enemyIds = new Set(summary.fingerprints.flatMap((f) => f.enemyIds))
+    const compositions = new Set(
+      summary.fingerprints.map((f) => f.enemyComposition),
+    )
+    expect(partyIds.size).toBeGreaterThan(1)
+    expect(partyRoles.size).toBeGreaterThan(1)
+    expect(enemyIds.size).toBeGreaterThan(1)
+    expect(compositions.size).toBeGreaterThan(1)
+  })
+
+  it('固定対戦モードではpartyIdsとenemyIdsが全試行で同一で戦闘シードだけ異なる', () => {
+    const summary = runSimulation({ ...baseOptions, count: 20 })
+    const first = summary.fingerprints[0]
+    for (let i = 1; i < summary.fingerprints.length; i++) {
+      expect(summary.fingerprints[i].partyIds).toEqual(first.partyIds)
+      expect(summary.fingerprints[i].enemyIds).toEqual(first.enemyIds)
+      expect(summary.fingerprints[i].partyRoles).toEqual(first.partyRoles)
+      expect(summary.fingerprints[i].enemyComposition).toBe(
+        first.enemyComposition,
+      )
+    }
+    const seeds = new Set(summary.rawResults?.map((r) => r.seed))
+    expect(seeds.size).toBe(summary.count)
   })
 
   it('結果区分の合計が試行回数と一致する', () => {
@@ -54,6 +82,33 @@ describe('runSimulation', () => {
     }
   })
 
+  it('S級・Normal・固定対戦1000回で暫定目標を満たす', () => {
+    const summary = runSimulation({
+      rank: 'S',
+      difficulty: 'normal',
+      count: 1000,
+      mode: 'fixed',
+      roleMode: 'fixed',
+      seed: 'sim-S-normal',
+    })
+    const retreatCount = summary.outcomes.retreat
+    const retreatRate = retreatCount / summary.count
+    const victory = summary.outcomes.victory + summary.outcomes.costlyVictory
+    const victoryRate = victory / summary.count
+    const proposalOnly =
+      (summary.retreatReasons.memberProposal?.count ?? 0) +
+      (summary.retreatReasons.criticalMember?.count ?? 0)
+    const proposalRate = retreatCount === 0 ? 0 : proposalOnly / retreatCount
+    const defeatRate =
+      (summary.outcomes.defeat + summary.outcomes.totalLoss) / summary.count
+
+    expect(proposalRate).toBeLessThan(0.3)
+    expect(retreatRate).toBeLessThan(0.5)
+    expect(victoryRate).toBeGreaterThanOrEqual(0.3)
+    expect(summary.avgRounds).toBeGreaterThan(6.38)
+    expect(defeatRate).toBeLessThan(0.2)
+  })
+
   it('診断集計に必要な項目が含まれる', () => {
     const summary = runSimulation({ ...baseOptions, count: 50 })
     expect(summary.avgRounds).toBeGreaterThan(0)
@@ -63,5 +118,8 @@ describe('runSimulation', () => {
     expect(summary.contactResultStats).toBeDefined()
     expect(summary.enemyCompositionStats).toBeDefined()
     expect(summary.enemyAbilityStats).toBeDefined()
+    expect(summary.fingerprints.length).toBe(summary.count)
+    expect(summary.roleProposalRates).toBeDefined()
+    expect(summary.retreatAttemptsByCount).toBeDefined()
   })
 })

@@ -293,7 +293,10 @@ export type RetreatTriggerReason =
   | 'lowPartyHp'
   | 'lowMorale'
   | 'overwhelmed'
-  | 'manualAction'
+  | 'memberProposal'
+  | 'criticalMember'
+  | 'fearPanic'
+  | 'individualEscape'
 
 export interface RetreatDiagnostic {
   reason: RetreatTriggerReason
@@ -311,6 +314,15 @@ export interface RetreatDiagnostic {
   partyThreat: number
   enemyThreat: number
   matchedReasons: RetreatTriggerReason[]
+
+  proposerId?: string
+  proposerRole?: string
+  proposerHpRatio?: number
+  proposerMorale?: number
+  leaderId?: string
+  approved?: boolean
+  attempted?: boolean
+  attemptCount?: number
 }
 
 export interface RetreatResult {
@@ -347,6 +359,13 @@ export interface BattleOptions {
   context?: BattleContext
 }
 
+export interface TrialFingerprint {
+  partyIds: string[]
+  partyRoles: AdventurerRole[]
+  enemyIds: string[]
+  enemyComposition: string
+}
+
 export interface BattleResult {
   seed: string
   outcome: BattleOutcome
@@ -365,6 +384,7 @@ export interface BattleResult {
   contactResult: ContactResult
   retreatResult?: RetreatResult
   retreatDiagnostic?: RetreatDiagnostic
+  retreatAttempts?: RetreatDiagnostic[]
   logs: BattleLogEntry[]
 }
 

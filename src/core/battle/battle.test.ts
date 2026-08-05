@@ -5,7 +5,15 @@ import {
   generateEncounter,
   calculatePartyThreat,
 } from '../generators/encounterGenerator.ts'
-import { runBattle } from './battle.ts'
+import {
+  runBattle,
+  requestPartyRetreat,
+  attemptIndividualEscape,
+} from './battle.ts'
+import { createAdventurerUnit, createEnemyUnit } from './battleState.ts'
+import { addStatus } from './actions.ts'
+import { SeededRng } from '../rng/seededRng.ts'
+import type { BattleState } from './battle.ts'
 
 function balancedParty(rank: 'B' | 'C' | 'D', seed: string) {
   const roles: ('vanguard' | 'ranger' | 'mage' | 'healer')[] = [
@@ -102,9 +110,9 @@ describe('runBattle', () => {
     expect(cRate).toBeGreaterThan(dRate)
   })
 
-  it('個別撤退が manualAction として記録される', () => {
+  it('個別撤退が individualEscape として記録される', () => {
     const party = balancedParty('C', 'manual-adv')
-    party[0].currentHp = party[0].maxHp * 0.1
+    party[0].currentHp = party[0].maxHp * 0.05
     const enemy = generateEnemy('manual-enemy', {
       rank: 'E',
       species: 'beast',
@@ -112,6 +120,180 @@ describe('runBattle', () => {
     })
     const result = runBattle('manual-seed', party, [enemy])
     expect(result.retreatDiagnostic).toBeDefined()
-    expect(result.retreatDiagnostic?.matchedReasons).toContain('manualAction')
+    expect(result.retreatDiagnostic?.matchedReasons).toContain(
+      'individualEscape',
+    )
+  })
+})
+
+function makeRetreatState(
+  partyUnits: ReturnType<typeof createAdventurerUnit>[],
+  enemyUnits: ReturnType<typeof createEnemyUnit>[],
+): BattleState {
+  return {
+    seed: 'retreat-test',
+    rng: new SeededRng('retreat-test'),
+    party: partyUnits,
+    enemies: enemyUnits,
+    round: 1,
+    logs: [],
+    contact: {
+      type: 'success',
+      partyScouting: 0,
+      enemyStealth: 0,
+      successChance: 50,
+      roll: 50,
+      effects: {},
+    },
+    discoveredWeaknesses: new Set(),
+    partyDamageDealt: 0,
+    enemyDamageDealt: 0,
+    ended: false,
+    partyInitBonus: 0,
+    enemyInitBonus: 0,
+    deadAdventurers: new Set(),
+    injuries: [],
+    abilityUsage: {},
+    retreatAttempts: [],
+    lastRetreatRound: -2,
+    context: {
+      lighting: 'normal',
+      noise: 0,
+      water: false,
+      smoke: false,
+    },
+  }
+}
+
+describe('撤退意思決定', () => {
+  it('requestPartyRetreat が memberProposal として記録される', () => {
+    const base = generateAdventurer({
+      seed: 'req-base',
+      rank: 'S',
+      role: 'vanguard',
+    })
+    base.personality = {
+      bravery: 0,
+      caution: 4,
+      cooperation: 0,
+      altruism: 0,
+      greed: 0,
+      discipline: 0,
+    }
+    base.morale = 30
+    base.currentHp = Math.floor(base.maxHp * 0.15)
+
+    const wounded = generateAdventurer({
+      seed: 'req-wounded',
+      rank: 'S',
+      role: 'mage',
+    })
+    wounded.currentHp = Math.floor(wounded.maxHp * 0.4)
+
+    const down = generateAdventurer({
+      seed: 'req-down',
+      rank: 'S',
+      role: 'ranger',
+    })
+    down.currentHp = 0
+
+    const healer = generateAdventurer({
+      seed: 'req-healer',
+      rank: 'S',
+      role: 'healer',
+    })
+
+    const party = [base, wounded, down, healer].map(createAdventurerUnit)
+    party[0].skills.leadership = 20
+    party[1].skills.leadership = 0
+    party[2].skills.leadership = 0
+    party[3].skills.leadership = 0
+
+    const enemy = createEnemyUnit(
+      generateEnemy('req-enemy', {
+        rank: 'E',
+        species: 'beast',
+        archetype: 'assault',
+      }),
+    )
+
+    const state = makeRetreatState(party, [enemy])
+    requestPartyRetreat(state, party[0])
+
+    const diagnostic = state.retreatAttempts[0]
+    expect(diagnostic).toBeDefined()
+    expect(diagnostic.reason).toBe('memberProposal')
+    expect(diagnostic.matchedReasons).toContain('memberProposal')
+    expect(diagnostic.proposerId).toBe(party[0].id)
+    expect(diagnostic.proposerRole).toBe('vanguard')
+    expect(diagnostic.approved).toBe(true)
+    expect(diagnostic.attempted).toBe(true)
+  })
+
+  it('requestPartyRetreat が criticalMember として記録される', () => {
+    const base = generateAdventurer({
+      seed: 'crit-base',
+      rank: 'S',
+      role: 'vanguard',
+    })
+    base.personality = {
+      bravery: 0,
+      caution: 4,
+      cooperation: 0,
+      altruism: 0,
+      greed: 0,
+      discipline: 0,
+    }
+    base.morale = 30
+    base.currentHp = Math.floor(base.maxHp * 0.1)
+
+    const party = [
+      base,
+      generateAdventurer({ seed: 'crit-1', rank: 'S', role: 'ranger' }),
+      generateAdventurer({ seed: 'crit-2', rank: 'S', role: 'mage' }),
+      generateAdventurer({ seed: 'crit-3', rank: 'S', role: 'healer' }),
+    ].map(createAdventurerUnit)
+    party[0].skills.leadership = 20
+    party[1].skills.leadership = 0
+    party[2].skills.leadership = 0
+    party[3].skills.leadership = 0
+
+    const enemy = createEnemyUnit(
+      generateEnemy('crit-enemy', {
+        rank: 'E',
+        species: 'beast',
+        archetype: 'assault',
+      }),
+    )
+
+    const state = makeRetreatState(party, [enemy])
+    requestPartyRetreat(state, party[0])
+
+    expect(state.retreatAttempts[0].reason).toBe('criticalMember')
+    expect(state.retreatAttempts[0].matchedReasons).toContain('criticalMember')
+  })
+
+  it('attemptIndividualEscape が fearPanic として記録される', () => {
+    const adv = createAdventurerUnit(
+      generateAdventurer({
+        seed: 'fear-adv',
+        rank: 'S',
+        role: 'vanguard',
+      }),
+    )
+    const enemy = createEnemyUnit(
+      generateEnemy('fear-enemy', {
+        rank: 'E',
+        species: 'beast',
+        archetype: 'assault',
+      }),
+    )
+
+    const state = makeRetreatState([adv], [enemy])
+    addStatus(adv, 'frightened', 2, 5, 'test')
+    attemptIndividualEscape(state, adv)
+
+    expect(state.retreatAttempts[0].reason).toBe('fearPanic')
+    expect(state.retreatAttempts[0].matchedReasons).toContain('fearPanic')
   })
 })

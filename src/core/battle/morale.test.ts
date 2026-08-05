@@ -190,6 +190,7 @@ describe('evaluatePartyRetreat', () => {
     const party = baseParty('half')
     party[0].isAlive = false
     party[1].isAlive = false
+    party[2].isAlive = false
     const enemy = createEnemyUnit(makeEnemy('half-enemy', { threatCost: 1 }))
     const result = evaluatePartyRetreat(party, [enemy], 1)
     expect(result.diagnostic.matchedReasons).toContain('halfIncapacitated')

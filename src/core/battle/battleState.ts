@@ -62,6 +62,7 @@ export interface BattleUnit {
   statusEffects: StatusEffect[]
   usedAbilities: Set<string>
   isSummoned: boolean
+  retreatProposalRejected?: boolean
 }
 
 export function createAdventurerUnit(adv: Adventurer): BattleUnit {
