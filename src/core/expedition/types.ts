@@ -1,9 +1,13 @@
 import type {
   Adventurer,
   AdventurerRank,
+  BattleOutcome,
+  BattleResult,
   Difficulty,
   EncounterShape,
+  EnemySpecies,
   SkillName,
+  StatusEffect,
 } from '../models/types.ts'
 import type { EncounterPlan } from '../generators/encounterGenerator.ts'
 
@@ -49,6 +53,7 @@ export interface KnownInformation {
   id: string
   name: string
   description: string
+  battleIntel?: BattleIntel
 }
 
 export interface HiddenInformation {
@@ -57,6 +62,14 @@ export interface HiddenInformation {
   description: string
   difficulty: number
   requiredSkill?: SkillName
+  battleIntel?: BattleIntel
+}
+
+export interface BattleIntel {
+  kind: 'weakness' | 'ability'
+  id: string
+  name: string
+  targetSpecies?: EnemySpecies
 }
 
 export interface DiscoveredInformation {
@@ -65,6 +78,7 @@ export interface DiscoveredInformation {
   description: string
   source: string
   completeness: 'fragment' | 'complete'
+  battleIntel?: BattleIntel
 }
 
 export type CheckResult =
@@ -118,6 +132,8 @@ export interface ExpeditionInjury {
   cause: string
   hpLoss: number
   status: 'active' | 'treated' | 'worsened'
+  sourceType?: 'expedition' | 'battle'
+  sourceId?: string
 }
 
 export interface ExpeditionState {
@@ -126,7 +142,7 @@ export interface ExpeditionState {
   partyHp: Record<string, number>
   partyMp: Record<string, number>
   partyMorale: Record<string, number>
-  partyStatusEffects: Record<string, string[]>
+  partyStatusEffects: Record<string, StatusEffect[]>
   supplies: {
     food: number
     medicine: number
@@ -135,13 +151,26 @@ export interface ExpeditionState {
   information: DiscoveredInformation[]
   injuries: ExpeditionInjury[]
   casualties: string[]
+  incapacitated: string[]
   objectiveProgress: number
   objectiveCompleted: boolean
   discoveredThreats: ExpeditionFeature[]
   avoidedThreats: ExpeditionFeature[]
   logs: ExpeditionLogEntry[]
   battleEntrySnapshot?: BattleEntryConditions
+  battles: ExpeditionBattleRecord[]
+  battleOutcome?: BattleOutcome
   metadata?: Record<string, unknown>
+}
+
+export interface ExpeditionBattleConfig {
+  enabled: boolean
+  seed: string
+  triggerPhase: 'afterExploration'
+  shape?: EncounterShape
+  allowedSpecies?: EnemySpecies[]
+  bossAllowed?: boolean
+  recommendedPartySize?: number
 }
 
 export interface ExpeditionRequest {
@@ -157,6 +186,7 @@ export interface ExpeditionRequest {
   knownInformation: KnownInformation[]
   hiddenInformation: HiddenInformation[]
   encounter?: { shape: EncounterShape; count: number } | EncounterPlan
+  battle?: ExpeditionBattleConfig
 }
 
 export interface EnvironmentEffect {
@@ -170,10 +200,35 @@ export interface BattleEntryConditions {
   initialHp: Record<string, number>
   initialMp: Record<string, number>
   initialMorale: Record<string, number>
-  initialStatusEffects: Record<string, string[]>
-  knownEnemyWeaknesses: string[]
-  knownEnemyAbilities: string[]
+  initialStatusEffects: Record<string, StatusEffect[]>
+  knownEnemyWeaknesses: BattleIntel[]
+  knownEnemyAbilities: BattleIntel[]
   environmentEffects: EnvironmentEffect[]
+}
+
+export interface ExpeditionBattleRecord {
+  id: string
+  phase: ExpeditionPhase
+  trigger: string
+  encounterSeed: string
+  combatSeed: string
+  entrySnapshot: BattleEntryConditions
+  enemyIds: string[]
+  enemyComposition: string
+  outcome: BattleOutcome
+  rounds: number
+  survivingAdventurerIds: string[]
+  incapacitatedAdventurerIds: string[]
+  deadAdventurerIds: string[]
+  knownEnemyWeaknesses: BattleIntel[]
+  knownEnemyAbilities: BattleIntel[]
+  matchedWeaknessIntel: BattleIntel[]
+  unmatchedWeaknessIntel: BattleIntel[]
+  matchedAbilityIntel: BattleIntel[]
+  unmatchedAbilityIntel: BattleIntel[]
+  discoveredWeaknesses: string[]
+  injuries: ExpeditionInjury[]
+  result: BattleResult
 }
 
 export type ExpeditionOutcome =

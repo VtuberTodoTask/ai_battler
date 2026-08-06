@@ -68,6 +68,7 @@ export interface BattleUnit {
 
 export function createAdventurerUnit(adv: Adventurer): BattleUnit {
   const startHp = adv.currentHp ?? adv.maxHp
+  const startMp = adv.currentMp ?? adv.maxMp
   return {
     id: adv.id,
     name: adv.name,
@@ -75,7 +76,7 @@ export function createAdventurerUnit(adv: Adventurer): BattleUnit {
     original: deepClone(adv),
     hp: startHp,
     maxHp: adv.maxHp,
-    mp: adv.maxMp,
+    mp: startMp,
     maxMp: adv.maxMp,
     morale: adv.morale,
     stats: { ...adv.stats },
@@ -99,7 +100,7 @@ export function createAdventurerUnit(adv: Adventurer): BattleUnit {
     initiative: 0,
     isAlive: startHp > 0,
     escaped: false,
-    statusEffects: [],
+    statusEffects: deepClone(adv.statusEffects),
     usedAbilities: new Set<string>(),
     isSummoned: false,
   }

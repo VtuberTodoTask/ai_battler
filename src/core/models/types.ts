@@ -391,6 +391,7 @@ export interface InjuryResult {
 
 export interface BattleOptions {
   context?: BattleContext
+  forcedContactType?: 'success' | 'failure'
 }
 
 export interface TrialFingerprint {
@@ -400,6 +401,17 @@ export interface TrialFingerprint {
   enemyComposition: string
 }
 
+export interface BattleParticipantFinalState {
+  id: string
+  currentHp: number
+  currentMp: number
+  morale: number
+  statusEffects: StatusEffect[]
+  alive: boolean
+  incapacitated: boolean
+  dead: boolean
+}
+
 export interface BattleResult {
   seed: string
   outcome: BattleOutcome
@@ -407,6 +419,7 @@ export interface BattleResult {
   survivingAdventurers: string[]
   incapacitatedAdventurers: string[]
   deadAdventurers: string[]
+  finalAdventurerStates: BattleParticipantFinalState[]
   survivingEnemies: string[]
   defeatedEnemies: string[]
   escapedEnemies: string[]

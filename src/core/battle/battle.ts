@@ -5,6 +5,7 @@ import {
   BattleLogEntry,
   BattleOptions,
   BattleOutcome,
+  BattleParticipantFinalState,
   BattleResult,
   ContactResult,
   Enemy,
@@ -14,7 +15,7 @@ import {
   RetreatResult,
   RetreatTriggerReason,
 } from '../models/types.ts'
-import { clamp } from '../util.ts'
+import { clamp, deepClone } from '../util.ts'
 import { MAX_ROUNDS } from '../balance/constants.ts'
 import {
   BattleUnit,
@@ -207,7 +208,48 @@ function performMonsterKnowledgeCheck(state: BattleState): void {
   }
 }
 
-function resolveContact(state: BattleState): void {
+function resolveContact(
+  state: BattleState,
+  forcedType?: 'success' | 'failure',
+): void {
+  if (forcedType === 'success') {
+    state.partyInitBonus = 2
+    const effects: ContactResult['effects'] = { initiativeBonus: 2 }
+    state.contact = {
+      type: 'success',
+      partyScouting: 0,
+      enemyStealth: 0,
+      successChance: 100,
+      roll: 0,
+      effects,
+    }
+    log(state, 'contact', 'contact', '遠征側の有利により接敵に成功。', {
+      metadata: { contactType: 'success' },
+    })
+    performMonsterKnowledgeCheck(state)
+    return
+  }
+
+  if (forcedType === 'failure') {
+    state.enemyInitBonus = 3
+    const effects: ContactResult['effects'] = {
+      enemyInitiativeBonus: 3,
+      side: 'enemy',
+    }
+    state.contact = {
+      type: 'failure',
+      partyScouting: 0,
+      enemyStealth: 0,
+      successChance: 0,
+      roll: 100,
+      effects,
+    }
+    log(state, 'contact', 'contact', '遠征側の不利により敵に先制された。', {
+      metadata: { contactType: 'failure' },
+    })
+    return
+  }
+
   const party = state.party
   const enemies = state.enemies
 
@@ -1393,7 +1435,7 @@ export function runBattle(
     enemyActionCount: 0,
   }
 
-  resolveContact(state)
+  resolveContact(state, options?.forcedContactType)
   applyStealthStart(state)
 
   for (let round = 1; round <= MAX_ROUNDS && !state.ended; round++) {
@@ -1467,6 +1509,19 @@ export function runBattle(
     .map((u) => u.id)
   const deadAdventurerIds = [...state.deadAdventurers]
 
+  const finalAdventurerStates: BattleParticipantFinalState[] = state.party.map(
+    (u) => ({
+      id: u.id,
+      currentHp: clamp(u.hp, 0, u.maxHp),
+      currentMp: clamp(u.mp, 0, u.maxMp),
+      morale: clamp(u.morale, 0, 100),
+      statusEffects: deepClone(u.statusEffects),
+      alive: u.isAlive,
+      incapacitated: !u.isAlive && !u.escaped,
+      dead: state.deadAdventurers.has(u.id),
+    }),
+  )
+
   return {
     seed,
     outcome: state.outcome ?? 'stalemate',
@@ -1474,6 +1529,7 @@ export function runBattle(
     survivingAdventurers,
     incapacitatedAdventurers,
     deadAdventurers: deadAdventurerIds,
+    finalAdventurerStates,
     survivingEnemies: state.enemies
       .filter((e) => e.isAlive || e.escaped)
       .map((e) => e.id),
