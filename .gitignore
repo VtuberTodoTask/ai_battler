@@ -25,3 +25,7 @@ dist-ssr
 
 # Coverage
 coverage
+
+# Ablation raw data
+reports/ability-ablation-raw.json
+reports/ability-ablation-summary.json
