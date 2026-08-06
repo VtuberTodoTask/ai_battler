@@ -256,7 +256,15 @@ function resolveContact(state: BattleState): void {
       'contact',
       'contact',
       `冒険者側が接敵に大成功。${stunCount}体の敵が行動不能。`,
-      { roll, successChance },
+      {
+        roll,
+        successChance,
+        metadata: {
+          contactType: type,
+          topScoutRole: topScout?.role,
+          leaderRole: leader?.role,
+        },
+      },
     )
 
     if (topScout) {
@@ -271,6 +279,11 @@ function resolveContact(state: BattleState): void {
     log(state, 'contact', 'contact', '冒険者側が接敵に成功。', {
       roll,
       successChance,
+      metadata: {
+        contactType: type,
+        topScoutRole: topScout?.role,
+        leaderRole: leader?.role,
+      },
     })
     performMonsterKnowledgeCheck(state)
   } else if (roll >= 96) {
@@ -295,14 +308,31 @@ function resolveContact(state: BattleState): void {
       'contact',
       'contact',
       `冒険者側が接敵に大失敗。${damageCount}人が初期ダメージを受ける。`,
-      { roll, successChance },
+      {
+        roll,
+        successChance,
+        metadata: {
+          contactType: type,
+          topScoutRole: topScout?.role,
+          leaderRole: leader?.role,
+          initialDamage: damageCount,
+        },
+      },
     )
   } else {
     type = 'failure'
     state.enemyInitBonus = 3
     effects.enemyInitiativeBonus = 3
     effects.side = 'enemy'
-    log(state, 'contact', 'contact', '敵側が先制。', { roll, successChance })
+    log(state, 'contact', 'contact', '敵側が先制。', {
+      roll,
+      successChance,
+      metadata: {
+        contactType: type,
+        topScoutRole: topScout?.role,
+        leaderRole: leader?.role,
+      },
+    })
   }
 
   state.contact = {
@@ -455,7 +485,11 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
-        metadata: { guardPotency: 5 },
+        metadata: {
+          guardPotency: 5,
+          guardSourceRole: unit.role,
+          guardTargetRole: action.target.role,
+        },
       },
     )
     return
@@ -475,7 +509,13 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
-        metadata: { requestedMorale: 10, actualMoraleGained, guardPotency: 3 },
+        metadata: {
+          requestedMorale: 10,
+          actualMoraleGained,
+          guardPotency: 3,
+          supportSourceRole: unit.role,
+          supportTargetRole: action.target.role,
+        },
       },
     )
     return
@@ -633,6 +673,41 @@ function resolveAttack(
     else state.enemyDamageDealt += result.damageDealt
   }
 
+  let guardPrevented = 0
+  let preventedIncap = false
+  let guardSourceId: string | undefined
+  if (result.hit && result.damageDealtWithoutGuard !== undefined) {
+    const withoutGuard = result.damageDealtWithoutGuard
+    guardPrevented = Math.max(0, withoutGuard - result.damageDealt)
+    if (guardPrevented > 0) {
+      const preHp = defender.hp + result.damageDealt
+      preventedIncap = preHp - withoutGuard <= 0 && defender.hp > 0
+      guardSourceId = defender.statusEffects.find(
+        (e) => e.type === 'guarded',
+      )?.sourceId
+    }
+  }
+
+  const attackMetadata: Record<string, unknown> = {
+    isFlank,
+    isCounter,
+    attackerRole: attacker.role,
+    targetRole: defender.role,
+  }
+  if (guardPrevented > 0) {
+    attackMetadata.guardPrevented = guardPrevented
+    attackMetadata.preventedIncap = preventedIncap
+    attackMetadata.guardSourceId = guardSourceId
+  }
+  if (
+    state.leaderTargetId &&
+    attacker.isAdventurer &&
+    defender.id === state.leaderTargetId &&
+    !wasLeader(state, attacker)
+  ) {
+    attackMetadata.followedLeaderTarget = true
+  }
+
   log(state, 'combat', attackType, result.message, {
     actorId: attacker.id,
     targetIds: [defender.id],
@@ -640,7 +715,7 @@ function resolveAttack(
     successChance: result.successChance,
     damage: result.damageDealt,
     statusApplied: result.statusApplied,
-    metadata: { isFlank, isCounter },
+    metadata: attackMetadata,
   })
 
   if (result.hit && hasAbility(attacker, 'areaAttack')) {
