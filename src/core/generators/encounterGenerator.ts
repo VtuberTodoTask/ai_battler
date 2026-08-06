@@ -40,7 +40,7 @@ export function effectiveEncounterThreat(
   return rawThreat * actionEconomyMultiplier(enemyCount, partySize)
 }
 
-interface EncounterPlan {
+export interface EncounterPlan {
   shape: EncounterShape
   count: number
   slots: EncounterSlot[]
