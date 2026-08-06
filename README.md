@@ -120,6 +120,61 @@ console.log(result.logs)
 - **自動戦闘**: 生成したパーティと遭遇を戦闘
 - **シミュレーション**: 指定回数（最大 1000）の戦闘を一括実行し勝率を表示
 
+## Phase 1 最終定数
+
+Phase 1 最終状態として採用した定数です（`src/core/balance/constants.ts` から抜粋）。
+
+### ADVENTURER_THREAT
+
+```ts
+{
+  E: 2.97,
+  D: 3.90,
+  C: 4.61,
+  B: 6.11,
+  A: 6.13,
+  S: 7.24,
+}
+```
+
+### ABILITY_THREAT_COST
+
+```ts
+{
+  flight: 2.414,
+  poisonAttack: 0.05,     // provisional (low confidence)
+  bleedAttack: 0.05,      // provisional (low confidence)
+  areaAttack: 0.117,
+  revive: 0.432,
+  regeneration: 2.687,
+  frontDefense: 0.626,
+  magicResist: 1.867,
+  physicalResist: 0.789,
+  darknessBoost: 0.100,
+  corpseExplosion: 0.05,  // provisional (low confidence)
+  summon: 3.227,
+  taunt: 0.05,            // provisional (low confidence)
+  fear: 3.884,
+  healBlock: 0.05,        // provisional (low confidence)
+  counter: 0.065,
+  stealthStart: 0.05,     // provisional (low confidence)
+  swarmCoordination: 1.408,
+}
+```
+
+Provisional マークの能力は、Phase 1.7A の ablation で信頼区間が 0 をまたいだか有効シナリオが少なく、暫定値を維持しています。
+
+### 評価シード
+
+- `phase1-7-ability-cost-validation-v1`（能力コスト反映後 validation）
+- `phase1-7b-calibration-v1`（等級較正 calibration）
+- `phase1-7b-validation-v1`（等級較正 validation）
+- `phase1-final-difficulty-validation-v1`（最終難易度別ベンチマーク）
+
+詳細は `PHASE1.7_REPORT.md` を参照してください。
+
+---
+
 ## 既知の制限
 
 - 戦闘AIはルールベースであり、最適解ではなく役割別の行動優先度です。
