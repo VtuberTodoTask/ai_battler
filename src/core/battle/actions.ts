@@ -17,6 +17,7 @@ export interface ActionResult {
   successChance: number
   damage: number
   damageDealt: number
+  damageDealtWithoutGuard?: number
   statusApplied?: string[]
   message: string
 }
@@ -298,10 +299,12 @@ export function rollAttack(
   let raw = damageBase + rng.integer(-2, 2)
   raw = Math.max(1, raw)
 
+  const guardedEffect = defender.statusEffects.find((e) => e.type === 'guarded')
+  const guardBonus = guardedEffect?.value ?? 0
+
   let reduction = defender.equipment?.armor?.reduction ?? 0
-  if (hasStatus(defender, 'guarded')) {
-    reduction +=
-      defender.statusEffects.find((e) => e.type === 'guarded')?.value ?? 3
+  if (guardBonus > 0) {
+    reduction += guardBonus
   }
 
   const physicalReduction = getAbilityNumeric(defender, 'physicalReduction', 0)
@@ -348,6 +351,21 @@ export function rollAttack(
   }
 
   final = Math.max(1, Math.round(final))
+
+  let finalWithoutGuard = final
+  if (guardBonus > 0) {
+    finalWithoutGuard = Math.max(1, raw - (reduction - guardBonus)) * multiplier
+    if (critical) finalWithoutGuard *= critMultiplier
+    if (context.lighting === 'dark' && hasAbility(attacker, 'darknessBoost')) {
+      finalWithoutGuard += getAbilityNumeric(attacker, 'darkAttackBonus', 0)
+    }
+    if (hasAbility(attacker, 'swarmCoordination') && swarmAllyCount > 0) {
+      finalWithoutGuard +=
+        getAbilityNumeric(attacker, 'swarmBonus', 0) * swarmAllyCount
+    }
+    finalWithoutGuard = Math.max(1, Math.round(finalWithoutGuard))
+  }
+
   defender.hp -= final
 
   const poisonChance = getAbilityNumeric(attacker, 'poisonChance', 0)
@@ -392,6 +410,7 @@ export function rollAttack(
     successChance: chance,
     damage: raw,
     damageDealt: final,
+    damageDealtWithoutGuard: finalWithoutGuard,
     statusApplied: appliedStatuses,
     message: `${attacker.name} hit ${defender.name} for ${final} damage`,
   }
