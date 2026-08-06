@@ -14,6 +14,7 @@ import type {
   EnvironmentEffect,
   ExpeditionEffect,
   ExpeditionFeature,
+  ExpeditionInjury,
   ExpeditionLogEntry,
   ExpeditionOutcome,
   ExpeditionPhase,
@@ -512,9 +513,9 @@ function attemptInformationDiscovery(
   }
 }
 
-function applyExpeditionDamage(
+export function applyExpeditionDamage(
   state: ExpeditionState,
-  party: Adventurer[],
+  _party: Adventurer[],
   target: Adventurer,
   damage: number,
   cause: string,
@@ -528,7 +529,7 @@ function applyExpeditionDamage(
   const actualDamage = current - nextHp
   state.partyHp[target.id] = nextHp
 
-  if (nextHp === 0 && allowFatal) {
+  if (actualDamage > 0 && nextHp === 0 && allowFatal) {
     if (!state.casualties.includes(target.id)) {
       state.casualties.push(target.id)
     }
@@ -559,10 +560,23 @@ function applyExpeditionDamage(
   return { type: 'hpDamage', value: actualDamage, targetId: target.id }
 }
 
-function treatActiveInjuries(state: ExpeditionState): void {
+export function isUnresolvedInjury(injury: ExpeditionInjury): boolean {
+  return injury.status === 'active' || injury.status === 'worsened'
+}
+
+export function isUnresolvedSeriousInjury(injury: ExpeditionInjury): boolean {
+  return injury.type === 'serious' && isUnresolvedInjury(injury)
+}
+
+function treatInjuries(state: ExpeditionState, critical: boolean): void {
+  // 通常成功: active -> treated
+  // worsened -> active（重症を安定化するが完全回復には至らない）
+  // criticalSuccess: active -> treated, worsened -> treated
   for (const injury of state.injuries) {
     if (injury.status === 'active') {
       injury.status = 'treated'
+    } else if (injury.status === 'worsened') {
+      injury.status = critical ? 'treated' : 'active'
     }
   }
 }
@@ -1213,7 +1227,7 @@ function runReturn(
           effects.push({ type: 'hpHeal', value: heal, targetId: a.id })
         }
       }
-      treatActiveInjuries(state)
+      treatInjuries(state, result === 'criticalSuccess')
     } else {
       facts.push('帰還中の負傷者手当てが不十分だった')
     }
@@ -1337,7 +1351,7 @@ function runAftermath(
           healEffects.push({ type: 'hpHeal', value: heal, targetId: a.id })
         }
       }
-      treatActiveInjuries(state)
+      treatInjuries(state, result === 'criticalSuccess')
     } else {
       facts.push('治療は不十分だった')
     }
@@ -1431,8 +1445,8 @@ function determineOutcome(
   const timeExceeded =
     request.timeLimit !== undefined && state.elapsedTime > request.timeLimit
   const noSupplies = state.supplies.food <= 0
-  const activeSerious = state.injuries.filter(
-    (i) => i.status === 'active' && i.type === 'serious',
+  const unresolvedSerious = state.injuries.filter(
+    isUnresolvedSeriousInjury,
   ).length
   const allCasualties = state.casualties.length === party.length
   const hasCasualties = state.casualties.length > 0
@@ -1445,7 +1459,7 @@ function determineOutcome(
   if (
     state.objectiveProgress >= 100 &&
     !hasCasualties &&
-    activeSerious === 0 &&
+    unresolvedSerious === 0 &&
     avgMorale >= 40 &&
     !timeExceeded &&
     !noSupplies
@@ -1466,7 +1480,7 @@ function determineOutcome(
     else outcome = 'forcedRetreat'
   }
 
-  if (hasCasualties || activeSerious > 1) {
+  if (hasCasualties || unresolvedSerious > 1) {
     if (outcome === 'completeSuccess') outcome = 'success'
     else if (outcome === 'success') outcome = 'partialSuccess'
     else if (outcome === 'partialSuccess') outcome = 'failedObjective'
@@ -1474,6 +1488,13 @@ function determineOutcome(
   }
 
   return outcome
+}
+
+export const expeditionTestInternals = {
+  applyExpeditionDamage,
+  isUnresolvedInjury,
+  isUnresolvedSeriousInjury,
+  determineOutcome,
 }
 
 export function runExpedition(

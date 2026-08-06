@@ -1,4 +1,7 @@
-import { runExpedition } from '../src/core/expedition/expedition.ts'
+import {
+  isUnresolvedSeriousInjury,
+  runExpedition,
+} from '../src/core/expedition/expedition.ts'
 import type { ExpeditionRequest } from '../src/core/expedition/types.ts'
 import { generateAdventurer } from '../src/core/generators/adventurerGenerator.ts'
 import type { Adventurer, AdventurerRole } from '../src/core/models/types.ts'
@@ -69,8 +72,8 @@ function summarize(result: ReturnType<typeof runExpedition>): string {
   ).length
   const discoveredThreats = state.discoveredThreats.join(', ') || 'なし'
   const avoidedThreats = state.avoidedThreats.join(', ') || 'なし'
-  const activeSerious = state.injuries.filter(
-    (i) => i.status === 'active' && i.type === 'serious',
+  const unresolvedSerious = state.injuries.filter(
+    isUnresolvedSeriousInjury,
   ).length
   const keyFacts = state.logs
     .filter((l) => l.facts.length > 0)
@@ -89,7 +92,7 @@ function summarize(result: ReturnType<typeof runExpedition>): string {
     `残存物資: food=${state.supplies.food}, medicine=${state.supplies.medicine}, tools=${state.supplies.tools}`,
     `平均HP: ${average(hpValues).toFixed(1)}`,
     `平均士気: ${average(moraleValues).toFixed(1)}`,
-    `負傷数: ${state.injuries.length}（未治療の重傷=${activeSerious}）`,
+    `負傷数: ${state.injuries.length}（未解決の重傷=${unresolvedSerious}）`,
     `犠牲者: ${state.casualties.join(', ') || 'なし'}`,
     `発見情報: ${infoCount}件（完全=${completeInfo} / 断片=${infoCount - completeInfo}）`,
     `発見した脅威: ${discoveredThreats}`,

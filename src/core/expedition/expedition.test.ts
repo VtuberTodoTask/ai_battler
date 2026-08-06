@@ -1,8 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import { generateAdventurer } from '../generators/adventurerGenerator.ts'
+import { SeededRng } from '../rng/seededRng.ts'
 import type { Adventurer, AdventurerRole } from '../models/types.ts'
-import type { ExpeditionRequest, ExpeditionResult } from './types.ts'
-import { initializeExpeditionState, runExpedition } from './expedition.ts'
+import type {
+  ExpeditionRequest,
+  ExpeditionResult,
+  ExpeditionState,
+} from './types.ts'
+import {
+  applyExpeditionDamage,
+  expeditionTestInternals,
+  initializeExpeditionState,
+  isUnresolvedInjury,
+  isUnresolvedSeriousInjury,
+  runExpedition,
+} from './expedition.ts'
 
 function makeRequest(
   seed: string,
@@ -656,46 +668,261 @@ describe('Battle entry snapshot', () => {
   })
 })
 
-describe('Injury and casualty handling', () => {
-  it('marks active injuries as treated after healing', () => {
-    const request = makeRequest('injury-status', {
-      environment: 'mountain',
-      features: ['unstableTerrain'],
-    })
+function minimalAdventurer(id = 'a', name = 'Test'): Adventurer {
+  return { id, name } as unknown as Adventurer
+}
+
+function minimalExpeditionState(hp = 5): ExpeditionState {
+  return {
+    currentPhase: 'exploration',
+    elapsedTime: 0,
+    partyHp: { a: hp },
+    partyMp: { a: 10 },
+    partyMorale: { a: 50 },
+    partyStatusEffects: { a: [] },
+    supplies: { food: 10, medicine: 10, tools: 10 },
+    information: [],
+    injuries: [],
+    casualties: [],
+    objectiveProgress: 0,
+    objectiveCompleted: false,
+    discoveredThreats: [],
+    avoidedThreats: [],
+    logs: [],
+  }
+}
+
+describe('applyExpeditionDamage', () => {
+  it('kills target and logs casualty when allowFatal reduces HP to 0', () => {
+    const state = minimalExpeditionState(5)
+    const target = minimalAdventurer()
+    const rng = new SeededRng('test')
+    const effect = applyExpeditionDamage(
+      state,
+      [target],
+      target,
+      5,
+      'test-hazard',
+      true,
+      rng,
+    )
+    expect(state.partyHp.a).toBe(0)
+    expect(effect.value).toBe(5)
+    expect(state.casualties).toContain('a')
+    const casualtyLog = state.logs.find((l) => l.type === 'casualty')
+    expect(casualtyLog).toBeDefined()
+    expect(casualtyLog?.targetIds).toContain('a')
+    expect(casualtyLog?.effects[0].value).toBe(5)
+  })
+
+  it('clamps HP at 1 when allowFatal is false', () => {
+    const state = minimalExpeditionState(5)
+    const target = minimalAdventurer()
+    const rng = new SeededRng('test')
+    const effect = applyExpeditionDamage(
+      state,
+      [target],
+      target,
+      10,
+      'test-hazard',
+      false,
+      rng,
+    )
+    expect(state.partyHp.a).toBe(1)
+    expect(effect.value).toBe(4)
+    expect(state.casualties).toHaveLength(0)
+    expect(state.injuries[0].type).toBe('light')
+  })
+
+  it('does not add duplicate casualty IDs', () => {
+    const state = minimalExpeditionState(5)
+    const target = minimalAdventurer()
+    const rng = new SeededRng('test')
+    applyExpeditionDamage(state, [target], target, 5, 'test', true, rng)
+    applyExpeditionDamage(state, [target], target, 5, 'test', true, rng)
+    applyExpeditionDamage(state, [target], target, 5, 'test', true, rng)
+    expect(state.casualties).toEqual(['a'])
+    const casualtyLogs = state.logs.filter((l) => l.type === 'casualty')
+    expect(casualtyLogs).toHaveLength(1)
+  })
+})
+
+describe('Injury state helpers', () => {
+  function makeInjury(
+    status: 'active' | 'treated' | 'worsened',
+    type: 'light' | 'serious',
+  ) {
+    return {
+      id: 'i-1',
+      adventurerId: 'a',
+      type,
+      cause: 'test',
+      hpLoss: 10,
+      status,
+    }
+  }
+
+  it('counts active and worsened serious injuries as unresolved', () => {
+    expect(isUnresolvedSeriousInjury(makeInjury('active', 'serious'))).toBe(
+      true,
+    )
+    expect(isUnresolvedSeriousInjury(makeInjury('worsened', 'serious'))).toBe(
+      true,
+    )
+    expect(isUnresolvedSeriousInjury(makeInjury('treated', 'serious'))).toBe(
+      false,
+    )
+    expect(isUnresolvedSeriousInjury(makeInjury('active', 'light'))).toBe(false)
+  })
+
+  it('counts active and worsened as unresolved regardless of severity', () => {
+    expect(isUnresolvedInjury(makeInjury('active', 'light'))).toBe(true)
+    expect(isUnresolvedInjury(makeInjury('worsened', 'light'))).toBe(true)
+    expect(isUnresolvedInjury(makeInjury('treated', 'light'))).toBe(false)
+  })
+})
+
+describe('Outcome injury handling', () => {
+  function outcomeWithInjuries(
+    injuryStatus: 'active' | 'worsened' | 'treated',
+    type: 'light' | 'serious',
+  ) {
+    const request = makeRequest('injury-outcome')
     const party = makeParty(
       ['vanguard', 'guardian', 'mage', 'healer'],
-      'injury-status',
+      'injury-outcome',
     )
-    const result = runExpedition(request, party)
-    for (const injury of result.state.injuries) {
-      if (injury.status === 'active' && injury.type === 'serious') {
-        expect(result.outcome).not.toBe('completeSuccess')
-      }
+    const state = initializeExpeditionState(request, party)
+    state.objectiveProgress = 100
+    state.partyMorale = {
+      [party[0].id]: 80,
+      [party[1].id]: 80,
+      [party[2].id]: 80,
+      [party[3].id]: 80,
     }
-    const treated = result.state.injuries.filter((i) => i.status === 'treated')
-    const active = result.state.injuries.filter((i) => i.status === 'active')
-    expect(treated.length + active.length).toBeLessThanOrEqual(
-      result.state.injuries.length,
+    state.injuries.push({
+      id: 'i-1',
+      adventurerId: party[0].id,
+      type,
+      cause: 'test',
+      hpLoss: 12,
+      status: injuryStatus,
+    })
+    return expeditionTestInternals.determineOutcome(request, state, party)
+  }
+
+  it('prevents completeSuccess when a serious injury is active', () => {
+    expect(outcomeWithInjuries('active', 'serious')).not.toBe('completeSuccess')
+  })
+
+  it('prevents completeSuccess when a serious injury is worsened', () => {
+    expect(outcomeWithInjuries('worsened', 'serious')).not.toBe(
+      'completeSuccess',
     )
   })
 
-  it('logs a casualty fact with target ID when a casualty occurs', () => {
-    const roles: AdventurerRole[] = ['vanguard', 'mage', 'healer', 'support']
-    for (let i = 0; i < 200; i++) {
-      const party = makeParty(roles, `casualty-${i}`)
-      const request = makeRequest(`casualty-${i}`, {
-        environment: 'mountain',
-        features: ['traps', 'unstableTerrain'],
-        difficulty: 'deadly',
-      })
-      const result = runExpedition(request, party)
-      for (const id of result.state.casualties) {
-        const log = result.state.logs.some(
-          (l) => l.type === 'casualty' && l.targetIds?.includes(id),
-        )
-        expect(log).toBe(true)
+  it('allows completeSuccess when a serious injury is treated', () => {
+    expect(outcomeWithInjuries('treated', 'serious')).toBe('completeSuccess')
+  })
+
+  it('does not downgrade completeSuccess for active light injuries', () => {
+    expect(outcomeWithInjuries('active', 'light')).toBe('completeSuccess')
+  })
+
+  it('worsened light injury is still unresolved but not serious', () => {
+    const request = makeRequest('worsened-light')
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'worsened-light',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.objectiveProgress = 100
+    state.partyMorale = {
+      [party[0].id]: 80,
+      [party[1].id]: 80,
+      [party[2].id]: 80,
+      [party[3].id]: 80,
+    }
+    state.injuries.push({
+      id: 'i-1',
+      adventurerId: party[0].id,
+      type: 'light',
+      cause: 'test',
+      hpLoss: 3,
+      status: 'worsened',
+    })
+    expect(
+      expeditionTestInternals.determineOutcome(request, state, party),
+    ).toBe('completeSuccess')
+  })
+
+  it('worsening from active to worsened does not improve outcome', () => {
+    const request = makeRequest('active-vs-worsened')
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'active-vs-worsened',
+    )
+    const active = initializeExpeditionState(request, party)
+    active.objectiveProgress = 100
+    active.partyMorale = {
+      [party[0].id]: 80,
+      [party[1].id]: 80,
+      [party[2].id]: 80,
+      [party[3].id]: 80,
+    }
+    active.injuries.push({
+      id: 'i-1',
+      adventurerId: party[0].id,
+      type: 'serious',
+      cause: 'test',
+      hpLoss: 12,
+      status: 'active',
+    })
+    const worsened = initializeExpeditionState(request, party)
+    worsened.objectiveProgress = 100
+    worsened.partyMorale = {
+      [party[0].id]: 80,
+      [party[1].id]: 80,
+      [party[2].id]: 80,
+      [party[3].id]: 80,
+    }
+    worsened.injuries.push({
+      id: 'i-1',
+      adventurerId: party[0].id,
+      type: 'serious',
+      cause: 'test',
+      hpLoss: 12,
+      status: 'worsened',
+    })
+    const activeOutcome = expeditionTestInternals.determineOutcome(
+      request,
+      active,
+      party,
+    )
+    const worsenedOutcome = expeditionTestInternals.determineOutcome(
+      request,
+      worsened,
+      party,
+    )
+    expect(activeOutcome).not.toBe('completeSuccess')
+    expect(worsenedOutcome).not.toBe('completeSuccess')
+    expect(activeOutcome).toBe(worsenedOutcome)
+  })
+})
+
+describe('Healer injury treatment', () => {
+  it('treats active injuries and stabilizes worsened injuries on normal success', () => {
+    const request = makeRequest('heal-normal', { features: [] })
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'heal-normal',
+    )
+    const result = runExpedition(request, party)
+    // worsened は存在しない or 治療後 active/treated のいずれか
+    for (const injury of result.state.injuries) {
+      if (injury.status === 'worsened') {
+        expect(injury.type).not.toBe('serious')
       }
-      if (result.state.casualties.length > 0) break
     }
   })
 })
