@@ -4,7 +4,6 @@ import {
   type Difficulty,
   type Enemy,
   type EnemyArchetype,
-  type EnemyRank,
   type EnemySpecies,
   type EnemyTier,
   type EncounterGenerationOptions,
@@ -15,12 +14,8 @@ import { SPECIES, SPECIES_MAP } from '../../data/enemyData.ts'
 import {
   ADVENTURER_THREAT,
   DIFFICULTY_BUDGET_MULTIPLIER,
-  ENEMY_BASE_THREAT,
-  TIER_THREAT_MULTIPLIER,
 } from '../balance/constants.ts'
 import { generateEnemy } from './enemyGenerator.ts'
-
-const ENEMY_RANKS: EnemyRank[] = ['E', 'D', 'C', 'B', 'A', 'S', 'DISASTER']
 
 export function actionEconomyMultiplier(
   enemyCount: number,
@@ -194,22 +189,6 @@ function buildPlan(
   return { shape, count, slots }
 }
 
-function pickRankForTarget(target: number, tier: EnemyTier): EnemyRank {
-  let bestRank: EnemyRank = 'E'
-  let bestScore = Infinity
-  for (const rank of ENEMY_RANKS) {
-    const base = ENEMY_BASE_THREAT[rank] * TIER_THREAT_MULTIPLIER[tier]
-    if (base <= 0) continue
-    const scale = target / base
-    const score = Math.abs(Math.log(scale))
-    if (score < bestScore) {
-      bestScore = score
-      bestRank = rank
-    }
-  }
-  return bestRank
-}
-
 export function generateEncounter(
   options: EncounterGenerationOptions,
 ): Enemy[] {
@@ -243,17 +222,11 @@ export function generateEncounter(
   const enemies: Enemy[] = []
   for (let i = 0; i < plan.slots.length; i++) {
     const slot = plan.slots[i]
-    const tier = slot.tier
-    const rank = pickRankForTarget(slot.targetThreat, tier)
-    const baseThreat = ENEMY_BASE_THREAT[rank] * TIER_THREAT_MULTIPLIER[tier]
-    const threatScale = baseThreat > 0 ? slot.targetThreat / baseThreat : 1
-
     const enemy = generateEnemy(`${parsed.seed}:enemy:${i}`, {
-      rank,
-      tier,
+      tier: slot.tier,
       species: slot.species,
       archetype: slot.archetype,
-      threatScale,
+      targetThreat: slot.targetThreat,
     })
     enemies.push(enemy)
   }

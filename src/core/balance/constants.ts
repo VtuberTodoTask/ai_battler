@@ -1,4 +1,9 @@
-import { AdventurerRank, EnemyRank, EnemyTier } from '../models/types.ts'
+import {
+  AbilityId,
+  AdventurerRank,
+  EnemyRank,
+  EnemyTier,
+} from '../models/types.ts'
 
 export const ADVENTURER_RANK_BASE: Record<AdventurerRank, number> = {
   E: 42,
@@ -78,11 +83,25 @@ export const MORALE_INITIAL_BASE = 20
 
 export const RETREAT_MORALE_THRESHOLD = 30
 
-export const ABILITY_THREAT_BONUS = {
-  minor: 0,
-  standard: 0,
-  strong: 0,
-  extreme: 0,
+export const ABILITY_THREAT_COST: Record<AbilityId, number> = {
+  flight: 0.425,
+  poisonAttack: 0.703,
+  bleedAttack: 0.2,
+  areaAttack: 0.225,
+  revive: 0.269,
+  regeneration: 1.208,
+  frontDefense: 0.499,
+  magicResist: 0.653,
+  physicalResist: 1.25,
+  darknessBoost: 0.204,
+  corpseExplosion: 0.272,
+  summon: 0.984,
+  taunt: 0.396,
+  fear: 1.09,
+  healBlock: 1.25,
+  counter: 0.278,
+  stealthStart: 0.1,
+  swarmCoordination: 0.141,
 }
 
 export const DIFFICULTY_TARGET_WINRATE = {

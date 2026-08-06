@@ -138,6 +138,26 @@ export interface TraitInstance {
 
 export type AbilityEffect = Partial<Record<string, number | boolean | string>>
 
+export type AbilityId =
+  | 'flight'
+  | 'poisonAttack'
+  | 'bleedAttack'
+  | 'areaAttack'
+  | 'revive'
+  | 'regeneration'
+  | 'frontDefense'
+  | 'magicResist'
+  | 'physicalResist'
+  | 'darknessBoost'
+  | 'corpseExplosion'
+  | 'summon'
+  | 'taunt'
+  | 'fear'
+  | 'healBlock'
+  | 'counter'
+  | 'stealthStart'
+  | 'swarmCoordination'
+
 export interface AbilityDefinition {
   id: string
   name: string

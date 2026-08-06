@@ -6,6 +6,7 @@ import {
   effectiveEncounterThreat,
   generateEncounter,
 } from './encounterGenerator.ts'
+import { calculateAbilityThreat } from './enemyGenerator.ts'
 import type { EncounterShape } from '../models/types.ts'
 import {
   ADVENTURER_THREAT,
@@ -211,6 +212,29 @@ describe('generateEncounter', () => {
         partySize: 4,
       })
       expect(enemies.length).toBe(4)
+    }
+  })
+
+  it('能力追加後も敵総脅威点がslotTargetThreatの許容誤差内', () => {
+    for (let i = 0; i < 200; i++) {
+      const p = party('C')
+      const threat = calculatePartyThreat(p)
+      const difficulty = (['easy', 'normal', 'hard', 'deadly'] as const)[i % 4]
+      const enemies = generateEncounter({
+        seed: `slot-target-${i}`,
+        partyThreat: threat,
+        difficulty,
+        partySize: 4,
+      })
+      const budget = threat * DIFFICULTY_BUDGET_MULTIPLIER[difficulty]
+      const mult = actionEconomyMultiplier(enemies.length, 4)
+      const slotTarget = budget / enemies.length / mult
+      for (const enemy of enemies) {
+        expect(enemy.threatCost).toBeGreaterThanOrEqual(slotTarget * 0.7)
+        expect(enemy.threatCost).toBeLessThanOrEqual(slotTarget * 1.3)
+        const abilityThreat = calculateAbilityThreat(enemy.abilities)
+        expect(enemy.threatCost).toBeGreaterThanOrEqual(abilityThreat)
+      }
     }
   })
 
