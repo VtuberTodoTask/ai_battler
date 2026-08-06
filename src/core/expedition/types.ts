@@ -64,6 +64,7 @@ export interface DiscoveredInformation {
   name: string
   description: string
   source: string
+  completeness: 'fragment' | 'complete'
 }
 
 export type CheckResult =
@@ -72,6 +73,13 @@ export type CheckResult =
   | 'partialSuccess'
   | 'failure'
   | 'criticalFailure'
+
+export interface InformationDiscoveryAttempt {
+  informationId: string
+  requiredSkill: SkillName
+  difficulty: number
+  result: CheckResult
+}
 
 export interface ExpeditionCheck {
   phase: ExpeditionPhase
@@ -104,10 +112,12 @@ export interface ExpeditionLogEntry {
 }
 
 export interface ExpeditionInjury {
+  id: string
   adventurerId: string
   type: 'light' | 'serious'
   cause: string
   hpLoss: number
+  status: 'active' | 'treated' | 'worsened'
 }
 
 export interface ExpeditionState {
@@ -130,7 +140,7 @@ export interface ExpeditionState {
   discoveredThreats: ExpeditionFeature[]
   avoidedThreats: ExpeditionFeature[]
   logs: ExpeditionLogEntry[]
-  battleEntry?: BattleEntryConditions
+  battleEntrySnapshot?: BattleEntryConditions
   metadata?: Record<string, unknown>
 }
 
@@ -155,10 +165,12 @@ export interface EnvironmentEffect {
 }
 
 export interface BattleEntryConditions {
+  /** Snapshot of absolute values taken at the moment a battle would start. */
   surprise: 'partyAdvantage' | 'neutral' | 'enemyAdvantage'
-  initialHpModifiers: Record<string, number>
-  initialMpModifiers: Record<string, number>
-  initialMoraleModifiers: Record<string, number>
+  initialHp: Record<string, number>
+  initialMp: Record<string, number>
+  initialMorale: Record<string, number>
+  initialStatusEffects: Record<string, string[]>
   knownEnemyWeaknesses: string[]
   knownEnemyAbilities: string[]
   environmentEffects: EnvironmentEffect[]

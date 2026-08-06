@@ -223,3 +223,24 @@ export function getTopSkillMember(
 ): Adventurer | undefined {
   return [...party].sort((a, b) => b.skills[skill] - a.skills[skill])[0]
 }
+
+export function primaryRoleForSkill(skill: SkillName): string {
+  const mapping: Partial<Record<SkillName, string>> = {
+    trapDetection: 'scout',
+    trapDisarm: 'scout',
+    stealth: 'scout',
+    scouting: 'scout',
+    survival: 'ranger',
+    melee: 'vanguard',
+    defense: 'guardian',
+    firstAid: 'healer',
+    healing: 'healer',
+    leadership: 'support',
+    tactics: 'support',
+    monsterKnowledge: 'mage',
+    attackMagic: 'mage',
+    defenseMagic: 'mage',
+    ranged: 'ranger',
+  }
+  return mapping[skill] ?? ''
+}

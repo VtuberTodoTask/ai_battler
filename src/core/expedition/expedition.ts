@@ -1,11 +1,12 @@
 import { SeededRng } from '../rng/seededRng.ts'
 import type {
   Adventurer,
+  AdventurerRank,
   AdventurerRole,
   Difficulty,
   SkillName,
 } from '../models/types.ts'
-import { clamp } from '../util.ts'
+import { clamp, deepClone } from '../util.ts'
 import type {
   BattleEntryConditions,
   CheckResult,
@@ -20,15 +21,16 @@ import type {
   ExpeditionResult,
   ExpeditionState,
   HiddenInformation,
+  InformationDiscoveryAttempt,
 } from './types.ts'
 import {
   calculateAssistanceBonus,
   calculateEquipmentBonus,
   calculateInformationBonus,
   difficultyBasePenalty,
-  getRoleMembers,
   hasRole,
   logEntry,
+  primaryRoleForSkill,
   resolveCheck,
   roleCount,
   rolePrimarySkill,
@@ -49,6 +51,15 @@ export const EXPEDITION_PHASES: ExpeditionPhase[] = [
 
 const BASE_PHASE_TIME = 2
 const DISTANCE_TIME_FACTOR = 0.5
+
+export const EXPEDITION_RANK_PENALTY: Record<AdventurerRank, number> = {
+  E: 0,
+  D: 4,
+  C: 8,
+  B: 12,
+  A: 16,
+  S: 20,
+}
 
 function hasFeature(
   features: ExpeditionFeature[],
@@ -138,6 +149,7 @@ export function initializeExpeditionState(
       name: k.name,
       description: k.description,
       source: 'known',
+      completeness: 'complete' as const,
     })),
     injuries: [],
     casualties: [],
@@ -189,6 +201,10 @@ function averagePartyMorale(state: ExpeditionState): number {
   if (ids.length === 0) return 50
   const total = ids.reduce((sum, id) => sum + state.partyMorale[id], 0)
   return total / ids.length
+}
+
+function rankPenaltyForRequest(request: ExpeditionRequest): number {
+  return EXPEDITION_RANK_PENALTY[request.rank]
 }
 
 function featurePenaltyForSkill(
@@ -280,8 +296,8 @@ function resolveSkillCheck(
   skill: SkillName,
   preferredRole: AdventurerRole | undefined,
   difficultyModifier: number,
+  rankPenalty: number,
   toolCost = 0,
-  _infoSource = '',
 ): {
   result: CheckResult
   primary: Adventurer
@@ -289,11 +305,11 @@ function resolveSkillCheck(
   effectiveValue: number
   roll: number
 } {
-  const { primary, assistants } = selectResponsible(
-    getAliveParty(party, state),
-    skill,
-    preferredRole,
-  )
+  const alive = getAliveParty(party, state)
+  if (alive.length === 0) {
+    throw new Error(`Cannot resolve ${phase} check: no living party members`)
+  }
+  const { primary, assistants } = selectResponsible(alive, skill, preferredRole)
   const assistance = calculateAssistanceBonus(assistants, skill)
 
   let equipment = 0
@@ -310,9 +326,7 @@ function resolveSkillCheck(
   const roleBonus = roleBonusForSkill(party, skill)
   const absencePenalty = absencePenaltyForSkill(party, skill)
   const featurePenalty = featurePenaltyForSkill(
-    (state.metadata?.threatFeatures as ExpeditionFeature[] | undefined) ??
-      requestFeaturesFromState(state) ??
-      [],
+    requestFeaturesFromState(state),
     skill,
   )
 
@@ -324,6 +338,7 @@ function resolveSkillCheck(
       info +
       roleBonus -
       difficultyModifier -
+      rankPenalty -
       difficultyBasePenalty(
         (state.metadata?.difficulty as Difficulty | undefined) ?? 'normal',
       ) -
@@ -344,26 +359,6 @@ function requestFeaturesFromState(state: ExpeditionState): ExpeditionFeature[] {
   )
 }
 
-function discoverInformation(
-  rng: SeededRng,
-  state: ExpeditionState,
-  hidden: HiddenInformation[],
-  source: string,
-): DiscoveredInformation | undefined {
-  const already = new Set(state.information.map((i) => i.id))
-  const available = hidden.filter((h) => !already.has(h.id))
-  if (available.length === 0) return undefined
-  const picked = rng.pick(available)
-  const info: DiscoveredInformation = {
-    id: picked.id,
-    name: picked.name,
-    description: picked.description,
-    source,
-  }
-  state.information.push(info)
-  return info
-}
-
 function genericFact(rng: SeededRng, source: string): DiscoveredInformation {
   const facts = [
     '周辺の地形を把握した',
@@ -378,18 +373,198 @@ function genericFact(rng: SeededRng, source: string): DiscoveredInformation {
     name: rng.pick(facts),
     description: '',
     source,
+    completeness: 'complete',
   }
 }
 
-function addInjury(
+function getExistingInfo(
   state: ExpeditionState,
-  targetId: string,
-  hpLoss: number,
+  id: string,
+): DiscoveredInformation | undefined {
+  return state.information.find((i) => i.id === id)
+}
+
+function attemptInformationDiscovery(
+  rng: SeededRng,
+  party: Adventurer[],
+  state: ExpeditionState,
+  phase: ExpeditionPhase,
+  defaultSkill: SkillName,
+  hidden: HiddenInformation[],
+  rankPenalty: number,
+): {
+  result: CheckResult
+  primary: Adventurer
+  assistants: Adventurer[]
+  effectiveValue: number
+  roll: number
+  discovered?: DiscoveredInformation
+  attempt: InformationDiscoveryAttempt
+} {
+  const candidates = hidden.filter((h) => {
+    const existing = getExistingInfo(state, h.id)
+    return !existing || existing.completeness === 'fragment'
+  })
+
+  if (candidates.length === 0) {
+    const skill = defaultSkill
+    const preferredRole = primaryRoleForSkill(skill) as AdventurerRole
+    const difficulty = 10 + rankPenalty
+    const { result, primary, assistants, effectiveValue, roll } =
+      resolveSkillCheck(
+        rng,
+        party,
+        state,
+        phase,
+        skill,
+        preferredRole,
+        difficulty,
+        rankPenalty,
+      )
+    const discovered =
+      result === 'criticalSuccess' || result === 'success'
+        ? genericFact(rng, skill)
+        : undefined
+    if (discovered) {
+      state.information.push(discovered)
+      state.objectiveProgress += result === 'criticalSuccess' ? 10 : 5
+    }
+    return {
+      result,
+      primary,
+      assistants,
+      effectiveValue,
+      roll,
+      discovered,
+      attempt: {
+        informationId: discovered?.id ?? 'generic',
+        requiredSkill: skill,
+        difficulty,
+        result,
+      },
+    }
+  }
+
+  const picked = rng.pick(candidates)
+  const skill = picked.requiredSkill ?? defaultSkill
+  const preferredRole = primaryRoleForSkill(skill) as AdventurerRole
+  const difficulty = picked.difficulty + rankPenalty
+  const { result, primary, assistants, effectiveValue, roll } =
+    resolveSkillCheck(
+      rng,
+      party,
+      state,
+      phase,
+      skill,
+      preferredRole,
+      difficulty,
+      rankPenalty,
+    )
+
+  const existing = getExistingInfo(state, picked.id)
+  let discovered: DiscoveredInformation | undefined
+
+  if (result === 'criticalSuccess' || result === 'success') {
+    if (existing && existing.completeness === 'fragment') {
+      existing.completeness = 'complete'
+      existing.name = existing.name.replace('（断片）', '')
+      existing.description = picked.description
+      state.objectiveProgress += 10
+      discovered = existing
+    } else if (!existing) {
+      discovered = {
+        id: picked.id,
+        name: picked.name,
+        description: picked.description,
+        source: skill,
+        completeness: 'complete',
+      }
+      state.information.push(discovered)
+      state.objectiveProgress += result === 'criticalSuccess' ? 20 : 15
+    }
+  } else if (result === 'partialSuccess') {
+    if (!existing) {
+      discovered = {
+        id: picked.id,
+        name: `${picked.name}（断片）`,
+        description: picked.description,
+        source: skill,
+        completeness: 'fragment',
+      }
+      state.information.push(discovered)
+      state.objectiveProgress += 5
+    }
+  }
+
+  return {
+    result,
+    primary,
+    assistants,
+    effectiveValue,
+    roll,
+    discovered,
+    attempt: {
+      informationId: picked.id,
+      requiredSkill: skill,
+      difficulty,
+      result,
+    },
+  }
+}
+
+function applyExpeditionDamage(
+  state: ExpeditionState,
+  party: Adventurer[],
+  target: Adventurer,
+  damage: number,
   cause: string,
-): void {
-  state.partyHp[targetId] = clamp(state.partyHp[targetId] - hpLoss, 1, Infinity)
-  const type: 'light' | 'serious' = hpLoss >= 10 ? 'serious' : 'light'
-  state.injuries.push({ adventurerId: targetId, type, cause, hpLoss })
+  allowFatal: boolean,
+  rng: SeededRng,
+): ExpeditionEffect {
+  const current = state.partyHp[target.id]
+  const nextHp = allowFatal
+    ? Math.max(0, current - damage)
+    : Math.max(1, current - damage)
+  const actualDamage = current - nextHp
+  state.partyHp[target.id] = nextHp
+
+  if (nextHp === 0 && allowFatal) {
+    if (!state.casualties.includes(target.id)) {
+      state.casualties.push(target.id)
+    }
+    addLog(
+      state,
+      logEntry(
+        state.currentPhase,
+        'casualty',
+        [],
+        [`${target.name}が${cause}で命を落とした`],
+        [{ type: 'hpDamage', value: actualDamage, targetId: target.id }],
+        undefined,
+        [target.id],
+      ),
+    )
+  } else if (actualDamage > 0) {
+    const type: 'light' | 'serious' = actualDamage >= 10 ? 'serious' : 'light'
+    state.injuries.push({
+      id: `injury-${state.injuries.length}-${rng.integer(1, 1_000_000)}`,
+      adventurerId: target.id,
+      type,
+      cause,
+      hpLoss: actualDamage,
+      status: 'active',
+    })
+  }
+
+  return { type: 'hpDamage', value: actualDamage, targetId: target.id }
+}
+
+function treatActiveInjuries(state: ExpeditionState): void {
+  for (const injury of state.injuries) {
+    if (injury.status === 'active') {
+      injury.status = 'treated'
+    }
+  }
 }
 
 function addMorale(
@@ -440,6 +615,18 @@ function calculateTravelTime(
   return Math.max(1, time)
 }
 
+function objectiveProgressFact(progress: number): string {
+  if (progress <= 0) return '目的に関する成果を得られなかった'
+  if (progress < 40) return '手がかりは得たが、依頼目的は達成できなかった'
+  if (progress < 60) return '依頼目的を部分的に達成した'
+  if (progress < 100) return '最低限の目的を達成した'
+  return '依頼目的を完全に達成した'
+}
+
+function setObjectiveCompletedFromProgress(state: ExpeditionState): void {
+  state.objectiveCompleted = state.objectiveProgress >= 60
+}
+
 function travelPhase(
   request: ExpeditionRequest,
   party: Adventurer[],
@@ -468,7 +655,7 @@ function travelPhase(
         phase,
         'foodShortage',
         [],
-        [],
+        ['食糧が不足し、士気が低下した'],
         [{ type: 'moraleChange', value: -5 }],
         undefined,
         Object.keys(state.partyMorale),
@@ -487,7 +674,6 @@ function travelPhase(
       'ranger',
       hasFeature(request.features, 'navigationDifficulty') ? 10 : 0,
       0,
-      'survival',
     )
 
   const facts: string[] = []
@@ -504,7 +690,7 @@ function travelPhase(
   } else if (result === 'partialSuccess') {
     facts.push(`${primary.name}が経路を確保したが、多少の遅延が発生した`)
     state.elapsedTime += 1
-  } else if (result === 'failure' || result === 'criticalFailure') {
+  } else {
     facts.push(
       `${primary.name}が${phase === 'approach' ? '接近' : '帰還'}経路を見失い、迂回した`,
     )
@@ -575,6 +761,7 @@ function handleEnvironmentalHazard(
         ? 10
         : 5
   const toolCost = skill === 'trapDetection' || skill === 'survival' ? 1 : 0
+  const rankPenalty = rankPenaltyForRequest(request)
   const { result, primary, assistants, effectiveValue, roll } =
     resolveSkillCheck(
       rng,
@@ -584,8 +771,8 @@ function handleEnvironmentalHazard(
       skill,
       preferredRole,
       baseDifficulty,
+      rankPenalty,
       toolCost,
-      skill,
     )
 
   const facts: string[] = []
@@ -597,15 +784,17 @@ function handleEnvironmentalHazard(
       `${primary.name}が${featureLabel(feature)}を事前に察知・回避した`,
     )
     if (feature === 'traps' || feature === 'ambushRisk') {
-      const info = discoverInformation(
+      const discovery = attemptInformationDiscovery(
         rng,
+        party,
         state,
-        request.hiddenInformation,
+        phase,
         skill,
+        request.hiddenInformation,
+        rankPenalty,
       )
-      if (info) {
-        facts.push(`${info.name}に関する情報を得た`)
-        state.objectiveProgress += 10
+      if (discovery.discovered) {
+        facts.push(`${discovery.discovered.name}に関する情報を得た`)
       }
     }
   } else {
@@ -621,9 +810,19 @@ function handleEnvironmentalHazard(
         damage = Math.max(1, damage - reduction)
         facts.push(`Guardianが${target.name}の被害を軽減した`)
       }
-      addInjury(state, target.id, damage, feature)
-      effects.push({ type: 'hpDamage', value: damage, targetId: target.id })
-      facts.push(`${target.name}が${damage}のダメージを受けた`)
+      const effect = applyExpeditionDamage(
+        state,
+        party,
+        target,
+        damage,
+        feature,
+        result === 'criticalFailure',
+        rng,
+      )
+      effects.push(effect)
+      if (effect.value && effect.value > 0) {
+        facts.push(`${target.name}が${effect.value}のダメージを受けた`)
+      }
 
       if (feature === 'poisonRisk' && !hasRole(party, 'healer')) {
         state.partyStatusEffects[target.id].push('poisoned')
@@ -674,8 +873,8 @@ function runPreparation(
       skill,
       'ranger',
       0,
+      0,
       1,
-      'survival',
     )
 
   const facts: string[] = []
@@ -746,6 +945,7 @@ function runExploration(
 ): void {
   state.currentPhase = 'exploration'
   const loops = 3
+  const rankPenalty = rankPenaltyForRequest(request)
 
   const skillByEnvironment: Record<string, SkillName> = {
     ruins: 'monsterKnowledge',
@@ -760,71 +960,66 @@ function runExploration(
   }
 
   for (let i = 0; i < loops; i++) {
-    const baseSkill = skillByEnvironment[request.environment] ?? 'scouting'
-    const preferredRole: AdventurerRole | undefined =
-      baseSkill === 'monsterKnowledge'
-        ? 'mage'
-        : baseSkill === 'leadership'
-          ? 'support'
-          : 'scout'
-
+    const defaultSkill = skillByEnvironment[request.environment] ?? 'scouting'
     const difficulty =
       5 +
       (hasFeature(request.features, 'poorVisibility') ? 10 : 0) +
       (hasFeature(request.features, 'unstableTerrain') ? 5 : 0) +
       (hasFeature(request.features, 'limitedSupplies') ? 5 : 0)
 
-    const { result, primary, assistants, effectiveValue, roll } =
-      resolveSkillCheck(
-        rng,
-        party,
-        state,
-        'exploration',
-        baseSkill,
-        preferredRole,
-        difficulty,
-        0,
-        baseSkill,
-      )
+    const discovery = attemptInformationDiscovery(
+      rng,
+      party,
+      state,
+      'exploration',
+      defaultSkill,
+      request.hiddenInformation,
+      difficulty + rankPenalty,
+    )
+
+    const { result, primary, assistants, effectiveValue, roll } = discovery
 
     const facts: string[] = []
     const effects: ExpeditionEffect[] = []
 
     if (result === 'criticalSuccess' || result === 'success') {
       facts.push(`${primary.name}が調査対象に関する手がかりを発見した`)
-      const info =
-        discoverInformation(rng, state, request.hiddenInformation, baseSkill) ??
-        genericFact(rng, baseSkill)
-      if (!state.information.some((existing) => existing.id === info.id)) {
-        state.information.push(info)
-      }
-      facts.push(`${info.name}に関する情報を得た`)
-      state.objectiveProgress += 25
-      if (result === 'criticalSuccess') {
-        state.objectiveProgress += 10
+      if (discovery.discovered) {
+        const label =
+          discovery.discovered.completeness === 'complete'
+            ? discovery.discovered.name
+            : `${discovery.discovered.name}（断片）`
+        facts.push(`${label}に関する情報を得た`)
       }
     } else if (result === 'partialSuccess') {
       facts.push(`${primary.name}が断片的な手がかりを得た`)
-      const info = discoverInformation(
-        rng,
-        state,
-        request.hiddenInformation,
-        baseSkill,
-      )
-      if (info) {
-        facts.push(`${info.name}に関する情報を得た`)
-        state.information.push(info)
+      if (discovery.discovered) {
+        facts.push(`${discovery.discovered.name}に関する断片情報を得た`)
       }
-      state.objectiveProgress += 10
     } else {
       facts.push('調査に手間取った')
       state.elapsedTime += 1
       if (result === 'criticalFailure') {
-        const target = rng.pick(getAliveParty(party, state))
-        const damage = rng.integer(2, 5)
-        addInjury(state, target.id, damage, 'explorationAccident')
-        effects.push({ type: 'hpDamage', value: damage, targetId: target.id })
-        facts.push(`${target.name}が小さな事故で${damage}のダメージを受けた`)
+        const alive = getAliveParty(party, state)
+        const target = alive.length > 0 ? rng.pick(alive) : undefined
+        if (target) {
+          const damage = rng.integer(2, 5)
+          const effect = applyExpeditionDamage(
+            state,
+            party,
+            target,
+            damage,
+            'explorationAccident',
+            true,
+            rng,
+          )
+          effects.push(effect)
+          if (effect.value && effect.value > 0) {
+            facts.push(
+              `${target.name}が小さな事故で${effect.value}のダメージを受けた`,
+            )
+          }
+        }
       }
     }
 
@@ -842,7 +1037,7 @@ function runExploration(
         facts,
         effects,
         {
-          skill: baseSkill,
+          skill: discovery.attempt.requiredSkill,
           effectiveValue,
           roll,
           result,
@@ -901,7 +1096,8 @@ function runObjective(
     10 +
     (hasFeature(request.features, 'poorVisibility') ? 5 : 0) +
     (hasFeature(request.features, 'navigationDifficulty') ? 5 : 0) +
-    (state.objectiveProgress < 50 ? 10 : 0)
+    (state.objectiveProgress < 40 ? 10 : 0)
+  const rankPenalty = rankPenaltyForRequest(request)
 
   const { result, primary, assistants, effectiveValue, roll } =
     resolveSkillCheck(
@@ -912,8 +1108,7 @@ function runObjective(
       skill,
       preferredRole,
       difficulty,
-      0,
-      skill,
+      rankPenalty,
     )
 
   const facts: string[] = []
@@ -921,25 +1116,11 @@ function runObjective(
 
   if (result === 'criticalSuccess' || result === 'success') {
     facts.push(`${primary.name}が目標となる情報を確認した`)
-    state.objectiveCompleted = true
-    const info =
-      discoverInformation(rng, state, request.hiddenInformation, skill) ??
-      genericFact(rng, skill)
-    if (!state.information.some((existing) => existing.id === info.id)) {
-      state.information.push(info)
-    }
-    facts.push(`目的「${info.name}」を達成した`)
-    state.objectiveProgress = Math.min(100, state.objectiveProgress + 30)
-    if (result === 'criticalSuccess') {
-      addMoraleAll(state, party, 5)
-      effects.push({ type: 'moraleChange', value: 5 })
-    }
+    state.objectiveProgress = 100
   } else if (result === 'partialSuccess') {
-    facts.push('目的は部分的に達成された')
     state.objectiveProgress = Math.min(100, state.objectiveProgress + 20)
-    if (state.objectiveProgress >= 60) {
-      state.objectiveCompleted = true
-      facts.push('最低限の情報は集まった')
+    if (state.objectiveProgress >= 60 && state.objectiveProgress < 100) {
+      facts.push('最低限の目的を達成した')
     }
   } else {
     facts.push('目的の達成に失敗した')
@@ -953,6 +1134,14 @@ function runObjective(
     state.elapsedTime > request.timeLimit
   ) {
     facts.push('制限時間を超過した')
+  }
+
+  setObjectiveCompletedFromProgress(state)
+  facts.push(objectiveProgressFact(state.objectiveProgress))
+
+  if (result === 'criticalSuccess') {
+    addMoraleAll(state, party, 5)
+    effects.push({ type: 'moraleChange', value: 5 })
   }
 
   addLog(
@@ -983,8 +1172,11 @@ function runReturn(
 
   state.currentPhase = 'return'
   const skill: SkillName = 'firstAid'
-  if (hasRole(party, 'healer')) {
-    const healer = getRoleMembers(party, 'healer')[0]
+  const aliveHealers = getAliveParty(party, state).filter(
+    (a) => a.role === 'healer',
+  )
+  if (aliveHealers.length > 0) {
+    const healer = aliveHealers[0]
     const { result, effectiveValue, roll } = resolveSkillCheck(
       rng,
       party,
@@ -994,7 +1186,6 @@ function runReturn(
       'healer',
       0,
       0,
-      'firstAid',
     )
 
     const facts: string[] = []
@@ -1004,6 +1195,12 @@ function runReturn(
       const usedMedicine = Math.min(1, state.supplies.medicine)
       if (usedMedicine > 0) {
         state.supplies.medicine -= usedMedicine
+        facts.push(`医薬品を${usedMedicine}消費した`)
+        effects.push({
+          type: 'supplyConsume',
+          value: usedMedicine,
+          targetId: 'medicine',
+        })
       }
       facts.push(`${healer.name}が帰還中の負傷者を手当てした`)
       for (const a of getAliveParty(party, state)) {
@@ -1016,6 +1213,7 @@ function runReturn(
           effects.push({ type: 'hpHeal', value: heal, targetId: a.id })
         }
       }
+      treatActiveInjuries(state)
     } else {
       facts.push('帰還中の負傷者手当てが不十分だった')
     }
@@ -1034,12 +1232,23 @@ function runReturn(
       if (state.injuries.some((i) => i.adventurerId === a.id)) {
         if (rng.chance(20)) {
           const worsening = rng.integer(2, 5)
-          state.partyHp[a.id] = clamp(
-            state.partyHp[a.id] - worsening,
-            1,
-            Infinity,
+          const effect = applyExpeditionDamage(
+            state,
+            party,
+            a,
+            worsening,
+            'worseningDuringReturn',
+            true,
+            rng,
           )
-          addInjury(state, a.id, worsening, 'worseningDuringReturn')
+          if (effect.value && effect.value > 0) {
+            const injury = state.injuries.find(
+              (i) => i.adventurerId === a.id && i.status === 'active',
+            )
+            if (injury) {
+              injury.status = 'worsened'
+            }
+          }
         }
       }
     }
@@ -1072,22 +1281,27 @@ function runAftermath(
     effects.push({ type: 'moraleChange', value: -10 })
   }
 
-  if (state.objectiveCompleted) {
-    facts.push('目的を達成した')
-    addMoraleAll(state, party, 5)
-    effects.push({ type: 'moraleChange', value: 5 })
-  } else if (state.objectiveProgress > 0) {
-    facts.push('目的は部分的に達成された')
-    addMoraleAll(state, party, 2)
-    effects.push({ type: 'moraleChange', value: 2 })
-  } else {
-    facts.push('目的を達成できなかった')
-    addMoraleAll(state, party, -5)
-    effects.push({ type: 'moraleChange', value: -5 })
+  setObjectiveCompletedFromProgress(state)
+  facts.push(objectiveProgressFact(state.objectiveProgress))
+
+  const moraleDelta =
+    state.objectiveProgress >= 100
+      ? 5
+      : state.objectiveProgress >= 60
+        ? 3
+        : state.objectiveProgress >= 40
+          ? 0
+          : -5
+  if (moraleDelta !== 0) {
+    addMoraleAll(state, party, moraleDelta)
+    effects.push({ type: 'moraleChange', value: moraleDelta })
   }
 
-  if (hasRole(party, 'healer')) {
-    const healer = getRoleMembers(party, 'healer')[0]
+  const aliveHealers = getAliveParty(party, state).filter(
+    (a) => a.role === 'healer',
+  )
+  if (aliveHealers.length > 0) {
+    const healer = aliveHealers[0]
     const healSkill = 'healing'
     const { result, effectiveValue, roll } = resolveSkillCheck(
       rng,
@@ -1098,15 +1312,20 @@ function runAftermath(
       'healer',
       0,
       0,
-      'healing',
     )
 
     const healEffects: ExpeditionEffect[] = []
-    if (state.supplies.medicine > 0) {
-      state.supplies.medicine -= Math.min(2, state.supplies.medicine)
-    }
-
     if (result === 'criticalSuccess' || result === 'success') {
+      const usedMedicine = Math.min(2, state.supplies.medicine)
+      if (usedMedicine > 0) {
+        state.supplies.medicine -= usedMedicine
+        facts.push(`医薬品を${usedMedicine}消費した`)
+        healEffects.push({
+          type: 'supplyConsume',
+          value: usedMedicine,
+          targetId: 'medicine',
+        })
+      }
       facts.push(`${healer.name}が負傷者の治療を行った`)
       for (const a of getAliveParty(party, state)) {
         const heal = Math.min(
@@ -1118,7 +1337,7 @@ function runAftermath(
           healEffects.push({ type: 'hpHeal', value: heal, targetId: a.id })
         }
       }
-      effects.push(...healEffects)
+      treatActiveInjuries(state)
     } else {
       facts.push('治療は不十分だった')
     }
@@ -1144,7 +1363,7 @@ function runAftermath(
   addLog(state, logEntry('aftermath', 'summary', [], facts, effects))
 }
 
-function buildBattleEntry(
+function buildBattleEntrySnapshot(
   request: ExpeditionRequest,
   party: Adventurer[],
   state: ExpeditionState,
@@ -1154,7 +1373,6 @@ function buildBattleEntry(
     envEffects.push({ type: 'lighting', value: 'dark' })
   }
   if (hasFeature(request.features, 'unstableTerrain')) {
-    envEffects.push({ type: 'water', value: true })
     envEffects.push({ type: 'terrain', value: 'unstable' })
   }
   if (hasFeature(request.features, 'flyingEnemies')) {
@@ -1175,16 +1393,29 @@ function buildBattleEntry(
     }
   }
 
-  const surprise: BattleEntryConditions['surprise'] =
-    state.discoveredThreats.length > state.avoidedThreats.length
-      ? 'enemyAdvantage'
-      : 'neutral'
+  const unresolvedThreats = state.discoveredThreats.filter(
+    (feature) => !state.avoidedThreats.includes(feature),
+  ).length
+
+  let surprise: BattleEntryConditions['surprise']
+  if (
+    state.avoidedThreats.length > 0 &&
+    unresolvedThreats === 0 &&
+    state.information.length >= 2
+  ) {
+    surprise = 'partyAdvantage'
+  } else if (unresolvedThreats > 0) {
+    surprise = 'enemyAdvantage'
+  } else {
+    surprise = 'neutral'
+  }
 
   return {
     surprise,
-    initialHpModifiers: {},
-    initialMpModifiers: {},
-    initialMoraleModifiers: {},
+    initialHp: deepClone(state.partyHp),
+    initialMp: deepClone(state.partyMp),
+    initialMorale: deepClone(state.partyMorale),
+    initialStatusEffects: deepClone(state.partyStatusEffects),
     knownEnemyWeaknesses,
     knownEnemyAbilities,
     environmentEffects: envEffects,
@@ -1199,47 +1430,62 @@ function determineOutcome(
   const avgMorale = averagePartyMorale(state)
   const timeExceeded =
     request.timeLimit !== undefined && state.elapsedTime > request.timeLimit
-  const seriousInjuries = state.injuries.filter(
-    (i) => i.type === 'serious',
-  ).length
   const noSupplies = state.supplies.food <= 0
+  const activeSerious = state.injuries.filter(
+    (i) => i.status === 'active' && i.type === 'serious',
+  ).length
+  const allCasualties = state.casualties.length === party.length
+  const hasCasualties = state.casualties.length > 0
 
-  if (state.casualties.length === party.length) {
+  if (allCasualties) {
     return 'lostExpedition'
   }
 
-  if (state.casualties.length > 0 || seriousInjuries > 1) {
-    if (!state.objectiveCompleted) return 'lostExpedition'
+  let outcome: ExpeditionOutcome
+  if (
+    state.objectiveProgress >= 100 &&
+    !hasCasualties &&
+    activeSerious === 0 &&
+    avgMorale >= 40 &&
+    !timeExceeded &&
+    !noSupplies
+  ) {
+    outcome = 'completeSuccess'
+  } else if (state.objectiveProgress >= 60) {
+    outcome = 'success'
+  } else if (state.objectiveProgress >= 40) {
+    outcome = 'partialSuccess'
+  } else {
+    outcome = 'failedObjective'
   }
 
   if (timeExceeded || noSupplies || avgMorale < 15) {
-    if (state.objectiveCompleted) return 'partialSuccess'
-    return 'forcedRetreat'
+    if (outcome === 'completeSuccess') outcome = 'success'
+    else if (outcome === 'success') outcome = 'partialSuccess'
+    else if (outcome === 'partialSuccess') outcome = 'failedObjective'
+    else outcome = 'forcedRetreat'
   }
 
-  if (state.objectiveCompleted) {
-    if (
-      state.casualties.length === 0 &&
-      seriousInjuries === 0 &&
-      avgMorale >= 40 &&
-      !timeExceeded
-    ) {
-      return 'completeSuccess'
-    }
-    return 'success'
+  if (hasCasualties || activeSerious > 1) {
+    if (outcome === 'completeSuccess') outcome = 'success'
+    else if (outcome === 'success') outcome = 'partialSuccess'
+    else if (outcome === 'partialSuccess') outcome = 'failedObjective'
+    else outcome = 'lostExpedition'
   }
 
-  if (state.objectiveProgress >= 40) {
-    return 'partialSuccess'
-  }
-
-  return 'failedObjective'
+  return outcome
 }
 
 export function runExpedition(
   request: ExpeditionRequest,
   party: Adventurer[],
 ): ExpeditionResult {
+  if (request.objectiveType !== 'investigation') {
+    throw new Error(
+      `Unsupported objectiveType in Phase 3.0: ${request.objectiveType}`,
+    )
+  }
+
   const rng = new SeededRng(request.seed)
   const state = initializeExpeditionState(request, party)
   state.metadata = {
@@ -1252,11 +1498,14 @@ export function runExpedition(
   runPreparation(request, party, state, rng)
   runApproach(request, party, state, rng)
   runExploration(request, party, state, rng)
+
+  state.battleEntrySnapshot = buildBattleEntrySnapshot(request, party, state)
+
   runObjective(request, party, state, rng)
   runReturn(request, party, state, rng)
   runAftermath(request, party, state, rng)
 
-  state.battleEntry = buildBattleEntry(request, party, state)
+  setObjectiveCompletedFromProgress(state)
   state.currentPhase = 'aftermath'
 
   const outcome = determineOutcome(request, state, party)

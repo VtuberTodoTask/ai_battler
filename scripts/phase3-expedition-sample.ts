@@ -23,19 +23,21 @@ function makeRequest(
         id: 'info-1',
         name: '敵の痕跡',
         description: '敵が近くにいる証拠',
-        difficulty: 10,
+        difficulty: 5,
       },
       {
         id: 'info-2',
         name: '古い地図',
         description: '遺跡の配置がわかる',
-        difficulty: 10,
+        difficulty: 15,
+        requiredSkill: 'scouting',
       },
       {
         id: 'info-3',
         name: '魔力の残滓',
         description: '魔法の気配',
-        difficulty: 10,
+        difficulty: 20,
+        requiredSkill: 'monsterKnowledge',
       },
     ],
     ...overrides,
@@ -62,12 +64,23 @@ function summarize(result: ReturnType<typeof runExpedition>): string {
   const hpValues = Object.values(state.partyHp)
   const moraleValues = Object.values(state.partyMorale)
   const infoCount = state.information.length
+  const completeInfo = state.information.filter(
+    (i) => i.completeness === 'complete',
+  ).length
   const discoveredThreats = state.discoveredThreats.join(', ') || 'なし'
   const avoidedThreats = state.avoidedThreats.join(', ') || 'なし'
+  const activeSerious = state.injuries.filter(
+    (i) => i.status === 'active' && i.type === 'serious',
+  ).length
   const keyFacts = state.logs
     .filter((l) => l.facts.length > 0)
-    .slice(-3)
+    .slice(-4)
     .flatMap((l) => l.facts)
+
+  const snapshot = state.battleEntrySnapshot
+  const snapshotLine = snapshot
+    ? `潜在戦闘スナップショット: surprise=${snapshot.surprise}`
+    : '潜在戦闘スナップショット: なし'
 
   return [
     `結果: ${outcome}`,
@@ -76,11 +89,12 @@ function summarize(result: ReturnType<typeof runExpedition>): string {
     `残存物資: food=${state.supplies.food}, medicine=${state.supplies.medicine}, tools=${state.supplies.tools}`,
     `平均HP: ${average(hpValues).toFixed(1)}`,
     `平均士気: ${average(moraleValues).toFixed(1)}`,
-    `負傷数: ${state.injuries.length}（重傷=${state.injuries.filter((i) => i.type === 'serious').length}）`,
+    `負傷数: ${state.injuries.length}（未治療の重傷=${activeSerious}）`,
     `犠牲者: ${state.casualties.join(', ') || 'なし'}`,
-    `発見情報: ${infoCount}件`,
+    `発見情報: ${infoCount}件（完全=${completeInfo} / 断片=${infoCount - completeInfo}）`,
     `発見した脅威: ${discoveredThreats}`,
     `回避した脅威: ${avoidedThreats}`,
+    snapshotLine,
     `重要ログ:`,
     ...keyFacts.map((f) => `  - ${f}`),
   ].join('\n')
