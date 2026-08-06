@@ -434,7 +434,11 @@ function resolveAction(
       'combat',
       'heal',
       `${unit.name}が${action.target.name}を回復させた。+${amount} HP`,
-      { actorId: unit.id, targetIds: [action.target.id] },
+      {
+        actorId: unit.id,
+        targetIds: [action.target.id],
+        metadata: { healAmount: amount },
+      },
     )
     return
   }
@@ -448,7 +452,11 @@ function resolveAction(
       'combat',
       'guard',
       `${unit.name}が${action.target.name}を防護した。`,
-      { actorId: unit.id, targetIds: [action.target.id] },
+      {
+        actorId: unit.id,
+        targetIds: [action.target.id],
+        metadata: { guardAmount: 5 },
+      },
     )
     return
   }
@@ -462,7 +470,11 @@ function resolveAction(
       'combat',
       'support',
       `${unit.name}が${action.target.name}を支援した。`,
-      { actorId: unit.id, targetIds: [action.target.id] },
+      {
+        actorId: unit.id,
+        targetIds: [action.target.id],
+        metadata: { supportMorale: 10, guardAmount: 3 },
+      },
     )
     return
   }
@@ -626,6 +638,7 @@ function resolveAttack(
     successChance: result.successChance,
     damage: result.damageDealt,
     statusApplied: result.statusApplied,
+    metadata: { isFlank, isCounter },
   })
 
   if (result.hit && hasAbility(attacker, 'areaAttack')) {
