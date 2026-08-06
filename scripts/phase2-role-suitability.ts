@@ -6,26 +6,28 @@ import {
   generateEncounter,
 } from '../src/core/generators/encounterGenerator.ts'
 import { runBattle } from '../src/core/battle/battle.ts'
+import { SeededRng } from '../src/core/rng/seededRng.ts'
 import type {
   Adventurer,
   AdventurerRole,
   BattleLogEntry,
+  BattleOutcome,
   BattleResult,
   Enemy,
 } from '../src/core/models/types.ts'
 
-const RANK = 'C' as const
-const DIFFICULTY = 'normal' as const
-const BASE_SEED = 'phase2-role-suitability-v1'
-const BASE_METRICS_TRIALS = 5000
-const PAIRED_TRIALS = 1000
+const CONFIG = {
+  rank: 'C' as const,
+  difficulty: 'normal' as const,
+  baseTrials: 5000,
+  pairedTrials: 5000,
+  baseSeed: 'phase2-role-suitability-v2',
+} as const
 
 const ACTION_TYPES: Set<BattleLogEntry['actionType']> = new Set([
-  'attack',
   'melee',
   'ranged',
   'magic',
-  'flank',
   'heal',
   'guard',
   'support',
@@ -46,13 +48,33 @@ const DISRUPTIVE_STATUSES = new Set([
   'defenseDown',
 ])
 
+const ROLES: AdventurerRole[] = [
+  'vanguard',
+  'guardian',
+  'scout',
+  'ranger',
+  'mage',
+  'healer',
+  'support',
+]
+
+function isFavorable(outcome: BattleOutcome): boolean {
+  return (
+    outcome === 'victory' ||
+    outcome === 'costlyVictory' ||
+    outcome === 'partialVictory'
+  )
+}
+
 interface RoleMetrics {
-  trials: number
+  partyTrials: number
+  characterAppearances: number
   damageDealt: number
   damageTaken: number
   healAmount: number
-  guardAmount: number
-  supportMorale: number
+  guardPotency: number
+  requestedMorale: number
+  actualMoraleGained: number
   actionCount: number
   statusInflicted: number
   statusCured: number
@@ -62,18 +84,19 @@ interface RoleMetrics {
   retreatSuccessContributions: number
   incapacitations: number
   survived: number
-  presentInTrials: number
   injurySeverities: number[]
 }
 
 function emptyMetrics(): RoleMetrics {
   return {
-    trials: 0,
+    partyTrials: 0,
+    characterAppearances: 0,
     damageDealt: 0,
     damageTaken: 0,
     healAmount: 0,
-    guardAmount: 0,
-    supportMorale: 0,
+    guardPotency: 0,
+    requestedMorale: 0,
+    actualMoraleGained: 0,
     actionCount: 0,
     statusInflicted: 0,
     statusCured: 0,
@@ -83,233 +106,20 @@ function emptyMetrics(): RoleMetrics {
     retreatSuccessContributions: 0,
     incapacitations: 0,
     survived: 0,
-    presentInTrials: 0,
     injurySeverities: [],
   }
 }
 
-function buildParty(
-  roles: AdventurerRole[],
-  seedPrefix: string,
-  rank: AdventurerRole extends string ? string : never = RANK,
-): Adventurer[] {
-  return roles.map((role, i) =>
-    generateAdventurer({
-      seed: `${seedPrefix}-${role}-${i}`,
-      rank: rank as 'C',
-      role,
-    }),
-  )
-}
-
-function partyIds(party: Adventurer[]) {
-  return new Set(party.map((a) => a.id))
-}
-
-function enemyIds(enemies: Enemy[]) {
-  return new Set(enemies.map((e) => e.id))
-}
-
-function updateMetricsFromBattle(
-  result: BattleResult,
-  party: Adventurer[],
-  enemies: Enemy[],
-  metrics: Record<AdventurerRole, RoleMetrics>,
-): void {
-  const partyIdSet = partyIds(party)
-  const enemyIdSet = enemyIds(enemies)
-  const roleById = new Map(party.map((a) => [a.id, a.role]))
-
-  const statusesByUnit = new Map<string, Set<string>>()
-
-  function record(
-    role: AdventurerRole | undefined,
-    key: keyof RoleMetrics,
-    value: number,
-  ) {
-    if (!role) return
-    const m = metrics[role]
-    if (key === 'trials' || key === 'presentInTrials') {
-      ;(m[key] as number) += value
-    } else {
-      ;(m[key] as number) += value
-    }
+function createMetricsMap(): Record<AdventurerRole, RoleMetrics> {
+  return {
+    vanguard: emptyMetrics(),
+    guardian: emptyMetrics(),
+    scout: emptyMetrics(),
+    ranger: emptyMetrics(),
+    mage: emptyMetrics(),
+    healer: emptyMetrics(),
+    support: emptyMetrics(),
   }
-
-  for (const log of result.logs) {
-    const actorRole = log.actorId ? roleById.get(log.actorId) : undefined
-    const targetId = log.targetIds?.[0]
-    const targetRole = targetId ? roleById.get(targetId) : undefined
-
-    if (actorRole) {
-      if (ACTION_TYPES.has(log.actionType)) {
-        record(actorRole, 'actionCount', 1)
-      }
-      if (
-        log.actionType === 'weaknessDiscovery' ||
-        log.actionType === 'monsterKnowledge'
-      ) {
-        record(actorRole, 'weaknessDiscoveries', 1)
-      }
-      if (log.actionType === 'heal') {
-        const amount = (log.metadata?.healAmount as number | undefined) ?? 0
-        record(actorRole, 'healAmount', amount)
-        // 状態異常解除の追跡
-        if (targetId && amount > 0) {
-          const active = statusesByUnit.get(targetId)
-          if (active && (active.has('poisoned') || active.has('bleeding'))) {
-            record(actorRole, 'statusCured', 1)
-            active.delete('poisoned')
-            active.delete('bleeding')
-          }
-        }
-      }
-      if (log.actionType === 'guard') {
-        const amount = (log.metadata?.guardAmount as number | undefined) ?? 0
-        record(actorRole, 'guardAmount', amount)
-      }
-      if (log.actionType === 'support') {
-        const morale = (log.metadata?.supportMorale as number | undefined) ?? 0
-        const guard = (log.metadata?.guardAmount as number | undefined) ?? 0
-        record(actorRole, 'supportMorale', morale)
-        record(actorRole, 'guardAmount', guard)
-      }
-      if (
-        typeof log.damage === 'number' &&
-        log.damage > 0 &&
-        log.targetIds &&
-        enemyIdSet.has(log.targetIds[0])
-      ) {
-        record(actorRole, 'damageDealt', log.damage)
-      }
-      if (log.statusApplied && log.targetIds) {
-        for (const target of log.targetIds) {
-          if (enemyIdSet.has(target)) {
-            for (const status of log.statusApplied) {
-              record(actorRole, 'statusInflicted', 1)
-              if (DISRUPTIVE_STATUSES.has(status)) {
-                record(actorRole, 'enemyActionDisruptions', 1)
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (targetRole && typeof log.damage === 'number' && log.damage > 0) {
-      if (
-        partyIdSet.has(log.actorId ?? '') ||
-        enemyIdSet.has(log.actorId ?? '')
-      ) {
-        record(targetRole, 'damageTaken', log.damage)
-      }
-    }
-
-    if (
-      log.actionType === 'incapacitate' &&
-      targetId &&
-      partyIdSet.has(targetId)
-    ) {
-      const role = roleById.get(targetId)
-      if (role) {
-        statusesByUnit.delete(targetId)
-      }
-    }
-
-    if (log.statusApplied && log.targetIds) {
-      for (const target of log.targetIds) {
-        if (partyIdSet.has(target)) {
-          const set = statusesByUnit.get(target) ?? new Set<string>()
-          for (const status of log.statusApplied) {
-            set.add(status)
-          }
-          statusesByUnit.set(target, set)
-        }
-      }
-    }
-  }
-
-  // retreat
-  for (const attempt of result.retreatAttempts ?? []) {
-    if (attempt.proposerRole) {
-      const role = attempt.proposerRole as AdventurerRole
-      record(role, 'retreatProposed', 1)
-      if (attempt.success) {
-        record(role, 'retreatSuccessContributions', 1)
-      }
-    }
-  }
-
-  // survival / incap / injuries
-  const aliveOrEscaped = new Set(result.survivingAdventurers)
-  const incap = new Set(result.incapacitatedAdventurers)
-  const dead = new Set(result.deadAdventurers)
-  const rolesSeen = new Set<AdventurerRole>()
-  for (const a of party) {
-    const role = a.role
-    if (rolesSeen.has(role)) continue
-    rolesSeen.add(role)
-    record(role, 'presentInTrials', 1)
-    if (aliveOrEscaped.has(a.id)) record(role, 'survived', 1)
-    if (incap.has(a.id) || dead.has(a.id)) record(role, 'incapacitations', 1)
-  }
-  for (const injury of result.injuries) {
-    const role = roleById.get(injury.adventurerId)
-    if (role) {
-      metrics[role].injurySeverities.push(injury.severity)
-    }
-  }
-}
-
-function finalizeMetrics(
-  metrics: Record<AdventurerRole, RoleMetrics>,
-): Record<AdventurerRole, Record<string, number>> {
-  const out: Record<string, Record<string, number>> = {}
-  for (const [role, m] of Object.entries(metrics) as [
-    AdventurerRole,
-    RoleMetrics,
-  ][]) {
-    const trials = m.presentInTrials
-    const avg = (value: number) => (trials > 0 ? value / trials : 0)
-    out[role] = {
-      試行数: trials,
-      平均与ダメージ: avg(m.damageDealt),
-      平均被ダメージ: avg(m.damageTaken),
-      平均回復量: avg(m.healAmount),
-      平均防護量: avg(m.guardAmount),
-      平均支援士気: avg(m.supportMorale),
-      平均行動回数: avg(m.actionCount),
-      状態異常付与回数: avg(m.statusInflicted),
-      状態異常解除回数: avg(m.statusCured),
-      敵行動妨害回数: avg(m.enemyActionDisruptions),
-      弱点発見回数: avg(m.weaknessDiscoveries),
-      撤退提案回数: avg(m.retreatProposed),
-      撤退成功貢献回数: avg(m.retreatSuccessContributions),
-      戦闘不能率: avg(m.incapacitations),
-      生存率: avg(m.survived),
-      平均重傷重症度:
-        m.injurySeverities.length > 0
-          ? m.injurySeverities.reduce((a, b) => a + b, 0) /
-            m.injurySeverities.length
-          : 0,
-    }
-  }
-  return out
-}
-
-function formatMetricsTable(
-  metrics: Record<AdventurerRole, Record<string, number>>,
-): string {
-  const roles = Object.keys(metrics).sort() as AdventurerRole[]
-  const keys = Object.keys(metrics[roles[0]])
-  const header = `| 指標 | ${roles.join(' | ')} |`
-  const sep = `| ${'--- | '.repeat(roles.length + 1)}`
-  const lines = [header, sep]
-  for (const key of keys) {
-    const cells = roles.map((r) => metrics[r][key].toFixed(3))
-    lines.push(`| ${key} | ${cells.join(' | ')} |`)
-  }
-  return lines.join('\n')
 }
 
 interface OverallResult {
@@ -344,11 +154,7 @@ function emptyOverall(): OverallResult {
 
 function updateOverall(result: BattleResult, overall: OverallResult): void {
   overall.trials++
-  if (
-    result.outcome === 'victory' ||
-    result.outcome === 'costlyVictory' ||
-    result.outcome === 'partialVictory'
-  ) {
+  if (isFavorable(result.outcome)) {
     overall.victories++
   } else if (result.outcome === 'retreat') {
     overall.retreats++
@@ -401,55 +207,281 @@ function formatOverall(o: OverallResult): string {
 `
 }
 
-function runComposition(
-  name: string,
-  roles: AdventurerRole[],
-  trials: number,
-  useFixedEnemies: boolean,
-  baseRoles?: AdventurerRole[],
-): { overall: OverallResult; metrics: Record<AdventurerRole, RoleMetrics> } {
-  const overall = emptyOverall()
-  const metrics: Record<AdventurerRole, RoleMetrics> = {
-    vanguard: emptyMetrics(),
-    guardian: emptyMetrics(),
-    scout: emptyMetrics(),
-    ranger: emptyMetrics(),
-    mage: emptyMetrics(),
-    healer: emptyMetrics(),
-    support: emptyMetrics(),
+function updateMetricsFromBattle(
+  result: BattleResult,
+  party: Adventurer[],
+  enemies: Enemy[],
+  metrics: Record<AdventurerRole, RoleMetrics>,
+): void {
+  const partyIdSet = new Set(party.map((a) => a.id))
+  const enemyIdSet = new Set(enemies.map((e) => e.id))
+  const roleById = new Map(party.map((a) => [a.id, a.role]))
+
+  const characterCounts = new Map<AdventurerRole, number>()
+  for (const a of party) {
+    characterCounts.set(a.role, (characterCounts.get(a.role) ?? 0) + 1)
+  }
+  for (const [role, count] of characterCounts.entries()) {
+    const m = metrics[role]
+    m.partyTrials += 1
+    m.characterAppearances += count
   }
 
-  for (let i = 0; i < trials; i++) {
-    const party = buildParty(roles, `${BASE_SEED}-${name}-${i}`, RANK)
-    let enemies: Enemy[]
-    if (useFixedEnemies && baseRoles) {
-      const baseParty = buildParty(
-        baseRoles,
-        `${BASE_SEED}-${name}-base-${i}`,
-        RANK,
-      )
-      enemies = generateEncounter({
-        seed: `${BASE_SEED}-${name}-enc-${i}`,
-        planSeed: `${BASE_SEED}-${name}-plan-${i}`,
-        partyThreat: calculatePartyThreat(baseParty),
-        difficulty: DIFFICULTY,
-        partySize: baseRoles.length,
-      })
-    } else {
-      enemies = generateEncounter({
-        seed: `${BASE_SEED}-${name}-enc-${i}`,
-        planSeed: `${BASE_SEED}-${name}-plan-${i}`,
-        partyThreat: calculatePartyThreat(party),
-        difficulty: DIFFICULTY,
-        partySize: roles.length,
-      })
+  const aliveOrEscaped = new Set(result.survivingAdventurers)
+  const incap = new Set(result.incapacitatedAdventurers)
+  const dead = new Set(result.deadAdventurers)
+  for (const a of party) {
+    const m = metrics[a.role]
+    if (aliveOrEscaped.has(a.id)) {
+      m.survived += 1
     }
-    const result = runBattle(`${BASE_SEED}-${name}-battle-${i}`, party, enemies)
-    updateOverall(result, overall)
-    updateMetricsFromBattle(result, party, enemies, metrics)
+    if (incap.has(a.id) || dead.has(a.id)) {
+      m.incapacitations += 1
+    }
+  }
+  for (const injury of result.injuries) {
+    const role = roleById.get(injury.adventurerId)
+    if (role) {
+      metrics[role].injurySeverities.push(injury.severity)
+    }
   }
 
-  return { overall, metrics }
+  const statusesByUnit = new Map<string, Set<string>>()
+
+  function record(role: AdventurerRole, key: keyof RoleMetrics, value: number) {
+    const m = metrics[role]
+    ;(m[key] as number) += value
+  }
+
+  for (const log of result.logs) {
+    const actorRole = log.actorId ? roleById.get(log.actorId) : undefined
+    const targetId = log.targetIds?.[0]
+    const targetRole = targetId ? roleById.get(targetId) : undefined
+
+    if (actorRole) {
+      if (ACTION_TYPES.has(log.actionType)) {
+        record(actorRole, 'actionCount', 1)
+      }
+      if (
+        log.actionType === 'weaknessDiscovery' ||
+        log.actionType === 'monsterKnowledge'
+      ) {
+        record(actorRole, 'weaknessDiscoveries', 1)
+      }
+      if (log.actionType === 'heal') {
+        const amount =
+          (log.metadata?.actualHealAmount as number | undefined) ?? 0
+        record(actorRole, 'healAmount', amount)
+        if (targetId && amount > 0) {
+          const active = statusesByUnit.get(targetId)
+          if (active && (active.has('poisoned') || active.has('bleeding'))) {
+            record(actorRole, 'statusCured', 1)
+            active.delete('poisoned')
+            active.delete('bleeding')
+          }
+        }
+      }
+      if (log.actionType === 'guard') {
+        const potency = (log.metadata?.guardPotency as number | undefined) ?? 0
+        record(actorRole, 'guardPotency', potency)
+      }
+      if (log.actionType === 'support') {
+        const actual =
+          (log.metadata?.actualMoraleGained as number | undefined) ?? 0
+        const requested =
+          (log.metadata?.requestedMorale as number | undefined) ?? 0
+        const potency = (log.metadata?.guardPotency as number | undefined) ?? 0
+        record(actorRole, 'requestedMorale', requested)
+        record(actorRole, 'actualMoraleGained', actual)
+        record(actorRole, 'guardPotency', potency)
+      }
+      if (
+        typeof log.damage === 'number' &&
+        log.damage > 0 &&
+        log.targetIds &&
+        enemyIdSet.has(log.targetIds[0])
+      ) {
+        record(actorRole, 'damageDealt', log.damage)
+      }
+      if (log.statusApplied && log.targetIds) {
+        for (const target of log.targetIds) {
+          if (enemyIdSet.has(target)) {
+            for (const status of log.statusApplied) {
+              record(actorRole, 'statusInflicted', 1)
+              if (DISRUPTIVE_STATUSES.has(status)) {
+                record(actorRole, 'enemyActionDisruptions', 1)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (targetRole && typeof log.damage === 'number' && log.damage > 0) {
+      if (
+        (log.actorId && partyIdSet.has(log.actorId)) ||
+        (log.actorId && enemyIdSet.has(log.actorId))
+      ) {
+        record(targetRole, 'damageTaken', log.damage)
+      }
+    }
+
+    if (
+      log.actionType === 'incapacitate' &&
+      targetId &&
+      partyIdSet.has(targetId)
+    ) {
+      statusesByUnit.delete(targetId)
+    }
+
+    if (log.statusApplied && log.targetIds) {
+      for (const target of log.targetIds) {
+        if (partyIdSet.has(target)) {
+          const set = statusesByUnit.get(target) ?? new Set<string>()
+          for (const status of log.statusApplied) {
+            set.add(status)
+          }
+          statusesByUnit.set(target, set)
+        }
+      }
+    }
+  }
+
+  for (const attempt of result.retreatAttempts ?? []) {
+    if (
+      attempt.proposerRole &&
+      ROLES.includes(attempt.proposerRole as AdventurerRole)
+    ) {
+      const role = attempt.proposerRole as AdventurerRole
+      record(role, 'retreatProposed', 1)
+      if (attempt.success) {
+        record(role, 'retreatSuccessContributions', 1)
+      }
+    }
+  }
+}
+
+function finalizeMetricsPerParty(
+  metrics: Record<AdventurerRole, RoleMetrics>,
+): Record<AdventurerRole, Record<string, number>> {
+  return finalizeMetrics(metrics, 'party')
+}
+
+function finalizeMetricsPerCharacter(
+  metrics: Record<AdventurerRole, RoleMetrics>,
+): Record<AdventurerRole, Record<string, number>> {
+  return finalizeMetrics(metrics, 'character')
+}
+
+function finalizeMetrics(
+  metrics: Record<AdventurerRole, RoleMetrics>,
+  mode: 'party' | 'character',
+): Record<AdventurerRole, Record<string, number>> {
+  const out: Record<string, Record<string, number>> = {}
+  for (const [role, m] of Object.entries(metrics) as [
+    AdventurerRole,
+    RoleMetrics,
+  ][]) {
+    const divisor =
+      mode === 'party' ? m.partyTrials || 1 : m.characterAppearances || 1
+    const avg = (value: number) => (divisor > 0 ? value / divisor : 0)
+    out[role] = {
+      試行数: m.partyTrials,
+      キャラクター出現数: m.characterAppearances,
+      平均与ダメージ: avg(m.damageDealt),
+      平均被ダメージ: avg(m.damageTaken),
+      平均回復量: avg(m.healAmount),
+      防護付与値: avg(m.guardPotency),
+      士気付与値: avg(m.actualMoraleGained),
+      士気要求値: avg(m.requestedMorale),
+      平均行動回数: avg(m.actionCount),
+      状態異常付与回数: avg(m.statusInflicted),
+      状態異常解除回数: avg(m.statusCured),
+      敵行動妨害回数: avg(m.enemyActionDisruptions),
+      弱点発見回数: avg(m.weaknessDiscoveries),
+      撤退提案回数: avg(m.retreatProposed),
+      撤退成功貢献回数: avg(m.retreatSuccessContributions),
+      戦闘不能率: avg(m.incapacitations),
+      生存率: avg(m.survived),
+      平均重傷重症度:
+        m.injurySeverities.length > 0
+          ? m.injurySeverities.reduce((a, b) => a + b, 0) /
+            m.injurySeverities.length
+          : 0,
+    }
+  }
+  return out
+}
+
+function formatMetricsTable(
+  metrics: Record<AdventurerRole, Record<string, number>>,
+): string {
+  const roles = Object.keys(metrics).sort() as AdventurerRole[]
+  const keys = Object.keys(metrics[roles[0]])
+  const header = `| 指標 | ${roles.join(' | ')} |`
+  const sep = `| ${['---', ...roles.map(() => '---')].join(' | ')} |`
+  const lines = [header, sep]
+  for (const key of keys) {
+    const cells = roles.map((r) => {
+      const v = metrics[r][key]
+      if (key === '試行数' || key === 'キャラクター出現数') {
+        return Number.isInteger(v) ? v.toString() : v.toFixed(0)
+      }
+      return v.toFixed(3)
+    })
+    lines.push(`| ${key} | ${cells.join(' | ')} |`)
+  }
+  return lines.join('\n')
+}
+
+function buildSlotAdventurer(
+  slotSeed: string,
+  role: AdventurerRole,
+): Adventurer {
+  return generateAdventurer({
+    seed: slotSeed,
+    rank: CONFIG.rank,
+    role,
+  })
+}
+
+function buildPairedParties(
+  name: string,
+  trial: number,
+  baseRoles: AdventurerRole[],
+  variantRoles: AdventurerRole[],
+): { baseParty: Adventurer[]; variantParty: Adventurer[] } {
+  const baseParty: Adventurer[] = []
+  const variantParty: Adventurer[] = []
+  const maxSlots = Math.max(baseRoles.length, variantRoles.length)
+  for (let slotIndex = 0; slotIndex < maxSlots; slotIndex++) {
+    const slotSeed = `${CONFIG.baseSeed}-${name}-${trial}-slot-${slotIndex}`
+    const baseRole = baseRoles[slotIndex]
+    const variantRole = variantRoles[slotIndex]
+
+    if (baseRole && variantRole && baseRole === variantRole) {
+      const member = buildSlotAdventurer(slotSeed, baseRole)
+      baseParty.push(member)
+      variantParty.push(structuredClone(member))
+      continue
+    }
+
+    if (baseRole) {
+      baseParty.push(buildSlotAdventurer(slotSeed, baseRole))
+    }
+    if (variantRole) {
+      variantParty.push(buildSlotAdventurer(slotSeed, variantRole))
+    }
+  }
+  return { baseParty, variantParty }
+}
+
+interface PairedResult {
+  baseOverall: OverallResult
+  variantOverall: OverallResult
+  baseMetrics: Record<AdventurerRole, RoleMetrics>
+  variantMetrics: Record<AdventurerRole, RoleMetrics>
+  pairs: { baseFav: boolean; variantFav: boolean }[]
 }
 
 function runPairedComparison(
@@ -457,53 +489,35 @@ function runPairedComparison(
   baseRoles: AdventurerRole[],
   variantRoles: AdventurerRole[],
   trials: number,
-): {
-  baseOverall: OverallResult
-  variantOverall: OverallResult
-  baseMetrics: Record<AdventurerRole, RoleMetrics>
-  variantMetrics: Record<AdventurerRole, RoleMetrics>
-} {
+): PairedResult {
   const baseOverall = emptyOverall()
   const variantOverall = emptyOverall()
-  const baseMetrics = {
-    vanguard: emptyMetrics(),
-    guardian: emptyMetrics(),
-    scout: emptyMetrics(),
-    ranger: emptyMetrics(),
-    mage: emptyMetrics(),
-    healer: emptyMetrics(),
-    support: emptyMetrics(),
-  }
-  const variantMetrics = { ...baseMetrics }
+  const baseMetrics = createMetricsMap()
+  const variantMetrics = createMetricsMap()
+  const pairs: { baseFav: boolean; variantFav: boolean }[] = []
 
   for (let i = 0; i < trials; i++) {
-    const baseParty = buildParty(
+    const { baseParty, variantParty } = buildPairedParties(
+      name,
+      i,
       baseRoles,
-      `${BASE_SEED}-${name}-base-${i}`,
-      RANK,
-    )
-    const variantParty = buildParty(
       variantRoles,
-      `${BASE_SEED}-${name}-var-${i}`,
-      RANK,
     )
+    const battleSeed = `${CONFIG.baseSeed}-${name}-${i}-battle`
+    const planSeed = `${CONFIG.baseSeed}-${name}-${i}-plan`
+    const encSeed = `${CONFIG.baseSeed}-${name}-${i}-enc`
+
     const enemies = generateEncounter({
-      seed: `${BASE_SEED}-${name}-enc-${i}`,
-      planSeed: `${BASE_SEED}-${name}-plan-${i}`,
+      seed: encSeed,
+      planSeed,
       partyThreat: calculatePartyThreat(baseParty),
-      difficulty: DIFFICULTY,
-      partySize: baseRoles.length,
+      difficulty: CONFIG.difficulty,
+      partySize: baseParty.length,
     })
-    const baseResult = runBattle(
-      `${BASE_SEED}-${name}-base-battle-${i}`,
-      baseParty,
-      enemies,
-    )
-    const variantResult = runBattle(
-      `${BASE_SEED}-${name}-var-battle-${i}`,
-      variantParty,
-      enemies,
-    )
+
+    const baseResult = runBattle(battleSeed, baseParty, enemies)
+    const variantResult = runBattle(battleSeed, variantParty, enemies)
+
     updateOverall(baseResult, baseOverall)
     updateOverall(variantResult, variantOverall)
     updateMetricsFromBattle(baseResult, baseParty, enemies, baseMetrics)
@@ -513,198 +527,330 @@ function runPairedComparison(
       enemies,
       variantMetrics,
     )
+    pairs.push({
+      baseFav: isFavorable(baseResult.outcome),
+      variantFav: isFavorable(variantResult.outcome),
+    })
   }
 
-  return { baseOverall, variantOverall, baseMetrics, variantMetrics }
+  return { baseOverall, variantOverall, baseMetrics, variantMetrics, pairs }
 }
 
-function main() {
-  const lines: string[] = []
-  lines.push('# Phase 2 役割適性計測レポート')
-  lines.push('')
-  lines.push(`- 等級: ${RANK}`)
-  lines.push(`- 難易度: ${DIFFICULTY}`)
-  lines.push(`- 基本計測試行数: ${BASE_METRICS_TRIALS}`)
-  lines.push(`- ペアード比較試行数: ${PAIRED_TRIALS}`)
-  lines.push(`- シード: ${BASE_SEED}`)
-  lines.push('')
+function pairedBootstrapCI(
+  pairs: { baseFav: boolean; variantFav: boolean }[],
+  seed: string,
+  iterations = 10000,
+): { lower: number; upper: number; mean: number } {
+  const rng = new SeededRng(seed)
+  const diffs: number[] = []
+  const n = pairs.length
+  for (let i = 0; i < iterations; i++) {
+    let baseWins = 0
+    let variantWins = 0
+    for (let j = 0; j < n; j++) {
+      const idx = rng.integer(0, n - 1)
+      if (pairs[idx].baseFav) baseWins++
+      if (pairs[idx].variantFav) variantWins++
+    }
+    diffs.push(variantWins / n - baseWins / n)
+  }
+  diffs.sort((a, b) => a - b)
+  const lower = diffs[Math.floor(iterations * 0.025)]
+  const upper = diffs[Math.floor(iterations * 0.975)]
+  const mean = diffs.reduce((a, b) => a + b, 0) / diffs.length
+  return { lower, upper, mean }
+}
 
-  // 1. ロール別基本指標（標準編成で集計）
-  lines.push('## 1. ロール別基本指標（標準編成 vanguard/guardian/mage/healer）')
-  lines.push('')
-  const standard = runComposition(
-    'standard-base-metrics',
-    ['vanguard', 'guardian', 'mage', 'healer'],
-    BASE_METRICS_TRIALS,
-    false,
+function summarizePaired(
+  pairs: { baseFav: boolean; variantFav: boolean }[],
+  seed: string,
+): {
+  baseRate: number
+  variantRate: number
+  diff: number
+  ci: { lower: number; upper: number; mean: number }
+  baseWinVariantLoss: number
+  baseLossVariantWin: number
+} {
+  const n = pairs.length
+  const baseWins = pairs.filter((p) => p.baseFav).length
+  const variantWins = pairs.filter((p) => p.variantFav).length
+  const baseWinVariantLoss = pairs.filter(
+    (p) => p.baseFav && !p.variantFav,
+  ).length
+  const baseLossVariantWin = pairs.filter(
+    (p) => !p.baseFav && p.variantFav,
+  ).length
+  const baseRate = baseWins / n
+  const variantRate = variantWins / n
+  const diff = variantRate - baseRate
+  const ci = pairedBootstrapCI(pairs, seed)
+  return {
+    baseRate,
+    variantRate,
+    diff,
+    ci,
+    baseWinVariantLoss,
+    baseLossVariantWin,
+  }
+}
+
+function selfVerification() {
+  const standard: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer']
+  const trials = 1000
+  const { pairs, baseOverall, variantOverall } = runPairedComparison(
+    'self-verification',
+    standard,
+    standard,
+    trials,
   )
-  lines.push(formatOverall(finalizeOverall(standard.overall)))
-  lines.push('')
-  lines.push(formatMetricsTable(finalizeMetrics(standard.metrics)))
+  const base = finalizeOverall(baseOverall)
+  const variant = finalizeOverall(variantOverall)
+  const mismatches = pairs.filter((p) => p.baseFav !== p.variantFav).length
+  const ok =
+    mismatches === 0 &&
+    base.victories === variant.victories &&
+    base.retreats === variant.retreats &&
+    base.defeats === variant.defeats &&
+    base.totalLosses === variant.totalLosses &&
+    base.stalemates === variant.stalemates &&
+    Math.abs(base.avgRounds - variant.avgRounds) < 1e-9 &&
+    Math.abs(base.avgPartyDamage - variant.avgPartyDamage) < 1e-9 &&
+    Math.abs(base.avgEnemyDamage - variant.avgEnemyDamage) < 1e-9
+  return { ok, mismatches, base, variant }
+}
+
+function runComposition(
+  name: string,
+  roles: AdventurerRole[],
+  trials: number,
+): { overall: OverallResult; metrics: Record<AdventurerRole, RoleMetrics> } {
+  const overall = emptyOverall()
+  const metrics = createMetricsMap()
+  for (let i = 0; i < trials; i++) {
+    const party: Adventurer[] = []
+    for (let slotIndex = 0; slotIndex < roles.length; slotIndex++) {
+      const slotSeed = `${CONFIG.baseSeed}-${name}-${i}-slot-${slotIndex}`
+      party.push(buildSlotAdventurer(slotSeed, roles[slotIndex]))
+    }
+    const planSeed = `${CONFIG.baseSeed}-${name}-${i}-plan`
+    const encSeed = `${CONFIG.baseSeed}-${name}-${i}-enc`
+    const enemies = generateEncounter({
+      seed: encSeed,
+      planSeed,
+      partyThreat: calculatePartyThreat(party),
+      difficulty: CONFIG.difficulty,
+      partySize: party.length,
+    })
+    const battleSeed = `${CONFIG.baseSeed}-${name}-${i}-battle`
+    const result = runBattle(battleSeed, party, enemies)
+    updateOverall(result, overall)
+    updateMetricsFromBattle(result, party, enemies, metrics)
+  }
+  return { overall, metrics }
+}
+
+interface ExperimentConfig {
+  name: string
+  base: AdventurerRole[]
+  variant: AdventurerRole[]
+}
+
+function experimentSection(
+  title: string,
+  experiments: ExperimentConfig[],
+): string {
+  const lines: string[] = []
+  lines.push(`## ${title}`)
   lines.push('')
 
-  // 2. 置換実験
-  lines.push('## 2. 置換実験（標準編成から一枠変更、同じ敵編成でペアード比較）')
-  const replacements: {
-    name: string
-    variant: AdventurerRole[]
-  }[] = [
-    {
-      name: 'guardian → vanguard',
-      variant: ['vanguard', 'vanguard', 'mage', 'healer'],
-    },
-    {
-      name: 'guardian → scout',
-      variant: ['vanguard', 'scout', 'mage', 'healer'],
-    },
-    {
-      name: 'mage → ranger',
-      variant: ['vanguard', 'guardian', 'ranger', 'healer'],
-    },
-    {
-      name: 'healer → support',
-      variant: ['vanguard', 'guardian', 'mage', 'support'],
-    },
-    {
-      name: 'healer → mage',
-      variant: ['vanguard', 'guardian', 'mage', 'mage'],
-    },
-    {
-      name: 'vanguard x2（guardianをvanguardへ）',
-      variant: ['vanguard', 'vanguard', 'mage', 'healer'],
-    },
-    {
-      name: 'mage x2（healerをmageへ）',
-      variant: ['vanguard', 'guardian', 'mage', 'mage'],
-    },
-    {
-      name: 'healer x2（mageをhealerへ）',
-      variant: ['vanguard', 'guardian', 'healer', 'healer'],
-    },
-  ]
-
-  const baseRoles: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer']
-  for (const rep of replacements) {
-    lines.push(`### ${rep.name}`)
-    lines.push('')
-    const { baseOverall, variantOverall, variantMetrics } = runPairedComparison(
-      rep.name,
-      baseRoles,
-      rep.variant,
-      PAIRED_TRIALS,
+  const summaryRows: string[] = []
+  for (const exp of experiments) {
+    const { baseOverall, variantOverall, variantMetrics, pairs } =
+      runPairedComparison(exp.name, exp.base, exp.variant, CONFIG.pairedTrials)
+    const summary = summarizePaired(
+      pairs,
+      `${CONFIG.baseSeed}-${exp.name}-bootstrap`,
     )
+
+    lines.push(`### ${exp.name}`)
+    lines.push('')
     lines.push('**base**')
     lines.push(formatOverall(finalizeOverall(baseOverall)))
     lines.push('')
     lines.push('**variant**')
     lines.push(formatOverall(finalizeOverall(variantOverall)))
     lines.push('')
-    lines.push('**variant ロール指標**')
-    lines.push(formatMetricsTable(finalizeMetrics(variantMetrics)))
+    lines.push('**variant ロール指標（1パーティあたり）**')
+    lines.push(formatMetricsTable(finalizeMetricsPerParty(variantMetrics)))
     lines.push('')
-  }
-
-  // 3. 欠損役割の影響
-  lines.push('## 3. 欠損役割の影響')
-  lines.push('')
-  const missingConfigs: {
-    name: string
-    base: AdventurerRole[]
-    missing: AdventurerRole[]
-  }[] = [
-    {
-      name: 'healer不在（3人）',
-      base: ['vanguard', 'guardian', 'mage', 'healer'],
-      missing: ['vanguard', 'guardian', 'mage'],
-    },
-    {
-      name: 'guardian不在（3人）',
-      base: ['vanguard', 'guardian', 'mage', 'healer'],
-      missing: ['vanguard', 'mage', 'healer'],
-    },
-    {
-      name: '魔法攻撃不在（mageをvanguardへ）',
-      base: ['vanguard', 'guardian', 'mage', 'healer'],
-      missing: ['vanguard', 'guardian', 'vanguard', 'healer'],
-    },
-    {
-      name: '遠距離攻撃不在（rangerをvanguardへ）',
-      base: ['vanguard', 'guardian', 'ranger', 'healer'],
-      missing: ['vanguard', 'guardian', 'vanguard', 'healer'],
-    },
-    {
-      name: '索敵役不在（scoutをvanguardへ）',
-      base: ['vanguard', 'scout', 'mage', 'healer'],
-      missing: ['vanguard', 'vanguard', 'mage', 'healer'],
-    },
-    {
-      name: '指揮役不在（supportをvanguardへ）',
-      base: ['vanguard', 'guardian', 'support', 'healer'],
-      missing: ['vanguard', 'guardian', 'vanguard', 'healer'],
-    },
-  ]
-
-  const missingResults: {
-    name: string
-    baseOverall: OverallResult
-    variantOverall: OverallResult
-    variantMetrics: Record<AdventurerRole, RoleMetrics>
-  }[] = []
-  for (const cfg of missingConfigs) {
-    lines.push(`### ${cfg.name}`)
+    lines.push('**variant ロール指標（1キャラクターあたり）**')
+    lines.push(formatMetricsTable(finalizeMetricsPerCharacter(variantMetrics)))
     lines.push('')
-    const result = runPairedComparison(
-      cfg.name,
-      cfg.base,
-      cfg.missing,
-      PAIRED_TRIALS,
+
+    summaryRows.push(
+      `| ${exp.name} | ${summary.baseRate.toFixed(3)} | ${summary.variantRate.toFixed(3)} | ${summary.diff.toFixed(3)} | ${summary.ci.lower.toFixed(3)} | ${summary.ci.upper.toFixed(3)} | ${summary.baseWinVariantLoss} | ${summary.baseLossVariantWin} |`,
     )
-    missingResults.push({
-      name: cfg.name,
-      baseOverall: result.baseOverall,
-      variantOverall: result.variantOverall,
-      variantMetrics: result.variantMetrics,
-    })
-    lines.push('**base**')
-    lines.push(formatOverall(finalizeOverall(result.baseOverall)))
-    lines.push('')
-    lines.push('**missing**')
-    lines.push(formatOverall(finalizeOverall(result.variantOverall)))
-    lines.push('')
-    lines.push('**missing ロール指標**')
-    lines.push(formatMetricsTable(finalizeMetrics(result.variantMetrics)))
-    lines.push('')
   }
 
-  // 4. 結果分解（missing vs base の差分）をまとめ
-  lines.push('## 4. 欠損役割の影響（差分まとめ）')
+  lines.push('### 差分まとめ')
   lines.push('')
   lines.push(
-    '| 条件 | 勝率差 | 接敵失敗増 | 被ダメージ増 | ラウンド増 | 撤退増 | 重傷増 | 全滅増 |',
+    '| 条件 | base勝率 | variant勝率 | 差分 | 95%CI下限 | 95%CI上限 | base勝/variant敗 | base敗/variant勝 |',
   )
   lines.push('| --- | --- | --- | --- | --- | --- | --- | --- |')
-  for (const { name, baseOverall, variantOverall } of missingResults) {
-    const b = finalizeOverall(baseOverall)
-    const v = finalizeOverall(variantOverall)
-    const diffWin = v.victories / v.trials - b.victories / b.trials
-    const diffContact = v.contactFailures - b.contactFailures
-    const diffDmg = v.avgEnemyDamage - b.avgEnemyDamage
-    const diffRounds = v.avgRounds - b.avgRounds
-    const diffRetreat = v.retreats / v.trials - b.retreats / b.trials
-    const diffInjuries = v.avgInjuries - b.avgInjuries
-    const diffTotalLoss = v.totalLosses / v.trials - b.totalLosses / b.trials
-    lines.push(
-      `| ${name} | ${diffWin.toFixed(3)} | ${diffContact.toFixed(3)} | ${diffDmg.toFixed(1)} | ${diffRounds.toFixed(1)} | ${diffRetreat.toFixed(3)} | ${diffInjuries.toFixed(2)} | ${diffTotalLoss.toFixed(3)} |`,
-    )
-  }
+  lines.push(...summaryRows)
   lines.push('')
   lines.push(
-    '注: 「特定敵能力への対処失敗」は、現状のログから直接定量化できないため、勝率・全滅・被ダメージの増加を代理指標としています。',
+    '注: 95%信頼区間は paired bootstrap（10,000 回）で算出。信頼区間が 0 を含む場合、差は統計的に不明確とみなします。',
+  )
+  lines.push('')
+  return lines.join('\n')
+}
+
+function main() {
+  const lines: string[] = []
+  lines.push('# Phase 2.1 役割適性計測レポート')
+  lines.push('')
+  lines.push(`- 等級: ${CONFIG.rank}`)
+  lines.push(`- 難易度: ${CONFIG.difficulty}`)
+  lines.push(`- 基本計測試行数: ${CONFIG.baseTrials}`)
+  lines.push(`- ペアード比較試行数: ${CONFIG.pairedTrials}`)
+  lines.push(`- シード: ${CONFIG.baseSeed}`)
+  lines.push('')
+
+  // 自己検証
+  lines.push('## 0. 自己検証（同一編成を base/variant へ）')
+  lines.push('')
+  const self = selfVerification()
+  if (!self.ok) {
+    lines.push(`自己検証に失敗しました。不一致ペア数: ${self.mismatches}`)
+    lines.push('')
+    lines.push('base/variant の再現性が崩れているため、置換実験を中止します。')
+    const report = lines.join('\n')
+    fs.writeFileSync(path.resolve(process.cwd(), 'PHASE2_REPORT.md'), report)
+    console.error('Self-verification failed:', self.mismatches, 'mismatches')
+    process.exit(1)
+  }
+  lines.push(
+    `OK: 1000 試行中不一致ペア 0、勝率・ラウンド・与/被ダメージが一致。`,
+  )
+  lines.push('')
+
+  // 標準編成の基本指標
+  lines.push(
+    '## 1. 標準編成（vanguard/guardian/mage/healer）のロール別基本指標',
+  )
+  lines.push('')
+  const standard = runComposition(
+    'standard-base',
+    ['vanguard', 'guardian', 'mage', 'healer'],
+    CONFIG.baseTrials,
+  )
+  lines.push(formatOverall(finalizeOverall(standard.overall)))
+  lines.push('')
+  lines.push('**1パーティあたり**')
+  lines.push(formatMetricsTable(finalizeMetricsPerParty(standard.metrics)))
+  lines.push('')
+  lines.push('**1キャラクターあたり**')
+  lines.push(formatMetricsTable(finalizeMetricsPerCharacter(standard.metrics)))
+  lines.push('')
+
+  // 置換実験
+  const swapExperiments: ExperimentConfig[] = [
+    {
+      name: 'guardian → vanguard',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'vanguard', 'mage', 'healer'],
+    },
+    {
+      name: 'guardian → scout',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'scout', 'mage', 'healer'],
+    },
+    {
+      name: 'mage → ranger',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'guardian', 'ranger', 'healer'],
+    },
+    {
+      name: 'healer → support',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'guardian', 'mage', 'support'],
+    },
+    {
+      name: 'healer → mage',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'guardian', 'mage', 'mage'],
+    },
+    {
+      name: 'mage → healer',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'guardian', 'healer', 'healer'],
+    },
+  ]
+  lines.push(experimentSection('2. 置換実験', swapExperiments))
+
+  // 役割不在（4人維持）
+  const absenceExperiments: ExperimentConfig[] = [
+    {
+      name: 'healer不在',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'guardian', 'mage', 'vanguard'],
+    },
+    {
+      name: 'guardian不在',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'scout', 'mage', 'healer'],
+    },
+    {
+      name: '魔法攻撃不在',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'guardian', 'ranger', 'healer'],
+    },
+    {
+      name: '遠距離攻撃不在',
+      base: ['vanguard', 'guardian', 'ranger', 'healer'],
+      variant: ['vanguard', 'guardian', 'vanguard', 'healer'],
+    },
+    {
+      name: '索敵役不在',
+      base: ['vanguard', 'scout', 'mage', 'healer'],
+      variant: ['vanguard', 'vanguard', 'mage', 'healer'],
+    },
+    {
+      name: '指揮役不在',
+      base: ['vanguard', 'guardian', 'support', 'healer'],
+      variant: ['vanguard', 'guardian', 'vanguard', 'healer'],
+    },
+  ]
+  lines.push(experimentSection('3. 4人維持した役割不在', absenceExperiments))
+
+  // 人数不足
+  const understaffedExperiments: ExperimentConfig[] = [
+    {
+      name: '標準4人 → 3人（healer除く）',
+      base: ['vanguard', 'guardian', 'mage', 'healer'],
+      variant: ['vanguard', 'guardian', 'mage'],
+    },
+  ]
+  lines.push(experimentSection('4. 人数不足', understaffedExperiments))
+
+  // 注意事項
+  lines.push('## 5. 測定上の注意')
+  lines.push('')
+  lines.push(
+    '- 状態異常付与・敵行動妨害は、現行のロール定義では冒険者側が敵に付与する手段がないため 0 となっています。',
+  )
+  lines.push(
+    '- 防護・支援の効果量は「付与値」であり、実際に軽減したダメージ量ではありません。',
+  )
+  lines.push(
+    '- 人数不足実験では、base と variant でパーティサイズが異なるため、敵編成は base（4人）脅威点で生成されます。',
   )
 
-  const report = lines.join('\n')
   const reportPath = path.resolve(process.cwd(), 'PHASE2_REPORT.md')
-  fs.writeFileSync(reportPath, report)
+  fs.writeFileSync(reportPath, lines.join('\n'))
   console.log(`Report written to ${reportPath}`)
 }
 

@@ -437,7 +437,7 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
-        metadata: { healAmount: amount },
+        metadata: { actualHealAmount: amount },
       },
     )
     return
@@ -455,7 +455,7 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
-        metadata: { guardAmount: 5 },
+        metadata: { guardPotency: 5 },
       },
     )
     return
@@ -463,7 +463,9 @@ function resolveAction(
 
   if (action.action === 'support') {
     if (!action.target) return
-    action.target.morale = clamp(action.target.morale + 10, 0, 100)
+    const before = action.target.morale
+    action.target.morale = clamp(before + 10, 0, 100)
+    const actualMoraleGained = action.target.morale - before
     addStatus(action.target, 'guarded', 2, 3, unit.id)
     log(
       state,
@@ -473,7 +475,7 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
-        metadata: { supportMorale: 10, guardAmount: 3 },
+        metadata: { requestedMorale: 10, actualMoraleGained, guardPotency: 3 },
       },
     )
     return
