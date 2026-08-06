@@ -148,6 +148,7 @@ export interface EliminationObjectiveState {
   defeatedTargetIds: string[]
   escapedTargetIds: string[]
   survivingTargetIds: string[]
+  unknownTargetIds: string[]
   confirmedTargetIds: string[]
   progress: number
   completed: boolean

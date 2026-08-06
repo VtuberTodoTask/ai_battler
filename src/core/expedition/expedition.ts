@@ -156,6 +156,7 @@ export function initializeExpeditionState(
           defeatedTargetIds: [],
           escapedTargetIds: [],
           survivingTargetIds: [],
+          unknownTargetIds: [],
           confirmedTargetIds: [],
           progress: 0,
           completed: false,
@@ -706,6 +707,7 @@ function eliminationProgressFact(
     defeatedTargetIds,
     escapedTargetIds,
     survivingTargetIds,
+    unknownTargetIds,
     confirmedTargetIds,
     progress,
     completed,
@@ -720,6 +722,9 @@ function eliminationProgressFact(
   if (survivingTargetIds.length > 0) {
     parts.push(`${survivingTargetIds.length}体が生存している`)
   }
+  if (unknownTargetIds.length > 0) {
+    parts.push(`${unknownTargetIds.length}体の最終状態を確認できなかった`)
+  }
   parts.push(`討伐進捗は${progress}%となった`)
   if (confirmedTargetIds.length > 0) {
     parts.push(
@@ -728,7 +733,10 @@ function eliminationProgressFact(
   }
   if (completed) {
     parts.push('全対象の討伐を確認した')
-  } else if (defeatedTargetIds.length === requiredTargetIds.length) {
+  } else if (
+    unknownTargetIds.length === 0 &&
+    defeatedTargetIds.length === requiredTargetIds.length
+  ) {
     parts.push('全対象を撃破したが討伐確認が未完了のため依頼目的は未完了')
   } else {
     parts.push('討伐対象が残っているため依頼目的は未完了')
@@ -1649,10 +1657,18 @@ function determineEliminationOutcome(
     )
   }
 
-  const { requiredTargetIds, defeatedTargetIds, confirmedTargetIds, progress } =
-    obj
-  const allDefeated = defeatedTargetIds.length === requiredTargetIds.length
-  const allConfirmed = confirmedTargetIds.length === requiredTargetIds.length
+  const {
+    requiredTargetIds,
+    defeatedTargetIds,
+    unknownTargetIds,
+    confirmedTargetIds,
+    progress,
+  } = obj
+  const hasUnknown = unknownTargetIds.length > 0
+  const allDefeated =
+    !hasUnknown && defeatedTargetIds.length === requiredTargetIds.length
+  const allConfirmed =
+    !hasUnknown && confirmedTargetIds.length === requiredTargetIds.length
   const hasCasualties = state.casualties.length > 0
   const majorDamage = hasCasualties || unresolvedSerious > 0
   const returnIssues = timeExceeded || noSupplies || avgMorale < 40
@@ -1893,9 +1909,10 @@ function resolveEliminationTargets(
     0,
     100,
   )
-  const completed = confirmationRequired
-    ? false
-    : defeatedTargetIds.length === requiredTargetIds.length
+  const completed =
+    unknownTargetIds.length === 0 &&
+    defeatedTargetIds.length === requiredTargetIds.length &&
+    confirmedTargetIds.length === requiredTargetIds.length
 
   const requiredSet = new Set(requiredTargetIds)
   const confirmedUnique = confirmedTargetIds.filter((id) => requiredSet.has(id))
@@ -1903,6 +1920,7 @@ function resolveEliminationTargets(
   obj.defeatedTargetIds = defeatedTargetIds
   obj.escapedTargetIds = escapedTargetIds
   obj.survivingTargetIds = survivingTargetIds
+  obj.unknownTargetIds = unknownTargetIds
   obj.confirmedTargetIds = confirmedUnique
   obj.progress = progress
   obj.completed = completed
@@ -1925,6 +1943,9 @@ function resolveEliminationTargets(
         ...(survivingTargetIds.length > 0
           ? [`${survivingTargetIds.length}体が生存している`]
           : []),
+        ...(unknownTargetIds.length > 0
+          ? [`${unknownTargetIds.length}体の最終状態を確認できなかった`]
+          : []),
         `討伐進捗は${progress}%となった`,
       ],
       [
@@ -1945,12 +1966,54 @@ function resolveEliminationTargets(
           value: survivingTargetIds.length,
         },
         {
+          type: 'eliminationUnknown',
+          value: unknownTargetIds.length,
+        },
+        {
           type: 'eliminationProgress',
           value: progress,
         },
       ],
     ),
   )
+}
+
+function logEliminationConfirmationState(
+  state: ExpeditionState,
+  objective: EliminationObjectiveState,
+  facts: string[],
+  actorIds: string[] = [],
+  check?: ExpeditionLogEntry['check'],
+): void {
+  addLog(
+    state,
+    logEntry(
+      'objective',
+      'eliminationConfirmation',
+      actorIds,
+      facts,
+      [
+        {
+          type: 'eliminationConfirmed',
+          value: objective.confirmedTargetIds.length,
+        },
+        {
+          type: 'eliminationCompleted',
+          value: objective.completed ? 1 : 0,
+        },
+      ],
+      check,
+    ),
+  )
+}
+
+function updateEliminationCompleted(
+  objective: EliminationObjectiveState,
+): void {
+  objective.completed =
+    objective.unknownTargetIds.length === 0 &&
+    objective.defeatedTargetIds.length === objective.requiredTargetIds.length &&
+    objective.confirmedTargetIds.length === objective.requiredTargetIds.length
 }
 
 function runEliminationObjective(
@@ -1966,36 +2029,43 @@ function runEliminationObjective(
     return
   }
 
-  const { defeatedTargetIds, requiredTargetIds, confirmationRequired } = obj
+  const { defeatedTargetIds, confirmationRequired } = obj
+
+  if (defeatedTargetIds.length === 0) {
+    obj.confirmedTargetIds = []
+    updateEliminationCompleted(obj)
+    state.objectiveCompleted = obj.completed
+    logEliminationConfirmationState(state, obj, [
+      '撃破対象が存在しないため、討伐確認は行われなかった',
+      eliminationProgressFact(obj),
+    ])
+    return
+  }
 
   if (!confirmationRequired) {
     obj.confirmedTargetIds = [...defeatedTargetIds]
-    obj.completed =
-      defeatedTargetIds.length === requiredTargetIds.length &&
-      obj.confirmedTargetIds.length === requiredTargetIds.length
+    updateEliminationCompleted(obj)
     state.objectiveCompleted = obj.completed
-    addLog(
-      state,
-      logEntry(
-        'objective',
-        'eliminationConfirmation',
-        [],
-        [
-          `撃破した${defeatedTargetIds.length}体の討伐を確認した`,
-          eliminationProgressFact(obj),
-        ],
-        [
-          {
-            type: 'eliminationConfirmed',
-            value: obj.confirmedTargetIds.length,
-          },
-          {
-            type: 'eliminationCompleted',
-            value: obj.completed ? 1 : 0,
-          },
-        ],
-      ),
-    )
+    logEliminationConfirmationState(state, obj, [
+      `撃破した${defeatedTargetIds.length}体の討伐を自動確認した`,
+      eliminationProgressFact(obj),
+    ])
+    return
+  }
+
+  const skippedBattleOutcome =
+    state.battleOutcome === 'retreat' ||
+    state.battleOutcome === 'stalemate' ||
+    state.battleOutcome === 'defeat'
+
+  if (skippedBattleOutcome) {
+    obj.confirmedTargetIds = []
+    updateEliminationCompleted(obj)
+    state.objectiveCompleted = obj.completed
+    logEliminationConfirmationState(state, obj, [
+      '撤退または戦闘継続不能のため、討伐確認を実施できなかった',
+      eliminationProgressFact(obj),
+    ])
     return
   }
 
@@ -2026,13 +2096,12 @@ function runEliminationObjective(
     )
 
   const facts: string[] = []
-  const effects: ExpeditionEffect[] = []
 
   if (result === 'criticalSuccess' || result === 'success') {
     obj.confirmedTargetIds = [...defeatedTargetIds]
     facts.push(`撃破した${defeatedTargetIds.length}体の討伐を確認した`)
   } else if (result === 'partialSuccess') {
-    const confirmCount = Math.max(1, Math.ceil(defeatedTargetIds.length / 2))
+    const confirmCount = Math.ceil(defeatedTargetIds.length / 2)
     obj.confirmedTargetIds = defeatedTargetIds.slice(0, confirmCount)
     facts.push(
       `撃破した${defeatedTargetIds.length}体のうち${confirmCount}体の討伐を確認した`,
@@ -2045,39 +2114,22 @@ function runEliminationObjective(
     facts.push('討伐証明品を紛失・誤認した')
   }
 
-  obj.completed =
-    defeatedTargetIds.length === requiredTargetIds.length &&
-    obj.confirmedTargetIds.length === requiredTargetIds.length
+  updateEliminationCompleted(obj)
   state.objectiveCompleted = obj.completed
-
-  effects.push(
-    {
-      type: 'eliminationConfirmed',
-      value: obj.confirmedTargetIds.length,
-    },
-    {
-      type: 'eliminationCompleted',
-      value: obj.completed ? 1 : 0,
-    },
-  )
 
   facts.push(eliminationProgressFact(obj))
 
-  addLog(
+  logEliminationConfirmationState(
     state,
-    logEntry(
-      'objective',
-      'eliminationConfirmation',
-      [primary.id, ...assistants.map((a) => a.id)],
-      facts,
-      effects,
-      {
-        skill: confirmationSkill,
-        effectiveValue,
-        roll,
-        result,
-      },
-    ),
+    obj,
+    facts,
+    [primary.id, ...assistants.map((a) => a.id)],
+    {
+      skill: confirmationSkill,
+      effectiveValue,
+      roll,
+      result,
+    },
   )
 }
 
@@ -2449,15 +2501,7 @@ function runEliminationExpedition(
     }
   }
 
-  const shouldSkipObjective =
-    state.battleOutcome === 'retreat' ||
-    state.battleOutcome === 'stalemate' ||
-    state.battleOutcome === 'defeat' ||
-    state.battleOutcome === 'totalLoss'
-
-  if (!shouldSkipObjective) {
-    runEliminationObjective(request, party, state, rng)
-  }
+  runEliminationObjective(request, party, state, rng)
 
   if (getActiveParty(party, state).length === 0) {
     state.currentPhase = 'aftermath'

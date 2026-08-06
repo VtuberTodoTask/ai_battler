@@ -62,9 +62,10 @@ elimination 依頼で最大1回の戦闘を発生させ、討伐対象の撃破�
   - effect: eliminationDefeated=4
   - effect: eliminationEscaped=0
   - effect: eliminationSurviving=0
+  - effect: eliminationUnknown=0
   - effect: eliminationProgress=100
 - type=eliminationConfirmation
-  - 撃破した4体の討伐を確認した
+  - 撃破した4体の討伐を自動確認した
   - 討伐対象として4体が指定された。戦闘で4体を撃破した。討伐進捗は100%となった。撃破した4体のうち4体の討伐を確認した。全対象の討伐を確認した
   - effect: eliminationConfirmed=4
   - effect: eliminationCompleted=1
@@ -129,14 +130,15 @@ elimination 依頼で最大1回の戦闘を発生させ、討伐対象の撃破�
   - effect: eliminationDefeated=4
   - effect: eliminationEscaped=0
   - effect: eliminationSurviving=0
+  - effect: eliminationUnknown=0
   - effect: eliminationProgress=100
 - type=eliminationConfirmation
-  - 撃破した4体の討伐を確認した
+  - 撃破した4体の討伐を自動確認した
   - 討伐対象として4体が指定された。戦闘で4体を撃破した。討伐進捗は100%となった。撃破した4体のうち4体の討伐を確認した。全対象の討伐を確認した
   - effect: eliminationConfirmed=4
   - effect: eliminationCompleted=1
 
-## C. 一部撃破して撤退
+## C. 一部撃破したが残敵が逃亡
 
 - 依頼等級: C
 - パーティ: vanguard / guardian / mage / healer（C級）
@@ -197,9 +199,10 @@ elimination 依頼で最大1回の戦闘を発生させ、討伐対象の撃破�
   - effect: eliminationDefeated=2
   - effect: eliminationEscaped=2
   - effect: eliminationSurviving=0
+  - effect: eliminationUnknown=0
   - effect: eliminationProgress=50
 - type=eliminationConfirmation
-  - 撃破した2体の討伐を確認した
+  - 撃破した2体の討伐を自動確認した
   - 討伐対象として4体が指定された。戦闘で2体を撃破した。2体が逃亡した。討伐進捗は50%となった。撃破した2体のうち2体の討伐を確認した。討伐対象が残っているため依頼目的は未完了
   - effect: eliminationConfirmed=2
   - effect: eliminationCompleted=0
@@ -264,6 +267,7 @@ elimination 依頼で最大1回の戦闘を発生させ、討伐対象の撃破�
   - effect: eliminationDefeated=4
   - effect: eliminationEscaped=0
   - effect: eliminationSurviving=0
+  - effect: eliminationUnknown=0
   - effect: eliminationProgress=100
 - type=eliminationConfirmation
   - 討伐確認に失敗した

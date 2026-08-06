@@ -221,7 +221,7 @@ const scenarios = [
     confirmationRequired: false,
   },
   {
-    title: 'C. 一部撃破して撤退',
+    title: 'C. 一部撃破したが残敵が逃亡',
     seed: 's1',
     rank: 'C' as AdventurerRank,
     confirmationRequired: false,
