@@ -1,227 +1,276 @@
-# Phase 3.1 遠征中戦闘発生と状態往復 サンプル出力
+# Phase 3.2 討伐依頼（elimination）サンプル出力
 
-investigation 依頼で最大1回の戦闘を発生させ、遠征状態と戦闘状態を往復させた決定論的シミュレーション結果。
+elimination 依頼で最大1回の戦闘を発生させ、討伐対象の撃破・確認・遠征結果を分離した決定論的シミュレーション結果。
 
-## A. 有利接敵からの完全成功
+## A. 完全討伐
 
-- 依頼シード: phase3-1-a-10
-- パーティ: scout / ranger / mage / healer（D級）
-- 遠征結果: completeSuccess
-- 目的達成: はい（進捿=100.0%）
-- 戦闘結果: victory
-- 接敵状況: partyAdvantage
-- 戦闘ラウンド数: 18
+- 依頼等級: S
+- パーティ: vanguard / guardian / mage / healer（S級）
+- 依頼シード: s37
 - 敵編成: undeadx4
-- encounterSeed: phase3-1-a-10:battle:0:encounter
-- combatSeed: phase3-1-a-10:battle:0:combat
-- 戦闘前に判明していた弱点: なし
-- 戦闘前に判明していた能力: なし
-- 敵編成と一致した弱点情報: なし
-- 敵編成と不一致だった弱点情報: なし
-- 敵編成と一致した能力情報: なし
-- 敵編成と不一致だった能力情報: なし
-- 活動可能者: ゴウ ドラグナー, ガルド エルウィン, ソフィア ジェム, カイン アイヴィー
-- 戦闘不能者: なし
-- 死亡者: なし
-- 負傷: 1件（未解決の重傷=0）
-- 犠牲者: なし
-- 発見情報: 4件
-
-### 1. 遠征開始時
-
-- ゴウ ドラグナー（scout） HP=54/54, MP=10/10, 士気=46, 状態異常=[なし]
-- ガルド エルウィン（ranger） HP=49/49, MP=16/16, 士気=59, 状態異常=[なし]
-- ソフィア ジェム（mage） HP=45/45, MP=40/40, 士気=48, 状態異常=[なし]
-- カイン アイヴィー（healer） HP=45/45, MP=41/41, 士気=54, 状態異常=[なし]
-
-### 2. 戦闘直前
-
-- ゴウ ドラグナー（scout） HP=54/54, MP=10/10, 士気=42, 状態異常=[なし]
-- ガルド エルウィン（ranger） HP=49/49, MP=16/16, 士気=55, 状態異常=[なし]
-- ソフィア ジェム（mage） HP=45/45, MP=40/40, 士気=44, 状態異常=[なし]
-- カイン アイヴィー（healer） HP=45/45, MP=41/41, 士気=50, 状態異常=[なし]
-
-### 3. 戦闘直後
-
-- ゴウ ドラグナー（scout） HP=54/54, MP=10/10, 士気=42, 状態異常=[なし]
-- ガルド エルウィン（ranger） HP=49/49, MP=16/16, 士気=55, 状態異常=[なし]
-- ソフィア ジェム（mage） HP=45/45, MP=0/40, 士気=44, 状態異常=[なし]
-- カイン アイヴィー（healer） HP=45/45, MP=17/41, 士気=50, 状態異常=[なし]
-
-### 4. 帰還後
-
-- ゴウ ドラグナー（scout） HP=54/54, MP=10/10, 士気=41, 状態異常=[なし]
-- ガルド エルウィン（ranger） HP=49/49, MP=16/16, 士気=54, 状態異常=[なし]
-- ソフィア ジェム（mage） HP=45/45, MP=0/40, 士気=43, 状態異常=[なし]
-- カイン アイヴィー（healer） HP=41/45, MP=17/41, 士気=49, 状態異常=[なし]
-
-### 戦闘要約
-
-- 戦闘が18ラウンドでvictoryとなった
-- 接敵結果: success
-
-### 主要ログ（直近8件）
-
-- ゴウ ドラグナーが調査対象に関する手がかりを発見した
-- 周辺の地形を把握したに関する情報を得た
-- 戦闘が18ラウンドでvictoryとなった
-- 接敵結果: success
-- ゴウ ドラグナーが目標となる情報を確認した
-- 依頼目的を完全に達成した
-- ガルド エルウィンが安全な帰還経路を確保した
-- 罠に遭遇した
-- カイン アイヴィーが12のダメージを受けた
-- 帰還中の負傷者手当てが不十分だった
-- カイン アイヴィーによる治療判定: success
-- 依頼目的を完全に達成した
-- 医薬品を2消費した
-- カイン アイヴィーが負傷者の治療を行った
-
-## B. 戦闘勝利だが調査失敗
-
-- 依頼シード: phase3-1-b-12
-- パーティ: scout / ranger / mage / healer（D級）
-- 遠征結果: failedObjective
-- 目的達成: いいえ（進捿=20.0%）
+- 必須対象ID: B-undead-swarm-standard-s37:battle:0:encounter:enemy:0, A-undead-swarm-standard-s37:battle:0:encounter:enemy:1, S-undead-swarm-standard-s37:battle:0:encounter:enemy:2, A-undead-swarm-standard-s37:battle:0:encounter:enemy:3
 - 戦闘結果: victory
-- 接敵状況: enemyAdvantage
-- 戦闘ラウンド数: 8
+- 撃破対象: B-undead-swarm-standard-s37:battle:0:encounter:enemy:0, A-undead-swarm-standard-s37:battle:0:encounter:enemy:1, S-undead-swarm-standard-s37:battle:0:encounter:enemy:2, A-undead-swarm-standard-s37:battle:0:encounter:enemy:3
+- 逃亡対象: なし
+- 生存対象: なし
+- 確認済み対象: B-undead-swarm-standard-s37:battle:0:encounter:enemy:0, A-undead-swarm-standard-s37:battle:0:encounter:enemy:1, S-undead-swarm-standard-s37:battle:0:encounter:enemy:2, A-undead-swarm-standard-s37:battle:0:encounter:enemy:3
+- 討伐進捗: 100%
+- 討伐完了: はい
+- 遠征結果: completeSuccess
+- 生存者: トール ジェム, ヴァン エルウィン, ユリ サンド, ドラン ハインド
+- 戦闘不能者: なし
+- 死亡者: なし
+
+### 1. 遠征開始時
+
+- トール ジェム（vanguard） HP=80/80, MP=7/7, 士気=65, 状態異常=[なし]
+- ヴァン エルウィン（guardian） HP=92/92, MP=7/7, 士気=69, 状態異常=[なし]
+- ユリ サンド（mage） HP=66/66, MP=65/65, 士気=67, 状態異常=[なし]
+- ドラン ハインド（healer） HP=72/72, MP=56/56, 士気=67, 状態異常=[なし]
+
+### 2. 戦闘直前
+
+- トール ジェム（vanguard） HP=80/80, MP=7/7, 士気=63, 状態異常=[なし]
+- ヴァン エルウィン（guardian） HP=92/92, MP=7/7, 士気=70, 状態異常=[なし]
+- ユリ サンド（mage） HP=66/66, MP=65/65, 士気=65, 状態異常=[なし]
+- ドラン ハインド（healer） HP=70/72, MP=56/56, 士気=65, 状態異常=[なし]
+
+### 3. 戦闘直後
+
+- トール ジェム（vanguard） HP=63/80, MP=7/7, 士気=63, 状態異常=[guarded(2)]
+- ヴァン エルウィン（guardian） HP=92/92, MP=7/7, 士気=70, 状態異常=[guarded(2)]
+- ユリ サンド（mage） HP=66/66, MP=15/65, 士気=65, 状態異常=[なし]
+- ドラン ハインド（healer） HP=70/72, MP=56/56, 士気=65, 状態異常=[なし]
+
+### 4. 帰還後
+
+- トール ジェム（vanguard） HP=80/80, MP=7/7, 士気=68, 状態異常=[guarded(2)]
+- ヴァン エルウィン（guardian） HP=92/92, MP=7/7, 士気=75, 状態異常=[guarded(2)]
+- ユリ サンド（mage） HP=66/66, MP=15/65, 士気=70, 状態異常=[なし]
+- ドラン ハインド（healer） HP=72/72, MP=56/56, 士気=70, 状態異常=[なし]
+
+### 構造化facts
+
+- type=battleSummary
+  - 戦闘が10ラウンドでvictoryとなった
+  - 接敵結果: failure
+- type=eliminationTargetsAssigned
+  - 討伐対象として4体が指定された
+  - 戦闘で4体を撃破した
+  - 討伐進捗は100%となった
+  - effect: eliminationTargets=4
+  - effect: eliminationDefeated=4
+  - effect: eliminationEscaped=0
+  - effect: eliminationSurviving=0
+  - effect: eliminationUnknown=0
+  - effect: eliminationProgress=100
+- type=eliminationConfirmation
+  - 撃破した4体の討伐を自動確認した
+  - 討伐対象として4体が指定された。戦闘で4体を撃破した。討伐進捗は100%となった。撃破した4体のうち4体の討伐を確認した。全対象の討伐を確認した
+  - effect: eliminationConfirmed=4
+  - effect: eliminationCompleted=1
+
+## B. 討伐成功だが損害大
+
+- 依頼等級: C
+- パーティ: vanguard / guardian / mage / healer（C級）
+- 依頼シード: s325
+- 敵編成: constructx4
+- 必須対象ID: C-construct-assault-standard-s325:battle:0:encounter:enemy:0, C-construct-assault-standard-s325:battle:0:encounter:enemy:1, B-construct-assault-standard-s325:battle:0:encounter:enemy:2, C-construct-assault-standard-s325:battle:0:encounter:enemy:3
+- 戦闘結果: victory
+- 撃破対象: C-construct-assault-standard-s325:battle:0:encounter:enemy:0, C-construct-assault-standard-s325:battle:0:encounter:enemy:1, B-construct-assault-standard-s325:battle:0:encounter:enemy:2, C-construct-assault-standard-s325:battle:0:encounter:enemy:3
+- 逃亡対象: なし
+- 生存対象: なし
+- 確認済み対象: C-construct-assault-standard-s325:battle:0:encounter:enemy:0, C-construct-assault-standard-s325:battle:0:encounter:enemy:1, B-construct-assault-standard-s325:battle:0:encounter:enemy:2, C-construct-assault-standard-s325:battle:0:encounter:enemy:3
+- 討伐進捗: 100%
+- 討伐完了: はい
+- 遠征結果: success
+- 生存者: マルチナ サンド, ベル ヴァレス, フェイ ジェム, チェルシー クォーツ
+- 戦闘不能者: なし
+- 死亡者: なし
+
+### 1. 遠征開始時
+
+- マルチナ サンド（vanguard） HP=80/80, MP=6/6, 士気=49, 状態異常=[なし]
+- ベル ヴァレス（guardian） HP=71/71, MP=0/0, 士気=62, 状態異常=[なし]
+- フェイ ジェム（mage） HP=50/50, MP=43/43, 士気=54, 状態異常=[なし]
+- チェルシー クォーツ（healer） HP=47/47, MP=43/43, 士気=60, 状態異常=[なし]
+
+### 2. 戦闘直前
+
+- マルチナ サンド（vanguard） HP=80/80, MP=6/6, 士気=33, 状態異常=[なし]
+- ベル ヴァレス（guardian） HP=71/71, MP=0/0, 士気=46, 状態異常=[なし]
+- フェイ ジェム（mage） HP=40/50, MP=43/43, 士気=38, 状態異常=[なし]
+- チェルシー クォーツ（healer） HP=46/47, MP=43/43, 士気=44, 状態異常=[なし]
+
+### 3. 戦闘直後
+
+- マルチナ サンド（vanguard） HP=71/80, MP=6/6, 士気=33, 状態異常=[guarded(2)]
+- ベル ヴァレス（guardian） HP=71/71, MP=0/0, 士気=46, 状態異常=[guarded(2)]
+- フェイ ジェム（mage） HP=40/50, MP=3/43, 士気=38, 状態異常=[なし]
+- チェルシー クォーツ（healer） HP=46/47, MP=37/43, 士気=44, 状態異常=[なし]
+
+### 4. 帰還後
+
+- マルチナ サンド（vanguard） HP=80/80, MP=6/6, 士気=32, 状態異常=[guarded(2)]
+- ベル ヴァレス（guardian） HP=71/71, MP=0/0, 士気=45, 状態異常=[guarded(2)]
+- フェイ ジェム（mage） HP=50/50, MP=3/43, 士気=37, 状態異常=[なし]
+- チェルシー クォーツ（healer） HP=47/47, MP=37/43, 士気=43, 状態異常=[なし]
+
+### 構造化facts
+
+- type=battleSummary
+  - 戦闘が12ラウンドでvictoryとなった
+  - 接敵結果: failure
+- type=eliminationTargetsAssigned
+  - 討伐対象として4体が指定された
+  - 戦闘で4体を撃破した
+  - 討伐進捗は100%となった
+  - effect: eliminationTargets=4
+  - effect: eliminationDefeated=4
+  - effect: eliminationEscaped=0
+  - effect: eliminationSurviving=0
+  - effect: eliminationUnknown=0
+  - effect: eliminationProgress=100
+- type=eliminationConfirmation
+  - 撃破した4体の討伐を自動確認した
+  - 討伐対象として4体が指定された。戦闘で4体を撃破した。討伐進捗は100%となった。撃破した4体のうち4体の討伐を確認した。全対象の討伐を確認した
+  - effect: eliminationConfirmed=4
+  - effect: eliminationCompleted=1
+
+## C. 一部撃破したが残敵が逃亡
+
+- 依頼等級: C
+- パーティ: vanguard / guardian / mage / healer（C級）
+- 依頼シード: s1
 - 敵編成: insectx4
-- encounterSeed: phase3-1-b-12:battle:0:encounter
-- combatSeed: phase3-1-b-12:battle:0:combat
-- 戦闘前に判明していた弱点: なし
-- 戦闘前に判明していた能力: なし
-- 敵編成と一致した弱点情報: なし
-- 敵編成と不一致だった弱点情報: なし
-- 敵編成と一致した能力情報: なし
-- 敵編成と不一致だった能力情報: なし
-- 活動可能者: マルチナ リバー, ゼクス クロム, ガルド クレスト, レオ クレスト
-- 戦闘不能者: なし
-- 死亡者: なし
-- 負傷: 2件（未解決の重傷=0）
-- 犠牲者: なし
-- 発見情報: 2件
-
-### 1. 遠征開始時
-
-- マルチナ リバー（scout） HP=55/55, MP=8/8, 士気=35, 状態異常=[なし]
-- ゼクス クロム（ranger） HP=48/48, MP=7/7, 士気=47, 状態異常=[なし]
-- ガルド クレスト（mage） HP=52/52, MP=38/38, 士気=46, 状態異常=[なし]
-- レオ クレスト（healer） HP=45/45, MP=40/40, 士気=53, 状態異常=[なし]
-
-### 2. 戦闘直前
-
-- マルチナ リバー（scout） HP=55/55, MP=8/8, 士気=25, 状態異常=[なし]
-- ゼクス クロム（ranger） HP=48/48, MP=7/7, 士気=37, 状態異常=[なし]
-- ガルド クレスト（mage） HP=47/52, MP=38/38, 士気=36, 状態異常=[なし]
-- レオ クレスト（healer） HP=37/45, MP=40/40, 士気=43, 状態異常=[なし]
-
-### 3. 戦闘直後
-
-- マルチナ リバー（scout） HP=55/55, MP=8/8, 士気=25, 状態異常=[なし]
-- ゼクス クロム（ranger） HP=48/48, MP=7/7, 士気=37, 状態異常=[なし]
-- ガルド クレスト（mage） HP=39/52, MP=3/38, 士気=36, 状態異常=[なし]
-- レオ クレスト（healer） HP=37/45, MP=22/40, 士気=43, 状態異常=[なし]
-
-### 4. 帰還後
-
-- マルチナ リバー（scout） HP=55/55, MP=8/8, 士気=20, 状態異常=[なし]
-- ゼクス クロム（ranger） HP=48/48, MP=7/7, 士気=32, 状態異常=[なし]
-- ガルド クレスト（mage） HP=52/52, MP=3/38, 士気=31, 状態異常=[なし]
-- レオ クレスト（healer） HP=45/45, MP=22/40, 士気=38, 状態異常=[なし]
-
-### 戦闘要約
-
-- 戦闘が8ラウンドでvictoryとなった
-- 接敵結果: failure
-
-### 主要ログ（直近8件）
-
-- ガルド クレストが断片的な手がかりを得た
-- 魔力の残滓（断片）に関する断片情報を得た
-- 戦闘が8ラウンドでvictoryとなった
-- 接敵結果: failure
-- 目的の達成に失敗した
-- 手がかりは得たが、依頼目的は達成できなかった
-- ゼクス クロムが安全な帰還経路を確保した
-- マルチナ リバーが視界不良を事前に察知・回避した
-- 医薬品を1消費した
-- レオ クレストが帰還中の負傷者を手当てした
-- レオ クレストによる治療判定: success
-- 手がかりは得たが、依頼目的は達成できなかった
-- 医薬品を2消費した
-- レオ クレストが負傷者の治療を行った
-
-## C. 情報取得後に戦闘撤退
-
-- 依頼シード: phase3-1-c-77
-- パーティ: scout / ranger / mage / healer（D級）
+- 必須対象ID: C-insect-swarm-standard-s1:battle:0:encounter:enemy:1, C-insect-ambusher-standard-s1:battle:0:encounter:enemy:2, C-insect-swarm-standard-s1:battle:0:encounter:enemy:0, C-insect-swarm-standard-s1:battle:0:encounter:enemy:3
+- 戦闘結果: victory
+- 撃破対象: C-insect-swarm-standard-s1:battle:0:encounter:enemy:0, C-insect-swarm-standard-s1:battle:0:encounter:enemy:3
+- 逃亡対象: C-insect-swarm-standard-s1:battle:0:encounter:enemy:1, C-insect-ambusher-standard-s1:battle:0:encounter:enemy:2
+- 生存対象: なし
+- 確認済み対象: C-insect-swarm-standard-s1:battle:0:encounter:enemy:0, C-insect-swarm-standard-s1:battle:0:encounter:enemy:3
+- 討伐進捗: 50%
+- 討伐完了: いいえ
 - 遠征結果: partialSuccess
-- 目的達成: いいえ（進捿=40.0%）
-- 戦闘結果: retreat
-- 接敵状況: enemyAdvantage
-- 戦闘ラウンド数: 1
-- 敵編成: aberrationx4
-- encounterSeed: phase3-1-c-77:battle:0:encounter
-- combatSeed: phase3-1-c-77:battle:0:combat
-- 戦闘前に判明していた弱点: なし
-- 戦闘前に判明していた能力: なし
-- 敵編成と一致した弱点情報: なし
-- 敵編成と不一致だった弱点情報: なし
-- 敵編成と一致した能力情報: なし
-- 敵編成と不一致だった能力情報: なし
-- 活動可能者: エルナ ピーク, ルーカス アッシュ, ロイド サンド, レオ アッシュ
+- 生存者: トール スカイ, オルム アイヴィー, フェイ アイヴィー, レイラ ノース
 - 戦闘不能者: なし
 - 死亡者: なし
-- 負傷: 1件（未解決の重傷=0）
-- 犠牲者: なし
-- 発見情報: 3件
 
 ### 1. 遠征開始時
 
-- エルナ ピーク（scout） HP=56/56, MP=6/6, 士気=47, 状態異常=[なし]
-- ルーカス アッシュ（ranger） HP=45/45, MP=4/4, 士気=46, 状態異常=[なし]
-- ロイド サンド（mage） HP=52/52, MP=39/39, 士気=53, 状態異常=[なし]
-- レオ アッシュ（healer） HP=50/50, MP=41/41, 士気=53, 状態異常=[なし]
+- トール スカイ（vanguard） HP=68/68, MP=9/9, 士気=56, 状態異常=[なし]
+- オルム アイヴィー（guardian） HP=71/71, MP=4/4, 士気=60, 状態異常=[なし]
+- フェイ アイヴィー（mage） HP=47/47, MP=43/43, 士気=59, 状態異常=[なし]
+- レイラ ノース（healer） HP=66/66, MP=42/42, 士気=53, 状態異常=[なし]
 
 ### 2. 戦闘直前
 
-- エルナ ピーク（scout） HP=56/56, MP=6/6, 士気=34, 状態異常=[なし]
-- ルーカス アッシュ（ranger） HP=39/45, MP=4/4, 士気=33, 状態異常=[なし]
-- ロイド サンド（mage） HP=52/52, MP=39/39, 士気=40, 状態異常=[なし]
-- レオ アッシュ（healer） HP=50/50, MP=41/41, 士気=40, 状態異常=[なし]
+- トール スカイ（vanguard） HP=68/68, MP=9/9, 士気=52, 状態異常=[なし]
+- オルム アイヴィー（guardian） HP=71/71, MP=4/4, 士気=56, 状態異常=[なし]
+- フェイ アイヴィー（mage） HP=47/47, MP=43/43, 士気=55, 状態異常=[なし]
+- レイラ ノース（healer） HP=65/66, MP=42/42, 士気=49, 状態異常=[なし]
 
 ### 3. 戦闘直後
 
-- エルナ ピーク（scout） HP=56/56, MP=6/6, 士気=34, 状態異常=[なし]
-- ルーカス アッシュ（ranger） HP=39/45, MP=4/4, 士気=33, 状態異常=[なし]
-- ロイド サンド（mage） HP=52/52, MP=39/39, 士気=40, 状態異常=[なし]
-- レオ アッシュ（healer） HP=50/50, MP=41/41, 士気=40, 状態異常=[なし]
+- トール スカイ（vanguard） HP=68/68, MP=9/9, 士気=52, 状態異常=[guarded(1)]
+- オルム アイヴィー（guardian） HP=71/71, MP=4/4, 士気=56, 状態異常=[guarded(1)]
+- フェイ アイヴィー（mage） HP=39/47, MP=18/43, 士気=55, 状態異常=[なし]
+- レイラ ノース（healer） HP=65/66, MP=36/42, 士気=49, 状態異常=[なし]
 
 ### 4. 帰還後
 
-- エルナ ピーク（scout） HP=56/56, MP=6/6, 士気=32, 状態異常=[なし]
-- ルーカス アッシュ（ranger） HP=44/45, MP=4/4, 士気=31, 状態異常=[なし]
-- ロイド サンド（mage） HP=52/52, MP=39/39, 士気=38, 状態異常=[なし]
-- レオ アッシュ（healer） HP=50/50, MP=41/41, 士気=38, 状態異常=[なし]
+- トール スカイ（vanguard） HP=68/68, MP=9/9, 士気=52, 状態異常=[guarded(1)]
+- オルム アイヴィー（guardian） HP=71/71, MP=4/4, 士気=56, 状態異常=[guarded(1)]
+- フェイ アイヴィー（mage） HP=46/47, MP=18/43, 士気=55, 状態異常=[なし]
+- レイラ ノース（healer） HP=66/66, MP=36/42, 士気=49, 状態異常=[なし]
 
-### 戦闘要約
+### 構造化facts
 
-- 戦闘が1ラウンドでretreatとなった
-- 接敵結果: failure
+- type=battleSummary
+  - 戦闘が6ラウンドでvictoryとなった
+  - 接敵結果: failure
+- type=eliminationTargetsAssigned
+  - 討伐対象として4体が指定された
+  - 戦闘で2体を撃破した
+  - 2体が逃亡した
+  - 討伐進捗は50%となった
+  - effect: eliminationTargets=4
+  - effect: eliminationDefeated=2
+  - effect: eliminationEscaped=2
+  - effect: eliminationSurviving=0
+  - effect: eliminationUnknown=0
+  - effect: eliminationProgress=50
+- type=eliminationConfirmation
+  - 撃破した2体の討伐を自動確認した
+  - 討伐対象として4体が指定された。戦闘で2体を撃破した。2体が逃亡した。討伐進捗は50%となった。撃破した2体のうち2体の討伐を確認した。討伐対象が残っているため依頼目的は未完了
+  - effect: eliminationConfirmed=2
+  - effect: eliminationCompleted=0
 
-### 主要ログ（直近8件）
+## D. 戦闘勝利だが確認失敗
 
-- エルナ ピークが調査対象に関する手がかりを発見した
-- 敵の痕跡に関する情報を得た
-- エルナ ピークが視界不良を事前に察知・回避した
-- 戦闘が1ラウンドでretreatとなった
-- 接敵結果: failure
-- ルーカス アッシュが帰還経路を見失い、迂回した
-- エルナ ピークが罠を事前に察知・回避した
-- 魔力の残滓（断片）に関する情報を得た
-- 医薬品を1消費した
-- レオ アッシュが帰還中の負傷者を手当てした
-- レオ アッシュによる治療判定: partialSuccess
-- 依頼目的を部分的に達成した
-- 治療は不十分だった
+- 依頼等級: S
+- パーティ: vanguard / guardian / mage / healer（S級）
+- 依頼シード: s45
+- 敵編成: constructx4
+- 必須対象ID: A-construct-tank-standard-s45:battle:0:encounter:enemy:0, S-construct-tank-standard-s45:battle:0:encounter:enemy:1, S-construct-tank-standard-s45:battle:0:encounter:enemy:2, S-construct-tank-standard-s45:battle:0:encounter:enemy:3
+- 戦闘結果: victory
+- 撃破対象: A-construct-tank-standard-s45:battle:0:encounter:enemy:0, S-construct-tank-standard-s45:battle:0:encounter:enemy:1, S-construct-tank-standard-s45:battle:0:encounter:enemy:2, S-construct-tank-standard-s45:battle:0:encounter:enemy:3
+- 逃亡対象: なし
+- 生存対象: なし
+- 確認済み対象: なし
+- 討伐進捗: 100%
+- 討伐完了: いいえ
+- 遠征結果: failedObjective
+- 生存者: ベル ジェム, ユリ クォーツ, カイン フォレスト, グスタフ ハインド
+- 戦闘不能者: なし
+- 死亡者: なし
+
+### 1. 遠征開始時
+
+- ベル ジェム（vanguard） HP=83/83, MP=14/14, 士気=57, 状態異常=[なし]
+- ユリ クォーツ（guardian） HP=92/92, MP=12/12, 士気=70, 状態異常=[なし]
+- カイン フォレスト（mage） HP=79/79, MP=55/55, 士気=72, 状態異常=[なし]
+- グスタフ ハインド（healer） HP=73/73, MP=53/53, 士気=66, 状態異常=[なし]
+
+### 2. 戦闘直前
+
+- ベル ジェム（vanguard） HP=83/83, MP=14/14, 士気=52, 状態異常=[なし]
+- ユリ クォーツ（guardian） HP=91/92, MP=12/12, 士気=65, 状態異常=[なし]
+- カイン フォレスト（mage） HP=79/79, MP=55/55, 士気=67, 状態異常=[なし]
+- グスタフ ハインド（healer） HP=73/73, MP=53/53, 士気=61, 状態異常=[なし]
+
+### 3. 戦闘直後
+
+- ベル ジェム（vanguard） HP=83/83, MP=14/14, 士気=52, 状態異常=[なし]
+- ユリ クォーツ（guardian） HP=63/92, MP=12/12, 士気=65, 状態異常=[なし]
+- カイン フォレスト（mage） HP=52/79, MP=0/55, 士気=67, 状態異常=[なし]
+- グスタフ ハインド（healer） HP=48/73, MP=35/53, 士気=61, 状態異常=[なし]
+
+### 4. 帰還後
+
+- ベル ジェム（vanguard） HP=83/83, MP=14/14, 士気=60, 状態異常=[なし]
+- ユリ クォーツ（guardian） HP=76/92, MP=12/12, 士気=70, 状態異常=[なし]
+- カイン フォレスト（mage） HP=65/79, MP=0/55, 士気=72, 状態異常=[なし]
+- グスタフ ハインド（healer） HP=61/73, MP=35/53, 士気=66, 状態異常=[なし]
+
+### 構造化facts
+
+- type=battleSummary
+  - 戦闘が16ラウンドでvictoryとなった
+  - 接敵結果: failure
+- type=eliminationTargetsAssigned
+  - 討伐対象として4体が指定された
+  - 戦闘で4体を撃破した
+  - 討伐進捗は100%となった
+  - effect: eliminationTargets=4
+  - effect: eliminationDefeated=4
+  - effect: eliminationEscaped=0
+  - effect: eliminationSurviving=0
+  - effect: eliminationUnknown=0
+  - effect: eliminationProgress=100
+- type=eliminationConfirmation
+  - 討伐確認に失敗した
+  - 討伐対象として4体が指定された。戦闘で4体を撃破した。討伐進捗は100%となった。全対象を撃破したが討伐確認が未完了のため依頼目的は未完了
+  - effect: eliminationConfirmed=0
+  - effect: eliminationCompleted=0
