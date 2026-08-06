@@ -140,10 +140,26 @@ function summarizeScenario(
       .join(', ')
     lines.push(`- 戦闘前に判明していた弱点: ${weaknessNames || 'なし'}`)
     lines.push(`- 戦闘前に判明していた能力: ${abilityNames || 'なし'}`)
-    const appliedNames = record.appliedIntel.map((i) => i.name).join(', ')
-    const unmatchedNames = record.unmatchedIntel.map((i) => i.name).join(', ')
-    lines.push(`- 敵編成と一致した情報: ${appliedNames || 'なし'}`)
-    lines.push(`- 敵編成と不一致だった情報: ${unmatchedNames || 'なし'}`)
+    const matchedWeaknessNames = record.matchedWeaknessIntel
+      .map((i) => i.name)
+      .join(', ')
+    const unmatchedWeaknessNames = record.unmatchedWeaknessIntel
+      .map((i) => i.name)
+      .join(', ')
+    const matchedAbilityNames = record.matchedAbilityIntel
+      .map((i) => i.name)
+      .join(', ')
+    const unmatchedAbilityNames = record.unmatchedAbilityIntel
+      .map((i) => i.name)
+      .join(', ')
+    lines.push(`- 敵編成と一致した弱点情報: ${matchedWeaknessNames || 'なし'}`)
+    lines.push(
+      `- 敵編成と不一致だった弱点情報: ${unmatchedWeaknessNames || 'なし'}`,
+    )
+    lines.push(`- 敵編成と一致した能力情報: ${matchedAbilityNames || 'なし'}`)
+    lines.push(
+      `- 敵編成と不一致だった能力情報: ${unmatchedAbilityNames || 'なし'}`,
+    )
   }
 
   const activeIds = party

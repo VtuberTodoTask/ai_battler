@@ -222,8 +222,10 @@ export interface ExpeditionBattleRecord {
   deadAdventurerIds: string[]
   knownEnemyWeaknesses: BattleIntel[]
   knownEnemyAbilities: BattleIntel[]
-  appliedIntel: BattleIntel[]
-  unmatchedIntel: BattleIntel[]
+  matchedWeaknessIntel: BattleIntel[]
+  unmatchedWeaknessIntel: BattleIntel[]
+  matchedAbilityIntel: BattleIntel[]
+  unmatchedAbilityIntel: BattleIntel[]
   discoveredWeaknesses: string[]
   injuries: ExpeditionInjury[]
   result: BattleResult

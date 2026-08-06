@@ -7,6 +7,7 @@ import type {
   AdventurerRole,
   BattleOutcome,
   BattleResult,
+  Enemy,
   StatusEffect,
 } from '../models/types.ts'
 import type {
@@ -1315,6 +1316,8 @@ describe('Battle state carryover', () => {
       state.battleEntrySnapshot!.knownEnemyAbilities,
       [],
       [],
+      [],
+      [],
     )
 
     expect(state.partyHp[party[0].id]).toBe(party[0].maxHp)
@@ -1420,13 +1423,13 @@ describe('Known enemy weaknesses', () => {
         name: 'Skeleton',
         weaknesses: [{ weaknessId: 'light', name: '光弱点', known: false }],
       },
-    ]
+    ] as unknown as Enemy[]
     const known: BattleIntel[] = [
       { kind: 'weakness', id: 'fire', name: '火弱点' },
       { kind: 'weakness', id: 'light', name: '光弱点' },
     ]
     const state = minimalExpeditionState()
-    const { applied, unmatched } =
+    const { matched, unmatched } =
       expeditionTestInternals.applyKnownEnemyWeaknesses(
         enemies,
         known,
@@ -1437,7 +1440,7 @@ describe('Known enemy weaknesses', () => {
     expect(enemies[0].weaknesses[1].known).toBe(false)
     expect(enemies[1].weaknesses[0].known).toBe(true)
     expect(enemies[2].weaknesses[0].known).toBe(true)
-    expect(applied.length).toBe(2)
+    expect(matched.length).toBe(2)
     expect(unmatched.length).toBe(0)
   })
 
@@ -1455,7 +1458,7 @@ describe('Known enemy weaknesses', () => {
         name: 'Skeleton',
         weaknesses: [{ weaknessId: 'fire', name: '火弱点', known: false }],
       },
-    ]
+    ] as unknown as Enemy[]
     const known: BattleIntel[] = [
       {
         kind: 'weakness',
@@ -1483,7 +1486,7 @@ describe('Known enemy weaknesses', () => {
         name: 'Wolf',
         weaknesses: [],
       },
-    ]
+    ] as unknown as Enemy[]
     const known: BattleIntel[] = [
       { kind: 'weakness', id: 'nonexistent', name: 'nonexistent' },
     ]
@@ -1499,6 +1502,258 @@ describe('Known enemy weaknesses', () => {
     )
     expect(diag).toBeDefined()
     expect(diag?.facts[0]).toContain('nonexistent')
+  })
+})
+
+describe('Known enemy abilities', () => {
+  it('matches ability intel when an enemy has the ability', () => {
+    const enemies = [
+      {
+        species: 'beast',
+        abilities: [{ abilityId: 'poisonAttack', name: '毒攻撃' }],
+      },
+    ] as unknown as Enemy[]
+    const known: BattleIntel[] = [
+      { kind: 'ability', id: 'poisonAttack', name: '毒攻撃' },
+    ]
+    const state = minimalExpeditionState()
+    const { matched, unmatched } =
+      expeditionTestInternals.matchKnownEnemyAbilities(
+        enemies,
+        known,
+        state,
+        'b-0',
+      )
+    expect(matched.length).toBe(1)
+    expect(unmatched.length).toBe(0)
+  })
+
+  it('unmatched ability intel when no enemy has the ability', () => {
+    const enemies = [{ species: 'beast', abilities: [] }] as unknown as Enemy[]
+    const known: BattleIntel[] = [
+      { kind: 'ability', id: 'flight', name: '飛行' },
+    ]
+    const state = minimalExpeditionState()
+    const { matched, unmatched } =
+      expeditionTestInternals.matchKnownEnemyAbilities(
+        enemies,
+        known,
+        state,
+        'b-0',
+      )
+    expect(matched.length).toBe(0)
+    expect(unmatched.length).toBe(1)
+    const diag = state.logs.find(
+      (l) => l.type === 'diagnostic' && l.phase === 'battle',
+    )
+    expect(diag).toBeDefined()
+    expect(diag?.facts[0]).toContain('飛行')
+  })
+
+  it('matches when any enemy of the target species has the ability', () => {
+    const enemies = [
+      { species: 'undead', abilities: [] },
+      {
+        species: 'undead',
+        abilities: [{ abilityId: 'poisonAttack', name: '毒攻撃' }],
+      },
+    ] as unknown as Enemy[]
+    const known: BattleIntel[] = [
+      { kind: 'ability', id: 'poisonAttack', name: '毒攻撃' },
+    ]
+    const state = minimalExpeditionState()
+    const { matched } = expeditionTestInternals.matchKnownEnemyAbilities(
+      enemies,
+      known,
+      state,
+      'b-0',
+    )
+    expect(matched.length).toBe(1)
+  })
+
+  it('does not match ability intel when targetSpecies differs', () => {
+    const enemies = [
+      {
+        species: 'undead',
+        abilities: [{ abilityId: 'poisonAttack', name: '毒攻撃' }],
+      },
+    ] as unknown as Enemy[]
+    const known: BattleIntel[] = [
+      {
+        kind: 'ability',
+        id: 'poisonAttack',
+        name: '毒攻撃',
+        targetSpecies: 'beast',
+      },
+    ]
+    const state = minimalExpeditionState()
+    const { matched, unmatched } =
+      expeditionTestInternals.matchKnownEnemyAbilities(
+        enemies,
+        known,
+        state,
+        'b-0',
+      )
+    expect(matched.length).toBe(0)
+    expect(unmatched.length).toBe(1)
+  })
+
+  it('stores matched and unmatched abilities in the battle record', () => {
+    const request = makeRequest('ability-record')
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'ability-record',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.battleEntrySnapshot = emptyBattleEntrySnapshot()
+
+    const result = {
+      seed: 's',
+      outcome: 'victory' as const,
+      rounds: 3,
+      survivingAdventurers: party.map((a) => a.id),
+      incapacitatedAdventurers: [],
+      deadAdventurers: [],
+      finalAdventurerStates: party.map((a) => ({
+        id: a.id,
+        currentHp: a.maxHp,
+        currentMp: a.maxMp,
+        morale: 50,
+        statusEffects: [],
+        alive: true,
+        incapacitated: false,
+        dead: false,
+      })),
+      survivingEnemies: [],
+      defeatedEnemies: ['e1'],
+      escapedEnemies: [],
+      injuries: [],
+      discoveredWeaknesses: [],
+      partyDamageDealt: 10,
+      enemyDamageDealt: 5,
+      abilityUsage: {},
+      contactResult: {
+        type: 'success' as const,
+        partyScouting: 0,
+        enemyStealth: 0,
+        successChance: 100,
+        roll: 0,
+        effects: {},
+      },
+      logs: [],
+      adventurerActionCount: 1,
+      enemyActionCount: 1,
+    } satisfies BattleResult
+
+    const matched: BattleIntel[] = [
+      { kind: 'ability', id: 'poisonAttack', name: '毒攻撃' },
+    ]
+    const unmatched: BattleIntel[] = [
+      { kind: 'ability', id: 'flight', name: '飛行' },
+    ]
+
+    expeditionTestInternals.applyBattleResultToExpedition(
+      state,
+      result,
+      request,
+      'b-0',
+      'enc',
+      'comb',
+      [],
+      [...matched, ...unmatched],
+      [],
+      [],
+      matched,
+      unmatched,
+    )
+
+    expect(state.battles[0].matchedAbilityIntel).toEqual(matched)
+    expect(state.battles[0].unmatchedAbilityIntel).toEqual(unmatched)
+
+    const summary = state.logs.find((l) => l.type === 'battleSummary')
+    expect(summary).toBeDefined()
+    expect(summary?.facts.some((f) => f.includes('毒攻撃'))).toBe(true)
+    expect(summary?.facts.some((f) => f.includes('飛行'))).toBe(true)
+  })
+
+  it('distinguishes matched and unmatched abilities in the battle summary', () => {
+    const request = makeRequest('ability-summary')
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'ability-summary',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.battleEntrySnapshot = emptyBattleEntrySnapshot()
+
+    const result = {
+      seed: 's',
+      outcome: 'victory' as const,
+      rounds: 3,
+      survivingAdventurers: party.map((a) => a.id),
+      incapacitatedAdventurers: [],
+      deadAdventurers: [],
+      finalAdventurerStates: party.map((a) => ({
+        id: a.id,
+        currentHp: a.maxHp,
+        currentMp: a.maxMp,
+        morale: 50,
+        statusEffects: [],
+        alive: true,
+        incapacitated: false,
+        dead: false,
+      })),
+      survivingEnemies: [],
+      defeatedEnemies: ['e1'],
+      escapedEnemies: [],
+      injuries: [],
+      discoveredWeaknesses: [],
+      partyDamageDealt: 10,
+      enemyDamageDealt: 5,
+      abilityUsage: {},
+      contactResult: {
+        type: 'success' as const,
+        partyScouting: 0,
+        enemyStealth: 0,
+        successChance: 100,
+        roll: 0,
+        effects: {},
+      },
+      logs: [],
+      adventurerActionCount: 1,
+      enemyActionCount: 1,
+    } satisfies BattleResult
+
+    const matched: BattleIntel[] = [
+      { kind: 'ability', id: 'regenerate', name: '再生' },
+    ]
+    const unmatched: BattleIntel[] = [
+      { kind: 'ability', id: 'flight', name: '飛行' },
+    ]
+
+    expeditionTestInternals.applyBattleResultToExpedition(
+      state,
+      result,
+      request,
+      'b-0',
+      'enc',
+      'comb',
+      [],
+      [...matched, ...unmatched],
+      [],
+      [],
+      matched,
+      unmatched,
+    )
+
+    const summary = state.logs.find((l) => l.type === 'battleSummary')!
+    const matchedLine = summary.facts.find((f) =>
+      f.includes('一致した能力情報'),
+    )
+    const unmatchedLine = summary.facts.find((f) =>
+      f.includes('確認できなかった能力情報'),
+    )
+    expect(matchedLine).toContain('再生')
+    expect(unmatchedLine).toContain('飛行')
   })
 })
 
@@ -1786,6 +2041,8 @@ describe('Incapacitated adventurer handling', () => {
       state.battleEntrySnapshot.knownEnemyAbilities,
       [],
       [],
+      [],
+      [],
     )
 
     expect(state.casualties).toEqual([party[0].id])
@@ -1971,7 +2228,9 @@ describe('Battle seed handling', () => {
     expect(differentEnemies || differentOutcome).toBe(true)
   })
 
-  it('changing expedition events before battle does not change battle outcome when battle seed is fixed', () => {
+  it('changing expedition events before battle does not change enemy composition when battle seed is fixed', () => {
+    // 戦闘シードが固定するのは乱数系列。戦闘前のHP/MP/士気/状態異常/surprise/環境条件が異なれば、
+    // 同じcombatSeedでも戦闘結果は変わり得るが、敵編成は同一になる。
     const battle = battleConfig({ seed: 'fixed-battle-seed' })
     const requestA = makeRequest('pre-a', {
       battle,

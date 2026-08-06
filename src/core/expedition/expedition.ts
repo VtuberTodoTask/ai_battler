@@ -5,6 +5,7 @@ import type {
   AdventurerRole,
   BattleResult,
   Difficulty,
+  Enemy,
   SkillName,
   StatusEffect,
 } from '../models/types.ts'
@@ -1603,15 +1604,12 @@ function environmentEffectsToBattleContext(effects: EnvironmentEffect[]): {
 }
 
 function applyKnownEnemyWeaknesses(
-  enemies: {
-    species: string
-    weaknesses: { weaknessId: string; name: string; known: boolean }[]
-  }[],
+  enemies: Enemy[],
   knownWeaknesses: BattleIntel[],
   state: ExpeditionState,
   battleId: string,
-): { applied: BattleIntel[]; unmatched: BattleIntel[] } {
-  const applied: BattleIntel[] = []
+): { matched: BattleIntel[]; unmatched: BattleIntel[] } {
+  const matched: BattleIntel[] = []
   const unmatched: BattleIntel[] = []
 
   for (const intel of knownWeaknesses) {
@@ -1642,11 +1640,56 @@ function applyKnownEnemyWeaknesses(
         ),
       )
     } else {
-      applied.push(intel)
+      matched.push(intel)
     }
   }
 
-  return { applied, unmatched }
+  return { matched, unmatched }
+}
+
+function matchKnownEnemyAbilities(
+  enemies: Enemy[],
+  knownAbilities: BattleIntel[],
+  state: ExpeditionState,
+  battleId: string,
+): { matched: BattleIntel[]; unmatched: BattleIntel[] } {
+  const matched: BattleIntel[] = []
+  const unmatched: BattleIntel[] = []
+
+  for (const intel of knownAbilities) {
+    const found = enemies.some((enemy) => {
+      if (
+        intel.targetSpecies !== undefined &&
+        enemy.species !== intel.targetSpecies
+      ) {
+        return false
+      }
+
+      return enemy.abilities.some(
+        (ability) =>
+          ability.abilityId === intel.id || ability.name === intel.name,
+      )
+    })
+
+    if (found) {
+      matched.push(intel)
+    } else {
+      unmatched.push(intel)
+      addLog(
+        state,
+        logEntry(
+          'battle',
+          'diagnostic',
+          [],
+          [
+            `戦闘${battleId}: 能力「${intel.name}」は今回遭遇した敵編成では確認できなかった`,
+          ],
+        ),
+      )
+    }
+  }
+
+  return { matched, unmatched }
 }
 
 function convertBattleInjuries(
@@ -1695,8 +1738,10 @@ function applyBattleResultToExpedition(
   combatSeed: string,
   knownEnemyWeaknesses: BattleIntel[],
   knownEnemyAbilities: BattleIntel[],
-  appliedIntel: BattleIntel[],
-  unmatchedIntel: BattleIntel[],
+  matchedWeaknessIntel: BattleIntel[],
+  unmatchedWeaknessIntel: BattleIntel[],
+  matchedAbilityIntel: BattleIntel[],
+  unmatchedAbilityIntel: BattleIntel[],
 ): void {
   state.battleOutcome = result.outcome
 
@@ -1742,8 +1787,10 @@ function applyBattleResultToExpedition(
     deadAdventurerIds: result.deadAdventurers,
     knownEnemyWeaknesses,
     knownEnemyAbilities,
-    appliedIntel,
-    unmatchedIntel,
+    matchedWeaknessIntel,
+    unmatchedWeaknessIntel,
+    matchedAbilityIntel,
+    unmatchedAbilityIntel,
     discoveredWeaknesses: result.discoveredWeaknesses,
     injuries: expeditionInjuries,
     result,
@@ -1769,17 +1816,27 @@ function applyBattleResultToExpedition(
   }
   if (knownEnemyAbilities.length > 0) {
     facts.push(
-      `戦闘前に判明していた能力: ${knownEnemyAbilities.map((i) => i.name).join(', ')}`,
+      `戦闘前に得ていた能力情報: ${knownEnemyAbilities.map((i) => i.name).join(', ')}`,
     )
   }
-  if (appliedIntel.length > 0) {
+  if (matchedAbilityIntel.length > 0) {
     facts.push(
-      `戦闘前に判明していた弱点のうち、敵編成と一致: ${appliedIntel.map((i) => i.name).join(', ')}`,
+      `敵編成と一致した能力情報: ${matchedAbilityIntel.map((i) => i.name).join(', ')}`,
     )
   }
-  if (unmatchedIntel.length > 0) {
+  if (unmatchedAbilityIntel.length > 0) {
     facts.push(
-      `戦闘前に判明していた弱点のうち、敵編成と不一致: ${unmatchedIntel.map((i) => i.name).join(', ')}`,
+      `今回の敵編成では確認できなかった能力情報: ${unmatchedAbilityIntel.map((i) => i.name).join(', ')}`,
+    )
+  }
+  if (matchedWeaknessIntel.length > 0) {
+    facts.push(
+      `敵編成と一致した弱点情報: ${matchedWeaknessIntel.map((i) => i.name).join(', ')}`,
+    )
+  }
+  if (unmatchedWeaknessIntel.length > 0) {
+    facts.push(
+      `今回の敵編成では確認できなかった弱点情報: ${unmatchedWeaknessIntel.map((i) => i.name).join(', ')}`,
     )
   }
   addLog(
@@ -1817,10 +1874,18 @@ function runExpeditionBattle(
     bossAllowed: config?.bossAllowed,
   })
 
-  const { applied: appliedIntel, unmatched: unmatchedIntel } =
+  const { matched: matchedWeaknessIntel, unmatched: unmatchedWeaknessIntel } =
     applyKnownEnemyWeaknesses(
       enemies,
       entry.knownEnemyWeaknesses,
+      state,
+      battleId,
+    )
+
+  const { matched: matchedAbilityIntel, unmatched: unmatchedAbilityIntel } =
+    matchKnownEnemyAbilities(
+      enemies,
+      entry.knownEnemyAbilities,
       state,
       battleId,
     )
@@ -1849,8 +1914,10 @@ function runExpeditionBattle(
     combatSeed,
     entry.knownEnemyWeaknesses,
     entry.knownEnemyAbilities,
-    appliedIntel,
-    unmatchedIntel,
+    matchedWeaknessIntel,
+    unmatchedWeaknessIntel,
+    matchedAbilityIntel,
+    unmatchedAbilityIntel,
   )
 }
 
@@ -1864,6 +1931,7 @@ export const expeditionTestInternals = {
   buildBattleParty,
   environmentEffectsToBattleContext,
   applyKnownEnemyWeaknesses,
+  matchKnownEnemyAbilities,
   convertBattleInjuries,
   applyBattleResultToExpedition,
   runExpeditionBattle,
