@@ -378,6 +378,34 @@ function isFavorable(outcome: BattleOutcome): boolean {
   )
 }
 
+export function countRole(roles: readonly string[], role: string): number {
+  return roles.filter((r) => r === role).length
+}
+
+export function determineRolePresentSide(
+  base: readonly string[],
+  variant: readonly string[],
+  targetRole: string,
+): 'base' | 'variant' {
+  const baseCount = countRole(base, targetRole)
+  const variantCount = countRole(variant, targetRole)
+  if (baseCount > 0 && variantCount === 0) return 'base'
+  if (variantCount > 0 && baseCount === 0) return 'variant'
+  throw new Error(
+    `Role ${targetRole} must be in exactly one side: base=${baseCount}, variant=${variantCount}`,
+  )
+}
+
+export function calculateRoleContributionDelta(
+  rolePresentSide: 'base' | 'variant',
+  baseRate: number,
+  variantRate: number,
+): number {
+  return rolePresentSide === 'base'
+    ? baseRate - variantRate
+    : variantRate - baseRate
+}
+
 interface OverallResult {
   trials: number
   victories: number
@@ -939,10 +967,13 @@ interface SuitabilityMetrics {
   objectiveUtilityDelta: number
 }
 
-interface ExperimentResult {
+export interface ExperimentResult {
   role: string
   replacement: string
   condition: ConditionKey
+  rolePresentSide: 'base' | 'variant'
+  roleCountDelta: number
+  roleContributionDelta: number
   baseOverall: OverallResult
   variantOverall: OverallResult
   baseSpecific: SpecificMetrics
@@ -1014,8 +1045,21 @@ function runExperiment(
     `${CONFIG.baseSeed}-${role}-${replacement.name}-${condition}-bootstrap`,
   )
 
+  const rolePresentSide = determineRolePresentSide(
+    replacement.base,
+    replacement.variant,
+    role,
+  )
+  const roleCountDelta =
+    countRole(replacement.variant, role) - countRole(replacement.base, role)
+  const roleContributionDelta = calculateRoleContributionDelta(
+    rolePresentSide,
+    summary.baseRate,
+    summary.variantRate,
+  )
+
   const suitability: SuitabilityMetrics = {
-    combatOutcomeDelta: summary.diff,
+    combatOutcomeDelta: roleContributionDelta,
     contactSuccessDelta: variantS.contactSuccesses - baseS.contactSuccesses,
     informationGainDelta:
       variantS.weaknessDiscoveries - baseS.weaknessDiscoveries,
@@ -1028,6 +1072,9 @@ function runExperiment(
     role,
     replacement: replacement.name,
     condition,
+    rolePresentSide,
+    roleCountDelta,
+    roleContributionDelta,
     baseOverall: baseO,
     variantOverall: variantO,
     baseSpecific: baseS,
@@ -1127,15 +1174,11 @@ function roleSpecificColumns(role: string): string[] {
   }
 }
 
-function roleSpecificMetrics(exp: ExperimentResult): SpecificMetrics {
-  // In the current experiment design, the role being evaluated is present in
-  // base for healer/support/guardian, and in variant for ranger/scout.
-  return ['healer', 'support', 'guardian'].includes(exp.role)
-    ? exp.baseSpecific
-    : exp.variantSpecific
+export function roleSpecificMetrics(exp: ExperimentResult): SpecificMetrics {
+  return exp.rolePresentSide === 'base' ? exp.baseSpecific : exp.variantSpecific
 }
 
-function specificValue(exp: ExperimentResult, key: string): string {
+export function specificValue(exp: ExperimentResult, key: string): string {
   const { role, baseSpecific: base, variantSpecific: variant } = exp
   const roleM = roleSpecificMetrics(exp)
 
@@ -1172,26 +1215,23 @@ function specificValue(exp: ExperimentResult, key: string): string {
     return fmt(a - c)
   }
   if (key === 'retreatChanceReduction') {
-    return fmt(baseRetreatRate - variantRetreatRate)
+    const delta = baseRetreatRate - variantRetreatRate
+    return role === 'support'
+      ? `${fmt(delta)} (パーティ全体値・Support帰属不能)`
+      : fmt(delta)
   }
-  if (key === 'favorableRateDelta') return fmt(exp.summary.diff)
+  if (key === 'favorableRateDelta') return fmt(exp.roleContributionDelta)
 
   // absolute metrics from the side that actually contains the evaluated role
   if (key === 'actualDamagePrevented') {
-    const byRole =
-      role === 'guardian'
-        ? roleM.actualDamagePreventedByGuardian
-        : role === 'support'
-          ? roleM.actualDamagePreventedBySupport
-          : roleM.actualDamagePrevented
-    return fmt(byRole)
+    if (role === 'guardian') return fmt(roleM.actualDamagePreventedByGuardian)
+    if (role === 'support') return fmt(roleM.actualDamagePreventedBySupport)
+    return fmt(roleM.actualDamagePrevented)
   }
   if (key === 'preventedIncapacitations') {
-    const byRole =
-      role === 'guardian'
-        ? roleM.preventedIncapacitationsByGuardian
-        : roleM.preventedIncapacitations
-    return fmt(byRole)
+    if (role === 'guardian')
+      return fmt(roleM.preventedIncapacitationsByGuardian)
+    return fmt(roleM.preventedIncapacitations)
   }
   if (key === 'redirectedAttackCount') return '0 (未実装)'
   if (key === 'healerMpSavedEstimate') return '0 (未実装)'
@@ -1207,9 +1247,14 @@ function specificValue(exp: ExperimentResult, key: string): string {
   if (key === 'moraleGained') return fmt(roleM.moraleGained)
   if (key === 'moraleLossPrevented') return '0 (未実装)'
   if (key === 'retreatProposalPrevented') return '0 (未実装)'
-  if (key === 'leaderTargetFollowCount')
-    return fmt(roleM.leaderTargetFollowCount)
-  if (key === 'focusFireContribution') return fmt(roleM.focusFireContribution)
+  if (key === 'leaderTargetFollowCount') {
+    const v = fmt(roleM.leaderTargetFollowCount)
+    return role === 'support' ? `${v} (パーティ全体値・Support帰属不能)` : v
+  }
+  if (key === 'focusFireContribution') {
+    const v = fmt(roleM.focusFireContribution)
+    return role === 'support' ? `${v} (パーティ全体値・Support帰属不能)` : v
+  }
   if (key === 'initiativeContribution') return '0 (未実装)'
   if (key === 'healAmount') return fmt(roleM.healAmount)
   if (key === 'statusCured') return fmt(roleM.statusCured)
@@ -1248,19 +1293,25 @@ function generateReport(results: ExperimentResult[]): string {
   lines.push(`OK: 同一編成を base/variant へ 1000 試行、不一致 0。`)
   lines.push('')
 
+  lines.push('### 注記：天井効果')
+  lines.push('')
+  lines.push('条件別実験の多くは基準有利率が高く、天井効果が存在する。')
+  lines.push('ロール分類は暫定評価であり、絶対的な強弱を示さない。')
+  lines.push('今回は遭遇難易度を変更して再測定していない。')
+  lines.push('')
   lines.push('## 2. 現行モデルの空白（未実装機能）')
   lines.push('')
   const blanks = [
     '冒険者側の状態異常付与',
     '敵行動妨害',
-    'supportによる命中支援',
-    'supportによる集中攻撃',
-    'supportによる行動順操作',
-    'scoutによる罠回避',
-    'scoutによる敵数事前把握',
-    'rangerによる飛行阻害',
-    'guardianによる攻撃肩代わり',
-    '実際の防護ダメージ軽減量',
+    'Guardianによる攻撃肩代わり',
+    'healer MP節約量の直接計測',
+    'Supportによる命中支援',
+    'Supportによる行動順操作',
+    'Support由来と証明できる集中攻撃効果',
+    'Scoutによる罠回避',
+    'Scoutによる敵数事前把握',
+    'Rangerによる飛行阻害',
   ]
   for (const b of blanks) lines.push(`- ${b}: 0 として記録`)
   lines.push('')
@@ -1288,8 +1339,11 @@ function generateReport(results: ExperimentResult[]): string {
       '置換',
       'base有利率',
       'variant有利率',
-      '差分',
+      'raw差分 (variant-base)',
       '95%CI',
+      '対象ロール存在側',
+      'ロール数差 (variant-base)',
+      'ロール寄与差 (roleあり - roleなし)',
     ]
     const specificCols = roleSpecificColumns(role)
     lines.push(`| ${headerCols.concat(specificCols).join(' | ')} |`)
@@ -1315,6 +1369,11 @@ function generateReport(results: ExperimentResult[]): string {
           fmt(s.variantRate),
           fmt(s.diff),
           `${s.ci.lower.toFixed(3)} ~ ${s.ci.upper.toFixed(3)}`,
+          exp.rolePresentSide,
+          `${exp.roleCountDelta >= 0 ? '+' : ''}${exp.roleCountDelta}`,
+          `${exp.roleContributionDelta >= 0 ? '+' : ''}${fmt(
+            exp.roleContributionDelta,
+          )}`,
         ]
         for (const col of specificCols) {
           if (col === 'favorableRateDelta') {
@@ -1356,7 +1415,7 @@ function generateReport(results: ExperimentResult[]): string {
     lines.push('')
 
     if (role === 'guardian') {
-      lines.push('**Guardian 追加ログ指標（variant 平均）**')
+      lines.push('**Guardian 追加ログ指標（Guardian存在側）**')
       lines.push('')
       lines.push(
         '| 条件 | actualDamagePrevented | redirectedAttackCount | preventedIncapacitation | healerMpSavedEstimate | guardTargetRoleCounts |',
@@ -1368,14 +1427,17 @@ function generateReport(results: ExperimentResult[]): string {
             r.condition === condition && r.replacement === replacements[0].name,
         )
         if (!exp) continue
-        const v = exp.variantSpecific
+        const roleSide =
+          exp.rolePresentSide === 'base'
+            ? exp.baseSpecific
+            : exp.variantSpecific
         lines.push(
           `| ${getFocusConditionName(condition)} | ${fmt(
-            v.actualDamagePreventedByGuardian,
+            roleSide.actualDamagePreventedByGuardian,
           )} | 0 (未実装) | ${fmt(
-            v.preventedIncapacitationsByGuardian,
+            roleSide.preventedIncapacitationsByGuardian,
           )} | 0 (未実装) | ${formatGuardTargetCounts(
-            v.guardTargetRoleCountsByGuardian,
+            roleSide.guardTargetRoleCountsByGuardian,
           )} |`,
         )
       }
@@ -1383,27 +1445,37 @@ function generateReport(results: ExperimentResult[]): string {
     }
 
     if (role === 'support') {
-      lines.push('**Support 追加ログ指標（variant 平均）**')
+      lines.push('**Support 追加ログ指標（Support存在側）**')
       lines.push('')
       lines.push(
-        '| 条件 | moraleLossPrevented | retreatProposalPrevented | retreatChanceReduction | leaderTargetFollowCount | focusFireContribution | initiativeContribution |',
+        '| 条件 | moraleGained | actualDamagePreventedBySupport | moraleLossPrevented | retreatProposalPrevented | initiativeContribution | retreatChanceReduction | leaderTargetFollowCount | focusFireContribution |',
       )
-      lines.push('| --- | --- | --- | --- | --- | --- | --- |')
+      lines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- |')
       for (const condition of focusConditions) {
         const exp = roleRes.find(
           (r) =>
             r.condition === condition && r.replacement === replacements[0].name,
         )
         if (!exp) continue
-        const v = exp.variantSpecific
+        const roleSide =
+          exp.rolePresentSide === 'base'
+            ? exp.baseSpecific
+            : exp.variantSpecific
         const baseRate = exp.baseOverall.retreats / CONFIG.trials
         const variantRate = exp.variantOverall.retreats / CONFIG.trials
+        const retreatChanceReduction = baseRate - variantRate
         lines.push(
-          `| ${getFocusConditionName(condition)} | 0 (未実装) | 0 (未実装) | ${fmt(
-            baseRate - variantRate,
-          )} | ${fmt(v.leaderTargetFollowCount)} | ${fmt(
-            v.focusFireContribution,
-          )} | 0 (未実装) |`,
+          `| ${getFocusConditionName(condition)} | ${fmt(
+            roleSide.moraleGained,
+          )} | ${fmt(
+            roleSide.actualDamagePreventedBySupport,
+          )} | 0 (未実装) | 0 (未実装) | 0 (未実装) | ${fmt(
+            retreatChanceReduction,
+          )} (パーティ全体値・Support帰属不能) | ${fmt(
+            roleSide.leaderTargetFollowCount,
+          )} (パーティ全体値・Support帰属不能) | ${fmt(
+            roleSide.focusFireContribution,
+          )} (パーティ全体値・Support帰属不能) |`,
         )
       }
       lines.push('')
@@ -1417,27 +1489,35 @@ function generateReport(results: ExperimentResult[]): string {
   for (const { role } of ROLE_EXPERIMENTS) {
     const roleRes = roleResults.get(role) ?? []
     // Use all experiments for this role, not just the primary replacement.
-    // diff = variantFav - baseFav; negative means the party WITH the role wins more.
     const threshold = 0.02
-    const beneficial = roleRes.filter((r) => r.summary.diff < -threshold).length
-    const harmful = roleRes.filter((r) => r.summary.diff > threshold).length
+    const deltas = roleRes.map((r) => r.roleContributionDelta)
     const total = roleRes.length
-    const classification =
-      total === 0
-        ? 'D. 本来の役割を表す機能が未実装'
-        : beneficial >= Math.ceil(total / 2)
-          ? 'A. 現行機能で有効'
-          : beneficial > 0 && harmful <= beneficial
-            ? 'B. 特定条件でのみ有効'
-            : harmful > 0 &&
-                beneficial > 0 &&
-                Math.abs(harmful - beneficial) <= 1
-              ? 'E. 他ロールと役割が重複'
-              : harmful > 0
-                ? 'C. 機能は動作しているが効果不足'
-                : 'D. 本来の役割を表す機能が未実装'
+    const mean = total > 0 ? deltas.reduce((a, b) => a + b, 0) / total : 0
+    const beneficial = deltas.filter((d) => d > threshold).length
+    const harmful = deltas.filter((d) => d < -threshold).length
+    const neutral = total - beneficial - harmful
+    let classification: string
+    if (total === 0 || (beneficial === 0 && harmful === 0)) {
+      classification = 'D. 本来の役割を表す機能が未実装'
+    } else if (mean > 0.03 && beneficial >= harmful) {
+      classification = 'A. 現行機能で有効'
+    } else if (mean > 0 && beneficial > 0) {
+      classification = 'B. 特定条件でのみ有効'
+    } else if (mean < -0.02 && harmful > 0) {
+      classification = 'C. 機能は動作しているが効果不足'
+    } else if (
+      harmful > 0 &&
+      beneficial > 0 &&
+      Math.abs(harmful - beneficial) <= 1
+    ) {
+      classification = 'E. 他ロールと役割が重複'
+    } else if (harmful > beneficial) {
+      classification = 'C. 機能は動作しているが効果不足'
+    } else {
+      classification = 'D. 本来の役割を表す機能が未実装'
+    }
     lines.push(
-      `| ${role} | ${classification} | 全置換の有利条件 ${beneficial}/${total}（有害 ${harmful}） |`,
+      `| ${role} | ${classification} | 全置換のロール寄与正 ${beneficial}/${total}（寄与負 ${harmful}, 中立 ${neutral}） |`,
     )
   }
   lines.push('')
@@ -1479,4 +1559,6 @@ function main(): void {
   console.log(`Report written to ${reportPath}`)
 }
 
-main()
+if (process.argv[1]?.endsWith('phase2-2-role-conditions.ts')) {
+  main()
+}
