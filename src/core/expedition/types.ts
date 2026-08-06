@@ -136,6 +136,23 @@ export interface ExpeditionInjury {
   sourceId?: string
 }
 
+export interface InvestigationObjectiveState {
+  type: 'investigation'
+}
+
+export interface EliminationObjectiveState {
+  type: 'elimination'
+  mode: 'allEnemies'
+  confirmationRequired: boolean
+  requiredTargetIds: string[]
+  defeatedTargetIds: string[]
+  escapedTargetIds: string[]
+  survivingTargetIds: string[]
+  confirmedTargetIds: string[]
+  progress: number
+  completed: boolean
+}
+
 export interface ExpeditionState {
   currentPhase: ExpeditionPhase
   elapsedTime: number
@@ -160,6 +177,7 @@ export interface ExpeditionState {
   battleEntrySnapshot?: BattleEntryConditions
   battles: ExpeditionBattleRecord[]
   battleOutcome?: BattleOutcome
+  objectiveState?: InvestigationObjectiveState | EliminationObjectiveState
   metadata?: Record<string, unknown>
 }
 
@@ -171,6 +189,11 @@ export interface ExpeditionBattleConfig {
   allowedSpecies?: EnemySpecies[]
   bossAllowed?: boolean
   recommendedPartySize?: number
+}
+
+export interface EliminationObjectiveConfig {
+  mode: 'allEnemies'
+  confirmationRequired: boolean
 }
 
 export interface ExpeditionRequest {
@@ -187,6 +210,7 @@ export interface ExpeditionRequest {
   hiddenInformation: HiddenInformation[]
   encounter?: { shape: EncounterShape; count: number } | EncounterPlan
   battle?: ExpeditionBattleConfig
+  elimination?: EliminationObjectiveConfig
 }
 
 export interface EnvironmentEffect {

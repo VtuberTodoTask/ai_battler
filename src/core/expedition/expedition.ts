@@ -18,6 +18,7 @@ import type {
   BattleIntel,
   CheckResult,
   DiscoveredInformation,
+  EliminationObjectiveState,
   EnvironmentEffect,
   ExpeditionBattleRecord,
   ExpeditionEffect,
@@ -145,6 +146,22 @@ export function initializeExpeditionState(
     partyStatusEffects[a.id] = deepClone(a.statusEffects)
   }
 
+  const objectiveState: EliminationObjectiveState | undefined =
+    request.objectiveType === 'elimination' && request.elimination
+      ? {
+          type: 'elimination',
+          mode: request.elimination.mode,
+          confirmationRequired: request.elimination.confirmationRequired,
+          requiredTargetIds: [],
+          defeatedTargetIds: [],
+          escapedTargetIds: [],
+          survivingTargetIds: [],
+          confirmedTargetIds: [],
+          progress: 0,
+          completed: false,
+        }
+      : undefined
+
   return {
     currentPhase: 'preparation',
     elapsedTime: 0,
@@ -170,6 +187,7 @@ export function initializeExpeditionState(
     avoidedThreats: [],
     logs: [],
     battles: [],
+    objectiveState,
     metadata: {
       preparationRouteBonus: 0,
       approachTimeBonus: 0,
@@ -678,6 +696,44 @@ function objectiveProgressFact(progress: number): string {
   if (progress < 60) return '依頼目的を部分的に達成した'
   if (progress < 100) return '最低限の目的を達成した'
   return '依頼目的を完全に達成した'
+}
+
+function eliminationProgressFact(
+  objectiveState: EliminationObjectiveState,
+): string {
+  const {
+    requiredTargetIds,
+    defeatedTargetIds,
+    escapedTargetIds,
+    survivingTargetIds,
+    confirmedTargetIds,
+    progress,
+    completed,
+  } = objectiveState
+  const parts: string[] = [
+    `討伐対象として${requiredTargetIds.length}体が指定された`,
+    `戦闘で${defeatedTargetIds.length}体を撃破した`,
+  ]
+  if (escapedTargetIds.length > 0) {
+    parts.push(`${escapedTargetIds.length}体が逃亡した`)
+  }
+  if (survivingTargetIds.length > 0) {
+    parts.push(`${survivingTargetIds.length}体が生存している`)
+  }
+  parts.push(`討伐進捗は${progress}%となった`)
+  if (confirmedTargetIds.length > 0) {
+    parts.push(
+      `撃破した${defeatedTargetIds.length}体のうち${confirmedTargetIds.length}体の討伐を確認した`,
+    )
+  }
+  if (completed) {
+    parts.push('全対象の討伐を確認した')
+  } else if (defeatedTargetIds.length === requiredTargetIds.length) {
+    parts.push('全対象を撃破したが討伐確認が未完了のため依頼目的は未完了')
+  } else {
+    parts.push('討伐対象が残っているため依頼目的は未完了')
+  }
+  return parts.join('。')
 }
 
 function setObjectiveCompletedFromProgress(state: ExpeditionState): void {
@@ -1353,8 +1409,13 @@ function runAftermath(
     effects.push({ type: 'moraleChange', value: -10 })
   }
 
-  setObjectiveCompletedFromProgress(state)
-  facts.push(objectiveProgressFact(state.objectiveProgress))
+  if (state.objectiveState && state.objectiveState.type === 'elimination') {
+    state.objectiveCompleted = state.objectiveState.completed
+    facts.push(eliminationProgressFact(state.objectiveState))
+  } else {
+    setObjectiveCompletedFromProgress(state)
+    facts.push(objectiveProgressFact(state.objectiveProgress))
+  }
 
   const moraleDelta =
     state.objectiveProgress >= 100
@@ -1492,7 +1553,7 @@ function buildBattleEntrySnapshot(
   }
 }
 
-function determineOutcome(
+function determineInvestigationOutcome(
   request: ExpeditionRequest,
   state: ExpeditionState,
   party: Adventurer[],
@@ -1556,6 +1617,80 @@ function determineOutcome(
   }
 
   return outcome
+}
+
+function determineEliminationOutcome(
+  request: ExpeditionRequest,
+  state: ExpeditionState,
+  party: Adventurer[],
+): ExpeditionOutcome {
+  const avgMorale = averagePartyMorale(state)
+  const timeExceeded =
+    request.timeLimit !== undefined && state.elapsedTime > request.timeLimit
+  const noSupplies = state.supplies.food <= 0
+  const unresolvedSerious = state.injuries.filter(
+    isUnresolvedSeriousInjury,
+  ).length
+  const allCasualties = state.casualties.length === party.length
+  const activeCount = getActiveParty(party, state).length
+  const allIncapacitated =
+    !allCasualties &&
+    activeCount === 0 &&
+    getNonDeadParty(party, state).length > 0
+
+  if (allCasualties || allIncapacitated) {
+    return 'lostExpedition'
+  }
+
+  const obj = state.objectiveState
+  if (obj === undefined || obj.type !== 'elimination') {
+    throw new Error(
+      'determineEliminationOutcome called without elimination objectiveState',
+    )
+  }
+
+  const { requiredTargetIds, defeatedTargetIds, confirmedTargetIds, progress } =
+    obj
+  const allDefeated = defeatedTargetIds.length === requiredTargetIds.length
+  const allConfirmed = confirmedTargetIds.length === requiredTargetIds.length
+  const hasCasualties = state.casualties.length > 0
+  const majorDamage = hasCasualties || unresolvedSerious > 0
+  const returnIssues = timeExceeded || noSupplies || avgMorale < 40
+
+  if (allDefeated && !allConfirmed) {
+    return 'failedObjective'
+  }
+
+  if (allDefeated && allConfirmed) {
+    if (!majorDamage && !returnIssues) {
+      return 'completeSuccess'
+    }
+    return 'success'
+  }
+
+  const forcedBattleRetreat =
+    state.battleOutcome === 'retreat' ||
+    state.battleOutcome === 'stalemate' ||
+    state.battleOutcome === 'defeat'
+
+  if (progress >= 40) {
+    return 'partialSuccess'
+  }
+  if (forcedBattleRetreat) {
+    return 'forcedRetreat'
+  }
+  return 'failedObjective'
+}
+
+function determineOutcome(
+  request: ExpeditionRequest,
+  state: ExpeditionState,
+  party: Adventurer[],
+): ExpeditionOutcome {
+  if (request.objectiveType === 'elimination') {
+    return determineEliminationOutcome(request, state, party)
+  }
+  return determineInvestigationOutcome(request, state, party)
 }
 
 function buildBattleParty(
@@ -1690,6 +1825,260 @@ function matchKnownEnemyAbilities(
   }
 
   return { matched, unmatched }
+}
+
+function resolveEliminationTargets(
+  state: ExpeditionState,
+  result: BattleResult,
+  request: ExpeditionRequest,
+  battleId: string,
+): void {
+  const obj = state.objectiveState
+  if (obj === undefined || obj.type !== 'elimination') return
+
+  const requiredTargetIds = obj.requiredTargetIds
+  if (requiredTargetIds.length === 0) {
+    addLog(
+      state,
+      logEntry(
+        'battle',
+        'diagnostic',
+        [],
+        [`戦闘${battleId}: 討伐対象IDが設定されていない`],
+      ),
+    )
+    return
+  }
+
+  const defeated = new Set(result.defeatedEnemies)
+  const surviving = new Set(result.survivingEnemies)
+  const escaped = new Set(result.escapedEnemies)
+
+  const defeatedTargetIds: string[] = []
+  const escapedTargetIds: string[] = []
+  const survivingTargetIds: string[] = []
+  const unknownTargetIds: string[] = []
+
+  for (const id of requiredTargetIds) {
+    if (defeated.has(id)) {
+      defeatedTargetIds.push(id)
+    } else if (escaped.has(id)) {
+      escapedTargetIds.push(id)
+    } else if (surviving.has(id)) {
+      survivingTargetIds.push(id)
+    } else {
+      unknownTargetIds.push(id)
+    }
+  }
+
+  if (unknownTargetIds.length > 0) {
+    addLog(
+      state,
+      logEntry(
+        'battle',
+        'diagnostic',
+        [],
+        [
+          `戦闘${battleId}: 討伐対象 ${unknownTargetIds.join(', ')} の最終状態が不明`,
+        ],
+      ),
+    )
+  }
+
+  const confirmationRequired =
+    request.elimination?.confirmationRequired ?? false
+  const confirmedTargetIds = confirmationRequired ? [] : [...defeatedTargetIds]
+  const progress = clamp(
+    Math.round((defeatedTargetIds.length / requiredTargetIds.length) * 100),
+    0,
+    100,
+  )
+  const completed = confirmationRequired
+    ? false
+    : defeatedTargetIds.length === requiredTargetIds.length
+
+  const requiredSet = new Set(requiredTargetIds)
+  const confirmedUnique = confirmedTargetIds.filter((id) => requiredSet.has(id))
+
+  obj.defeatedTargetIds = defeatedTargetIds
+  obj.escapedTargetIds = escapedTargetIds
+  obj.survivingTargetIds = survivingTargetIds
+  obj.confirmedTargetIds = confirmedUnique
+  obj.progress = progress
+  obj.completed = completed
+
+  state.objectiveProgress = progress
+  state.objectiveCompleted = completed
+
+  addLog(
+    state,
+    logEntry(
+      'battle',
+      'eliminationTargetsAssigned',
+      [],
+      [
+        `討伐対象として${requiredTargetIds.length}体が指定された`,
+        `戦闘で${defeatedTargetIds.length}体を撃破した`,
+        ...(escapedTargetIds.length > 0
+          ? [`${escapedTargetIds.length}体が逃亡した`]
+          : []),
+        ...(survivingTargetIds.length > 0
+          ? [`${survivingTargetIds.length}体が生存している`]
+          : []),
+        `討伐進捗は${progress}%となった`,
+      ],
+      [
+        {
+          type: 'eliminationTargets',
+          value: requiredTargetIds.length,
+        },
+        {
+          type: 'eliminationDefeated',
+          value: defeatedTargetIds.length,
+        },
+        {
+          type: 'eliminationEscaped',
+          value: escapedTargetIds.length,
+        },
+        {
+          type: 'eliminationSurviving',
+          value: survivingTargetIds.length,
+        },
+        {
+          type: 'eliminationProgress',
+          value: progress,
+        },
+      ],
+    ),
+  )
+}
+
+function runEliminationObjective(
+  request: ExpeditionRequest,
+  party: Adventurer[],
+  state: ExpeditionState,
+  rng: SeededRng,
+): void {
+  state.currentPhase = 'objective'
+
+  const obj = state.objectiveState
+  if (obj === undefined || obj.type !== 'elimination') {
+    return
+  }
+
+  const { defeatedTargetIds, requiredTargetIds, confirmationRequired } = obj
+
+  if (!confirmationRequired) {
+    obj.confirmedTargetIds = [...defeatedTargetIds]
+    obj.completed =
+      defeatedTargetIds.length === requiredTargetIds.length &&
+      obj.confirmedTargetIds.length === requiredTargetIds.length
+    state.objectiveCompleted = obj.completed
+    addLog(
+      state,
+      logEntry(
+        'objective',
+        'eliminationConfirmation',
+        [],
+        [
+          `撃破した${defeatedTargetIds.length}体の討伐を確認した`,
+          eliminationProgressFact(obj),
+        ],
+        [
+          {
+            type: 'eliminationConfirmed',
+            value: obj.confirmedTargetIds.length,
+          },
+          {
+            type: 'eliminationCompleted',
+            value: obj.completed ? 1 : 0,
+          },
+        ],
+      ),
+    )
+    return
+  }
+
+  const confirmationSkill: SkillName =
+    request.environment === 'magical' || request.environment === 'ruins'
+      ? 'monsterKnowledge'
+      : request.environment === 'mountain' || request.environment === 'desert'
+        ? 'survival'
+        : 'scouting'
+  const preferredRole: AdventurerRole | undefined =
+    confirmationSkill === 'monsterKnowledge'
+      ? 'mage'
+      : confirmationSkill === 'scouting'
+        ? 'scout'
+        : 'ranger'
+  const rankPenalty = rankPenaltyForRequest(request)
+
+  const { result, primary, assistants, effectiveValue, roll } =
+    resolveSkillCheck(
+      rng,
+      party,
+      state,
+      'objective',
+      confirmationSkill,
+      preferredRole,
+      10,
+      rankPenalty,
+    )
+
+  const facts: string[] = []
+  const effects: ExpeditionEffect[] = []
+
+  if (result === 'criticalSuccess' || result === 'success') {
+    obj.confirmedTargetIds = [...defeatedTargetIds]
+    facts.push(`撃破した${defeatedTargetIds.length}体の討伐を確認した`)
+  } else if (result === 'partialSuccess') {
+    const confirmCount = Math.max(1, Math.ceil(defeatedTargetIds.length / 2))
+    obj.confirmedTargetIds = defeatedTargetIds.slice(0, confirmCount)
+    facts.push(
+      `撃破した${defeatedTargetIds.length}体のうち${confirmCount}体の討伐を確認した`,
+    )
+  } else if (result === 'failure') {
+    obj.confirmedTargetIds = []
+    facts.push('討伐確認に失敗した')
+  } else {
+    obj.confirmedTargetIds = []
+    facts.push('討伐証明品を紛失・誤認した')
+  }
+
+  obj.completed =
+    defeatedTargetIds.length === requiredTargetIds.length &&
+    obj.confirmedTargetIds.length === requiredTargetIds.length
+  state.objectiveCompleted = obj.completed
+
+  effects.push(
+    {
+      type: 'eliminationConfirmed',
+      value: obj.confirmedTargetIds.length,
+    },
+    {
+      type: 'eliminationCompleted',
+      value: obj.completed ? 1 : 0,
+    },
+  )
+
+  facts.push(eliminationProgressFact(obj))
+
+  addLog(
+    state,
+    logEntry(
+      'objective',
+      'eliminationConfirmation',
+      [primary.id, ...assistants.map((a) => a.id)],
+      facts,
+      effects,
+      {
+        skill: confirmationSkill,
+        effectiveValue,
+        roll,
+        result,
+      },
+    ),
+  )
 }
 
 function convertBattleInjuries(
@@ -1874,6 +2263,10 @@ function runExpeditionBattle(
     bossAllowed: config?.bossAllowed,
   })
 
+  if (state.objectiveState && state.objectiveState.type === 'elimination') {
+    state.objectiveState.requiredTargetIds = enemies.map((enemy) => enemy.id)
+  }
+
   const { matched: matchedWeaknessIntel, unmatched: unmatchedWeaknessIntel } =
     applyKnownEnemyWeaknesses(
       enemies,
@@ -1919,6 +2312,8 @@ function runExpeditionBattle(
     matchedAbilityIntel,
     unmatchedAbilityIntel,
   )
+
+  resolveEliminationTargets(state, result, request, battleId)
 }
 
 export const expeditionTestInternals = {
@@ -1938,18 +2333,14 @@ export const expeditionTestInternals = {
   buildBattleEntrySnapshot,
   resolveSkillCheck,
   treatMember,
+  resolveEliminationTargets,
+  runEliminationObjective,
 }
 
-export function runExpedition(
+function runInvestigationExpedition(
   request: ExpeditionRequest,
   party: Adventurer[],
 ): ExpeditionResult {
-  if (request.objectiveType !== 'investigation') {
-    throw new Error(
-      `Unsupported objectiveType in Phase 3.0: ${request.objectiveType}`,
-    )
-  }
-
   const rng = new SeededRng(request.seed)
   const state = initializeExpeditionState(request, party)
   state.metadata = {
@@ -2013,4 +2404,95 @@ export function runExpedition(
   const outcome = determineOutcome(request, state, party)
 
   return { request, outcome, state, party }
+}
+
+function runEliminationExpedition(
+  request: ExpeditionRequest,
+  party: Adventurer[],
+): ExpeditionResult {
+  if (request.elimination === undefined) {
+    throw new Error('Elimination request requires elimination configuration')
+  }
+  if (request.battle === undefined) {
+    throw new Error('Elimination request requires battle configuration')
+  }
+  if (!request.battle.enabled) {
+    throw new Error('Elimination request requires battle.enabled === true')
+  }
+
+  const rng = new SeededRng(request.seed)
+  const state = initializeExpeditionState(request, party)
+  state.metadata = {
+    difficulty: request.difficulty,
+    requestFeatures: request.features,
+    threatFeatures: request.features,
+    ...state.metadata,
+  }
+
+  runPreparation(request, party, state, rng)
+  runApproach(request, party, state, rng)
+  runExploration(request, party, state, rng)
+
+  state.battleEntrySnapshot = buildBattleEntrySnapshot(request, party, state)
+
+  if (getActiveParty(party, state).length > 0) {
+    runExpeditionBattle(request, party, state)
+  }
+
+  if (getActiveParty(party, state).length === 0) {
+    state.currentPhase = 'aftermath'
+    return {
+      request,
+      outcome: determineOutcome(request, state, party),
+      state,
+      party,
+    }
+  }
+
+  const shouldSkipObjective =
+    state.battleOutcome === 'retreat' ||
+    state.battleOutcome === 'stalemate' ||
+    state.battleOutcome === 'defeat' ||
+    state.battleOutcome === 'totalLoss'
+
+  if (!shouldSkipObjective) {
+    runEliminationObjective(request, party, state, rng)
+  }
+
+  if (getActiveParty(party, state).length === 0) {
+    state.currentPhase = 'aftermath'
+    return {
+      request,
+      outcome: determineOutcome(request, state, party),
+      state,
+      party,
+    }
+  }
+
+  runReturn(request, party, state, rng)
+  runAftermath(request, party, state, rng)
+
+  state.currentPhase = 'aftermath'
+
+  const outcome = determineOutcome(request, state, party)
+
+  return { request, outcome, state, party }
+}
+
+export function runExpedition(
+  request: ExpeditionRequest,
+  party: Adventurer[],
+): ExpeditionResult {
+  switch (request.objectiveType) {
+    case 'investigation':
+      return runInvestigationExpedition(request, party)
+
+    case 'elimination':
+      return runEliminationExpedition(request, party)
+
+    default:
+      throw new Error(
+        `Unsupported objectiveType in Phase 3.2: ${request.objectiveType}`,
+      )
+  }
 }

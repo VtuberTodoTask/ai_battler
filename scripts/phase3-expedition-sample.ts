@@ -1,7 +1,4 @@
-import {
-  isUnresolvedSeriousInjury,
-  runExpedition,
-} from '../src/core/expedition/expedition.ts'
+import { runExpedition } from '../src/core/expedition/expedition.ts'
 import type { ExpeditionRequest } from '../src/core/expedition/types.ts'
 import { generateAdventurer } from '../src/core/generators/adventurerGenerator.ts'
 import type {
@@ -12,53 +9,9 @@ import type {
 } from '../src/core/models/types.ts'
 import { writeFileSync } from 'node:fs'
 
-function makeRequest(
-  seed: string,
-  rank: AdventurerRank = 'D',
-): ExpeditionRequest {
-  return {
-    id: `phase3-1-${seed}`,
-    seed,
-    rank,
-    difficulty: 'normal',
-    objectiveType: 'investigation',
-    environment: 'forest',
-    distance: 3,
-    features: ['traps', 'poorVisibility'],
-    knownInformation: [],
-    hiddenInformation: [
-      {
-        id: 'info-1',
-        name: '敵の痕跡',
-        description: '敵が近くにいる証拠',
-        difficulty: 5,
-      },
-      {
-        id: 'info-2',
-        name: '古い地図',
-        description: '遺跡の配置がわかる',
-        difficulty: 15,
-        requiredSkill: 'scouting',
-      },
-      {
-        id: 'info-3',
-        name: '魔力の残滓',
-        description: '魔法の気配',
-        difficulty: 20,
-        requiredSkill: 'monsterKnowledge',
-      },
-    ],
-    battle: {
-      enabled: true,
-      seed: `${seed}:battle:0`,
-      triggerPhase: 'afterExploration',
-    },
-  }
-}
+const ROLES: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer']
 
-const ROLES: AdventurerRole[] = ['scout', 'ranger', 'mage', 'healer']
-
-function makeParty(seedBase: string, rank: AdventurerRank = 'D'): Adventurer[] {
+function makeParty(seedBase: string, rank: AdventurerRank): Adventurer[] {
   return ROLES.map((role, i) =>
     generateAdventurer({
       seed: `${seedBase}-${role}-${i}`,
@@ -66,6 +19,32 @@ function makeParty(seedBase: string, rank: AdventurerRank = 'D'): Adventurer[] {
       role,
     }),
   )
+}
+
+function makeRequest(
+  seed: string,
+  rank: AdventurerRank,
+  confirmationRequired: boolean,
+): ExpeditionRequest {
+  return {
+    id: `phase3-2-${seed}`,
+    seed,
+    rank,
+    difficulty: 'normal',
+    objectiveType: 'elimination',
+    environment: 'forest',
+    distance: 3,
+    features: ['traps', 'poorVisibility'],
+    knownInformation: [],
+    hiddenInformation: [],
+    battle: {
+      enabled: true,
+      seed: `${seed}:battle:0`,
+      triggerPhase: 'afterExploration',
+      shape: 'standard',
+    },
+    elimination: { mode: 'allEnemies', confirmationRequired },
+  }
 }
 
 function formatStatus(effects: StatusEffect[]): string {
@@ -91,14 +70,16 @@ function formatMemberSnapshots(
 
 function summarizeScenario(
   title: string,
+  rank: AdventurerRank,
   party: Adventurer[],
   result: ReturnType<typeof runExpedition>,
 ): string {
   const { outcome, state } = result
   const record = state.battles[0]
-  const unresolvedSerious = state.injuries.filter(
-    isUnresolvedSeriousInjury,
-  ).length
+  const obj =
+    state.objectiveState?.type === 'elimination'
+      ? state.objectiveState
+      : undefined
 
   const beforeHp = Object.fromEntries(party.map((a) => [a.id, a.currentHp]))
   const beforeMp = Object.fromEntries(party.map((a) => [a.id, a.currentMp]))
@@ -116,53 +97,7 @@ function summarizeScenario(
     post.map((f) => [f.id, f.statusEffects ?? []]),
   )
 
-  const lines: string[] = []
-  lines.push(`## ${title}`)
-  lines.push('')
-  lines.push(`- 依頼シード: ${result.request.seed}`)
-  lines.push(`- パーティ: ${ROLES.join(' / ')}（D級）`)
-  lines.push(`- 遠征結果: ${outcome}`)
-  lines.push(
-    `- 目的達成: ${state.objectiveCompleted ? 'はい' : 'いいえ'}（進捿=${state.objectiveProgress.toFixed(1)}%）`,
-  )
-  lines.push(`- 戦闘結果: ${record?.outcome ?? 'なし'}`)
-  if (record) {
-    lines.push(`- 接敵状況: ${record.entrySnapshot.surprise}`)
-    lines.push(`- 戦闘ラウンド数: ${record.rounds}`)
-    lines.push(`- 敵編成: ${record.enemyComposition}`)
-    lines.push(`- encounterSeed: ${record.encounterSeed}`)
-    lines.push(`- combatSeed: ${record.combatSeed}`)
-    const weaknessNames = record.knownEnemyWeaknesses
-      .map((i) => i.name)
-      .join(', ')
-    const abilityNames = record.knownEnemyAbilities
-      .map((i) => i.name)
-      .join(', ')
-    lines.push(`- 戦闘前に判明していた弱点: ${weaknessNames || 'なし'}`)
-    lines.push(`- 戦闘前に判明していた能力: ${abilityNames || 'なし'}`)
-    const matchedWeaknessNames = record.matchedWeaknessIntel
-      .map((i) => i.name)
-      .join(', ')
-    const unmatchedWeaknessNames = record.unmatchedWeaknessIntel
-      .map((i) => i.name)
-      .join(', ')
-    const matchedAbilityNames = record.matchedAbilityIntel
-      .map((i) => i.name)
-      .join(', ')
-    const unmatchedAbilityNames = record.unmatchedAbilityIntel
-      .map((i) => i.name)
-      .join(', ')
-    lines.push(`- 敵編成と一致した弱点情報: ${matchedWeaknessNames || 'なし'}`)
-    lines.push(
-      `- 敵編成と不一致だった弱点情報: ${unmatchedWeaknessNames || 'なし'}`,
-    )
-    lines.push(`- 敵編成と一致した能力情報: ${matchedAbilityNames || 'なし'}`)
-    lines.push(
-      `- 敵編成と不一致だった能力情報: ${unmatchedAbilityNames || 'なし'}`,
-    )
-  }
-
-  const activeIds = party
+  const active = party
     .filter(
       (a) =>
         !state.casualties.includes(a.id) &&
@@ -170,24 +105,39 @@ function summarizeScenario(
         state.partyHp[a.id] > 0,
     )
     .map((a) => a.name)
-  const incapacitatedIds = party
+  const incapacitated = party
     .filter(
       (a) =>
         !state.casualties.includes(a.id) && state.incapacitated.includes(a.id),
     )
     .map((a) => a.name)
-  const deadIds = party
+  const dead = party
     .filter((a) => state.casualties.includes(a.id))
     .map((a) => a.name)
-  lines.push(`- 活動可能者: ${activeIds.join(', ') || 'なし'}`)
-  lines.push(`- 戦闘不能者: ${incapacitatedIds.join(', ') || 'なし'}`)
-  lines.push(`- 死亡者: ${deadIds.join(', ') || 'なし'}`)
 
-  lines.push(
-    `- 負傷: ${state.injuries.length}件（未解決の重傷=${unresolvedSerious}）`,
-  )
-  lines.push(`- 犠牲者: ${state.casualties.join(', ') || 'なし'}`)
-  lines.push(`- 発見情報: ${state.information.length}件`)
+  const lines: string[] = []
+  lines.push(`## ${title}`)
+  lines.push('')
+  lines.push(`- 依頼等級: ${rank}`)
+  lines.push(`- パーティ: ${ROLES.join(' / ')}（${rank}級）`)
+  lines.push(`- 依頼シード: ${result.request.seed}`)
+  if (record) {
+    lines.push(`- 敵編成: ${record.enemyComposition}`)
+    lines.push(`- 必須対象ID: ${record.enemyIds.join(', ')}`)
+    lines.push(`- 戦闘結果: ${record.outcome}`)
+  }
+  if (obj) {
+    lines.push(`- 撃破対象: ${obj.defeatedTargetIds.join(', ') || 'なし'}`)
+    lines.push(`- 逃亡対象: ${obj.escapedTargetIds.join(', ') || 'なし'}`)
+    lines.push(`- 生存対象: ${obj.survivingTargetIds.join(', ') || 'なし'}`)
+    lines.push(`- 確認済み対象: ${obj.confirmedTargetIds.join(', ') || 'なし'}`)
+    lines.push(`- 討伐進捗: ${obj.progress}%`)
+    lines.push(`- 討伐完了: ${obj.completed ? 'はい' : 'いいえ'}`)
+  }
+  lines.push(`- 遠征結果: ${outcome}`)
+  lines.push(`- 生存者: ${active.join(', ') || 'なし'}`)
+  lines.push(`- 戦闘不能者: ${incapacitated.join(', ') || 'なし'}`)
+  lines.push(`- 死亡者: ${dead.join(', ') || 'なし'}`)
   lines.push('')
 
   lines.push('### 1. 遠征開始時')
@@ -202,23 +152,25 @@ function summarizeScenario(
   )
   lines.push('')
 
-  lines.push('### 2. 戦闘直前')
-  lines.push(
-    ...formatMemberSnapshots(
-      party,
-      pre.initialHp,
-      pre.initialMp,
-      pre.initialMorale,
-      pre.initialStatusEffects,
-    ),
-  )
-  lines.push('')
+  if (record) {
+    lines.push('### 2. 戦闘直前')
+    lines.push(
+      ...formatMemberSnapshots(
+        party,
+        pre.initialHp,
+        pre.initialMp,
+        pre.initialMorale,
+        pre.initialStatusEffects,
+      ),
+    )
+    lines.push('')
 
-  lines.push('### 3. 戦闘直後')
-  lines.push(
-    ...formatMemberSnapshots(party, postHp, postMp, postMorale, postStatus),
-  )
-  lines.push('')
+    lines.push('### 3. 戦闘直後')
+    lines.push(
+      ...formatMemberSnapshots(party, postHp, postMp, postMorale, postStatus),
+    )
+    lines.push('')
+  }
 
   lines.push('### 4. 帰還後')
   lines.push(
@@ -232,46 +184,22 @@ function summarizeScenario(
   )
   lines.push('')
 
-  if (record) {
-    const summary = state.logs
-      .filter((l) => l.type === 'battleSummary')
-      .flatMap((l) => l.facts)
-    if (summary.length > 0) {
-      lines.push('### 戦闘要約')
-      for (const fact of summary) {
-        lines.push(`- ${fact}`)
-      }
-      lines.push('')
-    }
-
-    if (record.result.discoveredWeaknesses.length > 0) {
-      lines.push(`### 戦闘で発見した弱点`)
-      for (const w of record.result.discoveredWeaknesses) {
-        lines.push(`- ${w}`)
-      }
-      lines.push('')
-    }
-
-    if (
-      state.casualties.length > 0 ||
-      record.result.incapacitatedAdventurers.length > 0
-    ) {
-      lines.push('### 戦闘被害')
-      lines.push(
-        `- 死亡者: ${record.result.deadAdventurers.join(', ') || 'なし'}`,
-      )
-      lines.push(
-        `- 戦闘不能者: ${record.result.incapacitatedAdventurers.join(', ') || 'なし'}`,
-      )
-      lines.push('')
-    }
-  }
-
-  lines.push('### 主要ログ（直近8件）')
-  const recentLogs = state.logs.filter((l) => l.facts.length > 0).slice(-8)
-  for (const log of recentLogs) {
+  lines.push('### 構造化facts')
+  const relevantTypes = new Set([
+    'eliminationTargetsAssigned',
+    'eliminationConfirmation',
+    'eliminationIncomplete',
+    'eliminationCompleted',
+    'battleSummary',
+  ])
+  for (const log of state.logs) {
+    if (!relevantTypes.has(log.type) || log.facts.length === 0) continue
+    lines.push(`- type=${log.type}`)
     for (const fact of log.facts) {
-      lines.push(`- ${fact}`)
+      lines.push(`  - ${fact}`)
+    }
+    for (const effect of log.effects) {
+      lines.push(`  - effect: ${effect.type}=${effect.value}`)
     }
   }
   lines.push('')
@@ -281,28 +209,44 @@ function summarizeScenario(
 
 const scenarios = [
   {
-    title: 'A. 有利接敵からの完全成功',
-    seed: 'phase3-1-a-10',
+    title: 'A. 完全討伐',
+    seed: 's37',
+    rank: 'S' as AdventurerRank,
+    confirmationRequired: false,
   },
   {
-    title: 'B. 戦闘勝利だが調査失敗',
-    seed: 'phase3-1-b-12',
+    title: 'B. 討伐成功だが損害大',
+    seed: 's325',
+    rank: 'C' as AdventurerRank,
+    confirmationRequired: false,
   },
   {
-    title: 'C. 情報取得後に戦闘撤退',
-    seed: 'phase3-1-c-77',
+    title: 'C. 一部撃破して撤退',
+    seed: 's1',
+    rank: 'C' as AdventurerRank,
+    confirmationRequired: false,
+  },
+  {
+    title: 'D. 戦闘勝利だが確認失敗',
+    seed: 's45',
+    rank: 'S' as AdventurerRank,
+    confirmationRequired: true,
   },
 ]
 
-let md = '# Phase 3.1 遠征中戦闘発生と状態往復 サンプル出力\n\n'
+let md = '# Phase 3.2 討伐依頼（elimination）サンプル出力\n\n'
 md +=
-  'investigation 依頼で最大1回の戦闘を発生させ、遠征状態と戦闘状態を往復させた決定論的シミュレーション結果。\n\n'
+  'elimination 依頼で最大1回の戦闘を発生させ、討伐対象の撃破・確認・遠征結果を分離した決定論的シミュレーション結果。\n\n'
 
 for (const scenario of scenarios) {
-  const request = makeRequest(scenario.seed)
-  const party = makeParty(scenario.seed)
+  const request = makeRequest(
+    scenario.seed,
+    scenario.rank,
+    scenario.confirmationRequired,
+  )
+  const party = makeParty(scenario.seed, scenario.rank)
   const result = runExpedition(request, party)
-  md += summarizeScenario(scenario.title, party, result)
+  md += summarizeScenario(scenario.title, scenario.rank, party, result)
 }
 
 const outputPath = 'PHASE3_EXPEDITION_SAMPLE.md'
