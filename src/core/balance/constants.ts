@@ -16,10 +16,10 @@ export const ADVENTURER_RANK_BASE: Record<AdventurerRank, number> = {
 
 // Calibrated from measured per-rank combat metrics (expected DPR * survival).
 export const ADVENTURER_THREAT: Record<AdventurerRank, number> = {
-  E: 2.58,
-  D: 3.39,
-  C: 4.01,
-  B: 5.31,
+  E: 2.97,
+  D: 3.9,
+  C: 4.61,
+  B: 6.11,
   A: 6.13,
   S: 7.24,
 }
@@ -84,24 +84,24 @@ export const MORALE_INITIAL_BASE = 20
 export const RETREAT_MORALE_THRESHOLD = 30
 
 export const ABILITY_THREAT_COST: Record<AbilityId, number> = {
-  flight: 0.425,
-  poisonAttack: 0.703,
-  bleedAttack: 0.2,
-  areaAttack: 0.225,
-  revive: 0.269,
-  regeneration: 1.208,
-  frontDefense: 0.499,
-  magicResist: 0.653,
-  physicalResist: 1.25,
-  darknessBoost: 0.204,
-  corpseExplosion: 0.272,
-  summon: 0.984,
-  taunt: 0.396,
-  fear: 1.09,
-  healBlock: 1.25,
-  counter: 0.278,
-  stealthStart: 0.1,
-  swarmCoordination: 0.141,
+  flight: 2.413950000000001,
+  poisonAttack: 0.05,
+  bleedAttack: 0.05,
+  areaAttack: 0.11718666666666686,
+  revive: 0.4319589535864975,
+  regeneration: 2.686831304347829,
+  frontDefense: 0.6260731340996166,
+  magicResist: 1.866533857923498,
+  physicalResist: 0.7886467605633801,
+  darknessBoost: 0.10044571428571544,
+  corpseExplosion: 0.05,
+  summon: 3.2270504761904792,
+  taunt: 0.05,
+  fear: 3.8844156521739155,
+  healBlock: 0.05,
+  counter: 0.06459364485981296,
+  stealthStart: 0.05,
+  swarmCoordination: 1.407858227848102,
 }
 
 export const DIFFICULTY_TARGET_WINRATE = {
