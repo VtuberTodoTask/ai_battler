@@ -3,15 +3,21 @@ import type {
   Adventurer,
   AdventurerRank,
   AdventurerRole,
+  BattleResult,
   Difficulty,
   SkillName,
+  StatusEffect,
 } from '../models/types.ts'
+import { runBattle } from '../battle/battle.ts'
+import { generateEncounter } from '../generators/encounterGenerator.ts'
+import { ADVENTURER_THREAT } from '../balance/constants.ts'
 import { clamp, deepClone } from '../util.ts'
 import type {
   BattleEntryConditions,
   CheckResult,
   DiscoveredInformation,
   EnvironmentEffect,
+  ExpeditionBattleRecord,
   ExpeditionEffect,
   ExpeditionFeature,
   ExpeditionInjury,
@@ -128,13 +134,13 @@ export function initializeExpeditionState(
   const partyHp: Record<string, number> = {}
   const partyMp: Record<string, number> = {}
   const partyMorale: Record<string, number> = {}
-  const partyStatusEffects: Record<string, string[]> = {}
+  const partyStatusEffects: Record<string, StatusEffect[]> = {}
 
   for (const a of party) {
     partyHp[a.id] = a.currentHp
     partyMp[a.id] = a.currentMp
     partyMorale[a.id] = a.morale
-    partyStatusEffects[a.id] = a.statusEffects.map((s) => s.type)
+    partyStatusEffects[a.id] = deepClone(a.statusEffects)
   }
 
   return {
@@ -159,6 +165,7 @@ export function initializeExpeditionState(
     discoveredThreats: [],
     avoidedThreats: [],
     logs: [],
+    battles: [],
     metadata: {
       preparationRouteBonus: 0,
       approachTimeBonus: 0,
@@ -648,6 +655,7 @@ function travelPhase(
   rng: SeededRng,
   phase: 'approach' | 'return',
 ): void {
+  if (getAliveParty(party, state).length === 0) return
   state.currentPhase = phase
   const travelTime = calculateTravelTime(
     request,
@@ -839,7 +847,11 @@ function handleEnvironmentalHazard(
       }
 
       if (feature === 'poisonRisk' && !hasRole(party, 'healer')) {
-        state.partyStatusEffects[target.id].push('poisoned')
+        state.partyStatusEffects[target.id].push({
+          type: 'poisoned',
+          duration: 3,
+          sourceId: feature,
+        })
         facts.push(`${target.name}が毒に冒された`)
       }
     }
@@ -1097,6 +1109,7 @@ function runObjective(
   state: ExpeditionState,
   rng: SeededRng,
 ): void {
+  if (getAliveParty(party, state).length === 0) return
   state.currentPhase = 'objective'
 
   const skill: SkillName =
@@ -1455,6 +1468,11 @@ function determineOutcome(
     return 'lostExpedition'
   }
 
+  const forcedBattleRetreat =
+    state.battleOutcome === 'retreat' ||
+    state.battleOutcome === 'stalemate' ||
+    state.battleOutcome === 'defeat'
+
   let outcome: ExpeditionOutcome
   if (
     state.objectiveProgress >= 100 &&
@@ -1469,6 +1487,8 @@ function determineOutcome(
     outcome = 'success'
   } else if (state.objectiveProgress >= 40) {
     outcome = 'partialSuccess'
+  } else if (forcedBattleRetreat) {
+    outcome = 'forcedRetreat'
   } else {
     outcome = 'failedObjective'
   }
@@ -1490,11 +1510,260 @@ function determineOutcome(
   return outcome
 }
 
+function buildBattleParty(
+  party: Adventurer[],
+  state: ExpeditionState,
+): Adventurer[] {
+  return party
+    .filter((member) => !state.casualties.includes(member.id))
+    .map((member) => {
+      const cloned = deepClone(member)
+      cloned.currentHp = state.partyHp[member.id]
+      cloned.currentMp = state.partyMp[member.id]
+      cloned.morale = state.partyMorale[member.id]
+      cloned.statusEffects = deepClone(
+        state.partyStatusEffects[member.id] ?? [],
+      )
+      return cloned
+    })
+}
+
+function environmentEffectsToBattleContext(effects: EnvironmentEffect[]): {
+  lighting: 'dark' | 'bright' | 'normal'
+  noise: number
+  water: boolean
+  smoke: boolean
+} {
+  const context = {
+    lighting: 'normal' as 'dark' | 'bright' | 'normal',
+    noise: 0,
+    water: false,
+    smoke: false,
+  }
+  for (const effect of effects) {
+    if (
+      effect.type === 'lighting' &&
+      (effect.value === 'dark' ||
+        effect.value === 'bright' ||
+        effect.value === 'normal')
+    ) {
+      context.lighting = effect.value as 'dark' | 'bright' | 'normal'
+    } else if (effect.type === 'noise' && typeof effect.value === 'number') {
+      context.noise += effect.value
+    } else if (effect.type === 'water' && effect.value === true) {
+      context.water = true
+    } else if (effect.type === 'smoke' && effect.value === true) {
+      context.smoke = true
+    }
+  }
+  return context
+}
+
+function applyKnownEnemyWeaknesses(
+  enemies: {
+    weaknesses: { weaknessId: string; name: string; known: boolean }[]
+  }[],
+  knownWeaknesses: string[],
+  state: ExpeditionState,
+  battleId: string,
+): void {
+  for (const entry of knownWeaknesses) {
+    let matched = false
+    for (const enemy of enemies) {
+      const w = enemy.weaknesses.find(
+        (x) => x.weaknessId === entry || x.name === entry,
+      )
+      if (w) {
+        w.known = true
+        matched = true
+        break
+      }
+    }
+    if (!matched) {
+      addLog(
+        state,
+        logEntry(
+          'battle',
+          'diagnostic',
+          [],
+          [`戦闘${battleId}: 弱点「${entry}」は敵編成に存在しなかった`],
+        ),
+      )
+    }
+  }
+}
+
+function convertBattleInjuries(
+  result: BattleResult,
+  battleId: string,
+  state: ExpeditionState,
+): ExpeditionInjury[] {
+  const injuries: ExpeditionInjury[] = []
+  for (let i = 0; i < result.injuries.length; i++) {
+    const injury = result.injuries[i]
+    if (injury.category === 'dead') continue
+    const type: 'light' | 'serious' =
+      injury.category === 'light' ? 'light' : 'serious'
+    const id = `${battleId}-injury-${injury.adventurerId}-${i}`
+    if (
+      state.injuries.some(
+        (existing) =>
+          existing.sourceType === 'battle' &&
+          existing.sourceId === battleId &&
+          existing.adventurerId === injury.adventurerId &&
+          existing.type === type,
+      )
+    ) {
+      continue
+    }
+    injuries.push({
+      id,
+      adventurerId: injury.adventurerId,
+      type,
+      cause: `battle: ${result.outcome}`,
+      hpLoss: injury.severity,
+      status: 'active',
+      sourceType: 'battle',
+      sourceId: battleId,
+    })
+  }
+  return injuries
+}
+
+function applyBattleResultToExpedition(
+  state: ExpeditionState,
+  result: BattleResult,
+  request: ExpeditionRequest,
+  battleId: string,
+): void {
+  state.battleOutcome = result.outcome
+
+  for (const final of result.finalAdventurerStates) {
+    state.partyHp[final.id] = final.currentHp
+    state.partyMp[final.id] = final.currentMp
+    state.partyMorale[final.id] = final.morale
+    state.partyStatusEffects[final.id] = deepClone(final.statusEffects)
+
+    if (final.dead && !state.casualties.includes(final.id)) {
+      state.casualties.push(final.id)
+    }
+  }
+
+  const expeditionInjuries = convertBattleInjuries(result, battleId, state)
+  state.injuries.push(...expeditionInjuries)
+
+  const enemySpeciesCount = new Map<string, number>()
+  for (const id of result.survivingEnemies.concat(result.defeatedEnemies)) {
+    const species = id.split('-')[1] ?? id
+    enemySpeciesCount.set(species, (enemySpeciesCount.get(species) ?? 0) + 1)
+  }
+
+  const record: ExpeditionBattleRecord = {
+    id: battleId,
+    phase: 'battle',
+    trigger: request.battle?.triggerPhase ?? 'afterExploration',
+    entrySnapshot: state.battleEntrySnapshot!,
+    enemyIds: result.survivingEnemies.concat(result.defeatedEnemies),
+    enemyComposition: Array.from(enemySpeciesCount.entries())
+      .map(([s, c]) => `${s}x${c}`)
+      .join(', '),
+    outcome: result.outcome,
+    rounds: result.rounds,
+    survivingAdventurerIds: result.survivingAdventurers,
+    incapacitatedAdventurerIds: result.incapacitatedAdventurers,
+    deadAdventurerIds: result.deadAdventurers,
+    discoveredWeaknesses: result.discoveredWeaknesses,
+    injuries: expeditionInjuries,
+    result,
+  }
+  state.battles.push(record)
+
+  const facts: string[] = [
+    `戦闘が${result.rounds}ラウンドで${result.outcome}となった`,
+  ]
+  if (result.contactResult.type) {
+    facts.push(`接敵結果: ${result.contactResult.type}`)
+  }
+  if (result.deadAdventurers.length > 0) {
+    facts.push(`戦闘で死亡者: ${result.deadAdventurers.join(', ')}`)
+  }
+  if (expeditionInjuries.length > 0) {
+    facts.push(
+      `戦闘負傷者: ${expeditionInjuries.map((i) => i.adventurerId).join(', ')}`,
+    )
+  }
+  if (result.discoveredWeaknesses.length > 0) {
+    facts.push(`戦闘中に弱点を発見: ${result.discoveredWeaknesses.join(', ')}`)
+  }
+  addLog(
+    state,
+    logEntry('battle', 'battleSummary', [], facts, [], undefined, [
+      ...result.deadAdventurers,
+      ...expeditionInjuries.map((i) => i.adventurerId),
+    ]),
+  )
+}
+
+function runExpeditionBattle(
+  request: ExpeditionRequest,
+  party: Adventurer[],
+  state: ExpeditionState,
+): void {
+  const entry = state.battleEntrySnapshot!
+  const battleId = `battle-${state.battles.length}`
+  const config = request.battle
+  const partySize = config?.recommendedPartySize ?? 4
+  const requestPartyThreat = ADVENTURER_THREAT[request.rank] * partySize
+
+  const enemies = generateEncounter({
+    seed: `${request.seed}:battle:0:encounter`,
+    planSeed: `${request.seed}:battle:0:encounter`,
+    difficulty: request.difficulty,
+    partyThreat: requestPartyThreat,
+    partySize,
+    shape: config?.shape,
+    allowedSpecies: config?.allowedSpecies,
+    bossAllowed: config?.bossAllowed,
+  })
+
+  applyKnownEnemyWeaknesses(
+    enemies,
+    entry.knownEnemyWeaknesses,
+    state,
+    battleId,
+  )
+
+  const battleParty = buildBattleParty(party, state)
+  const context = environmentEffectsToBattleContext(entry.environmentEffects)
+  const forcedContactType =
+    entry.surprise === 'partyAdvantage'
+      ? 'success'
+      : entry.surprise === 'enemyAdvantage'
+        ? 'failure'
+        : undefined
+
+  const result = runBattle(
+    `${request.seed}:battle:0:combat`,
+    battleParty,
+    enemies,
+    { context, forcedContactType },
+  )
+
+  state.currentPhase = 'battle'
+  applyBattleResultToExpedition(state, result, request, battleId)
+}
+
 export const expeditionTestInternals = {
   applyExpeditionDamage,
   isUnresolvedInjury,
   isUnresolvedSeriousInjury,
   determineOutcome,
+  buildBattleParty,
+  environmentEffectsToBattleContext,
+  applyKnownEnemyWeaknesses,
+  convertBattleInjuries,
+  applyBattleResultToExpedition,
+  runExpeditionBattle,
 }
 
 export function runExpedition(
@@ -1522,7 +1791,45 @@ export function runExpedition(
 
   state.battleEntrySnapshot = buildBattleEntrySnapshot(request, party, state)
 
-  runObjective(request, party, state, rng)
+  const battleEnabled =
+    request.battle !== undefined && request.battle.enabled === true
+  if (battleEnabled && getAliveParty(party, state).length > 0) {
+    runExpeditionBattle(request, party, state)
+  }
+
+  if (getAliveParty(party, state).length === 0) {
+    setObjectiveCompletedFromProgress(state)
+    state.currentPhase = 'aftermath'
+    return {
+      request,
+      outcome: determineOutcome(request, state, party),
+      state,
+      party,
+    }
+  }
+
+  const shouldSkipObjective =
+    battleEnabled &&
+    (state.battleOutcome === 'retreat' ||
+      state.battleOutcome === 'stalemate' ||
+      state.battleOutcome === 'defeat' ||
+      state.battleOutcome === 'totalLoss')
+
+  if (!shouldSkipObjective) {
+    runObjective(request, party, state, rng)
+  }
+
+  if (getAliveParty(party, state).length === 0) {
+    setObjectiveCompletedFromProgress(state)
+    state.currentPhase = 'aftermath'
+    return {
+      request,
+      outcome: determineOutcome(request, state, party),
+      state,
+      party,
+    }
+  }
+
   runReturn(request, party, state, rng)
   runAftermath(request, party, state, rng)
 

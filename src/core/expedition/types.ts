@@ -1,9 +1,13 @@
 import type {
   Adventurer,
   AdventurerRank,
+  BattleOutcome,
+  BattleResult,
   Difficulty,
   EncounterShape,
+  EnemySpecies,
   SkillName,
+  StatusEffect,
 } from '../models/types.ts'
 import type { EncounterPlan } from '../generators/encounterGenerator.ts'
 
@@ -118,6 +122,8 @@ export interface ExpeditionInjury {
   cause: string
   hpLoss: number
   status: 'active' | 'treated' | 'worsened'
+  sourceType?: 'expedition' | 'battle'
+  sourceId?: string
 }
 
 export interface ExpeditionState {
@@ -126,7 +132,7 @@ export interface ExpeditionState {
   partyHp: Record<string, number>
   partyMp: Record<string, number>
   partyMorale: Record<string, number>
-  partyStatusEffects: Record<string, string[]>
+  partyStatusEffects: Record<string, StatusEffect[]>
   supplies: {
     food: number
     medicine: number
@@ -141,7 +147,19 @@ export interface ExpeditionState {
   avoidedThreats: ExpeditionFeature[]
   logs: ExpeditionLogEntry[]
   battleEntrySnapshot?: BattleEntryConditions
+  battles: ExpeditionBattleRecord[]
+  battleOutcome?: BattleOutcome
   metadata?: Record<string, unknown>
+}
+
+export interface ExpeditionBattleConfig {
+  enabled: boolean
+  seed: string
+  triggerPhase: 'afterExploration'
+  shape?: EncounterShape
+  allowedSpecies?: EnemySpecies[]
+  bossAllowed?: boolean
+  recommendedPartySize?: number
 }
 
 export interface ExpeditionRequest {
@@ -157,6 +175,7 @@ export interface ExpeditionRequest {
   knownInformation: KnownInformation[]
   hiddenInformation: HiddenInformation[]
   encounter?: { shape: EncounterShape; count: number } | EncounterPlan
+  battle?: ExpeditionBattleConfig
 }
 
 export interface EnvironmentEffect {
@@ -170,10 +189,27 @@ export interface BattleEntryConditions {
   initialHp: Record<string, number>
   initialMp: Record<string, number>
   initialMorale: Record<string, number>
-  initialStatusEffects: Record<string, string[]>
+  initialStatusEffects: Record<string, StatusEffect[]>
   knownEnemyWeaknesses: string[]
   knownEnemyAbilities: string[]
   environmentEffects: EnvironmentEffect[]
+}
+
+export interface ExpeditionBattleRecord {
+  id: string
+  phase: ExpeditionPhase
+  trigger: string
+  entrySnapshot: BattleEntryConditions
+  enemyIds: string[]
+  enemyComposition: string
+  outcome: BattleOutcome
+  rounds: number
+  survivingAdventurerIds: string[]
+  incapacitatedAdventurerIds: string[]
+  deadAdventurerIds: string[]
+  discoveredWeaknesses: string[]
+  injuries: ExpeditionInjury[]
+  result: BattleResult
 }
 
 export type ExpeditionOutcome =

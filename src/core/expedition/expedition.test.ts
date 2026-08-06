@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { generateAdventurer } from '../generators/adventurerGenerator.ts'
 import { SeededRng } from '../rng/seededRng.ts'
-import type { Adventurer, AdventurerRole } from '../models/types.ts'
+import type {
+  Adventurer,
+  AdventurerRank,
+  AdventurerRole,
+  BattleOutcome,
+  BattleResult,
+  StatusEffect,
+} from '../models/types.ts'
 import type {
   ExpeditionRequest,
   ExpeditionResult,
@@ -56,11 +63,15 @@ function makeRequest(
   }
 }
 
-function makeParty(roles: AdventurerRole[], seedBase: string): Adventurer[] {
+function makeParty(
+  roles: AdventurerRole[],
+  seedBase: string,
+  rank: AdventurerRank = 'C',
+): Adventurer[] {
   return roles.map((role, i) =>
     generateAdventurer({
       seed: `${seedBase}-${role}-${i}`,
-      rank: 'C',
+      rank,
       role,
     }),
   )
@@ -689,6 +700,7 @@ function minimalExpeditionState(hp = 5): ExpeditionState {
     discoveredThreats: [],
     avoidedThreats: [],
     logs: [],
+    battles: [],
   }
 }
 
@@ -1010,5 +1022,476 @@ describe('Log consistency', () => {
       expect(snap.initialMorale[a.id]).toBeDefined()
       expect(snap.initialStatusEffects[a.id]).toBeDefined()
     }
+  })
+})
+
+function battleConfig(
+  overrides?: Partial<NonNullable<ExpeditionRequest['battle']>>,
+): NonNullable<ExpeditionRequest['battle']> {
+  return {
+    enabled: true,
+    seed: 'battle-seed',
+    triggerPhase: 'afterExploration',
+    ...overrides,
+  }
+}
+
+function findBattleLog(result: ExpeditionResult): boolean {
+  return result.state.logs.some((l) => l.type === 'battleSummary')
+}
+
+describe('Expedition battle integration', () => {
+  it('runs a battle when battle.enabled is true', () => {
+    const request = makeRequest('battle-enabled', {
+      battle: battleConfig(),
+    })
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'battle-enabled',
+      'S',
+    )
+    const result = runExpedition(request, party)
+    expect(result.state.battles).toHaveLength(1)
+    expect(result.state.battleEntrySnapshot).toBeDefined()
+    expect(findBattleLog(result)).toBe(true)
+  })
+
+  it('skips battle when battle.enabled is false', () => {
+    const request = makeRequest('battle-disabled', {
+      battle: { enabled: false, seed: 'x', triggerPhase: 'afterExploration' },
+    })
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'battle-disabled',
+    )
+    const result = runExpedition(request, party)
+    expect(result.state.battles).toHaveLength(0)
+    expect(findBattleLog(result)).toBe(false)
+  })
+
+  it('produces identical results with the same seed and party', () => {
+    const request = makeRequest('battle-determinism', {
+      battle: battleConfig(),
+    })
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'battle-determinism',
+      'S',
+    )
+    const a = runExpedition(request, cloneParty(party))
+    const b = runExpedition(request, cloneParty(party))
+    expect(a).toEqual(b)
+  })
+
+  it('produces different results with different seeds', () => {
+    const requestA = makeRequest('battle-seed-a', {
+      battle: battleConfig(),
+    })
+    const requestB = makeRequest('battle-seed-b', {
+      battle: battleConfig(),
+    })
+    const partyA = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'battle-seed-a',
+      'S',
+    )
+    const partyB = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'battle-seed-b',
+      'S',
+    )
+    const resultA = runExpedition(requestA, partyA)
+    const resultB = runExpedition(requestB, partyB)
+    expect(resultA.state.battles[0].enemyIds).not.toEqual(
+      resultB.state.battles[0].enemyIds,
+    )
+  })
+
+  it('uses the same enemy composition for E and S parties with the same request rank', () => {
+    const request = makeRequest('battle-rank-test', {
+      rank: 'C',
+      battle: battleConfig(),
+    })
+    const partyE = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'e-party',
+      'E',
+    )
+    const partyS = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      's-party',
+      'S',
+    )
+    const resultE = runExpedition(request, partyE)
+    const resultS = runExpedition(request, partyS)
+    expect(resultE.state.battles[0].enemyIds).toEqual(
+      resultS.state.battles[0].enemyIds,
+    )
+  })
+
+  it('does not weaken enemy composition when a party member is injured before battle', () => {
+    const request = makeRequest('battle-injured-direct', {
+      battle: battleConfig(),
+    })
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'injured-party',
+      'C',
+    )
+
+    const healthyState = initializeExpeditionState(request, party)
+    healthyState.battleEntrySnapshot = emptyBattleEntrySnapshot()
+    expeditionTestInternals.runExpeditionBattle(request, party, healthyState)
+
+    const injuredState = initializeExpeditionState(request, party)
+    injuredState.partyHp[party[0].id] = 1
+    injuredState.battleEntrySnapshot = emptyBattleEntrySnapshot()
+    expeditionTestInternals.runExpeditionBattle(request, party, injuredState)
+
+    // 同じ依頼シードなら、戦闘前の負傷状態に関わらず敵編成は同一
+    expect(new Set(healthyState.battles[0].enemyIds)).toEqual(
+      new Set(injuredState.battles[0].enemyIds),
+    )
+  })
+
+  it('does not weaken enemy composition when a party member is dead before battle', () => {
+    const request = makeRequest('battle-dead-direct', {
+      battle: battleConfig(),
+    })
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'dead-party',
+      'C',
+    )
+
+    const healthyState = initializeExpeditionState(request, party)
+    healthyState.battleEntrySnapshot = emptyBattleEntrySnapshot()
+    expeditionTestInternals.runExpeditionBattle(request, party, healthyState)
+
+    const deadState = initializeExpeditionState(request, party)
+    deadState.casualties.push(party[0].id)
+    deadState.battleEntrySnapshot = emptyBattleEntrySnapshot()
+    expeditionTestInternals.runExpeditionBattle(request, party, deadState)
+
+    expect(deadState.casualties).toContain(party[0].id)
+    expect(new Set(healthyState.battles[0].enemyIds)).toEqual(
+      new Set(deadState.battles[0].enemyIds),
+    )
+  })
+
+  it('returns final adventurer states from the battle', () => {
+    const request = makeRequest('battle-final-states', {
+      battle: battleConfig(),
+    })
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'battle-final-states',
+      'S',
+    )
+    const result = runExpedition(request, party)
+    const record = result.state.battles[0]
+    expect(record.result.finalAdventurerStates).toHaveLength(party.length)
+    for (const final of record.result.finalAdventurerStates) {
+      expect(final.id).toBeDefined()
+      expect(typeof final.alive).toBe('boolean')
+      expect(typeof final.dead).toBe('boolean')
+      expect(typeof final.incapacitated).toBe('boolean')
+      expect(final.currentHp).toBeGreaterThanOrEqual(0)
+      expect(final.currentMp).toBeGreaterThanOrEqual(0)
+      expect(final.morale).toBeGreaterThanOrEqual(0)
+      expect(final.morale).toBeLessThanOrEqual(100)
+      expect(final.statusEffects).toBeDefined()
+    }
+  })
+})
+
+describe('Battle state carryover', () => {
+  it('buildBattleParty excludes casualties and uses current expedition stats', () => {
+    const request = makeRequest('carryover-party')
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'carryover',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.partyHp[party[0].id] = 10
+    state.partyMp[party[0].id] = 5
+    state.partyMorale[party[0].id] = 30
+    state.partyStatusEffects[party[0].id] = [
+      { type: 'poisoned', duration: 2, sourceId: 'test' },
+    ]
+    state.casualties.push(party[1].id)
+
+    const battleParty = expeditionTestInternals.buildBattleParty(party, state)
+    expect(battleParty.some((a) => a.id === party[1].id)).toBe(false)
+    const lead = battleParty.find((a) => a.id === party[0].id)!
+    expect(lead.currentHp).toBe(10)
+    expect(lead.currentMp).toBe(5)
+    expect(lead.morale).toBe(30)
+    expect(lead.statusEffects).toEqual([
+      { type: 'poisoned', duration: 2, sourceId: 'test' },
+    ])
+  })
+
+  it('applyBattleResultToExpedition updates hp/mp/morale/status and casualties', () => {
+    const request = makeRequest('carryover-apply')
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'carryover',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.battleEntrySnapshot = {
+      surprise: 'neutral',
+      initialHp: {},
+      initialMp: {},
+      initialMorale: {},
+      initialStatusEffects: {},
+      knownEnemyWeaknesses: [],
+      knownEnemyAbilities: [],
+      environmentEffects: [],
+    }
+
+    const status: StatusEffect = {
+      type: 'weakened',
+      duration: 2,
+      sourceId: 'x',
+    }
+    const result = {
+      seed: 's',
+      outcome: 'victory' as BattleOutcome,
+      rounds: 5,
+      survivingAdventurers: [party[0].id, party[1].id],
+      incapacitatedAdventurers: [],
+      deadAdventurers: [party[2].id],
+      finalAdventurerStates: party.map((a, i) => ({
+        id: a.id,
+        currentHp: i === 2 ? 0 : a.maxHp - i,
+        currentMp: a.maxMp - i,
+        morale: 50 - i,
+        statusEffects: i === 0 ? [status] : [],
+        alive: i !== 2,
+        incapacitated: false,
+        dead: i === 2,
+      })),
+      survivingEnemies: [],
+      defeatedEnemies: ['e1'],
+      escapedEnemies: [],
+      injuries: [
+        {
+          adventurerId: party[2].id,
+          name: 'x',
+          severity: 30,
+          survivalRoll: 50,
+          survivalChance: 80,
+          category: 'dead' as const,
+        },
+      ],
+      discoveredWeaknesses: [],
+      partyDamageDealt: 10,
+      enemyDamageDealt: 5,
+      abilityUsage: {},
+      contactResult: {
+        type: 'success' as const,
+        partyScouting: 0,
+        enemyStealth: 0,
+        successChance: 100,
+        roll: 0,
+        effects: {},
+      },
+      logs: [],
+      adventurerActionCount: 1,
+      enemyActionCount: 1,
+    } satisfies BattleResult
+
+    expeditionTestInternals.applyBattleResultToExpedition(
+      state,
+      result,
+      request,
+      'b-0',
+    )
+
+    expect(state.partyHp[party[0].id]).toBe(party[0].maxHp)
+    expect(state.partyHp[party[2].id]).toBe(0)
+    expect(state.partyMp[party[1].id]).toBe(party[1].maxMp - 1)
+    expect(state.partyMorale[party[0].id]).toBe(50)
+    expect(state.casualties).toContain(party[2].id)
+    expect(state.partyStatusEffects[party[0].id]).toEqual([status])
+    expect(state.battles).toHaveLength(1)
+    expect(state.battles[0].deadAdventurerIds).toContain(party[2].id)
+  })
+})
+
+function emptyBattleEntrySnapshot(
+  surprise: 'partyAdvantage' | 'neutral' | 'enemyAdvantage' = 'neutral',
+) {
+  return {
+    surprise,
+    initialHp: {},
+    initialMp: {},
+    initialMorale: {},
+    initialStatusEffects: {},
+    knownEnemyWeaknesses: [],
+    knownEnemyAbilities: [],
+    environmentEffects: [],
+  }
+}
+
+describe('Surprise and contact', () => {
+  it('partyAdvantage forces contact success', () => {
+    const request = makeRequest('surprise-advantage', {
+      battle: battleConfig(),
+    })
+    const party = makeParty(
+      ['scout', 'ranger', 'mage', 'healer'],
+      'surprise-advantage',
+      'S',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.battleEntrySnapshot = emptyBattleEntrySnapshot('partyAdvantage')
+    expeditionTestInternals.runExpeditionBattle(request, party, state)
+    expect(state.battles[0].entrySnapshot.surprise).toBe('partyAdvantage')
+    expect(state.battles[0].result.contactResult.type).toBe('success')
+  })
+
+  it('enemyAdvantage forces contact failure', () => {
+    const request = makeRequest('surprise-disadvantage', {
+      battle: battleConfig(),
+    })
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'surprise-disadvantage',
+      'S',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.battleEntrySnapshot = emptyBattleEntrySnapshot('enemyAdvantage')
+    expeditionTestInternals.runExpeditionBattle(request, party, state)
+    expect(state.battles[0].entrySnapshot.surprise).toBe('enemyAdvantage')
+    expect(state.battles[0].result.contactResult.type).toBe('failure')
+  })
+
+  it('neutral does not force contact type option', () => {
+    const request = makeRequest('surprise-neutral', {
+      battle: battleConfig(),
+    })
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'surprise-neutral',
+      'S',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.battleEntrySnapshot = emptyBattleEntrySnapshot('neutral')
+    expeditionTestInternals.runExpeditionBattle(request, party, state)
+    expect(state.battles[0].entrySnapshot.surprise).toBe('neutral')
+    // neutral では forcedContactType が undefined なので、既存の接敵判定が実行される
+    expect(['greatSuccess', 'success', 'failure', 'greatFailure']).toContain(
+      state.battles[0].result.contactResult.type,
+    )
+  })
+})
+
+describe('Known enemy weaknesses', () => {
+  it('sets known flag for matching weakness id or name', () => {
+    const enemies: {
+      id: string
+      name: string
+      weaknesses: { weaknessId: string; name: string; known: boolean }[]
+    }[] = [
+      {
+        id: 'e1',
+        name: 'Goblin',
+        weaknesses: [
+          { weaknessId: 'fire', name: '火弱点', known: false },
+          { weaknessId: 'ice', name: '氷弱点', known: false },
+        ],
+      },
+      {
+        id: 'e2',
+        name: 'Slime',
+        weaknesses: [{ weaknessId: 'light', name: '光弱点', known: false }],
+      },
+    ]
+    const state = minimalExpeditionState()
+    expeditionTestInternals.applyKnownEnemyWeaknesses(
+      enemies,
+      ['fire', '光弱点'],
+      state,
+      'b-0',
+    )
+    expect(enemies[0].weaknesses[0].known).toBe(true)
+    expect(enemies[0].weaknesses[1].known).toBe(false)
+    expect(enemies[1].weaknesses[0].known).toBe(true)
+  })
+
+  it('logs a diagnostic for unknown weakness references', () => {
+    const enemies: {
+      id: string
+      name: string
+      weaknesses: { weaknessId: string; name: string; known: boolean }[]
+    }[] = [{ id: 'e1', name: 'Goblin', weaknesses: [] }]
+    const state = minimalExpeditionState()
+    expeditionTestInternals.applyKnownEnemyWeaknesses(
+      enemies,
+      ['nonexistent'],
+      state,
+      'b-0',
+    )
+    const diag = state.logs.find(
+      (l) => l.type === 'diagnostic' && l.phase === 'battle',
+    )
+    expect(diag).toBeDefined()
+    expect(diag?.facts[0]).toContain('nonexistent')
+  })
+})
+
+describe('Outcome separation', () => {
+  function outcomeWith(
+    battleOutcome: BattleOutcome | undefined,
+    progress: number,
+    casualties: string[] = [],
+  ) {
+    const request = makeRequest('outcome-separation')
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'outcome',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.objectiveProgress = progress
+    state.casualties = casualties
+    state.battleOutcome = battleOutcome
+    return expeditionTestInternals.determineOutcome(request, state, party)
+  }
+
+  it('victory with full progress and no losses is completeSuccess', () => {
+    expect(outcomeWith('victory', 100)).toBe('completeSuccess')
+  })
+
+  it('victory with low progress is failedObjective', () => {
+    expect(outcomeWith('victory', 10)).toBe('failedObjective')
+  })
+
+  it('retreat with progress 40 or more is partialSuccess', () => {
+    expect(outcomeWith('retreat', 40)).toBe('partialSuccess')
+    expect(outcomeWith('retreat', 60)).toBe('success')
+  })
+
+  it('retreat with low progress is forcedRetreat', () => {
+    expect(outcomeWith('retreat', 10)).toBe('forcedRetreat')
+  })
+
+  it('defeat is treated as forcedRetreat when progress is low', () => {
+    expect(outcomeWith('defeat', 0)).toBe('forcedRetreat')
+  })
+
+  it('total loss with all casualties is lostExpedition', () => {
+    const request = makeRequest('outcome-total')
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'outcome-total',
+    )
+    const state = initializeExpeditionState(request, party)
+    state.battleOutcome = 'totalLoss'
+    state.casualties = party.map((a) => a.id)
+    expect(
+      expeditionTestInternals.determineOutcome(request, state, party),
+    ).toBe('lostExpedition')
   })
 })

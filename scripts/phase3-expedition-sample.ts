@@ -4,21 +4,26 @@ import {
 } from '../src/core/expedition/expedition.ts'
 import type { ExpeditionRequest } from '../src/core/expedition/types.ts'
 import { generateAdventurer } from '../src/core/generators/adventurerGenerator.ts'
-import type { Adventurer, AdventurerRole } from '../src/core/models/types.ts'
+import type {
+  Adventurer,
+  AdventurerRank,
+  AdventurerRole,
+  StatusEffect,
+} from '../src/core/models/types.ts'
 import { writeFileSync } from 'node:fs'
 
 function makeRequest(
   seed: string,
-  overrides: Partial<ExpeditionRequest> = {},
+  rank: AdventurerRank = 'D',
 ): ExpeditionRequest {
   return {
-    id: `phase3-sample-${seed}`,
+    id: `phase3-1-${seed}`,
     seed,
-    rank: 'C',
+    rank,
     difficulty: 'normal',
     objectiveType: 'investigation',
     environment: 'forest',
-    distance: 4,
+    distance: 3,
     features: ['traps', 'poorVisibility'],
     knownInformation: [],
     hiddenInformation: [
@@ -43,119 +48,209 @@ function makeRequest(
         requiredSkill: 'monsterKnowledge',
       },
     ],
-    ...overrides,
+    battle: {
+      enabled: true,
+      seed: `${seed}-battle`,
+      triggerPhase: 'afterExploration',
+    },
   }
 }
 
-function makeParty(roles: AdventurerRole[], seedBase: string): Adventurer[] {
-  return roles.map((role, i) =>
+const ROLES: AdventurerRole[] = ['scout', 'ranger', 'mage', 'healer']
+
+function makeParty(seedBase: string, rank: AdventurerRank = 'D'): Adventurer[] {
+  return ROLES.map((role, i) =>
     generateAdventurer({
       seed: `${seedBase}-${role}-${i}`,
-      rank: 'C',
+      rank,
       role,
     }),
   )
 }
 
-function average(values: number[]): number {
-  if (values.length === 0) return 0
-  return values.reduce((a, b) => a + b, 0) / values.length
+function formatStatus(effects: StatusEffect[]): string {
+  if (effects.length === 0) return 'なし'
+  return effects.map((e) => `${e.type}(${e.duration})`).join(', ')
 }
 
-function summarize(result: ReturnType<typeof runExpedition>): string {
+function formatMemberSnapshots(
+  party: Adventurer[],
+  hp: Record<string, number>,
+  mp: Record<string, number>,
+  morale: Record<string, number>,
+  statusEffects: Record<string, StatusEffect[]>,
+): string[] {
+  return party.map((a) => {
+    const st = formatStatus(statusEffects[a.id] ?? [])
+    return (
+      `  - ${a.name}（${a.role}） HP=${hp[a.id]}/${a.maxHp}, MP=${mp[a.id]}/${a.maxMp}, 士気=${morale[a.id]}` +
+      (st ? `, 状態異常=[${st}]` : '')
+    )
+  })
+}
+
+function summarizeScenario(
+  title: string,
+  party: Adventurer[],
+  result: ReturnType<typeof runExpedition>,
+): string {
   const { outcome, state } = result
-  const hpValues = Object.values(state.partyHp)
-  const moraleValues = Object.values(state.partyMorale)
-  const infoCount = state.information.length
-  const completeInfo = state.information.filter(
-    (i) => i.completeness === 'complete',
-  ).length
-  const discoveredThreats = state.discoveredThreats.join(', ') || 'なし'
-  const avoidedThreats = state.avoidedThreats.join(', ') || 'なし'
+  const record = state.battles[0]
   const unresolvedSerious = state.injuries.filter(
     isUnresolvedSeriousInjury,
   ).length
-  const keyFacts = state.logs
-    .filter((l) => l.facts.length > 0)
-    .slice(-4)
-    .flatMap((l) => l.facts)
 
-  const snapshot = state.battleEntrySnapshot
-  const snapshotLine = snapshot
-    ? `潜在戦闘スナップショット: surprise=${snapshot.surprise}`
-    : '潜在戦闘スナップショット: なし'
+  const beforeHp = Object.fromEntries(party.map((a) => [a.id, a.currentHp]))
+  const beforeMp = Object.fromEntries(party.map((a) => [a.id, a.currentMp]))
+  const beforeMorale = Object.fromEntries(party.map((a) => [a.id, a.morale]))
+  const beforeStatus = Object.fromEntries(
+    party.map((a) => [a.id, a.statusEffects ?? []]),
+  )
 
-  return [
-    `結果: ${outcome}`,
-    `目的達成: ${state.objectiveCompleted ? 'はい' : 'いいえ'}（進捗=${state.objectiveProgress.toFixed(1)}%）`,
-    `経過時間: ${state.elapsedTime.toFixed(1)}`,
-    `残存物資: food=${state.supplies.food}, medicine=${state.supplies.medicine}, tools=${state.supplies.tools}`,
-    `平均HP: ${average(hpValues).toFixed(1)}`,
-    `平均士気: ${average(moraleValues).toFixed(1)}`,
-    `負傷数: ${state.injuries.length}（未解決の重傷=${unresolvedSerious}）`,
-    `犠牲者: ${state.casualties.join(', ') || 'なし'}`,
-    `発見情報: ${infoCount}件（完全=${completeInfo} / 断片=${infoCount - completeInfo}）`,
-    `発見した脅威: ${discoveredThreats}`,
-    `回避した脅威: ${avoidedThreats}`,
-    snapshotLine,
-    `重要ログ:`,
-    ...keyFacts.map((f) => `  - ${f}`),
-  ].join('\n')
-}
+  const pre = state.battleEntrySnapshot!
+  const post = record?.result.finalAdventurerStates ?? []
+  const postHp = Object.fromEntries(post.map((f) => [f.id, f.currentHp]))
+  const postMp = Object.fromEntries(post.map((f) => [f.id, f.currentMp]))
+  const postMorale = Object.fromEntries(post.map((f) => [f.id, f.morale]))
+  const postStatus = Object.fromEntries(
+    post.map((f) => [f.id, f.statusEffects ?? []]),
+  )
 
-function section(title: string, body: string): string {
-  return `## ${title}\n\n${body}\n`
+  const lines: string[] = []
+  lines.push(`## ${title}`)
+  lines.push('')
+  lines.push(`- 依頼シード: ${result.request.seed}`)
+  lines.push(`- パーティ: ${ROLES.join(' / ')}（D級）`)
+  lines.push(`- 遠征結果: ${outcome}`)
+  lines.push(
+    `- 目的達成: ${state.objectiveCompleted ? 'はい' : 'いいえ'}（進捿=${state.objectiveProgress.toFixed(1)}%）`,
+  )
+  lines.push(`- 戦闘結果: ${record?.outcome ?? 'なし'}`)
+  if (record) {
+    lines.push(`- 接敵状況: ${record.entrySnapshot.surprise}`)
+    lines.push(`- 戦闘ラウンド数: ${record.rounds}`)
+    lines.push(`- 敵編成: ${record.enemyComposition}`)
+  }
+  lines.push(
+    `- 負傷: ${state.injuries.length}件（未解決の重傷=${unresolvedSerious}）`,
+  )
+  lines.push(`- 犠牲者: ${state.casualties.join(', ') || 'なし'}`)
+  lines.push(`- 発見情報: ${state.information.length}件`)
+  lines.push('')
+
+  lines.push('### 1. 遠征開始時')
+  lines.push(
+    ...formatMemberSnapshots(
+      party,
+      beforeHp,
+      beforeMp,
+      beforeMorale,
+      beforeStatus,
+    ),
+  )
+  lines.push('')
+
+  lines.push('### 2. 戦闘直前')
+  lines.push(
+    ...formatMemberSnapshots(
+      party,
+      pre.initialHp,
+      pre.initialMp,
+      pre.initialMorale,
+      pre.initialStatusEffects,
+    ),
+  )
+  lines.push('')
+
+  lines.push('### 3. 戦闘直後')
+  lines.push(
+    ...formatMemberSnapshots(party, postHp, postMp, postMorale, postStatus),
+  )
+  lines.push('')
+
+  lines.push('### 4. 帰還後')
+  lines.push(
+    ...formatMemberSnapshots(
+      party,
+      state.partyHp,
+      state.partyMp,
+      state.partyMorale,
+      state.partyStatusEffects,
+    ),
+  )
+  lines.push('')
+
+  if (record) {
+    const summary = state.logs
+      .filter((l) => l.type === 'battleSummary')
+      .flatMap((l) => l.facts)
+    if (summary.length > 0) {
+      lines.push('### 戦闘要約')
+      for (const fact of summary) {
+        lines.push(`- ${fact}`)
+      }
+      lines.push('')
+    }
+
+    if (record.result.discoveredWeaknesses.length > 0) {
+      lines.push(`### 戦闘で発見した弱点`)
+      for (const w of record.result.discoveredWeaknesses) {
+        lines.push(`- ${w}`)
+      }
+      lines.push('')
+    }
+
+    if (
+      state.casualties.length > 0 ||
+      record.result.incapacitatedAdventurers.length > 0
+    ) {
+      lines.push('### 戦闘被害')
+      lines.push(
+        `- 死亡者: ${record.result.deadAdventurers.join(', ') || 'なし'}`,
+      )
+      lines.push(
+        `- 戦闘不能者: ${record.result.incapacitatedAdventurers.join(', ') || 'なし'}`,
+      )
+      lines.push('')
+    }
+  }
+
+  lines.push('### 主要ログ（直近8件）')
+  const recentLogs = state.logs.filter((l) => l.facts.length > 0).slice(-8)
+  for (const log of recentLogs) {
+    for (const fact of log.facts) {
+      lines.push(`- ${fact}`)
+    }
+  }
+  lines.push('')
+
+  return lines.join('\n')
 }
 
 const scenarios = [
   {
-    title: '森林の調査（標準編成）',
-    roles: ['vanguard', 'guardian', 'mage', 'healer'] as AdventurerRole[],
-    request: makeRequest('forest-standard', {
-      environment: 'forest',
-      features: ['traps', 'poorVisibility'],
-    }),
-    seed: 'forest-standard-party',
+    title: 'A. 有利接敵からの完全成功',
+    seed: 'phase3-1-a-10',
   },
   {
-    title: '森林の調査（Scout投入）',
-    roles: ['vanguard', 'scout', 'mage', 'healer'] as AdventurerRole[],
-    request: makeRequest('forest-scout', {
-      environment: 'forest',
-      features: ['traps', 'poorVisibility'],
-    }),
-    seed: 'forest-scout-party',
+    title: 'B. 戦闘勝利だが調査失敗',
+    seed: 'phase3-1-b-12',
   },
   {
-    title: '山岳の調査（不安定地形）',
-    roles: ['vanguard', 'guardian', 'mage', 'healer'] as AdventurerRole[],
-    request: makeRequest('mountain-standard', {
-      environment: 'mountain',
-      features: ['unstableTerrain', 'navigationDifficulty'],
-    }),
-    seed: 'mountain-standard-party',
-  },
-  {
-    title: '魔法遺跡の調査（Mage重視）',
-    roles: ['vanguard', 'mage', 'healer', 'support'] as AdventurerRole[],
-    request: makeRequest('ruins-mage', {
-      environment: 'ruins',
-      features: ['poorVisibility'],
-    }),
-    seed: 'ruins-mage-party',
+    title: 'C. 情報取得後に戦闘撤退',
+    seed: 'phase3-1-c-77',
   },
 ]
 
-let md = '# Phase 3.0 遠征シミュレーター サンプル出力\n\n'
-md += 'investigation 依頼の決定論的シミュレーション結果。\n\n'
+let md = '# Phase 3.1 遠征中戦闘発生と状態往復 サンプル出力\n\n'
+md +=
+  'investigation 依頼で最大1回の戦闘を発生させ、遠征状態と戦闘状態を往復させた決定論的シミュレーション結果。\n\n'
 
 for (const scenario of scenarios) {
-  const party = makeParty(scenario.roles, scenario.seed)
-  const result = runExpedition(scenario.request, party)
-  const summary = summarize(result)
-  const roleLine = scenario.roles.join(' / ')
-  md += section(`${scenario.title}（${roleLine}）`, summary)
-  md += '\n'
+  const request = makeRequest(scenario.seed)
+  const party = makeParty(scenario.seed)
+  const result = runExpedition(request, party)
+  md += summarizeScenario(scenario.title, party, result)
 }
 
 const outputPath = 'PHASE3_EXPEDITION_SAMPLE.md'
