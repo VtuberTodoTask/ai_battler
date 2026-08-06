@@ -50,7 +50,7 @@ function makeRequest(
     ],
     battle: {
       enabled: true,
-      seed: `${seed}-battle`,
+      seed: `${seed}:battle:0`,
       triggerPhase: 'afterExploration',
     },
   }
@@ -130,7 +130,43 @@ function summarizeScenario(
     lines.push(`- 接敵状況: ${record.entrySnapshot.surprise}`)
     lines.push(`- 戦闘ラウンド数: ${record.rounds}`)
     lines.push(`- 敵編成: ${record.enemyComposition}`)
+    lines.push(`- encounterSeed: ${record.encounterSeed}`)
+    lines.push(`- combatSeed: ${record.combatSeed}`)
+    const weaknessNames = record.knownEnemyWeaknesses
+      .map((i) => i.name)
+      .join(', ')
+    const abilityNames = record.knownEnemyAbilities
+      .map((i) => i.name)
+      .join(', ')
+    lines.push(`- 戦闘前に判明していた弱点: ${weaknessNames || 'なし'}`)
+    lines.push(`- 戦闘前に判明していた能力: ${abilityNames || 'なし'}`)
+    const appliedNames = record.appliedIntel.map((i) => i.name).join(', ')
+    const unmatchedNames = record.unmatchedIntel.map((i) => i.name).join(', ')
+    lines.push(`- 敵編成と一致した情報: ${appliedNames || 'なし'}`)
+    lines.push(`- 敵編成と不一致だった情報: ${unmatchedNames || 'なし'}`)
   }
+
+  const activeIds = party
+    .filter(
+      (a) =>
+        !state.casualties.includes(a.id) &&
+        !state.incapacitated.includes(a.id) &&
+        state.partyHp[a.id] > 0,
+    )
+    .map((a) => a.name)
+  const incapacitatedIds = party
+    .filter(
+      (a) =>
+        !state.casualties.includes(a.id) && state.incapacitated.includes(a.id),
+    )
+    .map((a) => a.name)
+  const deadIds = party
+    .filter((a) => state.casualties.includes(a.id))
+    .map((a) => a.name)
+  lines.push(`- 活動可能者: ${activeIds.join(', ') || 'なし'}`)
+  lines.push(`- 戦闘不能者: ${incapacitatedIds.join(', ') || 'なし'}`)
+  lines.push(`- 死亡者: ${deadIds.join(', ') || 'なし'}`)
+
   lines.push(
     `- 負傷: ${state.injuries.length}件（未解決の重傷=${unresolvedSerious}）`,
   )
