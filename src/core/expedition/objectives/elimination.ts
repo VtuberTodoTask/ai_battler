@@ -6,9 +6,11 @@ import {
 } from '../../models/types.ts'
 import {
   EliminationObjectiveState,
+  ExpeditionBattleResolvedContext,
   ExpeditionExecutionContext,
   ExpeditionLogEntry,
   ExpeditionObjectiveHandler,
+  ExpeditionObjectiveState,
   ExpeditionOutcome,
   ExpeditionOutcomeContext,
   ExpeditionRequest,
@@ -433,7 +435,7 @@ export function runEliminationObjective(
 
 export function initializeEliminationObjectiveState(
   request: ExpeditionRequest,
-): EliminationObjectiveState {
+): ExpeditionObjectiveState {
   if (request.elimination === undefined) {
     throw new Error('Elimination request requires elimination configuration')
   }
@@ -453,6 +455,15 @@ export function initializeEliminationObjectiveState(
 }
 
 export const eliminationHandler: ExpeditionObjectiveHandler = {
+  flow: {
+    preparation: true,
+    approach: true,
+    exploration: true,
+    battle: 'required',
+    objective: true,
+    return: true,
+    aftermath: true,
+  },
   validateRequest(request: ExpeditionRequest): void {
     if (request.elimination === undefined) {
       throw new Error('Elimination request requires elimination configuration')
@@ -465,6 +476,18 @@ export const eliminationHandler: ExpeditionObjectiveHandler = {
     }
   },
   initializeObjectiveState: initializeEliminationObjectiveState,
+  onBattleResolved(context: ExpeditionBattleResolvedContext): void {
+    const obj = context.state.objectiveState
+    if (obj !== undefined && obj.type === 'elimination') {
+      obj.requiredTargetIds = context.initialEnemyIds
+    }
+    resolveEliminationTargets(
+      context.state,
+      context.battleResult,
+      context.request,
+      context.battleId,
+    )
+  },
   runObjective(context: ExpeditionExecutionContext): void {
     runEliminationObjective(
       context.request,

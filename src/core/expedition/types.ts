@@ -182,7 +182,7 @@ export interface ExpeditionState {
   battleEntrySnapshot?: BattleEntryConditions
   battles: ExpeditionBattleRecord[]
   battleOutcome?: BattleOutcome
-  objectiveState?: InvestigationObjectiveState | EliminationObjectiveState
+  objectiveState?: ExpeditionObjectiveState
   metadata?: Record<string, unknown>
 }
 
@@ -294,11 +294,25 @@ export interface ExpeditionFlowDefinition {
   aftermath: boolean
 }
 
+export interface ExpeditionBattleResolvedContext extends ExpeditionExecutionContext {
+  battleId: string
+  battleResult: BattleResult
+  battleRecord: ExpeditionBattleRecord
+  initialEnemyIds: string[]
+}
+
+export interface ExpeditionBattleExecutionResult {
+  battleId: string
+  battleResult: BattleResult
+  battleRecord: ExpeditionBattleRecord
+  initialEnemyIds: string[]
+}
+
 export interface ExpeditionObjectiveHandler {
+  flow: ExpeditionFlowDefinition
   validateRequest(request: ExpeditionRequest): void
-  initializeObjectiveState(
-    request: ExpeditionRequest,
-  ): InvestigationObjectiveState | EliminationObjectiveState
+  initializeObjectiveState(request: ExpeditionRequest): ExpeditionObjectiveState
+  onBattleResolved?(context: ExpeditionBattleResolvedContext): void
   runObjective(context: ExpeditionExecutionContext): void
   finalizeObjectiveState(context: ExpeditionExecutionContext): {
     objectiveCompleted: boolean

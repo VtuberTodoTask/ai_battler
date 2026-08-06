@@ -6,6 +6,7 @@ import { SeededRng } from '../rng/seededRng.ts'
 import { runExpedition } from './expedition.ts'
 import { initializeExpeditionState } from './state.ts'
 import { expeditionTestInternals } from './test-internals.ts'
+import { initializeEliminationObjectiveState } from './objectives/elimination.ts'
 
 describe('Elimination state consistency', () => {
   it('has no duplicate requiredTargetIds', () => {
@@ -122,6 +123,7 @@ describe('Elimination unknown targets', () => {
       request,
       makeEliminationParty('unknown-resolve', 'S'),
     )
+    state.objectiveState = initializeEliminationObjectiveState(request)
     const obj = state.objectiveState as EliminationObjectiveState
     obj.requiredTargetIds = ['e-0', 'e-1', 'e-2', 'e-3']
     const result = {
@@ -181,6 +183,7 @@ describe('Elimination unknown targets', () => {
     const request = makeEliminationRequest('unknown-outcome', 'S', true)
     const party = makeEliminationParty('unknown-outcome', 'S')
     const state = initializeExpeditionState(request, party)
+    state.objectiveState = initializeEliminationObjectiveState(request)
     const obj = state.objectiveState as EliminationObjectiveState
     obj.requiredTargetIds = ['e-0', 'e-1']
     obj.defeatedTargetIds = ['e-0']
@@ -206,6 +209,7 @@ describe('Elimination unknown targets', () => {
       request,
       makeEliminationParty('unknown-logs', 'S'),
     )
+    state.objectiveState = initializeEliminationObjectiveState(request)
     const obj = state.objectiveState as EliminationObjectiveState
     obj.requiredTargetIds = ['e-0', 'e-1', 'e-2', 'e-3']
     const result = {
@@ -249,6 +253,7 @@ describe('Elimination zero defeated targets', () => {
       request,
       makeEliminationParty('zero-defeated', 'S'),
     )
+    state.objectiveState = initializeEliminationObjectiveState(request)
     const obj = state.objectiveState as EliminationObjectiveState
     obj.requiredTargetIds = ['e-0', 'e-1']
     obj.defeatedTargetIds = []
@@ -323,6 +328,7 @@ describe('Elimination confirmation on retreat', () => {
       request,
       makeEliminationParty('retreat-confirm', 'S'),
     )
+    state.objectiveState = initializeEliminationObjectiveState(request)
     const obj = state.objectiveState as EliminationObjectiveState
     obj.requiredTargetIds = ['e-0', 'e-1']
     obj.defeatedTargetIds = ['e-0']

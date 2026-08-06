@@ -11,6 +11,7 @@ import type { EliminationObjectiveState } from './types.ts'
 import { runExpedition } from './expedition.ts'
 import { initializeExpeditionState } from './state.ts'
 import { expeditionTestInternals } from './test-internals.ts'
+import { initializeEliminationObjectiveState } from './objectives/elimination.ts'
 
 describe('Outcome separation', () => {
   function outcomeWith(
@@ -138,6 +139,7 @@ describe('Elimination target fixation', () => {
       request,
       makeEliminationParty('summon-test', 'S'),
     )
+    state.objectiveState = initializeEliminationObjectiveState(request)
     const requiredIds = ['e-0', 'e-1', 'e-2', 'e-3']
     const obj = state.objectiveState as EliminationObjectiveState
     obj.requiredTargetIds = [...requiredIds]
@@ -200,6 +202,7 @@ describe('Elimination progress', () => {
       request,
       makeEliminationParty('progress-test', 'S'),
     )
+    state.objectiveState = initializeEliminationObjectiveState(request)
     const obj = state.objectiveState as EliminationObjectiveState
     obj.requiredTargetIds = ['e-0', 'e-1', 'e-2', 'e-3']
     const result = {

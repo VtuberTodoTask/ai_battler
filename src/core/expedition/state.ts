@@ -2,7 +2,6 @@ import { Adventurer, StatusEffect } from '../models/types.ts'
 import {
   ExpeditionEffect,
   ExpeditionFeature,
-  ExpeditionObjectiveState,
   ExpeditionRequest,
   ExpeditionState,
 } from './types.ts'
@@ -85,25 +84,6 @@ export function initializeExpeditionState(
     partyStatusEffects[a.id] = deepClone(a.statusEffects)
   }
 
-  const objectiveState: ExpeditionObjectiveState | undefined =
-    request.objectiveType === 'investigation'
-      ? { type: 'investigation' }
-      : request.objectiveType === 'elimination' && request.elimination
-        ? {
-            type: 'elimination',
-            mode: request.elimination.mode,
-            confirmationRequired: request.elimination.confirmationRequired,
-            requiredTargetIds: [],
-            defeatedTargetIds: [],
-            escapedTargetIds: [],
-            survivingTargetIds: [],
-            unknownTargetIds: [],
-            confirmedTargetIds: [],
-            progress: 0,
-            completed: false,
-          }
-        : undefined
-
   return {
     currentPhase: 'preparation',
     elapsedTime: 0,
@@ -129,7 +109,7 @@ export function initializeExpeditionState(
     avoidedThreats: [],
     logs: [],
     battles: [],
-    objectiveState,
+    objectiveState: undefined,
     metadata: {
       preparationRouteBonus: 0,
       approachTimeBonus: 0,

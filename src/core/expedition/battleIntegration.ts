@@ -3,6 +3,7 @@ import { Adventurer, BattleResult } from '../models/types.ts'
 import {
   BattleIntel,
   EnvironmentEffect,
+  ExpeditionBattleExecutionResult,
   ExpeditionBattleRecord,
   ExpeditionRequest,
   ExpeditionState,
@@ -16,7 +17,6 @@ import { convertBattleInjuries } from './injuries.ts'
 import { deepClone } from '../util.ts'
 import { generateEncounter } from '../generators/encounterGenerator.ts'
 import { getActiveParty } from './state.ts'
-import { resolveEliminationTargets } from './objectives/elimination.ts'
 import { runBattle } from '../battle/battle.ts'
 
 export function buildBattleParty(
@@ -79,7 +79,7 @@ export function applyBattleResultToExpedition(
   unmatchedWeaknessIntel: BattleIntel[],
   matchedAbilityIntel: BattleIntel[],
   unmatchedAbilityIntel: BattleIntel[],
-): void {
+): ExpeditionBattleRecord {
   state.battleOutcome = result.outcome
 
   state.incapacitated = result.finalAdventurerStates
@@ -183,13 +183,15 @@ export function applyBattleResultToExpedition(
       ...expeditionInjuries.map((i) => i.adventurerId),
     ]),
   )
+
+  return record
 }
 
 export function runExpeditionBattle(
   request: ExpeditionRequest,
   party: Adventurer[],
   state: ExpeditionState,
-): void {
+): ExpeditionBattleExecutionResult {
   const entry = state.battleEntrySnapshot!
   const battleId = `battle-${state.battles.length}`
   const config = request.battle
@@ -210,10 +212,7 @@ export function runExpeditionBattle(
     allowedSpecies: config?.allowedSpecies,
     bossAllowed: config?.bossAllowed,
   })
-
-  if (state.objectiveState && state.objectiveState.type === 'elimination') {
-    state.objectiveState.requiredTargetIds = enemies.map((enemy) => enemy.id)
-  }
+  const initialEnemyIds = enemies.map((enemy) => enemy.id)
 
   const { matched: matchedWeaknessIntel, unmatched: unmatchedWeaknessIntel } =
     applyKnownEnemyWeaknesses(
@@ -246,7 +245,7 @@ export function runExpeditionBattle(
   })
 
   state.currentPhase = 'battle'
-  applyBattleResultToExpedition(
+  const record = applyBattleResultToExpedition(
     state,
     result,
     request,
@@ -261,5 +260,10 @@ export function runExpeditionBattle(
     unmatchedAbilityIntel,
   )
 
-  resolveEliminationTargets(state, result, request, battleId)
+  return {
+    battleId,
+    battleResult: result,
+    battleRecord: record,
+    initialEnemyIds,
+  }
 }

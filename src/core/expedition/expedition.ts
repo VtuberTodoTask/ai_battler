@@ -30,32 +30,10 @@ export const EXPEDITION_PHASES = [
   'aftermath',
 ] as const
 
-const FLOW_BY_OBJECTIVE: Record<
-  'investigation' | 'elimination',
-  ExpeditionFlowDefinition
-> = {
-  investigation: {
-    preparation: true,
-    approach: true,
-    exploration: true,
-    battle: 'optional',
-    objective: true,
-    return: true,
-    aftermath: true,
-  },
-  elimination: {
-    preparation: true,
-    approach: true,
-    exploration: true,
-    battle: 'required',
-    objective: true,
-    return: true,
-    aftermath: true,
-  },
-}
+type ImplementedObjectiveType = 'investigation' | 'elimination'
 
-const OBJECTIVE_HANDLERS: Record<
-  'investigation' | 'elimination',
+export const OBJECTIVE_HANDLERS: Record<
+  ImplementedObjectiveType,
   ExpeditionObjectiveHandler
 > = {
   investigation: investigationHandler,
@@ -85,8 +63,9 @@ export function runExpedition(
     throw new Error(`Unsupported objectiveType in Phase 3.2: ${objectiveType}`)
   }
 
-  const handler = OBJECTIVE_HANDLERS[objectiveType]
-  const flow = FLOW_BY_OBJECTIVE[objectiveType]
+  const handler =
+    OBJECTIVE_HANDLERS[objectiveType as 'investigation' | 'elimination']
+  const flow = handler.flow
 
   handler.validateRequest(request)
 
@@ -117,7 +96,14 @@ export function runExpedition(
       flow.battle === 'required' ||
       (request.battle !== undefined && request.battle.enabled === true)
     if (battleEnabled && getActiveParty(party, state).length > 0) {
-      runExpeditionBattle(request, party, state)
+      const battleExecution = runExpeditionBattle(request, party, state)
+      handler.onBattleResolved?.({
+        ...context,
+        battleId: battleExecution.battleId,
+        battleResult: battleExecution.battleResult,
+        battleRecord: battleExecution.battleRecord,
+        initialEnemyIds: battleExecution.initialEnemyIds,
+      })
     }
   }
 

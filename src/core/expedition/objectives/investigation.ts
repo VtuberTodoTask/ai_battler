@@ -7,7 +7,7 @@ import {
   ExpeditionOutcomeContext,
   ExpeditionRequest,
   ExpeditionState,
-  InvestigationObjectiveState,
+  ExpeditionObjectiveState,
 } from '../types.ts'
 import { SeededRng } from '../../rng/seededRng.ts'
 import { addLog, logEntry } from '../logs.ts'
@@ -187,17 +187,24 @@ export function determineInvestigationOutcome(
   return outcome
 }
 
-export function initializeInvestigationObjectiveState(
-  _request: ExpeditionRequest,
-): InvestigationObjectiveState {
-  return { type: 'investigation' }
-}
-
 export const investigationHandler: ExpeditionObjectiveHandler = {
+  flow: {
+    preparation: true,
+    approach: true,
+    exploration: true,
+    battle: 'optional',
+    objective: true,
+    return: true,
+    aftermath: true,
+  },
   validateRequest() {
     // investigation accepts the default request shape
   },
-  initializeObjectiveState: initializeInvestigationObjectiveState,
+  initializeObjectiveState(
+    _request: ExpeditionRequest,
+  ): ExpeditionObjectiveState {
+    return { type: 'investigation' }
+  },
   runObjective(context: ExpeditionExecutionContext): void {
     runObjective(context.request, context.party, context.state, context.rng)
   },
