@@ -1,0 +1,601 @@
+{
+  "outcome": "partialSuccess",
+  "state": {
+    "avoidedThreats": ["poorVisibility", "traps"],
+    "battleEntrySnapshot": {
+      "environmentEffects": [
+        {
+          "type": "lighting",
+          "value": "dark"
+        }
+      ],
+      "initialHp": {
+        "D-healer-phase3-1-c-77-healer-3": 50,
+        "D-mage-phase3-1-c-77-mage-2": 52,
+        "D-ranger-phase3-1-c-77-ranger-1": 39,
+        "D-scout-phase3-1-c-77-scout-0": 56
+      },
+      "initialMorale": {
+        "D-healer-phase3-1-c-77-healer-3": 40,
+        "D-mage-phase3-1-c-77-mage-2": 40,
+        "D-ranger-phase3-1-c-77-ranger-1": 33,
+        "D-scout-phase3-1-c-77-scout-0": 34
+      },
+      "initialMp": {
+        "D-healer-phase3-1-c-77-healer-3": 41,
+        "D-mage-phase3-1-c-77-mage-2": 39,
+        "D-ranger-phase3-1-c-77-ranger-1": 4,
+        "D-scout-phase3-1-c-77-scout-0": 6
+      },
+      "initialStatusEffects": {
+        "D-healer-phase3-1-c-77-healer-3": [],
+        "D-mage-phase3-1-c-77-mage-2": [],
+        "D-ranger-phase3-1-c-77-ranger-1": [],
+        "D-scout-phase3-1-c-77-scout-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "enemyAdvantage"
+    },
+    "battleOutcome": "retreat",
+    "battles": [
+      {
+        "combatSeed": "phase3-1-c-77:battle:0:combat",
+        "deadAdventurerIds": [],
+        "discoveredWeaknesses": [],
+        "encounterSeed": "phase3-1-c-77:battle:0:encounter",
+        "enemyComposition": "aberrationx4",
+        "enemyIds": [
+          "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:0",
+          "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:1",
+          "C-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:2",
+          "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:3"
+        ],
+        "entrySnapshot": {
+          "environmentEffects": [
+            {
+              "type": "lighting",
+              "value": "dark"
+            }
+          ],
+          "initialHp": {
+            "D-healer-phase3-1-c-77-healer-3": 50,
+            "D-mage-phase3-1-c-77-mage-2": 52,
+            "D-ranger-phase3-1-c-77-ranger-1": 39,
+            "D-scout-phase3-1-c-77-scout-0": 56
+          },
+          "initialMorale": {
+            "D-healer-phase3-1-c-77-healer-3": 40,
+            "D-mage-phase3-1-c-77-mage-2": 40,
+            "D-ranger-phase3-1-c-77-ranger-1": 33,
+            "D-scout-phase3-1-c-77-scout-0": 34
+          },
+          "initialMp": {
+            "D-healer-phase3-1-c-77-healer-3": 41,
+            "D-mage-phase3-1-c-77-mage-2": 39,
+            "D-ranger-phase3-1-c-77-ranger-1": 4,
+            "D-scout-phase3-1-c-77-scout-0": 6
+          },
+          "initialStatusEffects": {
+            "D-healer-phase3-1-c-77-healer-3": [],
+            "D-mage-phase3-1-c-77-mage-2": [],
+            "D-ranger-phase3-1-c-77-ranger-1": [],
+            "D-scout-phase3-1-c-77-scout-0": []
+          },
+          "knownEnemyAbilities": [],
+          "knownEnemyWeaknesses": [],
+          "surprise": "enemyAdvantage"
+        },
+        "id": "battle-0",
+        "incapacitatedAdventurerIds": [],
+        "injuries": [],
+        "knownEnemyAbilities": [],
+        "knownEnemyWeaknesses": [],
+        "matchedAbilityIntel": [],
+        "matchedWeaknessIntel": [],
+        "outcome": "retreat",
+        "phase": "battle",
+        "result": {
+          "abilityUsage": {},
+          "adventurerActionCount": 0,
+          "contactResult": {
+            "effects": {
+              "enemyInitiativeBonus": 3,
+              "side": "enemy"
+            },
+            "enemyStealth": 0,
+            "partyScouting": 0,
+            "roll": 100,
+            "successChance": 0,
+            "type": "failure"
+          },
+          "deadAdventurers": [],
+          "defeatedEnemies": [],
+          "discoveredWeaknesses": [],
+          "enemyActionCount": 0,
+          "enemyDamageDealt": 0,
+          "escapedEnemies": [],
+          "finalAdventurerStates": [
+            {
+              "alive": true,
+              "currentHp": 56,
+              "currentMp": 6,
+              "dead": false,
+              "id": "D-scout-phase3-1-c-77-scout-0",
+              "incapacitated": false,
+              "morale": 34,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 39,
+              "currentMp": 4,
+              "dead": false,
+              "id": "D-ranger-phase3-1-c-77-ranger-1",
+              "incapacitated": false,
+              "morale": 33,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 52,
+              "currentMp": 39,
+              "dead": false,
+              "id": "D-mage-phase3-1-c-77-mage-2",
+              "incapacitated": false,
+              "morale": 40,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 50,
+              "currentMp": 41,
+              "dead": false,
+              "id": "D-healer-phase3-1-c-77-healer-3",
+              "incapacitated": false,
+              "morale": 40,
+              "statusEffects": []
+            }
+          ],
+          "incapacitatedAdventurers": [],
+          "injuries": [],
+          "logs": [
+            {
+              "actionType": "contact",
+              "metadata": {
+                "contactType": "failure"
+              },
+              "phase": "contact",
+              "result": "遠征側の不利により敵に先制された。",
+              "round": 0
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-healer-phase3-1-c-77-healer-3",
+              "phase": "retreat",
+              "result": "レオ アッシュがパーティ撤退を試みた。成功",
+              "roll": 34,
+              "round": 1,
+              "successChance": 66.25
+            }
+          ],
+          "outcome": "retreat",
+          "partyDamageDealt": 0,
+          "retreatAttempts": [
+            {
+              "aliveCount": 4,
+              "approved": true,
+              "attemptCount": 1,
+              "attempted": true,
+              "averageMorale": 36.75,
+              "enemyThreat": 24.336,
+              "healerAlive": true,
+              "incapacitatedCount": 0,
+              "leaderId": "D-healer-phase3-1-c-77-healer-3",
+              "matchedReasons": ["lowMorale"],
+              "moraleThreshold": 40.1,
+              "partyHpRatio": 0.9666666666666667,
+              "partyThreat": 15.6,
+              "proposerHpRatio": 1,
+              "proposerId": "D-healer-phase3-1-c-77-healer-3",
+              "proposerMorale": 40,
+              "proposerRole": "healer",
+              "reason": "lowMorale",
+              "retreatHpThreshold": 0.24500000000000002,
+              "roll": 34,
+              "round": 1,
+              "success": true,
+              "successChance": 66.25
+            }
+          ],
+          "retreatDiagnostic": {
+            "aliveCount": 4,
+            "approved": true,
+            "attemptCount": 1,
+            "attempted": true,
+            "averageMorale": 36.75,
+            "enemyThreat": 24.336,
+            "healerAlive": true,
+            "incapacitatedCount": 0,
+            "leaderId": "D-healer-phase3-1-c-77-healer-3",
+            "matchedReasons": ["lowMorale"],
+            "moraleThreshold": 40.1,
+            "partyHpRatio": 0.9666666666666667,
+            "partyThreat": 15.6,
+            "proposerHpRatio": 1,
+            "proposerId": "D-healer-phase3-1-c-77-healer-3",
+            "proposerMorale": 40,
+            "proposerRole": "healer",
+            "reason": "lowMorale",
+            "retreatHpThreshold": 0.24500000000000002,
+            "roll": 34,
+            "round": 1,
+            "success": true,
+            "successChance": 66.25
+          },
+          "retreatResult": {
+            "chance": 66.25,
+            "roll": 34,
+            "side": "party",
+            "success": true
+          },
+          "rounds": 1,
+          "seed": "phase3-1-c-77:battle:0:combat",
+          "survivingAdventurers": [
+            "D-scout-phase3-1-c-77-scout-0",
+            "D-ranger-phase3-1-c-77-ranger-1",
+            "D-mage-phase3-1-c-77-mage-2",
+            "D-healer-phase3-1-c-77-healer-3"
+          ],
+          "survivingEnemies": [
+            "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:0",
+            "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:1",
+            "C-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:2",
+            "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:3"
+          ]
+        },
+        "rounds": 1,
+        "survivingAdventurerIds": [
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-ranger-phase3-1-c-77-ranger-1",
+          "D-mage-phase3-1-c-77-mage-2",
+          "D-healer-phase3-1-c-77-healer-3"
+        ],
+        "trigger": "afterExploration",
+        "unmatchedAbilityIntel": [],
+        "unmatchedWeaknessIntel": []
+      }
+    ],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": ["traps", "poorVisibility"],
+    "elapsedTime": 11.9875,
+    "incapacitated": [],
+    "information": [
+      {
+        "completeness": "complete",
+        "description": "遺跡の配置がわかる",
+        "id": "info-2",
+        "name": "古い地図",
+        "source": "scouting"
+      },
+      {
+        "completeness": "complete",
+        "description": "敵が近くにいる証拠",
+        "id": "info-1",
+        "name": "敵の痕跡",
+        "source": "scouting"
+      },
+      {
+        "completeness": "fragment",
+        "description": "魔法の気配",
+        "id": "info-3",
+        "name": "魔力の残滓（断片）",
+        "source": "monsterKnowledge"
+      }
+    ],
+    "injuries": [
+      {
+        "adventurerId": "D-ranger-phase3-1-c-77-ranger-1",
+        "cause": "traps",
+        "hpLoss": 6,
+        "id": "injury-0-666712",
+        "status": "treated",
+        "type": "light"
+      }
+    ],
+    "logs": [
+      {
+        "actorIds": [
+          "D-ranger-phase3-1-c-77-ranger-1",
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-healer-phase3-1-c-77-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 56,
+          "result": "failure",
+          "roll": 82,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -3
+          },
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "出発準備が遅れ、初期士気が低下した",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [
+          "D-ranger-phase3-1-c-77-ranger-1",
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-healer-phase3-1-c-77-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 51,
+          "result": "criticalFailure",
+          "roll": 99,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -5
+          }
+        ],
+        "facts": ["ルーカス アッシュが接近経路を見失い、迂回した"],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-mage-phase3-1-c-77-mage-2",
+          "D-healer-phase3-1-c-77-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 61,
+          "result": "partialSuccess",
+          "roll": 81,
+          "skill": "trapDetection"
+        },
+        "effects": [
+          {
+            "targetId": "D-ranger-phase3-1-c-77-ranger-1",
+            "type": "hpDamage",
+            "value": 6
+          },
+          {
+            "type": "moraleChange",
+            "value": -3
+          }
+        ],
+        "facts": ["罠に遭遇した", "ルーカス アッシュが6のダメージを受けた"],
+        "phase": "approach",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-ranger-phase3-1-c-77-ranger-1",
+          "D-mage-phase3-1-c-77-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 20,
+          "result": "failure",
+          "roll": 56,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-ranger-phase3-1-c-77-ranger-1",
+          "D-mage-phase3-1-c-77-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 20,
+          "result": "criticalSuccess",
+          "roll": 1,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": [
+          "エルナ ピークが調査対象に関する手がかりを発見した",
+          "古い地図に関する情報を得た"
+        ],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-ranger-phase3-1-c-77-ranger-1",
+          "D-mage-phase3-1-c-77-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 35,
+          "result": "success",
+          "roll": 16,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": [
+          "エルナ ピークが調査対象に関する手がかりを発見した",
+          "敵の痕跡に関する情報を得た"
+        ],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-ranger-phase3-1-c-77-ranger-1",
+          "D-mage-phase3-1-c-77-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 69,
+          "result": "success",
+          "roll": 29,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["エルナ ピークが視界不良を事前に察知・回避した"],
+        "phase": "exploration",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["戦闘が1ラウンドでretreatとなった", "接敵結果: failure"],
+        "phase": "battle",
+        "targetIds": [],
+        "type": "battleSummary"
+      },
+      {
+        "actorIds": [
+          "D-ranger-phase3-1-c-77-ranger-1",
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-healer-phase3-1-c-77-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 51,
+          "result": "failure",
+          "roll": 77,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": ["ルーカス アッシュが帰還経路を見失い、迂回した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "D-scout-phase3-1-c-77-scout-0",
+          "D-mage-phase3-1-c-77-mage-2",
+          "D-healer-phase3-1-c-77-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 66,
+          "result": "success",
+          "roll": 62,
+          "skill": "trapDetection"
+        },
+        "effects": [],
+        "facts": [
+          "エルナ ピークが罠を事前に察知・回避した",
+          "魔力の残滓（断片）に関する情報を得た"
+        ],
+        "phase": "return",
+        "type": "hazard"
+      },
+      {
+        "actorIds": ["D-healer-phase3-1-c-77-healer-3"],
+        "check": {
+          "effectiveValue": 83,
+          "result": "success",
+          "roll": 70,
+          "skill": "firstAid"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "targetId": "D-ranger-phase3-1-c-77-ranger-1",
+            "type": "hpHeal",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "レオ アッシュが帰還中の負傷者を手当てした"
+        ],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": ["D-healer-phase3-1-c-77-healer-3"],
+        "check": {
+          "effectiveValue": 88,
+          "result": "partialSuccess",
+          "roll": 89,
+          "skill": "healing"
+        },
+        "effects": [],
+        "facts": ["レオ アッシュによる治療判定: partialSuccess"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["依頼目的を部分的に達成した", "治療は不十分だった"],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": -1,
+      "requestFeatures": ["traps", "poorVisibility"],
+      "returnTimeBonus": 0,
+      "threatFeatures": ["traps", "poorVisibility"]
+    },
+    "objectiveCompleted": false,
+    "objectiveProgress": 40,
+    "objectiveState": {
+      "type": "investigation"
+    },
+    "partyHp": {
+      "D-healer-phase3-1-c-77-healer-3": 50,
+      "D-mage-phase3-1-c-77-mage-2": 52,
+      "D-ranger-phase3-1-c-77-ranger-1": 44,
+      "D-scout-phase3-1-c-77-scout-0": 56
+    },
+    "partyMorale": {
+      "D-healer-phase3-1-c-77-healer-3": 38,
+      "D-mage-phase3-1-c-77-mage-2": 38,
+      "D-ranger-phase3-1-c-77-ranger-1": 31,
+      "D-scout-phase3-1-c-77-scout-0": 32
+    },
+    "partyMp": {
+      "D-healer-phase3-1-c-77-healer-3": 41,
+      "D-mage-phase3-1-c-77-mage-2": 39,
+      "D-ranger-phase3-1-c-77-ranger-1": 4,
+      "D-scout-phase3-1-c-77-scout-0": 6
+    },
+    "partyStatusEffects": {
+      "D-healer-phase3-1-c-77-healer-3": [],
+      "D-mage-phase3-1-c-77-mage-2": [],
+      "D-ranger-phase3-1-c-77-ranger-1": [],
+      "D-scout-phase3-1-c-77-scout-0": []
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 3,
+      "tools": 1
+    }
+  }
+}

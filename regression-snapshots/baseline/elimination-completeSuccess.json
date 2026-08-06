@@ -1,0 +1,1775 @@
+{
+  "outcome": "completeSuccess",
+  "state": {
+    "avoidedThreats": [],
+    "battleEntrySnapshot": {
+      "environmentEffects": [
+        {
+          "type": "lighting",
+          "value": "dark"
+        }
+      ],
+      "initialHp": {
+        "S-guardian-s37-guardian-1": 92,
+        "S-healer-s37-healer-3": 70,
+        "S-mage-s37-mage-2": 66,
+        "S-vanguard-s37-vanguard-0": 80
+      },
+      "initialMorale": {
+        "S-guardian-s37-guardian-1": 70,
+        "S-healer-s37-healer-3": 65,
+        "S-mage-s37-mage-2": 65,
+        "S-vanguard-s37-vanguard-0": 63
+      },
+      "initialMp": {
+        "S-guardian-s37-guardian-1": 7,
+        "S-healer-s37-healer-3": 56,
+        "S-mage-s37-mage-2": 65,
+        "S-vanguard-s37-vanguard-0": 7
+      },
+      "initialStatusEffects": {
+        "S-guardian-s37-guardian-1": [],
+        "S-healer-s37-healer-3": [],
+        "S-mage-s37-mage-2": [],
+        "S-vanguard-s37-vanguard-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "enemyAdvantage"
+    },
+    "battleOutcome": "victory",
+    "battles": [
+      {
+        "combatSeed": "s37:battle:0:combat",
+        "deadAdventurerIds": [],
+        "discoveredWeaknesses": [],
+        "encounterSeed": "s37:battle:0:encounter",
+        "enemyComposition": "undeadx4",
+        "enemyIds": [
+          "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+          "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+          "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+          "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+        ],
+        "entrySnapshot": {
+          "environmentEffects": [
+            {
+              "type": "lighting",
+              "value": "dark"
+            }
+          ],
+          "initialHp": {
+            "S-guardian-s37-guardian-1": 92,
+            "S-healer-s37-healer-3": 70,
+            "S-mage-s37-mage-2": 66,
+            "S-vanguard-s37-vanguard-0": 80
+          },
+          "initialMorale": {
+            "S-guardian-s37-guardian-1": 70,
+            "S-healer-s37-healer-3": 65,
+            "S-mage-s37-mage-2": 65,
+            "S-vanguard-s37-vanguard-0": 63
+          },
+          "initialMp": {
+            "S-guardian-s37-guardian-1": 7,
+            "S-healer-s37-healer-3": 56,
+            "S-mage-s37-mage-2": 65,
+            "S-vanguard-s37-vanguard-0": 7
+          },
+          "initialStatusEffects": {
+            "S-guardian-s37-guardian-1": [],
+            "S-healer-s37-healer-3": [],
+            "S-mage-s37-mage-2": [],
+            "S-vanguard-s37-vanguard-0": []
+          },
+          "knownEnemyAbilities": [],
+          "knownEnemyWeaknesses": [],
+          "surprise": "enemyAdvantage"
+        },
+        "id": "battle-0",
+        "incapacitatedAdventurerIds": [],
+        "injuries": [],
+        "knownEnemyAbilities": [],
+        "knownEnemyWeaknesses": [],
+        "matchedAbilityIntel": [],
+        "matchedWeaknessIntel": [],
+        "outcome": "victory",
+        "phase": "battle",
+        "result": {
+          "abilityUsage": {},
+          "adventurerActionCount": 40,
+          "contactResult": {
+            "effects": {
+              "enemyInitiativeBonus": 3,
+              "side": "enemy"
+            },
+            "enemyStealth": 0,
+            "partyScouting": 0,
+            "roll": 100,
+            "successChance": 0,
+            "type": "failure"
+          },
+          "deadAdventurers": [],
+          "defeatedEnemies": [
+            "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+            "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+            "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+            "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+          ],
+          "discoveredWeaknesses": [],
+          "enemyActionCount": 23,
+          "enemyDamageDealt": 17,
+          "escapedEnemies": [],
+          "finalAdventurerStates": [
+            {
+              "alive": true,
+              "currentHp": 63,
+              "currentMp": 7,
+              "dead": false,
+              "id": "S-vanguard-s37-vanguard-0",
+              "incapacitated": false,
+              "morale": 63,
+              "statusEffects": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ]
+            },
+            {
+              "alive": true,
+              "currentHp": 92,
+              "currentMp": 7,
+              "dead": false,
+              "id": "S-guardian-s37-guardian-1",
+              "incapacitated": false,
+              "morale": 70,
+              "statusEffects": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ]
+            },
+            {
+              "alive": true,
+              "currentHp": 66,
+              "currentMp": 15,
+              "dead": false,
+              "id": "S-mage-s37-mage-2",
+              "incapacitated": false,
+              "morale": 65,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 70,
+              "currentMp": 56,
+              "dead": false,
+              "id": "S-healer-s37-healer-3",
+              "incapacitated": false,
+              "morale": 65,
+              "statusEffects": []
+            }
+          ],
+          "incapacitatedAdventurers": [],
+          "injuries": [],
+          "logs": [
+            {
+              "actionType": "contact",
+              "metadata": {
+                "contactType": "failure"
+              },
+              "phase": "contact",
+              "result": "遠征側の不利により敵に先制された。",
+              "round": 0
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 1,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム hit 亡霊屍の群れ for 15 damage",
+              "roll": 72,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 85,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド missed",
+              "roll": 71,
+              "round": 1,
+              "successChance": 69,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド hit 亡霊屍の群れ for 15 damage",
+              "roll": 87,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 92,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 missed",
+              "roll": 53,
+              "round": 1,
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "亡霊屍の群れ missed",
+              "roll": 91,
+              "round": 1,
+              "successChance": 9,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "蘇った屍の群れ missed",
+              "roll": 98,
+              "round": 1,
+              "successChance": 14,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "朽ちたスケルトン子分 missed",
+              "roll": 50,
+              "round": 1,
+              "successChance": 6,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド missed",
+              "roll": 91,
+              "round": 2,
+              "successChance": 69,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 2,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 16,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム hit 亡霊屍の群れ for 16 damage",
+              "roll": 79,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 85,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 17,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド hit 亡霊屍の群れ for 17 damage",
+              "roll": 89,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 92,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "蘇った屍の群れ missed",
+              "roll": 85,
+              "round": 2,
+              "successChance": 14,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 2,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "S-guardian-s37-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 hit トール ジェム for 2 damage",
+              "roll": 19,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "亡霊屍の群れ missed",
+              "roll": 73,
+              "round": 2,
+              "successChance": 9,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "朽ちたスケルトン子分 missed",
+              "roll": 73,
+              "round": 2,
+              "successChance": 6,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 3,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 17,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド hit 朽ちたスケルトン子分 for 17 damage",
+              "roll": 21,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 94,
+              "targetIds": [
+                "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド hit 亡霊屍の群れ for 11 damage",
+              "roll": 22,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 69,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "亡霊屍の群れが戦闘不能になった。",
+              "round": 3,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム missed",
+              "roll": 76,
+              "round": 3,
+              "successChance": 47,
+              "targetIds": [
+                "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "damage": 5,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "S-guardian-s37-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "蘇った屍の群れ hit トール ジェム for 5 damage",
+              "roll": 8,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 14,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 missed",
+              "roll": 39,
+              "round": 3,
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "朽ちたスケルトン子分 missed",
+              "roll": 81,
+              "round": 3,
+              "successChance": 6,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 22,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド hit 朽ちたスケルトン子分 for 22 damage",
+              "roll": 37,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 94,
+              "targetIds": [
+                "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド missed",
+              "roll": 74,
+              "round": 4,
+              "successChance": 21,
+              "targetIds": [
+                "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 4,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 5,
+              "metadata": {
+                "guardPrevented": 7,
+                "guardSourceId": "S-guardian-s37-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 hit トール ジェム for 5 damage",
+              "roll": 2,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム hit 朽ちたスケルトン子分 for 13 damage",
+              "roll": 30,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 47,
+              "targetIds": [
+                "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "蘇った屍の群れ missed",
+              "roll": 45,
+              "round": 4,
+              "successChance": 14,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "朽ちたスケルトン子分 missed",
+              "roll": 26,
+              "round": 4,
+              "successChance": 6,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 9,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム hit 朽ちたスケルトン子分 for 9 damage",
+              "roll": 25,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 47,
+              "targetIds": [
+                "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 6,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド hit 朽ちたスケルトン子分 for 6 damage",
+              "roll": 21,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 21,
+              "targetIds": [
+                "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 2,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "S-guardian-s37-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 hit トール ジェム for 2 damage",
+              "roll": 7,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 21,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド hit 朽ちたスケルトン子分 for 21 damage",
+              "roll": 60,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 94,
+              "targetIds": [
+                "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "朽ちたスケルトン子分が戦闘不能になった。",
+              "round": 5,
+              "targetIds": [
+                "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 5,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "蘇った屍の群れ missed",
+              "roll": 91,
+              "round": 5,
+              "successChance": 14,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 24,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム hit 蘇った屍の群れ for 24 damage",
+              "roll": 11,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 81,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 6,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 16,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド hit 骸骨ゾンビ雑兵 for 16 damage",
+              "roll": 66,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 71,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 missed",
+              "roll": 92,
+              "round": 6,
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド hit 蘇った屍の群れ for 15 damage",
+              "roll": 9,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "蘇った屍の群れ missed",
+              "roll": 83,
+              "round": 6,
+              "successChance": 14,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド missed",
+              "roll": 100,
+              "round": 7,
+              "successChance": 71,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム hit 蘇った屍の群れ for 14 damage",
+              "roll": 47,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 81,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド hit 蘇った屍の群れ for 11 damage",
+              "roll": 44,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 missed",
+              "roll": 63,
+              "round": 7,
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 7,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "蘇った屍の群れ missed",
+              "roll": 46,
+              "round": 7,
+              "successChance": 14,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 missed",
+              "roll": 57,
+              "round": 8,
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド missed",
+              "roll": 77,
+              "round": 8,
+              "successChance": 71,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム hit 蘇った屍の群れ for 15 damage",
+              "roll": 50,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 81,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド hit 蘇った屍の群れ for 11 damage",
+              "roll": 24,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "蘇った屍の群れが戦闘不能になった。",
+              "round": 8,
+              "targetIds": [
+                "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 8,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム hit 骸骨ゾンビ雑兵 for 10 damage",
+              "roll": 65,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 73,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "counter",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵が反撃した。",
+              "round": 9,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": true,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 missed",
+              "roll": 58,
+              "round": 9,
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 9,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 7,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド hit 骸骨ゾンビ雑兵 for 7 damage",
+              "roll": 25,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 47,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 16,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド hit 骸骨ゾンビ雑兵 for 16 damage",
+              "roll": 61,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 71,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 missed",
+              "roll": 45,
+              "round": 9,
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンがトール ジェムを防護した。",
+              "round": 10,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s37-mage-2",
+              "damage": 23,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ サンド hit 骸骨ゾンビ雑兵 for 23 damage",
+              "roll": 12,
+              "round": 10,
+              "statusApplied": [],
+              "successChance": 71,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "damage": 3,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "S-guardian-s37-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵 hit トール ジェム for 3 damage",
+              "roll": 7,
+              "round": 10,
+              "statusApplied": [],
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s37-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ドラン ハインド missed",
+              "roll": 91,
+              "round": 10,
+              "successChance": 47,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s37-vanguard-0",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール ジェム hit 骸骨ゾンビ雑兵 for 10 damage",
+              "roll": 68,
+              "round": 10,
+              "statusApplied": [],
+              "successChance": 73,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "骸骨ゾンビ雑兵が戦闘不能になった。",
+              "round": 10,
+              "targetIds": [
+                "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2"
+              ]
+            }
+          ],
+          "outcome": "victory",
+          "partyDamageDealt": 334,
+          "retreatAttempts": [],
+          "rounds": 10,
+          "seed": "s37:battle:0:combat",
+          "survivingAdventurers": [
+            "S-vanguard-s37-vanguard-0",
+            "S-guardian-s37-guardian-1",
+            "S-mage-s37-mage-2",
+            "S-healer-s37-healer-3"
+          ],
+          "survivingEnemies": []
+        },
+        "rounds": 10,
+        "survivingAdventurerIds": [
+          "S-vanguard-s37-vanguard-0",
+          "S-guardian-s37-guardian-1",
+          "S-mage-s37-mage-2",
+          "S-healer-s37-healer-3"
+        ],
+        "trigger": "afterExploration",
+        "unmatchedAbilityIntel": [],
+        "unmatchedWeaknessIntel": []
+      }
+    ],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": ["poorVisibility"],
+    "elapsedTime": 8.65,
+    "incapacitated": [],
+    "information": [],
+    "injuries": [
+      {
+        "adventurerId": "S-healer-s37-healer-3",
+        "cause": "poorVisibility",
+        "hpLoss": 2,
+        "id": "injury-0-649226",
+        "status": "treated",
+        "type": "light"
+      },
+      {
+        "adventurerId": "S-guardian-s37-guardian-1",
+        "cause": "poorVisibility",
+        "hpLoss": 2,
+        "id": "injury-1-719380",
+        "status": "treated",
+        "type": "light"
+      }
+    ],
+    "logs": [
+      {
+        "actorIds": [
+          "S-guardian-s37-guardian-1",
+          "S-vanguard-s37-vanguard-0",
+          "S-healer-s37-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 89,
+          "result": "criticalSuccess",
+          "roll": 11,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "ヴァン エルウィンが効率的なルートと補給計画を立てた",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [
+          "S-guardian-s37-guardian-1",
+          "S-vanguard-s37-vanguard-0",
+          "S-healer-s37-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 84,
+          "result": "criticalSuccess",
+          "roll": 12,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["ヴァン エルウィンが安全な接近経路を確保した"],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "S-mage-s37-mage-2",
+          "S-vanguard-s37-vanguard-0",
+          "S-healer-s37-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 40,
+          "result": "failure",
+          "roll": 76,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "S-healer-s37-healer-3",
+            "type": "hpDamage",
+            "value": 2
+          }
+        ],
+        "facts": [
+          "視界不良に遭遇した",
+          "Guardianがドラン ハインドの被害を軽減した",
+          "ドラン ハインドが2のダメージを受けた"
+        ],
+        "phase": "approach",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [
+          "S-mage-s37-mage-2",
+          "S-vanguard-s37-vanguard-0",
+          "S-healer-s37-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 89,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "S-mage-s37-mage-2",
+          "S-vanguard-s37-vanguard-0",
+          "S-healer-s37-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 47,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "S-mage-s37-mage-2",
+          "S-vanguard-s37-vanguard-0",
+          "S-healer-s37-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 93,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["戦闘が10ラウンドでvictoryとなった", "接敵結果: failure"],
+        "phase": "battle",
+        "targetIds": [],
+        "type": "battleSummary"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "eliminationTargets",
+            "value": 4
+          },
+          {
+            "type": "eliminationDefeated",
+            "value": 4
+          },
+          {
+            "type": "eliminationEscaped",
+            "value": 0
+          },
+          {
+            "type": "eliminationSurviving",
+            "value": 0
+          },
+          {
+            "type": "eliminationUnknown",
+            "value": 0
+          },
+          {
+            "type": "eliminationProgress",
+            "value": 100
+          }
+        ],
+        "facts": [
+          "討伐対象として4体が指定された",
+          "戦闘で4体を撃破した",
+          "討伐進捗は100%となった"
+        ],
+        "phase": "battle",
+        "type": "eliminationTargetsAssigned"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "eliminationConfirmed",
+            "value": 4
+          },
+          {
+            "type": "eliminationCompleted",
+            "value": 1
+          }
+        ],
+        "facts": [
+          "撃破した4体の討伐を自動確認した",
+          "討伐対象として4体が指定された。戦闘で4体を撃破した。討伐進捗は100%となった。撃破した4体のうち4体の討伐を確認した。全対象の討伐を確認した"
+        ],
+        "phase": "objective",
+        "type": "eliminationConfirmation"
+      },
+      {
+        "actorIds": [
+          "S-guardian-s37-guardian-1",
+          "S-vanguard-s37-vanguard-0",
+          "S-healer-s37-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 84,
+          "result": "success",
+          "roll": 28,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["ヴァン エルウィンが安全な帰還経路を確保した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "S-mage-s37-mage-2",
+          "S-vanguard-s37-vanguard-0",
+          "S-healer-s37-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 40,
+          "result": "failure",
+          "roll": 82,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "S-guardian-s37-guardian-1",
+            "type": "hpDamage",
+            "value": 2
+          }
+        ],
+        "facts": [
+          "視界不良に遭遇した",
+          "Guardianがヴァン エルウィンの被害を軽減した",
+          "ヴァン エルウィンが2のダメージを受けた"
+        ],
+        "phase": "return",
+        "type": "hazard"
+      },
+      {
+        "actorIds": ["S-healer-s37-healer-3"],
+        "check": {
+          "effectiveValue": 100,
+          "result": "success",
+          "roll": 79,
+          "skill": "firstAid"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "targetId": "S-vanguard-s37-vanguard-0",
+            "type": "hpHeal",
+            "value": 5
+          },
+          {
+            "targetId": "S-guardian-s37-guardian-1",
+            "type": "hpHeal",
+            "value": 2
+          },
+          {
+            "targetId": "S-healer-s37-healer-3",
+            "type": "hpHeal",
+            "value": 2
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "ドラン ハインドが帰還中の負傷者を手当てした"
+        ],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": ["S-healer-s37-healer-3"],
+        "check": {
+          "effectiveValue": 100,
+          "result": "criticalSuccess",
+          "roll": 11,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          },
+          {
+            "targetId": "S-vanguard-s37-vanguard-0",
+            "type": "hpHeal",
+            "value": 12
+          }
+        ],
+        "facts": ["ドラン ハインドによる治療判定: criticalSuccess"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "討伐対象として4体が指定された。戦闘で4体を撃破した。討伐進捗は100%となった。撃破した4体のうち4体の討伐を確認した。全対象の討伐を確認した",
+          "医薬品を2消費した",
+          "ドラン ハインドが負傷者の治療を行った"
+        ],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": 2,
+      "requestFeatures": ["traps", "poorVisibility"],
+      "returnTimeBonus": 0,
+      "threatFeatures": ["traps", "poorVisibility"]
+    },
+    "objectiveCompleted": true,
+    "objectiveProgress": 100,
+    "objectiveState": {
+      "completed": true,
+      "confirmationRequired": false,
+      "confirmedTargetIds": [
+        "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+        "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+        "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+        "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+      ],
+      "defeatedTargetIds": [
+        "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+        "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+        "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+        "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+      ],
+      "escapedTargetIds": [],
+      "mode": "allEnemies",
+      "progress": 100,
+      "requiredTargetIds": [
+        "B-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+        "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+        "S-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+        "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3"
+      ],
+      "survivingTargetIds": [],
+      "type": "elimination",
+      "unknownTargetIds": []
+    },
+    "partyHp": {
+      "S-guardian-s37-guardian-1": 92,
+      "S-healer-s37-healer-3": 72,
+      "S-mage-s37-mage-2": 66,
+      "S-vanguard-s37-vanguard-0": 80
+    },
+    "partyMorale": {
+      "S-guardian-s37-guardian-1": 75,
+      "S-healer-s37-healer-3": 70,
+      "S-mage-s37-mage-2": 70,
+      "S-vanguard-s37-vanguard-0": 68
+    },
+    "partyMp": {
+      "S-guardian-s37-guardian-1": 7,
+      "S-healer-s37-healer-3": 56,
+      "S-mage-s37-mage-2": 15,
+      "S-vanguard-s37-vanguard-0": 7
+    },
+    "partyStatusEffects": {
+      "S-guardian-s37-guardian-1": [
+        {
+          "duration": 2,
+          "sourceId": "S-guardian-s37-guardian-1",
+          "type": "guarded",
+          "value": 3
+        }
+      ],
+      "S-healer-s37-healer-3": [],
+      "S-mage-s37-mage-2": [],
+      "S-vanguard-s37-vanguard-0": [
+        {
+          "duration": 2,
+          "sourceId": "S-guardian-s37-guardian-1",
+          "type": "guarded",
+          "value": 5
+        }
+      ]
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 1,
+      "tools": 3
+    }
+  }
+}
