@@ -408,6 +408,8 @@ function makeSummonTestState(
       smoke: false,
     },
     minionActionsRemaining: 99,
+    maxEnemyActionsThisRound: 99,
+    enemyActionsThisRound: 0,
     adventurerActionCount: 0,
     enemyActionCount: 0,
   }

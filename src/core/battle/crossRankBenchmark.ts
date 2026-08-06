@@ -4,7 +4,6 @@ import {
   type AdventurerRank,
   type AdventurerRole,
   type Difficulty,
-  type Enemy,
   type EncounterShape,
 } from '../models/types.ts'
 import { generateAdventurer } from '../generators/adventurerGenerator.ts'
@@ -179,19 +178,21 @@ export function runCrossRankBenchmark(
     const favorable = ['victory', 'costlyVictory', 'partialVictory'] as const
     results.push({
       rank,
-      victoryRate: averageCount(perRank, (r) => (r.outcome === 'victory' ? 1 : 0)),
-      costlyVictoryRate: averageCount(
-        perRank,
-        (r) => (r.outcome === 'costlyVictory' ? 1 : 0),
+      victoryRate: averageCount(perRank, (r) =>
+        r.outcome === 'victory' ? 1 : 0,
       ),
-      partialVictoryRate: averageCount(
-        perRank,
-        (r) => (r.outcome === 'partialVictory' ? 1 : 0),
+      costlyVictoryRate: averageCount(perRank, (r) =>
+        r.outcome === 'costlyVictory' ? 1 : 0,
+      ),
+      partialVictoryRate: averageCount(perRank, (r) =>
+        r.outcome === 'partialVictory' ? 1 : 0,
       ),
       retreatRate: averageCount(perRank, (r) =>
         r.outcome === 'retreat' ? 1 : 0,
       ),
-      defeatRate: averageCount(perRank, (r) => (r.outcome === 'defeat' ? 1 : 0)),
+      defeatRate: averageCount(perRank, (r) =>
+        r.outcome === 'defeat' ? 1 : 0,
+      ),
       totalLossRate: averageCount(perRank, (r) =>
         r.outcome === 'totalLoss' ? 1 : 0,
       ),
@@ -199,7 +200,7 @@ export function runCrossRankBenchmark(
         r.outcome === 'stalemate' ? 1 : 0,
       ),
       favorableOutcomeRate: averageCount(perRank, (r) =>
-        favorable.includes(r.outcome as any) ? 1 : 0,
+        favorable.includes(r.outcome as (typeof favorable)[number]) ? 1 : 0,
       ),
       avgRounds: average(perRank.map((r) => r.rounds)),
       avgEnemyCount: average(perRank.map((r) => r.enemyCount)),
@@ -216,9 +217,7 @@ export function runCrossRankBenchmark(
       avgEnemyActionsPerRound: average(
         perRank.map((r) => (r.rounds > 0 ? r.enemyActions / r.rounds : 0)),
       ),
-      rawThreatRatio: average(
-        perRank.map((r) => r.partyThreat / r.rawThreat),
-      ),
+      rawThreatRatio: average(perRank.map((r) => r.partyThreat / r.rawThreat)),
       actionEconomyAdjustedThreatRatio: average(
         perRank.map((r) => r.partyThreat / r.adjustedThreat),
       ),
@@ -228,9 +227,6 @@ export function runCrossRankBenchmark(
   return { options, results }
 }
 
-function averageCount<T>(
-  items: T[],
-  fn: (item: T) => number,
-): number {
+function averageCount<T>(items: T[], fn: (item: T) => number): number {
   return items.reduce((s, item) => s + fn(item), 0) / items.length
 }

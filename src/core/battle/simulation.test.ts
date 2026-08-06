@@ -98,7 +98,9 @@ describe('runSimulation', () => {
     const proposalOnly =
       (summary.retreatReasons.memberProposal?.count ?? 0) +
       (summary.retreatReasons.criticalMember?.count ?? 0)
-    const proposalRate = retreatCount === 0 ? 0 : proposalOnly / retreatCount
+    // proposalRate is the share of *all* trials that retreat due to a member
+    // proposal, not the share of retreats.
+    const proposalRate = proposalOnly / summary.count
     const defeatRate =
       (summary.outcomes.defeat + summary.outcomes.totalLoss) / summary.count
 

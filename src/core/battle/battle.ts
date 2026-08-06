@@ -82,6 +82,8 @@ export interface BattleState {
   context: BattleContext
   leaderTargetId?: string
   minionActionsRemaining: number
+  maxEnemyActionsThisRound: number
+  enemyActionsThisRound: number
   adventurerActionCount: number
   enemyActionCount: number
 }
@@ -1072,8 +1074,17 @@ function isMinion(unit: BattleUnit): boolean {
 function processStartOfRound(state: BattleState): void {
   state.leaderTargetId = undefined
 
-  const livingMinions = getAliveEnemies(state).filter((e) => e.tier === 'minion')
-  state.minionActionsRemaining = Math.max(1, Math.ceil(livingMinions.length / 2))
+  const livingMinions = getAliveEnemies(state).filter(
+    (e) => e.tier === 'minion',
+  )
+  state.minionActionsRemaining = Math.max(
+    1,
+    Math.ceil(livingMinions.length / 2),
+  )
+
+  const aliveAdventurers = getAliveAdventurers(state).length
+  state.maxEnemyActionsThisRound = Math.max(1, aliveAdventurers)
+  state.enemyActionsThisRound = 0
 
   const partyEval = evaluatePartyRetreat(
     state.party,
@@ -1286,6 +1297,8 @@ export function runBattle(
     lastRetreatRound: -2,
     context: options?.context ?? getDefaultContext(),
     minionActionsRemaining: 99,
+    maxEnemyActionsThisRound: 99,
+    enemyActionsThisRound: 0,
     adventurerActionCount: 0,
     enemyActionCount: 0,
   }
@@ -1311,6 +1324,12 @@ export function runBattle(
       if (isMinion(unit) && state.minionActionsRemaining <= 0) {
         continue
       }
+      if (
+        !unit.isAdventurer &&
+        state.enemyActionsThisRound >= state.maxEnemyActionsThisRound
+      ) {
+        continue
+      }
 
       const action = unit.isAdventurer
         ? decideAdventurerAction(unit, state)
@@ -1329,6 +1348,9 @@ export function runBattle(
 
       resolveAction(state, unit, action)
       if (isMinion(unit)) state.minionActionsRemaining--
+      if (!unit.isAdventurer) {
+        state.enemyActionsThisRound++
+      }
       if (unit.isAdventurer) state.adventurerActionCount++
       else state.enemyActionCount++
 

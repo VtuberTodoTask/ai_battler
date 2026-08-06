@@ -6,7 +6,10 @@ import {
   effectiveEncounterThreat,
   generateEncounter,
 } from './encounterGenerator.ts'
-import { ADVENTURER_THREAT } from '../balance/constants.ts'
+import {
+  ADVENTURER_THREAT,
+  DIFFICULTY_BUDGET_MULTIPLIER,
+} from '../balance/constants.ts'
 
 function party(rank: 'E' | 'D' | 'C' | 'B' | 'A' | 'S' = 'C') {
   return generateAdventurers({ seed: 'enc-party', count: 4, rank })
@@ -25,21 +28,16 @@ describe('generateEncounter', () => {
         partySize: 4,
       })
       const rawThreat = enemies.reduce((sum, e) => sum + e.threatCost, 0)
-      const budget =
-        difficulty === 'easy'
-          ? threat * 0.7
-          : difficulty === 'normal'
-            ? threat
-            : difficulty === 'hard'
-              ? threat * 1.25
-              : threat * 1.5
+      const budget = threat * DIFFICULTY_BUDGET_MULTIPLIER[difficulty]
       const effective = effectiveEncounterThreat(rawThreat, enemies.length, 4)
       if (budget >= 1) {
         expect(effective).toBeGreaterThanOrEqual(budget * 0.8)
         expect(effective).toBeLessThanOrEqual(budget * 1.2)
       }
       expect(enemies.length).toBeLessThanOrEqual(12)
-      expect(enemies.filter((e) => e.tier === 'boss').length).toBeLessThanOrEqual(1)
+      expect(
+        enemies.filter((e) => e.tier === 'boss').length,
+      ).toBeLessThanOrEqual(1)
     }
   })
 
@@ -135,7 +133,7 @@ describe('generateEncounter', () => {
     })
     expect(enemies.some((e) => e.tier === 'boss')).toBe(false)
     const raw = enemies.reduce((sum, e) => sum + e.threatCost, 0)
-    const budget = ADVENTURER_THREAT.S * 4
+    const budget = ADVENTURER_THREAT.S * 4 * DIFFICULTY_BUDGET_MULTIPLIER.normal
     const effective = effectiveEncounterThreat(raw, enemies.length, 4)
     expect(effective).toBeGreaterThanOrEqual(budget * 0.8)
     expect(effective).toBeLessThanOrEqual(budget * 1.2)

@@ -1,11 +1,12 @@
 import { generateAdventurer } from '../generators/adventurerGenerator.ts'
 import { generateEnemy } from '../generators/enemyGenerator.ts'
-import {
-  calculateHitChance,
-  calculateWeaponDamage,
-} from '../battle/actions.ts'
+import { calculateHitChance, calculateWeaponDamage } from '../battle/actions.ts'
 import { createAdventurerUnit, createEnemyUnit } from '../battle/battleState.ts'
-import type { AdventurerRank, AdventurerRole, EnemyRank } from '../models/types.ts'
+import type {
+  AdventurerRank,
+  AdventurerRole,
+  EnemyRank,
+} from '../models/types.ts'
 import type { BattleUnit } from '../battle/battleState.ts'
 
 const RANKS: AdventurerRank[] = ['E', 'D', 'C', 'B', 'A', 'S']
@@ -50,8 +51,7 @@ export function calibrateThreatTables(): ThreatCalibrationResult {
     }),
   )
 
-  const adventurerMetrics: Partial<Record<AdventurerRank, RankCalibration>> =
-    {}
+  const adventurerMetrics: Partial<Record<AdventurerRank, RankCalibration>> = {}
   const enemyMetrics: Partial<Record<EnemyRank, RankCalibration>> = {}
 
   for (const rank of RANKS) {
@@ -85,14 +85,19 @@ export function calibrateThreatTables(): ThreatCalibrationResult {
     )
   }
 
-  const advMetrics = adventurerMetrics as Record<AdventurerRank, RankCalibration>
+  const advMetrics = adventurerMetrics as Record<
+    AdventurerRank,
+    RankCalibration
+  >
   const enemyMetricsFull = enemyMetrics as Record<EnemyRank, RankCalibration>
 
   return {
     adventurerThreat: normalizeToE(mapPower(advMetrics)),
     enemyBaseThreat: {
       ...normalizeToE(mapPower(enemyMetricsFull)),
-      DISASTER: Number((normalizeToE(mapPower(enemyMetricsFull)).S * 1.5).toFixed(2)),
+      DISASTER: Number(
+        (normalizeToE(mapPower(enemyMetricsFull)).S * 1.5).toFixed(2),
+      ),
     } as Record<EnemyRank, number>,
     adventurerMetrics: advMetrics,
     enemyMetrics: enemyMetricsFull,

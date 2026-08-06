@@ -6,8 +6,10 @@ import {
 import { generateEnemy } from '../generators/enemyGenerator.ts'
 import {
   calculatePartyThreat,
+  effectiveEncounterThreat,
   generateEncounter,
 } from '../generators/encounterGenerator.ts'
+import { DIFFICULTY_BUDGET_MULTIPLIER } from '../balance/constants.ts'
 import { runBattle } from './battle.ts'
 import { createAdventurerUnit, createEnemyUnit } from './battleState.ts'
 import { calculateHitChance, rollAttack, healUnit } from './actions.ts'
@@ -1065,16 +1067,10 @@ describe('遭遇生成', () => {
         difficulty,
       })
       const total = enemies.reduce((sum, e) => sum + e.threatCost, 0)
-      const budget =
-        difficulty === 'easy'
-          ? threat * 0.7
-          : difficulty === 'normal'
-            ? threat
-            : difficulty === 'hard'
-              ? threat * 1.25
-              : threat * 1.5
+      const budget = threat * DIFFICULTY_BUDGET_MULTIPLIER[difficulty]
       if (budget >= 1) {
-        const ratio = total / budget
+        const effective = effectiveEncounterThreat(total, enemies.length, 4)
+        const ratio = effective / budget
         expect(ratio).toBeGreaterThanOrEqual(0.8)
         expect(ratio).toBeLessThanOrEqual(1.2)
       }
