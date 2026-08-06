@@ -6,6 +6,7 @@ import {
   effectiveEncounterThreat,
   generateEncounter,
 } from './encounterGenerator.ts'
+import type { EncounterShape } from '../models/types.ts'
 import {
   ADVENTURER_THREAT,
   DIFFICULTY_BUDGET_MULTIPLIER,
@@ -34,31 +35,56 @@ describe('generateEncounter', () => {
         expect(effective).toBeGreaterThanOrEqual(budget * 0.8)
         expect(effective).toBeLessThanOrEqual(budget * 1.2)
       }
-      expect(enemies.length).toBeLessThanOrEqual(12)
       expect(
         enemies.filter((e) => e.tier === 'boss').length,
       ).toBeLessThanOrEqual(1)
     }
   })
 
-  it('Normalのstandard/elite/boss遭遇で敵数は6体を超えない', () => {
-    for (let i = 0; i < 200; i++) {
-      const p = party('C')
-      const threat = calculatePartyThreat(p)
-      const shapes: Array<'standard' | 'eliteGroup' | 'boss'> = [
-        'standard',
-        'eliteGroup',
-        'boss',
-      ]
-      const enemies = generateEncounter({
-        seed: `shape-${i}`,
-        partyThreat: threat,
-        difficulty: 'normal',
-        shape: shapes[i % 3],
-        partySize: 4,
-      })
-      expect(enemies.length).toBeLessThanOrEqual(6)
+  it('指定した形状の敵数が等級に関係なく固定される', () => {
+    const shapes: EncounterShape[] = ['standard', 'eliteGroup', 'swarm', 'boss']
+    const expected: Record<(typeof shapes)[number], number> = {
+      standard: 4,
+      eliteGroup: 4,
+      swarm: 7,
+      boss: 4,
     }
+    for (const rank of ['E', 'D', 'C', 'B', 'A', 'S'] as const) {
+      for (const shape of shapes) {
+        for (let i = 0; i < 50; i++) {
+          const p = party(rank)
+          const enemies = generateEncounter({
+            seed: `count-${rank}-${shape}-${i}`,
+            partyThreat: calculatePartyThreat(p),
+            difficulty: 'normal',
+            shape,
+            partySize: 4,
+          })
+          expect(enemies.length).toBe(expected[shape])
+        }
+      }
+    }
+  })
+
+  it('全等級でNormalの平均敵数が等級間で一致する', () => {
+    const countsByRank: number[] = []
+    const trials = 200
+    for (const rank of ['E', 'D', 'C', 'B', 'A', 'S'] as const) {
+      let total = 0
+      for (let i = 0; i < trials; i++) {
+        const p = party(rank)
+        const enemies = generateEncounter({
+          seed: `avg-${rank}-${i}`,
+          planSeed: `avg-plan-${i}`,
+          partyThreat: calculatePartyThreat(p),
+          difficulty: 'normal',
+          partySize: 4,
+        })
+        total += enemies.length
+      }
+      countsByRank.push(total / trials)
+    }
+    expect(new Set(countsByRank).size).toBe(1)
   })
 
   it('bossAllowed=false の場合、1000 編成にボスが 0 体', () => {
@@ -110,6 +136,81 @@ describe('generateEncounter', () => {
       })
       const ids = enemies.map((e) => e.id)
       expect(new Set(ids).size).toBe(ids.length)
+    }
+  })
+
+  it('boss形状以外にbossが生成されない', () => {
+    for (let i = 0; i < 500; i++) {
+      const p = party('C')
+      const enemies = generateEncounter({
+        seed: `noboss-${i}`,
+        partyThreat: calculatePartyThreat(p),
+        difficulty: 'normal',
+        shape: 'standard',
+        partySize: 4,
+      })
+      expect(enemies.every((e) => e.tier !== 'boss')).toBe(true)
+    }
+  })
+
+  it('swarm形状では全敵がminionである', () => {
+    for (let i = 0; i < 500; i++) {
+      const p = party('C')
+      const enemies = generateEncounter({
+        seed: `swarm-${i}`,
+        partyThreat: calculatePartyThreat(p),
+        difficulty: 'normal',
+        shape: 'swarm',
+        partySize: 4,
+      })
+      expect(enemies.length).toBe(7)
+      expect(enemies.every((e) => e.tier === 'minion')).toBe(true)
+    }
+  })
+
+  it('boss形状では必ず1体のbossと3体のstandardである', () => {
+    for (let i = 0; i < 500; i++) {
+      const p = party('C')
+      const enemies = generateEncounter({
+        seed: `boss-shape-${i}`,
+        partyThreat: calculatePartyThreat(p),
+        difficulty: 'normal',
+        shape: 'boss',
+        partySize: 4,
+      })
+      expect(enemies.length).toBe(4)
+      expect(enemies.filter((e) => e.tier === 'boss').length).toBe(1)
+      expect(enemies.filter((e) => e.tier === 'standard').length).toBe(3)
+    }
+  })
+
+  it('予算不足でも敵数を削減しない', () => {
+    const p = party('E')
+    const threat = calculatePartyThreat(p)
+    for (let i = 0; i < 200; i++) {
+      const enemies = generateEncounter({
+        seed: `underbudget-${i}`,
+        partyThreat: threat,
+        difficulty: 'normal',
+        shape: 'standard',
+        partySize: 4,
+      })
+      expect(enemies.length).toBe(4)
+    }
+  })
+
+  it('予算余剰でも敵数を追加しない', () => {
+    const p = party('S')
+    const threat = calculatePartyThreat(p)
+    for (let i = 0; i < 200; i++) {
+      const enemies = generateEncounter({
+        seed: `overbudget-${i}`,
+        partyThreat: threat,
+        difficulty: 'normal',
+        shape: 'standard',
+        partySize: 4,
+      })
+      expect(enemies.length).toBe(4)
     }
   })
 

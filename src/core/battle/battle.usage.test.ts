@@ -69,10 +69,12 @@ function aiState(
 describe('蘇生・召喚の使用制限', () => {
   it('revive は戦闘中 1 回まで', () => {
     const reviver = makeEnemy('reviver-1', {
+      species: 'undead',
       maxHp: 300,
       currentHp: 300,
       abilities: [{ abilityId: 'revive', name: '蘇生' }],
       behavior: { usesAbilitiesFirst: true } as unknown as EnemyBehavior,
+      stats: { dex: 100 } as unknown as BaseStats,
     })
     const dead1 = makeEnemy('dead-1', {
       currentHp: 0,
@@ -84,7 +86,9 @@ describe('蘇生・召喚の使用制限', () => {
       maxHp: 30,
       abilities: [],
     })
-    const party = [makeAdventurer('rev-adv')]
+    const party = [
+      makeAdventurer('rev-adv', { stats: { str: 1 } as unknown as BaseStats }),
+    ]
     const result = runBattle('revive-usage', party, [reviver, dead1, dead2])
     expect(result.abilityUsage.revive).toBe(1)
     expect(

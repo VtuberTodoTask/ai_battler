@@ -41,6 +41,18 @@ import { clamp, deepClone, round } from '../util.ts'
 
 const STAT_NAMES: StatName[] = ['str', 'con', 'dex', 'int', 'per', 'wil', 'soc']
 
+function scaleStats(stats: BaseStats, scale: number): BaseStats {
+  const scaled = { ...stats } as BaseStats
+  for (const name of STAT_NAMES) {
+    scaled[name] = clamp(
+      round(stats[name] * scale),
+      MIN_STAT,
+      MAX_STAT_NORMAL + 20,
+    )
+  }
+  return scaled
+}
+
 const SKILL_FORMULAS: Record<keyof SkillSet, (s: BaseStats) => number> = {
   melee: (s) => round((s.str + s.dex) / 2),
   ranged: (s) => s.dex,
@@ -239,6 +251,7 @@ export interface EnemyGenerationOverrides {
   tier?: EnemyTier
   allowedTiers?: EnemyTier[]
   rankLimit?: EnemyRank
+  threatScale?: number
 }
 
 export function generateEnemy(
@@ -255,7 +268,12 @@ export function generateEnemy(
   const archetypeDef = ARCHETYPE_MAP[archetype]
   const speciesDef = SPECIES_MAP[species]
 
-  const stats = generateStats(rng, rank, archetypeDef, speciesDef)
+  const scale = overrides.threatScale ?? 1
+  const statScale = Math.sqrt(scale)
+  const stats = scaleStats(
+    generateStats(rng, rank, archetypeDef, speciesDef),
+    statScale,
+  )
   const skills = generateSkills(stats, archetype)
   const maxHp = round((25 + round(stats.con * 0.7)) * TIER_HP_MULTIPLIER[tier])
   const morale =
@@ -270,7 +288,7 @@ export function generateEnemy(
     if (!def) return total
     return total + baseThreat * ABILITY_THREAT_BONUS[def.threatLevel]
   }, 0)
-  const threatCost = round(baseThreat + abilityThreat)
+  const threatCost = (baseThreat + abilityThreat) * scale
 
   const weaknesses = generateWeaknesses(rng, species)
   const behavior = generateBehavior(rng, archetypeDef, species)
@@ -303,10 +321,12 @@ export function generateEnemy(
           ? 'wand'
           : 'longsword'
     const armorId = archetype === 'tank' ? 'heavy' : 'leather'
-    enemy.equipment = {
-      weapon: deepClone(WEAPONS[weaponId]),
-      armor: deepClone(ARMORS[armorId]),
+    const weapon = deepClone(WEAPONS[weaponId])
+    const armor = deepClone(ARMORS[armorId])
+    if (scale !== 1) {
+      weapon.damage = round(weapon.damage * statScale)
     }
+    enemy.equipment = { weapon, armor }
   }
 
   return enemy

@@ -1,5 +1,7 @@
 # 第1段階 構造修正レポート（遭遇形状・行動数・ミニオン集団行動）
 
+> **訂正**: 本レポートの「全等級が 40 ～ 75% に収まる」「平均敵数が等級間で 1 体以内」などの記述は、第1.5段階の実装後に修正が必要であることが判明しました。敵数を完全に固定した正確な結果は [PHASE1.5_REPORT.md](./PHASE1.5_REPORT.md) を参照してください。
+
 作業日時: 2026-08-05  
 ブランチ: `devin/ai-battler-diagnostics`  
 対象: `src/core/generators/encounterGenerator.ts`, `src/core/battle/battle.ts`  

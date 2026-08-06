@@ -36,7 +36,10 @@ describe('generateEnemy', () => {
   })
 
   it('弱点が1～2個存在する', () => {
-    const enemy = generateEnemy('enemy-weak-001', { rank: 'C' })
+    const enemy = generateEnemy('enemy-weak-001', {
+      rank: 'C',
+      species: 'beast',
+    })
     expect(enemy.weaknesses.length).toBeGreaterThanOrEqual(1)
     expect(enemy.weaknesses.length).toBeLessThanOrEqual(2)
   })

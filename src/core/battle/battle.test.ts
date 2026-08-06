@@ -119,11 +119,15 @@ describe('runBattle', () => {
   it('個別撤退が individualEscape として記録される', () => {
     const party = balancedParty('C', 'manual-adv')
     party[0].currentHp = party[0].maxHp * 0.05
+    party[0].stats = { ...party[0].stats, dex: 100 }
     const enemy = generateEnemy('manual-enemy', {
       rank: 'E',
       species: 'beast',
       archetype: 'assault',
     })
+    enemy.maxHp = 1
+    enemy.currentHp = 1
+    enemy.stats = { ...enemy.stats, str: 1, dex: 1, con: 1 }
     const result = runBattle('manual-seed', party, [enemy])
     expect(result.retreatDiagnostic).toBeDefined()
     expect(result.retreatDiagnostic?.matchedReasons).toContain(

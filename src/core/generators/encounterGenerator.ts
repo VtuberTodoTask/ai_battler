@@ -20,60 +20,7 @@ import {
 } from '../balance/constants.ts'
 import { generateEnemy } from './enemyGenerator.ts'
 
-const RANKS: EnemyRank[] = ['E', 'D', 'C', 'B', 'A', 'S']
-const ALL_TIERS: EnemyTier[] = ['minion', 'standard', 'elite', 'boss']
-// Strongly prefer the same rank as the party. Cost distance only breaks ties.
-const RANK_DISTANCE_WEIGHT = 50
-
-interface RankTierCombo {
-  rank: EnemyRank
-  tier: EnemyTier
-  baseCost: number
-}
-
-function getRankTierCombos(): RankTierCombo[] {
-  const combos: RankTierCombo[] = []
-  for (const rank of RANKS) {
-    for (const tier of ALL_TIERS) {
-      combos.push({
-        rank,
-        tier,
-        baseCost: ENEMY_BASE_THREAT[rank] * TIER_THREAT_MULTIPLIER[tier],
-      })
-    }
-  }
-  return combos
-}
-
-// The expected enemy rank is the adventurer rank whose power curve the
-// per-slot target is closest to. This makes standard encounters prefer the
-// same rank as the party rather than being pulled toward the enemy base-cost
-// table, which currently has a different scale.
-function expectedEnemyRankIndex(targetRaw: number): number {
-  let best = 0
-  let bestDistance = Infinity
-  for (let i = 0; i < RANKS.length; i++) {
-    const rank = RANKS[i] as 'E' | 'D' | 'C' | 'B' | 'A' | 'S'
-    const distance = Math.abs(ADVENTURER_THREAT[rank] - targetRaw)
-    if (distance < bestDistance) {
-      bestDistance = distance
-      best = i
-    }
-  }
-  return best
-}
-
-function candidateScore(
-  baseCost: number,
-  rank: EnemyRank,
-  targetRaw: number,
-): number {
-  const rankIndex = RANKS.indexOf(rank)
-  const expectedRank = expectedEnemyRankIndex(targetRaw)
-  const rankDistance = Math.abs(rankIndex - expectedRank)
-  const costDistance = Math.abs(baseCost - targetRaw)
-  return rankDistance * RANK_DISTANCE_WEIGHT + costDistance
-}
+const ENEMY_RANKS: EnemyRank[] = ['E', 'D', 'C', 'B', 'A', 'S', 'DISASTER']
 
 export function actionEconomyMultiplier(
   enemyCount: number,
@@ -98,6 +45,71 @@ export function effectiveEncounterThreat(
   return rawThreat * actionEconomyMultiplier(enemyCount, partySize)
 }
 
+interface EncounterPlan {
+  shape: EncounterShape
+  count: number
+  slots: EncounterSlot[]
+}
+
+interface EncounterSlot {
+  tier: EnemyTier
+  species?: EnemySpecies
+  archetype?: EnemyArchetype
+  targetThreat: number
+}
+
+function fixedCountForShape(shape: EncounterShape): number {
+  switch (shape) {
+    case 'standard':
+      return 4
+    case 'eliteGroup':
+      return 4
+    case 'swarm':
+      return 7
+    case 'boss':
+      return 4
+  }
+}
+
+function tierForSlot(shape: EncounterShape, slotIndex: number): EnemyTier {
+  switch (shape) {
+    case 'standard':
+      return 'standard'
+    case 'eliteGroup':
+      return 'elite'
+    case 'swarm':
+      return 'minion'
+    case 'boss':
+      return slotIndex === 0 ? 'boss' : 'standard'
+  }
+}
+
+function shapeWeightsForDifficulty(
+  difficulty: Difficulty,
+  bossAllowed: boolean,
+): Record<EncounterShape, number> {
+  const weights: Record<Difficulty, Record<EncounterShape, number>> = {
+    easy: { standard: 0.5, eliteGroup: 0.25, swarm: 0.15, boss: 0.1 },
+    normal: { standard: 0.5, eliteGroup: 0.25, swarm: 0.15, boss: 0.1 },
+    hard: { standard: 0.35, eliteGroup: 0.3, swarm: 0.1, boss: 0.25 },
+    deadly: { standard: 0.2, eliteGroup: 0.3, swarm: 0.05, boss: 0.45 },
+  }
+  const result = { ...weights[difficulty] }
+  if (!bossAllowed) result.boss = 0
+  return result
+}
+
+function weightedPick<T>(rng: SeededRng, items: T[], weights: number[]): T {
+  const total = weights.reduce((a, b) => a + b, 0)
+  if (total <= 0) return items[0] as T
+  let r = rng.next() * total
+  for (let i = 0; i < items.length; i++) {
+    r -= weights[i]
+    if (r <= 0) return items[i]
+  }
+  return items[items.length - 1]
+}
+
 function pickSpecies(
   rng: SeededRng,
   existingSpecies: EnemySpecies[],
@@ -119,484 +131,134 @@ function randomArchetypeForSpecies(
   return rng.pick(SPECIES_MAP[species].preferredArchetypes)
 }
 
-function weightedPick<T>(rng: SeededRng, items: T[], weights: number[]): T {
-  const total = weights.reduce((a, b) => a + b, 0)
-  let r = rng.next() * total
-  for (let i = 0; i < items.length; i++) {
-    r -= weights[i]
-    if (r <= 0) return items[i]
-  }
-  return items[items.length - 1]
-}
-
-interface ShapePlan {
-  shape: EncounterShape
-  count: number
-}
-
-// Fixed per-shape counts so enemy count does not scale with rank.
-// Rank progression is carried by the enemy rank selected within the shape.
-function fixedCountForShape(shape: EncounterShape): number {
-  switch (shape) {
-    case 'standard':
-      return 4
-    case 'eliteGroup':
-      return 4
-    case 'swarm':
-      return 7
-    case 'boss':
-      return 4
-  }
-}
-
 function chooseShape(
   rng: SeededRng,
-  _budget: number,
-  _partySize: number,
-  _averageAdventurerThreat: number,
   difficulty: Difficulty,
-  requestedShape?: EncounterShape,
-): ShapePlan {
-  const shapeWeights: Record<Difficulty, Record<EncounterShape, number>> = {
-    easy: { standard: 0.5, eliteGroup: 0.25, swarm: 0.15, boss: 0.1 },
-    normal: { standard: 0.5, eliteGroup: 0.25, swarm: 0.15, boss: 0.1 },
-    hard: { standard: 0.35, eliteGroup: 0.3, swarm: 0.1, boss: 0.25 },
-    deadly: { standard: 0.2, eliteGroup: 0.3, swarm: 0.05, boss: 0.45 },
-  }
-
-  if (requestedShape) {
-    return { shape: requestedShape, count: fixedCountForShape(requestedShape) }
-  }
-
-  const shapes: EncounterShape[] = ['standard', 'eliteGroup', 'swarm', 'boss']
-  const weights = shapes.map((s) => shapeWeights[difficulty][s])
-  const shape = weightedPick(rng, shapes, weights)
-  return { shape, count: fixedCountForShape(shape) }
-}
-
-interface SlotPlan {
-  shape: EncounterShape
-  tier: EnemyTier
-  species?: EnemySpecies
-  archetype?: EnemyArchetype
-}
-
-function allowedTiersForSlot(
-  shape: EncounterShape,
-  primaryTier: EnemyTier,
-  isFirst: boolean,
+  requestedShape: EncounterShape | undefined,
   bossAllowed: boolean,
-): EnemyTier[] {
-  if (shape === 'boss' && isFirst && bossAllowed) return ['boss']
-
-  // Each shape strongly enforces its identity. Rank progression is carried by
-  // the enemy rank selected within the shape's tier, not by mixing tiers.
-  const map: Record<EncounterShape, EnemyTier[]> = {
-    standard: ['standard'],
-    eliteGroup: ['elite'],
-    swarm: ['minion'],
-    boss: ['standard'],
+): EncounterShape {
+  if (requestedShape) {
+    if (requestedShape === 'boss' && !bossAllowed) return 'standard'
+    return requestedShape
   }
-  const base = map[shape]
-  // Put the planned primary tier first, then the rest without duplicates.
-  const ordered = [primaryTier, ...base.filter((t) => t !== primaryTier)]
-  return bossAllowed ? ordered : ordered.filter((t) => t !== 'boss')
+  const weights = shapeWeightsForDifficulty(difficulty, bossAllowed)
+  const shapes: EncounterShape[] = ['standard', 'eliteGroup', 'swarm', 'boss']
+  return weightedPick(
+    rng,
+    shapes,
+    shapes.map((s) => weights[s]),
+  )
 }
 
-function buildSlots(
+function buildPlan(
+  planSeed: string,
   shape: EncounterShape,
   count: number,
-  species: EnemySpecies,
-  archetype: EnemyArchetype,
-): SlotPlan[] {
-  const slots: SlotPlan[] = []
+  slotTarget: number,
+  allowedSpecies?: EnemySpecies[],
+): EncounterPlan {
+  const slots: EncounterSlot[] = []
+  let firstSpecies: EnemySpecies | undefined
+  let firstArchetype: EnemyArchetype | undefined
+
   for (let i = 0; i < count; i++) {
-    let tier: EnemyTier
-    switch (shape) {
-      case 'boss':
-        tier = i === 0 ? 'boss' : 'standard'
-        break
-      case 'swarm':
-        tier = 'minion'
-        break
-      case 'eliteGroup':
-        tier = 'elite'
-        break
-      default:
-        tier = 'standard'
+    const slotRng = new SeededRng(`${planSeed}:slot:${i}`)
+    const tier = tierForSlot(shape, i)
+    const species =
+      i === 0 || !firstSpecies
+        ? pickSpecies(slotRng, [], allowedSpecies)
+        : slotRng.chance(80) && firstSpecies
+          ? firstSpecies
+          : pickSpecies(slotRng, [firstSpecies], allowedSpecies)
+
+    const archetype =
+      i === 0 || !firstArchetype
+        ? randomArchetypeForSpecies(slotRng, species)
+        : slotRng.chance(80) && species === firstSpecies
+          ? firstArchetype
+          : randomArchetypeForSpecies(slotRng, species)
+
+    if (i === 0) {
+      firstSpecies = species
+      firstArchetype = archetype
     }
-    slots.push({ shape, tier, species, archetype })
-  }
-  return slots
-}
 
-interface SlotGenerationOptions {
-  partySize: number
-  budget: number
-  rawSoFar: number
-  currentCount: number
-  allowBoss: boolean
-  maxEnemyCount: number
-}
-
-function generateEnemyForSlot(
-  seed: string,
-  targetRaw: number,
-  slot: SlotPlan,
-  options: SlotGenerationOptions,
-  attempt: number,
-): Enemy | undefined {
-  const isFirst = options.currentCount === 0
-  const tiers = allowedTiersForSlot(
-    slot.shape,
-    slot.tier,
-    isFirst,
-    options.allowBoss,
-  )
-
-  const maxCost = options.budget * 1.2 - options.rawSoFar
-  if (maxCost <= 0) return undefined
-
-  // Build a unified candidate list across all allowed tiers, sorted by a
-  // score that prefers the expected rank and a cost close to the target.
-  const candidates = getRankTierCombos()
-    .filter(
-      (c) =>
-        tiers.includes(c.tier) &&
-        c.baseCost <= maxCost * 1.5 &&
-        (options.allowBoss || c.tier !== 'boss'),
-    )
-    .map((c) => ({
-      ...c,
-      score: candidateScore(c.baseCost, c.rank, targetRaw),
-    }))
-    .sort((a, b) => a.score - b.score || a.baseCost - b.baseCost)
-
-  for (let i = 0; i < Math.min(candidates.length, 12); i++) {
-    const c = candidates[i]
-    const enemy = generateEnemy(`${seed}-try-${c.tier}-${c.rank}-${attempt}`, {
-      rank: c.rank,
-      species: slot.species ?? 'beast',
-      archetype: slot.archetype ?? 'assault',
-      tier: c.tier,
+    slots.push({
+      tier,
+      species,
+      archetype,
+      targetThreat: slotTarget,
     })
+  }
 
-    const newRaw = options.rawSoFar + enemy.threatCost
-    const newCount = options.currentCount + 1
-    const newEffective = effectiveEncounterThreat(
-      newRaw,
-      newCount,
-      options.partySize,
-    )
-    if (
-      newEffective <= options.budget * 1.2 &&
-      enemy.threatCost <= maxCost * 1.05 &&
-      newCount <= options.maxEnemyCount
-    ) {
-      return enemy
+  return { shape, count, slots }
+}
+
+function pickRankForTarget(target: number, tier: EnemyTier): EnemyRank {
+  let bestRank: EnemyRank = 'E'
+  let bestScore = Infinity
+  for (const rank of ENEMY_RANKS) {
+    const base = ENEMY_BASE_THREAT[rank] * TIER_THREAT_MULTIPLIER[tier]
+    if (base <= 0) continue
+    const scale = target / base
+    const score = Math.abs(Math.log(scale))
+    if (score < bestScore) {
+      bestScore = score
+      bestRank = rank
     }
   }
-
-  return undefined
-}
-
-function generateEnemyForBudget(
-  seed: string,
-  targetRaw: number,
-  species: EnemySpecies,
-  archetype: EnemyArchetype,
-  allowedTiers: EnemyTier[],
-  bossAllowed: boolean,
-): Enemy | undefined {
-  const candidates = getRankTierCombos()
-    .filter(
-      (c) =>
-        allowedTiers.includes(c.tier) && (bossAllowed || c.tier !== 'boss'),
-    )
-    .map((c) => ({
-      ...c,
-      score: candidateScore(c.baseCost, c.rank, targetRaw),
-    }))
-    .sort((a, b) => a.score - b.score || a.baseCost - b.baseCost)
-
-  for (let i = 0; i < Math.min(candidates.length, 8); i++) {
-    const c = candidates[i]
-    const enemy = generateEnemy(`${seed}-${c.rank}-${c.tier}`, {
-      rank: c.rank,
-      species,
-      archetype,
-      tier: c.tier,
-    })
-    return enemy
-  }
-
-  return undefined
-}
-
-function pickSpeciesForFill(
-  seed: string,
-  existing: Enemy[],
-  allowedSpecies?: EnemySpecies[],
-): EnemySpecies {
-  const rng = new SeededRng(seed)
-  return pickSpecies(
-    rng,
-    existing.map((e) => e.species),
-    allowedSpecies,
-  )
-}
-
-function fallbackEnemy(
-  seed: string,
-  budget: number,
-  partySize: number,
-  bossAllowed: boolean,
-  allowedSpecies?: EnemySpecies[],
-  maxEnemyCount = 12,
-): Enemy[] {
-  const rng = new SeededRng(seed)
-  const species = pickSpecies(rng, [], allowedSpecies)
-  const archetype = randomArchetypeForSpecies(rng, species)
-
-  // Try one-enemy solutions first.
-  const targetRaw = budget / actionEconomyMultiplier(1, partySize)
-  for (let a = 0; a < 30; a++) {
-    const enemy = generateEnemyForBudget(
-      `${seed}-fallback-1-${a}`,
-      targetRaw,
-      species,
-      archetype,
-      bossAllowed ? ['standard', 'elite', 'boss'] : ['standard', 'elite'],
-      bossAllowed,
-    )
-    if (!enemy) break
-    const effective = effectiveEncounterThreat(enemy.threatCost, 1, partySize)
-    if (effective >= budget * 0.8 && effective <= budget * 1.2) {
-      return [enemy]
-    }
-  }
-
-  // Build up from the cheapest single enemy.
-  const enemy =
-    generateEnemyForBudget(
-      `${seed}-fallback`,
-      targetRaw,
-      species,
-      archetype,
-      ['standard'],
-      bossAllowed,
-    ) ??
-    generateEnemy(`${seed}-fallback-minion`, {
-      rank: 'E',
-      species,
-      archetype,
-      tier: 'minion',
-    })
-
-  const enemies: Enemy[] = [enemy]
-  let rawSoFar = enemy.threatCost
-  while (enemies.length < maxEnemyCount) {
-    const currentCount = enemies.length
-    const targetRawNext =
-      budget / actionEconomyMultiplier(currentCount + 1, partySize) - rawSoFar
-    if (targetRawNext <= 0) break
-    const nextSpecies = pickSpeciesForFill(
-      `${seed}-fill-${currentCount}`,
-      enemies,
-      allowedSpecies,
-    )
-    const nextArchetype = archetype
-    const minion = generateEnemyForBudget(
-      `${seed}-fill-${currentCount}`,
-      targetRawNext,
-      nextSpecies,
-      nextArchetype,
-      ['minion', 'standard'],
-      false,
-    )
-    if (!minion) break
-    const newRaw = rawSoFar + minion.threatCost
-    const newEff = effectiveEncounterThreat(newRaw, currentCount + 1, partySize)
-    if (newEff > budget * 1.2) break
-    enemies.push(minion)
-    rawSoFar = newRaw
-    if (newEff >= budget * 0.8) break
-  }
-
-  return enemies
+  return bestRank
 }
 
 export function generateEncounter(
   options: EncounterGenerationOptions,
 ): Enemy[] {
   const parsed = zEncounterGenerationOptions.parse(options)
-  const planRng = new SeededRng(parsed.planSeed ?? parsed.seed)
-  // Warm-up the planning RNG so sequential plan seeds do not produce correlated
-  // shape/count/tier choices.
-  for (let i = 0; i < 15; i++) planRng.next()
   const partySize = parsed.partySize ?? 4
-  const budget =
-    parsed.partyThreat * DIFFICULTY_BUDGET_MULTIPLIER[parsed.difficulty]
-  const maxEnemyCount = parsed.maxEnemyCount ?? 12
   const bossAllowed = parsed.bossAllowed ?? true
+  const planSeed = parsed.planSeed ?? parsed.seed
 
-  if (budget < 0.5) {
-    return fallbackEnemy(
-      parsed.seed,
-      budget,
-      partySize,
-      bossAllowed,
-      parsed.allowedSpecies,
-      maxEnemyCount,
-    )
-  }
-
-  const averageAdventurerThreat =
-    partySize > 0 ? parsed.partyThreat / partySize : 1
-  const { shape, count } = chooseShape(
-    planRng,
-    budget,
-    partySize,
-    averageAdventurerThreat,
+  const shapeRng = new SeededRng(`${planSeed}:shape`)
+  const shape = chooseShape(
+    shapeRng,
     parsed.difficulty,
     parsed.shape,
+    bossAllowed,
   )
-  const species = parsed.allowedSpecies
-    ? planRng.pick(parsed.allowedSpecies)
-    : pickSpecies(planRng, [], undefined)
-  const archetype = randomArchetypeForSpecies(planRng, species)
-  const slots = buildSlots(shape, count, species, archetype)
+  const count = fixedCountForShape(shape)
 
-  for (let attempt = 0; attempt < 100; attempt++) {
-    const slotRng = new SeededRng(`${parsed.seed}-enc-${attempt}`)
-    const enemies: Enemy[] = []
-    let rawSoFar = 0
+  const budget =
+    parsed.partyThreat * DIFFICULTY_BUDGET_MULTIPLIER[parsed.difficulty]
+  const mult = actionEconomyMultiplier(count, partySize)
+  const slotTarget = budget / count / mult
 
-    for (let i = 0; i < slots.length; i++) {
-      const slot = slots[i]
-      const remainingSlots = slots.length - i
-      const targetTotalRaw =
-        budget / actionEconomyMultiplier(slots.length, partySize)
-      const targetRaw = (targetTotalRaw - rawSoFar) / remainingSlots
-      if (targetRaw <= 0) break
+  const plan = buildPlan(
+    planSeed,
+    shape,
+    count,
+    slotTarget,
+    parsed.allowedSpecies,
+  )
 
-      const existingSpecies = enemies.map((e) => e.species)
-      const slotSpecies =
-        slot.species ??
-        (enemies.length > 0 && slotRng.chance(80)
-          ? enemies[0].species
-          : pickSpecies(slotRng, existingSpecies, parsed.allowedSpecies))
-      const slotArchetype =
-        slot.archetype ?? randomArchetypeForSpecies(slotRng, slotSpecies)
+  const enemies: Enemy[] = []
+  for (let i = 0; i < plan.slots.length; i++) {
+    const slot = plan.slots[i]
+    const tier = slot.tier
+    const rank = pickRankForTarget(slot.targetThreat, tier)
+    const baseThreat = ENEMY_BASE_THREAT[rank] * TIER_THREAT_MULTIPLIER[tier]
+    const threatScale = baseThreat > 0 ? slot.targetThreat / baseThreat : 1
 
-      const allowBoss =
-        bossAllowed && (shape === 'boss' ? i === 0 : slot.tier === 'boss')
-
-      const enemy = generateEnemyForSlot(
-        `${parsed.seed}-slot-${attempt}-${i}`,
-        targetRaw,
-        { ...slot, species: slotSpecies, archetype: slotArchetype },
-        {
-          partySize,
-          budget,
-          rawSoFar,
-          currentCount: enemies.length,
-          allowBoss,
-          maxEnemyCount,
-        },
-        attempt,
-      )
-
-      if (!enemy) break
-
-      enemies.push(enemy)
-      rawSoFar += enemy.threatCost
-
-      const currentEffective = effectiveEncounterThreat(
-        rawSoFar,
-        enemies.length,
-        partySize,
-      )
-      if (
-        currentEffective >= budget * 0.8 &&
-        currentEffective <= budget * 1.2
-      ) {
-        // Hitting the target range early avoids overshooting.
-        break
-      }
-    }
-
-    // If the planned shape is under-budget, pad with minions without
-    // exceeding the safety cap.
-    while (enemies.length < maxEnemyCount) {
-      const currentEffective = effectiveEncounterThreat(
-        rawSoFar,
-        enemies.length,
-        partySize,
-      )
-      if (
-        currentEffective >= budget * 0.8 &&
-        currentEffective <= budget * 1.2
-      ) {
-        break
-      }
-      if (currentEffective > budget * 1.2) break
-
-      const targetRaw =
-        budget / actionEconomyMultiplier(enemies.length + 1, partySize) -
-        rawSoFar
-      if (targetRaw <= 0) break
-
-      const fillSpecies = pickSpeciesForFill(
-        `${parsed.seed}-fill-${attempt}-${enemies.length}`,
-        enemies,
-        parsed.allowedSpecies,
-      )
-      const fillArchetype =
-        enemies[0]?.archetype ??
-        randomArchetypeForSpecies(
-          new SeededRng(`${parsed.seed}-fill`),
-          fillSpecies,
-        )
-      const minion = generateEnemyForBudget(
-        `${parsed.seed}-fill-${attempt}-${enemies.length}`,
-        targetRaw,
-        fillSpecies,
-        fillArchetype,
-        ['minion', 'standard'],
-        false,
-      )
-      if (!minion) break
-      const newRaw = rawSoFar + minion.threatCost
-      const newEffective = effectiveEncounterThreat(
-        newRaw,
-        enemies.length + 1,
-        partySize,
-      )
-      if (newEffective > budget * 1.2) break
-      enemies.push(minion)
-      rawSoFar = newRaw
-      if (newEffective >= budget * 0.8) break
-    }
-
-    const finalEffective = effectiveEncounterThreat(
-      rawSoFar,
-      enemies.length,
-      partySize,
-    )
-    if (finalEffective >= budget * 0.8 && finalEffective <= budget * 1.2) {
-      return enemies
-    }
+    const enemy = generateEnemy(`${parsed.seed}:enemy:${i}`, {
+      rank,
+      tier,
+      species: slot.species,
+      archetype: slot.archetype,
+      threatScale,
+    })
+    enemies.push(enemy)
   }
 
-  return fallbackEnemy(
-    parsed.seed,
-    budget,
-    partySize,
-    bossAllowed,
-    parsed.allowedSpecies,
-    maxEnemyCount,
-  )
+  return enemies
 }
 
 export function calculatePartyThreat(
