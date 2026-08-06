@@ -10,7 +10,9 @@ import {
   Enemy,
   EnemySpecies,
   InjuryResult,
+  RetreatDiagnostic,
   RetreatResult,
+  RetreatTriggerReason,
 } from '../models/types.ts'
 import { clamp } from '../util.ts'
 import { MAX_ROUNDS } from '../balance/constants.ts'
@@ -35,15 +37,18 @@ import {
   decideAdventurerAction,
   decideEnemyAction,
   DecidedAction,
+  getPersonality,
 } from './ai.ts'
 import {
   adjustMorale,
+  averagePartyMorale,
   calculateRetreatChance,
+  evaluatePartyRetreat,
   getEnemyLeader,
   getLeader,
   onAllyIncapacitated,
+  partyTotalHpRatio,
   shouldEnemyRetreat,
-  shouldPartyRetreat,
 } from './morale.ts'
 import { generateEnemy } from '../generators/enemyGenerator.ts'
 
@@ -62,7 +67,6 @@ export interface BattleState {
   discoveredWeaknesses: Set<string>
   partyDamageDealt: number
   enemyDamageDealt: number
-  retreat?: RetreatResult
   ended: boolean
   outcome?: BattleOutcome
   partyInitBonus: number
@@ -70,8 +74,18 @@ export interface BattleState {
   deadAdventurers: Set<string>
   injuries: InjuryResult[]
   abilityUsage: Record<string, number>
+  retreatDiagnostic?: RetreatDiagnostic
+  lastRetreatAttempt?: RetreatResult
+  successfulRetreat?: RetreatResult
+  retreatAttempts: RetreatDiagnostic[]
+  lastRetreatRound: number
   context: BattleContext
   leaderTargetId?: string
+  minionActionsRemaining: number
+  maxEnemyActionsThisRound: number
+  enemyActionsThisRound: number
+  adventurerActionCount: number
+  enemyActionCount: number
 }
 
 function log(
@@ -388,8 +402,20 @@ function resolveAction(
   unit: BattleUnit,
   action: DecidedAction,
 ): void {
-  if (action.action === 'retreat') {
-    attemptRetreat(state, unit)
+  if (action.action === 'requestPartyRetreat') {
+    if (!canAttemptPartyRetreat(state)) {
+      unit.retreatProposalRejected = true
+      if (shouldIndividualEscapeQuick(unit, state)) {
+        attemptIndividualEscape(state, unit)
+      }
+      return
+    }
+    requestPartyRetreat(state, unit)
+    return
+  }
+
+  if (action.action === 'individualEscape') {
+    attemptIndividualEscape(state, unit)
     return
   }
 
@@ -680,68 +706,410 @@ function resolveAttack(
   if (hasStatus(attacker, 'stealthed')) removeStatus(attacker, 'stealthed')
 }
 
-function attemptRetreat(state: BattleState, unit: BattleUnit): void {
-  if (unit.isAdventurer) {
-    if (state.retreat || state.ended) return
-    const leader = getLeader(state.party) ?? unit
-    const chance = calculateRetreatChance(leader, getAliveEnemies(state))
-    const roll = state.rng.d100()
-    const success = roll <= chance
-    state.retreat = { side: 'party', success, roll, chance }
+function buildRetreatDiagnostic(
+  state: BattleState,
+  base: RetreatDiagnostic,
+  proposer?: BattleUnit,
+  leader?: BattleUnit,
+  approved?: boolean,
+): RetreatDiagnostic {
+  const alive = getAliveAdventurers(state)
+  const incapacitated = state.party.filter(
+    (u) => !u.isAlive || u.escaped,
+  ).length
+  const healerAlive = state.party.some(
+    (u) => u.role === 'healer' && u.isAlive && !u.escaped,
+  )
+  const partyHpRatio = partyTotalHpRatio(state.party)
+  const avgMorale = averagePartyMorale(state.party)
+  const leaderUnit = leader ?? getLeader(state.party)
+
+  return {
+    ...base,
+    round: state.round,
+    aliveCount: alive.length,
+    incapacitatedCount: incapacitated,
+    healerAlive,
+    partyHpRatio,
+    averageMorale: avgMorale,
+    partyThreat: base.partyThreat,
+    enemyThreat: base.enemyThreat,
+    proposerId: proposer?.id,
+    proposerRole: proposer?.role,
+    proposerHpRatio: proposer ? proposer.hp / proposer.maxHp : undefined,
+    proposerMorale: proposer?.morale,
+    leaderId: leaderUnit?.id,
+    approved: approved ?? base.approved,
+    attemptCount: state.retreatAttempts.length + 1,
+  }
+}
+
+function canAttemptPartyRetreat(state: BattleState): boolean {
+  if (state.ended || state.successfulRetreat) return false
+  return state.round - state.lastRetreatRound >= 2
+}
+
+function attemptPartyRetreat(
+  state: BattleState,
+  leader: BattleUnit,
+  diagnostic: RetreatDiagnostic,
+): RetreatResult {
+  const chance = calculateRetreatChance(leader, getAliveEnemies(state))
+  const roll = state.rng.d100()
+  const success = roll <= chance
+  const result: RetreatResult = { side: 'party', success, roll, chance }
+
+  const fullDiagnostic = buildRetreatDiagnostic(
+    state,
+    diagnostic,
+    leader,
+    leader,
+  )
+  fullDiagnostic.success = success
+  fullDiagnostic.successChance = chance
+  fullDiagnostic.roll = roll
+  fullDiagnostic.attempted = true
+
+  state.lastRetreatAttempt = result
+  state.lastRetreatRound = state.round
+  state.retreatDiagnostic = fullDiagnostic
+  state.retreatAttempts.push(fullDiagnostic)
+
+  log(
+    state,
+    'retreat',
+    'retreat',
+    `${leader.name}がパーティ撤退を試みた。${success ? '成功' : '失敗'}`,
+    { actorId: leader.id, roll, successChance: chance },
+  )
+
+  if (success) {
+    state.successfulRetreat = result
+    state.ended = true
+    state.outcome = 'retreat'
+    getAliveAdventurers(state).forEach((u) => {
+      u.escaped = true
+    })
+  }
+
+  return result
+}
+
+function attemptEnemyEscape(state: BattleState, unit: BattleUnit): boolean {
+  const alive = getAliveEnemies(state)
+  if (alive.length === 0) return false
+  const chance = clamp(
+    (unit.behavior?.caution ?? 50) + unit.stats.dex - 30,
+    5,
+    95,
+  )
+  const roll = state.rng.d100()
+  const success = roll <= chance
+  if (success) {
+    unit.escaped = true
+    log(state, 'retreat', 'retreat', `${unit.name}が撤退した。`, {
+      actorId: unit.id,
+      roll,
+      successChance: chance,
+    })
+  } else {
+    log(state, 'retreat', 'retreat', `${unit.name}は撤退に失敗した。`, {
+      actorId: unit.id,
+      roll,
+      successChance: chance,
+    })
+  }
+  return success
+}
+
+function calculateIndividualEscapeChance(
+  unit: BattleUnit,
+  pursuers: BattleUnit[],
+): number {
+  const avgPer =
+    pursuers.length === 0
+      ? 0
+      : pursuers.reduce((sum, e) => sum + e.stats.per, 0) / pursuers.length
+  const avgDex =
+    pursuers.length === 0
+      ? 0
+      : pursuers.reduce((sum, e) => sum + e.stats.dex, 0) / pursuers.length
+  const personality = getPersonality(unit)
+  const caution = personality?.caution ?? 0
+  const bravery = personality?.bravery ?? 0
+  const greed = personality?.greed ?? 0
+
+  const chance =
+    unit.stats.dex +
+    unit.skills.stealth * 0.5 -
+    avgPer * 0.5 -
+    avgDex * 0.3 -
+    pursuers.length * 2 +
+    caution * 3 -
+    bravery * 2 -
+    greed * 1
+
+  return clamp(chance, 5, 95)
+}
+
+export function attemptIndividualEscape(
+  state: BattleState,
+  unit: BattleUnit,
+): boolean {
+  const pursuers = getAliveEnemies(state)
+  const chance = calculateIndividualEscapeChance(unit, pursuers)
+  const roll = state.rng.d100()
+  const success = roll <= chance
+
+  const partyEval = evaluatePartyRetreat(
+    state.party,
+    state.enemies,
+    state.round,
+  )
+  const individualReason: RetreatTriggerReason =
+    hasStatus(unit, 'frightened') || unit.morale <= 0
+      ? 'fearPanic'
+      : 'individualEscape'
+  const diagnostic = buildRetreatDiagnostic(
+    state,
+    {
+      ...partyEval.diagnostic,
+      reason: individualReason,
+      matchedReasons: [individualReason],
+      success,
+      successChance: chance,
+      roll,
+    },
+    unit,
+    getLeader(state.party),
+    undefined,
+  )
+  diagnostic.attempted = true
+
+  state.retreatDiagnostic = diagnostic
+  state.retreatAttempts.push(diagnostic)
+
+  if (success) {
+    unit.escaped = true
     log(
       state,
       'retreat',
-      'retreat',
-      `${leader.name}が撤退を試みた。${success ? '成功' : '失敗'}`,
-      { actorId: leader.id, roll, successChance: chance },
+      'individualEscape',
+      `${unit.name}が単独で離脱した。`,
+      {
+        actorId: unit.id,
+        roll,
+        successChance: chance,
+      },
     )
-    if (success) {
-      state.ended = true
-      state.outcome = 'retreat'
-      getAliveAdventurers(state).forEach((u) => {
-        u.escaped = true
-      })
-    }
   } else {
-    const alive = getAliveEnemies(state)
-    if (alive.length === 0) return
-    const chance = clamp(
-      (unit.behavior?.caution ?? 50) + unit.stats.dex - 30,
-      5,
-      95,
+    log(
+      state,
+      'retreat',
+      'individualEscape',
+      `${unit.name}は単独離脱に失敗した。`,
+      { actorId: unit.id, roll, successChance: chance },
     )
-    const roll = state.rng.d100()
-    const success = roll <= chance
-    if (success) {
-      unit.escaped = true
-      log(state, 'retreat', 'retreat', `${unit.name}が撤退した。`, {
-        actorId: unit.id,
-        roll,
-        successChance: chance,
-      })
-    } else {
-      log(state, 'retreat', 'retreat', `${unit.name}は撤退に失敗した。`, {
-        actorId: unit.id,
-        roll,
-        successChance: chance,
-      })
-    }
   }
+  return success
+}
+
+function evaluateRetreatApproval(
+  state: BattleState,
+  proposer: BattleUnit,
+  diagnostic: RetreatDiagnostic,
+): boolean {
+  const leader = getLeader(state.party) ?? proposer
+  const proposerPersonality = getPersonality(proposer)
+  const leaderPersonality = getPersonality(leader)
+
+  const bravery = leaderPersonality?.bravery ?? 0
+  const caution = leaderPersonality?.caution ?? 0
+  const discipline = leaderPersonality?.discipline ?? 0
+  const greed = leaderPersonality?.greed ?? 0
+
+  let score = 0
+  if (diagnostic.matchedReasons.length > 0) score += 25
+  if (diagnostic.partyHpRatio <= 0.5) score += 20
+  if (diagnostic.incapacitatedCount >= 1) score += 15
+  if (diagnostic.averageMorale <= diagnostic.moraleThreshold) score += 15
+  if (diagnostic.enemyThreat >= diagnostic.partyThreat * 1.25) score += 15
+
+  const proposerHpRatio = proposer.hp / proposer.maxHp
+  if (proposerHpRatio <= 0.1) score += 25
+  else if (proposerHpRatio <= 0.25) score += 10
+
+  if (proposer.morale <= 10) score += 15
+  score += (proposer.skills.leadership ?? 0) * 0.3
+
+  score += caution * 4
+  score -= bravery * 5
+  score -= discipline * 3
+  score -= greed * 3
+
+  const disciplineModifier =
+    proposerPersonality?.discipline ?? 0 + (leaderPersonality?.discipline ?? 0)
+  score += disciplineModifier * 1.5
+
+  return score >= 50
+}
+
+export function requestPartyRetreat(
+  state: BattleState,
+  proposer: BattleUnit,
+): void {
+  const partyEval = evaluatePartyRetreat(
+    state.party,
+    state.enemies,
+    state.round,
+  )
+  const hpRatio = proposer.hp / proposer.maxHp
+  const criticalPersonal = hpRatio <= 0.1 || proposer.morale <= 10
+  const deterioratingParty =
+    partyEval.diagnostic.partyHpRatio <= 0.5 ||
+    partyEval.diagnostic.incapacitatedCount >= 1 ||
+    partyEval.diagnostic.averageMorale <=
+      partyEval.diagnostic.moraleThreshold ||
+    partyEval.diagnostic.enemyThreat >= partyEval.diagnostic.partyThreat * 1.25
+
+  const personality = getPersonality(proposer)
+  const bravery = personality?.bravery ?? 0
+  const caution = personality?.caution ?? 0
+  const greed = personality?.greed ?? 0
+  const discipline = personality?.discipline ?? 0
+  const personalThreshold =
+    0.25 - bravery * 0.015 + caution * 0.015 - greed * 0.015 - discipline * 0.01
+
+  const shouldRequest =
+    criticalPersonal || (hpRatio <= personalThreshold && deterioratingParty)
+
+  if (!shouldRequest) {
+    if (shouldIndividualEscapeQuick(proposer, state)) {
+      attemptIndividualEscape(state, proposer)
+    }
+    return
+  }
+
+  const reason: RetreatTriggerReason = criticalPersonal
+    ? 'criticalMember'
+    : 'memberProposal'
+
+  const proposalDiagnostic: RetreatDiagnostic = {
+    ...partyEval.diagnostic,
+    reason,
+    matchedReasons: [reason, ...partyEval.diagnostic.matchedReasons],
+  }
+
+  const approved = evaluateRetreatApproval(state, proposer, proposalDiagnostic)
+
+  const diagnostic = buildRetreatDiagnostic(
+    state,
+    {
+      ...proposalDiagnostic,
+      success: false,
+      successChance: 0,
+      roll: 0,
+    },
+    proposer,
+    getLeader(state.party),
+    approved,
+  )
+
+  if (!approved) {
+    diagnostic.success = false
+    diagnostic.attempted = false
+    state.retreatDiagnostic = diagnostic
+    state.retreatAttempts.push(diagnostic)
+    proposer.retreatProposalRejected = true
+    log(
+      state,
+      'retreat',
+      'requestPartyRetreat',
+      `${proposer.name}の撤退提案はリーダーに却下された。`,
+      { actorId: proposer.id },
+    )
+    if (shouldIndividualEscapeQuick(proposer, state)) {
+      attemptIndividualEscape(state, proposer)
+    }
+    return
+  }
+
+  if (!canAttemptPartyRetreat(state)) {
+    diagnostic.approved = true
+    diagnostic.attempted = false
+    state.retreatDiagnostic = diagnostic
+    state.retreatAttempts.push(diagnostic)
+    proposer.retreatProposalRejected = true
+    return
+  }
+
+  const leader = getLeader(state.party) ?? proposer
+  attemptPartyRetreat(state, leader, diagnostic)
+}
+
+function shouldIndividualEscapeQuick(
+  unit: BattleUnit,
+  _state: BattleState,
+): boolean {
+  const hpRatio = unit.hp / unit.maxHp
+  const personality = getPersonality(unit)
+  const bravery = personality?.bravery ?? 0
+  const caution = personality?.caution ?? 0
+  const discipline = personality?.discipline ?? 0
+
+  if (hpRatio < 0.1) return true
+  if (unit.morale <= 0) return true
+  if (hasStatus(unit, 'frightened')) return true
+  if (unit.retreatProposalRejected) return true
+  if (bravery < 0 && hpRatio < 0.15) return true
+  if (caution > 0 && hpRatio < 0.15) return true
+  if (discipline < 0 && hpRatio < 0.15) return true
+  return false
+}
+
+function isMinion(unit: BattleUnit): boolean {
+  return !unit.isAdventurer && unit.tier === 'minion'
 }
 
 function processStartOfRound(state: BattleState): void {
   state.leaderTargetId = undefined
 
-  if (shouldPartyRetreat(state.party, state.enemies, state.round)) {
+  const livingMinions = getAliveEnemies(state).filter(
+    (e) => e.tier === 'minion',
+  )
+  state.minionActionsRemaining = Math.max(
+    1,
+    Math.ceil(livingMinions.length / 2),
+  )
+
+  const aliveAdventurers = getAliveAdventurers(state).length
+  state.maxEnemyActionsThisRound = Math.max(1, aliveAdventurers)
+  state.enemyActionsThisRound = 0
+
+  const partyEval = evaluatePartyRetreat(
+    state.party,
+    state.enemies,
+    state.round,
+  )
+  if (partyEval.should && canAttemptPartyRetreat(state)) {
     const leader = getLeader(state.party) ?? getAliveAdventurers(state)[0]
-    if (leader) attemptRetreat(state, leader)
+    if (leader) {
+      const diagnostic = buildRetreatDiagnostic(
+        state,
+        partyEval.diagnostic,
+        leader,
+        leader,
+        true,
+      )
+      attemptPartyRetreat(state, leader, diagnostic)
+    }
   }
 
   if (!state.ended && shouldEnemyRetreat(state.enemies, state.party)) {
     const alive = getAliveEnemies(state)
     for (const enemy of alive) {
       if (enemy.species !== 'undead' && enemy.species !== 'construct') {
-        attemptRetreat(state, enemy)
+        attemptEnemyEscape(state, enemy)
       }
     }
   }
@@ -925,7 +1293,14 @@ export function runBattle(
     deadAdventurers: new Set<string>(),
     injuries: [],
     abilityUsage: {},
+    retreatAttempts: [],
+    lastRetreatRound: -2,
     context: options?.context ?? getDefaultContext(),
+    minionActionsRemaining: 99,
+    maxEnemyActionsThisRound: 99,
+    enemyActionsThisRound: 0,
+    adventurerActionCount: 0,
+    enemyActionCount: 0,
   }
 
   resolveContact(state)
@@ -946,6 +1321,15 @@ export function runBattle(
         removeStatus(unit, 'stunned')
         continue
       }
+      if (isMinion(unit) && state.minionActionsRemaining <= 0) {
+        continue
+      }
+      if (
+        !unit.isAdventurer &&
+        state.enemyActionsThisRound >= state.maxEnemyActionsThisRound
+      ) {
+        continue
+      }
 
       const action = unit.isAdventurer
         ? decideAdventurerAction(unit, state)
@@ -963,6 +1347,12 @@ export function runBattle(
       }
 
       resolveAction(state, unit, action)
+      if (isMinion(unit)) state.minionActionsRemaining--
+      if (!unit.isAdventurer) {
+        state.enemyActionsThisRound++
+      }
+      if (unit.isAdventurer) state.adventurerActionCount++
+      else state.enemyActionCount++
 
       if (state.ended) break
       if (checkBattleEnd(state)) break
@@ -1005,7 +1395,11 @@ export function runBattle(
     enemyDamageDealt: state.enemyDamageDealt,
     abilityUsage: state.abilityUsage,
     contactResult: state.contact,
-    retreatResult: state.retreat,
+    retreatResult: state.successfulRetreat ?? state.lastRetreatAttempt,
+    retreatDiagnostic: state.retreatDiagnostic,
+    retreatAttempts: state.retreatAttempts,
     logs: state.logs,
+    adventurerActionCount: state.adventurerActionCount,
+    enemyActionCount: state.enemyActionCount,
   }
 }

@@ -33,6 +33,15 @@ export const ENEMY_ARCHETYPES = [
 
 export const ENEMY_TIERS = ['minion', 'standard', 'elite', 'boss'] as const
 
+export const ENCOUNTER_SHAPES = [
+  'standard',
+  'eliteGroup',
+  'swarm',
+  'boss',
+] as const
+
+export type EncounterShape = (typeof ENCOUNTER_SHAPES)[number]
+
 export const ELEMENTS = [
   'physical',
   'fire',
@@ -128,6 +137,26 @@ export interface TraitInstance {
 }
 
 export type AbilityEffect = Partial<Record<string, number | boolean | string>>
+
+export type AbilityId =
+  | 'flight'
+  | 'poisonAttack'
+  | 'bleedAttack'
+  | 'areaAttack'
+  | 'revive'
+  | 'regeneration'
+  | 'frontDefense'
+  | 'magicResist'
+  | 'physicalResist'
+  | 'darknessBoost'
+  | 'corpseExplosion'
+  | 'summon'
+  | 'taunt'
+  | 'fear'
+  | 'healBlock'
+  | 'counter'
+  | 'stealthStart'
+  | 'swarmCoordination'
 
 export interface AbilityDefinition {
   id: string
@@ -240,13 +269,18 @@ export interface AdventurerGenerationOptions {
   count?: number
 }
 
+export type Difficulty = 'easy' | 'normal' | 'hard' | 'deadly'
+
 export interface EncounterGenerationOptions {
   seed: string
   partyThreat: number
-  difficulty: 'easy' | 'normal' | 'hard' | 'deadly'
+  difficulty: Difficulty
   allowedSpecies?: EnemySpecies[]
   bossAllowed?: boolean
   maxEnemyCount?: number
+  shape?: EncounterShape
+  planSeed?: string
+  partySize?: number
 }
 
 export type ContactResultType =
@@ -287,6 +321,44 @@ export type BattleOutcome =
   | 'totalLoss'
   | 'stalemate'
 
+export type RetreatTriggerReason =
+  | 'halfIncapacitated'
+  | 'healerLostWithWounded'
+  | 'lowPartyHp'
+  | 'lowMorale'
+  | 'overwhelmed'
+  | 'memberProposal'
+  | 'criticalMember'
+  | 'fearPanic'
+  | 'individualEscape'
+
+export interface RetreatDiagnostic {
+  reason: RetreatTriggerReason
+  round: number
+  success: boolean
+  successChance: number
+  roll: number
+  aliveCount: number
+  incapacitatedCount: number
+  healerAlive: boolean
+  partyHpRatio: number
+  averageMorale: number
+  moraleThreshold: number
+  retreatHpThreshold: number
+  partyThreat: number
+  enemyThreat: number
+  matchedReasons: RetreatTriggerReason[]
+
+  proposerId?: string
+  proposerRole?: string
+  proposerHpRatio?: number
+  proposerMorale?: number
+  leaderId?: string
+  approved?: boolean
+  attempted?: boolean
+  attemptCount?: number
+}
+
 export interface RetreatResult {
   side: 'party' | 'enemy'
   success: boolean
@@ -321,6 +393,13 @@ export interface BattleOptions {
   context?: BattleContext
 }
 
+export interface TrialFingerprint {
+  partyIds: string[]
+  partyRoles: AdventurerRole[]
+  enemyIds: string[]
+  enemyComposition: string
+}
+
 export interface BattleResult {
   seed: string
   outcome: BattleOutcome
@@ -338,7 +417,11 @@ export interface BattleResult {
   abilityUsage: Record<string, number>
   contactResult: ContactResult
   retreatResult?: RetreatResult
+  retreatDiagnostic?: RetreatDiagnostic
+  retreatAttempts?: RetreatDiagnostic[]
   logs: BattleLogEntry[]
+  adventurerActionCount: number
+  enemyActionCount: number
 }
 
 export const zAdventurerRank = z.enum(RANKS)
@@ -362,4 +445,7 @@ export const zEncounterGenerationOptions = z.object({
   allowedSpecies: z.array(zEnemySpecies).optional(),
   bossAllowed: z.boolean().optional(),
   maxEnemyCount: z.number().int().min(1).optional(),
+  shape: z.enum(ENCOUNTER_SHAPES).optional(),
+  planSeed: z.string().optional(),
+  partySize: z.number().int().min(1).optional(),
 })

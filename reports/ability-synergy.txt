@@ -1,0 +1,68 @@
+=== 能力シナジー診断 ===
+seed: phase1-6-synergy-v1
+trials per scenario: 500
+
+
+-- summon + revive (sumCost=1.253) --
+E: none=0.080 summon=0.030 revive=0.072 pair=0.038 expected=0.022 synergy=0.016
+D: none=0.906 summon=0.868 revive=0.866 pair=0.862 expected=0.828 synergy=0.034
+C: none=0.958 summon=0.922 revive=0.960 pair=0.936 expected=0.924 synergy=0.012
+B: none=1.000 summon=0.996 revive=0.998 pair=0.998 expected=0.994 synergy=0.004
+A: none=0.998 summon=0.996 revive=0.998 pair=0.998 expected=0.996 synergy=0.002
+S: none=1.000 summon=1.000 revive=1.000 pair=1.000 expected=1.000 synergy=0.000
+
+-- regeneration + frontDefense (sumCost=1.707) --
+E: none=0.080 regeneration=0.046 frontDefense=0.072 pair=0.038 expected=0.038 synergy=0.000
+D: none=0.906 regeneration=0.886 frontDefense=0.898 pair=0.876 expected=0.878 synergy=-0.002
+C: none=0.958 regeneration=0.956 frontDefense=0.960 pair=0.946 expected=0.958 synergy=-0.012
+B: none=1.000 regeneration=0.998 frontDefense=1.000 pair=0.998 expected=0.998 synergy=0.000
+A: none=0.998 regeneration=0.998 frontDefense=0.998 pair=0.998 expected=0.998 synergy=0.000
+S: none=1.000 regeneration=1.000 frontDefense=1.000 pair=1.000 expected=1.000 synergy=0.000
+
+-- physicalResist + magicResist (sumCost=1.903) --
+E: none=0.080 physicalResist=0.056 magicResist=0.036 pair=0.058 expected=0.012 synergy=0.046
+D: none=0.906 physicalResist=0.874 magicResist=0.888 pair=0.854 expected=0.856 synergy=-0.002
+C: none=0.958 physicalResist=0.958 magicResist=0.948 pair=0.942 expected=0.948 synergy=-0.006
+B: none=1.000 physicalResist=0.998 magicResist=0.996 pair=1.000 expected=0.994 synergy=0.006
+A: none=0.998 physicalResist=0.998 magicResist=0.998 pair=0.998 expected=0.998 synergy=0.000
+S: none=1.000 physicalResist=1.000 magicResist=1.000 pair=1.000 expected=1.000 synergy=0.000
+
+-- areaAttack + poisonAttack (sumCost=0.928) --
+E: none=0.080 areaAttack=0.076 poisonAttack=0.088 pair=0.070 expected=0.084 synergy=-0.014
+D: none=0.906 areaAttack=0.888 poisonAttack=0.894 pair=0.902 expected=0.876 synergy=0.026
+C: none=0.958 areaAttack=0.958 poisonAttack=0.958 pair=0.950 expected=0.958 synergy=-0.008
+B: none=1.000 areaAttack=0.998 poisonAttack=0.998 pair=1.000 expected=0.996 synergy=0.004
+A: none=0.998 areaAttack=0.998 poisonAttack=0.998 pair=0.996 expected=0.998 synergy=-0.002
+S: none=1.000 areaAttack=1.000 poisonAttack=1.000 pair=1.000 expected=1.000 synergy=0.000
+
+-- areaAttack + bleedAttack (sumCost=0.425) --
+E: none=0.080 areaAttack=0.076 bleedAttack=0.074 pair=0.080 expected=0.070 synergy=0.010
+D: none=0.906 areaAttack=0.888 bleedAttack=0.898 pair=0.922 expected=0.880 synergy=0.042
+C: none=0.958 areaAttack=0.958 bleedAttack=0.972 pair=0.976 expected=0.972 synergy=0.004
+B: none=1.000 areaAttack=0.998 bleedAttack=1.000 pair=0.998 expected=0.998 synergy=0.000
+A: none=0.998 areaAttack=0.998 bleedAttack=0.998 pair=0.996 expected=0.998 synergy=-0.002
+S: none=1.000 areaAttack=1.000 bleedAttack=1.000 pair=1.000 expected=1.000 synergy=0.000
+
+-- healBlock + poisonAttack (sumCost=1.953) --
+E: none=0.080 healBlock=0.060 poisonAttack=0.088 pair=0.072 expected=0.068 synergy=0.004
+D: none=0.906 healBlock=0.932 poisonAttack=0.894 pair=0.918 expected=0.920 synergy=-0.002
+C: none=0.958 healBlock=0.970 poisonAttack=0.958 pair=0.958 expected=0.970 synergy=-0.012
+B: none=1.000 healBlock=1.000 poisonAttack=0.998 pair=1.000 expected=0.998 synergy=0.002
+A: none=0.998 healBlock=0.998 poisonAttack=0.998 pair=0.998 expected=0.998 synergy=0.000
+S: none=1.000 healBlock=1.000 poisonAttack=1.000 pair=1.000 expected=1.000 synergy=0.000
+
+-- counter + taunt (sumCost=0.674) --
+E: none=0.080 counter=0.070 taunt=0.114 pair=0.098 expected=0.104 synergy=-0.006
+D: none=0.906 counter=0.902 taunt=0.930 pair=0.926 expected=0.926 synergy=0.000
+C: none=0.958 counter=0.960 taunt=0.976 pair=0.956 expected=0.978 synergy=-0.022
+B: none=1.000 counter=1.000 taunt=0.998 pair=0.998 expected=0.998 synergy=0.000
+A: none=0.998 counter=0.996 taunt=0.998 pair=0.998 expected=0.996 synergy=0.002
+S: none=1.000 counter=1.000 taunt=1.000 pair=1.000 expected=1.000 synergy=0.000
+
+-- corpseExplosion + revive (sumCost=0.541) --
+E: none=0.080 corpseExplosion=0.072 revive=0.072 pair=0.074 expected=0.064 synergy=0.010
+D: none=0.906 corpseExplosion=0.892 revive=0.866 pair=0.884 expected=0.852 synergy=0.032
+C: none=0.958 corpseExplosion=0.970 revive=0.960 pair=0.956 expected=0.972 synergy=-0.016
+B: none=1.000 corpseExplosion=1.000 revive=0.998 pair=1.000 expected=0.998 synergy=0.002
+A: none=0.998 corpseExplosion=0.998 revive=0.998 pair=0.998 expected=0.998 synergy=0.000
+S: none=1.000 corpseExplosion=1.000 revive=1.000 pair=1.000 expected=1.000 synergy=0.000

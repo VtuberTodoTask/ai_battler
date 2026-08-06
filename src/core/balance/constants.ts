@@ -1,4 +1,9 @@
-import { AdventurerRank, EnemyRank, EnemyTier } from '../models/types.ts'
+import {
+  AbilityId,
+  AdventurerRank,
+  EnemyRank,
+  EnemyTier,
+} from '../models/types.ts'
 
 export const ADVENTURER_RANK_BASE: Record<AdventurerRank, number> = {
   E: 42,
@@ -9,13 +14,14 @@ export const ADVENTURER_RANK_BASE: Record<AdventurerRank, number> = {
   S: 78,
 }
 
+// Calibrated from measured per-rank combat metrics (expected DPR * survival).
 export const ADVENTURER_THREAT: Record<AdventurerRank, number> = {
-  E: 1,
-  D: 2,
-  C: 4,
-  B: 7,
-  A: 11,
-  S: 16,
+  E: 2.97,
+  D: 3.9,
+  C: 4.61,
+  B: 6.11,
+  A: 6.13,
+  S: 7.24,
 }
 
 export const ENEMY_RANK_BASE: Record<EnemyRank, number> = {
@@ -28,21 +34,23 @@ export const ENEMY_RANK_BASE: Record<EnemyRank, number> = {
   DISASTER: 90,
 }
 
+// Calibrated against simulated Normal encounters to keep favorable outcome
+// rates within 55–70% across ranks. DISASTER is set to roughly 2.5x S standard.
 export const ENEMY_BASE_THREAT: Record<EnemyRank, number> = {
-  E: 1,
-  D: 2,
-  C: 4,
-  B: 7,
-  A: 11,
-  S: 16,
-  DISASTER: 24,
+  E: 2.31,
+  D: 4.77,
+  C: 5.18,
+  B: 6.51,
+  A: 7.74,
+  S: 7.99,
+  DISASTER: 19.98,
 }
 
 export const TIER_THREAT_MULTIPLIER: Record<EnemyTier, number> = {
-  minion: 0.5,
+  minion: 0.35,
   standard: 1,
-  elite: 1.5,
-  boss: 2.5,
+  elite: 1.4,
+  boss: 2.2,
 }
 
 export const TIER_HP_MULTIPLIER: Record<EnemyTier, number> = {
@@ -53,10 +61,10 @@ export const TIER_HP_MULTIPLIER: Record<EnemyTier, number> = {
 }
 
 export const DIFFICULTY_BUDGET_MULTIPLIER = {
-  easy: 0.7,
-  normal: 1.0,
-  hard: 1.25,
-  deadly: 1.5,
+  easy: 0.9,
+  normal: 1.56,
+  hard: 2.15,
+  deadly: 2.85,
 }
 
 export const MIN_STAT = 20
@@ -75,11 +83,25 @@ export const MORALE_INITIAL_BASE = 20
 
 export const RETREAT_MORALE_THRESHOLD = 30
 
-export const ABILITY_THREAT_BONUS = {
-  minor: 0,
-  standard: 0.1,
-  strong: 0.25,
-  extreme: 0.5,
+export const ABILITY_THREAT_COST: Record<AbilityId, number> = {
+  flight: 2.413950000000001,
+  poisonAttack: 0.05,
+  bleedAttack: 0.05,
+  areaAttack: 0.11718666666666686,
+  revive: 0.4319589535864975,
+  regeneration: 2.686831304347829,
+  frontDefense: 0.6260731340996166,
+  magicResist: 1.866533857923498,
+  physicalResist: 0.7886467605633801,
+  darknessBoost: 0.10044571428571544,
+  corpseExplosion: 0.05,
+  summon: 3.2270504761904792,
+  taunt: 0.05,
+  fear: 3.8844156521739155,
+  healBlock: 0.05,
+  counter: 0.06459364485981296,
+  stealthStart: 0.05,
+  swarmCoordination: 1.407858227848102,
 }
 
 export const DIFFICULTY_TARGET_WINRATE = {

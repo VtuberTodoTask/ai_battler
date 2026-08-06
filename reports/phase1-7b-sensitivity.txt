@@ -1,0 +1,10 @@
+=== Phase 1.7B ADVENTURER_THREAT 局所感度測定 ===
+trials: 5000
+multipliers: 0.9, 1, 1.1
+
+E: x0.90=0.809 x1.00=0.770 x1.10=0.736 -> m=1.150 newThreat=2.97 (current=2.58)
+D: x0.90=0.873 x1.00=0.823 x1.10=0.788 -> m=1.150 newThreat=3.90 (current=3.39)
+C: x0.90=0.919 x1.00=0.826 x1.10=0.784 -> m=1.150 newThreat=4.61 (current=4.01)
+B: x0.90=0.888 x1.00=0.751 x1.10=0.688 -> m=1.150 newThreat=6.11 (current=5.31)
+A: x0.90=0.866 x1.00=0.740 x1.10=0.656 -> m=1.000 newThreat=6.13 (current=6.13)
+S: x0.90=0.850 x1.00=0.677 x1.10=0.580 -> m=1.000 newThreat=7.24 (current=7.24)

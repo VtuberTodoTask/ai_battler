@@ -7,6 +7,7 @@ import { getAbilityNumeric, hasStatus } from './actions.ts'
 import { ABILITY_MAP } from '../../data/enemyData.ts'
 import { Personality } from '../models/types.ts'
 import { clamp } from '../util.ts'
+import { evaluatePartyRetreat } from './morale.ts'
 
 export type ActionType =
   | 'attack'
@@ -15,7 +16,8 @@ export type ActionType =
   | 'heal'
   | 'guard'
   | 'support'
-  | 'retreat'
+  | 'requestPartyRetreat'
+  | 'individualEscape'
   | 'revive'
   | 'summon'
   | 'healBlock'
@@ -36,7 +38,7 @@ interface AiState {
   leaderTargetId?: string
 }
 
-function getPersonality(unit: BattleUnit): Personality | undefined {
+export function getPersonality(unit: BattleUnit): Personality | undefined {
   const original = unit.original
   if (original && 'personality' in original) {
     return (original as { personality: Personality }).personality
@@ -188,26 +190,101 @@ function selectAllyForGuard(
   )
 }
 
+interface RetreatRequestEvaluation {
+  should: boolean
+  critical: boolean
+  deteriorating: boolean
+  personalThreshold: number
+}
+
+function evaluateRetreatRequest(
+  unit: BattleUnit,
+  state: AiState,
+): RetreatRequestEvaluation {
+  const hpRatio = unit.hp / unit.maxHp
+  const personality = getPersonality(unit)
+  const bravery = personality?.bravery ?? 0
+  const caution = personality?.caution ?? 0
+  const greed = personality?.greed ?? 0
+  const discipline = personality?.discipline ?? 0
+
+  const personalThreshold =
+    0.25 - bravery * 0.015 + caution * 0.015 - greed * 0.015 - discipline * 0.01
+
+  const criticalPersonal = hpRatio <= 0.1 || unit.morale <= 10
+
+  const partyEval = evaluatePartyRetreat(
+    state.party,
+    state.enemies,
+    state.round,
+  )
+  const diag = partyEval.diagnostic
+  const deterioratingParty =
+    diag.partyHpRatio <= 0.5 ||
+    diag.incapacitatedCount >= 1 ||
+    diag.averageMorale <= diag.moraleThreshold ||
+    diag.enemyThreat >= diag.partyThreat * 1.25
+
+  const should =
+    criticalPersonal || (hpRatio <= personalThreshold && deterioratingParty)
+
+  return {
+    should,
+    critical: criticalPersonal,
+    deteriorating: deterioratingParty,
+    personalThreshold,
+  }
+}
+
+function shouldIndividualEscape(unit: BattleUnit, _state: AiState): boolean {
+  const hpRatio = unit.hp / unit.maxHp
+  const personality = getPersonality(unit)
+  const bravery = personality?.bravery ?? 0
+  const caution = personality?.caution ?? 0
+  const discipline = personality?.discipline ?? 0
+
+  const frightened = hasStatus(unit, 'frightened')
+  const moraleCollapsed = unit.morale <= 0
+  const proposalRejected = !!unit.retreatProposalRejected
+  const criticallyWounded = hpRatio < 0.1
+  const cowardly = bravery < 0 && hpRatio < 0.15
+  const cautiousFlee = caution > 0 && hpRatio < 0.15
+  const arbitraryFlee = discipline < 0 && hpRatio < 0.15
+
+  return (
+    criticallyWounded ||
+    cowardly ||
+    cautiousFlee ||
+    arbitraryFlee ||
+    frightened ||
+    moraleCollapsed ||
+    proposalRejected
+  )
+}
+
+function defaultRetreatAction(unit: BattleUnit, state: AiState): DecidedAction {
+  if (shouldIndividualEscape(unit, state)) return { action: 'individualEscape' }
+  if (evaluateRetreatRequest(unit, state).should)
+    return { action: 'requestPartyRetreat' }
+  return { action: 'requestPartyRetreat' }
+}
+
 export function decideAdventurerAction(
   unit: BattleUnit,
   state: AiState,
 ): DecidedAction {
   const enemies = getAliveEnemies(state)
   const allies = getAliveAdventurers(state)
-  if (enemies.length === 0 || allies.length === 0) return { action: 'retreat' }
+  if (enemies.length === 0 || allies.length === 0)
+    return { action: 'requestPartyRetreat' }
 
-  const hpRatio = unit.hp / unit.maxHp
   const personality = getPersonality(unit)
 
-  const bravery = personality?.bravery ?? 0
   const caution = personality?.caution ?? 0
   const cooperation = personality?.cooperation ?? 0
   const altruism = personality?.altruism ?? 0
-  const greed = personality?.greed ?? 0
-  const discipline = personality?.discipline ?? 0
 
-  const retreatHpThreshold =
-    0.25 - bravery * 0.015 + caution * 0.015 - greed * 0.015 - discipline * 0.01
+  if (shouldIndividualEscape(unit, state)) return { action: 'individualEscape' }
 
   if (unit.role === 'healer') {
     const target = selectAllyForHeal(unit, allies)
@@ -226,7 +303,7 @@ export function decideAdventurerAction(
       state.leaderTargetId,
     )
     if (enemy) return { action: 'attack', target: enemy }
-    return { action: 'retreat' }
+    return defaultRetreatAction(unit, state)
   }
 
   if (unit.role === 'support') {
@@ -243,7 +320,7 @@ export function decideAdventurerAction(
       state.leaderTargetId,
     )
     if (enemy) return { action: 'attack', target: enemy }
-    return { action: 'retreat' }
+    return defaultRetreatAction(unit, state)
   }
 
   if (unit.role === 'guardian') {
@@ -270,7 +347,8 @@ export function decideAdventurerAction(
     if (rearWeak) return { action: 'flank', target: rearWeak, isFlank: true }
   }
 
-  if (hpRatio < retreatHpThreshold && unit.role !== 'guardian') {
+  const retreatRequest = evaluateRetreatRequest(unit, state)
+  if (retreatRequest.should && unit.role !== 'guardian') {
     if (unit.role === 'ranger') {
       const enemy = selectEnemyTargetForAdventurer(
         unit,
@@ -279,7 +357,7 @@ export function decideAdventurerAction(
       )
       if (enemy) return { action: 'ranged', target: enemy }
     }
-    return { action: 'retreat' }
+    return { action: 'requestPartyRetreat' }
   }
 
   if (unit.role === 'ranger' && unit.equipment?.weapon?.kind === 'ranged') {
@@ -300,7 +378,7 @@ export function decideAdventurerAction(
     if (unit.role === 'scout') return { action: 'flank', target, isFlank: true }
     return { action: 'attack', target }
   }
-  return { action: 'retreat' }
+  return defaultRetreatAction(unit, state)
 }
 
 function findDeadAlly(enemies: BattleUnit[]): BattleUnit | undefined {
@@ -318,7 +396,7 @@ export function decideEnemyAction(
   state: AiState,
 ): DecidedAction {
   const party = getAliveAdventurers(state)
-  if (party.length === 0) return { action: 'retreat' }
+  if (party.length === 0) return { action: 'attack' }
 
   const pref = unit.behavior?.targetPreference ?? 'random'
   let target: BattleUnit | undefined

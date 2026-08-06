@@ -6,8 +6,10 @@ import {
 import { generateEnemy } from '../generators/enemyGenerator.ts'
 import {
   calculatePartyThreat,
+  effectiveEncounterThreat,
   generateEncounter,
 } from '../generators/encounterGenerator.ts'
+import { DIFFICULTY_BUDGET_MULTIPLIER } from '../balance/constants.ts'
 import { runBattle } from './battle.ts'
 import { createAdventurerUnit, createEnemyUnit } from './battleState.ts'
 import { calculateHitChance, rollAttack, healUnit } from './actions.ts'
@@ -742,7 +744,11 @@ describe('弱点発見と利用', () => {
 
   it('魔物知識成功後に弱点が利用可能になる', () => {
     const attacker = makeAdventurer('monk-atk', 'mage', {
-      skills: { monsterKnowledge: 100, attackMagic: 80 } as Partial<SkillSet>,
+      skills: {
+        monsterKnowledge: 100,
+        attackMagic: 80,
+        scouting: 100,
+      } as Partial<SkillSet>,
       equipment: {
         weapon: {
           id: 'staff',
@@ -758,7 +764,9 @@ describe('弱点発見と利用', () => {
       weaknesses: [
         { weaknessId: 'fire', name: '火', known: false },
       ] as Enemy['weaknesses'],
-      skills: { defenseMagic: 30 } as Partial<SkillSet>,
+      skills: { defenseMagic: 0, stealth: 0 } as Partial<SkillSet>,
+      maxHp: 1000,
+      currentHp: 1000,
     })
     const party = [attacker]
     const result = runBattle('monk-seed', party, [enemy])
@@ -786,6 +794,8 @@ describe('弱点発見と利用', () => {
     const mage = createAdventurerUnit(
       makeAdventurer('mage-ai', 'mage', {
         skills: { attackMagic: 80 } as Partial<SkillSet>,
+        maxMp: 100,
+        currentMp: 100,
       }),
     )
     const highThreat = createEnemyUnit(
@@ -794,6 +804,8 @@ describe('弱点発見と利用', () => {
         maxHp: 120,
         currentHp: 120,
         abilities: [] as Enemy['abilities'],
+        weaknesses: [] as Enemy['weaknesses'],
+        threatCost: 10,
       }),
     )
     const fireWeakKnown = createEnemyUnit(
@@ -801,9 +813,11 @@ describe('弱点発見と利用', () => {
         rank: 'C',
         maxHp: 40,
         currentHp: 40,
+        abilities: [] as Enemy['abilities'],
         weaknesses: [
           { weaknessId: 'fire', name: '火', known: true },
         ] as Enemy['weaknesses'],
+        threatCost: 4,
       }),
     )
     const fireWeakUnknown = createEnemyUnit(
@@ -811,9 +825,11 @@ describe('弱点発見と利用', () => {
         rank: 'C',
         maxHp: 40,
         currentHp: 40,
+        abilities: [] as Enemy['abilities'],
         weaknesses: [
           { weaknessId: 'fire', name: '火', known: false },
         ] as Enemy['weaknesses'],
+        threatCost: 4,
       }),
     )
     const knownAction = decideAdventurerAction(
@@ -1065,16 +1081,10 @@ describe('遭遇生成', () => {
         difficulty,
       })
       const total = enemies.reduce((sum, e) => sum + e.threatCost, 0)
-      const budget =
-        difficulty === 'easy'
-          ? threat * 0.7
-          : difficulty === 'normal'
-            ? threat
-            : difficulty === 'hard'
-              ? threat * 1.25
-              : threat * 1.5
+      const budget = threat * DIFFICULTY_BUDGET_MULTIPLIER[difficulty]
       if (budget >= 1) {
-        const ratio = total / budget
+        const effective = effectiveEncounterThreat(total, enemies.length, 4)
+        const ratio = effective / budget
         expect(ratio).toBeGreaterThanOrEqual(0.8)
         expect(ratio).toBeLessThanOrEqual(1.2)
       }
@@ -1194,12 +1204,12 @@ describe('特殊能力と勝率の整合性', () => {
   function winRate(
     seedBase: string,
     party: Adventurer[],
-    enemy: Enemy,
+    enemies: Enemy[],
     trials = 30,
   ): number {
     let wins = 0
     for (let i = 0; i < trials; i++) {
-      const result = runBattle(`${seedBase}-${i}`, party, [enemy])
+      const result = runBattle(`${seedBase}-${i}`, party, enemies)
       if (result.outcome === 'victory' || result.outcome === 'costlyVictory')
         wins++
     }
@@ -1212,22 +1222,23 @@ describe('特殊能力と勝率の整合性', () => {
       count: 4,
       rank: 'C',
     })
-    const baseEnemy = makeEnemy('thr-base', {
-      maxHp: 150,
-      stats: { str: 60, dex: 60, con: 80 } as Partial<BaseStats>,
-      skills: { melee: 60, defense: 50 } as Partial<SkillSet>,
-      abilities: [] as Enemy['abilities'],
-    })
-    const strongEnemy = makeEnemy('thr-area', {
-      maxHp: 150,
-      stats: { str: 60, dex: 60, con: 80 } as Partial<BaseStats>,
-      skills: { melee: 60, defense: 50 } as Partial<SkillSet>,
+    const baseEnemies = Array.from({ length: 3 }, (_, i) =>
+      makeEnemy(`thr-base-${i}`, {
+        maxHp: 250,
+        currentHp: 250,
+        stats: { str: 60, dex: 60, con: 80 } as unknown as BaseStats,
+        skills: { melee: 60, defense: 50 } as Partial<SkillSet>,
+        abilities: [] as Enemy['abilities'],
+      }),
+    )
+    const strongEnemies = baseEnemies.map((e) => ({
+      ...e,
       abilities: [
         { abilityId: 'areaAttack', name: '範囲攻撃' },
       ] as Enemy['abilities'],
-    })
-    const baseRate = winRate('base', party, baseEnemy, 100)
-    const areaRate = winRate('area', party, strongEnemy, 100)
+    }))
+    const baseRate = winRate('base', party, baseEnemies, 100)
+    const areaRate = winRate('area', party, strongEnemies, 100)
     expect(areaRate).toBeLessThan(baseRate)
     expect(baseRate - areaRate).toBeLessThan(0.5)
   })

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { shouldEnemyRetreat, shouldPartyRetreat } from './morale.ts'
+import {
+  evaluatePartyRetreat,
+  shouldEnemyRetreat,
+  shouldPartyRetreat,
+} from './morale.ts'
 import { createAdventurerUnit, createEnemyUnit } from './battleState.ts'
 import { generateAdventurer } from '../generators/adventurerGenerator.ts'
 import { generateEnemy } from '../generators/enemyGenerator.ts'
@@ -163,5 +167,82 @@ describe('shouldPartyRetreat', () => {
     const lowGreed = firstRetreatRound(-3)
     const highGreed = firstRetreatRound(3)
     expect(highGreed).toBeGreaterThan(lowGreed)
+  })
+})
+
+describe('evaluatePartyRetreat', () => {
+  function baseParty(seed: string) {
+    return [
+      createAdventurerUnit(makeAdventurer(`${seed}-p1`, { role: 'vanguard' })),
+      createAdventurerUnit(makeAdventurer(`${seed}-p2`, { role: 'ranger' })),
+      createAdventurerUnit(makeAdventurer(`${seed}-p3`, { role: 'mage' })),
+      createAdventurerUnit(
+        makeAdventurer(`${seed}-healer`, {
+          role: 'healer',
+          currentHp: 50,
+          maxHp: 50,
+        }),
+      ),
+    ]
+  }
+
+  it('halfIncapacitated', () => {
+    const party = baseParty('half')
+    party[0].isAlive = false
+    party[1].isAlive = false
+    party[2].isAlive = false
+    const enemy = createEnemyUnit(makeEnemy('half-enemy', { threatCost: 1 }))
+    const result = evaluatePartyRetreat(party, [enemy], 1)
+    expect(result.diagnostic.matchedReasons).toContain('halfIncapacitated')
+  })
+
+  it('healerLostWithWounded', () => {
+    const party = baseParty('healer')
+    party[3].isAlive = false
+    party[0].hp = party[0].maxHp * 0.1
+    const enemy = createEnemyUnit(makeEnemy('healer-enemy', { threatCost: 1 }))
+    const result = evaluatePartyRetreat(party, [enemy], 1)
+    expect(result.diagnostic.matchedReasons).toContain('healerLostWithWounded')
+  })
+
+  it('lowPartyHp', () => {
+    const party = baseParty('hp')
+    party.forEach((u) => {
+      u.hp = u.maxHp * 0.1
+    })
+    const enemy = createEnemyUnit(makeEnemy('hp-enemy', { threatCost: 1 }))
+    const result = evaluatePartyRetreat(party, [enemy], 1)
+    expect(result.diagnostic.matchedReasons).toContain('lowPartyHp')
+  })
+
+  it('lowMorale', () => {
+    const party = baseParty('morale')
+    party.forEach((u) => {
+      u.morale = 5
+    })
+    const enemy = createEnemyUnit(makeEnemy('morale-enemy', { threatCost: 1 }))
+    const result = evaluatePartyRetreat(party, [enemy], 1)
+    expect(result.diagnostic.matchedReasons).toContain('lowMorale')
+  })
+
+  it('overwhelmed', () => {
+    const party = baseParty('over')
+    const enemy = createEnemyUnit(makeEnemy('over-enemy', { threatCost: 200 }))
+    const result = evaluatePartyRetreat(party, [enemy], 1)
+    expect(result.diagnostic.matchedReasons).toContain('overwhelmed')
+  })
+
+  it('複数条件成立時に matchedReasons へすべて入る', () => {
+    const party = baseParty('multi')
+    party[0].isAlive = false
+    party[1].isAlive = false
+    party[2].hp = party[2].maxHp * 0.1
+    party[3].isAlive = false
+    party.forEach((u) => {
+      u.morale = 5
+    })
+    const enemy = createEnemyUnit(makeEnemy('multi-enemy', { threatCost: 200 }))
+    const result = evaluatePartyRetreat(party, [enemy], 1)
+    expect(result.diagnostic.matchedReasons.length).toBeGreaterThanOrEqual(2)
   })
 })

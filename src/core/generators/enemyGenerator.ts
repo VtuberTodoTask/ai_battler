@@ -1,6 +1,7 @@
 import { SeededRng } from '../rng/seededRng.ts'
 import {
   AbilityDefinition,
+  AbilityId,
   AbilityInstance,
   BaseStats,
   Enemy,
@@ -15,7 +16,6 @@ import {
 } from '../models/types.ts'
 import {
   ABILITIES,
-  ABILITY_MAP,
   ARCHETYPE_MAP,
   ArchetypeDefinition,
   ENEMY_NAME_CORES,
@@ -28,7 +28,7 @@ import {
   abilityCountForRank,
 } from '../../data/enemyData.ts'
 import {
-  ABILITY_THREAT_BONUS,
+  ABILITY_THREAT_COST,
   ENEMY_BASE_THREAT,
   ENEMY_RANK_BASE,
   MAX_STAT_NORMAL,
@@ -40,6 +40,21 @@ import { WEAPONS, ARMORS } from '../../data/equipment.ts'
 import { clamp, deepClone, round } from '../util.ts'
 
 const STAT_NAMES: StatName[] = ['str', 'con', 'dex', 'int', 'per', 'wil', 'soc']
+
+const MIN_BODY_SCALE = 0.7
+const MAX_BODY_SCALE = 1.3
+
+function scaleStats(stats: BaseStats, scale: number): BaseStats {
+  const scaled = { ...stats } as BaseStats
+  for (const name of STAT_NAMES) {
+    scaled[name] = clamp(
+      round(stats[name] * scale),
+      MIN_STAT,
+      MAX_STAT_NORMAL + 20,
+    )
+  }
+  return scaled
+}
 
 const SKILL_FORMULAS: Record<keyof SkillSet, (s: BaseStats) => number> = {
   melee: (s) => round((s.str + s.dex) / 2),
@@ -161,14 +176,8 @@ function generateSkills(stats: BaseStats, archetype: EnemyArchetype): SkillSet {
   return skills
 }
 
-function generateAbilities(
-  rng: SeededRng,
-  rank: EnemyRank,
-  species: EnemySpecies,
-): AbilityInstance[] {
-  const { min, max } = abilityCountForRank(rank)
-  const count = rng.integer(min, max)
-  const pool = ABILITIES.filter((a) => {
+function abilityPoolForSpecies(species: EnemySpecies): AbilityDefinition[] {
+  return ABILITIES.filter((a) => {
     if (species === 'undead' && a.id === 'poisonAttack') return false
     if (
       species === 'construct' &&
@@ -177,12 +186,42 @@ function generateAbilities(
       return false
     return true
   })
-  const picked: AbilityDefinition[] = []
+}
+
+export function calculateAbilityThreat(abilities: AbilityInstance[]): number {
+  return abilities.reduce((total, a) => {
+    return total + (ABILITY_THREAT_COST[a.abilityId as AbilityId] ?? 0)
+  }, 0)
+}
+
+function generateAbilities(
+  rng: SeededRng,
+  rank: EnemyRank,
+  species: EnemySpecies,
+): AbilityInstance[] {
+  const { min, max } = abilityCountForRank(rank)
+  const count = rng.integer(min, max)
+  const pool = abilityPoolForSpecies(species)
   const available = rng.shuffle([...pool])
-  for (let i = 0; i < count && i < available.length; i++) {
-    picked.push(available[i])
-  }
-  return picked.map((a) => ({ abilityId: a.id, name: a.name }))
+  return available.slice(0, count).map((a) => ({
+    abilityId: a.id,
+    name: a.name,
+  }))
+}
+
+function generateAbilitiesForCount(
+  seed: string,
+  rank: EnemyRank,
+  species: EnemySpecies,
+  count: number,
+): AbilityInstance[] {
+  const rng = new SeededRng(`${seed}:abilities:${rank}`)
+  const pool = abilityPoolForSpecies(species)
+  const available = rng.shuffle([...pool])
+  return available.slice(0, count).map((a) => ({
+    abilityId: a.id,
+    name: a.name,
+  }))
 }
 
 function generateWeaknesses(
@@ -232,6 +271,33 @@ function generateBehavior(
   }
 }
 
+function averageAbilityCost(): number {
+  const values = Object.values(ABILITY_THREAT_COST)
+  return values.reduce((a, b) => a + b, 0) / values.length
+}
+
+export function expectedAbilityThreat(rank: EnemyRank): number {
+  const { min, max } = abilityCountForRank(rank)
+  return ((min + max) / 2) * averageAbilityCost()
+}
+
+export function pickRankForTarget(target: number, tier: EnemyTier): EnemyRank {
+  const ranks: EnemyRank[] = ['E', 'D', 'C', 'B', 'A', 'S']
+  let bestRank: EnemyRank = 'E'
+  let bestScore = Infinity
+  for (const rank of ranks) {
+    const base = ENEMY_BASE_THREAT[rank] * TIER_THREAT_MULTIPLIER[tier]
+    const expected = base + expectedAbilityThreat(rank)
+    if (expected <= 0) continue
+    const score = Math.abs(Math.log(expected / target))
+    if (score < bestScore) {
+      bestScore = score
+      bestRank = rank
+    }
+  }
+  return bestRank
+}
+
 export interface EnemyGenerationOverrides {
   rank?: EnemyRank
   species?: EnemySpecies
@@ -239,6 +305,93 @@ export interface EnemyGenerationOverrides {
   tier?: EnemyTier
   allowedTiers?: EnemyTier[]
   rankLimit?: EnemyRank
+  threatScale?: number
+  targetThreat?: number
+  abilities?: AbilityInstance[]
+}
+
+function rankIndex(rank: EnemyRank): number {
+  const order: EnemyRank[] = ['E', 'D', 'C', 'B', 'A', 'S', 'DISASTER']
+  return order.indexOf(rank)
+}
+
+interface BuildCandidate {
+  rank: EnemyRank
+  abilities: AbilityInstance[]
+  abilityThreat: number
+  baseThreat: number
+  bodyScale: number
+  actualThreat: number
+  inRange: boolean
+  error: number
+}
+
+function findBestBuild(
+  seed: string,
+  species: EnemySpecies,
+  archetype: EnemyArchetype,
+  tier: EnemyTier,
+  targetThreat: number,
+  suggestedRank?: EnemyRank,
+): BuildCandidate {
+  const ranks: EnemyRank[] = ['E', 'D', 'C', 'B', 'A', 'S']
+  const startIndex = suggestedRank ? ranks.indexOf(suggestedRank) : -1
+  const searchRanks =
+    startIndex >= 0
+      ? [
+          ...ranks.slice(0, startIndex + 1).reverse(),
+          ...ranks.slice(startIndex + 1),
+        ]
+      : ranks
+
+  let best: BuildCandidate | undefined
+
+  for (const rank of searchRanks) {
+    const baseThreat = ENEMY_BASE_THREAT[rank] * TIER_THREAT_MULTIPLIER[tier]
+    if (baseThreat <= 0) continue
+    const maxCount = abilityCountForRank(rank).max
+
+    for (let count = 0; count <= maxCount; count++) {
+      const abilities = generateAbilitiesForCount(
+        `${seed}:build:${rankIndex(rank)}`,
+        rank,
+        species,
+        count,
+      )
+      const abilityThreat = calculateAbilityThreat(abilities)
+      const rawScale = (targetThreat - abilityThreat) / baseThreat
+      const bodyScale = clamp(rawScale, MIN_BODY_SCALE, MAX_BODY_SCALE)
+      const actualThreat = baseThreat * bodyScale + abilityThreat
+      const error = Math.abs(actualThreat - targetThreat)
+      const inRange = rawScale >= MIN_BODY_SCALE && rawScale <= MAX_BODY_SCALE
+
+      const candidate: BuildCandidate = {
+        rank,
+        abilities,
+        abilityThreat,
+        baseThreat,
+        bodyScale,
+        actualThreat,
+        inRange,
+        error,
+      }
+
+      if (best === undefined) {
+        best = candidate
+        continue
+      }
+
+      if (candidate.inRange && !best.inRange) {
+        best = candidate
+      } else if (candidate.inRange === best.inRange) {
+        if (candidate.error < best.error) {
+          best = candidate
+        }
+      }
+    }
+  }
+
+  return best as BuildCandidate
 }
 
 export function generateEnemy(
@@ -246,7 +399,6 @@ export function generateEnemy(
   overrides: EnemyGenerationOverrides = {},
 ): Enemy {
   const rng = new SeededRng(seed)
-  const rank = overrides.rank ?? randomRank(rng)
   const species = overrides.species ?? randomSpecies(rng)
   const archetype =
     overrides.archetype ?? randomArchetypeForSpecies(rng, species)
@@ -255,22 +407,47 @@ export function generateEnemy(
   const archetypeDef = ARCHETYPE_MAP[archetype]
   const speciesDef = SPECIES_MAP[species]
 
-  const stats = generateStats(rng, rank, archetypeDef, speciesDef)
+  let rank: EnemyRank
+  let abilities: AbilityInstance[]
+  let abilityThreat: number
+  let baseThreat: number
+  let bodyScale: number
+  let actualThreat: number
+
+  if (overrides.targetThreat !== undefined) {
+    rank = overrides.rank ?? pickRankForTarget(overrides.targetThreat, tier)
+    const build = findBestBuild(
+      seed,
+      species,
+      archetype,
+      tier,
+      overrides.targetThreat,
+      rank,
+    )
+    rank = build.rank
+    abilities = build.abilities
+    abilityThreat = build.abilityThreat
+    baseThreat = build.baseThreat
+    bodyScale = build.bodyScale
+    actualThreat = build.actualThreat
+  } else {
+    rank = overrides.rank ?? randomRank(rng)
+    abilities = overrides.abilities ?? generateAbilities(rng, rank, species)
+    abilityThreat = calculateAbilityThreat(abilities)
+    baseThreat = ENEMY_BASE_THREAT[rank] * TIER_THREAT_MULTIPLIER[tier]
+    bodyScale = overrides.threatScale ?? 1
+    actualThreat = baseThreat * bodyScale + abilityThreat
+  }
+
+  const statScale = Math.sqrt(bodyScale)
+  const rawStats = generateStats(rng, rank, archetypeDef, speciesDef)
+  const stats = scaleStats(rawStats, statScale)
   const skills = generateSkills(stats, archetype)
   const maxHp = round((25 + round(stats.con * 0.7)) * TIER_HP_MULTIPLIER[tier])
   const morale =
     species === 'undead' || species === 'construct'
       ? 100
       : 20 + round(stats.wil * 0.5)
-
-  const abilities = generateAbilities(rng, rank, species)
-  const baseThreat = ENEMY_BASE_THREAT[rank] * TIER_THREAT_MULTIPLIER[tier]
-  const abilityThreat = abilities.reduce((total, a) => {
-    const def = ABILITY_MAP[a.abilityId]
-    if (!def) return total
-    return total + baseThreat * ABILITY_THREAT_BONUS[def.threatLevel]
-  }, 0)
-  const threatCost = round(baseThreat + abilityThreat)
 
   const weaknesses = generateWeaknesses(rng, species)
   const behavior = generateBehavior(rng, archetypeDef, species)
@@ -287,7 +464,7 @@ export function generateEnemy(
     maxHp,
     currentHp: maxHp,
     morale,
-    threatCost,
+    threatCost: actualThreat,
     tier,
     abilities,
     weaknesses,
@@ -303,10 +480,12 @@ export function generateEnemy(
           ? 'wand'
           : 'longsword'
     const armorId = archetype === 'tank' ? 'heavy' : 'leather'
-    enemy.equipment = {
-      weapon: deepClone(WEAPONS[weaponId]),
-      armor: deepClone(ARMORS[armorId]),
+    const weapon = deepClone(WEAPONS[weaponId])
+    const armor = deepClone(ARMORS[armorId])
+    if (bodyScale !== 1) {
+      weapon.damage = round(weapon.damage * statScale)
     }
+    enemy.equipment = { weapon, armor }
   }
 
   return enemy

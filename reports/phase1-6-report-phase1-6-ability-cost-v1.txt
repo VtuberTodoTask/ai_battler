@@ -1,0 +1,101 @@
+=== Phase 1.6 Ability Cost Benchmark ===
+seed: phase1-6-ability-cost-v1
+trialsPerRank: 5000
+roles: vanguard/guardian/mage/healer
+difficulty: normal
+
+=== 標準編成 Normal 5000試行 ===
+E: fav=0.783 | victory:3760 retreat:762 stalemate:311 costlyVictory:112 partialVictory:42 defeat:13
+   rounds=10.2 enemies=4.46 hp=297.5 abilities=0.16 enemyActions=2.51 rawRatio=1.48 adjRatio=1.56
+   avgRank=1.71 bodyScale=0.960 minBodyScale=0.792 maxBodyScale=1.279 abilityCost=0.021 actualThreat=3.430 targetThreat=3.613 threatError=0.183
+   shapes: {"boss":512,"standard":2461,"eliteGroup":1267,"swarm":760}
+   abilities: frontDefense:300(0.83) magicResist:274(0.80) poisonAttack:203(0.89)
+D: fav=0.850 | victory:4125 retreat:584 stalemate:168 costlyVictory:87 partialVictory:36
+   rounds=10.1 enemies=4.46 hp=310.4 abilities=0.00 enemyActions=2.53 rawRatio=1.48 adjRatio=1.56
+   avgRank=1.98 bodyScale=1.058 minBodyScale=0.792 maxBodyScale=1.207 abilityCost=0.000 actualThreat=4.507 targetThreat=4.747 threatError=0.241
+   shapes: {"boss":512,"standard":2461,"eliteGroup":1267,"swarm":760}
+C: fav=0.825 | victory:4035 retreat:632 stalemate:239 costlyVictory:64 partialVictory:25 defeat:5
+   rounds=10.5 enemies=4.46 hp=334.4 abilities=1.00 enemyActions=2.62 rawRatio=1.48 adjRatio=1.56
+   avgRank=3.20 bodyScale=1.115 minBodyScale=0.704 maxBodyScale=1.293 abilityCost=0.121 actualThreat=5.331 targetThreat=5.615 threatError=0.285
+   shapes: {"boss":512,"standard":2461,"eliteGroup":1267,"swarm":760}
+   abilities: areaAttack:420(0.89) bleedAttack:95(0.88) corpseExplosion:427(0.90) counter:399(0.88) darknessBoost:92(0.86) fear:435(0.90) flight:391(0.88) frontDefense:406(0.88) magicResist:435(0.90) poisonAttack:270(0.88) regeneration:306(0.89) revive:381(0.91) stealthStart:120(0.88) summon:391(0.88) swarmCoordination:82(0.82) taunt:365(0.90)
+B: fav=0.749 | victory:3664 stalemate:440 retreat:806 costlyVictory:58 partialVictory:22 defeat:10
+   rounds=11.3 enemies=4.46 hp=372.6 abilities=1.35 enemyActions=2.73 rawRatio=1.48 adjRatio=1.56
+   avgRank=6.20 bodyScale=1.184 minBodyScale=0.738 maxBodyScale=1.297 abilityCost=0.172 actualThreat=7.059 targetThreat=7.436 threatError=0.377
+   shapes: {"boss":512,"standard":2461,"eliteGroup":1267,"swarm":760}
+   abilities: areaAttack:412(0.76) bleedAttack:306(0.74) corpseExplosion:430(0.77) counter:383(0.77) darknessBoost:370(0.78) fear:395(0.79) flight:403(0.69) frontDefense:379(0.75) healBlock:388(0.79) magicResist:289(0.79) physicalResist:403(0.73) poisonAttack:299(0.81) regeneration:360(0.76) revive:379(0.77) stealthStart:395(0.75) summon:412(0.78) swarmCoordination:350(0.70) taunt:413(0.74)
+A: fav=0.656 | victory:3218 stalemate:645 retreat:1058 defeat:15 costlyVictory:48 partialVictory:16
+   rounds=12.0 enemies=4.46 hp=400.2 abilities=1.64 enemyActions=2.85 rawRatio=1.48 adjRatio=1.56
+   avgRank=11.57 bodyScale=1.132 minBodyScale=0.719 maxBodyScale=1.298 abilityCost=0.271 actualThreat=8.149 targetThreat=8.584 threatError=0.435
+   shapes: {"boss":512,"standard":2461,"eliteGroup":1267,"swarm":760}
+   abilities: areaAttack:320(0.78) bleedAttack:213(0.81) corpseExplosion:325(0.80) counter:295(0.79) darknessBoost:296(0.81) fear:741(0.78) flight:401(0.74) frontDefense:554(0.76) healBlock:720(0.78) magicResist:572(0.75) physicalResist:791(0.78) poisonAttack:447(0.80) regeneration:784(0.77) revive:291(0.79) stealthStart:189(0.77) summon:649(0.79) swarmCoordination:240(0.75) taunt:347(0.76)
+S: fav=0.561 | victory:2730 retreat:1490 stalemate:693 partialVictory:35 defeat:11 costlyVictory:41
+   rounds=11.3 enemies=4.46 hp=412.5 abilities=8.67 enemyActions=2.87 rawRatio=1.48 adjRatio=1.56
+   avgRank=13.27 bodyScale=1.145 minBodyScale=0.703 maxBodyScale=1.300 abilityCost=1.175 actualThreat=9.625 targetThreat=10.139 threatError=0.514
+   shapes: {"boss":512,"standard":2461,"eliteGroup":1267,"swarm":760}
+   abilities: areaAttack:2199(0.54) bleedAttack:1866(0.60) corpseExplosion:2340(0.56) counter:2320(0.54) darknessBoost:2159(0.58) fear:2807(0.47) flight:2464(0.50) frontDefense:2696(0.55) healBlock:2806(0.59) magicResist:2670(0.56) physicalResist:2689(0.57) poisonAttack:1680(0.64) regeneration:2870(0.56) revive:2295(0.57) stealthStart:2081(0.55) summon:2821(0.59) swarmCoordination:2175(0.53) taunt:2434(0.58)
+
+同一敵: C:standard,C:standard,C:standard,C:standard
+  標準編成: E:0.020 D:0.660 C:0.880 B:0.993 A:1.000 S:1.000
+  guardian偏重: E:0.000 D:0.000 C:0.000 B:0.010 A:0.087 S:0.180
+  攻撃偏重: E:0.010 D:0.063 C:0.113 B:0.217 A:0.253 S:0.457
+
+=== 遭遇形状別ベンチマーク（標準編成）===
+
+-- shape: standard --
+E: fav=0.861 enemies=4.00 enemyActions=2.43
+D: fav=0.852 enemies=4.00 enemyActions=2.51
+C: fav=0.789 enemies=4.00 enemyActions=2.61
+B: fav=0.720 enemies=4.00 enemyActions=2.72
+A: fav=0.540 enemies=4.00 enemyActions=2.92
+S: fav=0.452 enemies=4.00 enemyActions=2.91
+
+-- shape: eliteGroup --
+E: fav=0.566 enemies=4.00 enemyActions=2.67
+D: fav=0.834 enemies=4.00 enemyActions=2.56
+C: fav=0.874 enemies=4.00 enemyActions=2.58
+B: fav=0.731 enemies=4.00 enemyActions=2.74
+A: fav=0.761 enemies=4.00 enemyActions=2.79
+S: fav=0.661 enemies=4.00 enemyActions=2.82
+
+-- shape: swarm --
+E: fav=0.841 enemies=7.00 enemyActions=2.44
+D: fav=0.847 enemies=7.00 enemyActions=2.49
+C: fav=0.870 enemies=7.00 enemyActions=2.48
+B: fav=0.751 enemies=7.00 enemyActions=2.62
+A: fav=0.770 enemies=7.00 enemyActions=2.63
+S: fav=0.708 enemies=7.00 enemyActions=2.67
+
+-- shape: boss --
+E: fav=0.794 enemies=4.00 enemyActions=2.56
+D: fav=0.777 enemies=4.00 enemyActions=2.62
+C: fav=0.732 enemies=4.00 enemyActions=2.74
+B: fav=0.702 enemies=4.00 enemyActions=2.83
+A: fav=0.577 enemies=4.00 enemyActions=3.01
+S: fav=0.493 enemies=4.00 enemyActions=3.00
+
+=== 難易度単調性（標準編成）===
+easy: E:0.891 D:0.899 C:0.963 B:0.975 A:0.992 S:0.985
+normal: E:0.789 D:0.849 C:0.831 B:0.745 A:0.622 S:0.570
+hard: E:0.105 D:0.087 C:0.076 B:0.053 A:0.044 S:0.235
+deadly: E:0.028 D:0.023 C:0.015 B:0.012 A:0.015 S:0.101
+
+=== 能力別単独影響（標準編成 vs C級 standard 4体）===
+flight: cost=0.425 baseFav=0.950 abilityFav=0.936 delta=0.014
+poisonAttack: cost=0.703 baseFav=0.964 abilityFav=0.970 delta=-0.006
+bleedAttack: cost=0.200 baseFav=0.964 abilityFav=0.966 delta=-0.002
+areaAttack: cost=0.225 baseFav=0.958 abilityFav=0.940 delta=0.018
+revive: cost=0.269 baseFav=0.962 abilityFav=0.950 delta=0.012
+regeneration: cost=1.208 baseFav=0.960 abilityFav=0.932 delta=0.028
+frontDefense: cost=0.499 baseFav=0.952 abilityFav=0.950 delta=0.002
+magicResist: cost=0.653 baseFav=0.946 abilityFav=0.966 delta=-0.020
+physicalResist: cost=1.250 baseFav=0.956 abilityFav=0.936 delta=0.020
+darknessBoost: cost=0.204 baseFav=0.964 abilityFav=0.956 delta=0.008
+corpseExplosion: cost=0.272 baseFav=0.952 abilityFav=0.966 delta=-0.014
+summon: cost=0.984 baseFav=0.966 abilityFav=0.932 delta=0.034
+taunt: cost=0.396 baseFav=0.962 abilityFav=0.970 delta=-0.008
+fear: cost=1.090 baseFav=0.964 abilityFav=0.844 delta=0.120
+healBlock: cost=1.250 baseFav=0.958 abilityFav=0.978 delta=-0.020
+counter: cost=0.278 baseFav=0.958 abilityFav=0.948 delta=0.010
+stealthStart: cost=0.100 baseFav=0.968 abilityFav=0.952 delta=0.016
+swarmCoordination: cost=0.141 baseFav=0.968 abilityFav=0.904 delta=0.064
