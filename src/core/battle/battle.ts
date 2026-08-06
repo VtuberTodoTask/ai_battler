@@ -434,7 +434,11 @@ function resolveAction(
       'combat',
       'heal',
       `${unit.name}が${action.target.name}を回復させた。+${amount} HP`,
-      { actorId: unit.id, targetIds: [action.target.id] },
+      {
+        actorId: unit.id,
+        targetIds: [action.target.id],
+        metadata: { actualHealAmount: amount },
+      },
     )
     return
   }
@@ -448,21 +452,31 @@ function resolveAction(
       'combat',
       'guard',
       `${unit.name}が${action.target.name}を防護した。`,
-      { actorId: unit.id, targetIds: [action.target.id] },
+      {
+        actorId: unit.id,
+        targetIds: [action.target.id],
+        metadata: { guardPotency: 5 },
+      },
     )
     return
   }
 
   if (action.action === 'support') {
     if (!action.target) return
-    action.target.morale = clamp(action.target.morale + 10, 0, 100)
+    const before = action.target.morale
+    action.target.morale = clamp(before + 10, 0, 100)
+    const actualMoraleGained = action.target.morale - before
     addStatus(action.target, 'guarded', 2, 3, unit.id)
     log(
       state,
       'combat',
       'support',
       `${unit.name}が${action.target.name}を支援した。`,
-      { actorId: unit.id, targetIds: [action.target.id] },
+      {
+        actorId: unit.id,
+        targetIds: [action.target.id],
+        metadata: { requestedMorale: 10, actualMoraleGained, guardPotency: 3 },
+      },
     )
     return
   }
@@ -626,6 +640,7 @@ function resolveAttack(
     successChance: result.successChance,
     damage: result.damageDealt,
     statusApplied: result.statusApplied,
+    metadata: { isFlank, isCounter },
   })
 
   if (result.hit && hasAbility(attacker, 'areaAttack')) {
