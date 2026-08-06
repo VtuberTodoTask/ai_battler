@@ -81,6 +81,9 @@ export interface BattleState {
   lastRetreatRound: number
   context: BattleContext
   leaderTargetId?: string
+  minionActionsRemaining: number
+  adventurerActionCount: number
+  enemyActionCount: number
 }
 
 function log(
@@ -1062,8 +1065,15 @@ function shouldIndividualEscapeQuick(
   return false
 }
 
+function isMinion(unit: BattleUnit): boolean {
+  return !unit.isAdventurer && unit.tier === 'minion'
+}
+
 function processStartOfRound(state: BattleState): void {
   state.leaderTargetId = undefined
+
+  const livingMinions = getAliveEnemies(state).filter((e) => e.tier === 'minion')
+  state.minionActionsRemaining = Math.max(1, Math.ceil(livingMinions.length / 2))
 
   const partyEval = evaluatePartyRetreat(
     state.party,
@@ -1275,6 +1285,9 @@ export function runBattle(
     retreatAttempts: [],
     lastRetreatRound: -2,
     context: options?.context ?? getDefaultContext(),
+    minionActionsRemaining: 99,
+    adventurerActionCount: 0,
+    enemyActionCount: 0,
   }
 
   resolveContact(state)
@@ -1295,6 +1308,9 @@ export function runBattle(
         removeStatus(unit, 'stunned')
         continue
       }
+      if (isMinion(unit) && state.minionActionsRemaining <= 0) {
+        continue
+      }
 
       const action = unit.isAdventurer
         ? decideAdventurerAction(unit, state)
@@ -1312,6 +1328,9 @@ export function runBattle(
       }
 
       resolveAction(state, unit, action)
+      if (isMinion(unit)) state.minionActionsRemaining--
+      if (unit.isAdventurer) state.adventurerActionCount++
+      else state.enemyActionCount++
 
       if (state.ended) break
       if (checkBattleEnd(state)) break
@@ -1358,5 +1377,7 @@ export function runBattle(
     retreatDiagnostic: state.retreatDiagnostic,
     retreatAttempts: state.retreatAttempts,
     logs: state.logs,
+    adventurerActionCount: state.adventurerActionCount,
+    enemyActionCount: state.enemyActionCount,
   }
 }

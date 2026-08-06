@@ -80,7 +80,7 @@ export default function App() {
   const [simDifficulty, setSimDifficulty] =
     useState<(typeof DIFFICULTIES)[number]>('normal')
   const [simCount, setSimCount] = useState(1000)
-  const [simMode, setSimMode] = useState<'fixed' | 'random'>('fixed')
+  const [simMode, setSimMode] = useState<'fixed' | 'random'>('random')
   const [simRoleMode, setSimRoleMode] = useState<'fixed' | 'random'>('fixed')
   const [simEnsureHealer, setSimEnsureHealer] = useState(true)
   const [simAllowDuplicate, setSimAllowDuplicate] = useState(false)
@@ -457,9 +457,14 @@ export default function App() {
                   setSimMode(e.target.value as 'fixed' | 'random')
                 }
               >
-                <option value="fixed">固定対戦</option>
+                <option value="fixed">固定マッチアップ検証</option>
                 <option value="random">ランダム総合</option>
               </select>
+              {simMode === 'fixed' && (
+                <small>
+                  同一パーティ・同一敵編成で戦闘乱数のみを変更します。等級全体のバランス比較には使用しません。
+                </small>
+              )}
             </label>
             <label>
               ロール構成

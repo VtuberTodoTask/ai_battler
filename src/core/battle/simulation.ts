@@ -212,6 +212,7 @@ function finishCategory(map: Record<string, CategorySummary>): void {
 export function runSimulation(options: SimulationOptions): SimulationSummary {
   const seed = options.seed ?? 'sim'
   const count = options.count
+  const partySize = options.partySize ?? 4
 
   const outcomes: Record<BattleOutcome, number> = {
     victory: 0,
@@ -267,6 +268,7 @@ export function runSimulation(options: SimulationOptions): SimulationSummary {
       seed: `${seed}-encounter`,
       partyThreat: fixedPartyThreat,
       difficulty: options.difficulty,
+      partySize,
     })
   }
 
@@ -282,6 +284,7 @@ export function runSimulation(options: SimulationOptions): SimulationSummary {
             seed: `${seed}-encounter-${i}`,
             partyThreat,
             difficulty: options.difficulty,
+            partySize,
           })
 
     const compKey = enemyCompositionKey(enemies)

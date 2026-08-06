@@ -56,6 +56,7 @@ export interface BattleUnit {
     armor: { reduction: number }
   }
   threatCost?: number
+  tier?: string
   initiative: number
   isAlive: boolean
   escaped: boolean
@@ -126,6 +127,7 @@ export function createEnemyUnit(enemy: Enemy): BattleUnit {
     weaknesses: deepClone(enemy.weaknesses),
     behavior: { ...enemy.behavior },
     threatCost: enemy.threatCost,
+    tier: enemy.tier,
     equipment: enemy.equipment
       ? {
           weapon: {
