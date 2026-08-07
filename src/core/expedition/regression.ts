@@ -179,6 +179,62 @@ export function makeParty(
   )
 }
 
+export function makeRetrievalRequest(
+  seed: string,
+  rank: AdventurerRank,
+  targetOverrides: {
+    initialIntegrity?: number
+    minimumAcceptableIntegrity?: number
+    locationKnown?: boolean
+    discoveryDifficulty?: number
+    accessDifficulty?: number
+    securingDifficulty?: number
+    extractionDifficulty?: number
+    protectionDifficulty?: number
+    bulk?: 'portable' | 'bulky' | 'heavy'
+    handling?: 'standard' | 'delicate' | 'arcane'
+    fragility?: 'rugged' | 'standard' | 'fragile'
+  } = {},
+  battleEnabled = true,
+): ExpeditionRequest {
+  const target = {
+    id: 'target-1',
+    name: '回収対象',
+    initialIntegrity: 80,
+    minimumAcceptableIntegrity: 60,
+    bulk: 'portable' as const,
+    handling: 'standard' as const,
+    fragility: 'standard' as const,
+    locationKnown: false,
+    discoveryDifficulty: 15,
+    accessDifficulty: 15,
+    securingDifficulty: 15,
+    protectionDifficulty: 15,
+    extractionDifficulty: 15,
+    ...targetOverrides,
+  }
+  return {
+    id: `phase3-5-${seed}`,
+    seed,
+    rank,
+    difficulty: 'normal',
+    objectiveType: 'retrieval',
+    environment: 'forest',
+    distance: 3,
+    features: ['traps', 'poorVisibility'],
+    knownInformation: [],
+    hiddenInformation: [],
+    battle: battleEnabled
+      ? {
+          enabled: true,
+          seed: `${seed}:battle:0`,
+          triggerPhase: 'afterExploration',
+        }
+      : undefined,
+    retrieval: { target },
+  }
+}
+
 export interface RegressionScenario {
   name: string
   request: ExpeditionRequest
@@ -267,6 +323,91 @@ export const regressionScenarios: RegressionScenario[] = [
     name: 'escort-failedObjective',
     request: makeEscortRequest('s1', 'C'),
     party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's1', 'C'),
+  },
+  {
+    name: 'retrieval-completeSuccess',
+    request: {
+      ...makeRetrievalRequest(
+        's1',
+        'S',
+        {
+          locationKnown: true,
+          discoveryDifficulty: 0,
+          accessDifficulty: 0,
+          securingDifficulty: 0,
+          extractionDifficulty: 0,
+          protectionDifficulty: 0,
+        },
+        false,
+      ),
+      features: [],
+    },
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's1', 'S'),
+  },
+  {
+    name: 'retrieval-success',
+    request: {
+      ...makeRetrievalRequest(
+        's0',
+        'C',
+        {
+          locationKnown: true,
+          discoveryDifficulty: 0,
+          accessDifficulty: 0,
+          securingDifficulty: 0,
+          extractionDifficulty: 0,
+          protectionDifficulty: 0,
+          minimumAcceptableIntegrity: 30,
+        },
+        false,
+      ),
+      features: [],
+    },
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's0', 'C'),
+  },
+  {
+    name: 'retrieval-partialSuccess',
+    request: {
+      ...makeRetrievalRequest(
+        's0',
+        'C',
+        {
+          locationKnown: true,
+          discoveryDifficulty: 0,
+          accessDifficulty: 0,
+          securingDifficulty: 0,
+          extractionDifficulty: 0,
+          protectionDifficulty: 0,
+          initialIntegrity: 100,
+          minimumAcceptableIntegrity: 98,
+        },
+        false,
+      ),
+      features: [],
+    },
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's0', 'C'),
+  },
+  {
+    name: 'retrieval-failedObjective',
+    request: {
+      ...makeRetrievalRequest(
+        's0',
+        'C',
+        {
+          locationKnown: true,
+          discoveryDifficulty: 0,
+          accessDifficulty: 0,
+          securingDifficulty: 1000,
+          extractionDifficulty: 0,
+          protectionDifficulty: 0,
+          initialIntegrity: 4,
+          minimumAcceptableIntegrity: 1,
+        },
+        false,
+      ),
+      features: [],
+    },
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's0', 'C'),
   },
 ]
 

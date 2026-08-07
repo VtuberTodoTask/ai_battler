@@ -10,6 +10,7 @@ import type {
   ExpeditionResult,
   ExpeditionState,
   RescueObjectiveConfig,
+  RetrievalObjectiveConfig,
 } from './types.ts'
 import { runExpedition } from './expedition.ts'
 
@@ -294,6 +295,57 @@ export function makeEscortRequest(
 }
 
 export function makeEscortParty(
+  seedBase: string,
+  rank: AdventurerRank,
+  roles: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer'],
+): Adventurer[] {
+  return makeParty(roles, seedBase, rank)
+}
+
+export function makeRetrievalTarget(
+  overrides?: Partial<RetrievalObjectiveConfig['target']>,
+): NonNullable<ExpeditionRequest['retrieval']> {
+  return {
+    target: {
+      id: 'target-1',
+      name: '回収対象',
+      initialIntegrity: 80,
+      minimumAcceptableIntegrity: 60,
+      bulk: 'portable',
+      handling: 'standard',
+      fragility: 'standard',
+      locationKnown: false,
+      discoveryDifficulty: 15,
+      accessDifficulty: 15,
+      securingDifficulty: 15,
+      protectionDifficulty: 15,
+      extractionDifficulty: 15,
+      ...overrides,
+    },
+  }
+}
+
+export function makeRetrievalRequest(
+  seed: string,
+  rank: AdventurerRank = 'C',
+  targetOverrides?: Partial<RetrievalObjectiveConfig['target']>,
+  battleEnabled = true,
+  requestOverrides: Partial<ExpeditionRequest> = {},
+): ExpeditionRequest {
+  return makeRequest(seed, {
+    objectiveType: 'retrieval',
+    rank,
+    environment: 'forest',
+    hiddenInformation: [],
+    battle: battleEnabled
+      ? battleConfig({ seed: `${seed}:battle:0` })
+      : undefined,
+    retrieval: makeRetrievalTarget(targetOverrides),
+    ...requestOverrides,
+  })
+}
+
+export function makeRetrievalParty(
   seedBase: string,
   rank: AdventurerRank,
   roles: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer'],

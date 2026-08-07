@@ -1,0 +1,523 @@
+{
+  "outcome": "completeSuccess",
+  "state": {
+    "avoidedThreats": [],
+    "battleEntrySnapshot": {
+      "environmentEffects": [],
+      "initialHp": {
+        "S-guardian-s1-guardian-1": 87,
+        "S-healer-s1-healer-3": 83,
+        "S-mage-s1-mage-2": 64,
+        "S-vanguard-s1-vanguard-0": 84
+      },
+      "initialMorale": {
+        "S-guardian-s1-guardian-1": 69,
+        "S-healer-s1-healer-3": 62,
+        "S-mage-s1-mage-2": 69,
+        "S-vanguard-s1-vanguard-0": 65
+      },
+      "initialMp": {
+        "S-guardian-s1-guardian-1": 4,
+        "S-healer-s1-healer-3": 53,
+        "S-mage-s1-mage-2": 54,
+        "S-vanguard-s1-vanguard-0": 9
+      },
+      "initialStatusEffects": {
+        "S-guardian-s1-guardian-1": [],
+        "S-healer-s1-healer-3": [],
+        "S-mage-s1-mage-2": [],
+        "S-vanguard-s1-vanguard-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "neutral"
+    },
+    "battles": [],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": [],
+    "elapsedTime": 10.65,
+    "incapacitated": [],
+    "information": [],
+    "injuries": [],
+    "logs": [
+      {
+        "actorIds": [
+          "S-vanguard-s1-vanguard-0",
+          "S-guardian-s1-guardian-1",
+          "S-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 96,
+          "result": "success",
+          "roll": 42,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "トール スカイが効率的なルートと補給計画を立てた",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "metadata": {
+              "bulk": "portable",
+              "fragility": "standard",
+              "handling": "standard",
+              "initialIntegrity": 80,
+              "minimumAcceptableIntegrity": 60,
+              "targetId": "target-1",
+              "targetName": "回収対象"
+            },
+            "targetId": "target-1",
+            "type": "retrievalTargetAssigned",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalIntegrity",
+            "value": 80
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalInitialIntegrity",
+            "value": 80
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalMinimumIntegrity",
+            "value": 60
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalLocated",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalReached",
+            "value": 0
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalProgress",
+            "value": 15
+          }
+        ],
+        "facts": [
+          "回収対象「回収対象」の回収依頼を引き受けた",
+          "bulk=portable, handling=standard, fragility=standard"
+        ],
+        "phase": "preparation",
+        "targetIds": ["target-1"],
+        "type": "retrievalTargetAssigned"
+      },
+      {
+        "actorIds": [
+          "S-vanguard-s1-vanguard-0",
+          "S-guardian-s1-guardian-1",
+          "S-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 91,
+          "result": "success",
+          "roll": 76,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["トール スカイが安全な接近経路を確保した"],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "S-mage-s1-mage-2",
+          "S-vanguard-s1-vanguard-0",
+          "S-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 19,
+          "result": "failure",
+          "roll": 93,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "S-mage-s1-mage-2",
+          "S-vanguard-s1-vanguard-0",
+          "S-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 19,
+          "result": "failure",
+          "roll": 93,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "S-mage-s1-mage-2",
+          "S-vanguard-s1-vanguard-0",
+          "S-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 19,
+          "result": "partialSuccess",
+          "roll": 22,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["フェイ アイヴィーが断片的な手がかりを得た"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "targetId": "target-1",
+            "type": "retrievalLocated",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalProgress",
+            "value": 15
+          }
+        ],
+        "facts": ["事前情報から回収対象の位置は既に判明していた"],
+        "phase": "contact",
+        "targetIds": ["target-1"],
+        "type": "retrievalTargetLocated"
+      },
+      {
+        "actorIds": [
+          "S-vanguard-s1-vanguard-0",
+          "S-guardian-s1-guardian-1",
+          "S-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 71,
+          "result": "success",
+          "roll": 58,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "targetId": "target-1",
+            "type": "retrievalReached",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalProgress",
+            "value": 30
+          }
+        ],
+        "facts": ["トール スカイが回収対象のもとへ到達した"],
+        "phase": "contact",
+        "targetIds": ["target-1"],
+        "type": "retrievalAccess"
+      },
+      {
+        "actorIds": [
+          "S-mage-s1-mage-2",
+          "S-vanguard-s1-vanguard-0",
+          "S-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 69,
+          "result": "success",
+          "roll": 55,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "tools",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalSecured",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalProtectedForTransport",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalSecuringDamage",
+            "value": 0
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalIntegrity",
+            "value": 80
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalProgress",
+            "value": 55
+          }
+        ],
+        "facts": [
+          "フェイ アイヴィーは回収対象を確保し、運搬可能な状態にした",
+          "用具を1消費して回収作業を助けた"
+        ],
+        "phase": "objective",
+        "targetIds": ["target-1"],
+        "type": "retrievalSecuring"
+      },
+      {
+        "actorIds": ["S-vanguard-s1-vanguard-0"],
+        "effects": [
+          {
+            "metadata": {
+              "carrierIds": ["S-vanguard-s1-vanguard-0"],
+              "requiredCarrierCount": 1
+            },
+            "targetId": "target-1",
+            "type": "retrievalCarrierCount",
+            "value": 1
+          }
+        ],
+        "facts": ["1名を回収対象の運搬担当に指定した"],
+        "phase": "return",
+        "targetIds": ["target-1"],
+        "type": "retrievalCarriersAssigned"
+      },
+      {
+        "actorIds": [
+          "S-vanguard-s1-vanguard-0",
+          "S-guardian-s1-guardian-1",
+          "S-healer-s1-healer-3",
+          "S-vanguard-s1-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 81,
+          "result": "success",
+          "roll": 60,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "targetId": "target-1",
+            "type": "retrievalExtracted",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalExtractionDamage",
+            "value": 0
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalIntegrity",
+            "value": 80
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalProgress",
+            "value": 75
+          }
+        ],
+        "facts": [
+          "運搬担当: トール スカイ（vanguard）",
+          "トール スカイは回収対象を危険地帯から搬出した"
+        ],
+        "phase": "return",
+        "targetIds": ["target-1"],
+        "type": "retrievalExtraction"
+      },
+      {
+        "actorIds": [
+          "S-vanguard-s1-vanguard-0",
+          "S-guardian-s1-guardian-1",
+          "S-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 91,
+          "result": "criticalFailure",
+          "roll": 98,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -5
+          }
+        ],
+        "facts": ["トール スカイが帰還経路を見失い、迂回した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": ["S-healer-s1-healer-3"],
+        "check": {
+          "effectiveValue": 100,
+          "result": "success",
+          "roll": 67,
+          "skill": "firstAid"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "レイラ ノースが帰還中の負傷者を手当てした"
+        ],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": ["S-vanguard-s1-vanguard-0"],
+        "effects": [
+          {
+            "targetId": "target-1",
+            "type": "retrievalReturned",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalIntegrity",
+            "value": 80
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalProgress",
+            "value": 100
+          }
+        ],
+        "facts": ["回収対象を酒場まで持ち帰った"],
+        "phase": "return",
+        "targetIds": ["target-1"],
+        "type": "retrievalReturned"
+      },
+      {
+        "actorIds": ["S-healer-s1-healer-3"],
+        "check": {
+          "effectiveValue": 100,
+          "result": "success",
+          "roll": 45,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          }
+        ],
+        "facts": ["レイラ ノースによる治療判定: success"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "回収対象は発見済み・到達済み・確保済み・搬出済み・帰還済み。回収進捗は100%",
+          "医薬品を2消費した",
+          "レイラ ノースが負傷者の治療を行った"
+        ],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": 1,
+      "requestFeatures": [],
+      "returnTimeBonus": 0,
+      "threatFeatures": []
+    },
+    "objectiveCompleted": true,
+    "objectiveProgress": 100,
+    "objectiveState": {
+      "abandoned": false,
+      "battleExposureDamage": 0,
+      "bulk": "portable",
+      "carrierIds": ["S-vanguard-s1-vanguard-0"],
+      "completed": true,
+      "currentIntegrity": 80,
+      "extracted": true,
+      "extractionDamage": 0,
+      "fragility": "standard",
+      "handling": "standard",
+      "initialIntegrity": 80,
+      "located": true,
+      "lostDuringReturn": false,
+      "minimumAcceptableIntegrity": 60,
+      "progress": 100,
+      "protectedForTransport": true,
+      "reached": true,
+      "returned": true,
+      "secured": true,
+      "securingDamage": 0,
+      "targetId": "target-1",
+      "targetName": "回収対象",
+      "type": "retrieval"
+    },
+    "partyHp": {
+      "S-guardian-s1-guardian-1": 87,
+      "S-healer-s1-healer-3": 83,
+      "S-mage-s1-mage-2": 64,
+      "S-vanguard-s1-vanguard-0": 84
+    },
+    "partyMorale": {
+      "S-guardian-s1-guardian-1": 69,
+      "S-healer-s1-healer-3": 62,
+      "S-mage-s1-mage-2": 69,
+      "S-vanguard-s1-vanguard-0": 65
+    },
+    "partyMp": {
+      "S-guardian-s1-guardian-1": 4,
+      "S-healer-s1-healer-3": 53,
+      "S-mage-s1-mage-2": 54,
+      "S-vanguard-s1-vanguard-0": 9
+    },
+    "partyStatusEffects": {
+      "S-guardian-s1-guardian-1": [],
+      "S-healer-s1-healer-3": [],
+      "S-mage-s1-mage-2": [],
+      "S-vanguard-s1-vanguard-0": []
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 1,
+      "tools": 2
+    }
+  }
+}
