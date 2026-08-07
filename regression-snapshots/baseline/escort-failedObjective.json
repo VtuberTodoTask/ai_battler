@@ -1,0 +1,1694 @@
+{
+  "outcome": "failedObjective",
+  "state": {
+    "avoidedThreats": [],
+    "battleEntrySnapshot": {
+      "environmentEffects": [
+        {
+          "type": "lighting",
+          "value": "dark"
+        }
+      ],
+      "initialHp": {
+        "C-guardian-s1-guardian-1": 71,
+        "C-healer-s1-healer-3": 65,
+        "C-mage-s1-mage-2": 47,
+        "C-vanguard-s1-vanguard-0": 68
+      },
+      "initialMorale": {
+        "C-guardian-s1-guardian-1": 56,
+        "C-healer-s1-healer-3": 49,
+        "C-mage-s1-mage-2": 55,
+        "C-vanguard-s1-vanguard-0": 52
+      },
+      "initialMp": {
+        "C-guardian-s1-guardian-1": 4,
+        "C-healer-s1-healer-3": 42,
+        "C-mage-s1-mage-2": 43,
+        "C-vanguard-s1-vanguard-0": 9
+      },
+      "initialStatusEffects": {
+        "C-guardian-s1-guardian-1": [],
+        "C-healer-s1-healer-3": [],
+        "C-mage-s1-mage-2": [],
+        "C-vanguard-s1-vanguard-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "enemyAdvantage"
+    },
+    "battleOutcome": "victory",
+    "battles": [
+      {
+        "combatSeed": "s1:battle:0:combat",
+        "deadAdventurerIds": [],
+        "discoveredWeaknesses": [],
+        "encounterSeed": "s1:battle:0:encounter",
+        "enemyComposition": "insectx4",
+        "enemyIds": [
+          "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+          "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+          "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+          "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
+        ],
+        "entrySnapshot": {
+          "environmentEffects": [
+            {
+              "type": "lighting",
+              "value": "dark"
+            }
+          ],
+          "initialHp": {
+            "C-guardian-s1-guardian-1": 71,
+            "C-healer-s1-healer-3": 65,
+            "C-mage-s1-mage-2": 47,
+            "C-vanguard-s1-vanguard-0": 68
+          },
+          "initialMorale": {
+            "C-guardian-s1-guardian-1": 56,
+            "C-healer-s1-healer-3": 49,
+            "C-mage-s1-mage-2": 55,
+            "C-vanguard-s1-vanguard-0": 52
+          },
+          "initialMp": {
+            "C-guardian-s1-guardian-1": 4,
+            "C-healer-s1-healer-3": 42,
+            "C-mage-s1-mage-2": 43,
+            "C-vanguard-s1-vanguard-0": 9
+          },
+          "initialStatusEffects": {
+            "C-guardian-s1-guardian-1": [],
+            "C-healer-s1-healer-3": [],
+            "C-mage-s1-mage-2": [],
+            "C-vanguard-s1-vanguard-0": []
+          },
+          "knownEnemyAbilities": [],
+          "knownEnemyWeaknesses": [],
+          "surprise": "enemyAdvantage"
+        },
+        "id": "battle-0",
+        "incapacitatedAdventurerIds": [],
+        "injuries": [],
+        "knownEnemyAbilities": [],
+        "knownEnemyWeaknesses": [],
+        "matchedAbilityIntel": [],
+        "matchedWeaknessIntel": [],
+        "outcome": "victory",
+        "phase": "battle",
+        "result": {
+          "abilityUsage": {},
+          "adventurerActionCount": 30,
+          "contactResult": {
+            "effects": {
+              "enemyInitiativeBonus": 3,
+              "side": "enemy"
+            },
+            "enemyStealth": 0,
+            "partyScouting": 0,
+            "roll": 100,
+            "successChance": 0,
+            "type": "failure"
+          },
+          "deadAdventurers": [],
+          "defeatedEnemies": [
+            "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+            "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+            "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
+          ],
+          "discoveredWeaknesses": [],
+          "enemyActionCount": 18,
+          "enemyDamageDealt": 43,
+          "escapedEnemies": [
+            "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2"
+          ],
+          "finalAdventurerStates": [
+            {
+              "alive": true,
+              "currentHp": 68,
+              "currentMp": 9,
+              "dead": false,
+              "id": "C-vanguard-s1-vanguard-0",
+              "incapacitated": false,
+              "morale": 52,
+              "statusEffects": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ]
+            },
+            {
+              "alive": true,
+              "currentHp": 71,
+              "currentMp": 4,
+              "dead": false,
+              "id": "C-guardian-s1-guardian-1",
+              "incapacitated": false,
+              "morale": 56,
+              "statusEffects": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ]
+            },
+            {
+              "alive": true,
+              "currentHp": 33,
+              "currentMp": 3,
+              "dead": false,
+              "id": "C-mage-s1-mage-2",
+              "incapacitated": false,
+              "morale": 55,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 65,
+              "currentMp": 39,
+              "dead": false,
+              "id": "C-healer-s1-healer-3",
+              "incapacitated": false,
+              "morale": 49,
+              "statusEffects": []
+            }
+          ],
+          "incapacitatedAdventurers": [],
+          "injuries": [],
+          "logs": [
+            {
+              "actionType": "contact",
+              "metadata": {
+                "contactType": "failure"
+              },
+              "phase": "contact",
+              "result": "遠征側の不利により敵に先制された。",
+              "round": 0
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲忍長 hit フェイ アイヴィー for 6 damage",
+              "roll": 19,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 82,
+              "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s1-vanguard-0",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール スカイ hit 甲殻甲虫雑兵長 for 11 damage",
+              "roll": 21,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s1-mage-2",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ アイヴィー hit 甲殻蟻雑兵長 for 11 damage",
+              "roll": 23,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s1-healer-3",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ ノース hit 甲殻甲虫雑兵長 for 12 damage",
+              "roll": 11,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 70,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "甲殻甲虫雑兵長 missed",
+              "roll": 56,
+              "round": 1,
+              "successChance": 11,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーがトール スカイを防護した。",
+              "round": 1,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "甲殻蟻雑兵長 missed",
+              "roll": 58,
+              "round": 1,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蟻の群れ長 missed",
+              "roll": 80,
+              "round": 1,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s1-vanguard-0",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール スカイ hit 甲殻甲虫雑兵長 for 12 damage",
+              "roll": 25,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "damage": 14,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲忍長 hit フェイ アイヴィー for 14 damage",
+              "roll": 1,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 82,
+              "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s1-healer-3",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ ノース hit 甲殻甲虫雑兵長 for 11 damage",
+              "roll": 63,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 70,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s1-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ アイヴィー hit 甲殻甲虫雑兵長 for 12 damage",
+              "roll": 41,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "甲殻蟻雑兵長 missed",
+              "roll": 29,
+              "round": 2,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーがトール スカイを防護した。",
+              "round": 2,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蟻の群れ長 missed",
+              "roll": 17,
+              "round": 2,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "甲殻甲虫雑兵長 missed",
+              "roll": 35,
+              "round": 2,
+              "successChance": 6,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲忍長 hit フェイ アイヴィー for 9 damage",
+              "roll": 56,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 82,
+              "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s1-vanguard-0",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール スカイ hit 甲殻甲虫雑兵長 for 11 damage",
+              "roll": 61,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "甲殻甲虫雑兵長が戦闘不能になった。",
+              "round": 3,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s1-mage-2",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ アイヴィー hit 甲殻蟻雑兵長 for 15 damage",
+              "roll": 88,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "甲殻蟻雑兵長 missed",
+              "roll": 24,
+              "round": 3,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s1-healer-3",
+              "metadata": {
+                "actualHealAmount": 29
+              },
+              "phase": "combat",
+              "result": "レイラ ノースがフェイ アイヴィーを回復させた。+29 HP",
+              "round": 3,
+              "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーがトール スカイを防護した。",
+              "round": 3,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蟻の群れ長 missed",
+              "roll": 49,
+              "round": 3,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲忍長 hit フェイ アイヴィー for 5 damage",
+              "roll": 32,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 82,
+              "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s1-mage-2",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ アイヴィー hit 甲殻蟻雑兵長 for 11 damage",
+              "roll": 77,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s1-healer-3",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ ノース hit 甲殻蟻雑兵長 for 10 damage",
+              "roll": 41,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s1-vanguard-0",
+              "damage": 20,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール スカイ hit 甲殻蟻雑兵長 for 20 damage",
+              "roll": 31,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "甲殻蟻雑兵長 missed",
+              "roll": 79,
+              "round": 4,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーがトール スカイを防護した。",
+              "round": 4,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蟻の群れ長 missed",
+              "roll": 58,
+              "round": 4,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲忍長 hit フェイ アイヴィー for 9 damage",
+              "roll": 60,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 82,
+              "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s1-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ ノース missed",
+              "roll": 69,
+              "round": 5,
+              "successChance": 55,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s1-vanguard-0",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール スカイ hit 甲殻蟻雑兵長 for 15 damage",
+              "roll": 85,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "甲殻蟻雑兵長が戦闘不能になった。",
+              "round": 5,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s1-mage-2",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ アイヴィー hit 砂蟻の群れ長 for 11 damage",
+              "roll": 23,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蟻の群れ長 missed",
+              "roll": 62,
+              "round": 5,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーがトール スカイを防護した。",
+              "round": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "phase": "retreat",
+              "result": "砂蟻の群れ長は撤退に失敗した。",
+              "roll": 51,
+              "round": 6,
+              "successChance": 14
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "phase": "retreat",
+              "result": "毒蟲忍長が撤退した。",
+              "roll": 32,
+              "round": 6,
+              "successChance": 86
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s1-vanguard-0",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール スカイ hit 砂蟻の群れ長 for 11 damage",
+              "roll": 85,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s1-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ ノース missed",
+              "roll": 85,
+              "round": 6,
+              "successChance": 58,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s1-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ アイヴィー missed",
+              "roll": 98,
+              "round": 6,
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蟻の群れ長 missed",
+              "roll": 33,
+              "round": 6,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーがトール スカイを防護した。",
+              "round": 6,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "phase": "retreat",
+              "result": "砂蟻の群れ長は撤退に失敗した。",
+              "roll": 44,
+              "round": 7,
+              "successChance": 14
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s1-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ アイヴィー hit 砂蟻の群れ長 for 13 damage",
+              "roll": 74,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s1-vanguard-0",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール スカイ hit 砂蟻の群れ長 for 11 damage",
+              "roll": 74,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s1-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ ノース missed",
+              "roll": 82,
+              "round": 7,
+              "successChance": 58,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーがトール スカイを防護した。",
+              "round": 7,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蟻の群れ長 missed",
+              "roll": 15,
+              "round": 7,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "phase": "retreat",
+              "result": "砂蟻の群れ長は撤退に失敗した。",
+              "roll": 69,
+              "round": 8,
+              "successChance": 14
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s1-vanguard-0",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "トール スカイ hit 砂蟻の群れ長 for 14 damage",
+              "roll": 36,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s1-mage-2",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ アイヴィー hit 砂蟻の群れ長 for 15 damage",
+              "roll": 34,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "砂蟻の群れ長が戦闘不能になった。",
+              "round": 8,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
+              ]
+            }
+          ],
+          "outcome": "victory",
+          "partyDamageDealt": 226,
+          "retreatAttempts": [],
+          "rounds": 8,
+          "seed": "s1:battle:0:combat",
+          "survivingAdventurers": [
+            "C-vanguard-s1-vanguard-0",
+            "C-guardian-s1-guardian-1",
+            "C-mage-s1-mage-2",
+            "C-healer-s1-healer-3"
+          ],
+          "survivingEnemies": [
+            "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2"
+          ]
+        },
+        "rounds": 8,
+        "survivingAdventurerIds": [
+          "C-vanguard-s1-vanguard-0",
+          "C-guardian-s1-guardian-1",
+          "C-mage-s1-mage-2",
+          "C-healer-s1-healer-3"
+        ],
+        "trigger": "afterExploration",
+        "unmatchedAbilityIntel": [],
+        "unmatchedWeaknessIntel": []
+      }
+    ],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": ["poorVisibility"],
+    "elapsedTime": 13.65,
+    "incapacitated": [],
+    "information": [],
+    "injuries": [
+      {
+        "adventurerId": "C-healer-s1-healer-3",
+        "cause": "poorVisibility",
+        "hpLoss": 1,
+        "id": "injury-0-214255",
+        "status": "treated",
+        "type": "light"
+      },
+      {
+        "adventurerId": "C-mage-s1-mage-2",
+        "cause": "poorVisibility",
+        "hpLoss": 6,
+        "id": "injury-1-988448",
+        "status": "treated",
+        "type": "light"
+      }
+    ],
+    "logs": [
+      {
+        "actorIds": [
+          "C-vanguard-s1-vanguard-0",
+          "C-guardian-s1-guardian-1",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 59,
+          "result": "success",
+          "roll": 42,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "トール スカイが効率的なルートと補給計画を立てた",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 0
+          },
+          {
+            "type": "escortRouteProgress",
+            "value": 0
+          },
+          {
+            "type": "escortDelivered",
+            "value": 0
+          }
+        ],
+        "facts": ["護衛対象「護衛対象」を「目的地」まで護衛する任務を開始した"],
+        "phase": "preparation",
+        "type": "escortTargetAssigned"
+      },
+      {
+        "actorIds": [
+          "C-healer-s1-healer-3",
+          "C-vanguard-s1-vanguard-0",
+          "C-mage-s1-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 39,
+          "result": "partialSuccess",
+          "roll": 40,
+          "skill": "leadership"
+        },
+        "effects": [
+          {
+            "type": "escortCoordinated",
+            "value": 1
+          },
+          {
+            "type": "escortStress",
+            "value": 0
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": ["レイラ ノースが護衛対象との行動を何とか調整した"],
+        "phase": "preparation",
+        "type": "escortDeparture"
+      },
+      {
+        "actorIds": [
+          "C-vanguard-s1-vanguard-0",
+          "C-guardian-s1-guardian-1",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 54,
+          "result": "failure",
+          "roll": 76,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": ["トール スカイが接近経路を見失い、迂回した"],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-mage-s1-mage-2",
+          "C-vanguard-s1-vanguard-0",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 14,
+          "result": "failure",
+          "roll": 53,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "C-healer-s1-healer-3",
+            "type": "hpDamage",
+            "value": 1
+          }
+        ],
+        "facts": [
+          "視界不良に遭遇した",
+          "Guardianがレイラ ノースの被害を軽減した",
+          "レイラ ノースが1のダメージを受けた"
+        ],
+        "phase": "approach",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [
+          "C-mage-s1-mage-2",
+          "C-vanguard-s1-vanguard-0",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 37,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s1-mage-2",
+          "C-vanguard-s1-vanguard-0",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 67,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s1-mage-2",
+          "C-vanguard-s1-vanguard-0",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 44,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-vanguard-s1-vanguard-0",
+          "C-guardian-s1-guardian-1",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 36,
+          "result": "failure",
+          "roll": 89,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "escortRouteProgress",
+            "value": 25
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 36
+          },
+          {
+            "type": "escortStress",
+            "value": 20
+          },
+          {
+            "type": "escortTargetDamage",
+            "value": 4
+          }
+        ],
+        "facts": ["トール スカイは移動経路で迷い、護衛対象が怪我をした"],
+        "phase": "objective",
+        "type": "escortRouteProgress"
+      },
+      {
+        "actorIds": ["C-guardian-s1-guardian-1"],
+        "effects": [
+          {
+            "targetId": "C-guardian-s1-guardian-1",
+            "type": "escortProtectorAssigned",
+            "value": 1
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 36
+          }
+        ],
+        "facts": ["オルム アイヴィー（guardian）が護衛対象の保護担当になった"],
+        "phase": "objective",
+        "type": "escortProtectorAssigned"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["戦闘が8ラウンドでvictoryとなった", "接敵結果: failure"],
+        "phase": "battle",
+        "targetIds": [],
+        "type": "battleSummary"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s1-guardian-1",
+          "C-vanguard-s1-vanguard-0",
+          "C-mage-s1-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 70,
+          "result": "success",
+          "roll": 49,
+          "skill": "defense"
+        },
+        "effects": [
+          {
+            "type": "escortBattleExposureDamage",
+            "value": 0
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 36
+          },
+          {
+            "type": "escortStress",
+            "value": 25
+          }
+        ],
+        "facts": [
+          "オルム アイヴィーが護衛対象の保護を担当した",
+          "戦闘中、護衛対象への追加被害は発生しなかった"
+        ],
+        "phase": "battle",
+        "type": "escortBattleExposure"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "escortTargetHeal",
+            "value": 4
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortAlive",
+            "value": 1
+          }
+        ],
+        "facts": ["護衛対象のHPが4回復した（治療）"],
+        "phase": "objective",
+        "type": "escortTargetHeal"
+      },
+      {
+        "actorIds": [
+          "C-healer-s1-healer-3",
+          "C-mage-s1-mage-2",
+          "C-guardian-s1-guardian-1"
+        ],
+        "check": {
+          "effectiveValue": 80,
+          "result": "success",
+          "roll": 59,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "type": "escortCareHealing",
+            "value": 4
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "レイラ ノースが護衛対象の傷を手当てした"
+        ],
+        "phase": "objective",
+        "type": "escortCare"
+      },
+      {
+        "actorIds": [
+          "C-vanguard-s1-vanguard-0",
+          "C-guardian-s1-guardian-1",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 39,
+          "result": "success",
+          "roll": 18,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "escortRouteProgress",
+            "value": 75
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 25
+          }
+        ],
+        "facts": ["トール スカイが移動経路を切り開いた"],
+        "phase": "objective",
+        "type": "escortRouteProgress"
+      },
+      {
+        "actorIds": [
+          "C-vanguard-s1-vanguard-0",
+          "C-guardian-s1-guardian-1",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 54,
+          "result": "success",
+          "roll": 51,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["トール スカイが安全な帰還経路を確保した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-mage-s1-mage-2",
+          "C-vanguard-s1-vanguard-0",
+          "C-healer-s1-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 19,
+          "result": "failure",
+          "roll": 93,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "C-mage-s1-mage-2",
+            "type": "hpDamage",
+            "value": 6
+          }
+        ],
+        "facts": [
+          "視界不良に遭遇した",
+          "Guardianがフェイ アイヴィーの被害を軽減した",
+          "フェイ アイヴィーが6のダメージを受けた"
+        ],
+        "phase": "return",
+        "type": "hazard"
+      },
+      {
+        "actorIds": ["C-healer-s1-healer-3"],
+        "check": {
+          "effectiveValue": 87,
+          "result": "success",
+          "roll": 78,
+          "skill": "firstAid"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "targetId": "C-mage-s1-mage-2",
+            "type": "hpHeal",
+            "value": 5
+          },
+          {
+            "targetId": "C-healer-s1-healer-3",
+            "type": "hpHeal",
+            "value": 1
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "レイラ ノースが帰還中の負傷者を手当てした"
+        ],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "escortReturnedToOrigin",
+            "value": 1
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": [
+          "護衛任務は完了しなかったが、護衛対象は出発地点まで連れ戻された"
+        ],
+        "phase": "return",
+        "type": "escortReturnResult"
+      },
+      {
+        "actorIds": ["C-healer-s1-healer-3"],
+        "check": {
+          "effectiveValue": 93,
+          "result": "success",
+          "roll": 35,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          },
+          {
+            "targetId": "C-mage-s1-mage-2",
+            "type": "hpHeal",
+            "value": 8
+          }
+        ],
+        "facts": ["レイラ ノースによる治療判定: success"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": 3
+          }
+        ],
+        "facts": [
+          "護衛対象は出発済み・行動調整済み・移動進捗75%・出発地点へ帰還。護衛進捗は60%",
+          "医薬品を2消費した",
+          "レイラ ノースが負傷者の治療を行った"
+        ],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": 1,
+      "requestFeatures": ["traps", "poorVisibility"],
+      "returnTimeBonus": 0,
+      "threatFeatures": ["traps", "poorVisibility"]
+    },
+    "objectiveCompleted": false,
+    "objectiveProgress": 60,
+    "objectiveState": {
+      "accompanying": false,
+      "battleExposureDamage": 0,
+      "careDamage": 0,
+      "careHealing": 4,
+      "careProvided": true,
+      "completed": false,
+      "coordinated": true,
+      "currentHp": 40,
+      "delivered": false,
+      "departed": true,
+      "destinationId": "destination-1",
+      "destinationName": "目的地",
+      "destinationReached": false,
+      "handoffStatus": "notStarted",
+      "maxHp": 40,
+      "mobility": "mobile",
+      "progress": 60,
+      "protectorId": "C-guardian-s1-guardian-1",
+      "returnedToOrigin": true,
+      "routeProgress": 75,
+      "statusEffects": [],
+      "stranded": false,
+      "targetId": "target-1",
+      "targetName": "護衛対象",
+      "travelDamage": 4,
+      "travelStress": 25,
+      "type": "escort"
+    },
+    "partyHp": {
+      "C-guardian-s1-guardian-1": 71,
+      "C-healer-s1-healer-3": 66,
+      "C-mage-s1-mage-2": 40,
+      "C-vanguard-s1-vanguard-0": 68
+    },
+    "partyMorale": {
+      "C-guardian-s1-guardian-1": 59,
+      "C-healer-s1-healer-3": 52,
+      "C-mage-s1-mage-2": 58,
+      "C-vanguard-s1-vanguard-0": 55
+    },
+    "partyMp": {
+      "C-guardian-s1-guardian-1": 4,
+      "C-healer-s1-healer-3": 39,
+      "C-mage-s1-mage-2": 3,
+      "C-vanguard-s1-vanguard-0": 9
+    },
+    "partyStatusEffects": {
+      "C-guardian-s1-guardian-1": [
+        {
+          "duration": 1,
+          "sourceId": "C-guardian-s1-guardian-1",
+          "type": "guarded",
+          "value": 3
+        }
+      ],
+      "C-healer-s1-healer-3": [],
+      "C-mage-s1-mage-2": [],
+      "C-vanguard-s1-vanguard-0": [
+        {
+          "duration": 1,
+          "sourceId": "C-guardian-s1-guardian-1",
+          "type": "guarded",
+          "value": 5
+        }
+      ]
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 0,
+      "tools": 3
+    }
+  }
+}

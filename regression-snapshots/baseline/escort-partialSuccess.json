@@ -1,0 +1,1130 @@
+{
+  "outcome": "forcedRetreat",
+  "state": {
+    "avoidedThreats": [],
+    "battleEntrySnapshot": {
+      "environmentEffects": [
+        {
+          "type": "lighting",
+          "value": "dark"
+        }
+      ],
+      "initialHp": {
+        "C-guardian-s0-guardian-1": 70,
+        "C-healer-s0-healer-3": 52,
+        "C-mage-s0-mage-2": 67,
+        "C-vanguard-s0-vanguard-0": 69
+      },
+      "initialMorale": {
+        "C-guardian-s0-guardian-1": 52,
+        "C-healer-s0-healer-3": 66,
+        "C-mage-s0-mage-2": 47,
+        "C-vanguard-s0-vanguard-0": 51
+      },
+      "initialMp": {
+        "C-guardian-s0-guardian-1": 16,
+        "C-healer-s0-healer-3": 45,
+        "C-mage-s0-mage-2": 43,
+        "C-vanguard-s0-vanguard-0": 11
+      },
+      "initialStatusEffects": {
+        "C-guardian-s0-guardian-1": [],
+        "C-healer-s0-healer-3": [],
+        "C-mage-s0-mage-2": [],
+        "C-vanguard-s0-vanguard-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "enemyAdvantage"
+    },
+    "battleOutcome": "retreat",
+    "battles": [
+      {
+        "combatSeed": "s0:battle:0:combat",
+        "deadAdventurerIds": [],
+        "discoveredWeaknesses": [],
+        "encounterSeed": "s0:battle:0:encounter",
+        "enemyComposition": "insectx4",
+        "enemyIds": [
+          "C-insect-assault-standard-s0:battle:0:encounter:enemy:0",
+          "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1",
+          "C-insect-assault-standard-s0:battle:0:encounter:enemy:2",
+          "C-insect-assault-standard-s0:battle:0:encounter:enemy:3"
+        ],
+        "entrySnapshot": {
+          "environmentEffects": [
+            {
+              "type": "lighting",
+              "value": "dark"
+            }
+          ],
+          "initialHp": {
+            "C-guardian-s0-guardian-1": 70,
+            "C-healer-s0-healer-3": 52,
+            "C-mage-s0-mage-2": 67,
+            "C-vanguard-s0-vanguard-0": 69
+          },
+          "initialMorale": {
+            "C-guardian-s0-guardian-1": 52,
+            "C-healer-s0-healer-3": 66,
+            "C-mage-s0-mage-2": 47,
+            "C-vanguard-s0-vanguard-0": 51
+          },
+          "initialMp": {
+            "C-guardian-s0-guardian-1": 16,
+            "C-healer-s0-healer-3": 45,
+            "C-mage-s0-mage-2": 43,
+            "C-vanguard-s0-vanguard-0": 11
+          },
+          "initialStatusEffects": {
+            "C-guardian-s0-guardian-1": [],
+            "C-healer-s0-healer-3": [],
+            "C-mage-s0-mage-2": [],
+            "C-vanguard-s0-vanguard-0": []
+          },
+          "knownEnemyAbilities": [],
+          "knownEnemyWeaknesses": [],
+          "surprise": "enemyAdvantage"
+        },
+        "id": "battle-0",
+        "incapacitatedAdventurerIds": [],
+        "injuries": [],
+        "knownEnemyAbilities": [],
+        "knownEnemyWeaknesses": [],
+        "matchedAbilityIntel": [],
+        "matchedWeaknessIntel": [],
+        "outcome": "retreat",
+        "phase": "battle",
+        "result": {
+          "abilityUsage": {},
+          "adventurerActionCount": 8,
+          "contactResult": {
+            "effects": {
+              "enemyInitiativeBonus": 3,
+              "side": "enemy"
+            },
+            "enemyStealth": 0,
+            "partyScouting": 0,
+            "roll": 100,
+            "successChance": 0,
+            "type": "failure"
+          },
+          "deadAdventurers": [],
+          "defeatedEnemies": [],
+          "discoveredWeaknesses": [],
+          "enemyActionCount": 8,
+          "enemyDamageDealt": 58,
+          "escapedEnemies": [],
+          "finalAdventurerStates": [
+            {
+              "alive": true,
+              "currentHp": 11,
+              "currentMp": 11,
+              "dead": false,
+              "id": "C-vanguard-s0-vanguard-0",
+              "incapacitated": false,
+              "morale": 51,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 70,
+              "currentMp": 16,
+              "dead": false,
+              "id": "C-guardian-s0-guardian-1",
+              "incapacitated": false,
+              "morale": 52,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 67,
+              "currentMp": 33,
+              "dead": false,
+              "id": "C-mage-s0-mage-2",
+              "incapacitated": false,
+              "morale": 47,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 52,
+              "currentMp": 45,
+              "dead": false,
+              "id": "C-healer-s0-healer-3",
+              "incapacitated": false,
+              "morale": 66,
+              "statusEffects": []
+            }
+          ],
+          "incapacitatedAdventurers": [],
+          "injuries": [],
+          "logs": [
+            {
+              "actionType": "contact",
+              "metadata": {
+                "contactType": "failure"
+              },
+              "phase": "contact",
+              "result": "遠征側の不利により敵に先制された。",
+              "round": 0
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-insect-assault-standard-s0:battle:0:encounter:enemy:3",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "毒蜘蛛突撃兵 hit ベル ムーン for 8 damage",
+              "roll": 48,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 62,
+              "targetIds": ["C-vanguard-s0-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蜘蛛の群れ hit ベル ムーン for 8 damage",
+              "roll": 5,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["C-vanguard-s0-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s0-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ムーン missed",
+              "roll": 92,
+              "round": 1,
+              "successChance": 88,
+              "targetIds": [
+                "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s0-guardian-1",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ サンド hit 砂蜘蛛の群れ for 15 damage",
+              "roll": 3,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 78,
+              "targetIds": [
+                "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-insect-assault-standard-s0:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蟲突撃兵 missed",
+              "roll": 100,
+              "round": 1,
+              "successChance": 57,
+              "targetIds": ["C-vanguard-s0-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s0-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アメリア スカイ missed",
+              "roll": 52,
+              "round": 1,
+              "successChance": 43,
+              "targetIds": [
+                "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s0-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "チェルシー グレイ hit 砂蜘蛛の群れ for 14 damage",
+              "roll": 64,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 89,
+              "targetIds": [
+                "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-insect-assault-standard-s0:battle:0:encounter:enemy:2",
+              "damage": 11,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "甲殻蟻狂戦士 hit ベル ムーン for 11 damage",
+              "roll": 39,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 44,
+              "targetIds": ["C-vanguard-s0-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蜘蛛の群れ hit ベル ムーン for 5 damage",
+              "roll": 22,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["C-vanguard-s0-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-insect-assault-standard-s0:battle:0:encounter:enemy:3",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "毒蜘蛛突撃兵 hit ベル ムーン for 9 damage",
+              "roll": 53,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 62,
+              "targetIds": ["C-vanguard-s0-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-insect-assault-standard-s0:battle:0:encounter:enemy:0",
+              "damage": 17,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "砂蟲突撃兵 hit ベル ムーン for 17 damage",
+              "roll": 32,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 57,
+              "targetIds": ["C-vanguard-s0-vanguard-0"]
+            },
+            {
+              "actionType": "requestPartyRetreat",
+              "actorId": "C-vanguard-s0-vanguard-0",
+              "phase": "retreat",
+              "result": "ベル ムーンの撤退提案はリーダーに却下された。",
+              "round": 2
+            },
+            {
+              "actionType": "individualEscape",
+              "actorId": "C-vanguard-s0-vanguard-0",
+              "phase": "retreat",
+              "result": "ベル ムーンが単独で離脱した。",
+              "roll": 12,
+              "round": 2,
+              "successChance": 33.55
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s0-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アメリア スカイ missed",
+              "roll": 90,
+              "round": 2,
+              "successChance": 43,
+              "targetIds": [
+                "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-insect-assault-standard-s0:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "guardian"
+              },
+              "phase": "combat",
+              "result": "甲殻蟻狂戦士 missed",
+              "roll": 69,
+              "round": 2,
+              "successChance": 43,
+              "targetIds": ["C-guardian-s0-guardian-1"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s0-guardian-1",
+              "damage": 9,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ サンド hit 毒蜘蛛突撃兵 for 9 damage",
+              "roll": 20,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 68,
+              "targetIds": [
+                "C-insect-assault-standard-s0:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s0-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "チェルシー グレイ hit 砂蜘蛛の群れ for 12 damage",
+              "roll": 69,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 89,
+              "targetIds": [
+                "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "C-healer-s0-healer-3",
+              "phase": "retreat",
+              "result": "アメリア スカイがパーティ撤退を試みた。成功",
+              "roll": 28,
+              "round": 3,
+              "successChance": 95
+            }
+          ],
+          "outcome": "retreat",
+          "partyDamageDealt": 50,
+          "retreatAttempts": [
+            {
+              "aliveCount": 4,
+              "approved": false,
+              "attemptCount": 1,
+              "attempted": false,
+              "averageMorale": 54,
+              "enemyThreat": 28.766400000000004,
+              "healerAlive": true,
+              "incapacitatedCount": 0,
+              "leaderId": "C-healer-s0-healer-3",
+              "matchedReasons": ["memberProposal"],
+              "moraleThreshold": 49.1,
+              "partyHpRatio": 0.7731884057971015,
+              "partyThreat": 18.44,
+              "proposerHpRatio": 0.15942028985507245,
+              "proposerId": "C-vanguard-s0-vanguard-0",
+              "proposerMorale": 51,
+              "proposerRole": "vanguard",
+              "reason": "memberProposal",
+              "retreatHpThreshold": 0.16,
+              "roll": 0,
+              "round": 2,
+              "success": false,
+              "successChance": 0
+            },
+            {
+              "aliveCount": 4,
+              "attemptCount": 2,
+              "attempted": true,
+              "averageMorale": 54,
+              "enemyThreat": 28.766400000000004,
+              "healerAlive": true,
+              "incapacitatedCount": 0,
+              "leaderId": "C-healer-s0-healer-3",
+              "matchedReasons": ["individualEscape"],
+              "moraleThreshold": 49.1,
+              "partyHpRatio": 0.7731884057971015,
+              "partyThreat": 18.44,
+              "proposerHpRatio": 0.15942028985507245,
+              "proposerId": "C-vanguard-s0-vanguard-0",
+              "proposerMorale": 51,
+              "proposerRole": "vanguard",
+              "reason": "individualEscape",
+              "retreatHpThreshold": 0.16,
+              "roll": 12,
+              "round": 2,
+              "success": true,
+              "successChance": 33.55
+            },
+            {
+              "aliveCount": 3,
+              "approved": true,
+              "attemptCount": 3,
+              "attempted": true,
+              "averageMorale": 55,
+              "enemyThreat": 28.766400000000004,
+              "healerAlive": true,
+              "incapacitatedCount": 1,
+              "leaderId": "C-healer-s0-healer-3",
+              "matchedReasons": ["overwhelmed"],
+              "moraleThreshold": 49.1,
+              "partyHpRatio": 0.9777777777777779,
+              "partyThreat": 13.830000000000002,
+              "proposerHpRatio": 1,
+              "proposerId": "C-healer-s0-healer-3",
+              "proposerMorale": 66,
+              "proposerRole": "healer",
+              "reason": "overwhelmed",
+              "retreatHpThreshold": 0.16,
+              "roll": 28,
+              "round": 3,
+              "success": true,
+              "successChance": 95
+            }
+          ],
+          "retreatDiagnostic": {
+            "aliveCount": 3,
+            "approved": true,
+            "attemptCount": 3,
+            "attempted": true,
+            "averageMorale": 55,
+            "enemyThreat": 28.766400000000004,
+            "healerAlive": true,
+            "incapacitatedCount": 1,
+            "leaderId": "C-healer-s0-healer-3",
+            "matchedReasons": ["overwhelmed"],
+            "moraleThreshold": 49.1,
+            "partyHpRatio": 0.9777777777777779,
+            "partyThreat": 13.830000000000002,
+            "proposerHpRatio": 1,
+            "proposerId": "C-healer-s0-healer-3",
+            "proposerMorale": 66,
+            "proposerRole": "healer",
+            "reason": "overwhelmed",
+            "retreatHpThreshold": 0.16,
+            "roll": 28,
+            "round": 3,
+            "success": true,
+            "successChance": 95
+          },
+          "retreatResult": {
+            "chance": 95,
+            "roll": 28,
+            "side": "party",
+            "success": true
+          },
+          "rounds": 3,
+          "seed": "s0:battle:0:combat",
+          "survivingAdventurers": [
+            "C-vanguard-s0-vanguard-0",
+            "C-guardian-s0-guardian-1",
+            "C-mage-s0-mage-2",
+            "C-healer-s0-healer-3"
+          ],
+          "survivingEnemies": [
+            "C-insect-assault-standard-s0:battle:0:encounter:enemy:0",
+            "B-insect-swarm-standard-s0:battle:0:encounter:enemy:1",
+            "C-insect-assault-standard-s0:battle:0:encounter:enemy:2",
+            "C-insect-assault-standard-s0:battle:0:encounter:enemy:3"
+          ]
+        },
+        "rounds": 3,
+        "survivingAdventurerIds": [
+          "C-vanguard-s0-vanguard-0",
+          "C-guardian-s0-guardian-1",
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3"
+        ],
+        "trigger": "afterExploration",
+        "unmatchedAbilityIntel": [],
+        "unmatchedWeaknessIntel": []
+      }
+    ],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": ["poorVisibility"],
+    "elapsedTime": 11.65,
+    "incapacitated": [],
+    "information": [],
+    "injuries": [
+      {
+        "adventurerId": "C-guardian-s0-guardian-1",
+        "cause": "poorVisibility",
+        "hpLoss": 5,
+        "id": "injury-0-476073",
+        "status": "treated",
+        "type": "light"
+      },
+      {
+        "adventurerId": "C-guardian-s0-guardian-1",
+        "cause": "poorVisibility",
+        "hpLoss": 6,
+        "id": "injury-1-954381",
+        "status": "treated",
+        "type": "light"
+      }
+    ],
+    "logs": [
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 61,
+          "result": "partialSuccess",
+          "roll": 73,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "準備は整ったが、計画に若干の無理があった",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 0
+          },
+          {
+            "type": "escortRouteProgress",
+            "value": 0
+          },
+          {
+            "type": "escortDelivered",
+            "value": 0
+          }
+        ],
+        "facts": ["護衛対象「護衛対象」を「目的地」まで護衛する任務を開始した"],
+        "phase": "preparation",
+        "type": "escortTargetAssigned"
+      },
+      {
+        "actorIds": [
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 50,
+          "result": "criticalSuccess",
+          "roll": 9,
+          "skill": "leadership"
+        },
+        "effects": [
+          {
+            "type": "escortCoordinated",
+            "value": 1
+          },
+          {
+            "type": "escortStress",
+            "value": 0
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": ["アメリア スカイが護衛対象との行動を完璧に調整した"],
+        "phase": "preparation",
+        "type": "escortDeparture"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 56,
+          "result": "success",
+          "roll": 33,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["マルチナ サンドが安全な接近経路を確保した"],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 13,
+          "result": "failure",
+          "roll": 78,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "C-guardian-s0-guardian-1",
+            "type": "hpDamage",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "視界不良に遭遇した",
+          "Guardianがマルチナ サンドの被害を軽減した",
+          "マルチナ サンドが5のダメージを受けた"
+        ],
+        "phase": "approach",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "partialSuccess",
+          "roll": 3,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["チェルシー グレイが断片的な手がかりを得た"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 86,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 64,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 38,
+          "result": "success",
+          "roll": 27,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "escortRouteProgress",
+            "value": 50
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 0
+          }
+        ],
+        "facts": ["マルチナ サンドが移動経路を切り開いた"],
+        "phase": "objective",
+        "type": "escortRouteProgress"
+      },
+      {
+        "actorIds": ["C-guardian-s0-guardian-1"],
+        "effects": [
+          {
+            "targetId": "C-guardian-s0-guardian-1",
+            "type": "escortProtectorAssigned",
+            "value": 1
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": ["マルチナ サンド（guardian）が護衛対象の保護担当になった"],
+        "phase": "objective",
+        "type": "escortProtectorAssigned"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["戦闘が3ラウンドでretreatとなった", "接敵結果: failure"],
+        "phase": "battle",
+        "targetIds": [],
+        "type": "battleSummary"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-healer-s0-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 48,
+          "result": "success",
+          "roll": 10,
+          "skill": "defense"
+        },
+        "effects": [
+          {
+            "type": "escortBattleExposureDamage",
+            "value": 0
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 20
+          }
+        ],
+        "facts": [
+          "マルチナ サンドが護衛対象の保護を担当した",
+          "戦闘中、護衛対象への追加被害は発生しなかった"
+        ],
+        "phase": "battle",
+        "type": "escortBattleExposure"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 26,
+          "result": "failure",
+          "roll": 59,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "escortRouteProgress",
+            "value": 75
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 36
+          },
+          {
+            "type": "escortStress",
+            "value": 40
+          },
+          {
+            "type": "escortTargetDamage",
+            "value": 4
+          }
+        ],
+        "facts": ["マルチナ サンドは移動経路で迷い、護衛対象が怪我をした"],
+        "phase": "objective",
+        "type": "escortRouteProgress"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 56,
+          "result": "success",
+          "roll": 29,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["マルチナ サンドが安全な帰還経路を確保した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 13,
+          "result": "failure",
+          "roll": 36,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "C-guardian-s0-guardian-1",
+            "type": "hpDamage",
+            "value": 6
+          }
+        ],
+        "facts": [
+          "視界不良に遭遇した",
+          "Guardianがマルチナ サンドの被害を軽減した",
+          "マルチナ サンドが6のダメージを受けた"
+        ],
+        "phase": "return",
+        "type": "hazard"
+      },
+      {
+        "actorIds": ["C-healer-s0-healer-3"],
+        "check": {
+          "effectiveValue": 92,
+          "result": "success",
+          "roll": 66,
+          "skill": "firstAid"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "targetId": "C-vanguard-s0-vanguard-0",
+            "type": "hpHeal",
+            "value": 5
+          },
+          {
+            "targetId": "C-guardian-s0-guardian-1",
+            "type": "hpHeal",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "アメリア スカイが帰還中の負傷者を手当てした"
+        ],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "escortReturnedToOrigin",
+            "value": 1
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 36
+          }
+        ],
+        "facts": [
+          "護衛任務は完了しなかったが、護衛対象は出発地点まで連れ戻された"
+        ],
+        "phase": "return",
+        "type": "escortReturnResult"
+      },
+      {
+        "actorIds": ["C-healer-s0-healer-3"],
+        "check": {
+          "effectiveValue": 97,
+          "result": "success",
+          "roll": 55,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          },
+          {
+            "targetId": "C-vanguard-s0-vanguard-0",
+            "type": "hpHeal",
+            "value": 8
+          },
+          {
+            "targetId": "C-guardian-s0-guardian-1",
+            "type": "hpHeal",
+            "value": 6
+          }
+        ],
+        "facts": ["アメリア スカイによる治療判定: success"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": 3
+          }
+        ],
+        "facts": [
+          "護衛対象は出発済み・行動調整済み・移動進捗75%・出発地点へ帰還。護衛進捗は60%",
+          "医薬品を2消費した",
+          "アメリア スカイが負傷者の治療を行った"
+        ],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": 0,
+      "requestFeatures": ["traps", "poorVisibility"],
+      "returnTimeBonus": 0,
+      "threatFeatures": ["traps", "poorVisibility"]
+    },
+    "objectiveCompleted": false,
+    "objectiveProgress": 60,
+    "objectiveState": {
+      "accompanying": false,
+      "battleExposureDamage": 0,
+      "careDamage": 0,
+      "careHealing": 0,
+      "careProvided": false,
+      "completed": false,
+      "coordinated": true,
+      "currentHp": 36,
+      "delivered": false,
+      "departed": true,
+      "destinationId": "destination-1",
+      "destinationName": "目的地",
+      "destinationReached": false,
+      "handoffStatus": "notStarted",
+      "maxHp": 40,
+      "mobility": "mobile",
+      "progress": 60,
+      "protectorId": "C-guardian-s0-guardian-1",
+      "returnedToOrigin": true,
+      "routeProgress": 75,
+      "statusEffects": [],
+      "stranded": false,
+      "targetId": "target-1",
+      "targetName": "護衛対象",
+      "travelDamage": 4,
+      "travelStress": 40,
+      "type": "escort"
+    },
+    "partyHp": {
+      "C-guardian-s0-guardian-1": 75,
+      "C-healer-s0-healer-3": 52,
+      "C-mage-s0-mage-2": 67,
+      "C-vanguard-s0-vanguard-0": 24
+    },
+    "partyMorale": {
+      "C-guardian-s0-guardian-1": 55,
+      "C-healer-s0-healer-3": 69,
+      "C-mage-s0-mage-2": 50,
+      "C-vanguard-s0-vanguard-0": 54
+    },
+    "partyMp": {
+      "C-guardian-s0-guardian-1": 16,
+      "C-healer-s0-healer-3": 45,
+      "C-mage-s0-mage-2": 33,
+      "C-vanguard-s0-vanguard-0": 11
+    },
+    "partyStatusEffects": {
+      "C-guardian-s0-guardian-1": [],
+      "C-healer-s0-healer-3": [],
+      "C-mage-s0-mage-2": [],
+      "C-vanguard-s0-vanguard-0": []
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 1,
+      "tools": 3
+    }
+  }
+}

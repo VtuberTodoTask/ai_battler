@@ -22,8 +22,10 @@ export type ExpeditionPhase =
   | 'return'
   | 'aftermath'
 
-export type ObjectiveType =
-  'elimination' | 'investigation' | 'rescue' | 'escort' | 'retrieval' | 'survey'
+export type ImplementedObjectiveType =
+  'investigation' | 'elimination' | 'rescue' | 'escort'
+
+export type ObjectiveType = ImplementedObjectiveType | 'retrieval' | 'survey'
 
 export type EnvironmentType =
   | 'forest'
@@ -176,8 +178,41 @@ export interface RescueObjectiveState {
   completed: boolean
 }
 
+export interface EscortObjectiveState {
+  type: 'escort'
+  targetId: string
+  targetName: string
+  destinationId: string
+  destinationName: string
+  maxHp: number
+  currentHp: number
+  mobility: EscortTargetMobility
+  statusEffects: StatusEffect[]
+  travelStress: number
+  accompanying: boolean
+  departed: boolean
+  coordinated: boolean
+  routeProgress: number
+  protectorId?: string
+  travelDamage: number
+  battleExposureDamage: number
+  careProvided: boolean
+  careHealing: number
+  careDamage: number
+  destinationReached: boolean
+  handoffStatus: EscortHandoffStatus
+  delivered: boolean
+  returnedToOrigin: boolean
+  stranded: boolean
+  progress: number
+  completed: boolean
+}
+
 export type ExpeditionObjectiveState =
-  InvestigationObjectiveState | EliminationObjectiveState | RescueObjectiveState
+  | InvestigationObjectiveState
+  | EliminationObjectiveState
+  | RescueObjectiveState
+  | EscortObjectiveState
 
 export interface ExpeditionState {
   currentPhase: ExpeditionPhase
@@ -219,6 +254,39 @@ export interface ExpeditionBattleConfig {
 
 export type RescueTargetMobility = 'mobile' | 'assisted' | 'immobile'
 
+export type EscortTargetMobility = 'mobile' | 'assisted' | 'immobile'
+
+export type EscortHandoffRequirement = 'none' | 'standard'
+
+export type EscortHandoffStatus =
+  'notStarted' | 'notRequired' | 'pending' | 'completed' | 'failed'
+
+export interface EscortTargetConfig {
+  id: string
+  name: string
+  maxHp: number
+  initialHp: number
+  mobility: EscortTargetMobility
+  initialStatusEffects?: StatusEffect[]
+  initialStress: number
+  coordinationDifficulty: number
+  routeDifficulty: number
+  protectionDifficulty: number
+  careDifficulty: number
+}
+
+export interface EscortDestinationConfig {
+  id: string
+  name: string
+  handoffRequirement: EscortHandoffRequirement
+  handoffDifficulty: number
+}
+
+export interface EscortObjectiveConfig {
+  target: EscortTargetConfig
+  destination: EscortDestinationConfig
+}
+
 export interface RescueTargetConfig {
   id: string
   name: string
@@ -258,6 +326,7 @@ export interface ExpeditionRequest {
   battle?: ExpeditionBattleConfig
   elimination?: EliminationObjectiveConfig
   rescue?: RescueObjectiveConfig
+  escort?: EscortObjectiveConfig
 }
 
 export interface EnvironmentEffect {
@@ -332,6 +401,7 @@ export interface ExpeditionFlowDefinition {
   exploration: boolean
   battle: 'none' | 'optional' | 'required'
   objective: boolean
+  objectiveAfterForcedBattleRetreat?: boolean
   return: boolean
   aftermath: boolean
 }
@@ -354,6 +424,7 @@ export interface ExpeditionObjectiveHandler {
   flow: ExpeditionFlowDefinition
   validateRequest(request: ExpeditionRequest): void
   initializeObjectiveState(request: ExpeditionRequest): ExpeditionObjectiveState
+  afterPreparation?(context: ExpeditionExecutionContext): void
   beforeBattle?(context: ExpeditionExecutionContext): void
   onBattleResolved?(context: ExpeditionBattleResolvedContext): void
   runObjective(context: ExpeditionExecutionContext): void

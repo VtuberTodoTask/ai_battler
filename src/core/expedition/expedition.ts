@@ -19,6 +19,7 @@ import { runReturn } from './phases/return.ts'
 import { investigationHandler } from './objectives/investigation.ts'
 import { eliminationHandler } from './objectives/elimination.ts'
 import { rescueHandler } from './objectives/rescue.ts'
+import { escortHandler } from './objectives/escort.ts'
 
 export const EXPEDITION_PHASES = [
   'preparation',
@@ -31,7 +32,8 @@ export const EXPEDITION_PHASES = [
   'aftermath',
 ] as const
 
-type ImplementedObjectiveType = 'investigation' | 'elimination' | 'rescue'
+type ImplementedObjectiveType =
+  'investigation' | 'elimination' | 'rescue' | 'escort'
 
 export const OBJECTIVE_HANDLERS: Record<
   ImplementedObjectiveType,
@@ -40,12 +42,14 @@ export const OBJECTIVE_HANDLERS: Record<
   investigation: investigationHandler,
   elimination: eliminationHandler,
   rescue: rescueHandler,
+  escort: escortHandler,
 }
 
 function shouldSkipObjectiveAfterBattle(
   flow: ExpeditionFlowDefinition,
   state: { battleOutcome?: string },
 ): boolean {
+  if (flow.objectiveAfterForcedBattleRetreat === false) return false
   if (flow.battle !== 'optional') return false
   if (state.battleOutcome === undefined) return false
   return (
@@ -64,14 +68,15 @@ export function runExpedition(
   if (
     objectiveType !== 'investigation' &&
     objectiveType !== 'elimination' &&
-    objectiveType !== 'rescue'
+    objectiveType !== 'rescue' &&
+    objectiveType !== 'escort'
   ) {
-    throw new Error(`Unsupported objectiveType in Phase 3.3: ${objectiveType}`)
+    throw new Error(`Unsupported objectiveType in Phase 3.4: ${objectiveType}`)
   }
 
   const handler =
     OBJECTIVE_HANDLERS[
-      objectiveType as 'investigation' | 'elimination' | 'rescue'
+      objectiveType as 'investigation' | 'elimination' | 'rescue' | 'escort'
     ]
   const flow = handler.flow
 
@@ -95,6 +100,7 @@ export function runExpedition(
   }
 
   if (flow.preparation) runPreparation(request, party, state, rng)
+  handler.afterPreparation?.(context)
   if (flow.approach) runApproach(request, party, state, rng)
   if (flow.exploration) runExploration(request, party, state, rng)
 

@@ -118,6 +118,53 @@ export function makeRescueRequest(
   }
 }
 
+export function makeEscortRequest(
+  seed: string,
+  rank: AdventurerRank,
+  battleEnabled = true,
+): ExpeditionRequest {
+  return {
+    id: `phase3-4-${seed}`,
+    seed,
+    rank,
+    difficulty: 'normal',
+    objectiveType: 'escort',
+    environment: 'forest',
+    distance: 3,
+    features: ['traps', 'poorVisibility'],
+    knownInformation: [],
+    hiddenInformation: [],
+    battle: battleEnabled
+      ? {
+          enabled: true,
+          seed: `${seed}:battle:0`,
+          triggerPhase: 'afterExploration',
+        }
+      : undefined,
+    escort: {
+      target: {
+        id: 'target-1',
+        name: '護衛対象',
+        maxHp: 40,
+        initialHp: 40,
+        mobility: 'mobile',
+        initialStatusEffects: [],
+        initialStress: 0,
+        coordinationDifficulty: 15,
+        routeDifficulty: 15,
+        protectionDifficulty: 15,
+        careDifficulty: 15,
+      },
+      destination: {
+        id: 'destination-1',
+        name: '目的地',
+        handoffRequirement: 'standard',
+        handoffDifficulty: 15,
+      },
+    },
+  }
+}
+
 export function makeParty(
   roles: AdventurerRole[],
   seedBase: string,
@@ -199,6 +246,26 @@ export const regressionScenarios: RegressionScenario[] = [
   {
     name: 'rescue-failedObjective',
     request: makeRescueRequest('s1', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's1', 'C'),
+  },
+  {
+    name: 'escort-completeSuccess',
+    request: makeEscortRequest('s4', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's4', 'C'),
+  },
+  {
+    name: 'escort-success',
+    request: makeEscortRequest('s17', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's17', 'C'),
+  },
+  {
+    name: 'escort-partialSuccess',
+    request: makeEscortRequest('s0', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's0', 'C'),
+  },
+  {
+    name: 'escort-failedObjective',
+    request: makeEscortRequest('s1', 'C'),
     party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's1', 'C'),
   },
 ]
