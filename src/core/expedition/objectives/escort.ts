@@ -110,21 +110,38 @@ function hasEscortTargetStatus(
   return objective.statusEffects.some((e) => types.includes(e.type))
 }
 
+export type EscortDamageKind = 'travel' | 'battleExposure' | 'care'
+
+function escortDamageField(
+  objective: EscortObjectiveState,
+  kind: EscortDamageKind,
+  amount: number,
+): void {
+  switch (kind) {
+    case 'travel':
+      objective.travelDamage += amount
+      break
+    case 'battleExposure':
+      objective.battleExposureDamage += amount
+      break
+    case 'care':
+      objective.careDamage += amount
+      break
+  }
+}
+
 export function applyEscortTargetDamage(
   state: ExpeditionState,
   objective: EscortObjectiveState,
   damage: number,
   cause: string,
   phase: 'objective' | 'battle' | 'return',
+  kind: EscortDamageKind,
 ): number {
   if (damage <= 0 || objective.currentHp <= 0) return 0
   const actual = Math.min(damage, objective.currentHp)
   objective.currentHp -= actual
-  if (phase === 'objective') {
-    objective.travelDamage += actual
-  } else if (phase === 'battle') {
-    objective.battleExposureDamage += actual
-  }
+  escortDamageField(objective, kind, actual)
 
   if (objective.currentHp === 0) {
     addLog(
@@ -135,7 +152,6 @@ export function applyEscortTargetDamage(
         [],
         [`${objective.targetName}が${cause}で命を失った`],
         [
-          { type: 'escortTargetDamage', value: actual },
           { type: 'escortTargetHp', value: 0 },
           { type: 'escortAlive', value: 0 },
         ],
@@ -185,6 +201,17 @@ function removeEscortTargetStatus(
     }
     return true
   })
+  return removed
+}
+
+function removeOneEscortTargetStatus(
+  objective: EscortObjectiveState,
+  ...types: StatusEffect['type'][]
+): StatusEffect['type'] | undefined {
+  const index = objective.statusEffects.findIndex((e) => types.includes(e.type))
+  if (index === -1) return undefined
+  const removed = objective.statusEffects[index].type
+  objective.statusEffects.splice(index, 1)
   return removed
 }
 
@@ -280,6 +307,7 @@ export function initializeEscortObjectiveState(
     battleExposureDamage: 0,
     careProvided: false,
     careHealing: 0,
+    careDamage: 0,
     destinationReached: false,
     handoffStatus: 'notStarted',
     delivered: false,
@@ -304,6 +332,26 @@ export function runEscortDeparture(context: ExpeditionExecutionContext): void {
   if (getActiveParty(party, state).length === 0) return
   const objective = getEscortObjective(state)
   if (!isEscortTargetAlive(objective)) return
+
+  if (!objective.departed) {
+    addLog(
+      state,
+      logEntry(
+        'preparation',
+        'escortTargetAssigned',
+        [],
+        [
+          `護衛対象「${objective.targetName}」を「${objective.destinationName}」まで護衛する任務を開始した`,
+        ],
+        [
+          { type: 'escortTargetHp', value: objective.currentHp },
+          { type: 'escortStress', value: objective.travelStress },
+          { type: 'escortRouteProgress', value: objective.routeProgress },
+          { type: 'escortDelivered', value: 0 },
+        ],
+      ),
+    )
+  }
 
   const target = request.escort!.target
   const rng = escortRng(request, 'coordination')
@@ -533,13 +581,15 @@ export function runEscortRoute(
   modifyEscortStress(objective, stressDelta)
   state.elapsedTime += timeDelta
 
+  let actualDamage = 0
   if (damage > 0) {
-    applyEscortTargetDamage(
+    actualDamage = applyEscortTargetDamage(
       state,
       objective,
       damage,
       '移動中の事故',
       'objective',
+      'travel',
     )
   }
 
@@ -548,8 +598,8 @@ export function runEscortRoute(
     { type: 'escortTargetHp', value: objective.currentHp },
     { type: 'escortStress', value: objective.travelStress },
   ]
-  if (damage > 0) {
-    effects.push({ type: 'escortTargetDamage', value: damage })
+  if (actualDamage > 0) {
+    effects.push({ type: 'escortTargetDamage', value: actualDamage })
   }
 
   const facts: string[] = [fact]
@@ -681,23 +731,31 @@ export function resolveEscortBattleExposure(
 
   facts.push(`${primary.name}が護衛対象の保護を担当した`)
 
+  let actualDamage = 0
   if (damage > 0) {
-    applyEscortTargetDamage(state, objective, damage, '戦闘の余波', 'battle')
+    actualDamage = applyEscortTargetDamage(
+      state,
+      objective,
+      damage,
+      '戦闘の余波',
+      'battle',
+      'battleExposure',
+    )
   }
 
   if (!isEscortTargetAlive(objective)) {
     facts.push(`${objective.targetName}は戦闘の余波で命を失った`)
-  } else if (damage === 0) {
+  } else if (actualDamage === 0) {
     facts.push('戦闘中、護衛対象への追加被害は発生しなかった')
   } else {
     facts.push(
-      `${objective.targetName}が戦闘の余波で${damage}のダメージを負った`,
+      `${objective.targetName}が戦闘の余波で${actualDamage}のダメージを負った`,
     )
   }
 
   modifyEscortStress(objective, adjustedStressIncrease)
 
-  effects.push({ type: 'escortBattleExposureDamage', value: damage })
+  effects.push({ type: 'escortBattleExposureDamage', value: actualDamage })
   effects.push({ type: 'escortTargetHp', value: objective.currentHp })
   effects.push({ type: 'escortStress', value: objective.travelStress })
 
@@ -883,8 +941,7 @@ export function runEscortCare(context: ExpeditionExecutionContext): void {
       break
     case 'success':
       healing = 8
-      removeEscortTargetStatus(objective, 'poisoned')
-      removeEscortTargetStatus(objective, 'bleeding')
+      removeOneEscortTargetStatus(objective, 'poisoned', 'bleeding')
       objective.careProvided = true
       facts.push(`${primary.name}が${objective.targetName}の傷を手当てした`)
       break
@@ -908,20 +965,28 @@ export function runEscortCare(context: ExpeditionExecutionContext): void {
       break
   }
 
+  let actualHealing = 0
   if (healing > 0) {
-    const actual = healEscortTarget(
+    actualHealing = healEscortTarget(
       state,
       objective,
       healing,
       '治療',
       'objective',
     )
-    objective.careHealing += actual
+    objective.careHealing += actualHealing
   }
 
+  let actualCareDamage = 0
   if (damage > 0) {
-    applyEscortTargetDamage(state, objective, damage, '治療ミス', 'objective')
-    objective.careHealing -= damage
+    actualCareDamage = applyEscortTargetDamage(
+      state,
+      objective,
+      damage,
+      '治療ミス',
+      'objective',
+      'care',
+    )
   }
 
   if (!isEscortTargetAlive(objective)) {
@@ -929,6 +994,9 @@ export function runEscortCare(context: ExpeditionExecutionContext): void {
   }
 
   effects.push({ type: 'escortCareHealing', value: objective.careHealing })
+  if (actualCareDamage > 0) {
+    effects.push({ type: 'escortCareDamage', value: actualCareDamage })
+  }
   effects.push({ type: 'escortTargetHp', value: objective.currentHp })
 
   addLog(
@@ -1033,14 +1101,12 @@ export function prepareEscortReturn(context: ExpeditionExecutionContext): void {
   const { party, state } = context
   const objective = getEscortObjective(state)
 
-  if (objective.delivered) {
-    objective.accompanying = false
-    objective.returnedToOrigin = false
-    objective.stranded = false
-    return
-  }
-
-  if (objective.destinationReached) {
+  if (
+    objective.delivered ||
+    objective.handoffStatus === 'pending' ||
+    objective.handoffStatus === 'completed' ||
+    objective.handoffStatus === 'notRequired'
+  ) {
     objective.accompanying = false
     objective.returnedToOrigin = false
     objective.stranded = false
@@ -1063,7 +1129,14 @@ export function resolveEscortReturn(context: ExpeditionExecutionContext): void {
   const { party, state } = context
   const objective = getEscortObjective(state)
 
-  if (objective.delivered || objective.destinationReached) return
+  if (
+    objective.delivered ||
+    objective.handoffStatus === 'pending' ||
+    objective.handoffStatus === 'completed' ||
+    objective.handoffStatus === 'notRequired'
+  ) {
+    return
+  }
 
   const facts: string[] = []
   const effects: ExpeditionEffect[] = []
@@ -1075,7 +1148,15 @@ export function resolveEscortReturn(context: ExpeditionExecutionContext): void {
     objective.returnedToOrigin = true
     objective.accompanying = false
     objective.stranded = false
-    facts.push('護衛任務は完了しなかったが、護衛対象は出発地点まで連れ戻された')
+    if (objective.destinationReached) {
+      facts.push(
+        '目的地での引き渡しに失敗したため、護衛対象を出発地点まで連れ戻した',
+      )
+    } else {
+      facts.push(
+        '護衛任務は完了しなかったが、護衛対象は出発地点まで連れ戻された',
+      )
+    }
     effects.push({ type: 'escortReturnedToOrigin', value: 1 })
   } else if (isEscortTargetAlive(objective)) {
     objective.returnedToOrigin = false
@@ -1155,6 +1236,7 @@ export function determineEscortOutcome(
     ).length
 
     if (
+      !forcedBattleRetreat &&
       ratio >= 0.7 &&
       objective.travelStress < 50 &&
       !hasEscortTargetStatus(objective, 'poisoned', 'bleeding') &&

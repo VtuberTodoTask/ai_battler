@@ -8,8 +8,11 @@ import {
   getEscortTargetCondition,
   healEscortTarget,
   initializeEscortObjectiveState,
+  prepareEscortReturn,
+  resolveEscortReturn,
   runEscortCare,
   runEscortDeparture,
+  runEscortHandoff,
   runEscortRoute,
   validateEscortRequest,
 } from './objectives/escort.ts'
@@ -240,10 +243,24 @@ describe('Escort target damage and heal helpers', () => {
       request: context.request,
       outcome: 'failedObjective',
     })
-    applyEscortTargetDamage(context.state, objective, 100, 'test', 'objective')
+    applyEscortTargetDamage(
+      context.state,
+      objective,
+      100,
+      'test',
+      'objective',
+      'travel',
+    )
     expect(objective.currentHp).toBe(0)
     expect(getEscortTargetCondition(objective)).toBe('dead')
-    applyEscortTargetDamage(context.state, objective, 5, 'test', 'objective')
+    applyEscortTargetDamage(
+      context.state,
+      objective,
+      5,
+      'test',
+      'objective',
+      'travel',
+    )
     expect(
       context.state.logs.filter((l) => l.type === 'escortTargetDeath').length,
     ).toBe(1)
@@ -522,6 +539,87 @@ describe('Escort care', () => {
     runEscortCare(context)
     expect(context.state.logs.some((l) => l.type === 'escortCare')).toBe(false)
   })
+
+  it('removes one status effect on care success', () => {
+    const result = runExpedition(
+      makeEscortRequest(
+        's0',
+        'C',
+        {
+          initialHp: 40,
+          routeDifficulty: 1,
+          coordinationDifficulty: 1,
+          careDifficulty: 1,
+          initialStatusEffects: [
+            { type: 'poisoned', duration: 3, sourceId: 'x' },
+            { type: 'bleeding', duration: 3, sourceId: 'x' },
+          ],
+        },
+        { handoffRequirement: 'none', handoffDifficulty: 0 },
+        false,
+        { features: [] },
+      ),
+      makeEscortParty('s0', 'C', ['support', 'ranger', 'mage', 'healer']),
+    )
+    const obj = escortState(result)
+    const careLog = result.state.logs.find((l) => l.type === 'escortCare')
+    expect(careLog?.check?.result).toBe('success')
+    expect(obj.statusEffects.length).toBe(1)
+  })
+
+  it('removes all status effects on care criticalSuccess', () => {
+    const result = runExpedition(
+      makeEscortRequest(
+        's5',
+        'C',
+        {
+          initialHp: 40,
+          routeDifficulty: 1,
+          coordinationDifficulty: 1,
+          careDifficulty: 1,
+          initialStatusEffects: [
+            { type: 'poisoned', duration: 3, sourceId: 'x' },
+            { type: 'bleeding', duration: 3, sourceId: 'x' },
+          ],
+        },
+        { handoffRequirement: 'none', handoffDifficulty: 0 },
+        false,
+        { features: [] },
+      ),
+      makeEscortParty('s5', 'C', ['support', 'ranger', 'mage', 'healer']),
+    )
+    const obj = escortState(result)
+    const careLog = result.state.logs.find((l) => l.type === 'escortCare')
+    expect(careLog?.check?.result).toBe('criticalSuccess')
+    expect(obj.statusEffects.length).toBe(0)
+  })
+
+  it('removes no status effects on care partialSuccess', () => {
+    const result = runExpedition(
+      makeEscortRequest(
+        's1026',
+        'C',
+        {
+          initialHp: 40,
+          routeDifficulty: 1,
+          coordinationDifficulty: 1,
+          careDifficulty: 1,
+          initialStatusEffects: [
+            { type: 'poisoned', duration: 3, sourceId: 'x' },
+            { type: 'bleeding', duration: 3, sourceId: 'x' },
+          ],
+        },
+        { handoffRequirement: 'none', handoffDifficulty: 0 },
+        false,
+        { features: [] },
+      ),
+      makeEscortParty('s1026', 'C', ['support', 'ranger', 'mage', 'healer']),
+    )
+    const obj = escortState(result)
+    const careLog = result.state.logs.find((l) => l.type === 'escortCare')
+    expect(careLog?.check?.result).toBe('partialSuccess')
+    expect(obj.statusEffects.length).toBe(2)
+  })
 })
 
 describe('Escort handoff and return', () => {
@@ -582,10 +680,118 @@ describe('Escort handoff and return', () => {
       expect(obj.stranded).toBe(false)
       expect(
         result.state.logs.some((l) =>
-          l.facts.some((f) => f.includes('出発地点まで連れ戻された')),
+          l.facts.some(
+            (f) => f.includes('出発地点まで連れ戻') || f.includes('連れ戻した'),
+          ),
         ),
       ).toBe(true)
     }
+  })
+
+  it('returns target to origin on handoff failed', () => {
+    const { context } = makeEscortContext(
+      'handoff-fail',
+      'C',
+      {
+        routeDifficulty: 1,
+        coordinationDifficulty: 1,
+        careDifficulty: 1,
+        initialHp: 40,
+      },
+      {
+        handoffRequirement: 'standard',
+        handoffDifficulty: 100,
+      },
+      false,
+      { features: [] },
+    )
+    runEscortDeparture(context)
+    runEscortRoute(context, 1)
+    runEscortRoute(context, 2)
+    const objective = escortState({
+      state: context.state,
+      party: context.party,
+      request: context.request,
+      outcome: 'failedObjective',
+    })
+    objective.destinationReached = true
+    runEscortHandoff(context)
+    expect(objective.handoffStatus).toBe('failed')
+    expect(objective.delivered).toBe(false)
+    prepareEscortReturn(context)
+    resolveEscortReturn(context)
+    expect(objective.returnedToOrigin).toBe(true)
+    expect(objective.stranded).toBe(false)
+    expect(
+      context.state.logs.some((l) =>
+        l.facts.some((f) => f.includes('引き渡しに失敗したため')),
+      ),
+    ).toBe(true)
+  })
+
+  it('does not return target to origin on handoff pending or completed', () => {
+    const { context } = makeEscortContext(
+      'handoff-pending',
+      'C',
+      {
+        routeDifficulty: 1,
+        coordinationDifficulty: 1,
+        careDifficulty: 1,
+      },
+      {
+        handoffRequirement: 'standard',
+        handoffDifficulty: 1,
+      },
+      false,
+      { features: [] },
+    )
+    runEscortDeparture(context)
+    runEscortRoute(context, 1)
+    runEscortRoute(context, 2)
+    const objective = escortState({
+      state: context.state,
+      party: context.party,
+      request: context.request,
+      outcome: 'partialSuccess',
+    })
+    objective.destinationReached = true
+    objective.handoffStatus = 'pending'
+    prepareEscortReturn(context)
+    resolveEscortReturn(context)
+    expect(objective.returnedToOrigin).toBe(false)
+    expect(objective.stranded).toBe(false)
+
+    const completed = makeEscortContext(
+      'handoff-completed',
+      'C',
+      {
+        routeDifficulty: 1,
+        coordinationDifficulty: 1,
+        careDifficulty: 1,
+      },
+      {
+        handoffRequirement: 'none',
+        handoffDifficulty: 0,
+      },
+      false,
+      { features: [] },
+    )
+    runEscortDeparture(completed.context)
+    runEscortRoute(completed.context, 1)
+    runEscortRoute(completed.context, 2)
+    const completedObj = escortState({
+      state: completed.context.state,
+      party: completed.context.party,
+      request: completed.context.request,
+      outcome: 'completeSuccess',
+    })
+    completedObj.destinationReached = true
+    completedObj.delivered = true
+    completedObj.handoffStatus = 'notRequired'
+    prepareEscortReturn(completed.context)
+    resolveEscortReturn(completed.context)
+    expect(completedObj.returnedToOrigin).toBe(false)
+    expect(completedObj.stranded).toBe(false)
   })
 })
 
@@ -624,6 +830,162 @@ describe('Escort outcome dispatch', () => {
       'lostExpedition',
     ]
     expect(valid).toContain(result.outcome)
+  })
+})
+
+describe('Escort outcome semantics', () => {
+  it('produces success rather than completeSuccess after battle retreat', () => {
+    const result = runExpedition(
+      makeEscortRequest('s21', 'C'),
+      makeEscortParty('s21', 'C'),
+    )
+    const obj = escortState(result)
+    expect(result.state.battleOutcome).toBe('retreat')
+    expect(obj.delivered).toBe(true)
+    expect(result.outcome).toBe('success')
+  })
+
+  it('can still produce completeSuccess after battle victory', () => {
+    const result = runExpedition(
+      makeEscortRequest('s6', 'C'),
+      makeEscortParty('s6', 'C'),
+    )
+    const obj = escortState(result)
+    if (result.state.battleOutcome === 'victory') {
+      expect(result.outcome).toBe('completeSuccess')
+      expect(obj.currentHp).toBeGreaterThan(0)
+      expect(obj.delivered).toBe(true)
+    }
+  })
+})
+
+describe('Escort damage accounting and logs', () => {
+  it('records actual damage rather than attempted damage', () => {
+    const { context } = makeEscortContext('actual-dmg', 'C')
+    const objective = escortState({
+      state: context.state,
+      party: context.party,
+      request: context.request,
+      outcome: 'failedObjective',
+    })
+    objective.currentHp = 3
+    const actual = applyEscortTargetDamage(
+      context.state,
+      objective,
+      10,
+      'test',
+      'objective',
+      'travel',
+    )
+    expect(actual).toBe(3)
+    expect(objective.currentHp).toBe(0)
+    const routeLog = context.state.logs.find(
+      (l) => l.type === 'escortRouteProgress',
+    )
+    if (routeLog) {
+      const damageEffect = routeLog.effects.find(
+        (e) => e.type === 'escortTargetDamage',
+      )
+      if (damageEffect) {
+        expect(damageEffect.value).toBeLessThanOrEqual(objective.maxHp - 0)
+      }
+    }
+  })
+
+  it('does not double count death damage in escortTargetDeath log', () => {
+    const { context } = makeEscortContext('death-log', 'C', { initialHp: 5 })
+    const objective = escortState({
+      state: context.state,
+      party: context.party,
+      request: context.request,
+      outcome: 'failedObjective',
+    })
+    applyEscortTargetDamage(
+      context.state,
+      objective,
+      10,
+      'test',
+      'objective',
+      'travel',
+    )
+    const deathLog = context.state.logs.find(
+      (l) => l.type === 'escortTargetDeath',
+    )
+    expect(deathLog).toBeDefined()
+    expect(deathLog?.effects.some((e) => e.type === 'escortTargetDamage')).toBe(
+      false,
+    )
+  })
+
+  it('adds escortTargetAssigned log exactly once', () => {
+    const { context } = makeEscortContext('assigned', 'C')
+    runEscortDeparture(context)
+    const assignedLogs = context.state.logs.filter(
+      (l) => l.type === 'escortTargetAssigned',
+    )
+    expect(assignedLogs.length).toBe(1)
+    expect(assignedLogs[0].facts[0]).toContain('護衛')
+
+    runEscortDeparture(context)
+    expect(
+      context.state.logs.filter((l) => l.type === 'escortTargetAssigned')
+        .length,
+    ).toBe(1)
+  })
+
+  it('tracks careDamage separately from careHealing', () => {
+    const { context } = makeEscortContext('care-damage', 'C', {
+      careDifficulty: 100,
+    })
+    const objective = escortState({
+      state: context.state,
+      party: context.party,
+      request: context.request,
+      outcome: 'failedObjective',
+    })
+    objective.currentHp = 10
+    objective.statusEffects = [
+      { type: 'bleeding', duration: 3, sourceId: 'test' },
+    ]
+    runEscortDeparture(context)
+    runEscortCare(context)
+    if (objective.careDamage > 0) {
+      expect(objective.careHealing).toBe(0)
+      expect(objective.currentHp).toBeLessThan(10)
+    }
+  })
+
+  it('final damage accounting balances HP', () => {
+    const result = runExpedition(
+      makeEscortRequest('s80', 'C'),
+      makeEscortParty('s80', 'C'),
+    )
+    const obj = escortState(result)
+    const expected =
+      obj.maxHp -
+      obj.travelDamage -
+      obj.battleExposureDamage -
+      obj.careDamage +
+      obj.careHealing
+    expect(obj.currentHp).toBe(Math.min(obj.maxHp, expected))
+  })
+
+  it('reconstructs final location from structured logs', () => {
+    const result = runExpedition(
+      makeEscortRequest('s9', 'C'),
+      makeEscortParty('s9', 'C'),
+    )
+    const obj = escortState(result)
+    const logs = result.state.logs
+    const targetHpLog = logs.find((l) =>
+      l.effects.some(
+        (e) => e.type === 'escortTargetHp' && e.value === obj.currentHp,
+      ),
+    )
+    expect(targetHpLog).toBeDefined()
+    expect(obj.handoffStatus === 'pending' ? !obj.returnedToOrigin : true).toBe(
+      true,
+    )
   })
 })
 

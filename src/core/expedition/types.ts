@@ -198,6 +198,7 @@ export interface EscortObjectiveState {
   battleExposureDamage: number
   careProvided: boolean
   careHealing: number
+  careDamage: number
   destinationReached: boolean
   handoffStatus: EscortHandoffStatus
   delivered: boolean

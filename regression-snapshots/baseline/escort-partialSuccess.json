@@ -648,6 +648,30 @@
         "type": "routePlanning"
       },
       {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 0
+          },
+          {
+            "type": "escortRouteProgress",
+            "value": 0
+          },
+          {
+            "type": "escortDelivered",
+            "value": 0
+          }
+        ],
+        "facts": ["護衛対象「護衛対象」を「目的地」まで護衛する任務を開始した"],
+        "phase": "preparation",
+        "type": "escortTargetAssigned"
+      },
+      {
         "actorIds": [
           "C-healer-s0-healer-3",
           "C-vanguard-s0-vanguard-0",
@@ -1047,6 +1071,7 @@
     "objectiveState": {
       "accompanying": false,
       "battleExposureDamage": 0,
+      "careDamage": 0,
       "careHealing": 0,
       "careProvided": false,
       "completed": false,
