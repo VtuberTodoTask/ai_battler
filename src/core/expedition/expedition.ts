@@ -18,6 +18,7 @@ import { runPreparation } from './phases/preparation.ts'
 import { runReturn } from './phases/return.ts'
 import { investigationHandler } from './objectives/investigation.ts'
 import { eliminationHandler } from './objectives/elimination.ts'
+import { rescueHandler } from './objectives/rescue.ts'
 
 export const EXPEDITION_PHASES = [
   'preparation',
@@ -30,7 +31,7 @@ export const EXPEDITION_PHASES = [
   'aftermath',
 ] as const
 
-type ImplementedObjectiveType = 'investigation' | 'elimination'
+type ImplementedObjectiveType = 'investigation' | 'elimination' | 'rescue'
 
 export const OBJECTIVE_HANDLERS: Record<
   ImplementedObjectiveType,
@@ -38,6 +39,7 @@ export const OBJECTIVE_HANDLERS: Record<
 > = {
   investigation: investigationHandler,
   elimination: eliminationHandler,
+  rescue: rescueHandler,
 }
 
 function shouldSkipObjectiveAfterBattle(
@@ -59,12 +61,18 @@ export function runExpedition(
   party: Adventurer[],
 ): ExpeditionResult {
   const objectiveType = request.objectiveType
-  if (objectiveType !== 'investigation' && objectiveType !== 'elimination') {
-    throw new Error(`Unsupported objectiveType in Phase 3.2: ${objectiveType}`)
+  if (
+    objectiveType !== 'investigation' &&
+    objectiveType !== 'elimination' &&
+    objectiveType !== 'rescue'
+  ) {
+    throw new Error(`Unsupported objectiveType in Phase 3.3: ${objectiveType}`)
   }
 
   const handler =
-    OBJECTIVE_HANDLERS[objectiveType as 'investigation' | 'elimination']
+    OBJECTIVE_HANDLERS[
+      objectiveType as 'investigation' | 'elimination' | 'rescue'
+    ]
   const flow = handler.flow
 
   handler.validateRequest(request)
@@ -91,6 +99,7 @@ export function runExpedition(
   if (flow.exploration) runExploration(request, party, state, rng)
 
   if (flow.battle !== 'none') {
+    handler.beforeBattle?.(context)
     state.battleEntrySnapshot = buildBattleEntrySnapshot(request, party, state)
     const battleEnabled =
       flow.battle === 'required' ||
@@ -135,7 +144,11 @@ export function runExpedition(
     }
   }
 
-  if (flow.return) runReturn(request, party, state, rng)
+  if (flow.return) {
+    handler.beforeReturn?.(context)
+    runReturn(request, party, state, rng)
+    handler.afterReturn?.(context)
+  }
   if (flow.aftermath) runAftermath(request, party, state, rng, handler)
 
   state.currentPhase = 'aftermath'

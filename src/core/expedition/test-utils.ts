@@ -8,6 +8,7 @@ import type {
   ExpeditionRequest,
   ExpeditionResult,
   ExpeditionState,
+  RescueObjectiveConfig,
 } from './types.ts'
 import { runExpedition } from './expedition.ts'
 
@@ -59,6 +60,20 @@ export function makeParty(
   return roles.map((role, i) =>
     generateAdventurer({
       seed: `${seedBase}-${role}-${i}`,
+      rank,
+      role,
+    }),
+  )
+}
+
+export function makePairedParty(
+  roles: AdventurerRole[],
+  seedBase: string,
+  rank: AdventurerRank = 'C',
+): Adventurer[] {
+  return roles.map((role, slotIndex) =>
+    generateAdventurer({
+      seed: `${seedBase}:slot:${slotIndex}`,
       rank,
       role,
     }),
@@ -173,4 +188,53 @@ export function makeEliminationParty(
   rank: AdventurerRank,
 ): Adventurer[] {
   return makeParty(['vanguard', 'guardian', 'mage', 'healer'], seedBase, rank)
+}
+
+export function makeRescueTarget(
+  overrides?: Partial<RescueObjectiveConfig['target']>,
+): NonNullable<ExpeditionRequest['rescue']> {
+  return {
+    target: {
+      id: 'target-1',
+      name: '救出対象',
+      maxHp: 40,
+      initialHp: 40,
+      mobility: 'mobile',
+      initialStatusEffects: [],
+      locationKnown: false,
+      discoveryDifficulty: 15,
+      accessDifficulty: 15,
+      stabilizationDifficulty: 15,
+      evacuationDifficulty: 15,
+      ...overrides,
+    },
+  }
+}
+
+export function makeRescueRequest(
+  seed: string,
+  rank: AdventurerRank = 'C',
+  targetOverrides?: Partial<RescueObjectiveConfig['target']>,
+  battleEnabled = true,
+  requestOverrides: Partial<ExpeditionRequest> = {},
+): ExpeditionRequest {
+  return makeRequest(seed, {
+    objectiveType: 'rescue',
+    rank,
+    environment: 'forest',
+    hiddenInformation: [],
+    battle: battleEnabled
+      ? battleConfig({ seed: `${seed}:battle:0` })
+      : undefined,
+    rescue: makeRescueTarget(targetOverrides),
+    ...requestOverrides,
+  })
+}
+
+export function makeRescueParty(
+  seedBase: string,
+  rank: AdventurerRank,
+  roles: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer'],
+): Adventurer[] {
+  return makeParty(roles, seedBase, rank)
 }

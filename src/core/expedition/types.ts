@@ -155,8 +155,29 @@ export interface EliminationObjectiveState {
   completed: boolean
 }
 
+export interface RescueObjectiveState {
+  type: 'rescue'
+  targetId: string
+  targetName: string
+  maxHp: number
+  currentHp: number
+  mobility: RescueTargetMobility
+  statusEffects: StatusEffect[]
+  located: boolean
+  reached: boolean
+  stabilized: boolean
+  protectorId?: string
+  evacuated: boolean
+  returned: boolean
+  abandoned: boolean
+  battleExposureDamage: number
+  returnDamage: number
+  progress: number
+  completed: boolean
+}
+
 export type ExpeditionObjectiveState =
-  InvestigationObjectiveState | EliminationObjectiveState
+  InvestigationObjectiveState | EliminationObjectiveState | RescueObjectiveState
 
 export interface ExpeditionState {
   currentPhase: ExpeditionPhase
@@ -196,6 +217,26 @@ export interface ExpeditionBattleConfig {
   recommendedPartySize?: number
 }
 
+export type RescueTargetMobility = 'mobile' | 'assisted' | 'immobile'
+
+export interface RescueTargetConfig {
+  id: string
+  name: string
+  maxHp: number
+  initialHp: number
+  mobility: RescueTargetMobility
+  initialStatusEffects?: StatusEffect[]
+  locationKnown: boolean
+  discoveryDifficulty: number
+  accessDifficulty: number
+  stabilizationDifficulty: number
+  evacuationDifficulty: number
+}
+
+export interface RescueObjectiveConfig {
+  target: RescueTargetConfig
+}
+
 export interface EliminationObjectiveConfig {
   mode: 'allEnemies'
   confirmationRequired: boolean
@@ -216,6 +257,7 @@ export interface ExpeditionRequest {
   encounter?: { shape: EncounterShape; count: number } | EncounterPlan
   battle?: ExpeditionBattleConfig
   elimination?: EliminationObjectiveConfig
+  rescue?: RescueObjectiveConfig
 }
 
 export interface EnvironmentEffect {
@@ -312,8 +354,11 @@ export interface ExpeditionObjectiveHandler {
   flow: ExpeditionFlowDefinition
   validateRequest(request: ExpeditionRequest): void
   initializeObjectiveState(request: ExpeditionRequest): ExpeditionObjectiveState
+  beforeBattle?(context: ExpeditionExecutionContext): void
   onBattleResolved?(context: ExpeditionBattleResolvedContext): void
   runObjective(context: ExpeditionExecutionContext): void
+  beforeReturn?(context: ExpeditionExecutionContext): void
+  afterReturn?(context: ExpeditionExecutionContext): void
   finalizeObjectiveState(context: ExpeditionExecutionContext): {
     objectiveCompleted: boolean
     progressFact: string

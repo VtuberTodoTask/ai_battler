@@ -69,6 +69,14 @@ export function travelPhase(
   )
   state.elapsedTime += travelTime
 
+  if (phase === 'return') {
+    const returnTimeBonus =
+      (state.metadata?.returnTimeBonus as number | undefined) ?? 0
+    if (returnTimeBonus > 0) {
+      state.elapsedTime += returnTimeBonus
+    }
+  }
+
   const foodCost = Math.max(
     1,
     Math.ceil(activeParty.length * Math.max(1, request.distance) * 0.4),
