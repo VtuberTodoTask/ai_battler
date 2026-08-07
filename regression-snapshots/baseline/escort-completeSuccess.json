@@ -1,0 +1,1630 @@
+{
+  "outcome": "forcedRetreat",
+  "state": {
+    "avoidedThreats": [],
+    "battleEntrySnapshot": {
+      "environmentEffects": [
+        {
+          "type": "lighting",
+          "value": "dark"
+        }
+      ],
+      "initialHp": {
+        "C-guardian-s4-guardian-1": 76,
+        "C-healer-s4-healer-3": 50,
+        "C-mage-s4-mage-2": 55,
+        "C-vanguard-s4-vanguard-0": 65
+      },
+      "initialMorale": {
+        "C-guardian-s4-guardian-1": 42,
+        "C-healer-s4-healer-3": 50,
+        "C-mage-s4-mage-2": 44,
+        "C-vanguard-s4-vanguard-0": 39
+      },
+      "initialMp": {
+        "C-guardian-s4-guardian-1": 9,
+        "C-healer-s4-healer-3": 41,
+        "C-mage-s4-mage-2": 43,
+        "C-vanguard-s4-vanguard-0": 6
+      },
+      "initialStatusEffects": {
+        "C-guardian-s4-guardian-1": [],
+        "C-healer-s4-healer-3": [],
+        "C-mage-s4-mage-2": [],
+        "C-vanguard-s4-vanguard-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "enemyAdvantage"
+    },
+    "battleOutcome": "retreat",
+    "battles": [
+      {
+        "combatSeed": "s4:battle:0:combat",
+        "deadAdventurerIds": [],
+        "discoveredWeaknesses": [],
+        "encounterSeed": "s4:battle:0:encounter",
+        "enemyComposition": "constructx4",
+        "enemyIds": [
+          "C-construct-assault-standard-s4:battle:0:encounter:enemy:0",
+          "C-construct-assault-standard-s4:battle:0:encounter:enemy:1",
+          "C-construct-tank-standard-s4:battle:0:encounter:enemy:2",
+          "C-construct-assault-standard-s4:battle:0:encounter:enemy:3"
+        ],
+        "entrySnapshot": {
+          "environmentEffects": [
+            {
+              "type": "lighting",
+              "value": "dark"
+            }
+          ],
+          "initialHp": {
+            "C-guardian-s4-guardian-1": 76,
+            "C-healer-s4-healer-3": 50,
+            "C-mage-s4-mage-2": 55,
+            "C-vanguard-s4-vanguard-0": 65
+          },
+          "initialMorale": {
+            "C-guardian-s4-guardian-1": 42,
+            "C-healer-s4-healer-3": 50,
+            "C-mage-s4-mage-2": 44,
+            "C-vanguard-s4-vanguard-0": 39
+          },
+          "initialMp": {
+            "C-guardian-s4-guardian-1": 9,
+            "C-healer-s4-healer-3": 41,
+            "C-mage-s4-mage-2": 43,
+            "C-vanguard-s4-vanguard-0": 6
+          },
+          "initialStatusEffects": {
+            "C-guardian-s4-guardian-1": [],
+            "C-healer-s4-healer-3": [],
+            "C-mage-s4-mage-2": [],
+            "C-vanguard-s4-vanguard-0": []
+          },
+          "knownEnemyAbilities": [],
+          "knownEnemyWeaknesses": [],
+          "surprise": "enemyAdvantage"
+        },
+        "id": "battle-0",
+        "incapacitatedAdventurerIds": [],
+        "injuries": [],
+        "knownEnemyAbilities": [],
+        "knownEnemyWeaknesses": [],
+        "matchedAbilityIntel": [],
+        "matchedWeaknessIntel": [],
+        "outcome": "retreat",
+        "phase": "battle",
+        "result": {
+          "abilityUsage": {},
+          "adventurerActionCount": 20,
+          "contactResult": {
+            "effects": {
+              "enemyInitiativeBonus": 3,
+              "side": "enemy"
+            },
+            "enemyStealth": 0,
+            "partyScouting": 0,
+            "roll": 100,
+            "successChance": 0,
+            "type": "failure"
+          },
+          "deadAdventurers": [],
+          "defeatedEnemies": [],
+          "discoveredWeaknesses": [],
+          "enemyActionCount": 20,
+          "enemyDamageDealt": 111,
+          "escapedEnemies": [],
+          "finalAdventurerStates": [
+            {
+              "alive": true,
+              "currentHp": 43,
+              "currentMp": 6,
+              "dead": false,
+              "id": "C-vanguard-s4-vanguard-0",
+              "incapacitated": false,
+              "morale": 39,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 61,
+              "currentMp": 9,
+              "dead": false,
+              "id": "C-guardian-s4-guardian-1",
+              "incapacitated": false,
+              "morale": 42,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 55,
+              "currentMp": 18,
+              "dead": false,
+              "id": "C-mage-s4-mage-2",
+              "incapacitated": false,
+              "morale": 44,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 50,
+              "currentMp": 35,
+              "dead": false,
+              "id": "C-healer-s4-healer-3",
+              "incapacitated": false,
+              "morale": 50,
+              "statusEffects": []
+            }
+          ],
+          "incapacitatedAdventurers": [],
+          "injuries": [],
+          "logs": [
+            {
+              "actionType": "contact",
+              "metadata": {
+                "contactType": "failure"
+              },
+              "phase": "contact",
+              "result": "遠征側の不利により敵に先制された。",
+              "round": 0
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s4-vanguard-0",
+              "damage": 20,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ グレイ hit 錆びた魔導砲戦士 for 20 damage",
+              "roll": 57,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 77,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:3",
+              "damage": 16,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形狂戦士 hit マルチナ グレイ for 16 damage",
+              "roll": 36,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 49,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s4-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "オルム ヴァレス missed",
+              "roll": 48,
+              "round": 1,
+              "successChance": 31,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s4-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル オーシャン hit 錆びた魔導砲突撃兵 for 13 damage",
+              "roll": 21,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s4-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド グレイ missed",
+              "roll": 77,
+              "round": 1,
+              "successChance": 57,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:1",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士 hit マルチナ グレイ for 9 damage",
+              "roll": 17,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 30,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-construct-tank-standard-s4:battle:0:encounter:enemy:2",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像重戦士 hit マルチナ グレイ for 9 damage",
+              "roll": 7,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 72,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲突撃兵 missed",
+              "roll": 90,
+              "round": 1,
+              "successChance": 31,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士が再生した。+5 HP",
+              "round": 1,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s4-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド グレイ missed",
+              "roll": 78,
+              "round": 2,
+              "successChance": 57,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s4-vanguard-0",
+              "damage": 17,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ グレイ hit 錆びた魔導砲戦士 for 17 damage",
+              "roll": 64,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 77,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s4-healer-3",
+              "metadata": {
+                "actualHealAmount": 37
+              },
+              "phase": "combat",
+              "result": "オルム ヴァレスがマルチナ グレイを回復させた。+37 HP",
+              "round": 2,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s4-mage-2",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル オーシャン hit 錆びた魔導砲突撃兵 for 10 damage",
+              "roll": 67,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:0",
+              "damage": 10,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲突撃兵 hit マルチナ グレイ for 10 damage",
+              "roll": 31,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 31,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形狂戦士 missed",
+              "roll": 44,
+              "round": 2,
+              "successChance": 39,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:1",
+              "damage": 10,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士 hit マルチナ グレイ for 10 damage",
+              "roll": 18,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 30,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-construct-tank-standard-s4:battle:0:encounter:enemy:2",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像重戦士 hit マルチナ グレイ for 7 damage",
+              "roll": 70,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 72,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士が再生した。+5 HP",
+              "round": 2,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s4-vanguard-0",
+              "damage": 27,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ グレイ hit 錆びた魔導砲戦士 for 27 damage",
+              "roll": 7,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 77,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s4-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド グレイ missed",
+              "roll": 83,
+              "round": 3,
+              "successChance": 57,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s4-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル オーシャン hit 錆びた魔導砲突撃兵 for 14 damage",
+              "roll": 32,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形狂戦士 missed",
+              "roll": 57,
+              "round": 3,
+              "successChance": 39,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s4-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "オルム ヴァレス missed",
+              "roll": 63,
+              "round": 3,
+              "successChance": 31,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士 missed",
+              "roll": 96,
+              "round": 3,
+              "successChance": 30,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-construct-tank-standard-s4:battle:0:encounter:enemy:2",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像重戦士 hit マルチナ グレイ for 5 damage",
+              "roll": 57,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 72,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:0",
+              "damage": 14,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲突撃兵 hit マルチナ グレイ for 14 damage",
+              "roll": 4,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 31,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士が再生した。+5 HP",
+              "round": 3,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "requestPartyRetreat",
+              "actorId": "C-vanguard-s4-vanguard-0",
+              "phase": "retreat",
+              "result": "マルチナ グレイの撤退提案はリーダーに却下された。",
+              "round": 4
+            },
+            {
+              "actionType": "individualEscape",
+              "actorId": "C-vanguard-s4-vanguard-0",
+              "phase": "retreat",
+              "result": "マルチナ グレイは単独離脱に失敗した。",
+              "roll": 86,
+              "round": 4,
+              "successChance": 58.9
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s4-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル オーシャン hit 錆びた魔導砲突撃兵 for 13 damage",
+              "roll": 73,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s4-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド グレイ missed",
+              "roll": 74,
+              "round": 4,
+              "successChance": 57,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s4-healer-3",
+              "metadata": {
+                "actualHealAmount": 37
+              },
+              "phase": "combat",
+              "result": "オルム ヴァレスがマルチナ グレイを回復させた。+37 HP",
+              "round": 4,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:3",
+              "damage": 16,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形狂戦士 hit マルチナ グレイ for 16 damage",
+              "roll": 29,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 39,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士 missed",
+              "roll": 74,
+              "round": 4,
+              "successChance": 30,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-construct-tank-standard-s4:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像重戦士 missed",
+              "roll": 81,
+              "round": 4,
+              "successChance": 72,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲突撃兵 missed",
+              "roll": 83,
+              "round": 4,
+              "successChance": 31,
+              "targetIds": ["C-vanguard-s4-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士が再生した。+5 HP",
+              "round": 4,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "individualEscape",
+              "actorId": "C-vanguard-s4-vanguard-0",
+              "phase": "retreat",
+              "result": "マルチナ グレイが単独で離脱した。",
+              "roll": 45,
+              "round": 5,
+              "successChance": 58.9
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s4-guardian-1",
+              "damage": 23,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド グレイ hit 古代魔法人形狂戦士 for 23 damage",
+              "roll": 4,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 57,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s4-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル オーシャン hit 錆びた魔導砲突撃兵 for 13 damage",
+              "roll": 85,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s4-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "オルム ヴァレス missed",
+              "roll": 45,
+              "round": 5,
+              "successChance": 5,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:1",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "guardian"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士 hit ハロルド グレイ for 7 damage",
+              "roll": 11,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 34,
+              "targetIds": ["C-guardian-s4-guardian-1"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "guardian"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形狂戦士 missed",
+              "roll": 74,
+              "round": 5,
+              "successChance": 43,
+              "targetIds": ["C-guardian-s4-guardian-1"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-construct-assault-standard-s4:battle:0:encounter:enemy:0",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "guardian"
+              },
+              "phase": "combat",
+              "result": "錆びた魔導砲突撃兵 hit ハロルド グレイ for 8 damage",
+              "roll": 19,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 35,
+              "targetIds": ["C-guardian-s4-guardian-1"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-construct-tank-standard-s4:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "guardian"
+              },
+              "phase": "combat",
+              "result": "魔力像重戦士 missed",
+              "roll": 69,
+              "round": 5,
+              "successChance": 51,
+              "targetIds": ["C-guardian-s4-guardian-1"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "錆びた魔導砲戦士が再生した。+5 HP",
+              "round": 5,
+              "targetIds": [
+                "C-construct-assault-standard-s4:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "C-healer-s4-healer-3",
+              "phase": "retreat",
+              "result": "オルム ヴァレスがパーティ撤退を試みた。成功",
+              "roll": 62,
+              "round": 6,
+              "successChance": 95
+            }
+          ],
+          "outcome": "retreat",
+          "partyDamageDealt": 150,
+          "retreatAttempts": [
+            {
+              "aliveCount": 4,
+              "approved": false,
+              "attemptCount": 1,
+              "attempted": false,
+              "averageMorale": 43.75,
+              "enemyThreat": 28.766400000000004,
+              "healerAlive": true,
+              "incapacitatedCount": 0,
+              "leaderId": "C-healer-s4-healer-3",
+              "matchedReasons": ["memberProposal"],
+              "moraleThreshold": 10,
+              "partyHpRatio": 0.8263888888888888,
+              "partyThreat": 18.44,
+              "proposerHpRatio": 0.3055555555555556,
+              "proposerId": "C-vanguard-s4-vanguard-0",
+              "proposerMorale": 39,
+              "proposerRole": "vanguard",
+              "reason": "memberProposal",
+              "retreatHpThreshold": 0.19000000000000003,
+              "roll": 0,
+              "round": 4,
+              "success": false,
+              "successChance": 0
+            },
+            {
+              "aliveCount": 4,
+              "attemptCount": 2,
+              "attempted": true,
+              "averageMorale": 43.75,
+              "enemyThreat": 28.766400000000004,
+              "healerAlive": true,
+              "incapacitatedCount": 0,
+              "leaderId": "C-healer-s4-healer-3",
+              "matchedReasons": ["individualEscape"],
+              "moraleThreshold": 10,
+              "partyHpRatio": 0.8263888888888888,
+              "partyThreat": 18.44,
+              "proposerHpRatio": 0.3055555555555556,
+              "proposerId": "C-vanguard-s4-vanguard-0",
+              "proposerMorale": 39,
+              "proposerRole": "vanguard",
+              "reason": "individualEscape",
+              "retreatHpThreshold": 0.19000000000000003,
+              "roll": 86,
+              "round": 4,
+              "success": false,
+              "successChance": 58.9
+            },
+            {
+              "aliveCount": 4,
+              "attemptCount": 3,
+              "attempted": true,
+              "averageMorale": 43.75,
+              "enemyThreat": 28.766400000000004,
+              "healerAlive": true,
+              "incapacitatedCount": 0,
+              "leaderId": "C-healer-s4-healer-3",
+              "matchedReasons": ["individualEscape"],
+              "moraleThreshold": 10,
+              "partyHpRatio": 0.8993055555555556,
+              "partyThreat": 18.44,
+              "proposerHpRatio": 0.5972222222222222,
+              "proposerId": "C-vanguard-s4-vanguard-0",
+              "proposerMorale": 39,
+              "proposerRole": "vanguard",
+              "reason": "individualEscape",
+              "retreatHpThreshold": 0.19000000000000003,
+              "roll": 45,
+              "round": 5,
+              "success": true,
+              "successChance": 58.9
+            },
+            {
+              "aliveCount": 3,
+              "approved": true,
+              "attemptCount": 4,
+              "attempted": true,
+              "averageMorale": 45.333333333333336,
+              "enemyThreat": 28.766400000000004,
+              "healerAlive": true,
+              "incapacitatedCount": 1,
+              "leaderId": "C-healer-s4-healer-3",
+              "matchedReasons": ["overwhelmed"],
+              "moraleThreshold": 10,
+              "partyHpRatio": 0.9342105263157895,
+              "partyThreat": 13.830000000000002,
+              "proposerHpRatio": 1,
+              "proposerId": "C-healer-s4-healer-3",
+              "proposerMorale": 50,
+              "proposerRole": "healer",
+              "reason": "overwhelmed",
+              "retreatHpThreshold": 0.19000000000000003,
+              "roll": 62,
+              "round": 6,
+              "success": true,
+              "successChance": 95
+            }
+          ],
+          "retreatDiagnostic": {
+            "aliveCount": 3,
+            "approved": true,
+            "attemptCount": 4,
+            "attempted": true,
+            "averageMorale": 45.333333333333336,
+            "enemyThreat": 28.766400000000004,
+            "healerAlive": true,
+            "incapacitatedCount": 1,
+            "leaderId": "C-healer-s4-healer-3",
+            "matchedReasons": ["overwhelmed"],
+            "moraleThreshold": 10,
+            "partyHpRatio": 0.9342105263157895,
+            "partyThreat": 13.830000000000002,
+            "proposerHpRatio": 1,
+            "proposerId": "C-healer-s4-healer-3",
+            "proposerMorale": 50,
+            "proposerRole": "healer",
+            "reason": "overwhelmed",
+            "retreatHpThreshold": 0.19000000000000003,
+            "roll": 62,
+            "round": 6,
+            "success": true,
+            "successChance": 95
+          },
+          "retreatResult": {
+            "chance": 95,
+            "roll": 62,
+            "side": "party",
+            "success": true
+          },
+          "rounds": 6,
+          "seed": "s4:battle:0:combat",
+          "survivingAdventurers": [
+            "C-vanguard-s4-vanguard-0",
+            "C-guardian-s4-guardian-1",
+            "C-mage-s4-mage-2",
+            "C-healer-s4-healer-3"
+          ],
+          "survivingEnemies": [
+            "C-construct-assault-standard-s4:battle:0:encounter:enemy:0",
+            "C-construct-assault-standard-s4:battle:0:encounter:enemy:1",
+            "C-construct-tank-standard-s4:battle:0:encounter:enemy:2",
+            "C-construct-assault-standard-s4:battle:0:encounter:enemy:3"
+          ]
+        },
+        "rounds": 6,
+        "survivingAdventurerIds": [
+          "C-vanguard-s4-vanguard-0",
+          "C-guardian-s4-guardian-1",
+          "C-mage-s4-mage-2",
+          "C-healer-s4-healer-3"
+        ],
+        "trigger": "afterExploration",
+        "unmatchedAbilityIntel": [],
+        "unmatchedWeaknessIntel": []
+      }
+    ],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": ["traps", "poorVisibility"],
+    "elapsedTime": 12.65,
+    "incapacitated": [],
+    "information": [],
+    "injuries": [
+      {
+        "adventurerId": "C-vanguard-s4-vanguard-0",
+        "cause": "traps",
+        "hpLoss": 7,
+        "id": "injury-0-215435",
+        "status": "treated",
+        "type": "light"
+      },
+      {
+        "adventurerId": "C-guardian-s4-guardian-1",
+        "cause": "poorVisibility",
+        "hpLoss": 2,
+        "id": "injury-1-369020",
+        "status": "treated",
+        "type": "light"
+      }
+    ],
+    "logs": [
+      {
+        "actorIds": [
+          "C-guardian-s4-guardian-1",
+          "C-vanguard-s4-vanguard-0",
+          "C-mage-s4-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 60,
+          "result": "success",
+          "roll": 20,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "ハロルド グレイが効率的なルートと補給計画を立てた",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [
+          "C-healer-s4-healer-3",
+          "C-vanguard-s4-vanguard-0",
+          "C-mage-s4-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 58,
+          "result": "partialSuccess",
+          "roll": 75,
+          "skill": "leadership"
+        },
+        "effects": [
+          {
+            "type": "escortCoordinated",
+            "value": 1
+          },
+          {
+            "type": "escortStress",
+            "value": 0
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": ["オルム ヴァレスが護衛対象との行動を何とか調整した"],
+        "phase": "preparation",
+        "type": "escortDeparture"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s4-guardian-1",
+          "C-vanguard-s4-vanguard-0",
+          "C-mage-s4-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 55,
+          "result": "success",
+          "roll": 52,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["ハロルド グレイが安全な接近経路を確保した"],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-mage-s4-mage-2",
+          "C-healer-s4-healer-3",
+          "C-guardian-s4-guardian-1"
+        ],
+        "check": {
+          "effectiveValue": 38,
+          "result": "criticalFailure",
+          "roll": 96,
+          "skill": "trapDetection"
+        },
+        "effects": [
+          {
+            "targetId": "C-vanguard-s4-vanguard-0",
+            "type": "hpDamage",
+            "value": 7
+          },
+          {
+            "type": "moraleChange",
+            "value": -6
+          }
+        ],
+        "facts": [
+          "罠に遭遇した",
+          "Guardianがマルチナ グレイの被害を軽減した",
+          "マルチナ グレイが7のダメージを受けた"
+        ],
+        "phase": "approach",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [
+          "C-mage-s4-mage-2",
+          "C-vanguard-s4-vanguard-0",
+          "C-guardian-s4-guardian-1"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 87,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s4-mage-2",
+          "C-vanguard-s4-vanguard-0",
+          "C-guardian-s4-guardian-1"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "partialSuccess",
+          "roll": 18,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["ベル オーシャンが断片的な手がかりを得た"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s4-mage-2",
+          "C-vanguard-s4-vanguard-0",
+          "C-guardian-s4-guardian-1"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 60,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s4-guardian-1",
+          "C-vanguard-s4-vanguard-0",
+          "C-mage-s4-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 37,
+          "result": "success",
+          "roll": 22,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "escortRouteProgress",
+            "value": 50
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 0
+          }
+        ],
+        "facts": ["ハロルド グレイが移動経路を切り開いた"],
+        "phase": "objective",
+        "type": "escortRouteProgress"
+      },
+      {
+        "actorIds": ["C-guardian-s4-guardian-1"],
+        "effects": [
+          {
+            "targetId": "C-guardian-s4-guardian-1",
+            "type": "escortProtectorAssigned",
+            "value": 1
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": ["ハロルド グレイ（guardian）が護衛対象の保護担当になった"],
+        "phase": "objective",
+        "type": "escortProtectorAssigned"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["戦闘が6ラウンドでretreatとなった", "接敵結果: failure"],
+        "phase": "battle",
+        "targetIds": [],
+        "type": "battleSummary"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s4-guardian-1",
+          "C-vanguard-s4-vanguard-0",
+          "C-mage-s4-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 64,
+          "result": "partialSuccess",
+          "roll": 70,
+          "skill": "defense"
+        },
+        "effects": [
+          {
+            "type": "escortBattleExposureDamage",
+            "value": 4
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 36
+          },
+          {
+            "type": "escortStress",
+            "value": 20
+          }
+        ],
+        "facts": [
+          "ハロルド グレイが護衛対象の保護を担当した",
+          "護衛対象が戦闘の余波で4のダメージを負った"
+        ],
+        "phase": "battle",
+        "type": "escortBattleExposure"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "escortTargetHeal",
+            "value": 4
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortAlive",
+            "value": 1
+          }
+        ],
+        "facts": ["護衛対象のHPが4回復した（治療）"],
+        "phase": "objective",
+        "type": "escortTargetHeal"
+      },
+      {
+        "actorIds": [
+          "C-healer-s4-healer-3",
+          "C-mage-s4-mage-2",
+          "C-guardian-s4-guardian-1"
+        ],
+        "check": {
+          "effectiveValue": 79,
+          "result": "success",
+          "roll": 35,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "type": "escortCareHealing",
+            "value": 4
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "オルム ヴァレスが護衛対象の傷を手当てした"
+        ],
+        "phase": "objective",
+        "type": "escortCare"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s4-guardian-1",
+          "C-vanguard-s4-vanguard-0",
+          "C-mage-s4-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 25,
+          "result": "failure",
+          "roll": 72,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "escortRouteProgress",
+            "value": 75
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 36
+          },
+          {
+            "type": "escortStress",
+            "value": 40
+          },
+          {
+            "type": "escortTargetDamage",
+            "value": 4
+          }
+        ],
+        "facts": ["ハロルド グレイは移動経路で迷い、護衛対象が怪我をした"],
+        "phase": "objective",
+        "type": "escortRouteProgress"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s4-guardian-1",
+          "C-vanguard-s4-vanguard-0",
+          "C-mage-s4-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 55,
+          "result": "failure",
+          "roll": 78,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": ["ハロルド グレイが帰還経路を見失い、迂回した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-mage-s4-mage-2",
+          "C-vanguard-s4-vanguard-0",
+          "C-guardian-s4-guardian-1"
+        ],
+        "check": {
+          "effectiveValue": 16,
+          "result": "failure",
+          "roll": 64,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "C-guardian-s4-guardian-1",
+            "type": "hpDamage",
+            "value": 2
+          }
+        ],
+        "facts": [
+          "視界不良に遭遇した",
+          "Guardianがハロルド グレイの被害を軽減した",
+          "ハロルド グレイが2のダメージを受けた"
+        ],
+        "phase": "return",
+        "type": "hazard"
+      },
+      {
+        "actorIds": ["C-healer-s4-healer-3"],
+        "check": {
+          "effectiveValue": 83,
+          "result": "criticalSuccess",
+          "roll": 10,
+          "skill": "firstAid"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "targetId": "C-vanguard-s4-vanguard-0",
+            "type": "hpHeal",
+            "value": 10
+          },
+          {
+            "targetId": "C-guardian-s4-guardian-1",
+            "type": "hpHeal",
+            "value": 10
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "オルム ヴァレスが帰還中の負傷者を手当てした"
+        ],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "escortReturnedToOrigin",
+            "value": 1
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 36
+          }
+        ],
+        "facts": [
+          "護衛任務は完了しなかったが、護衛対象は出発地点まで連れ戻された"
+        ],
+        "phase": "return",
+        "type": "escortReturnResult"
+      },
+      {
+        "actorIds": ["C-healer-s4-healer-3"],
+        "check": {
+          "effectiveValue": 92,
+          "result": "criticalSuccess",
+          "roll": 15,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          },
+          {
+            "targetId": "C-vanguard-s4-vanguard-0",
+            "type": "hpHeal",
+            "value": 15
+          },
+          {
+            "targetId": "C-guardian-s4-guardian-1",
+            "type": "hpHeal",
+            "value": 7
+          }
+        ],
+        "facts": ["オルム ヴァレスによる治療判定: criticalSuccess"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": 3
+          }
+        ],
+        "facts": [
+          "護衛対象は出発済み・行動調整済み・移動進捗75%・出発地点へ帰還。護衛進捗は60%",
+          "医薬品を2消費した",
+          "オルム ヴァレスが負傷者の治療を行った"
+        ],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": 1,
+      "requestFeatures": ["traps", "poorVisibility"],
+      "returnTimeBonus": 0,
+      "threatFeatures": ["traps", "poorVisibility"]
+    },
+    "objectiveCompleted": false,
+    "objectiveProgress": 60,
+    "objectiveState": {
+      "accompanying": false,
+      "battleExposureDamage": 4,
+      "careHealing": 4,
+      "careProvided": true,
+      "completed": false,
+      "coordinated": true,
+      "currentHp": 36,
+      "delivered": false,
+      "departed": true,
+      "destinationId": "destination-1",
+      "destinationName": "目的地",
+      "destinationReached": false,
+      "handoffStatus": "notStarted",
+      "maxHp": 40,
+      "mobility": "mobile",
+      "progress": 60,
+      "protectorId": "C-guardian-s4-guardian-1",
+      "returnedToOrigin": true,
+      "routeProgress": 75,
+      "statusEffects": [],
+      "stranded": false,
+      "targetId": "target-1",
+      "targetName": "護衛対象",
+      "travelDamage": 4,
+      "travelStress": 40,
+      "type": "escort"
+    },
+    "partyHp": {
+      "C-guardian-s4-guardian-1": 76,
+      "C-healer-s4-healer-3": 50,
+      "C-mage-s4-mage-2": 55,
+      "C-vanguard-s4-vanguard-0": 68
+    },
+    "partyMorale": {
+      "C-guardian-s4-guardian-1": 43,
+      "C-healer-s4-healer-3": 51,
+      "C-mage-s4-mage-2": 45,
+      "C-vanguard-s4-vanguard-0": 40
+    },
+    "partyMp": {
+      "C-guardian-s4-guardian-1": 9,
+      "C-healer-s4-healer-3": 35,
+      "C-mage-s4-mage-2": 18,
+      "C-vanguard-s4-vanguard-0": 6
+    },
+    "partyStatusEffects": {
+      "C-guardian-s4-guardian-1": [],
+      "C-healer-s4-healer-3": [],
+      "C-mage-s4-mage-2": [],
+      "C-vanguard-s4-vanguard-0": []
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 0,
+      "tools": 2
+    }
+  }
+}

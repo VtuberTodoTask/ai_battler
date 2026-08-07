@@ -1,0 +1,2138 @@
+{
+  "outcome": "completeSuccess",
+  "state": {
+    "avoidedThreats": ["traps"],
+    "battleEntrySnapshot": {
+      "environmentEffects": [
+        {
+          "type": "lighting",
+          "value": "dark"
+        }
+      ],
+      "initialHp": {
+        "C-guardian-s17-guardian-1": 63,
+        "C-healer-s17-healer-3": 52,
+        "C-mage-s17-mage-2": 46,
+        "C-vanguard-s17-vanguard-0": 63
+      },
+      "initialMorale": {
+        "C-guardian-s17-guardian-1": 48,
+        "C-healer-s17-healer-3": 49,
+        "C-mage-s17-mage-2": 45,
+        "C-vanguard-s17-vanguard-0": 37
+      },
+      "initialMp": {
+        "C-guardian-s17-guardian-1": 7,
+        "C-healer-s17-healer-3": 54,
+        "C-mage-s17-mage-2": 43,
+        "C-vanguard-s17-vanguard-0": 10
+      },
+      "initialStatusEffects": {
+        "C-guardian-s17-guardian-1": [],
+        "C-healer-s17-healer-3": [],
+        "C-mage-s17-mage-2": [],
+        "C-vanguard-s17-vanguard-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "enemyAdvantage"
+    },
+    "battleOutcome": "victory",
+    "battles": [
+      {
+        "combatSeed": "s17:battle:0:combat",
+        "deadAdventurerIds": [],
+        "discoveredWeaknesses": [],
+        "encounterSeed": "s17:battle:0:encounter",
+        "enemyComposition": "aberrationx7",
+        "enemyIds": [
+          "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+          "E-aberration-ambusher-minion-s17:battle:0:encounter:enemy:3",
+          "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:4",
+          "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+          "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+          "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1",
+          "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+        ],
+        "entrySnapshot": {
+          "environmentEffects": [
+            {
+              "type": "lighting",
+              "value": "dark"
+            }
+          ],
+          "initialHp": {
+            "C-guardian-s17-guardian-1": 63,
+            "C-healer-s17-healer-3": 52,
+            "C-mage-s17-mage-2": 46,
+            "C-vanguard-s17-vanguard-0": 63
+          },
+          "initialMorale": {
+            "C-guardian-s17-guardian-1": 48,
+            "C-healer-s17-healer-3": 49,
+            "C-mage-s17-mage-2": 45,
+            "C-vanguard-s17-vanguard-0": 37
+          },
+          "initialMp": {
+            "C-guardian-s17-guardian-1": 7,
+            "C-healer-s17-healer-3": 54,
+            "C-mage-s17-mage-2": 43,
+            "C-vanguard-s17-vanguard-0": 10
+          },
+          "initialStatusEffects": {
+            "C-guardian-s17-guardian-1": [],
+            "C-healer-s17-healer-3": [],
+            "C-mage-s17-mage-2": [],
+            "C-vanguard-s17-vanguard-0": []
+          },
+          "knownEnemyAbilities": [],
+          "knownEnemyWeaknesses": [],
+          "surprise": "enemyAdvantage"
+        },
+        "id": "battle-0",
+        "incapacitatedAdventurerIds": [],
+        "injuries": [],
+        "knownEnemyAbilities": [],
+        "knownEnemyWeaknesses": [],
+        "matchedAbilityIntel": [],
+        "matchedWeaknessIntel": [],
+        "outcome": "victory",
+        "phase": "battle",
+        "result": {
+          "abilityUsage": {},
+          "adventurerActionCount": 41,
+          "contactResult": {
+            "effects": {
+              "enemyInitiativeBonus": 3,
+              "side": "enemy"
+            },
+            "enemyStealth": 0,
+            "partyScouting": 0,
+            "roll": 100,
+            "successChance": 0,
+            "type": "failure"
+          },
+          "deadAdventurers": [],
+          "defeatedEnemies": [
+            "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+            "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1",
+            "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+          ],
+          "discoveredWeaknesses": [],
+          "enemyActionCount": 35,
+          "enemyDamageDealt": 236,
+          "escapedEnemies": [
+            "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+            "E-aberration-ambusher-minion-s17:battle:0:encounter:enemy:3",
+            "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:4",
+            "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5"
+          ],
+          "finalAdventurerStates": [
+            {
+              "alive": true,
+              "currentHp": 63,
+              "currentMp": 10,
+              "dead": false,
+              "id": "C-vanguard-s17-vanguard-0",
+              "incapacitated": false,
+              "morale": 37,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 63,
+              "currentMp": 7,
+              "dead": false,
+              "id": "C-guardian-s17-guardian-1",
+              "incapacitated": false,
+              "morale": 48,
+              "statusEffects": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s17-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ]
+            },
+            {
+              "alive": true,
+              "currentHp": 50,
+              "currentMp": 3,
+              "dead": false,
+              "id": "C-mage-s17-mage-2",
+              "incapacitated": false,
+              "morale": 45,
+              "statusEffects": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s17-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ]
+            },
+            {
+              "alive": true,
+              "currentHp": 25,
+              "currentMp": 36,
+              "dead": false,
+              "id": "C-healer-s17-healer-3",
+              "incapacitated": false,
+              "morale": 49,
+              "statusEffects": []
+            }
+          ],
+          "incapacitatedAdventurers": [],
+          "injuries": [],
+          "logs": [
+            {
+              "actionType": "contact",
+              "metadata": {
+                "contactType": "failure"
+              },
+              "phase": "contact",
+              "result": "遠征側の不利により敵に先制された。",
+              "round": 0
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ hit レイラ スカイ for 9 damage",
+              "roll": 78,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 hit レイラ スカイ for 5 damage",
+              "roll": 81,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "damage": 12,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "触手ミミック暗殺者 hit レイラ スカイ for 12 damage",
+              "roll": 2,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6",
+              "damage": 11,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手ミミック司祭 hit ロイド スカイ for 11 damage",
+              "roll": 16,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 74,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ missed",
+              "roll": 93,
+              "round": 1,
+              "successChance": 68,
+              "targetIds": [
+                "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー hit 深淵スライム暗殺者 for 14 damage",
+              "roll": 79,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 83,
+              "targetIds": [
+                "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがレイラ スカイを防護した。",
+              "round": 1,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s17-healer-3",
+              "metadata": {
+                "actualHealAmount": 30
+              },
+              "phase": "combat",
+              "result": "ロイド スカイがレイラ スカイを回復させた。+30 HP",
+              "round": 1,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 3,
+              "metadata": {
+                "guardPrevented": 8,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 hit レイラ スカイ for 3 damage",
+              "roll": 17,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 90,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "damage": 1,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "触手ミミック暗殺者 hit レイラ スカイ for 1 damage",
+              "roll": 56,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 94,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ missed",
+              "roll": 98,
+              "round": 2,
+              "successChance": 91,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6",
+              "damage": 17,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手ミミック司祭 hit ロイド スカイ for 17 damage",
+              "roll": 10,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 74,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ missed",
+              "roll": 82,
+              "round": 2,
+              "successChance": 73,
+              "targetIds": [
+                "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー hit 深淵スライム暗殺者 for 10 damage",
+              "roll": 38,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 83,
+              "targetIds": [
+                "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s17-healer-3",
+              "damage": 9,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ロイド スカイ hit 深淵スライム暗殺者 for 9 damage",
+              "roll": 60,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 62,
+              "targetIds": [
+                "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがロイド スカイを防護した。",
+              "round": 2,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ hit レイラ スカイ for 8 damage",
+              "roll": 84,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 hit レイラ スカイ for 8 damage",
+              "roll": 44,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "触手ミミック暗殺者 hit レイラ スカイ for 7 damage",
+              "roll": 68,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6",
+              "damage": 7,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手ミミック司祭 hit ロイド スカイ for 7 damage",
+              "roll": 43,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 69,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがレイラ スカイを防護した。",
+              "round": 3,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー missed",
+              "roll": 90,
+              "round": 3,
+              "successChance": 83,
+              "targetIds": [
+                "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ hit 触手ミミック暗殺者 for 13 damage",
+              "roll": 34,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 73,
+              "targetIds": [
+                "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s17-healer-3",
+              "metadata": {
+                "actualHealAmount": 35
+              },
+              "phase": "combat",
+              "result": "ロイド スカイがロイド スカイを回復させた。+35 HP",
+              "round": 3,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ missed",
+              "roll": 95,
+              "round": 4,
+              "successChance": 91,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 2,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 hit レイラ スカイ for 2 damage",
+              "roll": 57,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 90,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "damage": 3,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "触手ミミック暗殺者 hit レイラ スカイ for 3 damage",
+              "roll": 53,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 94,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:4",
+              "damage": 1,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム暗殺者 hit レイラ スカイ for 1 damage",
+              "roll": 26,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 75,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー missed",
+              "roll": 96,
+              "round": 4,
+              "successChance": 83,
+              "targetIds": [
+                "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがレイラ スカイを防護した。",
+              "round": 4,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s17-healer-3",
+              "metadata": {
+                "actualHealAmount": 33
+              },
+              "phase": "combat",
+              "result": "ロイド スカイがレイラ スカイを回復させた。+33 HP",
+              "round": 4,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 21,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ hit 触手ミミック暗殺者 for 21 damage",
+              "roll": 3,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 73,
+              "targetIds": [
+                "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 5,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ hit レイラ スカイ for 5 damage",
+              "roll": 79,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "damage": 4,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "触手ミミック暗殺者 hit レイラ スカイ for 4 damage",
+              "roll": 41,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 94,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 1,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 hit レイラ スカイ for 1 damage",
+              "roll": 90,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 90,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6",
+              "damage": 14,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手ミミック司祭 hit ロイド スカイ for 14 damage",
+              "roll": 35,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 74,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー hit 深淵スライム暗殺者 for 11 damage",
+              "roll": 34,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 83,
+              "targetIds": [
+                "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "深淵スライム暗殺者が戦闘不能になった。",
+              "round": 5,
+              "targetIds": [
+                "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s17-healer-3",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ロイド スカイ hit 触手ミミック暗殺者 for 12 damage",
+              "roll": 4,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 22,
+              "targetIds": [
+                "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "触手ミミック暗殺者が戦闘不能になった。",
+              "round": 5,
+              "targetIds": [
+                "A-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ hit 触手ミミック司祭 for 10 damage",
+              "roll": 24,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 42,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
+              "round": 5,
+              "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 11,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ hit レイラ スカイ for 11 damage",
+              "roll": 21,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 hit レイラ スカイ for 7 damage",
+              "roll": 25,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6",
+              "damage": 14,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手ミミック司祭 hit ロイド スカイ for 14 damage",
+              "roll": 67,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 74,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s17-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ロイド スカイ missed",
+              "roll": 45,
+              "round": 6,
+              "successChance": 37,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー missed",
+              "roll": 100,
+              "round": 6,
+              "successChance": 73,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ missed",
+              "roll": 87,
+              "round": 6,
+              "successChance": 37,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがレイラ スカイを防護した。",
+              "round": 6,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 7,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ hit レイラ スカイ for 7 damage",
+              "roll": 28,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 missed",
+              "roll": 100,
+              "round": 7,
+              "successChance": 90,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6",
+              "damage": 14,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手ミミック司祭 hit ロイド スカイ for 14 damage",
+              "roll": 15,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 74,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー missed",
+              "roll": 82,
+              "round": 7,
+              "successChance": 68,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s17-healer-3",
+              "metadata": {
+                "actualHealAmount": 40
+              },
+              "phase": "combat",
+              "result": "ロイド スカイがロイド スカイを回復させた。+40 HP",
+              "round": 7,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ hit 虚ろなスライム待ち伏せ for 10 damage",
+              "roll": 39,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 77,
+              "targetIds": [
+                "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがレイラ スカイを防護した。",
+              "round": 7,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 4,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ hit レイラ スカイ for 4 damage",
+              "roll": 64,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手ミミック司祭 missed",
+              "roll": 94,
+              "round": 8,
+              "successChance": 74,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 4,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s17-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 hit レイラ スカイ for 4 damage",
+              "roll": 86,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 90,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー hit 触手ミミック司祭 for 14 damage",
+              "roll": 26,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 68,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s17-healer-3",
+              "metadata": {
+                "actualHealAmount": 40
+              },
+              "phase": "combat",
+              "result": "ロイド スカイがレイラ スカイを回復させた。+40 HP",
+              "round": 8,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
+              "round": 8,
+              "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ hit 狂気の狂信者忍 for 10 damage",
+              "roll": 35,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 69,
+              "targetIds": [
+                "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 hit レイラ スカイ for 6 damage",
+              "roll": 21,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 10,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ hit レイラ スカイ for 10 damage",
+              "roll": 79,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6",
+              "damage": 14,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手ミミック司祭 hit ロイド スカイ for 14 damage",
+              "roll": 64,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 74,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
+              "round": 9,
+              "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ hit 虚ろなスライム待ち伏せ for 12 damage",
+              "roll": 40,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 72,
+              "targetIds": [
+                "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s17-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ロイド スカイ missed",
+              "roll": 66,
+              "round": 9,
+              "successChance": 37,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー hit 触手ミミック司祭 for 13 damage",
+              "roll": 56,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 73,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなスライム待ち伏せ hit レイラ スカイ for 8 damage",
+              "roll": 33,
+              "round": 10,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の狂信者忍 hit レイラ スカイ for 8 damage",
+              "roll": 34,
+              "round": 10,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6",
+              "damage": 11,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手ミミック司祭 hit ロイド スカイ for 11 damage",
+              "roll": 21,
+              "round": 10,
+              "statusApplied": [],
+              "successChance": 74,
+              "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s17-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レイラ スカイ hit 狂気の狂信者忍 for 13 damage",
+              "roll": 59,
+              "round": 10,
+              "statusApplied": [],
+              "successChance": 64,
+              "targetIds": [
+                "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムがレイラ スカイを防護した。",
+              "round": 10,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s17-vanguard-0",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "アリス ドラグナー hit 触手ミミック司祭 for 13 damage",
+              "roll": 73,
+              "round": 10,
+              "statusApplied": [],
+              "successChance": 73,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "触手ミミック司祭が戦闘不能になった。",
+              "round": 10,
+              "targetIds": [
+                "B-aberration-controller-minion-s17:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s17-healer-3",
+              "metadata": {
+                "actualHealAmount": 35
+              },
+              "phase": "combat",
+              "result": "ロイド スカイがレイラ スカイを回復させた。+35 HP",
+              "round": 10,
+              "targetIds": ["C-mage-s17-mage-2"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "phase": "retreat",
+              "result": "狂気の狂信者忍が撤退した。",
+              "roll": 72,
+              "round": 11,
+              "successChance": 95
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "E-aberration-ambusher-minion-s17:battle:0:encounter:enemy:3",
+              "phase": "retreat",
+              "result": "虚ろな触手怪待ち伏せが撤退した。",
+              "roll": 48,
+              "round": 11,
+              "successChance": 62
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:4",
+              "phase": "retreat",
+              "result": "虚ろなスライム暗殺者が撤退した。",
+              "roll": 43,
+              "round": 11,
+              "successChance": 73
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "phase": "retreat",
+              "result": "虚ろなスライム待ち伏せが撤退した。",
+              "roll": 25,
+              "round": 11,
+              "successChance": 95
+            }
+          ],
+          "outcome": "victory",
+          "partyDamageDealt": 185,
+          "retreatAttempts": [],
+          "rounds": 11,
+          "seed": "s17:battle:0:combat",
+          "survivingAdventurers": [
+            "C-vanguard-s17-vanguard-0",
+            "C-guardian-s17-guardian-1",
+            "C-mage-s17-mage-2",
+            "C-healer-s17-healer-3"
+          ],
+          "survivingEnemies": [
+            "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+            "E-aberration-ambusher-minion-s17:battle:0:encounter:enemy:3",
+            "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:4",
+            "B-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5"
+          ]
+        },
+        "rounds": 11,
+        "survivingAdventurerIds": [
+          "C-vanguard-s17-vanguard-0",
+          "C-guardian-s17-guardian-1",
+          "C-mage-s17-mage-2",
+          "C-healer-s17-healer-3"
+        ],
+        "trigger": "afterExploration",
+        "unmatchedAbilityIntel": [],
+        "unmatchedWeaknessIntel": []
+      }
+    ],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": ["poorVisibility", "traps"],
+    "elapsedTime": 10.65,
+    "incapacitated": [],
+    "information": [],
+    "injuries": [
+      {
+        "adventurerId": "C-mage-s17-mage-2",
+        "cause": "poorVisibility",
+        "hpLoss": 4,
+        "id": "injury-0-77429",
+        "status": "treated",
+        "type": "light"
+      },
+      {
+        "adventurerId": "C-vanguard-s17-vanguard-0",
+        "cause": "explorationAccident",
+        "hpLoss": 4,
+        "id": "injury-1-837063",
+        "status": "treated",
+        "type": "light"
+      },
+      {
+        "adventurerId": "C-guardian-s17-guardian-1",
+        "cause": "traps",
+        "hpLoss": 8,
+        "id": "injury-2-272298",
+        "status": "treated",
+        "type": "light"
+      }
+    ],
+    "logs": [
+      {
+        "actorIds": [
+          "C-guardian-s17-guardian-1",
+          "C-vanguard-s17-vanguard-0",
+          "C-mage-s17-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 58,
+          "result": "success",
+          "roll": 52,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "グスタフ ジェムが効率的なルートと補給計画を立てた",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [
+          "C-healer-s17-healer-3",
+          "C-guardian-s17-guardian-1",
+          "C-vanguard-s17-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 48,
+          "result": "criticalFailure",
+          "roll": 100,
+          "skill": "leadership"
+        },
+        "effects": [
+          {
+            "type": "escortCoordinated",
+            "value": 0
+          },
+          {
+            "type": "escortStress",
+            "value": 25
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": ["ロイド スカイは護衛対象との行動調整に大きく失敗した"],
+        "phase": "preparation",
+        "type": "escortDeparture"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s17-guardian-1",
+          "C-vanguard-s17-vanguard-0",
+          "C-mage-s17-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 53,
+          "result": "partialSuccess",
+          "roll": 67,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["グスタフ ジェムが経路を確保したが、多少の遅延が発生した"],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-mage-s17-mage-2",
+          "C-vanguard-s17-vanguard-0",
+          "C-healer-s17-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 19,
+          "result": "partialSuccess",
+          "roll": 20,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "C-mage-s17-mage-2",
+            "type": "hpDamage",
+            "value": 4
+          }
+        ],
+        "facts": [
+          "視界不良に遭遇した",
+          "Guardianがレイラ スカイの被害を軽減した",
+          "レイラ スカイが4のダメージを受けた"
+        ],
+        "phase": "approach",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [
+          "C-mage-s17-mage-2",
+          "C-vanguard-s17-vanguard-0",
+          "C-healer-s17-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "criticalFailure",
+          "roll": 98,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "C-vanguard-s17-vanguard-0",
+            "type": "hpDamage",
+            "value": 4
+          }
+        ],
+        "facts": [
+          "調査に手間取った",
+          "アリス ドラグナーが小さな事故で4のダメージを受けた"
+        ],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-vanguard-s17-vanguard-0",
+          "C-mage-s17-mage-2",
+          "C-healer-s17-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 34,
+          "result": "criticalFailure",
+          "roll": 100,
+          "skill": "trapDetection"
+        },
+        "effects": [
+          {
+            "targetId": "C-guardian-s17-guardian-1",
+            "type": "hpDamage",
+            "value": 8
+          },
+          {
+            "type": "moraleChange",
+            "value": -6
+          }
+        ],
+        "facts": [
+          "罠に遭遇した",
+          "Guardianがグスタフ ジェムの被害を軽減した",
+          "グスタフ ジェムが8のダメージを受けた"
+        ],
+        "phase": "exploration",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [
+          "C-mage-s17-mage-2",
+          "C-vanguard-s17-vanguard-0",
+          "C-healer-s17-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 62,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s17-mage-2",
+          "C-vanguard-s17-vanguard-0",
+          "C-healer-s17-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 42,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s17-guardian-1",
+          "C-vanguard-s17-vanguard-0",
+          "C-mage-s17-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 28,
+          "result": "partialSuccess",
+          "roll": 40,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "escortRouteProgress",
+            "value": 50
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 35
+          }
+        ],
+        "facts": [
+          "グスタフ ジェムは移動経路を何とか進んだが、護衛対象に負担がかかった"
+        ],
+        "phase": "objective",
+        "type": "escortRouteProgress"
+      },
+      {
+        "actorIds": ["C-guardian-s17-guardian-1"],
+        "effects": [
+          {
+            "targetId": "C-guardian-s17-guardian-1",
+            "type": "escortProtectorAssigned",
+            "value": 1
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": ["グスタフ ジェム（guardian）が護衛対象の保護担当になった"],
+        "phase": "objective",
+        "type": "escortProtectorAssigned"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["戦闘が11ラウンドでvictoryとなった", "接敵結果: failure"],
+        "phase": "battle",
+        "targetIds": [],
+        "type": "battleSummary"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s17-guardian-1",
+          "C-vanguard-s17-vanguard-0",
+          "C-mage-s17-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 68,
+          "result": "success",
+          "roll": 30,
+          "skill": "defense"
+        },
+        "effects": [
+          {
+            "type": "escortBattleExposureDamage",
+            "value": 0
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 40
+          }
+        ],
+        "facts": [
+          "グスタフ ジェムが護衛対象の保護を担当した",
+          "戦闘中、護衛対象への追加被害は発生しなかった"
+        ],
+        "phase": "battle",
+        "type": "escortBattleExposure"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s17-guardian-1",
+          "C-vanguard-s17-vanguard-0",
+          "C-mage-s17-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 31,
+          "result": "success",
+          "roll": 15,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "escortRouteProgress",
+            "value": 100
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          },
+          {
+            "type": "escortStress",
+            "value": 40
+          }
+        ],
+        "facts": ["グスタフ ジェムが移動経路を切り開いた"],
+        "phase": "objective",
+        "type": "escortRouteProgress"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "escortDestinationReached",
+            "value": 1
+          },
+          {
+            "type": "escortRouteProgress",
+            "value": 100
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": ["護衛対象は目的地へ到着した"],
+        "phase": "objective",
+        "type": "escortDestinationReached"
+      },
+      {
+        "actorIds": [
+          "C-healer-s17-healer-3",
+          "C-guardian-s17-guardian-1",
+          "C-vanguard-s17-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 48,
+          "result": "success",
+          "roll": 24,
+          "skill": "leadership"
+        },
+        "effects": [
+          {
+            "type": "escortHandoffStatus",
+            "value": 2
+          },
+          {
+            "type": "escortDelivered",
+            "value": 1
+          },
+          {
+            "type": "escortTargetHp",
+            "value": 40
+          }
+        ],
+        "facts": ["ロイド スカイが目的地で引き渡しを完了した"],
+        "phase": "objective",
+        "type": "escortHandoff"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s17-guardian-1",
+          "C-vanguard-s17-vanguard-0",
+          "C-mage-s17-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 53,
+          "result": "criticalSuccess",
+          "roll": 10,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["グスタフ ジェムが安全な帰還経路を確保した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-vanguard-s17-vanguard-0",
+          "C-mage-s17-mage-2",
+          "C-healer-s17-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 34,
+          "result": "success",
+          "roll": 23,
+          "skill": "trapDetection"
+        },
+        "effects": [],
+        "facts": ["アリス ドラグナーが罠を事前に察知・回避した"],
+        "phase": "return",
+        "type": "hazard"
+      },
+      {
+        "actorIds": ["C-healer-s17-healer-3"],
+        "check": {
+          "effectiveValue": 84,
+          "result": "partialSuccess",
+          "roll": 90,
+          "skill": "firstAid"
+        },
+        "effects": [],
+        "facts": ["帰還中の負傷者手当てが不十分だった"],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": ["C-healer-s17-healer-3"],
+        "check": {
+          "effectiveValue": 94,
+          "result": "success",
+          "roll": 58,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          },
+          {
+            "targetId": "C-vanguard-s17-vanguard-0",
+            "type": "hpHeal",
+            "value": 4
+          },
+          {
+            "targetId": "C-guardian-s17-guardian-1",
+            "type": "hpHeal",
+            "value": 8
+          },
+          {
+            "targetId": "C-healer-s17-healer-3",
+            "type": "hpHeal",
+            "value": 8
+          }
+        ],
+        "facts": ["ロイド スカイによる治療判定: success"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "護衛対象は出発済み・移動進捗100%・目的地到達・引き渡し完了。護衛進捗は100%",
+          "医薬品を2消費した",
+          "ロイド スカイが負傷者の治療を行った"
+        ],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": 1,
+      "requestFeatures": ["traps", "poorVisibility"],
+      "returnTimeBonus": 0,
+      "threatFeatures": ["traps", "poorVisibility"]
+    },
+    "objectiveCompleted": true,
+    "objectiveProgress": 100,
+    "objectiveState": {
+      "accompanying": false,
+      "battleExposureDamage": 0,
+      "careHealing": 0,
+      "careProvided": false,
+      "completed": true,
+      "coordinated": false,
+      "currentHp": 40,
+      "delivered": true,
+      "departed": true,
+      "destinationId": "destination-1",
+      "destinationName": "目的地",
+      "destinationReached": true,
+      "handoffStatus": "completed",
+      "maxHp": 40,
+      "mobility": "mobile",
+      "progress": 100,
+      "protectorId": "C-guardian-s17-guardian-1",
+      "returnedToOrigin": false,
+      "routeProgress": 100,
+      "statusEffects": [],
+      "stranded": false,
+      "targetId": "target-1",
+      "targetName": "護衛対象",
+      "travelDamage": 0,
+      "travelStress": 40,
+      "type": "escort"
+    },
+    "partyHp": {
+      "C-guardian-s17-guardian-1": 71,
+      "C-healer-s17-healer-3": 33,
+      "C-mage-s17-mage-2": 50,
+      "C-vanguard-s17-vanguard-0": 67
+    },
+    "partyMorale": {
+      "C-guardian-s17-guardian-1": 56,
+      "C-healer-s17-healer-3": 54,
+      "C-mage-s17-mage-2": 50,
+      "C-vanguard-s17-vanguard-0": 42
+    },
+    "partyMp": {
+      "C-guardian-s17-guardian-1": 7,
+      "C-healer-s17-healer-3": 36,
+      "C-mage-s17-mage-2": 3,
+      "C-vanguard-s17-vanguard-0": 10
+    },
+    "partyStatusEffects": {
+      "C-guardian-s17-guardian-1": [
+        {
+          "duration": 1,
+          "sourceId": "C-guardian-s17-guardian-1",
+          "type": "guarded",
+          "value": 3
+        }
+      ],
+      "C-healer-s17-healer-3": [],
+      "C-mage-s17-mage-2": [
+        {
+          "duration": 1,
+          "sourceId": "C-guardian-s17-guardian-1",
+          "type": "guarded",
+          "value": 5
+        }
+      ],
+      "C-vanguard-s17-vanguard-0": []
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 2,
+      "tools": 1
+    }
+  }
+}

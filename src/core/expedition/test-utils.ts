@@ -5,6 +5,7 @@ import type {
   AdventurerRole,
 } from '../models/types.ts'
 import type {
+  EscortObjectiveConfig,
   ExpeditionRequest,
   ExpeditionResult,
   ExpeditionState,
@@ -232,6 +233,67 @@ export function makeRescueRequest(
 }
 
 export function makeRescueParty(
+  seedBase: string,
+  rank: AdventurerRank,
+  roles: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer'],
+): Adventurer[] {
+  return makeParty(roles, seedBase, rank)
+}
+
+export function makeEscortTarget(
+  overrides?: Partial<EscortObjectiveConfig['target']>,
+): NonNullable<ExpeditionRequest['escort']> {
+  return {
+    target: {
+      id: 'target-1',
+      name: '護衛対象',
+      maxHp: 40,
+      initialHp: 40,
+      mobility: 'mobile',
+      initialStatusEffects: [],
+      initialStress: 0,
+      coordinationDifficulty: 15,
+      routeDifficulty: 15,
+      protectionDifficulty: 15,
+      careDifficulty: 15,
+      ...overrides,
+    },
+    destination: {
+      id: 'destination-1',
+      name: '目的地',
+      handoffRequirement: 'standard',
+      handoffDifficulty: 15,
+    },
+  }
+}
+
+export function makeEscortRequest(
+  seed: string,
+  rank: AdventurerRank = 'C',
+  targetOverrides?: Partial<EscortObjectiveConfig['target']>,
+  destinationOverrides?: Partial<EscortObjectiveConfig['destination']>,
+  battleEnabled = true,
+  requestOverrides: Partial<ExpeditionRequest> = {},
+): ExpeditionRequest {
+  const escort = makeEscortTarget(targetOverrides)
+  const destination = {
+    ...escort.destination,
+    ...destinationOverrides,
+  }
+  return makeRequest(seed, {
+    objectiveType: 'escort',
+    rank,
+    environment: 'forest',
+    hiddenInformation: [],
+    battle: battleEnabled
+      ? battleConfig({ seed: `${seed}:battle:0` })
+      : undefined,
+    escort: { target: escort.target, destination },
+    ...requestOverrides,
+  })
+}
+
+export function makeEscortParty(
   seedBase: string,
   rank: AdventurerRank,
   roles: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer'],
