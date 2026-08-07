@@ -1,5 +1,6 @@
 import { describe, expect, it, afterAll } from 'vitest'
 import { writeFileSync } from 'node:fs'
+import * as prettier from 'prettier'
 import { initializeExpeditionState } from './state.ts'
 import {
   assignEscortProtector,
@@ -457,7 +458,7 @@ describe('Escort role contribution statistics', () => {
     expect(withAvg).toBeGreaterThan(withoutAvg)
   })
 
-  afterAll(() => {
+  afterAll(async () => {
     if (reports.length === 0) return
     const lines: string[] = [
       '# Phase 3.4 護衛役割寄与レポート',
@@ -476,6 +477,11 @@ describe('Escort role contribution statistics', () => {
       )
     }
     lines.push('')
-    writeFileSync('PHASE3_4_ROLE_CONTRIBUTION.md', lines.join('\n'), 'utf-8')
+    const config = await prettier.resolveConfig('PHASE3_4_ROLE_CONTRIBUTION.md')
+    const formatted = await prettier.format(lines.join('\n'), {
+      ...config,
+      parser: 'markdown',
+    })
+    writeFileSync('PHASE3_4_ROLE_CONTRIBUTION.md', formatted, 'utf-8')
   })
 })
