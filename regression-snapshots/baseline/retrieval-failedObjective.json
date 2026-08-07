@@ -67,6 +67,62 @@
         "type": "routePlanning"
       },
       {
+        "actorIds": [],
+        "effects": [
+          {
+            "metadata": {
+              "bulk": "portable",
+              "fragility": "standard",
+              "handling": "standard",
+              "initialIntegrity": 4,
+              "minimumAcceptableIntegrity": 1,
+              "targetId": "target-1",
+              "targetName": "回収対象"
+            },
+            "targetId": "target-1",
+            "type": "retrievalTargetAssigned",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalIntegrity",
+            "value": 4
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalInitialIntegrity",
+            "value": 4
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalMinimumIntegrity",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalLocated",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalReached",
+            "value": 0
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalProgress",
+            "value": 15
+          }
+        ],
+        "facts": [
+          "回収対象「回収対象」の回収依頼を引き受けた",
+          "bulk=portable, handling=standard, fragility=standard"
+        ],
+        "phase": "preparation",
+        "targetIds": ["target-1"],
+        "type": "retrievalTargetAssigned"
+      },
+      {
         "actorIds": [
           "C-guardian-s0-guardian-1",
           "C-vanguard-s0-vanguard-0",
@@ -138,51 +194,19 @@
         "actorIds": [],
         "effects": [
           {
-            "type": "retrievalIntegrity",
-            "value": 4
-          },
-          {
-            "type": "retrievalInitialIntegrity",
-            "value": 4
-          },
-          {
-            "type": "retrievalMinimumIntegrity",
-            "value": 1
-          },
-          {
+            "targetId": "target-1",
             "type": "retrievalLocated",
             "value": 1
           },
           {
-            "type": "retrievalReached",
-            "value": 0
-          },
-          {
-            "type": "retrievalProgress",
-            "value": 15
-          }
-        ],
-        "facts": [
-          "回収対象「回収対象」の回収依頼を引き受けた",
-          "bulk=portable, handling=standard, fragility=standard"
-        ],
-        "phase": "preparation",
-        "type": "retrievalTargetAssigned"
-      },
-      {
-        "actorIds": [],
-        "effects": [
-          {
-            "type": "retrievalLocated",
-            "value": 1
-          },
-          {
+            "targetId": "target-1",
             "type": "retrievalProgress",
             "value": 15
           }
         ],
         "facts": ["事前情報から回収対象の位置は既に判明していた"],
         "phase": "contact",
+        "targetIds": ["target-1"],
         "type": "retrievalTargetLocated"
       },
       {
@@ -199,10 +223,12 @@
         },
         "effects": [
           {
+            "targetId": "target-1",
             "type": "retrievalReached",
             "value": 1
           },
           {
+            "targetId": "target-1",
             "type": "retrievalProgress",
             "value": 30
           }
@@ -211,22 +237,26 @@
           "マルチナ サンドは回収対象のもとへ到達したが、多少の遅延が生じた"
         ],
         "phase": "contact",
+        "targetIds": ["target-1"],
         "type": "retrievalAccess"
       },
       {
         "actorIds": [],
         "effects": [
           {
+            "targetId": "target-1",
             "type": "retrievalIntegrity",
             "value": 0
           },
           {
+            "targetId": "target-1",
             "type": "retrievalDestroyed",
             "value": 1
           }
         ],
         "facts": ["回収対象が確保作業の失敗で破壊された"],
         "phase": "objective",
+        "targetIds": ["target-1"],
         "type": "retrievalTargetDestroyed"
       },
       {
@@ -243,6 +273,7 @@
         },
         "effects": [
           {
+            "targetId": "target-1",
             "type": "retrievalDamage",
             "value": 4
           },
@@ -252,22 +283,27 @@
             "value": 1
           },
           {
+            "targetId": "target-1",
             "type": "retrievalSecured",
             "value": 0
           },
           {
+            "targetId": "target-1",
             "type": "retrievalProtectedForTransport",
             "value": 0
           },
           {
+            "targetId": "target-1",
             "type": "retrievalSecuringDamage",
             "value": 4
           },
           {
+            "targetId": "target-1",
             "type": "retrievalIntegrity",
             "value": 0
           },
           {
+            "targetId": "target-1",
             "type": "retrievalProgress",
             "value": 30
           }
@@ -277,6 +313,7 @@
           "用具を1消費して回収作業を助けた"
         ],
         "phase": "objective",
+        "targetIds": ["target-1"],
         "type": "retrievalSecuring"
       },
       {

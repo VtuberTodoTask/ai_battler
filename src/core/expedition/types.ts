@@ -25,7 +25,7 @@ export type ExpeditionPhase =
 export type ImplementedObjectiveType =
   'investigation' | 'elimination' | 'rescue' | 'escort' | 'retrieval'
 
-export type ObjectiveType = ImplementedObjectiveType | 'retrieval' | 'survey'
+export type ObjectiveType = ImplementedObjectiveType | 'survey'
 
 export type EnvironmentType =
   | 'forest'

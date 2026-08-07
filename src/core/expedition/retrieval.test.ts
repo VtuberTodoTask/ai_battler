@@ -5,6 +5,7 @@ import { initializeExpeditionState } from './state.ts'
 import { SeededRng } from '../rng/seededRng.ts'
 import {
   makeEliminationRequest,
+  makePairedParty,
   makeParty,
   makeRequest,
   makeRetrievalParty,
@@ -13,6 +14,7 @@ import {
 import type {
   Adventurer,
   AdventurerRank,
+  AdventurerRole,
   BattleResult,
   SkillSet,
 } from '../models/types.ts'
@@ -246,7 +248,7 @@ describe('Retrieval fragility modifier', () => {
 })
 
 describe('Retrieval search and access', () => {
-  it('logs retrievalTargetAssigned exactly once per expedition', () => {
+  it('logs retrievalTargetAssigned exactly once before approach', () => {
     const request = makeRetrievalRequest('assigned', 'C', undefined, false)
     const party = makeRetrievalParty('assigned', 'C')
     const result = runExpedition(request, party)
@@ -254,10 +256,30 @@ describe('Retrieval search and access', () => {
       (l) => l.type === 'retrievalTargetAssigned',
     )
     expect(assigned).toHaveLength(1)
-    const effects = assigned[0].effects.map((e) => e.type)
-    expect(effects).toContain('retrievalIntegrity')
-    expect(effects).toContain('retrievalInitialIntegrity')
-    expect(effects).toContain('retrievalMinimumIntegrity')
+    const assignedIndex = result.state.logs.findIndex(
+      (l) => l.type === 'retrievalTargetAssigned',
+    )
+    const firstTravelIndex = result.state.logs.findIndex(
+      (l) => l.type === 'travel',
+    )
+    expect(assignedIndex).toBeLessThan(firstTravelIndex)
+
+    const effect = assigned[0].effects.find(
+      (e) => e.type === 'retrievalTargetAssigned',
+    )
+    expect(effect).toBeDefined()
+    expect(effect?.targetId).toBe(request.retrieval!.target.id)
+    expect(effect?.metadata).toMatchObject({
+      targetId: request.retrieval!.target.id,
+      targetName: request.retrieval!.target.name,
+      bulk: request.retrieval!.target.bulk,
+      handling: request.retrieval!.target.handling,
+      fragility: request.retrieval!.target.fragility,
+      initialIntegrity: request.retrieval!.target.initialIntegrity,
+      minimumAcceptableIntegrity:
+        request.retrieval!.target.minimumAcceptableIntegrity,
+    })
+    expect(assigned[0].targetIds).toEqual([request.retrieval!.target.id])
   })
 
   it('uses known location when locationKnown is true', () => {
@@ -616,6 +638,38 @@ describe('Retrieval carrier and extraction', () => {
     }
   })
 
+  it('logs retrievalCarriersAssigned with carrierIds metadata', () => {
+    const request = makeRetrievalRequest(
+      'carrier-log',
+      'C',
+      {
+        locationKnown: true,
+        accessDifficulty: 0,
+        securingDifficulty: 0,
+        extractionDifficulty: 0,
+        bulk: 'bulky',
+      },
+      false,
+      { features: [], difficulty: 'easy' },
+    )
+    const party = makeMaxSkillParty(DEFAULT_ROLES, 'carrier-log')
+    const result = runExpedition(request, party)
+    const logs = result.state.logs.filter(
+      (l) => l.type === 'retrievalCarriersAssigned',
+    )
+    expect(logs.length).toBeGreaterThanOrEqual(1)
+    const effect = logs[0].effects.find(
+      (e) => e.type === 'retrievalCarrierCount',
+    )
+    expect(effect).toBeDefined()
+    expect(effect?.metadata).toMatchObject({
+      carrierIds: expect.any(Array),
+      requiredCarrierCount: 2,
+    })
+    expect(effect?.targetId).toBe(request.retrieval!.target.id)
+    expect(logs[0].targetIds).toEqual([request.retrieval!.target.id])
+  })
+
   it('fails extraction when active party is smaller than required carriers', () => {
     const request = makeRetrievalRequest(
       'insufficient-carriers',
@@ -814,17 +868,71 @@ describe('Retrieval damage accounting and structured logs', () => {
     expect(state.currentIntegrity).toBe(expected)
   })
 
-  it('logs retrievalTargetDestroyed at most once', () => {
+  it('logs exactly one retrievalTargetDestroyed when target is destroyed', () => {
     const request = makeRetrievalRequest('destroy-once', 'C', {
-      initialIntegrity: 1,
+      initialIntegrity: 10,
       minimumAcceptableIntegrity: 1,
     })
     const party = makeRetrievalParty('destroy-once', 'C')
-    const result = runExpedition(request, party)
-    const destructionLogs = result.state.logs.filter(
+    const context = makeRetrievalContext(request, party)
+    const objective = getRetrievalObjective(context.state)
+    applyRetrievalDamage(
+      context.state,
+      objective,
+      10,
+      'test destruction',
+      'objective',
+      'securing',
+    )
+    const destructionLogs = context.state.logs.filter(
       (l) => l.type === 'retrievalTargetDestroyed',
     )
-    expect(destructionLogs.length).toBeLessThanOrEqual(1)
+    expect(destructionLogs).toHaveLength(1)
+    expect(destructionLogs[0].targetIds).toEqual([request.retrieval!.target.id])
+  })
+
+  it('logs no retrievalTargetDestroyed when target is not destroyed', () => {
+    const request = makeRetrievalRequest('no-destroy', 'C', {
+      initialIntegrity: 100,
+      minimumAcceptableIntegrity: 1,
+    })
+    const party = makeRetrievalParty('no-destroy', 'C')
+    const context = makeRetrievalContext(request, party)
+    const destructionLogs = context.state.logs.filter(
+      (l) => l.type === 'retrievalTargetDestroyed',
+    )
+    expect(destructionLogs).toHaveLength(0)
+  })
+
+  it('keeps retrievalTargetDestroyed at one when further damage is applied', () => {
+    const request = makeRetrievalRequest('destroy-once-further', 'C', {
+      initialIntegrity: 5,
+      minimumAcceptableIntegrity: 1,
+    })
+    const party = makeRetrievalParty('destroy-once-further', 'C')
+    const context = makeRetrievalContext(request, party)
+    const objective = getRetrievalObjective(context.state)
+    applyRetrievalDamage(
+      context.state,
+      objective,
+      10,
+      'test',
+      'objective',
+      'securing',
+    )
+    applyRetrievalDamage(
+      context.state,
+      objective,
+      10,
+      'test',
+      'objective',
+      'securing',
+    )
+    const destructionLogs = context.state.logs.filter(
+      (l) => l.type === 'retrievalTargetDestroyed',
+    )
+    expect(destructionLogs).toHaveLength(1)
+    expect(objective.currentIntegrity).toBe(0)
   })
 
   it('uses actual damage bounded by current integrity', () => {
@@ -848,23 +956,95 @@ describe('Retrieval damage accounting and structured logs', () => {
     expect(objective.currentIntegrity).toBe(0)
   })
 
-  it('reconstructs state from structured logs', () => {
+  it('reconstructs full state from structured logs', () => {
     const request = makeRetrievalRequest('reconstruct', 'C')
     const party = makeRetrievalParty('reconstruct', 'C')
     const result = runExpedition(request, party)
     const state = retrievalState(result)
     const logs = result.state.logs
-    const initialHp = getEffectValue(logs, 'retrievalInitialIntegrity') ?? 0
-    const finalHp = getLastEffectValue(logs, 'retrievalIntegrity') ?? 0
-    const battleExposure =
-      getEffectValue(logs, 'retrievalBattleExposureDamage') ?? 0
-    const securing = getEffectValue(logs, 'retrievalSecuringDamage') ?? 0
-    const extraction = getEffectValue(logs, 'retrievalExtractionDamage') ?? 0
-    expect(initialHp).toBe(state.initialIntegrity)
-    expect(finalHp).toBe(state.currentIntegrity)
-    expect(battleExposure).toBe(state.battleExposureDamage)
-    expect(securing).toBe(state.securingDamage)
-    expect(extraction).toBe(state.extractionDamage)
+
+    const assignedLog = logs.find((l) => l.type === 'retrievalTargetAssigned')!
+    const assignedEffect = assignedLog.effects.find(
+      (e) => e.type === 'retrievalTargetAssigned',
+    )!
+
+    const getLast = (type: string): number | undefined =>
+      getLastEffectValue(logs, type)
+
+    const getMetadata = (
+      logType: string,
+      effectType: string,
+    ): Record<string, unknown> | undefined => {
+      const log = logs.find((l) => l.type === logType)
+      return log?.effects.find((e) => e.type === effectType)?.metadata
+    }
+
+    const protectorMeta = getMetadata(
+      'retrievalProtectorAssigned',
+      'retrievalProtector',
+    ) as { protectorId?: string } | undefined
+    const carrierMeta = getMetadata(
+      'retrievalCarriersAssigned',
+      'retrievalCarrierCount',
+    ) as { carrierIds?: string[] } | undefined
+
+    const finalIntegrity = getLast('retrievalIntegrity') ?? 0
+    const reconstructed = {
+      targetId: assignedEffect.targetId,
+      targetName: assignedEffect.metadata?.targetName,
+      initialIntegrity: assignedEffect.metadata?.initialIntegrity,
+      finalIntegrity,
+      minimumAcceptableIntegrity:
+        assignedEffect.metadata?.minimumAcceptableIntegrity,
+      bulk: assignedEffect.metadata?.bulk,
+      handling: assignedEffect.metadata?.handling,
+      fragility: assignedEffect.metadata?.fragility,
+      located: Boolean(getLast('retrievalLocated')),
+      reached: Boolean(getLast('retrievalReached')),
+      secured: Boolean(getLast('retrievalSecured')),
+      protectedForTransport: Boolean(getLast('retrievalProtectedForTransport')),
+      protectorId: protectorMeta?.protectorId,
+      carrierIds: carrierMeta?.carrierIds ?? [],
+      battleExposureDamage: getLast('retrievalBattleExposureDamage') ?? 0,
+      securingDamage: getLast('retrievalSecuringDamage') ?? 0,
+      extractionDamage: getLast('retrievalExtractionDamage') ?? 0,
+      extracted: Boolean(getLast('retrievalExtracted')),
+      returned: Boolean(getLast('retrievalReturned')),
+      abandoned: Boolean(getLast('retrievalAbandoned')),
+      lostDuringReturn: Boolean(getLast('retrievalLostDuringReturn')),
+      progress: getLast('retrievalProgress') ?? 0,
+      completed:
+        Boolean(getLast('retrievalReturned')) &&
+        !getLast('retrievalDestroyed') &&
+        finalIntegrity >=
+          (assignedEffect.metadata?.minimumAcceptableIntegrity as number),
+    }
+
+    expect(reconstructed).toEqual({
+      targetId: state.targetId,
+      targetName: state.targetName,
+      initialIntegrity: state.initialIntegrity,
+      finalIntegrity: state.currentIntegrity,
+      minimumAcceptableIntegrity: state.minimumAcceptableIntegrity,
+      bulk: state.bulk,
+      handling: state.handling,
+      fragility: state.fragility,
+      located: state.located,
+      reached: state.reached,
+      secured: state.secured,
+      protectedForTransport: state.protectedForTransport,
+      protectorId: state.protectorId,
+      carrierIds: state.carrierIds,
+      battleExposureDamage: state.battleExposureDamage,
+      securingDamage: state.securingDamage,
+      extractionDamage: state.extractionDamage,
+      extracted: state.extracted,
+      returned: state.returned,
+      abandoned: state.abandoned,
+      lostDuringReturn: state.lostDuringReturn,
+      progress: state.progress,
+      completed: state.completed,
+    })
   })
 
   it('calculates progress from milestones', () => {
@@ -897,17 +1077,164 @@ describe('Retrieval damage accounting and structured logs', () => {
   })
 })
 
-function getEffectValue(
-  logs: ReturnType<typeof runExpedition>['state']['logs'],
-  type: string,
-): number | undefined {
-  for (const log of logs) {
-    for (const effect of log.effects) {
-      if (effect.type === type) return effect.value
+describe('Healer negative control', () => {
+  function makeControlledParty(
+    targetRole: AdventurerRole,
+    seedBase: string,
+  ): Adventurer[] {
+    const roles: AdventurerRole[] = [
+      'vanguard',
+      'guardian',
+      'ranger',
+      targetRole,
+    ]
+    const party = makePairedParty(roles, seedBase, 'C')
+    const maxStats = {
+      str: 100,
+      con: 100,
+      dex: 100,
+      int: 100,
+      per: 100,
+      wil: 100,
+      soc: 100,
     }
+    const maxSkills: SkillSet = {
+      melee: 100,
+      ranged: 100,
+      defense: 100,
+      tactics: 100,
+      attackMagic: 100,
+      defenseMagic: 100,
+      healing: 100,
+      scouting: 100,
+      stealth: 100,
+      trapDetection: 100,
+      trapDisarm: 100,
+      survival: 100,
+      monsterKnowledge: 100,
+      firstAid: 100,
+      leadership: 100,
+    }
+    for (const a of party) {
+      a.stats = { ...maxStats }
+      a.skills = { ...maxSkills }
+      a.maxHp = 1000
+      a.currentHp = 1000
+      a.maxMp = 1000
+      a.currentMp = 1000
+      a.morale = 100
+    }
+    return party
   }
-  return undefined
-}
+
+  it('Healer has no retrieval-specific bonus in search/access/securing/extraction', () => {
+    const contexts = [
+      {
+        environment: 'forest' as const,
+        handling: 'standard' as const,
+        bulk: 'heavy' as const,
+      },
+      {
+        environment: 'cave' as const,
+        handling: 'delicate' as const,
+        bulk: 'portable' as const,
+      },
+      {
+        environment: 'magical' as const,
+        handling: 'arcane' as const,
+        bulk: 'bulky' as const,
+      },
+    ] as const
+    for (const ctx of contexts) {
+      const seedBase = `healer-control-${ctx.environment}-${ctx.handling}`
+      const request = makeRetrievalRequest(
+        seedBase,
+        'C',
+        {
+          locationKnown: true,
+          accessDifficulty: 20,
+          securingDifficulty: 20,
+          extractionDifficulty: 20,
+          handling: ctx.handling,
+          bulk: ctx.bulk,
+        },
+        false,
+        {
+          environment: ctx.environment,
+          features: [],
+          difficulty: 'easy',
+        },
+      )
+      const healerResult = runExpedition(
+        request,
+        makeControlledParty('healer', seedBase),
+      )
+      const vanguardResult = runExpedition(
+        request,
+        makeControlledParty('vanguard', seedBase),
+      )
+      expect(healerResult.outcome).toBe(vanguardResult.outcome)
+      const healerState = retrievalState(healerResult)
+      const vanguardState = retrievalState(vanguardResult)
+      expect(healerState.located).toBe(vanguardState.located)
+      expect(healerState.reached).toBe(vanguardState.reached)
+      expect(healerState.secured).toBe(vanguardState.secured)
+      expect(healerState.extracted).toBe(vanguardState.extracted)
+      expect(healerState.currentIntegrity).toBe(vanguardState.currentIntegrity)
+    }
+  })
+
+  it('Healer has no retrieval-specific bonus in battle protection', () => {
+    const seedBase = 'healer-battle-protection'
+    const request = makeRetrievalRequest(
+      seedBase,
+      'C',
+      {
+        locationKnown: true,
+        accessDifficulty: 0,
+        securingDifficulty: 0,
+        protectionDifficulty: 15,
+      },
+      false,
+      { features: [], difficulty: 'easy' },
+    )
+    const healerContext = makeRetrievalContext(
+      request,
+      makeControlledParty('healer', seedBase),
+    )
+    const vanguardContext = makeRetrievalContext(
+      request,
+      makeControlledParty('vanguard', seedBase),
+    )
+    const healerObj = getRetrievalObjective(healerContext.state)
+    const vanguardObj = getRetrievalObjective(vanguardContext.state)
+    healerObj.located = true
+    healerObj.reached = true
+    vanguardObj.located = true
+    vanguardObj.reached = true
+    const battleResult = {
+      outcome: 'costlyVictory',
+      rounds: 8,
+    } as BattleResult
+    resolveRetrievalBattleExposure({
+      ...healerContext,
+      battleId: 'b1',
+      battleResult,
+      battleRecord: { id: 'b1' } as unknown as ExpeditionBattleRecord,
+      initialEnemyIds: [],
+    })
+    resolveRetrievalBattleExposure({
+      ...vanguardContext,
+      battleId: 'b1',
+      battleResult,
+      battleRecord: { id: 'b1' } as unknown as ExpeditionBattleRecord,
+      initialEnemyIds: [],
+    })
+    expect(healerObj.battleExposureDamage).toBe(
+      vanguardObj.battleExposureDamage,
+    )
+  })
+})
 
 function getLastEffectValue(
   logs: ReturnType<typeof runExpedition>['state']['logs'],

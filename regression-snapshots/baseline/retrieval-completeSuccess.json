@@ -67,6 +67,62 @@
         "type": "routePlanning"
       },
       {
+        "actorIds": [],
+        "effects": [
+          {
+            "metadata": {
+              "bulk": "portable",
+              "fragility": "standard",
+              "handling": "standard",
+              "initialIntegrity": 80,
+              "minimumAcceptableIntegrity": 60,
+              "targetId": "target-1",
+              "targetName": "回収対象"
+            },
+            "targetId": "target-1",
+            "type": "retrievalTargetAssigned",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalIntegrity",
+            "value": 80
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalInitialIntegrity",
+            "value": 80
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalMinimumIntegrity",
+            "value": 60
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalLocated",
+            "value": 1
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalReached",
+            "value": 0
+          },
+          {
+            "targetId": "target-1",
+            "type": "retrievalProgress",
+            "value": 15
+          }
+        ],
+        "facts": [
+          "回収対象「回収対象」の回収依頼を引き受けた",
+          "bulk=portable, handling=standard, fragility=standard"
+        ],
+        "phase": "preparation",
+        "targetIds": ["target-1"],
+        "type": "retrievalTargetAssigned"
+      },
+      {
         "actorIds": [
           "S-vanguard-s1-vanguard-0",
           "S-guardian-s1-guardian-1",
@@ -138,51 +194,19 @@
         "actorIds": [],
         "effects": [
           {
-            "type": "retrievalIntegrity",
-            "value": 80
-          },
-          {
-            "type": "retrievalInitialIntegrity",
-            "value": 80
-          },
-          {
-            "type": "retrievalMinimumIntegrity",
-            "value": 60
-          },
-          {
+            "targetId": "target-1",
             "type": "retrievalLocated",
             "value": 1
           },
           {
-            "type": "retrievalReached",
-            "value": 0
-          },
-          {
-            "type": "retrievalProgress",
-            "value": 15
-          }
-        ],
-        "facts": [
-          "回収対象「回収対象」の回収依頼を引き受けた",
-          "bulk=portable, handling=standard, fragility=standard"
-        ],
-        "phase": "preparation",
-        "type": "retrievalTargetAssigned"
-      },
-      {
-        "actorIds": [],
-        "effects": [
-          {
-            "type": "retrievalLocated",
-            "value": 1
-          },
-          {
+            "targetId": "target-1",
             "type": "retrievalProgress",
             "value": 15
           }
         ],
         "facts": ["事前情報から回収対象の位置は既に判明していた"],
         "phase": "contact",
+        "targetIds": ["target-1"],
         "type": "retrievalTargetLocated"
       },
       {
@@ -199,16 +223,19 @@
         },
         "effects": [
           {
+            "targetId": "target-1",
             "type": "retrievalReached",
             "value": 1
           },
           {
+            "targetId": "target-1",
             "type": "retrievalProgress",
             "value": 30
           }
         ],
         "facts": ["トール スカイが回収対象のもとへ到達した"],
         "phase": "contact",
+        "targetIds": ["target-1"],
         "type": "retrievalAccess"
       },
       {
@@ -230,22 +257,27 @@
             "value": 1
           },
           {
+            "targetId": "target-1",
             "type": "retrievalSecured",
             "value": 1
           },
           {
+            "targetId": "target-1",
             "type": "retrievalProtectedForTransport",
             "value": 1
           },
           {
+            "targetId": "target-1",
             "type": "retrievalSecuringDamage",
             "value": 0
           },
           {
+            "targetId": "target-1",
             "type": "retrievalIntegrity",
             "value": 80
           },
           {
+            "targetId": "target-1",
             "type": "retrievalProgress",
             "value": 55
           }
@@ -255,7 +287,26 @@
           "用具を1消費して回収作業を助けた"
         ],
         "phase": "objective",
+        "targetIds": ["target-1"],
         "type": "retrievalSecuring"
+      },
+      {
+        "actorIds": ["S-vanguard-s1-vanguard-0"],
+        "effects": [
+          {
+            "metadata": {
+              "carrierIds": ["S-vanguard-s1-vanguard-0"],
+              "requiredCarrierCount": 1
+            },
+            "targetId": "target-1",
+            "type": "retrievalCarrierCount",
+            "value": 1
+          }
+        ],
+        "facts": ["1名を回収対象の運搬担当に指定した"],
+        "phase": "return",
+        "targetIds": ["target-1"],
+        "type": "retrievalCarriersAssigned"
       },
       {
         "actorIds": [
@@ -272,18 +323,22 @@
         },
         "effects": [
           {
+            "targetId": "target-1",
             "type": "retrievalExtracted",
             "value": 1
           },
           {
+            "targetId": "target-1",
             "type": "retrievalExtractionDamage",
             "value": 0
           },
           {
+            "targetId": "target-1",
             "type": "retrievalIntegrity",
             "value": 80
           },
           {
+            "targetId": "target-1",
             "type": "retrievalProgress",
             "value": 75
           }
@@ -293,6 +348,7 @@
           "トール スカイは回収対象を危険地帯から搬出した"
         ],
         "phase": "return",
+        "targetIds": ["target-1"],
         "type": "retrievalExtraction"
       },
       {
@@ -343,20 +399,24 @@
         "actorIds": ["S-vanguard-s1-vanguard-0"],
         "effects": [
           {
+            "targetId": "target-1",
             "type": "retrievalReturned",
             "value": 1
           },
           {
+            "targetId": "target-1",
             "type": "retrievalIntegrity",
             "value": 80
           },
           {
+            "targetId": "target-1",
             "type": "retrievalProgress",
             "value": 100
           }
         ],
         "facts": ["回収対象を酒場まで持ち帰った"],
         "phase": "return",
+        "targetIds": ["target-1"],
         "type": "retrievalReturned"
       },
       {

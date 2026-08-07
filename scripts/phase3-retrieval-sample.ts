@@ -1,10 +1,19 @@
 import { writeFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { runExpedition } from '../src/core/expedition/expedition.ts'
 import { makeParty } from '../src/core/expedition/regression.ts'
 import { makeRetrievalRequest } from '../src/core/expedition/test-utils.ts'
 import type { RetrievalObjectiveState } from '../src/core/expedition/types.ts'
 
-interface Case {
+function isMainModule(): boolean {
+  if (!process.argv[1]) return false
+  const mainPath = resolve(process.argv[1])
+  const modulePath = fileURLToPath(import.meta.url)
+  return mainPath === modulePath
+}
+
+export interface SampleCase {
   id: string
   seed: string
   rank: 'C' | 'D' | 'E' | 'S'
@@ -14,7 +23,7 @@ interface Case {
   description: string
 }
 
-const cases: Case[] = [
+export const sampleCases: SampleCase[] = [
   {
     id: 'A',
     seed: 's1',
@@ -104,7 +113,7 @@ const cases: Case[] = [
   },
 ]
 
-function runCase(c: Case) {
+export function runSampleCase(c: SampleCase) {
   const request = makeRetrievalRequest(
     c.seed,
     c.rank,
@@ -119,50 +128,72 @@ function runCase(c: Case) {
   )
   const result = runExpedition(request, party)
   const objective = result.state.objectiveState as RetrievalObjectiveState
-  return { result, objective }
+  return { result, objective, request }
 }
 
-const sections = cases.map((c) => {
-  const { result, objective } = runCase(c)
-  const logSummary = result.state.logs
-    .filter(
-      (l) =>
-        l.type.startsWith('retrieval') ||
-        l.type === 'battleResolved' ||
-        l.type === 'travel' ||
-        l.type === 'expeditionOutcome',
+export function generatePhase3RetrievalSample(): string {
+  const sections = sampleCases.map((c) => {
+    const { result, objective, request } = runSampleCase(c)
+    const targetId = request.retrieval!.target.id
+    const carrierIds = objective.carrierIds
+    const logSummary = result.state.logs
+      .filter(
+        (l) =>
+          l.type.startsWith('retrieval') ||
+          l.type === 'battleResolved' ||
+          l.type === 'travel' ||
+          l.type === 'expeditionOutcome',
+      )
+      .map((l) => `- ${l.phase}: ${l.type} / ${l.facts[0] ?? '(no fact)'}`)
+      .join('\n')
+    const effects = result.state.logs
+      .flatMap((l) => l.effects)
+      .filter((e) => e.type.startsWith('retrieval'))
+      .map((e) => `${e.type}=${e.value}`)
+      .join(', ')
+    const assignedLog = result.state.logs.find(
+      (l) => l.type === 'retrievalTargetAssigned',
     )
-    .map((l) => `- ${l.phase}: ${l.type} / ${l.facts[0] ?? '(no fact)'}`)
-    .join('\n')
-  const effects = result.state.logs
-    .flatMap((l) => l.effects)
-    .filter((e) => e.type.startsWith('retrieval'))
-    .map((e) => `${e.type}=${e.value}`)
-    .join(', ')
-  return `## ケース ${c.id}: ${c.description}
+    const assignedEffect = assignedLog?.effects.find(
+      (e) => e.type === 'retrievalTargetAssigned',
+    )
+    return `## ケース ${c.id}: ${c.description}
 
 - **seed**: ${c.seed}
 - **rank**: ${c.rank}
 - **battle**: ${c.battle ? 'enabled' : 'disabled'}
 - **遠征結果**: ${result.outcome}
+- **targetId**: ${targetId}
 - **対象**: ${objective.targetName}
+- **bulk**: ${objective.bulk}
+- **handling**: ${objective.handling}
+- **fragility**: ${objective.fragility}
 - **initialIntegrity**: ${objective.initialIntegrity}
 - **minimumAcceptableIntegrity**: ${objective.minimumAcceptableIntegrity}
 - **currentIntegrity**: ${objective.currentIntegrity}
+- **carrierIds**: [${carrierIds.join(', ')}]
 - **状態**: located=${objective.located}, reached=${objective.reached}, secured=${objective.secured}, extracted=${objective.extracted}, returned=${objective.returned}
 - **進捗**: ${objective.progress}%
+- **retrievalTargetAssigned index**: ${result.state.logs.findIndex((l) => l.type === 'retrievalTargetAssigned')}
+- **retrievalTargetAssigned structured metadata**:
+  - targetId: ${assignedEffect?.metadata?.targetId}
+  - targetName: ${assignedEffect?.metadata?.targetName}
+  - bulk: ${assignedEffect?.metadata?.bulk}
+  - handling: ${assignedEffect?.metadata?.handling}
+  - fragility: ${assignedEffect?.metadata?.fragility}
 - **主要ログ**:
 ${logSummary}
 - **retrieval effects**: ${effects}
 `
-})
+  })
 
-const report = `# Phase 3.5 回収依頼（retrieval）サンプル
+  return `# Phase 3.5 回収依頼（retrieval）サンプル
 
 ${sections.join('\n---\n\n')}`
+}
 
-writeFileSync(
-  '/home/ubuntu/repos/ai_battler/PHASE3_RETRIEVAL_SAMPLE.md',
-  report,
-)
-console.log('Generated PHASE3_RETRIEVAL_SAMPLE.md')
+if (isMainModule()) {
+  const report = generatePhase3RetrievalSample()
+  writeFileSync('PHASE3_RETRIEVAL_SAMPLE.md', report)
+  console.log('Generated PHASE3_RETRIEVAL_SAMPLE.md')
+}

@@ -126,9 +126,19 @@ export function applyRetrievalDamage(
         [],
         [`${objective.targetName}が${cause}で破壊された`],
         [
-          { type: 'retrievalIntegrity', value: 0 },
-          { type: 'retrievalDestroyed', value: 1 },
+          {
+            type: 'retrievalIntegrity',
+            value: 0,
+            targetId: objective.targetId,
+          },
+          {
+            type: 'retrievalDestroyed',
+            value: 1,
+            targetId: objective.targetId,
+          },
         ],
+        undefined,
+        [objective.targetId],
       ),
     )
   }
@@ -349,22 +359,53 @@ function retrievalTargetAssignedLog(context: ExpeditionExecutionContext): void {
         `bulk=${target.bulk}, handling=${target.handling}, fragility=${target.fragility}`,
       ],
       [
-        { type: 'retrievalIntegrity', value: objective.currentIntegrity },
+        {
+          type: 'retrievalTargetAssigned',
+          value: 1,
+          targetId: objective.targetId,
+          metadata: {
+            targetId: objective.targetId,
+            targetName: objective.targetName,
+            bulk: objective.bulk,
+            handling: objective.handling,
+            fragility: objective.fragility,
+            initialIntegrity: objective.initialIntegrity,
+            minimumAcceptableIntegrity: objective.minimumAcceptableIntegrity,
+          },
+        },
+        {
+          type: 'retrievalIntegrity',
+          value: objective.currentIntegrity,
+          targetId: objective.targetId,
+        },
         {
           type: 'retrievalInitialIntegrity',
           value: objective.initialIntegrity,
+          targetId: objective.targetId,
         },
         {
           type: 'retrievalMinimumIntegrity',
           value: objective.minimumAcceptableIntegrity,
+          targetId: objective.targetId,
         },
-        { type: 'retrievalLocated', value: objective.located ? 1 : 0 },
-        { type: 'retrievalReached', value: objective.reached ? 1 : 0 },
+        {
+          type: 'retrievalLocated',
+          value: objective.located ? 1 : 0,
+          targetId: objective.targetId,
+        },
+        {
+          type: 'retrievalReached',
+          value: objective.reached ? 1 : 0,
+          targetId: objective.targetId,
+        },
         {
           type: 'retrievalProgress',
           value: calculateRetrievalProgress(objective),
+          targetId: objective.targetId,
         },
       ],
+      undefined,
+      [objective.targetId],
     ),
   )
 }
@@ -429,10 +470,15 @@ export function runRetrievalSearch(
     )
   }
 
-  effects.push({ type: 'retrievalLocated', value: objective.located ? 1 : 0 })
+  effects.push({
+    type: 'retrievalLocated',
+    value: objective.located ? 1 : 0,
+    targetId: objective.targetId,
+  })
   effects.push({
     type: 'retrievalProgress',
     value: calculateRetrievalProgress(objective),
+    targetId: objective.targetId,
   })
 
   addLog(
@@ -449,6 +495,7 @@ export function runRetrievalSearch(
         roll,
         result,
       },
+      [objective.targetId],
     ),
   )
 }
@@ -467,12 +514,15 @@ function runInitialRetrievalSearch(context: ExpeditionExecutionContext): void {
         [],
         [`事前情報から${objective.targetName}の位置は既に判明していた`],
         [
-          { type: 'retrievalLocated', value: 1 },
+          { type: 'retrievalLocated', value: 1, targetId: objective.targetId },
           {
             type: 'retrievalProgress',
             value: calculateRetrievalProgress(objective),
+            targetId: objective.targetId,
           },
         ],
+        undefined,
+        [objective.targetId],
       ),
     )
     return
@@ -548,10 +598,15 @@ export function runRetrievalAccess(
     }
   }
 
-  effects.push({ type: 'retrievalReached', value: objective.reached ? 1 : 0 })
+  effects.push({
+    type: 'retrievalReached',
+    value: objective.reached ? 1 : 0,
+    targetId: objective.targetId,
+  })
   effects.push({
     type: 'retrievalProgress',
     value: calculateRetrievalProgress(objective),
+    targetId: objective.targetId,
   })
 
   addLog(
@@ -568,6 +623,7 @@ export function runRetrievalAccess(
         roll,
         result,
       },
+      [objective.targetId],
     ),
   )
 }
@@ -616,7 +672,16 @@ function assignRetrievalProtector(context: ExpeditionExecutionContext): void {
       [
         `${protector.name}（${protector.role}）が${objective.targetName}の保護担当になった`,
       ],
-      [{ type: 'retrievalProtector', value: 1, targetId: protector.id }],
+      [
+        {
+          type: 'retrievalProtector',
+          value: 1,
+          targetId: objective.targetId,
+          metadata: { protectorId: protector.id },
+        },
+      ],
+      undefined,
+      [objective.targetId],
     ),
   )
 }
@@ -680,29 +745,40 @@ export function resolveRetrievalBattleExposure(
 
   const facts: string[] = []
   if (result === 'criticalSuccess' || result === 'success') {
-    facts.push(`${primary.name}が${objective.targetName}を戦闘から守り切った`)
+    facts.push(
+      `${primary.name}が${objective.targetName}の保護を担当した。戦闘中、回収対象への追加損傷は発生しなかった`,
+    )
   } else if (result === 'partialSuccess') {
     facts.push(
-      `${primary.name}は${objective.targetName}を守ったが、${actual}の損傷を受けた`,
+      `${primary.name}が${objective.targetName}の保護を担当した。戦闘中に回収対象へ${actual}の追加損傷が記録された`,
     )
   } else if (result === 'failure') {
     facts.push(
-      `${primary.name}は${objective.targetName}を守りきれず、${actual}の損傷を負わせた`,
+      `${primary.name}が${objective.targetName}の保護を担当した。保護判定の結果、回収対象に${actual}の追加損傷が記録された`,
     )
   } else {
     facts.push(
-      `${primary.name}は${objective.targetName}を守れず、${actual}の重大な損傷を負わせた`,
+      `${primary.name}が${objective.targetName}の保護を担当した。保護判定の結果、回収対象に${actual}の重大な追加損傷が記録された`,
     )
   }
 
   const effects: ExpeditionEffect[] = [
-    { type: 'retrievalDamage', value: actual },
-    { type: 'retrievalIntegrity', value: objective.currentIntegrity },
+    { type: 'retrievalDamage', value: actual, targetId: objective.targetId },
+    {
+      type: 'retrievalIntegrity',
+      value: objective.currentIntegrity,
+      targetId: objective.targetId,
+    },
     {
       type: 'retrievalBattleExposureDamage',
       value: objective.battleExposureDamage,
+      targetId: objective.targetId,
     },
-    { type: 'retrievalProgress', value: calculateRetrievalProgress(objective) },
+    {
+      type: 'retrievalProgress',
+      value: calculateRetrievalProgress(objective),
+      targetId: objective.targetId,
+    },
   ]
 
   addLog(
@@ -719,6 +795,7 @@ export function resolveRetrievalBattleExposure(
         roll,
         result,
       },
+      [objective.targetId],
     ),
   )
 }
@@ -753,22 +830,6 @@ function securingSkillAndPreferredRole(
   }
 }
 
-function securingRoleBonus(
-  party: Adventurer[],
-  state: ExpeditionState,
-  handling: RetrievalObjectiveState['handling'],
-): number {
-  const active = getActiveParty(party, state)
-  switch (handling) {
-    case 'standard':
-      return active.some((a) => a.role === 'support') ? 5 : 0
-    case 'delicate':
-      return active.some((a) => a.role === 'scout') ? 5 : 0
-    case 'arcane':
-      return active.some((a) => a.role === 'mage') ? 5 : 0
-  }
-}
-
 function supportBonus(
   party: Adventurer[],
   state: ExpeditionState,
@@ -798,7 +859,6 @@ export function runRetrievalSecuring(
     objective.handling,
   )
 
-  const roleBonus = securingRoleBonus(party, state, objective.handling)
   const support = supportBonus(party, state, objective.handling)
   const hasTools = state.supplies.tools >= 1
   const toolsBonus = hasTools ? 10 : 0
@@ -806,7 +866,6 @@ export function runRetrievalSecuring(
   const difficultyModifier =
     target.securingDifficulty +
     retrievalFragilityModifier(objective.fragility) -
-    roleBonus -
     support -
     toolsBonus
 
@@ -845,7 +904,11 @@ export function runRetrievalSecuring(
     facts.push(
       `${primary.name}は${objective.targetName}を確保したが、${actual}の損傷を受けた`,
     )
-    effects.push({ type: 'retrievalDamage', value: actual })
+    effects.push({
+      type: 'retrievalDamage',
+      value: actual,
+      targetId: objective.targetId,
+    })
   } else if (result === 'failure') {
     objective.secured = false
     objective.protectedForTransport = false
@@ -864,7 +927,11 @@ export function runRetrievalSecuring(
     facts.push(
       `${primary.name}は${objective.targetName}の確保に失敗し、${actual}の損傷を与えた`,
     )
-    effects.push({ type: 'retrievalDamage', value: actual })
+    effects.push({
+      type: 'retrievalDamage',
+      value: actual,
+      targetId: objective.targetId,
+    })
   }
 
   if (isRetrievalTargetDestroyed(objective)) {
@@ -883,22 +950,30 @@ export function runRetrievalSecuring(
     effects.push({ type: 'supplyConsume', value: 1, targetId: 'tools' })
   }
 
-  effects.push({ type: 'retrievalSecured', value: objective.secured ? 1 : 0 })
+  effects.push({
+    type: 'retrievalSecured',
+    value: objective.secured ? 1 : 0,
+    targetId: objective.targetId,
+  })
   effects.push({
     type: 'retrievalProtectedForTransport',
     value: objective.protectedForTransport ? 1 : 0,
+    targetId: objective.targetId,
   })
   effects.push({
     type: 'retrievalSecuringDamage',
     value: objective.securingDamage,
+    targetId: objective.targetId,
   })
   effects.push({
     type: 'retrievalIntegrity',
     value: objective.currentIntegrity,
+    targetId: objective.targetId,
   })
   effects.push({
     type: 'retrievalProgress',
     value: calculateRetrievalProgress(objective),
+    targetId: objective.targetId,
   })
 
   addLog(
@@ -915,6 +990,7 @@ export function runRetrievalSecuring(
         roll,
         result,
       },
+      [objective.targetId],
     ),
   )
 }
@@ -1008,10 +1084,18 @@ export function prepareRetrievalExtraction(
           `回収対象を運ぶには${required}名の運搬担当が必要だが、活動可能な冒険者が${active.length}名しかいなかった`,
         ],
         [
-          { type: 'retrievalCarrierCount', value: 0 },
-          { type: 'retrievalRequiredCarriers', value: required },
-          { type: 'retrievalExtracted', value: 0 },
+          {
+            type: 'retrievalCarrierCount',
+            value: 0,
+            targetId: objective.targetId,
+            metadata: {
+              carrierIds: [],
+              requiredCarrierCount: required,
+            },
+          },
         ],
+        undefined,
+        [objective.targetId],
       ),
     )
     return
@@ -1019,6 +1103,29 @@ export function prepareRetrievalExtraction(
 
   const carriers = selectCarriers(active, objective)
   objective.carrierIds = carriers.map((a) => a.id)
+
+  addLog(
+    state,
+    logEntry(
+      'return',
+      'retrievalCarriersAssigned',
+      carriers.map((a) => a.id),
+      [`${carriers.length}名を回収対象の運搬担当に指定した`],
+      [
+        {
+          type: 'retrievalCarrierCount',
+          value: carriers.length,
+          targetId: objective.targetId,
+          metadata: {
+            carrierIds: carriers.map((a) => a.id),
+            requiredCarrierCount: required,
+          },
+        },
+      ],
+      undefined,
+      [objective.targetId],
+    ),
+  )
 
   const target = getRetrievalConfig(request).target
   const rng = retrievalRng(request, 'extraction')
@@ -1073,7 +1180,11 @@ export function prepareRetrievalExtraction(
     facts.push(
       `${primary.name}は${objective.targetName}を搬出したが、${actual}の損傷を受けた`,
     )
-    effects.push({ type: 'retrievalDamage', value: actual })
+    effects.push({
+      type: 'retrievalDamage',
+      value: actual,
+      targetId: objective.targetId,
+    })
   } else if (result === 'failure') {
     objective.extracted = false
     facts.push(`${primary.name}は${objective.targetName}を搬出できなかった`)
@@ -1091,7 +1202,11 @@ export function prepareRetrievalExtraction(
     facts.push(
       `${primary.name}は${objective.targetName}の搬出に失敗し、${actual}の損傷を与えた`,
     )
-    effects.push({ type: 'retrievalDamage', value: actual })
+    effects.push({
+      type: 'retrievalDamage',
+      value: actual,
+      targetId: objective.targetId,
+    })
   }
 
   if (isRetrievalTargetDestroyed(objective)) {
@@ -1101,18 +1216,22 @@ export function prepareRetrievalExtraction(
   effects.push({
     type: 'retrievalExtracted',
     value: objective.extracted ? 1 : 0,
+    targetId: objective.targetId,
   })
   effects.push({
     type: 'retrievalExtractionDamage',
     value: objective.extractionDamage,
+    targetId: objective.targetId,
   })
   effects.push({
     type: 'retrievalIntegrity',
     value: objective.currentIntegrity,
+    targetId: objective.targetId,
   })
   effects.push({
     type: 'retrievalProgress',
     value: calculateRetrievalProgress(objective),
+    targetId: objective.targetId,
   })
 
   addLog(
@@ -1133,6 +1252,7 @@ export function prepareRetrievalExtraction(
         roll,
         result,
       },
+      [objective.targetId],
     ),
   )
 }
@@ -1160,13 +1280,20 @@ export function resolveRetrievalReturn(
         objective.carrierIds,
         [`${objective.targetName}を酒場まで持ち帰った`],
         [
-          { type: 'retrievalReturned', value: 1 },
-          { type: 'retrievalIntegrity', value: objective.currentIntegrity },
+          { type: 'retrievalReturned', value: 1, targetId: objective.targetId },
+          {
+            type: 'retrievalIntegrity',
+            value: objective.currentIntegrity,
+            targetId: objective.targetId,
+          },
           {
             type: 'retrievalProgress',
             value: calculateRetrievalProgress(objective),
+            targetId: objective.targetId,
           },
         ],
+        undefined,
+        [objective.targetId],
       ),
     )
   } else if (
@@ -1185,13 +1312,24 @@ export function resolveRetrievalReturn(
         [],
         [`遠征隊が帰還できず、${objective.targetName}の行方がわからなくなった`],
         [
-          { type: 'retrievalLostDuringReturn', value: 1 },
-          { type: 'retrievalIntegrity', value: objective.currentIntegrity },
+          {
+            type: 'retrievalLostDuringReturn',
+            value: 1,
+            targetId: objective.targetId,
+          },
+          {
+            type: 'retrievalIntegrity',
+            value: objective.currentIntegrity,
+            targetId: objective.targetId,
+          },
           {
             type: 'retrievalProgress',
             value: calculateRetrievalProgress(objective),
+            targetId: objective.targetId,
           },
         ],
+        undefined,
+        [objective.targetId],
       ),
     )
   } else if (
@@ -1210,13 +1348,24 @@ export function resolveRetrievalReturn(
         [],
         [`${objective.targetName}を回収できずに現場に置き去りにした`],
         [
-          { type: 'retrievalAbandoned', value: 1 },
-          { type: 'retrievalIntegrity', value: objective.currentIntegrity },
+          {
+            type: 'retrievalAbandoned',
+            value: 1,
+            targetId: objective.targetId,
+          },
+          {
+            type: 'retrievalIntegrity',
+            value: objective.currentIntegrity,
+            targetId: objective.targetId,
+          },
           {
             type: 'retrievalProgress',
             value: calculateRetrievalProgress(objective),
+            targetId: objective.targetId,
           },
         ],
+        undefined,
+        [objective.targetId],
       ),
     )
   } else {
@@ -1255,9 +1404,19 @@ export function runRetrievalObjective(
         [],
         [`${objective.targetName}は確保前に破壊された`],
         [
-          { type: 'retrievalDestroyed', value: 1 },
-          { type: 'retrievalIntegrity', value: 0 },
+          {
+            type: 'retrievalDestroyed',
+            value: 1,
+            targetId: objective.targetId,
+          },
+          {
+            type: 'retrievalIntegrity',
+            value: 0,
+            targetId: objective.targetId,
+          },
         ],
+        undefined,
+        [objective.targetId],
       ),
     )
     return
@@ -1356,11 +1515,13 @@ export const retrievalHandler: ExpeditionObjectiveHandler = {
   },
   validateRequest: validateRetrievalRequest,
   initializeObjectiveState: initializeRetrievalObjectiveState,
+  afterPreparation(context: ExpeditionExecutionContext): void {
+    retrievalTargetAssignedLog(context)
+  },
   beforeBattle(context: ExpeditionExecutionContext): void {
     const { request, state } = context
     const objective = getRetrievalObjective(state)
     const battleWillOccur = request.battle?.enabled === true
-    retrievalTargetAssignedLog(context)
     runInitialRetrievalSearch(context)
     if (objective.located && !objective.reached) {
       runRetrievalAccess(context, 'access', getSearchAccessBonus(state))
