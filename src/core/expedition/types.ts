@@ -10,6 +10,7 @@ import type {
   StatusEffect,
 } from '../models/types.ts'
 import type { EncounterPlan } from '../generators/encounterGenerator.ts'
+import type { SeededRng } from '../rng/seededRng.ts'
 
 export type ExpeditionPhase =
   | 'preparation'
@@ -154,6 +155,9 @@ export interface EliminationObjectiveState {
   completed: boolean
 }
 
+export type ExpeditionObjectiveState =
+  InvestigationObjectiveState | EliminationObjectiveState
+
 export interface ExpeditionState {
   currentPhase: ExpeditionPhase
   elapsedTime: number
@@ -178,7 +182,7 @@ export interface ExpeditionState {
   battleEntrySnapshot?: BattleEntryConditions
   battles: ExpeditionBattleRecord[]
   battleOutcome?: BattleOutcome
-  objectiveState?: InvestigationObjectiveState | EliminationObjectiveState
+  objectiveState?: ExpeditionObjectiveState
   metadata?: Record<string, unknown>
 }
 
@@ -269,4 +273,50 @@ export interface ExpeditionResult {
   outcome: ExpeditionOutcome
   state: ExpeditionState
   party: Adventurer[]
+}
+
+export interface ExpeditionExecutionContext {
+  request: ExpeditionRequest
+  party: Adventurer[]
+  state: ExpeditionState
+  rng: SeededRng
+}
+
+export type ExpeditionOutcomeContext = ExpeditionExecutionContext
+
+export interface ExpeditionFlowDefinition {
+  preparation: boolean
+  approach: boolean
+  exploration: boolean
+  battle: 'none' | 'optional' | 'required'
+  objective: boolean
+  return: boolean
+  aftermath: boolean
+}
+
+export interface ExpeditionBattleResolvedContext extends ExpeditionExecutionContext {
+  battleId: string
+  battleResult: BattleResult
+  battleRecord: ExpeditionBattleRecord
+  initialEnemyIds: string[]
+}
+
+export interface ExpeditionBattleExecutionResult {
+  battleId: string
+  battleResult: BattleResult
+  battleRecord: ExpeditionBattleRecord
+  initialEnemyIds: string[]
+}
+
+export interface ExpeditionObjectiveHandler {
+  flow: ExpeditionFlowDefinition
+  validateRequest(request: ExpeditionRequest): void
+  initializeObjectiveState(request: ExpeditionRequest): ExpeditionObjectiveState
+  onBattleResolved?(context: ExpeditionBattleResolvedContext): void
+  runObjective(context: ExpeditionExecutionContext): void
+  finalizeObjectiveState(context: ExpeditionExecutionContext): {
+    objectiveCompleted: boolean
+    progressFact: string
+  }
+  determineOutcome(context: ExpeditionOutcomeContext): ExpeditionOutcome
 }

@@ -1,14 +1,191 @@
-import { SeededRng } from '../rng/seededRng.ts'
-import type { Adventurer, SkillName } from '../models/types.ts'
-import type {
+import {
+  Adventurer,
+  AdventurerRank,
+  AdventurerRole,
+  Difficulty,
+  SkillName,
+} from '../models/types.ts'
+import {
   CheckResult,
   DiscoveredInformation,
-  ExpeditionCheck,
-  ExpeditionEffect,
-  ExpeditionLogEntry,
+  ExpeditionFeature,
   ExpeditionPhase,
+  ExpeditionRequest,
+  ExpeditionState,
 } from './types.ts'
+import { SeededRng } from '../rng/seededRng.ts'
 import { clamp } from '../util.ts'
+import { getActiveParty, hasFeature } from './state.ts'
+import { requestFeaturesFromState } from './information.ts'
+
+export const EXPEDITION_RANK_PENALTY: Record<AdventurerRank, number> = {
+  E: 0,
+  D: 4,
+  C: 8,
+  B: 12,
+  A: 16,
+  S: 20,
+}
+
+export function rankPenaltyForRequest(request: ExpeditionRequest): number {
+  return EXPEDITION_RANK_PENALTY[request.rank]
+}
+
+export function featurePenaltyForSkill(
+  features: ExpeditionFeature[],
+  skill: SkillName,
+): number {
+  let penalty = 0
+  if (
+    (skill === 'trapDetection' || skill === 'scouting') &&
+    (hasFeature(features, 'traps') || hasFeature(features, 'ambushRisk'))
+  ) {
+    penalty += 10
+  }
+  if (
+    (skill === 'scouting' || skill === 'survival') &&
+    (hasFeature(features, 'poorVisibility') ||
+      hasFeature(features, 'navigationDifficulty'))
+  ) {
+    penalty += 10
+  }
+  if (
+    (skill === 'survival' || skill === 'melee') &&
+    hasFeature(features, 'unstableTerrain')
+  ) {
+    penalty += skill === 'melee' ? 5 : 10
+  }
+  if (skill === 'firstAid' && hasFeature(features, 'poisonRisk')) {
+    penalty += 10
+  }
+  if (skill === 'leadership' && hasFeature(features, 'retreatDifficulty')) {
+    penalty += 10
+  }
+  if (skill === 'monsterKnowledge' && hasFeature(features, 'flyingEnemies')) {
+    penalty += 5
+  }
+  return penalty
+}
+
+export function roleBonusForSkill(
+  party: Adventurer[],
+  skill: SkillName,
+): number {
+  const mapping: Partial<Record<SkillName, AdventurerRole[]>> = {
+    trapDetection: ['scout'],
+    trapDisarm: ['scout'],
+    stealth: ['scout'],
+    scouting: ['scout', 'ranger'],
+    survival: ['ranger', 'scout'],
+    melee: ['vanguard', 'guardian'],
+    defense: ['guardian', 'vanguard'],
+    firstAid: ['healer'],
+    healing: ['healer'],
+    leadership: ['support'],
+    tactics: ['support', 'vanguard'],
+    monsterKnowledge: ['mage'],
+    attackMagic: ['mage'],
+    defenseMagic: ['mage'],
+    ranged: ['ranger'],
+  }
+  const roles = mapping[skill] ?? []
+  return Math.min(
+    roles.reduce((sum, role) => sum + roleSkillBonus(party, role, skill), 0),
+    25,
+  )
+}
+
+export function absencePenaltyForSkill(
+  party: Adventurer[],
+  skill: SkillName,
+): number {
+  const mapping: Partial<Record<SkillName, AdventurerRole[]>> = {
+    trapDetection: ['scout'],
+    scouting: ['scout', 'ranger'],
+    survival: ['ranger'],
+    melee: ['vanguard'],
+    firstAid: ['healer'],
+    healing: ['healer'],
+    leadership: ['support'],
+    monsterKnowledge: ['mage'],
+    defenseMagic: ['mage'],
+  }
+  const roles = mapping[skill] ?? []
+  let penalty = 0
+  for (const role of roles) {
+    if (!hasRole(party, role)) penalty += 8
+  }
+  return penalty
+}
+
+export function resolveSkillCheck(
+  rng: SeededRng,
+  party: Adventurer[],
+  state: ExpeditionState,
+  phase: ExpeditionPhase,
+  skill: SkillName,
+  preferredRole: AdventurerRole | undefined,
+  difficultyModifier: number,
+  rankPenalty: number,
+  toolCost = 0,
+): {
+  result: CheckResult
+  primary: Adventurer
+  assistants: Adventurer[]
+  effectiveValue: number
+  roll: number
+} {
+  const active = getActiveParty(party, state)
+  if (active.length === 0) {
+    throw new Error(`Cannot resolve ${phase} check: no active party members`)
+  }
+  const { primary, assistants } = selectResponsible(
+    active,
+    skill,
+    preferredRole,
+  )
+  const assistance = calculateAssistanceBonus(assistants, skill)
+
+  let equipment = 0
+  if (toolCost > 0) {
+    if (state.supplies.tools >= toolCost) {
+      equipment = calculateEquipmentBonus(toolCost)
+      state.supplies.tools -= toolCost
+    } else {
+      equipment = -10
+    }
+  }
+
+  const info = calculateInformationBonus(skill, state.information)
+  const roleBonus = roleBonusForSkill(active, skill)
+  const absencePenalty = absencePenaltyForSkill(active, skill)
+  const featurePenalty = featurePenaltyForSkill(
+    requestFeaturesFromState(state),
+    skill,
+  )
+
+  const base = primary.skills[skill]
+  const effectiveValue = clamp(
+    base +
+      assistance +
+      equipment +
+      info +
+      roleBonus -
+      difficultyModifier -
+      rankPenalty -
+      difficultyBasePenalty(
+        (state.metadata?.difficulty as Difficulty | undefined) ?? 'normal',
+      ) -
+      absencePenalty -
+      featurePenalty,
+    1,
+    100,
+  )
+
+  const { roll, result } = resolveCheck(rng, effectiveValue)
+
+  return { result, primary, assistants, effectiveValue, roll }
+}
 
 export function getRoleMembers(
   party: Adventurer[],
@@ -111,91 +288,6 @@ export function resolveCheck(
   return { roll, result }
 }
 
-export function createExpeditionCheck(
-  phase: ExpeditionPhase,
-  skill: SkillName,
-  responsible: ResponsibleSelection,
-  difficultyModifier: number,
-): ExpeditionCheck {
-  return {
-    phase,
-    skill,
-    responsibleMemberIds: [responsible.primary.id],
-    assistanceMemberIds: responsible.assistants.map((a) => a.id),
-    difficultyModifier,
-  }
-}
-
-export function formatCheckFacts(
-  check: ExpeditionCheck,
-  effectiveValue: number,
-  result: CheckResult,
-): string[] {
-  return [
-    `${check.phase}フェーズで ${check.skill} 判定（メイン=${check.responsibleMemberIds[0]}, 効果値=${effectiveValue.toFixed(0)}, 結果=${result}）`,
-  ]
-}
-
-export function applyEffectsToMember(
-  party: Adventurer[],
-  targetId: string,
-  effects: ExpeditionEffect[],
-  currentHp: Record<string, number>,
-  currentMp: Record<string, number>,
-  currentMorale: Record<string, number>,
-): void {
-  for (const effect of effects) {
-    const value = effect.value ?? 0
-    switch (effect.type) {
-      case 'hpDamage':
-        currentHp[targetId] = clamp(currentHp[targetId] - value, 1, Infinity)
-        break
-      case 'hpHeal':
-        currentHp[targetId] = clamp(
-          currentHp[targetId] + value,
-          1,
-          party.find((a) => a.id === targetId)?.maxHp ?? Infinity,
-        )
-        break
-      case 'mpDamage':
-        currentMp[targetId] = clamp(currentMp[targetId] - value, 0, Infinity)
-        break
-      case 'mpRestore':
-        currentMp[targetId] = clamp(
-          currentMp[targetId] + value,
-          0,
-          party.find((a) => a.id === targetId)?.maxMp ?? Infinity,
-        )
-        break
-      case 'moraleChange':
-        currentMorale[targetId] = clamp(currentMorale[targetId] + value, 0, 100)
-        break
-      default:
-        break
-    }
-  }
-}
-
-export function logEntry(
-  phase: ExpeditionPhase,
-  type: string,
-  actorIds: string[],
-  facts: string[],
-  effects: ExpeditionEffect[] = [],
-  check?: ExpeditionLogEntry['check'],
-  targetIds?: string[],
-): ExpeditionLogEntry {
-  return {
-    phase,
-    type,
-    actorIds,
-    targetIds,
-    check,
-    effects,
-    facts,
-  }
-}
-
 export function roleSkillBonus(
   party: Adventurer[],
   role: string,
@@ -215,13 +307,6 @@ export function rolePrimarySkill(
   const members = getRoleMembers(party, role)
   if (members.length === 0) return 0
   return members.reduce((max, a) => Math.max(max, a.skills[skill]), 0)
-}
-
-export function getTopSkillMember(
-  party: Adventurer[],
-  skill: SkillName,
-): Adventurer | undefined {
-  return [...party].sort((a, b) => b.skills[skill] - a.skills[skill])[0]
 }
 
 export function primaryRoleForSkill(skill: SkillName): string {

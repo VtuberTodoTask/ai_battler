@@ -1,0 +1,2520 @@
+{
+  "outcome": "failedObjective",
+  "state": {
+    "avoidedThreats": ["poorVisibility"],
+    "battleEntrySnapshot": {
+      "environmentEffects": [
+        {
+          "type": "lighting",
+          "value": "dark"
+        }
+      ],
+      "initialHp": {
+        "S-guardian-s45-guardian-1": 91,
+        "S-healer-s45-healer-3": 73,
+        "S-mage-s45-mage-2": 79,
+        "S-vanguard-s45-vanguard-0": 83
+      },
+      "initialMorale": {
+        "S-guardian-s45-guardian-1": 65,
+        "S-healer-s45-healer-3": 61,
+        "S-mage-s45-mage-2": 67,
+        "S-vanguard-s45-vanguard-0": 52
+      },
+      "initialMp": {
+        "S-guardian-s45-guardian-1": 12,
+        "S-healer-s45-healer-3": 53,
+        "S-mage-s45-mage-2": 55,
+        "S-vanguard-s45-vanguard-0": 14
+      },
+      "initialStatusEffects": {
+        "S-guardian-s45-guardian-1": [],
+        "S-healer-s45-healer-3": [],
+        "S-mage-s45-mage-2": [],
+        "S-vanguard-s45-vanguard-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "enemyAdvantage"
+    },
+    "battleOutcome": "victory",
+    "battles": [
+      {
+        "combatSeed": "s45:battle:0:combat",
+        "deadAdventurerIds": [],
+        "discoveredWeaknesses": [],
+        "encounterSeed": "s45:battle:0:encounter",
+        "enemyComposition": "constructx4",
+        "enemyIds": [
+          "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+          "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+          "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+          "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+        ],
+        "entrySnapshot": {
+          "environmentEffects": [
+            {
+              "type": "lighting",
+              "value": "dark"
+            }
+          ],
+          "initialHp": {
+            "S-guardian-s45-guardian-1": 91,
+            "S-healer-s45-healer-3": 73,
+            "S-mage-s45-mage-2": 79,
+            "S-vanguard-s45-vanguard-0": 83
+          },
+          "initialMorale": {
+            "S-guardian-s45-guardian-1": 65,
+            "S-healer-s45-healer-3": 61,
+            "S-mage-s45-mage-2": 67,
+            "S-vanguard-s45-vanguard-0": 52
+          },
+          "initialMp": {
+            "S-guardian-s45-guardian-1": 12,
+            "S-healer-s45-healer-3": 53,
+            "S-mage-s45-mage-2": 55,
+            "S-vanguard-s45-vanguard-0": 14
+          },
+          "initialStatusEffects": {
+            "S-guardian-s45-guardian-1": [],
+            "S-healer-s45-healer-3": [],
+            "S-mage-s45-mage-2": [],
+            "S-vanguard-s45-vanguard-0": []
+          },
+          "knownEnemyAbilities": [],
+          "knownEnemyWeaknesses": [],
+          "surprise": "enemyAdvantage"
+        },
+        "id": "battle-0",
+        "incapacitatedAdventurerIds": [],
+        "injuries": [],
+        "knownEnemyAbilities": [],
+        "knownEnemyWeaknesses": [],
+        "matchedAbilityIntel": [],
+        "matchedWeaknessIntel": [],
+        "outcome": "victory",
+        "phase": "battle",
+        "result": {
+          "abilityUsage": {},
+          "adventurerActionCount": 62,
+          "contactResult": {
+            "effects": {
+              "enemyInitiativeBonus": 3,
+              "side": "enemy"
+            },
+            "enemyStealth": 0,
+            "partyScouting": 0,
+            "roll": 100,
+            "successChance": 0,
+            "type": "failure"
+          },
+          "deadAdventurers": [],
+          "defeatedEnemies": [
+            "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+            "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+            "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+            "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+          ],
+          "discoveredWeaknesses": [],
+          "enemyActionCount": 34,
+          "enemyDamageDealt": 377,
+          "escapedEnemies": [],
+          "finalAdventurerStates": [
+            {
+              "alive": true,
+              "currentHp": 83,
+              "currentMp": 14,
+              "dead": false,
+              "id": "S-vanguard-s45-vanguard-0",
+              "incapacitated": false,
+              "morale": 52,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 63,
+              "currentMp": 12,
+              "dead": false,
+              "id": "S-guardian-s45-guardian-1",
+              "incapacitated": false,
+              "morale": 65,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 52,
+              "currentMp": 0,
+              "dead": false,
+              "id": "S-mage-s45-mage-2",
+              "incapacitated": false,
+              "morale": 67,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 48,
+              "currentMp": 35,
+              "dead": false,
+              "id": "S-healer-s45-healer-3",
+              "incapacitated": false,
+              "morale": 61,
+              "statusEffects": []
+            }
+          ],
+          "incapacitatedAdventurers": [],
+          "injuries": [],
+          "logs": [
+            {
+              "actionType": "contact",
+              "metadata": {
+                "contactType": "failure"
+              },
+              "phase": "contact",
+              "result": "遠征側の不利により敵に先制された。",
+              "round": 0
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト hit 鉄機械兵重戦士 for 15 damage",
+              "roll": 53,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 78,
+              "targetIds": [
+                "A-construct-tank-standard-s45:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s45-healer-3",
+              "damage": 32,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインド hit 鉄機械兵重戦士 for 32 damage",
+              "roll": 5,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 33,
+              "targetIds": [
+                "A-construct-tank-standard-s45:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 24,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム hit 鉄機械兵重戦士 for 24 damage",
+              "roll": 50,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "A-construct-tank-standard-s45:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 20,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 hit ベル ジェム for 20 damage",
+              "roll": 12,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 80,
+              "round": 1,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代機械兵盾 missed",
+              "roll": 87,
+              "round": 1,
+              "successChance": 78,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄機械兵重戦士 missed",
+              "roll": 33,
+              "round": 1,
+              "successChance": 24,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 11,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 hit ベル ジェム for 11 damage",
+              "roll": 46,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 18,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ hit 魔力像盾 for 18 damage",
+              "roll": 37,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト hit 鉄機械兵重戦士 for 14 damage",
+              "roll": 78,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 78,
+              "targetIds": [
+                "A-construct-tank-standard-s45:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 17,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 hit ベル ジェム for 17 damage",
+              "roll": 22,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 21,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム hit 鉄機械兵重戦士 for 21 damage",
+              "roll": 40,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "A-construct-tank-standard-s45:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "鉄機械兵重戦士が戦闘不能になった。",
+              "round": 2,
+              "targetIds": [
+                "A-construct-tank-standard-s45:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "S-healer-s45-healer-3",
+              "metadata": {
+                "actualHealAmount": 47
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインドがベル ジェムを回復させた。+47 HP",
+              "round": 2,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代機械兵盾 missed",
+              "roll": 88,
+              "round": 2,
+              "successChance": 68,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 12,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 hit ベル ジェム for 12 damage",
+              "roll": 6,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s45-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインド missed",
+              "roll": 36,
+              "round": 3,
+              "successChance": 22,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム missed",
+              "roll": 84,
+              "round": 3,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト missed",
+              "roll": 74,
+              "round": 3,
+              "successChance": 62,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 18,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 hit ベル ジェム for 18 damage",
+              "roll": 36,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 62,
+              "round": 3,
+              "successChance": 50,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 15,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代機械兵盾 hit ベル ジェム for 15 damage",
+              "roll": 2,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 68,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit カイン フォレスト for 8 area damage",
+              "round": 3,
+              "targetIds": ["S-mage-s45-mage-2"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit グスタフ ハインド for 8 area damage",
+              "round": 3,
+              "targetIds": ["S-healer-s45-healer-3"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 hit ベル ジェム for 8 damage",
+              "roll": 47,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム missed",
+              "roll": 51,
+              "round": 4,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "S-healer-s45-healer-3",
+              "metadata": {
+                "actualHealAmount": 47
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインドがベル ジェムを回復させた。+47 HP",
+              "round": 4,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 20,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ hit 古代魔法人形重戦士 for 20 damage",
+              "roll": 43,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 50,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 19,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 hit ベル ジェム for 19 damage",
+              "roll": 7,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 12,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代機械兵盾 hit ベル ジェム for 12 damage",
+              "roll": 34,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 68,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 6,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit ユリ クォーツ for 6 area damage",
+              "round": 4,
+              "targetIds": ["S-guardian-s45-guardian-1"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 6,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit カイン フォレスト for 6 area damage",
+              "round": 4,
+              "targetIds": ["S-mage-s45-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト hit 古代機械兵盾 for 14 damage",
+              "roll": 37,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 10,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 hit ベル ジェム for 10 damage",
+              "roll": 49,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "古代魔法人形重戦士が再生した。+5 HP",
+              "round": 4,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム missed",
+              "roll": 89,
+              "round": 5,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "S-healer-s45-healer-3",
+              "metadata": {
+                "actualHealAmount": 47
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインドがベル ジェムを回復させた。+47 HP",
+              "round": 5,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代機械兵盾 missed",
+              "roll": 96,
+              "round": 5,
+              "successChance": 68,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ hit 古代機械兵盾 for 14 damage",
+              "roll": 45,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 45,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 16,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 hit ベル ジェム for 16 damage",
+              "roll": 17,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト missed",
+              "roll": 58,
+              "round": 5,
+              "successChance": 55,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 14,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 hit ベル ジェム for 14 damage",
+              "roll": 9,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "古代魔法人形重戦士が再生した。+5 HP",
+              "round": 5,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 24,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト hit 古代機械兵盾 for 24 damage",
+              "roll": 2,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム missed",
+              "roll": 47,
+              "round": 6,
+              "successChance": 45,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s45-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインド missed",
+              "roll": 41,
+              "round": 6,
+              "successChance": 23,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 15,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 hit ベル ジェム for 15 damage",
+              "roll": 27,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 79,
+              "round": 6,
+              "successChance": 50,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代機械兵盾 hit ベル ジェム for 8 damage",
+              "roll": 28,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 68,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 4,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit グスタフ ハインド for 4 area damage",
+              "round": 6,
+              "targetIds": ["S-healer-s45-healer-3"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 4,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit ユリ クォーツ for 4 area damage",
+              "round": 6,
+              "targetIds": ["S-guardian-s45-guardian-1"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 missed",
+              "roll": 100,
+              "round": 6,
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "古代魔法人形重戦士が再生した。+5 HP",
+              "round": 6,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "S-healer-s45-healer-3",
+              "metadata": {
+                "actualHealAmount": 47
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインドがベル ジェムを回復させた。+47 HP",
+              "round": 7,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 20,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム hit 古代機械兵盾 for 20 damage",
+              "roll": 10,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 45,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 29,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ hit 古代魔法人形重戦士 for 29 damage",
+              "roll": 3,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 50,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト missed",
+              "roll": 59,
+              "round": 7,
+              "successChance": 55,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代機械兵盾 hit ベル ジェム for 9 damage",
+              "roll": 68,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 68,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 5,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit ユリ クォーツ for 5 area damage",
+              "round": 7,
+              "targetIds": ["S-guardian-s45-guardian-1"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 5,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit カイン フォレスト for 5 area damage",
+              "round": 7,
+              "targetIds": ["S-mage-s45-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 missed",
+              "roll": 62,
+              "round": 7,
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 hit ベル ジェム for 9 damage",
+              "roll": 16,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "古代魔法人形重戦士が再生した。+5 HP",
+              "round": 7,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム missed",
+              "roll": 86,
+              "round": 8,
+              "successChance": 45,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト hit 古代機械兵盾 for 15 damage",
+              "roll": 19,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s45-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインド missed",
+              "roll": 28,
+              "round": 8,
+              "successChance": 23,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 missed",
+              "roll": 67,
+              "round": 8,
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 62,
+              "round": 8,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 10,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代機械兵盾 hit ベル ジェム for 10 damage",
+              "roll": 25,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 68,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 5,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit ユリ クォーツ for 5 area damage",
+              "round": 8,
+              "targetIds": ["S-guardian-s45-guardian-1"]
+            },
+            {
+              "actionType": "area",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 5,
+              "phase": "combat",
+              "result": "古代機械兵盾 hit グスタフ ハインド for 5 area damage",
+              "round": 8,
+              "targetIds": ["S-healer-s45-healer-3"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 missed",
+              "roll": 94,
+              "round": 8,
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "古代魔法人形重戦士が再生した。+5 HP",
+              "round": 8,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム hit 古代機械兵盾 for 15 damage",
+              "roll": 21,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 45,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト hit 古代機械兵盾 for 13 damage",
+              "roll": 12,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "古代機械兵盾が戦闘不能になった。",
+              "round": 9,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "corpseExplosion",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "phase": "combat",
+              "result": "古代機械兵盾の死体が爆発し、ベル ジェムに8ダメージ。",
+              "round": 9,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "corpseExplosion",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "phase": "combat",
+              "result": "古代機械兵盾の死体が爆発し、ユリ クォーツに8ダメージ。",
+              "round": 9,
+              "targetIds": ["S-guardian-s45-guardian-1"]
+            },
+            {
+              "actionType": "corpseExplosion",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "phase": "combat",
+              "result": "古代機械兵盾の死体が爆発し、カイン フォレストに8ダメージ。",
+              "round": 9,
+              "targetIds": ["S-mage-s45-mage-2"]
+            },
+            {
+              "actionType": "corpseExplosion",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "phase": "combat",
+              "result": "古代機械兵盾の死体が爆発し、グスタフ ハインドに8ダメージ。",
+              "round": 9,
+              "targetIds": ["S-healer-s45-healer-3"]
+            },
+            {
+              "actionType": "corpseExplosion",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "phase": "combat",
+              "result": "古代機械兵盾の死体が爆発し、古代魔法人形重戦士に8ダメージ。",
+              "round": 9,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "corpseExplosion",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "phase": "combat",
+              "result": "古代機械兵盾の死体が爆発し、魔力像盾に8ダメージ。",
+              "round": 9,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 57,
+              "round": 9,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s45-healer-3",
+              "damage": 18,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインド hit 古代魔法人形重戦士 for 18 damage",
+              "roll": 22,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 28,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 missed",
+              "roll": 55,
+              "round": 9,
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 10,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 hit ベル ジェム for 10 damage",
+              "roll": 24,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "古代魔法人形重戦士が再生した。+5 HP",
+              "round": 9,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 34,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム hit 古代魔法人形重戦士 for 34 damage",
+              "roll": 10,
+              "round": 10,
+              "statusApplied": [],
+              "successChance": 50,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 89,
+              "round": 10,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト missed",
+              "roll": 73,
+              "round": 10,
+              "successChance": 69,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "S-healer-s45-healer-3",
+              "metadata": {
+                "actualHealAmount": 47
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインドがベル ジェムを回復させた。+47 HP",
+              "round": 10,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 missed",
+              "roll": 83,
+              "round": 10,
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士 missed",
+              "roll": 69,
+              "round": 10,
+              "successChance": 56,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "regen",
+              "phase": "combat",
+              "result": "古代魔法人形重戦士が再生した。+5 HP",
+              "round": 10,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 23,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム hit 古代魔法人形重戦士 for 23 damage",
+              "roll": 27,
+              "round": 11,
+              "statusApplied": [],
+              "successChance": 50,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 99,
+              "round": 11,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s45-healer-3",
+              "damage": 17,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインド hit 古代魔法人形重戦士 for 17 damage",
+              "roll": 12,
+              "round": 11,
+              "statusApplied": [],
+              "successChance": 28,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "古代魔法人形重戦士が戦闘不能になった。",
+              "round": 11,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト missed",
+              "roll": 85,
+              "round": 11,
+              "successChance": 62,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 13,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 hit ベル ジェム for 13 damage",
+              "roll": 24,
+              "round": 11,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム missed",
+              "roll": 98,
+              "round": 12,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s45-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインド missed",
+              "roll": 81,
+              "round": 12,
+              "successChance": 22,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト hit 魔力像盾 for 13 damage",
+              "roll": 32,
+              "round": 12,
+              "statusApplied": [],
+              "successChance": 62,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 29,
+              "metadata": {
+                "attackerRole": "guardian",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ hit 魔力像盾 for 29 damage",
+              "roll": 2,
+              "round": 12,
+              "statusApplied": [],
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 13,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 hit ベル ジェム for 13 damage",
+              "roll": 34,
+              "round": 12,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s45-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインド missed",
+              "roll": 48,
+              "round": 13,
+              "successChance": 22,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム missed",
+              "roll": 67,
+              "round": 13,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 51,
+              "round": 13,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト missed",
+              "roll": 93,
+              "round": 13,
+              "successChance": 62,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 missed",
+              "roll": 47,
+              "round": 13,
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム missed",
+              "roll": 58,
+              "round": 14,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 90,
+              "round": 14,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-healer-s45-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインド missed",
+              "roll": 49,
+              "round": 14,
+              "successChance": 22,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 14,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 hit ベル ジェム for 14 damage",
+              "roll": 38,
+              "round": 14,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト missed",
+              "roll": 67,
+              "round": 14,
+              "successChance": 62,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 21,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム hit 魔力像盾 for 21 damage",
+              "roll": 20,
+              "round": 15,
+              "statusApplied": [],
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "S-healer-s45-healer-3",
+              "metadata": {
+                "actualHealAmount": 46
+              },
+              "phase": "combat",
+              "result": "グスタフ ハインドがベル ジェムを回復させた。+46 HP",
+              "round": 15,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ missed",
+              "roll": 68,
+              "round": 15,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s45-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "カイン フォレスト hit 魔力像盾 for 14 damage",
+              "roll": 33,
+              "round": 15,
+              "statusApplied": [],
+              "successChance": 62,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力像盾 missed",
+              "roll": 68,
+              "round": 15,
+              "successChance": 41,
+              "targetIds": ["S-vanguard-s45-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-vanguard-s45-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ベル ジェム missed",
+              "roll": 86,
+              "round": 16,
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-guardian-s45-guardian-1",
+              "damage": 27,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ クォーツ hit 魔力像盾 for 27 damage",
+              "roll": 4,
+              "round": 16,
+              "statusApplied": [],
+              "successChance": 44,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "魔力像盾が戦闘不能になった。",
+              "round": 16,
+              "targetIds": [
+                "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+              ]
+            }
+          ],
+          "outcome": "victory",
+          "partyDamageDealt": 484,
+          "retreatAttempts": [],
+          "rounds": 16,
+          "seed": "s45:battle:0:combat",
+          "survivingAdventurers": [
+            "S-vanguard-s45-vanguard-0",
+            "S-guardian-s45-guardian-1",
+            "S-mage-s45-mage-2",
+            "S-healer-s45-healer-3"
+          ],
+          "survivingEnemies": []
+        },
+        "rounds": 16,
+        "survivingAdventurerIds": [
+          "S-vanguard-s45-vanguard-0",
+          "S-guardian-s45-guardian-1",
+          "S-mage-s45-mage-2",
+          "S-healer-s45-healer-3"
+        ],
+        "trigger": "afterExploration",
+        "unmatchedAbilityIntel": [],
+        "unmatchedWeaknessIntel": []
+      }
+    ],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": ["traps", "poorVisibility"],
+    "elapsedTime": 8.65,
+    "incapacitated": [],
+    "information": [],
+    "injuries": [
+      {
+        "adventurerId": "S-guardian-s45-guardian-1",
+        "cause": "traps",
+        "hpLoss": 1,
+        "id": "injury-0-180202",
+        "status": "treated",
+        "type": "light"
+      }
+    ],
+    "logs": [
+      {
+        "actorIds": [
+          "S-vanguard-s45-vanguard-0",
+          "S-guardian-s45-guardian-1",
+          "S-mage-s45-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 86,
+          "result": "success",
+          "roll": 73,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "ベル ジェムが効率的なルートと補給計画を立てた",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [
+          "S-vanguard-s45-vanguard-0",
+          "S-guardian-s45-guardian-1",
+          "S-mage-s45-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 81,
+          "result": "success",
+          "roll": 44,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["ベル ジェムが安全な接近経路を確保した"],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "S-mage-s45-mage-2",
+          "S-vanguard-s45-vanguard-0",
+          "S-healer-s45-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 53,
+          "result": "failure",
+          "roll": 83,
+          "skill": "trapDetection"
+        },
+        "effects": [
+          {
+            "targetId": "S-guardian-s45-guardian-1",
+            "type": "hpDamage",
+            "value": 1
+          },
+          {
+            "type": "moraleChange",
+            "value": -3
+          }
+        ],
+        "facts": [
+          "罠に遭遇した",
+          "Guardianがユリ クォーツの被害を軽減した",
+          "ユリ クォーツが1のダメージを受けた"
+        ],
+        "phase": "approach",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [
+          "S-mage-s45-mage-2",
+          "S-vanguard-s45-vanguard-0",
+          "S-healer-s45-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 71,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "S-mage-s45-mage-2",
+          "S-vanguard-s45-vanguard-0",
+          "S-healer-s45-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 26,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "S-mage-s45-mage-2",
+          "S-vanguard-s45-vanguard-0",
+          "S-healer-s45-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 58,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["戦闘が16ラウンドでvictoryとなった", "接敵結果: failure"],
+        "phase": "battle",
+        "targetIds": [],
+        "type": "battleSummary"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "eliminationTargets",
+            "value": 4
+          },
+          {
+            "type": "eliminationDefeated",
+            "value": 4
+          },
+          {
+            "type": "eliminationEscaped",
+            "value": 0
+          },
+          {
+            "type": "eliminationSurviving",
+            "value": 0
+          },
+          {
+            "type": "eliminationUnknown",
+            "value": 0
+          },
+          {
+            "type": "eliminationProgress",
+            "value": 100
+          }
+        ],
+        "facts": [
+          "討伐対象として4体が指定された",
+          "戦闘で4体を撃破した",
+          "討伐進捗は100%となった"
+        ],
+        "phase": "battle",
+        "type": "eliminationTargetsAssigned"
+      },
+      {
+        "actorIds": [
+          "S-mage-s45-mage-2",
+          "S-vanguard-s45-vanguard-0",
+          "S-healer-s45-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 27,
+          "result": "failure",
+          "roll": 50,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "type": "eliminationConfirmed",
+            "value": 0
+          },
+          {
+            "type": "eliminationCompleted",
+            "value": 0
+          }
+        ],
+        "facts": [
+          "討伐確認に失敗した",
+          "討伐対象として4体が指定された。戦闘で4体を撃破した。討伐進捗は100%となった。全対象を撃破したが討伐確認が未完了のため依頼目的は未完了"
+        ],
+        "phase": "objective",
+        "type": "eliminationConfirmation"
+      },
+      {
+        "actorIds": [
+          "S-vanguard-s45-vanguard-0",
+          "S-guardian-s45-guardian-1",
+          "S-mage-s45-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 81,
+          "result": "criticalSuccess",
+          "roll": 14,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["ベル ジェムが安全な帰還経路を確保した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "S-mage-s45-mage-2",
+          "S-vanguard-s45-vanguard-0",
+          "S-healer-s45-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 32,
+          "result": "success",
+          "roll": 10,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["カイン フォレストが視界不良を事前に察知・回避した"],
+        "phase": "return",
+        "type": "hazard"
+      },
+      {
+        "actorIds": ["S-healer-s45-healer-3"],
+        "check": {
+          "effectiveValue": 100,
+          "result": "success",
+          "roll": 95,
+          "skill": "firstAid"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "targetId": "S-guardian-s45-guardian-1",
+            "type": "hpHeal",
+            "value": 5
+          },
+          {
+            "targetId": "S-mage-s45-mage-2",
+            "type": "hpHeal",
+            "value": 5
+          },
+          {
+            "targetId": "S-healer-s45-healer-3",
+            "type": "hpHeal",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "グスタフ ハインドが帰還中の負傷者を手当てした"
+        ],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": ["S-healer-s45-healer-3"],
+        "check": {
+          "effectiveValue": 100,
+          "result": "success",
+          "roll": 50,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          },
+          {
+            "targetId": "S-guardian-s45-guardian-1",
+            "type": "hpHeal",
+            "value": 8
+          },
+          {
+            "targetId": "S-mage-s45-mage-2",
+            "type": "hpHeal",
+            "value": 8
+          },
+          {
+            "targetId": "S-healer-s45-healer-3",
+            "type": "hpHeal",
+            "value": 8
+          }
+        ],
+        "facts": ["グスタフ ハインドによる治療判定: success"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "討伐対象として4体が指定された。戦闘で4体を撃破した。討伐進捗は100%となった。全対象を撃破したが討伐確認が未完了のため依頼目的は未完了",
+          "医薬品を2消費した",
+          "グスタフ ハインドが負傷者の治療を行った"
+        ],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": 1,
+      "requestFeatures": ["traps", "poorVisibility"],
+      "returnTimeBonus": 0,
+      "threatFeatures": ["traps", "poorVisibility"]
+    },
+    "objectiveCompleted": false,
+    "objectiveProgress": 100,
+    "objectiveState": {
+      "completed": false,
+      "confirmationRequired": true,
+      "confirmedTargetIds": [],
+      "defeatedTargetIds": [
+        "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+        "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+        "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+        "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+      ],
+      "escapedTargetIds": [],
+      "mode": "allEnemies",
+      "progress": 100,
+      "requiredTargetIds": [
+        "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+        "S-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+        "S-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+        "S-construct-tank-standard-s45:battle:0:encounter:enemy:3"
+      ],
+      "survivingTargetIds": [],
+      "type": "elimination",
+      "unknownTargetIds": []
+    },
+    "partyHp": {
+      "S-guardian-s45-guardian-1": 76,
+      "S-healer-s45-healer-3": 61,
+      "S-mage-s45-mage-2": 65,
+      "S-vanguard-s45-vanguard-0": 83
+    },
+    "partyMorale": {
+      "S-guardian-s45-guardian-1": 70,
+      "S-healer-s45-healer-3": 66,
+      "S-mage-s45-mage-2": 72,
+      "S-vanguard-s45-vanguard-0": 60
+    },
+    "partyMp": {
+      "S-guardian-s45-guardian-1": 12,
+      "S-healer-s45-healer-3": 35,
+      "S-mage-s45-mage-2": 0,
+      "S-vanguard-s45-vanguard-0": 14
+    },
+    "partyStatusEffects": {
+      "S-guardian-s45-guardian-1": [],
+      "S-healer-s45-healer-3": [],
+      "S-mage-s45-mage-2": [],
+      "S-vanguard-s45-vanguard-0": []
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 1,
+      "tools": 2
+    }
+  }
+}

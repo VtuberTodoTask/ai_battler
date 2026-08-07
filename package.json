@@ -11,7 +11,9 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix && prettier --write .",
     "typecheck": "tsc -b",
     "test": "vitest run",
+    "test:expedition-regression": "vitest run src/core/expedition/regression.test.ts",
     "test:coverage": "vitest run --coverage",
+    "update:expedition-regression": "tsx scripts/capture-regression-snapshots.ts && prettier --write regression-snapshots/baseline",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -35,6 +37,7 @@
     "jsdom": "^27.0.1",
     "oxlint": "^1.75.0",
     "prettier": "^3.9.6",
+    "tsx": "^4.22.5",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.66.0",
     "vite": "^8.2.0",
