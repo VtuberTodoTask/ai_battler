@@ -20,6 +20,9 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
+  "overrides": {
+    "cssstyle": "~4.1.0"
+  },
   "devDependencies": {
     "@rolldown/binding-linux-x64-gnu": "^1.2.3",
     "@testing-library/dom": "^10.4.1",
@@ -34,7 +37,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.9.0",
-    "jsdom": "^27.0.1",
+    "jsdom": "^26.1.0",
     "oxlint": "^1.75.0",
     "prettier": "^3.9.6",
     "tsx": "^4.22.5",

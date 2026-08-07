@@ -92,6 +92,22 @@ details summary {
   font-weight: 600;
 }
 
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tabs button {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.tabs button.active {
+  background: #2563eb;
+  color: white;
+}
+
 details pre {
   max-height: 320px;
   overflow: auto;
