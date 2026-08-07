@@ -196,7 +196,7 @@ function summarizeScenario(
 const scenarios = [
   { title: 'A. 完全救出', seed: 's23', rank: 'C' as const },
   { title: 'B. 救出成功だが損害大', seed: 's43', rank: 'C' as const },
-  { title: 'C. 危険地帯から搬出したが未帰還', seed: 's12', rank: 'C' as const },
+  { title: 'C. 搬出に手間取ったが救出成功', seed: 's136', rank: 'C' as const },
   { title: 'D. 救出失敗', seed: 's1', rank: 'C' as const },
 ]
 

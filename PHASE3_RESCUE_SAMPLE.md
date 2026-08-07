@@ -190,7 +190,7 @@ rescue 依頼で最大1回の戦闘を発生させ、救出対象の発見・接
   - effect: moraleChange=-10
   - effect: moraleChange=3
 
-## C. 危険地帯から搬出したが未帰還
+## C. 搬出に手間取ったが救出成功
 
 - 依頼等級: C
 - 環境: forest
@@ -200,94 +200,89 @@ rescue 依頼で最大1回の戦闘を発生させ、救出対象の発見・接
 - 移動能力: mobile
 - 発見状態: 発見済み
 - 到達状態: 到達済み
-- 安定化状態: 安定化済み
-- 保護担当: フレイア ノース（guardian）
-- 戦闘結果: victory（10ラウンド）
-- 敵編成: aberrationx4
+- 安定化状態: 未安定化
+- 保護担当: ベル リバー（guardian）
+- 戦闘結果: retreat（5ラウンド）
+- 敵編成: aberrationx6
 - 戦闘被害: 0
 - 搬出状態: 搬出済み
-- 帰還状態: 未帰還
+- 帰還状態: 帰還済み
 - 置き去り状態: なし
 - 進捗: 80%
-- 遠征結果: partialSuccess
-- 冒険者生存者: ハロルド フォレスト（vanguard）, フレイア ノース（guardian）, フレイア ノース（mage）, ヴァン ハインド（healer）
+- 遠征結果: success
+- 冒険者生存者: フェイ ムーン（vanguard）, ベル リバー（guardian）, チェルシー リバー（healer）
 - 戦闘不能者: なし
-- 死亡者: なし
+- 死亡者: レオ スカイ
 
 ### 1. 遠征開始時
 
-- ハロルド フォレスト（vanguard） HP=66/66, MP=8/8, 士気=46
-- フレイア ノース（guardian） HP=71/71, MP=0/0, 士気=54
-- フレイア ノース（mage） HP=53/53, MP=53/53, 士気=51
-- ヴァン ハインド（healer） HP=54/54, MP=55/55, 士気=57
+- フェイ ムーン（vanguard） HP=69/69, MP=5/5, 士気=48
+- ベル リバー（guardian） HP=77/77, MP=8/8, 士気=52
+- レオ スカイ（mage） HP=52/52, MP=41/41, 士気=60
+- チェルシー リバー（healer） HP=50/50, MP=54/54, 士気=57
 
 ### 2. 戦闘直前
 
-- ハロルド フォレスト（vanguard） HP=66/66, MP=8/8, 士気=44
-- フレイア ノース（guardian） HP=71/71, MP=0/0, 士気=52
-- フレイア ノース（mage） HP=49/53, MP=53/53, 士気=49
-- ヴァン ハインド（healer） HP=54/54, MP=55/55, 士気=55
+- フェイ ムーン（vanguard） HP=67/69, MP=5/5, 士気=44
+- ベル リバー（guardian） HP=77/77, MP=8/8, 士気=48
+- レオ スカイ（mage） HP=52/52, MP=41/41, 士気=56
+- チェルシー リバー（healer） HP=50/50, MP=54/54, 士気=53
 
 ### 3. 戦闘直後
 
-- ハロルド フォレスト（vanguard） HP=66/66, MP=8/8, 士気=44
-- フレイア ノース（guardian） HP=71/71, MP=0/0, 士気=52
-- フレイア ノース（mage） HP=39/53, MP=8/53, 士気=49
-- ヴァン ハインド（healer） HP=54/54, MP=34/55, 士気=55
+- フェイ ムーン（vanguard） HP=67/69, MP=5/5, 士気=34
+- ベル リバー（guardian） HP=77/77, MP=8/8, 士気=38
+- レオ スカイ（mage） HP=0/52, MP=31/41, 士気=56
+- チェルシー リバー（healer） HP=29/50, MP=48/54, 士気=43
 
 ### 4. 帰還後
 
-- ハロルド フォレスト（vanguard） HP=66/66, MP=8/8, 士気=47
-- フレイア ノース（guardian） HP=71/71, MP=0/0, 士気=55
-- フレイア ノース（mage） HP=53/53, MP=8/53, 士気=52
-- ヴァン ハインド（healer） HP=54/54, MP=34/55, 士気=58
+- フェイ ムーン（vanguard） HP=69/69, MP=5/5, 士気=24
+- ベル リバー（guardian） HP=77/77, MP=8/8, 士気=28
+- レオ スカイ（mage） HP=0/52, MP=31/41, 士気=56
+- チェルシー リバー（healer） HP=49/50, MP=48/54, 士気=33
 
 ### 構造化facts
 
 - type=rescueSearch
-  - フレイア ノースが救出対象の位置を特定した
+  - レオ スカイが救出対象の位置をぎりぎりで特定した
   - effect: rescueLocated=1
   - effect: rescueProgress=20
 - type=rescueProtectorAssigned
-  - フレイア ノース（guardian）が救出対象の保護担当になった
-  - effect: rescueProtector=1, targetId=C-guardian-s12-guardian-1
+  - ベル リバー（guardian）が救出対象の保護担当になった
+  - effect: rescueProtector=1, targetId=C-guardian-s136-guardian-1
 - type=battleSummary
-  - 戦闘が10ラウンドでvictoryとなった
+  - 戦闘が5ラウンドでretreatとなった
   - 接敵結果: failure
+  - 戦闘で死亡者: C-mage-s136-mage-2
 - type=rescueBattleExposure
-  - フレイア ノースが救出対象を戦闘から守り切った
+  - ベル リバーが救出対象を戦闘から守り切った
   - effect: rescueTargetDamage=0
   - effect: rescueTargetHp=40
   - effect: rescueAlive=1
   - effect: rescueProgress=40
-- type=rescueStabilization
-  - ヴァン ハインドが救出対象を完全に安定化し、毒と出血を解除した
-  - 医薬品を1消費した
-  - effect: supplyConsume=1, targetId=medicine
-  - effect: rescueStabilized=1
-  - effect: rescueTargetHp=40
-  - effect: rescueAlive=1
-  - effect: rescueProgress=60
 - type=rescueEvacuation
-  - フレイア ノースが救出対象を搬出したが、2のダメージを負わせた
+  - ベル リバーが救出対象を搬出したが、2のダメージを負わせた
   - 搬出に手間取り、帰還に余分な時間がかかる
   - effect: returnTimeBonus=1
   - effect: rescueEvacuated=1
   - effect: rescueTargetHp=38
   - effect: rescueAlive=1
-  - effect: rescueProgress=80
+  - effect: rescueProgress=60
 - type=rescueReturn
-  - 救出対象を危険地帯から離れたが、拠点までは連れ帰れなかった
-  - 搬出は成功したが、完全な帰還には至らなかった
-  - effect: rescueReturned=0
+  - 救出対象を拠点まで連れ帰った
+  - 救出対象は帰還中に状態を維持した
+  - effect: rescueReturned=1
   - effect: rescueAbandoned=0
   - effect: rescueTargetHp=38
   - effect: rescueAlive=1
   - effect: rescueProgress=80
 - type=summary
-  - 救出対象は発見済み・接近済み・安定化済み・搬出済み・未帰還。救出進捗は80%
+  - 犠牲者: C-mage-s136-mage-2
+  - 救出対象は発見済み・接近済み・未安定化・搬出済み・帰還済み。救出進捗は80%
   - 医薬品を2消費した
-  - ヴァン ハインドが負傷者の治療を行った
+  - チェルシー リバーが負傷者の治療を行った
+  - effect: moraleChange=-10
   - effect: moraleChange=3
 
 ## D. 救出失敗

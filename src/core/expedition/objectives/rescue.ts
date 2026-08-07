@@ -680,7 +680,9 @@ function runRescueReAccess(context: ExpeditionExecutionContext): void {
   runRescueAccess(context, 'reaccess', battleBonus + searchAccessBonus)
 }
 
-function runRescueStabilization(context: ExpeditionExecutionContext): void {
+export function runRescueStabilization(
+  context: ExpeditionExecutionContext,
+): void {
   const { request, party, state } = context
   const objective = getRescueObjective(state)
   if (!objective.reached || !isRescueTargetAlive(objective)) return
@@ -759,7 +761,8 @@ function runRescueStabilization(context: ExpeditionExecutionContext): void {
       'healing partial success',
       'objective',
     )
-    if (hpRatio > 0.25) {
+    const postHealHpRatio = objective.currentHp / objective.maxHp
+    if (postHealHpRatio > 0.25) {
       objective.stabilized = true
       facts.push(
         `${primary.name}が${objective.targetName}を一時的に安定化させた`,
@@ -1053,26 +1056,15 @@ export function resolveRescueReturn(context: ExpeditionExecutionContext): void {
   const objective = getRescueObjective(state)
   const active = getActiveParty(party, state)
 
-  const meta = state.metadata as Record<string, unknown>
-  const evacuationResult = meta.rescueEvacuationResult as
-    CheckResult | undefined
+  objective.returned = objective.evacuated && active.length > 0
 
   if (
-    objective.evacuated &&
-    active.length > 0 &&
-    evacuationResult !== 'partialSuccess'
+    !objective.evacuated &&
+    objective.located &&
+    objective.reached &&
+    isRescueTargetAlive(objective)
   ) {
-    objective.returned = true
-  } else {
-    objective.returned = false
-    if (
-      !objective.evacuated &&
-      objective.located &&
-      objective.reached &&
-      isRescueTargetAlive(objective)
-    ) {
-      objective.abandoned = true
-    }
+    objective.abandoned = true
   }
 
   const facts: string[] = []
@@ -1082,16 +1074,8 @@ export function resolveRescueReturn(context: ExpeditionExecutionContext): void {
     facts.push(`${objective.targetName}を拠点まで連れ帰った`)
   } else if (objective.returned) {
     facts.push(`${objective.targetName}の遺体を拠点まで運んだ`)
-  } else if (objective.evacuated && active.length > 0) {
-    facts.push(
-      `${objective.targetName}を危険地帯から離れたが、拠点までは連れ帰れなかった`,
-    )
   } else if (objective.abandoned) {
     facts.push(`${objective.targetName}を置き去りにした`)
-  }
-
-  if (isRescueTargetAlive(objective) && evacuationResult === 'partialSuccess') {
-    facts.push('搬出は成功したが、完全な帰還には至らなかった')
   }
 
   if (objective.evacuated && isRescueTargetAlive(objective)) {

@@ -197,11 +197,6 @@ export const regressionScenarios: RegressionScenario[] = [
     party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's43', 'C'),
   },
   {
-    name: 'rescue-partialSuccess',
-    request: makeRescueRequest('s12', 'C'),
-    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's12', 'C'),
-  },
-  {
     name: 'rescue-failedObjective',
     request: makeRescueRequest('s1', 'C'),
     party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's1', 'C'),

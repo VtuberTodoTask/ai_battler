@@ -21,9 +21,11 @@ import {
   determineRescueOutcome,
   healRescueTarget,
   initializeRescueObjectiveState,
+  prepareRescueEvacuation,
   resolveRescueReturn,
   runRescueAccess,
   runRescueSearch,
+  runRescueStabilization,
 } from './objectives/rescue.ts'
 
 function rescueState(
@@ -696,6 +698,142 @@ describe('Rescue Phase 3.3.1 fixes', () => {
     expect(
       state.logs.some((l) => l.facts.some((f) => f.includes('帰還中に悪化'))),
     ).toBe(false)
+  })
+
+  it('treats evacuation partialSuccess as successful evacuation with 2 damage and return time +1', () => {
+    const request = makeRescueRequest(
+      'evac-2',
+      'C',
+      {
+        locationKnown: true,
+        accessDifficulty: 0,
+        stabilizationDifficulty: 1000,
+        evacuationDifficulty: 1,
+        mobility: 'mobile',
+        initialHp: 40,
+        maxHp: 40,
+      },
+      false,
+      { features: [] },
+    )
+    const party = makeRescueParty('evac-2', 'C')
+    const state = initializeExpeditionState(request, party)
+    state.objectiveState = initializeRescueObjectiveState(request)
+    const objective = state.objectiveState as RescueObjectiveState
+    objective.located = true
+    objective.reached = true
+    objective.currentHp = 40
+
+    const context = {
+      request,
+      party,
+      state,
+      rng: new SeededRng(request.seed),
+    } as unknown as ExpeditionExecutionContext
+
+    prepareRescueEvacuation(context)
+
+    const log = state.logs.find((l) => l.type === 'rescueEvacuation')
+    expect(log?.check?.result).toBe('partialSuccess')
+    expect(objective.evacuated).toBe(true)
+    expect(objective.currentHp).toBe(38)
+    expect((state.metadata as Record<string, unknown>).returnTimeBonus).toBe(1)
+
+    resolveRescueReturn(context)
+
+    expect(objective.returned).toBe(true)
+    expect(
+      state.logs.some((l) =>
+        l.facts.some((f) => f.includes('拠点まで連れ帰った')),
+      ),
+    ).toBe(true)
+    expect(
+      state.logs.some((l) =>
+        l.facts.some((f) => f.includes('完全な帰還には至らなかった')),
+      ),
+    ).toBe(false)
+  })
+
+  it('does not set returned=false for partialSuccess evacuation', () => {
+    const request = makeRescueRequest(
+      'evac-4',
+      'C',
+      {
+        locationKnown: true,
+        accessDifficulty: 0,
+        stabilizationDifficulty: 1000,
+        evacuationDifficulty: 1,
+        mobility: 'mobile',
+        initialHp: 40,
+        maxHp: 40,
+      },
+      false,
+      { features: [] },
+    )
+    const party = makeRescueParty('evac-4', 'C')
+    const state = initializeExpeditionState(request, party)
+    state.objectiveState = initializeRescueObjectiveState(request)
+    const objective = state.objectiveState as RescueObjectiveState
+    objective.located = true
+    objective.reached = true
+    objective.currentHp = 40
+
+    prepareRescueEvacuation({
+      request,
+      party,
+      state,
+      rng: new SeededRng(request.seed),
+    } as unknown as ExpeditionExecutionContext)
+    resolveRescueReturn({
+      request,
+      party,
+      state,
+      rng: new SeededRng(request.seed),
+    } as unknown as ExpeditionExecutionContext)
+
+    expect(objective.evacuated).toBe(true)
+    expect(objective.returned).toBe(true)
+  })
+
+  it('stabilizes partialSuccess based on post-heal HP ratio boundaries', () => {
+    const cases: { pre: number; stable: boolean }[] = [
+      { pre: 10, stable: true },
+      { pre: 5, stable: false },
+      { pre: 6, stable: true },
+    ]
+    const request = makeRescueRequest(
+      'stab-547',
+      'C',
+      {
+        stabilizationDifficulty: 7,
+        initialHp: 40,
+        maxHp: 40,
+      },
+      false,
+      { features: [] },
+    )
+    const party = makeRescueParty('stab-547', 'C')
+
+    for (const { pre, stable } of cases) {
+      const state = initializeExpeditionState(request, party)
+      state.objectiveState = initializeRescueObjectiveState(request)
+      const objective = state.objectiveState as RescueObjectiveState
+      objective.located = true
+      objective.reached = true
+      objective.currentHp = pre
+
+      runRescueStabilization({
+        request,
+        party,
+        state,
+        rng: new SeededRng(request.seed),
+      } as unknown as ExpeditionExecutionContext)
+
+      const log = state.logs.find((l) => l.type === 'rescueStabilization')
+      expect(log?.check?.result).toBe('partialSuccess')
+      expect(objective.stabilized).toBe(stable)
+      expect(objective.currentHp).toBe(pre + 5)
+    }
   })
 
   it('logs rescue target death only once and skips further treatment', () => {
