@@ -365,17 +365,21 @@ function rescueSearchBonus(state: ExpeditionState): {
   return { bonus: 0, canSearch: false }
 }
 
-function runRescueSearch(
+export function runRescueSearch(
   context: ExpeditionExecutionContext,
   stage: string,
-  accessBonus: number,
-): number {
+  searchBonus: number,
+): void {
   const { request, party, state } = context
   const objective = getRescueObjective(state)
   const target = request.rescue!.target
   const rng = rescueRng(request, stage)
   const rankPenalty = rankPenaltyForRequest(request)
   const preferredRole = selectRescueSearcherRole(getActiveParty(party, state))
+  const discoveryDifficulty = Math.max(
+    0,
+    target.discoveryDifficulty - searchBonus,
+  )
 
   const { result, primary, assistants, effectiveValue, roll } =
     resolveSkillCheck(
@@ -385,7 +389,7 @@ function runRescueSearch(
       'contact',
       'scouting',
       preferredRole,
-      target.discoveryDifficulty,
+      discoveryDifficulty,
       rankPenalty,
     )
 
@@ -442,8 +446,6 @@ function runRescueSearch(
       },
     ),
   )
-
-  return accessBonus
 }
 
 function setAccessBonus(state: ExpeditionState, bonus: number): void {
@@ -455,7 +457,7 @@ function getAccessBonus(state: ExpeditionState): number {
   return (state.metadata?.rescueAccessBonus as number | undefined) ?? 0
 }
 
-function runRescueAccess(
+export function runRescueAccess(
   context: ExpeditionExecutionContext,
   stage: string,
   bonus: number,
@@ -598,7 +600,7 @@ export function resolveRescueBattleExposure(
   const roundModifier = Math.min(10, Math.max(0, battleResult.rounds - 6))
   const difficultyModifier = baseModifier + roundModifier
 
-  const stage = `rescue:battle-exposure:${battleId}`
+  const stage = `battle-exposure:${battleId}`
   const rng = rescueRng(request, stage)
   const { result, effectiveValue, roll } = resolveRescueDefenseCheck(
     rng,
@@ -664,7 +666,7 @@ function runFinalRescueSearch(context: ExpeditionExecutionContext): void {
   if (objective.located) return
   const { bonus, canSearch } = rescueSearchBonus(state)
   if (!canSearch) return
-  runRescueSearch(context, 'rescue:final-search', bonus)
+  runRescueSearch(context, 'final-search', bonus)
 }
 
 function runRescueReAccess(context: ExpeditionExecutionContext): void {
@@ -672,8 +674,10 @@ function runRescueReAccess(context: ExpeditionExecutionContext): void {
   const objective = getRescueObjective(state)
   if (!objective.located || objective.reached) return
   const outcome = state.battleOutcome
-  const bonus = outcome === 'victory' || outcome === 'costlyVictory' ? 5 : 0
-  runRescueAccess(context, 'rescue:reaccess', bonus)
+  const battleBonus =
+    outcome === 'victory' || outcome === 'costlyVictory' ? 5 : 0
+  const searchAccessBonus = getAccessBonus(state)
+  runRescueAccess(context, 'reaccess', battleBonus + searchAccessBonus)
 }
 
 function runRescueStabilization(context: ExpeditionExecutionContext): void {
@@ -682,7 +686,7 @@ function runRescueStabilization(context: ExpeditionExecutionContext): void {
   if (!objective.reached || !isRescueTargetAlive(objective)) return
 
   const target = request.rescue!.target
-  const rng = rescueRng(request, 'rescue:stabilization')
+  const rng = rescueRng(request, 'stabilization')
   const rankPenalty = rankPenaltyForRequest(request)
 
   const hasMedicine = state.supplies.medicine > 0
@@ -911,7 +915,7 @@ export function prepareRescueEvacuation(
   }
 
   const target = request.rescue!.target
-  const rng = rescueRng(request, 'rescue:evacuation')
+  const rng = rescueRng(request, 'evacuation')
   const rankPenalty = rankPenaltyForRequest(request)
 
   const { skill, preferredRole, mobilityModifier, returnTimeBonus } =
@@ -1090,7 +1094,7 @@ export function resolveRescueReturn(context: ExpeditionExecutionContext): void {
     facts.push('搬出は成功したが、完全な帰還には至らなかった')
   }
 
-  if (isRescueTargetAlive(objective)) {
+  if (objective.evacuated && isRescueTargetAlive(objective)) {
     const notStabilized = !objective.stabilized
     const poisonedOrBleeding = hasRescueTargetStatus(
       objective,
@@ -1098,7 +1102,7 @@ export function resolveRescueReturn(context: ExpeditionExecutionContext): void {
       'bleeding',
     )
     if (notStabilized || poisonedOrBleeding) {
-      const rng = rescueRng(request, 'rescue:return')
+      const rng = rescueRng(request, 'return')
       let chance = objective.stabilized ? 0 : 20
       if (poisonedOrBleeding) chance += 15
       if (activeRole(party, state, 'healer')) chance -= 10
@@ -1113,7 +1117,7 @@ export function resolveRescueReturn(context: ExpeditionExecutionContext): void {
           'return',
         )
         facts.push(
-          `${objective.targetName}の状態が帰が帰還中に悪化し、${actual}のダメージを負った`,
+          `${objective.targetName}の状態が帰還中に悪化し、${actual}のダメージを負った`,
         )
       } else {
         facts.push(`${objective.targetName}は帰還中に状態を維持した`)
@@ -1241,7 +1245,7 @@ export function runInitialRescueSearch(
     )
     return
   }
-  runRescueSearch(context, 'rescue:initial-search', 0)
+  runRescueSearch(context, 'initial-search', 0)
 }
 
 export const rescueHandler: ExpeditionObjectiveHandler = {
@@ -1257,13 +1261,14 @@ export const rescueHandler: ExpeditionObjectiveHandler = {
   validateRequest: validateRescueRequest,
   initializeObjectiveState: initializeRescueObjectiveState,
   beforeBattle(context: ExpeditionExecutionContext): void {
-    const { state } = context
+    const { request, state } = context
     const objective = getRescueObjective(state)
+    const battleWillOccur = request.battle?.enabled === true
     runInitialRescueSearch(context)
     if (objective.located && !objective.reached) {
-      runRescueAccess(context, 'rescue:access', getAccessBonus(state))
+      runRescueAccess(context, 'access', getAccessBonus(state))
     }
-    if (objective.located && objective.reached) {
+    if (battleWillOccur && objective.located && objective.reached) {
       assignRescueProtector(context)
     }
   },

@@ -1284,9 +1284,9 @@
           "C-healer-s1-healer-3"
         ],
         "check": {
-          "effectiveValue": 9,
+          "effectiveValue": 19,
           "result": "failure",
-          "roll": 31,
+          "roll": 82,
           "skill": "scouting"
         },
         "effects": [
@@ -1403,7 +1403,7 @@
             "value": 0
           }
         ],
-        "facts": ["救出対象は帰還中に状態を維持した"],
+        "facts": [],
         "phase": "return",
         "type": "rescueReturn"
       },

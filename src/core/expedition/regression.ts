@@ -188,18 +188,18 @@ export const regressionScenarios: RegressionScenario[] = [
   },
   {
     name: 'rescue-completeSuccess',
-    request: makeRescueRequest('s2', 'C'),
-    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's2', 'C'),
+    request: makeRescueRequest('s23', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's23', 'C'),
   },
   {
     name: 'rescue-success',
-    request: makeRescueRequest('s22', 'C'),
-    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's22', 'C'),
+    request: makeRescueRequest('s43', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's43', 'C'),
   },
   {
     name: 'rescue-partialSuccess',
-    request: makeRescueRequest('s5', 'C'),
-    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's5', 'C'),
+    request: makeRescueRequest('s12', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's12', 'C'),
   },
   {
     name: 'rescue-failedObjective',

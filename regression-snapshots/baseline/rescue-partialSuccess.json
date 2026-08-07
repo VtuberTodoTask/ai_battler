@@ -1,7 +1,7 @@
 {
   "outcome": "partialSuccess",
   "state": {
-    "avoidedThreats": ["poorVisibility"],
+    "avoidedThreats": ["traps"],
     "battleEntrySnapshot": {
       "environmentEffects": [
         {
@@ -10,46 +10,46 @@
         }
       ],
       "initialHp": {
-        "C-guardian-s5-guardian-1": 72,
-        "C-healer-s5-healer-3": 45,
-        "C-mage-s5-mage-2": 67,
-        "C-vanguard-s5-vanguard-0": 72
+        "C-guardian-s12-guardian-1": 71,
+        "C-healer-s12-healer-3": 54,
+        "C-mage-s12-mage-2": 49,
+        "C-vanguard-s12-vanguard-0": 66
       },
       "initialMorale": {
-        "C-guardian-s5-guardian-1": 64,
-        "C-healer-s5-healer-3": 56,
-        "C-mage-s5-mage-2": 33,
-        "C-vanguard-s5-vanguard-0": 41
+        "C-guardian-s12-guardian-1": 52,
+        "C-healer-s12-healer-3": 55,
+        "C-mage-s12-mage-2": 49,
+        "C-vanguard-s12-vanguard-0": 44
       },
       "initialMp": {
-        "C-guardian-s5-guardian-1": 6,
-        "C-healer-s5-healer-3": 43,
-        "C-mage-s5-mage-2": 43,
-        "C-vanguard-s5-vanguard-0": 6
+        "C-guardian-s12-guardian-1": 0,
+        "C-healer-s12-healer-3": 55,
+        "C-mage-s12-mage-2": 53,
+        "C-vanguard-s12-vanguard-0": 8
       },
       "initialStatusEffects": {
-        "C-guardian-s5-guardian-1": [],
-        "C-healer-s5-healer-3": [],
-        "C-mage-s5-mage-2": [],
-        "C-vanguard-s5-vanguard-0": []
+        "C-guardian-s12-guardian-1": [],
+        "C-healer-s12-healer-3": [],
+        "C-mage-s12-mage-2": [],
+        "C-vanguard-s12-vanguard-0": []
       },
       "knownEnemyAbilities": [],
       "knownEnemyWeaknesses": [],
-      "surprise": "enemyAdvantage"
+      "surprise": "neutral"
     },
-    "battleOutcome": "retreat",
+    "battleOutcome": "victory",
     "battles": [
       {
-        "combatSeed": "s5:battle:0:combat",
+        "combatSeed": "s12:battle:0:combat",
         "deadAdventurerIds": [],
         "discoveredWeaknesses": [],
-        "encounterSeed": "s5:battle:0:encounter",
-        "enemyComposition": "insectx4",
+        "encounterSeed": "s12:battle:0:encounter",
+        "enemyComposition": "aberrationx4",
         "enemyIds": [
-          "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:0",
-          "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:1",
-          "B-insect-ambusher-standard-s5:battle:0:encounter:enemy:2",
-          "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:3"
+          "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+          "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+          "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+          "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
         ],
         "entrySnapshot": {
           "environmentEffects": [
@@ -59,32 +59,32 @@
             }
           ],
           "initialHp": {
-            "C-guardian-s5-guardian-1": 72,
-            "C-healer-s5-healer-3": 45,
-            "C-mage-s5-mage-2": 67,
-            "C-vanguard-s5-vanguard-0": 72
+            "C-guardian-s12-guardian-1": 71,
+            "C-healer-s12-healer-3": 54,
+            "C-mage-s12-mage-2": 49,
+            "C-vanguard-s12-vanguard-0": 66
           },
           "initialMorale": {
-            "C-guardian-s5-guardian-1": 64,
-            "C-healer-s5-healer-3": 56,
-            "C-mage-s5-mage-2": 33,
-            "C-vanguard-s5-vanguard-0": 41
+            "C-guardian-s12-guardian-1": 52,
+            "C-healer-s12-healer-3": 55,
+            "C-mage-s12-mage-2": 49,
+            "C-vanguard-s12-vanguard-0": 44
           },
           "initialMp": {
-            "C-guardian-s5-guardian-1": 6,
-            "C-healer-s5-healer-3": 43,
-            "C-mage-s5-mage-2": 43,
-            "C-vanguard-s5-vanguard-0": 6
+            "C-guardian-s12-guardian-1": 0,
+            "C-healer-s12-healer-3": 55,
+            "C-mage-s12-mage-2": 53,
+            "C-vanguard-s12-vanguard-0": 8
           },
           "initialStatusEffects": {
-            "C-guardian-s5-guardian-1": [],
-            "C-healer-s5-healer-3": [],
-            "C-mage-s5-mage-2": [],
-            "C-vanguard-s5-vanguard-0": []
+            "C-guardian-s12-guardian-1": [],
+            "C-healer-s12-healer-3": [],
+            "C-mage-s12-mage-2": [],
+            "C-vanguard-s12-vanguard-0": []
           },
           "knownEnemyAbilities": [],
           "knownEnemyWeaknesses": [],
-          "surprise": "enemyAdvantage"
+          "surprise": "neutral"
         },
         "id": "battle-0",
         "incapacitatedAdventurerIds": [],
@@ -93,81 +93,73 @@
         "knownEnemyWeaknesses": [],
         "matchedAbilityIntel": [],
         "matchedWeaknessIntel": [],
-        "outcome": "retreat",
+        "outcome": "victory",
         "phase": "battle",
         "result": {
           "abilityUsage": {},
-          "adventurerActionCount": 8,
+          "adventurerActionCount": 37,
           "contactResult": {
             "effects": {
               "enemyInitiativeBonus": 3,
               "side": "enemy"
             },
-            "enemyStealth": 0,
-            "partyScouting": 0,
-            "roll": 100,
-            "successChance": 0,
+            "enemyStealth": 117,
+            "partyScouting": 93,
+            "roll": 95,
+            "successChance": 26,
             "type": "failure"
           },
           "deadAdventurers": [],
-          "defeatedEnemies": [],
+          "defeatedEnemies": [
+            "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+            "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
+          ],
           "discoveredWeaknesses": [],
-          "enemyActionCount": 8,
-          "enemyDamageDealt": 64,
-          "escapedEnemies": [],
+          "enemyActionCount": 34,
+          "enemyDamageDealt": 238,
+          "escapedEnemies": [
+            "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+            "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2"
+          ],
           "finalAdventurerStates": [
             {
               "alive": true,
-              "currentHp": 67,
-              "currentMp": 6,
+              "currentHp": 66,
+              "currentMp": 8,
               "dead": false,
-              "id": "C-vanguard-s5-vanguard-0",
+              "id": "C-vanguard-s12-vanguard-0",
               "incapacitated": false,
-              "morale": 41,
-              "statusEffects": [
-                {
-                  "duration": 1,
-                  "sourceId": "C-guardian-s5-guardian-1",
-                  "type": "guarded",
-                  "value": 5
-                }
-              ]
-            },
-            {
-              "alive": true,
-              "currentHp": 69,
-              "currentMp": 6,
-              "dead": false,
-              "id": "C-guardian-s5-guardian-1",
-              "incapacitated": false,
-              "morale": 64,
-              "statusEffects": [
-                {
-                  "duration": 1,
-                  "sourceId": "C-guardian-s5-guardian-1",
-                  "type": "guarded",
-                  "value": 3
-                }
-              ]
-            },
-            {
-              "alive": true,
-              "currentHp": 52,
-              "currentMp": 33,
-              "dead": false,
-              "id": "C-mage-s5-mage-2",
-              "incapacitated": false,
-              "morale": 33,
+              "morale": 44,
               "statusEffects": []
             },
             {
               "alive": true,
-              "currentHp": 43,
-              "currentMp": 40,
+              "currentHp": 71,
+              "currentMp": 0,
               "dead": false,
-              "id": "C-healer-s5-healer-3",
+              "id": "C-guardian-s12-guardian-1",
               "incapacitated": false,
-              "morale": 56,
+              "morale": 52,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 39,
+              "currentMp": 8,
+              "dead": false,
+              "id": "C-mage-s12-mage-2",
+              "incapacitated": false,
+              "morale": 49,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 54,
+              "currentMp": 34,
+              "dead": false,
+              "id": "C-healer-s12-healer-3",
+              "incapacitated": false,
+              "morale": 55,
               "statusEffects": []
             }
           ],
@@ -177,58 +169,36 @@
             {
               "actionType": "contact",
               "metadata": {
-                "contactType": "failure"
+                "contactType": "failure",
+                "leaderRole": "healer",
+                "topScoutRole": "mage"
               },
               "phase": "contact",
-              "result": "遠征側の不利により敵に先制された。",
-              "round": 0
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "C-healer-s5-healer-3",
-              "phase": "retreat",
-              "result": "ゴウ スカイがパーティ撤退を試みた。失敗",
-              "roll": 93,
-              "round": 1,
-              "successChance": 92.375
+              "result": "敵側が先制。",
+              "roll": 95,
+              "round": 0,
+              "successChance": 26
             },
             {
               "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:0",
-              "damage": 8,
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3",
+              "damage": 5,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
                 "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "大蟻暗殺者 hit グスタフ クォーツ for 8 damage",
-              "roll": 56,
+              "result": "虚ろなミミック待ち伏せ hit フレイア ノース for 5 damage",
+              "roll": 95,
               "round": 1,
               "statusApplied": [],
               "successChance": 95,
-              "targetIds": ["C-mage-s5-mage-2"]
+              "targetIds": ["C-mage-s12-mage-2"]
             },
             {
               "actionType": "ranged",
-              "actorId": "B-insect-ambusher-standard-s5:battle:0:encounter:enemy:2",
-              "damage": 9,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "甲殻蟲忍 hit グスタフ クォーツ for 9 damage",
-              "roll": 18,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["C-mage-s5-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:3",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
               "damage": 6,
               "metadata": {
                 "isCounter": false,
@@ -236,34 +206,654 @@
                 "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "甲殻蜘蛛待ち伏せ hit グスタフ クォーツ for 6 damage",
-              "roll": 69,
+              "result": "狂気の触手怪忍 hit フレイア ノース for 6 damage",
+              "roll": 73,
               "round": 1,
               "statusApplied": [],
               "successChance": 95,
-              "targetIds": ["C-mage-s5-mage-2"]
-            },
-            {
-              "actionType": "area",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:3",
-              "damage": 3,
-              "phase": "combat",
-              "result": "甲殻蜘蛛待ち伏せ hit ミレイ サンド for 3 area damage",
-              "round": 1,
-              "targetIds": ["C-guardian-s5-guardian-1"]
-            },
-            {
-              "actionType": "area",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:3",
-              "damage": 3,
-              "phase": "combat",
-              "result": "甲殻蜘蛛待ち伏せ hit オルム クレスト for 3 area damage",
-              "round": 1,
-              "targetIds": ["C-vanguard-s5-vanguard-0"]
+              "targetIds": ["C-mage-s12-mage-2"]
             },
             {
               "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:1",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+              "damage": 11,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 11 damage",
+              "roll": 9,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "damage": 13,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手狂信者魔術師 hit ヴァン ハインド for 13 damage",
+              "roll": 44,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 70,
+              "targetIds": ["C-healer-s12-healer-3"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s12-vanguard-0",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド フォレスト hit 触手狂信者魔術師 for 10 damage",
+              "roll": 61,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 75,
+              "targetIds": [
+                "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s12-guardian-1",
+              "damage": 9,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース hit 虚ろなミミック待ち伏せ for 9 damage",
+              "roll": 44,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 53,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s12-healer-3",
+              "metadata": {
+                "actualHealAmount": 26
+              },
+              "phase": "combat",
+              "result": "ヴァン ハインドがフレイア ノースを回復させた。+26 HP",
+              "round": 1,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s12-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース hit 狂気の触手怪忍 for 14 damage",
+              "roll": 34,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 87,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 5 damage",
+              "roll": 68,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなミミック待ち伏せ hit フレイア ノース for 6 damage",
+              "roll": 79,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 8 damage",
+              "roll": 24,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "damage": 15,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手狂信者魔術師 hit ヴァン ハインド for 15 damage",
+              "roll": 68,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 70,
+              "targetIds": ["C-healer-s12-healer-3"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s12-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース missed",
+              "roll": 55,
+              "round": 2,
+              "successChance": 52,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s12-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース hit 狂気の触手怪忍 for 12 damage",
+              "roll": 68,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 84,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s12-healer-3",
+              "metadata": {
+                "actualHealAmount": 28
+              },
+              "phase": "combat",
+              "result": "ヴァン ハインドがヴァン ハインドを回復させた。+28 HP",
+              "round": 2,
+              "targetIds": ["C-healer-s12-healer-3"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s12-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド フォレスト missed",
+              "roll": 90,
+              "round": 2,
+              "successChance": 75,
+              "targetIds": [
+                "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 5 damage",
+              "roll": 66,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなミミック待ち伏せ hit フレイア ノース for 8 damage",
+              "roll": 24,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 9 damage",
+              "roll": 53,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "damage": 13,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手狂信者魔術師 hit ヴァン ハインド for 13 damage",
+              "roll": 32,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 70,
+              "targetIds": ["C-healer-s12-healer-3"]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s12-healer-3",
+              "metadata": {
+                "actualHealAmount": 41
+              },
+              "phase": "combat",
+              "result": "ヴァン ハインドがフレイア ノースを回復させた。+41 HP",
+              "round": 3,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s12-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド フォレスト missed",
+              "roll": 77,
+              "round": 3,
+              "successChance": 75,
+              "targetIds": [
+                "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s12-mage-2",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース hit 虚ろなミミック待ち伏せ for 11 damage",
+              "roll": 71,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 88,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s12-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース missed",
+              "roll": 69,
+              "round": 3,
+              "successChance": 52,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3",
+              "damage": 11,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなミミック待ち伏せ hit フレイア ノース for 11 damage",
+              "roll": 11,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 6 damage",
+              "roll": 84,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 7 damage",
+              "roll": 87,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "damage": 13,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手狂信者魔術師 hit ヴァン ハインド for 13 damage",
+              "roll": 41,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 70,
+              "targetIds": ["C-healer-s12-healer-3"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s12-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド フォレスト missed",
+              "roll": 83,
+              "round": 4,
+              "successChance": 61,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s12-healer-3",
+              "metadata": {
+                "actualHealAmount": 26
+              },
+              "phase": "combat",
+              "result": "ヴァン ハインドがヴァン ハインドを回復させた。+26 HP",
+              "round": 4,
+              "targetIds": ["C-healer-s12-healer-3"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s12-mage-2",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース hit 狂気の触手怪忍 for 10 damage",
+              "roll": 21,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 74,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s12-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース missed",
+              "roll": 87,
+              "round": 4,
+              "successChance": 52,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなミミック待ち伏せ hit フレイア ノース for 7 damage",
+              "roll": 71,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+              "damage": 9,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 9 damage",
+              "roll": 5,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 5 damage",
+              "roll": 68,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手狂信者魔術師 missed",
+              "roll": 96,
+              "round": 5,
+              "successChance": 70,
+              "targetIds": ["C-healer-s12-healer-3"]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s12-healer-3",
+              "metadata": {
+                "actualHealAmount": 41
+              },
+              "phase": "combat",
+              "result": "ヴァン ハインドがフレイア ノースを回復させた。+41 HP",
+              "round": 5,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s12-vanguard-0",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド フォレスト hit 虚ろなミミック待ち伏せ for 11 damage",
+              "roll": 18,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 61,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s12-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース missed",
+              "roll": 70,
+              "round": 5,
+              "successChance": 52,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s12-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース hit 狂気の触手怪忍 for 12 damage",
+              "roll": 34,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 77,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3",
               "damage": 12,
               "metadata": {
                 "isCounter": false,
@@ -271,36 +861,219 @@
                 "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "大蟻暗殺者 hit グスタフ クォーツ for 12 damage",
-              "roll": 52,
-              "round": 1,
+              "result": "虚ろなミミック待ち伏せ hit フレイア ノース for 12 damage",
+              "roll": 7,
+              "round": 6,
               "statusApplied": [],
               "successChance": 95,
-              "targetIds": ["C-mage-s5-mage-2"]
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 8 damage",
+              "roll": 66,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+              "damage": 11,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 11 damage",
+              "roll": 18,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手狂信者魔術師 missed",
+              "roll": 88,
+              "round": 6,
+              "successChance": 70,
+              "targetIds": ["C-healer-s12-healer-3"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-healer-s5-healer-3",
-              "damage": 9,
+              "actorId": "C-vanguard-s12-vanguard-0",
+              "damage": 17,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド フォレスト hit 虚ろなミミック待ち伏せ for 17 damage",
+              "roll": 5,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 61,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s12-healer-3",
+              "metadata": {
+                "actualHealAmount": 35
+              },
+              "phase": "combat",
+              "result": "ヴァン ハインドがフレイア ノースを回復させた。+35 HP",
+              "round": 6,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s12-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース missed",
+              "roll": 79,
+              "round": 6,
+              "successChance": 52,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s12-mage-2",
+              "damage": 17,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース hit 狂気の触手怪忍 for 17 damage",
+              "roll": 9,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 74,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "虚ろなミミック待ち伏せ missed",
+              "roll": 100,
+              "round": 7,
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 7 damage",
+              "roll": 22,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 5 damage",
+              "roll": 25,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手狂信者魔術師 missed",
+              "roll": 83,
+              "round": 7,
+              "successChance": 70,
+              "targetIds": ["C-healer-s12-healer-3"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s12-healer-3",
+              "damage": 10,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ゴウ スカイ hit 大蟻暗殺者 for 9 damage",
-              "roll": 26,
-              "round": 1,
+              "result": "ヴァン ハインド hit 虚ろなミミック待ち伏せ for 10 damage",
+              "roll": 14,
+              "round": 7,
               "statusApplied": [],
-              "successChance": 35,
+              "successChance": 26,
               "targetIds": [
-                "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:1"
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "C-vanguard-s5-vanguard-0",
-              "damage": 10,
+              "actorId": "C-vanguard-s12-vanguard-0",
+              "damage": 0,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -308,147 +1081,114 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "オルム クレスト hit 大蟻暗殺者 for 10 damage",
-              "roll": 30,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 79,
+              "result": "ハロルド フォレスト missed",
+              "roll": 91,
+              "round": 7,
+              "successChance": 61,
               "targetIds": [
-                "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:1"
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
               ]
             },
             {
-              "actionType": "guard",
-              "actorId": "C-guardian-s5-guardian-1",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "ミレイ サンドがグスタフ クォーツを防護した。",
-              "round": 1,
-              "targetIds": ["C-mage-s5-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s5-mage-2",
+              "actionType": "melee",
+              "actorId": "C-guardian-s12-guardian-1",
               "damage": 0,
               "metadata": {
-                "attackerRole": "mage",
+                "attackerRole": "guardian",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "グスタフ クォーツ missed",
-              "roll": 92,
-              "round": 1,
-              "successChance": 89,
+              "result": "フレイア ノース missed",
+              "roll": 68,
+              "round": 7,
+              "successChance": 52,
               "targetIds": [
-                "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:0"
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s12-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース hit 虚ろなミミック待ち伏せ for 13 damage",
+              "roll": 68,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 78,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "虚ろなミミック待ち伏せが戦闘不能になった。",
+              "round": 7,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:3"
               ]
             },
             {
               "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:0",
-              "damage": 2,
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+              "damage": 7,
               "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-guardian-s5-guardian-1",
                 "isCounter": false,
                 "isFlank": false,
-                "preventedIncap": false,
                 "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "大蟻暗殺者 hit グスタフ クォーツ for 2 damage",
-              "roll": 26,
-              "round": 2,
+              "result": "狂気の触手怪忍 hit フレイア ノース for 7 damage",
+              "roll": 48,
+              "round": 8,
               "statusApplied": [],
               "successChance": 95,
-              "targetIds": ["C-mage-s5-mage-2"]
+              "targetIds": ["C-mage-s12-mage-2"]
             },
             {
               "actionType": "ranged",
-              "actorId": "B-insect-ambusher-standard-s5:battle:0:encounter:enemy:2",
-              "damage": 1,
-              "metadata": {
-                "guardPrevented": 4,
-                "guardSourceId": "C-guardian-s5-guardian-1",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "甲殻蟲忍 hit グスタフ クォーツ for 1 damage",
-              "roll": 25,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["C-mage-s5-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:3",
-              "damage": 4,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-guardian-s5-guardian-1",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "甲殻蜘蛛待ち伏せ hit グスタフ クォーツ for 4 damage",
-              "roll": 56,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["C-mage-s5-mage-2"]
-            },
-            {
-              "actionType": "area",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:3",
-              "damage": 2,
-              "phase": "combat",
-              "result": "甲殻蜘蛛待ち伏せ hit オルム クレスト for 2 area damage",
-              "round": 2,
-              "targetIds": ["C-vanguard-s5-vanguard-0"]
-            },
-            {
-              "actionType": "area",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:3",
-              "damage": 2,
-              "phase": "combat",
-              "result": "甲殻蜘蛛待ち伏せ hit ゴウ スカイ for 2 area damage",
-              "round": 2,
-              "targetIds": ["C-healer-s5-healer-3"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:1",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
               "damage": 12,
               "metadata": {
-                "guardPrevented": 8,
-                "guardSourceId": "C-guardian-s5-guardian-1",
                 "isCounter": false,
                 "isFlank": false,
-                "preventedIncap": false,
                 "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "大蟻暗殺者 hit グスタフ クォーツ for 12 damage",
-              "roll": 15,
-              "round": 2,
+              "result": "狂気の触手怪忍 hit フレイア ノース for 12 damage",
+              "roll": 9,
+              "round": 8,
               "statusApplied": [],
-              "successChance": 93,
-              "targetIds": ["C-mage-s5-mage-2"]
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手狂信者魔術師 missed",
+              "roll": 92,
+              "round": 8,
+              "successChance": 70,
+              "targetIds": ["C-healer-s12-healer-3"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-vanguard-s5-vanguard-0",
+              "actorId": "C-vanguard-s12-vanguard-0",
               "damage": 14,
               "metadata": {
                 "attackerRole": "vanguard",
@@ -456,174 +1196,239 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "オルム クレスト hit 大蟻暗殺者 for 14 damage",
-              "roll": 44,
-              "round": 2,
+              "result": "ハロルド フォレスト hit 狂気の触手怪忍 for 14 damage",
+              "roll": 51,
+              "round": 8,
               "statusApplied": [],
-              "successChance": 79,
+              "successChance": 60,
               "targetIds": [
-                "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:1"
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s12-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース missed",
+              "roll": 74,
+              "round": 8,
+              "successChance": 52,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1"
               ]
             },
             {
               "actionType": "magic",
-              "actorId": "C-mage-s5-mage-2",
-              "damage": 12,
+              "actorId": "C-mage-s12-mage-2",
+              "damage": 13,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "グスタフ クォーツ hit 大蟻暗殺者 for 12 damage",
-              "roll": 56,
-              "round": 2,
+              "result": "フレイア ノース hit 狂気の触手怪忍 for 13 damage",
+              "roll": 40,
+              "round": 8,
               "statusApplied": [],
-              "successChance": 89,
+              "successChance": 77,
               "targetIds": [
-                "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:0"
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1"
               ]
             },
             {
               "actionType": "heal",
-              "actorId": "C-healer-s5-healer-3",
+              "actorId": "C-healer-s12-healer-3",
               "metadata": {
-                "actualHealAmount": 39
+                "actualHealAmount": 31
               },
               "phase": "combat",
-              "result": "ゴウ スカイがグスタフ クォーツを回復させた。+39 HP",
-              "round": 2,
-              "targetIds": ["C-mage-s5-mage-2"]
+              "result": "ヴァン ハインドがフレイア ノースを回復させた。+31 HP",
+              "round": 8,
+              "targetIds": ["C-mage-s12-mage-2"]
             },
             {
-              "actionType": "guard",
-              "actorId": "C-guardian-s5-guardian-1",
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0",
+              "damage": 8,
               "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "vanguard"
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "ミレイ サンドがオルム クレストを防護した。",
-              "round": 2,
-              "targetIds": ["C-vanguard-s5-vanguard-0"]
+              "result": "狂気の触手怪忍 hit フレイア ノース for 8 damage",
+              "roll": 82,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "狂気の触手怪忍 hit フレイア ノース for 6 damage",
+              "roll": 81,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["C-mage-s12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "healer"
+              },
+              "phase": "combat",
+              "result": "触手狂信者魔術師 missed",
+              "roll": 88,
+              "round": 9,
+              "successChance": 70,
+              "targetIds": ["C-healer-s12-healer-3"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s12-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース hit 触手狂信者魔術師 for 14 damage",
+              "roll": 13,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 54,
+              "targetIds": [
+                "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s12-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フレイア ノース missed",
+              "roll": 95,
+              "round": 9,
+              "successChance": 52,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s12-healer-3",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン ハインド hit 狂気の触手怪忍 for 11 damage",
+              "roll": 9,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 25,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s12-vanguard-0",
+              "damage": 18,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ハロルド フォレスト hit 狂気の触手怪忍 for 18 damage",
+              "roll": 4,
+              "round": 9,
+              "statusApplied": [],
+              "successChance": 60,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "狂気の触手怪忍が戦闘不能になった。",
+              "round": 9,
+              "targetIds": [
+                "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:0"
+              ]
             },
             {
               "actionType": "retreat",
-              "actorId": "C-healer-s5-healer-3",
+              "actorId": "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
               "phase": "retreat",
-              "result": "ゴウ スカイがパーティ撤退を試みた。成功",
-              "roll": 26,
-              "round": 3,
-              "successChance": 92.375
-            }
-          ],
-          "outcome": "retreat",
-          "partyDamageDealt": 45,
-          "retreatAttempts": [
-            {
-              "aliveCount": 4,
-              "approved": true,
-              "attemptCount": 1,
-              "attempted": true,
-              "averageMorale": 48.5,
-              "enemyThreat": 28.766400000000004,
-              "healerAlive": true,
-              "incapacitatedCount": 0,
-              "leaderId": "C-healer-s5-healer-3",
-              "matchedReasons": ["lowMorale"],
-              "moraleThreshold": 48.5,
-              "partyHpRatio": 0.975,
-              "partyThreat": 18.44,
-              "proposerHpRatio": 0.9,
-              "proposerId": "C-healer-s5-healer-3",
-              "proposerMorale": 56,
-              "proposerRole": "healer",
-              "reason": "lowMorale",
-              "retreatHpThreshold": 0.28500000000000003,
-              "roll": 93,
-              "round": 1,
-              "success": false,
-              "successChance": 92.375
+              "result": "狂気の触手怪忍が撤退した。",
+              "roll": 3,
+              "round": 10,
+              "successChance": 85
             },
             {
-              "aliveCount": 4,
-              "approved": true,
-              "attemptCount": 2,
-              "attempted": true,
-              "averageMorale": 48.5,
-              "enemyThreat": 28.766400000000004,
-              "healerAlive": true,
-              "incapacitatedCount": 0,
-              "leaderId": "C-healer-s5-healer-3",
-              "matchedReasons": ["lowMorale"],
-              "moraleThreshold": 48.5,
-              "partyHpRatio": 0.8812520729684908,
-              "partyThreat": 18.44,
-              "proposerHpRatio": 0.86,
-              "proposerId": "C-healer-s5-healer-3",
-              "proposerMorale": 56,
-              "proposerRole": "healer",
-              "reason": "lowMorale",
-              "retreatHpThreshold": 0.28500000000000003,
-              "roll": 26,
-              "round": 3,
-              "success": true,
-              "successChance": 92.375
+              "actionType": "retreat",
+              "actorId": "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2",
+              "phase": "retreat",
+              "result": "触手狂信者魔術師が撤退した。",
+              "roll": 49,
+              "round": 10,
+              "successChance": 95
             }
           ],
-          "retreatDiagnostic": {
-            "aliveCount": 4,
-            "approved": true,
-            "attemptCount": 2,
-            "attempted": true,
-            "averageMorale": 48.5,
-            "enemyThreat": 28.766400000000004,
-            "healerAlive": true,
-            "incapacitatedCount": 0,
-            "leaderId": "C-healer-s5-healer-3",
-            "matchedReasons": ["lowMorale"],
-            "moraleThreshold": 48.5,
-            "partyHpRatio": 0.8812520729684908,
-            "partyThreat": 18.44,
-            "proposerHpRatio": 0.86,
-            "proposerId": "C-healer-s5-healer-3",
-            "proposerMorale": 56,
-            "proposerRole": "healer",
-            "reason": "lowMorale",
-            "retreatHpThreshold": 0.28500000000000003,
-            "roll": 26,
-            "round": 3,
-            "success": true,
-            "successChance": 92.375
-          },
-          "retreatResult": {
-            "chance": 92.375,
-            "roll": 26,
-            "side": "party",
-            "success": true
-          },
-          "rounds": 3,
-          "seed": "s5:battle:0:combat",
+          "outcome": "victory",
+          "partyDamageDealt": 216,
+          "retreatAttempts": [],
+          "rounds": 10,
+          "seed": "s12:battle:0:combat",
           "survivingAdventurers": [
-            "C-vanguard-s5-vanguard-0",
-            "C-guardian-s5-guardian-1",
-            "C-mage-s5-mage-2",
-            "C-healer-s5-healer-3"
+            "C-vanguard-s12-vanguard-0",
+            "C-guardian-s12-guardian-1",
+            "C-mage-s12-mage-2",
+            "C-healer-s12-healer-3"
           ],
           "survivingEnemies": [
-            "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:0",
-            "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:1",
-            "B-insect-ambusher-standard-s5:battle:0:encounter:enemy:2",
-            "C-insect-ambusher-standard-s5:battle:0:encounter:enemy:3"
+            "B-aberration-ambusher-standard-s12:battle:0:encounter:enemy:1",
+            "C-aberration-controller-standard-s12:battle:0:encounter:enemy:2"
           ]
         },
-        "rounds": 3,
+        "rounds": 10,
         "survivingAdventurerIds": [
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1",
-          "C-mage-s5-mage-2",
-          "C-healer-s5-healer-3"
+          "C-vanguard-s12-vanguard-0",
+          "C-guardian-s12-guardian-1",
+          "C-mage-s12-mage-2",
+          "C-healer-s12-healer-3"
         ],
         "trigger": "afterExploration",
         "unmatchedAbilityIntel": [],
@@ -633,15 +1438,23 @@
     "casualties": [],
     "currentPhase": "aftermath",
     "discoveredThreats": ["traps", "poorVisibility"],
-    "elapsedTime": 12.65,
+    "elapsedTime": 11.65,
     "incapacitated": [],
     "information": [],
     "injuries": [
       {
-        "adventurerId": "C-healer-s5-healer-3",
-        "cause": "traps",
+        "adventurerId": "C-mage-s12-mage-2",
+        "cause": "explorationAccident",
+        "hpLoss": 4,
+        "id": "injury-0-143520",
+        "status": "treated",
+        "type": "light"
+      },
+      {
+        "adventurerId": "C-mage-s12-mage-2",
+        "cause": "poorVisibility",
         "hpLoss": 5,
-        "id": "injury-0-543467",
+        "id": "injury-1-245505",
         "status": "treated",
         "type": "light"
       }
@@ -649,14 +1462,14 @@
     "logs": [
       {
         "actorIds": [
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1",
-          "C-mage-s5-mage-2"
+          "C-guardian-s12-guardian-1",
+          "C-vanguard-s12-vanguard-0",
+          "C-mage-s12-mage-2"
         ],
         "check": {
-          "effectiveValue": 60,
+          "effectiveValue": 56,
           "result": "success",
-          "roll": 25,
+          "roll": 16,
           "skill": "survival"
         },
         "effects": [
@@ -666,7 +1479,7 @@
           }
         ],
         "facts": [
-          "オルム クレストが効率的なルートと補給計画を立てた",
+          "フレイア ノースが効率的なルートと補給計画を立てた",
           "Support不在のため、出発時の士気が低めである"
         ],
         "phase": "preparation",
@@ -674,62 +1487,48 @@
       },
       {
         "actorIds": [
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1",
-          "C-mage-s5-mage-2"
+          "C-guardian-s12-guardian-1",
+          "C-vanguard-s12-vanguard-0",
+          "C-mage-s12-mage-2"
         ],
         "check": {
-          "effectiveValue": 55,
+          "effectiveValue": 51,
           "result": "success",
-          "roll": 50,
+          "roll": 45,
           "skill": "survival"
         },
         "effects": [],
-        "facts": ["オルム クレストが安全な接近経路を確保した"],
+        "facts": ["フレイア ノースが安全な接近経路を確保した"],
         "phase": "approach",
         "type": "travel"
       },
       {
         "actorIds": [
-          "C-mage-s5-mage-2",
-          "C-healer-s5-healer-3",
-          "C-guardian-s5-guardian-1"
+          "C-mage-s12-mage-2",
+          "C-vanguard-s12-vanguard-0",
+          "C-healer-s12-healer-3"
         ],
         "check": {
-          "effectiveValue": 39,
-          "result": "partialSuccess",
-          "roll": 43,
+          "effectiveValue": 40,
+          "result": "success",
+          "roll": 24,
           "skill": "trapDetection"
         },
-        "effects": [
-          {
-            "targetId": "C-healer-s5-healer-3",
-            "type": "hpDamage",
-            "value": 5
-          },
-          {
-            "type": "moraleChange",
-            "value": -3
-          }
-        ],
-        "facts": [
-          "罠に遭遇した",
-          "Guardianがゴウ スカイの被害を軽減した",
-          "ゴウ スカイが5のダメージを受けた"
-        ],
+        "effects": [],
+        "facts": ["フレイア ノースが罠を事前に察知・回避した"],
         "phase": "approach",
         "type": "hazard"
       },
       {
         "actorIds": [
-          "C-mage-s5-mage-2",
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1"
+          "C-mage-s12-mage-2",
+          "C-healer-s12-healer-3",
+          "C-vanguard-s12-vanguard-0"
         ],
         "check": {
           "effectiveValue": 1,
           "result": "failure",
-          "roll": 62,
+          "roll": 57,
           "skill": "scouting"
         },
         "effects": [],
@@ -739,14 +1538,14 @@
       },
       {
         "actorIds": [
-          "C-mage-s5-mage-2",
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1"
+          "C-mage-s12-mage-2",
+          "C-healer-s12-healer-3",
+          "C-vanguard-s12-vanguard-0"
         ],
         "check": {
           "effectiveValue": 1,
           "result": "failure",
-          "roll": 45,
+          "roll": 51,
           "skill": "scouting"
         },
         "effects": [],
@@ -756,31 +1555,40 @@
       },
       {
         "actorIds": [
-          "C-mage-s5-mage-2",
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1"
+          "C-mage-s12-mage-2",
+          "C-healer-s12-healer-3",
+          "C-vanguard-s12-vanguard-0"
         ],
         "check": {
           "effectiveValue": 1,
-          "result": "failure",
-          "roll": 39,
+          "result": "criticalFailure",
+          "roll": 97,
           "skill": "scouting"
         },
-        "effects": [],
-        "facts": ["調査に手間取った"],
+        "effects": [
+          {
+            "targetId": "C-mage-s12-mage-2",
+            "type": "hpDamage",
+            "value": 4
+          }
+        ],
+        "facts": [
+          "調査に手間取った",
+          "フレイア ノースが小さな事故で4のダメージを受けた"
+        ],
         "phase": "exploration",
         "type": "explore"
       },
       {
         "actorIds": [
-          "C-mage-s5-mage-2",
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1"
+          "C-mage-s12-mage-2",
+          "C-healer-s12-healer-3",
+          "C-vanguard-s12-vanguard-0"
         ],
         "check": {
-          "effectiveValue": 13,
+          "effectiveValue": 11,
           "result": "success",
-          "roll": 3,
+          "roll": 5,
           "skill": "scouting"
         },
         "effects": [
@@ -793,20 +1601,20 @@
             "value": 20
           }
         ],
-        "facts": ["グスタフ クォーツが救出対象の位置を特定した"],
+        "facts": ["フレイア ノースが救出対象の位置を特定した"],
         "phase": "contact",
         "type": "rescueSearch"
       },
       {
         "actorIds": [
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1",
-          "C-mage-s5-mage-2"
+          "C-guardian-s12-guardian-1",
+          "C-vanguard-s12-vanguard-0",
+          "C-mage-s12-mage-2"
         ],
         "check": {
-          "effectiveValue": 32,
+          "effectiveValue": 28,
           "result": "partialSuccess",
-          "roll": 44,
+          "roll": 43,
           "skill": "survival"
         },
         "effects": [
@@ -826,48 +1634,48 @@
         ],
         "facts": [
           "用具を1消費して道を切り開いた",
-          "オルム クレストは救出対象のもとへ到達したが、多少の遅延が生じた"
+          "フレイア ノースは救出対象のもとへ到達したが、多少の遅延が生じた"
         ],
         "phase": "contact",
         "type": "rescueTargetReached"
       },
       {
-        "actorIds": ["C-guardian-s5-guardian-1"],
+        "actorIds": ["C-guardian-s12-guardian-1"],
         "effects": [
           {
-            "targetId": "C-guardian-s5-guardian-1",
+            "targetId": "C-guardian-s12-guardian-1",
             "type": "rescueProtector",
             "value": 1
           }
         ],
-        "facts": ["ミレイ サンド（guardian）が救出対象の保護担当になった"],
+        "facts": ["フレイア ノース（guardian）が救出対象の保護担当になった"],
         "phase": "contact",
         "type": "rescueProtectorAssigned"
       },
       {
         "actorIds": [],
         "effects": [],
-        "facts": ["戦闘が3ラウンドでretreatとなった", "接敵結果: failure"],
+        "facts": ["戦闘が10ラウンドでvictoryとなった", "接敵結果: failure"],
         "phase": "battle",
         "targetIds": [],
         "type": "battleSummary"
       },
       {
-        "actorIds": ["C-guardian-s5-guardian-1"],
+        "actorIds": ["C-guardian-s12-guardian-1"],
         "check": {
-          "effectiveValue": 75,
-          "result": "partialSuccess",
-          "roll": 85,
+          "effectiveValue": 80,
+          "result": "success",
+          "roll": 21,
           "skill": "defense"
         },
         "effects": [
           {
             "type": "rescueTargetDamage",
-            "value": 4
+            "value": 0
           },
           {
             "type": "rescueTargetHp",
-            "value": 36
+            "value": 40
           },
           {
             "type": "rescueAlive",
@@ -878,22 +1686,82 @@
             "value": 40
           }
         ],
-        "facts": [
-          "ミレイ サンドは救出対象を守ったが、4のダメージを負わせてしまった"
-        ],
+        "facts": ["フレイア ノースが救出対象を戦闘から守り切った"],
         "phase": "battle",
         "type": "rescueBattleExposure"
       },
       {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "rescueTargetHeal",
+            "value": 0
+          },
+          {
+            "type": "rescueTargetHp",
+            "value": 40
+          },
+          {
+            "type": "rescueAlive",
+            "value": 1
+          }
+        ],
+        "facts": ["救出対象のHPが0回復した（healing critical success）"],
+        "phase": "objective",
+        "type": "rescueTargetHeal"
+      },
+      {
         "actorIds": [
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1",
-          "C-mage-s5-mage-2"
+          "C-healer-s12-healer-3",
+          "C-mage-s12-mage-2",
+          "C-guardian-s12-guardian-1"
         ],
         "check": {
-          "effectiveValue": 22,
+          "effectiveValue": 88,
+          "result": "criticalSuccess",
+          "roll": 7,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "type": "rescueStabilized",
+            "value": 1
+          },
+          {
+            "type": "rescueTargetHp",
+            "value": 40
+          },
+          {
+            "type": "rescueAlive",
+            "value": 1
+          },
+          {
+            "type": "rescueProgress",
+            "value": 60
+          }
+        ],
+        "facts": [
+          "ヴァン ハインドが救出対象を完全に安定化し、毒と出血を解除した",
+          "医薬品を1消費した"
+        ],
+        "phase": "objective",
+        "type": "rescueStabilization"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s12-guardian-1",
+          "C-vanguard-s12-vanguard-0",
+          "C-mage-s12-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 28,
           "result": "partialSuccess",
-          "roll": 26,
+          "roll": 39,
           "skill": "survival"
         },
         "effects": [
@@ -907,7 +1775,7 @@
           },
           {
             "type": "rescueTargetHp",
-            "value": 34
+            "value": 38
           },
           {
             "type": "rescueAlive",
@@ -915,11 +1783,11 @@
           },
           {
             "type": "rescueProgress",
-            "value": 60
+            "value": 80
           }
         ],
         "facts": [
-          "オルム クレストが救出対象を搬出したが、2のダメージを負わせた",
+          "フレイア ノースが救出対象を搬出したが、2のダメージを負わせた",
           "搬出に手間取り、帰還に余分な時間がかかる"
         ],
         "phase": "objective",
@@ -927,44 +1795,54 @@
       },
       {
         "actorIds": [
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1",
-          "C-mage-s5-mage-2"
+          "C-guardian-s12-guardian-1",
+          "C-vanguard-s12-vanguard-0",
+          "C-mage-s12-mage-2"
         ],
         "check": {
-          "effectiveValue": 55,
-          "result": "partialSuccess",
-          "roll": 68,
+          "effectiveValue": 51,
+          "result": "success",
+          "roll": 39,
           "skill": "survival"
         },
         "effects": [],
-        "facts": ["オルム クレストが経路を確保したが、多少の遅延が発生した"],
+        "facts": ["フレイア ノースが安全な帰還経路を確保した"],
         "phase": "return",
         "type": "travel"
       },
       {
         "actorIds": [
-          "C-mage-s5-mage-2",
-          "C-vanguard-s5-vanguard-0",
-          "C-guardian-s5-guardian-1"
+          "C-mage-s12-mage-2",
+          "C-healer-s12-healer-3",
+          "C-vanguard-s12-vanguard-0"
         ],
         "check": {
-          "effectiveValue": 23,
-          "result": "success",
-          "roll": 16,
+          "effectiveValue": 21,
+          "result": "failure",
+          "roll": 46,
           "skill": "scouting"
         },
-        "effects": [],
-        "facts": ["グスタフ クォーツが視界不良を事前に察知・回避した"],
+        "effects": [
+          {
+            "targetId": "C-mage-s12-mage-2",
+            "type": "hpDamage",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "視界不良に遭遇した",
+          "Guardianがフレイア ノースの被害を軽減した",
+          "フレイア ノースが5のダメージを受けた"
+        ],
         "phase": "return",
         "type": "hazard"
       },
       {
-        "actorIds": ["C-healer-s5-healer-3"],
+        "actorIds": ["C-healer-s12-healer-3"],
         "check": {
-          "effectiveValue": 86,
+          "effectiveValue": 92,
           "result": "success",
-          "roll": 54,
+          "roll": 22,
           "skill": "firstAid"
         },
         "effects": [
@@ -974,29 +1852,14 @@
             "value": 1
           },
           {
-            "targetId": "C-vanguard-s5-vanguard-0",
-            "type": "hpHeal",
-            "value": 5
-          },
-          {
-            "targetId": "C-guardian-s5-guardian-1",
-            "type": "hpHeal",
-            "value": 3
-          },
-          {
-            "targetId": "C-mage-s5-mage-2",
-            "type": "hpHeal",
-            "value": 5
-          },
-          {
-            "targetId": "C-healer-s5-healer-3",
+            "targetId": "C-mage-s12-mage-2",
             "type": "hpHeal",
             "value": 5
           }
         ],
         "facts": [
           "医薬品を1消費した",
-          "ゴウ スカイが帰還中の負傷者を手当てした"
+          "ヴァン ハインドが帰還中の負傷者を手当てした"
         ],
         "phase": "return",
         "type": "firstAid"
@@ -1014,7 +1877,7 @@
           },
           {
             "type": "rescueTargetHp",
-            "value": 34
+            "value": 38
           },
           {
             "type": "rescueAlive",
@@ -1022,23 +1885,22 @@
           },
           {
             "type": "rescueProgress",
-            "value": 60
+            "value": 80
           }
         ],
         "facts": [
           "救出対象を危険地帯から離れたが、拠点までは連れ帰れなかった",
-          "搬出は成功したが、完全な帰還には至らなかった",
-          "救出対象は帰還中に状態を維持した"
+          "搬出は成功したが、完全な帰還には至らなかった"
         ],
         "phase": "return",
         "type": "rescueReturn"
       },
       {
-        "actorIds": ["C-healer-s5-healer-3"],
+        "actorIds": ["C-healer-s12-healer-3"],
         "check": {
-          "effectiveValue": 94,
-          "result": "success",
-          "roll": 42,
+          "effectiveValue": 100,
+          "result": "criticalSuccess",
+          "roll": 20,
           "skill": "healing"
         },
         "effects": [
@@ -1048,17 +1910,12 @@
             "value": 2
           },
           {
-            "targetId": "C-mage-s5-mage-2",
+            "targetId": "C-mage-s12-mage-2",
             "type": "hpHeal",
-            "value": 8
-          },
-          {
-            "targetId": "C-healer-s5-healer-3",
-            "type": "hpHeal",
-            "value": 2
+            "value": 14
           }
         ],
-        "facts": ["ゴウ スカイによる治療判定: success"],
+        "facts": ["ヴァン ハインドによる治療判定: criticalSuccess"],
         "phase": "aftermath",
         "type": "healing"
       },
@@ -1071,9 +1928,9 @@
           }
         ],
         "facts": [
-          "救出対象は発見済み・接近済み・未安定化・搬出済み・未帰還。救出進捗は60%",
+          "救出対象は発見済み・接近済み・安定化済み・搬出済み・未帰還。救出進捗は80%",
           "医薬品を2消費した",
-          "ゴウ スカイが負傷者の治療を行った"
+          "ヴァン ハインドが負傷者の治療を行った"
         ],
         "phase": "aftermath",
         "type": "summary"
@@ -1091,68 +1948,54 @@
       "threatFeatures": ["traps", "poorVisibility"]
     },
     "objectiveCompleted": false,
-    "objectiveProgress": 60,
+    "objectiveProgress": 80,
     "objectiveState": {
       "abandoned": false,
-      "battleExposureDamage": 4,
+      "battleExposureDamage": 0,
       "completed": false,
-      "currentHp": 34,
+      "currentHp": 38,
       "evacuated": true,
       "located": true,
       "maxHp": 40,
       "mobility": "mobile",
-      "progress": 60,
-      "protectorId": "C-guardian-s5-guardian-1",
+      "progress": 80,
+      "protectorId": "C-guardian-s12-guardian-1",
       "reached": true,
       "returnDamage": 0,
       "returned": false,
-      "stabilized": false,
+      "stabilized": true,
       "statusEffects": [],
       "targetId": "target-1",
       "targetName": "救出対象",
       "type": "rescue"
     },
     "partyHp": {
-      "C-guardian-s5-guardian-1": 72,
-      "C-healer-s5-healer-3": 50,
-      "C-mage-s5-mage-2": 65,
-      "C-vanguard-s5-vanguard-0": 72
+      "C-guardian-s12-guardian-1": 71,
+      "C-healer-s12-healer-3": 54,
+      "C-mage-s12-mage-2": 53,
+      "C-vanguard-s12-vanguard-0": 66
     },
     "partyMorale": {
-      "C-guardian-s5-guardian-1": 67,
-      "C-healer-s5-healer-3": 59,
-      "C-mage-s5-mage-2": 36,
-      "C-vanguard-s5-vanguard-0": 44
+      "C-guardian-s12-guardian-1": 55,
+      "C-healer-s12-healer-3": 58,
+      "C-mage-s12-mage-2": 52,
+      "C-vanguard-s12-vanguard-0": 47
     },
     "partyMp": {
-      "C-guardian-s5-guardian-1": 6,
-      "C-healer-s5-healer-3": 40,
-      "C-mage-s5-mage-2": 33,
-      "C-vanguard-s5-vanguard-0": 6
+      "C-guardian-s12-guardian-1": 0,
+      "C-healer-s12-healer-3": 34,
+      "C-mage-s12-mage-2": 8,
+      "C-vanguard-s12-vanguard-0": 8
     },
     "partyStatusEffects": {
-      "C-guardian-s5-guardian-1": [
-        {
-          "duration": 1,
-          "sourceId": "C-guardian-s5-guardian-1",
-          "type": "guarded",
-          "value": 3
-        }
-      ],
-      "C-healer-s5-healer-3": [],
-      "C-mage-s5-mage-2": [],
-      "C-vanguard-s5-vanguard-0": [
-        {
-          "duration": 1,
-          "sourceId": "C-guardian-s5-guardian-1",
-          "type": "guarded",
-          "value": 5
-        }
-      ]
+      "C-guardian-s12-guardian-1": [],
+      "C-healer-s12-healer-3": [],
+      "C-mage-s12-mage-2": [],
+      "C-vanguard-s12-vanguard-0": []
     },
     "supplies": {
       "food": 8,
-      "medicine": 1,
+      "medicine": 0,
       "tools": 1
     }
   }

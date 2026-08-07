@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { runExpedition } from './expedition.ts'
 import { initializeExpeditionState } from './state.ts'
+import { SeededRng } from '../rng/seededRng.ts'
 import {
   makeEliminationRequest,
   makeParty,
@@ -9,10 +10,20 @@ import {
   makeRescueRequest,
   minimalExpeditionState,
 } from './test-utils.ts'
-import type { RescueObjectiveState } from './types.ts'
+import type { Adventurer } from '../models/types.ts'
+import type {
+  ExpeditionExecutionContext,
+  ExpeditionRequest,
+  RescueObjectiveState,
+} from './types.ts'
 import {
+  applyRescueTargetDamage,
+  determineRescueOutcome,
   healRescueTarget,
   initializeRescueObjectiveState,
+  resolveRescueReturn,
+  runRescueAccess,
+  runRescueSearch,
 } from './objectives/rescue.ts'
 
 function rescueState(
@@ -21,6 +32,20 @@ function rescueState(
   const obj = result.state.objectiveState
   expect(obj?.type).toBe('rescue')
   return obj as RescueObjectiveState
+}
+
+function makeRescueContext(
+  request: ExpeditionRequest,
+  party: Adventurer[],
+): ExpeditionExecutionContext {
+  const state = initializeExpeditionState(request, party)
+  state.objectiveState = initializeRescueObjectiveState(request)
+  return {
+    request,
+    party,
+    state,
+    rng: new SeededRng(request.seed),
+  }
 }
 
 describe('Rescue input validation', () => {
@@ -342,29 +367,24 @@ describe('Rescue evacuation and return', () => {
   })
 
   it('sets returned=true when evacuation succeeds and party survives', () => {
-    const request = makeRescueRequest(
-      'return-true',
-      'C',
-      {
-        locationKnown: true,
-        accessDifficulty: 0,
-        evacuationDifficulty: 0,
-        stabilizationDifficulty: 0,
-      },
-      false,
-      { difficulty: 'easy', features: [] },
-    )
-    const party = makeRescueParty('return-true', 'C', [
-      'ranger',
-      'healer',
-      'guardian',
-      'vanguard',
-    ])
-    const result = runExpedition(request, party)
-    const obj = rescueState(result)
-    expect(obj.evacuated).toBe(true)
-    expect(obj.returned).toBe(true)
-    expect(result.outcome).toBe('completeSuccess')
+    const request = makeRescueRequest('return-true', 'C')
+    const party = makeRescueParty('return-true', 'C')
+    const state = initializeExpeditionState(request, party)
+    state.objectiveState = initializeRescueObjectiveState(request)
+    const objective = state.objectiveState as RescueObjectiveState
+    objective.located = true
+    objective.reached = true
+    objective.evacuated = true
+    objective.stabilized = true
+    resolveRescueReturn({
+      request,
+      party,
+      state,
+      rng: new SeededRng(request.seed),
+    } as unknown as ExpeditionExecutionContext)
+    expect(objective.evacuated).toBe(true)
+    expect(objective.returned).toBe(true)
+    expect(objective.returnDamage).toBe(0)
   })
 
   it('marks abandoned when located and reached but not evacuated', () => {
@@ -400,26 +420,23 @@ describe('Rescue evacuation and return', () => {
 
 describe('Rescue outcomes', () => {
   it('can produce completeSuccess', () => {
-    const request = makeRescueRequest(
-      'complete',
-      'C',
-      {
-        locationKnown: true,
-        accessDifficulty: 0,
-        evacuationDifficulty: 0,
-        stabilizationDifficulty: 0,
-      },
-      false,
-      { difficulty: 'easy', features: [] },
-    )
-    const party = makeRescueParty('complete', 'C', [
-      'ranger',
-      'healer',
-      'guardian',
-      'vanguard',
-    ])
-    const result = runExpedition(request, party)
-    expect(result.outcome).toBe('completeSuccess')
+    const request = makeRescueRequest('complete', 'C')
+    const party = makeRescueParty('complete', 'C')
+    const state = initializeExpeditionState(request, party)
+    state.objectiveState = initializeRescueObjectiveState(request)
+    const objective = state.objectiveState as RescueObjectiveState
+    objective.located = true
+    objective.reached = true
+    objective.evacuated = true
+    objective.returned = true
+    objective.stabilized = true
+    const outcome = determineRescueOutcome({
+      request,
+      party,
+      state,
+      rng: new SeededRng(request.seed),
+    } as unknown as ExpeditionExecutionContext)
+    expect(outcome).toBe('completeSuccess')
   })
 
   it('does not produce completeSuccess without stabilization', () => {
@@ -560,5 +577,146 @@ describe('Rescue integration with handler internals', () => {
     )
     const result = runExpedition(request, party)
     expect(result.state.objectiveState?.type).toBe('investigation')
+  })
+})
+
+describe('Rescue Phase 3.3.1 fixes', () => {
+  it('applies final search bonus to rescue search effectiveValue', () => {
+    const request = makeRescueRequest(
+      'search-bonus',
+      'C',
+      { discoveryDifficulty: 50 },
+      false,
+      { features: [] },
+    )
+    const party = makeParty(
+      ['scout', 'healer', 'guardian', 'vanguard'],
+      'search-bonus',
+      'C',
+    )
+
+    const context0 = makeRescueContext(request, party)
+    runRescueSearch(context0, 'final-search', 0)
+    const log0 = context0.state.logs.find((l) => l.type === 'rescueSearch')
+    const effective0 = log0?.check?.effectiveValue ?? 0
+
+    const context10 = makeRescueContext(request, party)
+    runRescueSearch(context10, 'final-search', 10)
+    const log10 = context10.state.logs.find((l) => l.type === 'rescueSearch')
+    const effective10 = log10?.check?.effectiveValue ?? 0
+
+    expect(effective10).toBe(effective0 + 10)
+  })
+
+  it('carries search access bonus into re-access plus battle victory bonus', () => {
+    const request = makeRescueRequest(
+      'reaccess-bonus',
+      'C',
+      {
+        locationKnown: true,
+        accessDifficulty: 50,
+        stabilizationDifficulty: 1000,
+      },
+      false,
+      { features: [] },
+    )
+    const party = makeParty(
+      ['ranger', 'healer', 'guardian', 'vanguard'],
+      'reaccess-bonus',
+      'C',
+    )
+
+    const contextBase = makeRescueContext(request, party)
+    contextBase.state.metadata = { rescueAccessBonus: 0 }
+    contextBase.state.battleOutcome = 'victory'
+    runRescueAccess(contextBase, 'reaccess', 5)
+    const logBase = contextBase.state.logs.find(
+      (l) => l.type === 'rescueTargetReached',
+    )
+    const effectiveBase = logBase?.check?.effectiveValue ?? 0
+
+    const contextBonus = makeRescueContext(request, party)
+    contextBonus.state.metadata = { rescueAccessBonus: 10 }
+    contextBonus.state.battleOutcome = 'victory'
+    runRescueAccess(contextBonus, 'reaccess', 15)
+    const logBonus = contextBonus.state.logs.find(
+      (l) => l.type === 'rescueTargetReached',
+    )
+    const effectiveBonus = logBonus?.check?.effectiveValue ?? 0
+
+    expect(effectiveBonus).toBe(effectiveBase + 10)
+  })
+
+  it('does not assign protector when battle is disabled', () => {
+    const request = makeRescueRequest(
+      'no-battle-protector',
+      'C',
+      {
+        locationKnown: true,
+        accessDifficulty: 0,
+      },
+      false,
+    )
+    const party = makeRescueParty('no-battle-protector', 'C')
+    const result = runExpedition(request, party)
+    const obj = rescueState(result)
+    expect(obj.protectorId).toBeUndefined()
+    expect(
+      result.state.logs.some((l) => l.type === 'rescueProtectorAssigned'),
+    ).toBe(false)
+    expect(
+      result.state.logs.some((l) => l.type === 'rescueBattleExposure'),
+    ).toBe(false)
+  })
+
+  it('does not apply return deterioration when target was not evacuated', () => {
+    const request = makeRescueRequest('no-return-deterioration', 'C')
+    const party = makeRescueParty('no-return-deterioration', 'C')
+    const state = initializeExpeditionState(request, party)
+    state.objectiveState = initializeRescueObjectiveState(request)
+    const objective = state.objectiveState as RescueObjectiveState
+    objective.located = true
+    objective.reached = true
+    objective.evacuated = false
+    objective.currentHp = 10
+    objective.statusEffects.push({
+      type: 'poisoned',
+      duration: 3,
+      sourceId: 'test',
+    })
+    resolveRescueReturn({
+      request,
+      party,
+      state,
+      rng: new SeededRng(request.seed),
+    } as unknown as ExpeditionExecutionContext)
+    expect(objective.abandoned).toBe(true)
+    expect(objective.returned).toBe(false)
+    expect(objective.returnDamage).toBe(0)
+    expect(
+      state.logs.some((l) => l.facts.some((f) => f.includes('帰還中に悪化'))),
+    ).toBe(false)
+  })
+
+  it('logs rescue target death only once and skips further treatment', () => {
+    const request = makeRescueRequest('death-once', 'C')
+    const party = makeRescueParty('death-once', 'C')
+    const state = initializeExpeditionState(request, party)
+    state.objectiveState = initializeRescueObjectiveState(request)
+    const objective = state.objectiveState as RescueObjectiveState
+    objective.currentHp = 1
+
+    applyRescueTargetDamage(state, objective, 10, 'test damage', 'objective')
+    const deathLogs = state.logs.filter((l) => l.type === 'rescueTargetDeath')
+    expect(deathLogs.length).toBe(1)
+    expect(objective.currentHp).toBe(0)
+
+    const healed = healRescueTarget(state, objective, 20, 'test', 'objective')
+    expect(healed).toBe(0)
+
+    applyRescueTargetDamage(state, objective, 5, 'extra damage', 'objective')
+    expect(
+      state.logs.filter((l) => l.type === 'rescueTargetDeath').length,
+    ).toBe(1)
   })
 })

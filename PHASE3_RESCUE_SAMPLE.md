@@ -13,67 +13,67 @@ rescue 依頼で最大1回の戦闘を発生させ、救出対象の発見・接
 - 発見状態: 発見済み
 - 到達状態: 到達済み
 - 安定化状態: 安定化済み
-- 保護担当: フェイ ドラグナー（guardian）
-- 戦闘結果: victory（9ラウンド）
-- 敵編成: insectx4
+- 保護担当: ジーク ハインド（guardian）
+- 戦闘結果: victory（6ラウンド）
+- 敵編成: beastx4
 - 戦闘被害: 0
 - 搬出状態: 搬出済み
 - 帰還状態: 帰還済み
 - 置き去り状態: なし
 - 進捗: 100%
 - 遠征結果: completeSuccess
-- 冒険者生存者: ハロルド ピーク（vanguard）, フェイ ドラグナー（guardian）, アメリア アイヴィー（mage）, ソフィア オーシャン（healer）
+- 冒険者生存者: ヴァン リーフ（vanguard）, ジーク ハインド（guardian）, ジーク アイヴィー（mage）, ジーク オーシャン（healer）
 - 戦闘不能者: なし
 - 死亡者: なし
 
 ### 1. 遠征開始時
 
-- ハロルド ピーク（vanguard） HP=72/72, MP=16/16, 士気=57
-- フェイ ドラグナー（guardian） HP=74/74, MP=1/1, 士気=40
-- アメリア アイヴィー（mage） HP=54/54, MP=45/45, 士気=44
-- ソフィア オーシャン（healer） HP=53/53, MP=42/42, 士気=58
+- ヴァン リーフ（vanguard） HP=71/71, MP=5/5, 士気=62
+- ジーク ハインド（guardian） HP=73/73, MP=4/4, 士気=53
+- ジーク アイヴィー（mage） HP=52/52, MP=44/44, 士気=54
+- ジーク オーシャン（healer） HP=50/50, MP=54/54, 士気=47
 
 ### 2. 戦闘直前
 
-- ハロルド ピーク（vanguard） HP=72/72, MP=16/16, 士気=55
-- フェイ ドラグナー（guardian） HP=74/74, MP=1/1, 士気=38
-- アメリア アイヴィー（mage） HP=54/54, MP=45/45, 士気=42
-- ソフィア オーシャン（healer） HP=53/53, MP=42/42, 士気=56
+- ヴァン リーフ（vanguard） HP=71/71, MP=5/5, 士気=63
+- ジーク ハインド（guardian） HP=73/73, MP=4/4, 士気=51
+- ジーク アイヴィー（mage） HP=52/52, MP=44/44, 士気=52
+- ジーク オーシャン（healer） HP=47/50, MP=54/54, 士気=45
 
 ### 3. 戦闘直後
 
-- ハロルド ピーク（vanguard） HP=64/72, MP=16/16, 士気=55
-- フェイ ドラグナー（guardian） HP=74/74, MP=1/1, 士気=38
-- アメリア アイヴィー（mage） HP=54/54, MP=5/45, 士気=42
-- ソフィア オーシャン（healer） HP=53/53, MP=30/42, 士気=56
+- ヴァン リーフ（vanguard） HP=71/71, MP=5/5, 士気=63, 状態異常=[guarded(1)]
+- ジーク ハインド（guardian） HP=73/73, MP=4/4, 士気=51, 状態異常=[guarded(1)]
+- ジーク アイヴィー（mage） HP=52/52, MP=19/44, 士気=52
+- ジーク オーシャン（healer） HP=47/50, MP=54/54, 士気=45
 
 ### 4. 帰還後
 
-- ハロルド ピーク（vanguard） HP=72/72, MP=16/16, 士気=58
-- フェイ ドラグナー（guardian） HP=74/74, MP=1/1, 士気=41
-- アメリア アイヴィー（mage） HP=54/54, MP=5/45, 士気=45
-- ソフィア オーシャン（healer） HP=53/53, MP=30/42, 士気=59
+- ヴァン リーフ（vanguard） HP=71/71, MP=5/5, 士気=65, 状態異常=[guarded(1)]
+- ジーク ハインド（guardian） HP=73/73, MP=4/4, 士気=53, 状態異常=[guarded(1)]
+- ジーク アイヴィー（mage） HP=52/52, MP=19/44, 士気=54
+- ジーク オーシャン（healer） HP=50/50, MP=54/54, 士気=47
 
 ### 構造化facts
 
 - type=rescueSearch
-  - アメリア アイヴィーが救出対象の位置をぎりぎりで特定した
+  - ジーク アイヴィーが救出対象の位置を特定した
   - effect: rescueLocated=1
   - effect: rescueProgress=20
 - type=rescueProtectorAssigned
-  - フェイ ドラグナー（guardian）が救出対象の保護担当になった
-  - effect: rescueProtector=1, targetId=C-guardian-s2-guardian-1
+  - ジーク ハインド（guardian）が救出対象の保護担当になった
+  - effect: rescueProtector=1, targetId=C-guardian-s23-guardian-1
 - type=battleSummary
-  - 戦闘が9ラウンドでvictoryとなった
+  - 戦闘が6ラウンドでvictoryとなった
   - 接敵結果: failure
 - type=rescueBattleExposure
-  - フェイ ドラグナーが救出対象を戦闘から守り切った
+  - ジーク ハインドが救出対象を戦闘から守り切った
   - effect: rescueTargetDamage=0
   - effect: rescueTargetHp=40
   - effect: rescueAlive=1
   - effect: rescueProgress=40
 - type=rescueStabilization
-  - ソフィア オーシャンが救出対象を安定化した
+  - ジーク オーシャンが救出対象を安定化した
   - 医薬品を1消費した
   - effect: supplyConsume=1, targetId=medicine
   - effect: rescueStabilized=1
@@ -81,7 +81,7 @@ rescue 依頼で最大1回の戦闘を発生させ、救出対象の発見・接
   - effect: rescueAlive=1
   - effect: rescueProgress=60
 - type=rescueEvacuation
-  - フェイ ドラグナーが救出対象を危険地帯から搬出した
+  - ヴァン リーフが救出対象を危険地帯から搬出した
   - effect: rescueEvacuated=1
   - effect: rescueTargetHp=40
   - effect: rescueAlive=1
@@ -96,7 +96,7 @@ rescue 依頼で最大1回の戦闘を発生させ、救出対象の発見・接
 - type=summary
   - 救出対象は発見済み・接近済み・安定化済み・搬出済み・帰還済み。救出進捗は100%
   - 医薬品を2消費した
-  - ソフィア オーシャンが負傷者の治療を行った
+  - ジーク オーシャンが負傷者の治療を行った
   - effect: moraleChange=5
 
 ## B. 救出成功だが損害大
@@ -109,85 +109,86 @@ rescue 依頼で最大1回の戦闘を発生させ、救出対象の発見・接
 - 移動能力: mobile
 - 発見状態: 発見済み
 - 到達状態: 到達済み
-- 安定化状態: 安定化済み
-- 保護担当: なし
-- 戦闘結果: costlyVictory（7ラウンド）
-- 敵編成: aberrationx6
+- 安定化状態: 未安定化
+- 保護担当: ハロルド ノース（guardian）
+- 戦闘結果: retreat（5ラウンド）
+- 敵編成: humanoidx4
 - 戦闘被害: 0
 - 搬出状態: 搬出済み
 - 帰還状態: 帰還済み
 - 置き去り状態: なし
-- 進捗: 100%
+- 進捗: 80%
 - 遠征結果: success
-- 冒険者生存者: ロイド ピーク（vanguard）, ルーカス グレイ（guardian）, ユリ ノース（healer）
+- 冒険者生存者: カイン クロム（vanguard）, ハロルド ノース（guardian）, アメリア ムーン（mage）
 - 戦闘不能者: なし
-- 死亡者: ジーク ノース
+- 死亡者: シエラ フォレスト
 
 ### 1. 遠征開始時
 
-- ロイド ピーク（vanguard） HP=66/66, MP=19/19, 士気=45
-- ルーカス グレイ（guardian） HP=78/78, MP=19/19, 士気=49
-- ジーク ノース（mage） HP=52/52, MP=43/43, 士気=57
-- ユリ ノース（healer） HP=63/63, MP=44/44, 士気=56
+- カイン クロム（vanguard） HP=69/69, MP=1/1, 士気=48
+- ハロルド ノース（guardian） HP=71/71, MP=2/2, 士気=54
+- アメリア ムーン（mage） HP=50/50, MP=43/43, 士気=53
+- シエラ フォレスト（healer） HP=49/49, MP=44/44, 士気=54
 
 ### 2. 戦闘直前
 
-- ロイド ピーク（vanguard） HP=66/66, MP=19/19, 士気=38
-- ルーカス グレイ（guardian） HP=78/78, MP=19/19, 士気=42
-- ジーク ノース（mage） HP=52/52, MP=43/43, 士気=50
-- ユリ ノース（healer） HP=63/63, MP=44/44, 士気=49
+- カイン クロム（vanguard） HP=69/69, MP=1/1, 士気=46
+- ハロルド ノース（guardian） HP=71/71, MP=2/2, 士気=52
+- アメリア ムーン（mage） HP=47/50, MP=43/43, 士気=51
+- シエラ フォレスト（healer） HP=49/49, MP=44/44, 士気=52
 
 ### 3. 戦闘直後
 
-- ロイド ピーク（vanguard） HP=19/66, MP=19/19, 士気=28
-- ルーカス グレイ（guardian） HP=78/78, MP=19/19, 士気=32
-- ジーク ノース（mage） HP=0/52, MP=23/43, 士気=50
-- ユリ ノース（healer） HP=3/63, MP=44/44, 士気=49
+- カイン クロム（vanguard） HP=26/69, MP=1/1, 士気=26
+- ハロルド ノース（guardian） HP=71/71, MP=2/2, 士気=32
+- アメリア ムーン（mage） HP=47/50, MP=23/43, 士気=31
+- シエラ フォレスト（healer） HP=0/49, MP=41/44, 士気=52
 
 ### 4. 帰還後
 
-- ロイド ピーク（vanguard） HP=32/66, MP=19/19, 士気=23
-- ルーカス グレイ（guardian） HP=78/78, MP=19/19, 士気=27
-- ジーク ノース（mage） HP=0/52, MP=23/43, 士気=50
-- ユリ ノース（healer） HP=16/63, MP=44/44, 士気=44
+- カイン クロム（vanguard） HP=26/69, MP=1/1, 士気=19
+- ハロルド ノース（guardian） HP=71/71, MP=2/2, 士気=25
+- アメリア ムーン（mage） HP=44/50, MP=23/43, 士気=24
+- シエラ フォレスト（healer） HP=0/49, MP=41/44, 士気=52
 
 ### 構造化facts
 
 - type=rescueSearch
-  - ジーク ノースが救出対象の位置を特定した
+  - アメリア ムーンが救出対象の位置をぎりぎりで特定した
   - effect: rescueLocated=1
   - effect: rescueProgress=20
+- type=rescueProtectorAssigned
+  - ハロルド ノース（guardian）が救出対象の保護担当になった
+  - effect: rescueProtector=1, targetId=C-guardian-s43-guardian-1
 - type=battleSummary
-  - 戦闘が7ラウンドでcostlyVictoryとなった
-  - 接敵結果: success
-  - 戦闘で死亡者: C-mage-s195-mage-2
-  - 戦闘中に弱点を発見: discoverer=C-mage-s195-mage-2,enemy=B-aberration-ambusher-standard-s195:battle:0:encounter:enemy:2,weakness=magic,name=魔術
-- type=rescueStabilization
-  - ユリ ノースが救出対象を一時的に安定化させた
-  - effect: rescueStabilized=1
+  - 戦闘が5ラウンドでretreatとなった
+  - 接敵結果: failure
+  - 戦闘で死亡者: C-healer-s43-healer-3
+- type=rescueBattleExposure
+  - ハロルド ノースが救出対象を戦闘から守り切った
+  - effect: rescueTargetDamage=0
   - effect: rescueTargetHp=40
   - effect: rescueAlive=1
-  - effect: rescueProgress=60
+  - effect: rescueProgress=40
 - type=rescueEvacuation
-  - ルーカス グレイが救出対象を危険地帯から搬出した
+  - ハロルド ノースが救出対象を危険地帯から搬出した
   - effect: rescueEvacuated=1
   - effect: rescueTargetHp=40
   - effect: rescueAlive=1
-  - effect: rescueProgress=80
+  - effect: rescueProgress=60
 - type=rescueReturn
   - 救出対象を拠点まで連れ帰った
+  - 救出対象は帰還中に状態を維持した
   - effect: rescueReturned=1
   - effect: rescueAbandoned=0
   - effect: rescueTargetHp=40
   - effect: rescueAlive=1
-  - effect: rescueProgress=100
+  - effect: rescueProgress=80
 - type=summary
-  - 犠牲者: C-mage-s195-mage-2
-  - 救出対象は発見済み・接近済み・安定化済み・搬出済み・帰還済み。救出進捗は100%
-  - 医薬品を2消費した
-  - ユリ ノースが負傷者の治療を行った
+  - 犠牲者: C-healer-s43-healer-3
+  - 救出対象は発見済み・接近済み・未安定化・搬出済み・帰還済み。救出進捗は80%
   - effect: moraleChange=-10
-  - effect: moraleChange=5
+  - effect: moraleChange=3
 
 ## C. 危険地帯から搬出したが未帰還
 
@@ -195,91 +196,98 @@ rescue 依頼で最大1回の戦闘を発生させ、救出対象の発見・接
 - 環境: forest
 - 救出対象名: 救出対象
 - 初期HP: 40
-- 最終HP: 34
+- 最終HP: 38
 - 移動能力: mobile
 - 発見状態: 発見済み
 - 到達状態: 到達済み
-- 安定化状態: 未安定化
-- 保護担当: ミレイ サンド（guardian）
-- 戦闘結果: retreat（3ラウンド）
-- 敵編成: insectx4
-- 戦闘被害: 4
+- 安定化状態: 安定化済み
+- 保護担当: フレイア ノース（guardian）
+- 戦闘結果: victory（10ラウンド）
+- 敵編成: aberrationx4
+- 戦闘被害: 0
 - 搬出状態: 搬出済み
 - 帰還状態: 未帰還
 - 置き去り状態: なし
-- 進捗: 60%
+- 進捗: 80%
 - 遠征結果: partialSuccess
-- 冒険者生存者: オルム クレスト（vanguard）, ミレイ サンド（guardian）, グスタフ クォーツ（mage）, ゴウ スカイ（healer）
+- 冒険者生存者: ハロルド フォレスト（vanguard）, フレイア ノース（guardian）, フレイア ノース（mage）, ヴァン ハインド（healer）
 - 戦闘不能者: なし
 - 死亡者: なし
 
 ### 1. 遠征開始時
 
-- オルム クレスト（vanguard） HP=72/72, MP=6/6, 士気=46
-- ミレイ サンド（guardian） HP=72/72, MP=6/6, 士気=69
-- グスタフ クォーツ（mage） HP=67/67, MP=43/43, 士気=38
-- ゴウ スカイ（healer） HP=50/50, MP=43/43, 士気=61
+- ハロルド フォレスト（vanguard） HP=66/66, MP=8/8, 士気=46
+- フレイア ノース（guardian） HP=71/71, MP=0/0, 士気=54
+- フレイア ノース（mage） HP=53/53, MP=53/53, 士気=51
+- ヴァン ハインド（healer） HP=54/54, MP=55/55, 士気=57
 
 ### 2. 戦闘直前
 
-- オルム クレスト（vanguard） HP=72/72, MP=6/6, 士気=41
-- ミレイ サンド（guardian） HP=72/72, MP=6/6, 士気=64
-- グスタフ クォーツ（mage） HP=67/67, MP=43/43, 士気=33
-- ゴウ スカイ（healer） HP=45/50, MP=43/43, 士気=56
+- ハロルド フォレスト（vanguard） HP=66/66, MP=8/8, 士気=44
+- フレイア ノース（guardian） HP=71/71, MP=0/0, 士気=52
+- フレイア ノース（mage） HP=49/53, MP=53/53, 士気=49
+- ヴァン ハインド（healer） HP=54/54, MP=55/55, 士気=55
 
 ### 3. 戦闘直後
 
-- オルム クレスト（vanguard） HP=67/72, MP=6/6, 士気=41, 状態異常=[guarded(1)]
-- ミレイ サンド（guardian） HP=69/72, MP=6/6, 士気=64, 状態異常=[guarded(1)]
-- グスタフ クォーツ（mage） HP=52/67, MP=33/43, 士気=33
-- ゴウ スカイ（healer） HP=43/50, MP=40/43, 士気=56
+- ハロルド フォレスト（vanguard） HP=66/66, MP=8/8, 士気=44
+- フレイア ノース（guardian） HP=71/71, MP=0/0, 士気=52
+- フレイア ノース（mage） HP=39/53, MP=8/53, 士気=49
+- ヴァン ハインド（healer） HP=54/54, MP=34/55, 士気=55
 
 ### 4. 帰還後
 
-- オルム クレスト（vanguard） HP=72/72, MP=6/6, 士気=44, 状態異常=[guarded(1)]
-- ミレイ サンド（guardian） HP=72/72, MP=6/6, 士気=67, 状態異常=[guarded(1)]
-- グスタフ クォーツ（mage） HP=65/67, MP=33/43, 士気=36
-- ゴウ スカイ（healer） HP=50/50, MP=40/43, 士気=59
+- ハロルド フォレスト（vanguard） HP=66/66, MP=8/8, 士気=47
+- フレイア ノース（guardian） HP=71/71, MP=0/0, 士気=55
+- フレイア ノース（mage） HP=53/53, MP=8/53, 士気=52
+- ヴァン ハインド（healer） HP=54/54, MP=34/55, 士気=58
 
 ### 構造化facts
 
 - type=rescueSearch
-  - グスタフ クォーツが救出対象の位置を特定した
+  - フレイア ノースが救出対象の位置を特定した
   - effect: rescueLocated=1
   - effect: rescueProgress=20
 - type=rescueProtectorAssigned
-  - ミレイ サンド（guardian）が救出対象の保護担当になった
-  - effect: rescueProtector=1, targetId=C-guardian-s5-guardian-1
+  - フレイア ノース（guardian）が救出対象の保護担当になった
+  - effect: rescueProtector=1, targetId=C-guardian-s12-guardian-1
 - type=battleSummary
-  - 戦闘が3ラウンドでretreatとなった
+  - 戦闘が10ラウンドでvictoryとなった
   - 接敵結果: failure
 - type=rescueBattleExposure
-  - ミレイ サンドは救出対象を守ったが、4のダメージを負わせてしまった
-  - effect: rescueTargetDamage=4
-  - effect: rescueTargetHp=36
+  - フレイア ノースが救出対象を戦闘から守り切った
+  - effect: rescueTargetDamage=0
+  - effect: rescueTargetHp=40
   - effect: rescueAlive=1
   - effect: rescueProgress=40
+- type=rescueStabilization
+  - ヴァン ハインドが救出対象を完全に安定化し、毒と出血を解除した
+  - 医薬品を1消費した
+  - effect: supplyConsume=1, targetId=medicine
+  - effect: rescueStabilized=1
+  - effect: rescueTargetHp=40
+  - effect: rescueAlive=1
+  - effect: rescueProgress=60
 - type=rescueEvacuation
-  - オルム クレストが救出対象を搬出したが、2のダメージを負わせた
+  - フレイア ノースが救出対象を搬出したが、2のダメージを負わせた
   - 搬出に手間取り、帰還に余分な時間がかかる
   - effect: returnTimeBonus=1
   - effect: rescueEvacuated=1
-  - effect: rescueTargetHp=34
+  - effect: rescueTargetHp=38
   - effect: rescueAlive=1
-  - effect: rescueProgress=60
+  - effect: rescueProgress=80
 - type=rescueReturn
   - 救出対象を危険地帯から離れたが、拠点までは連れ帰れなかった
   - 搬出は成功したが、完全な帰還には至らなかった
-  - 救出対象は帰還中に状態を維持した
   - effect: rescueReturned=0
   - effect: rescueAbandoned=0
-  - effect: rescueTargetHp=34
+  - effect: rescueTargetHp=38
   - effect: rescueAlive=1
-  - effect: rescueProgress=60
+  - effect: rescueProgress=80
 - type=summary
-  - 救出対象は発見済み・接近済み・未安定化・搬出済み・未帰還。救出進捗は60%
+  - 救出対象は発見済み・接近済み・安定化済み・搬出済み・未帰還。救出進捗は80%
   - 医薬品を2消費した
-  - ゴウ スカイが負傷者の治療を行った
+  - ヴァン ハインドが負傷者の治療を行った
   - effect: moraleChange=3
 
 ## D. 救出失敗
@@ -346,13 +354,6 @@ rescue 依頼で最大1回の戦闘を発生させ、救出対象の発見・接
 - type=rescueSearch
   - フェイ アイヴィーは救出対象の位置を見つけられなかった
   - effect: rescueLocated=0
-  - effect: rescueProgress=0
-- type=rescueReturn
-  - 救出対象は帰還中に状態を維持した
-  - effect: rescueReturned=0
-  - effect: rescueAbandoned=0
-  - effect: rescueTargetHp=40
-  - effect: rescueAlive=1
   - effect: rescueProgress=0
 - type=summary
   - 救出対象は未発見・未接近・未安定化・未搬出・未帰還。救出進捗は0%

@@ -66,6 +66,20 @@ export function makeParty(
   )
 }
 
+export function makePairedParty(
+  roles: AdventurerRole[],
+  seedBase: string,
+  rank: AdventurerRank = 'C',
+): Adventurer[] {
+  return roles.map((role, slotIndex) =>
+    generateAdventurer({
+      seed: `${seedBase}:slot:${slotIndex}`,
+      rank,
+      role,
+    }),
+  )
+}
+
 export function cloneParty(party: Adventurer[]): Adventurer[] {
   return structuredClone(party)
 }
