@@ -431,5 +431,5 @@ afterAll(async () => {
 ${table}
 `
   const formatted = await prettier.format(report, { parser: 'markdown' })
-  writeFileSync('/home/ubuntu/repos/ai_battler/PHASE3_5_REPORT.md', formatted)
+  writeFileSync('PHASE3_5_REPORT.md', formatted)
 })
