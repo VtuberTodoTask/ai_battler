@@ -23,7 +23,7 @@ export type ExpeditionPhase =
   | 'aftermath'
 
 export type ImplementedObjectiveType =
-  'investigation' | 'elimination' | 'rescue' | 'escort'
+  'investigation' | 'elimination' | 'rescue' | 'escort' | 'retrieval'
 
 export type ObjectiveType = ImplementedObjectiveType | 'retrieval' | 'survey'
 
@@ -208,11 +208,65 @@ export interface EscortObjectiveState {
   completed: boolean
 }
 
+export type RetrievalTargetBulk = 'portable' | 'bulky' | 'heavy'
+
+export type RetrievalHandlingType = 'standard' | 'delicate' | 'arcane'
+
+export type RetrievalFragility = 'rugged' | 'standard' | 'fragile'
+
+export interface RetrievalTargetConfig {
+  id: string
+  name: string
+  initialIntegrity: number
+  minimumAcceptableIntegrity: number
+  bulk: RetrievalTargetBulk
+  handling: RetrievalHandlingType
+  fragility: RetrievalFragility
+  locationKnown: boolean
+  discoveryDifficulty: number
+  accessDifficulty: number
+  securingDifficulty: number
+  protectionDifficulty: number
+  extractionDifficulty: number
+}
+
+export interface RetrievalObjectiveConfig {
+  target: RetrievalTargetConfig
+}
+
+export interface RetrievalObjectiveState {
+  type: 'retrieval'
+  targetId: string
+  targetName: string
+  initialIntegrity: number
+  minimumAcceptableIntegrity: number
+  currentIntegrity: number
+  bulk: RetrievalTargetBulk
+  handling: RetrievalHandlingType
+  fragility: RetrievalFragility
+  located: boolean
+  reached: boolean
+  protectorId?: string
+  secured: boolean
+  protectedForTransport: boolean
+  extracted: boolean
+  returned: boolean
+  abandoned: boolean
+  lostDuringReturn: boolean
+  carrierIds: string[]
+  battleExposureDamage: number
+  securingDamage: number
+  extractionDamage: number
+  progress: number
+  completed: boolean
+}
+
 export type ExpeditionObjectiveState =
   | InvestigationObjectiveState
   | EliminationObjectiveState
   | RescueObjectiveState
   | EscortObjectiveState
+  | RetrievalObjectiveState
 
 export interface ExpeditionState {
   currentPhase: ExpeditionPhase
@@ -327,6 +381,7 @@ export interface ExpeditionRequest {
   elimination?: EliminationObjectiveConfig
   rescue?: RescueObjectiveConfig
   escort?: EscortObjectiveConfig
+  retrieval?: RetrievalObjectiveConfig
 }
 
 export interface EnvironmentEffect {

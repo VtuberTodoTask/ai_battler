@@ -141,8 +141,8 @@ describe('State initialization', () => {
 
 describe('Outcome dispatch', () => {
   it('rejects unimplemented objective types instead of treating them as investigation', () => {
-    const request = makeRequest('unimplemented-retrieval', {
-      objectiveType: 'retrieval',
+    const request = makeRequest('unimplemented-survey', {
+      objectiveType: 'survey',
     })
     const party = makeParty(
       ['vanguard', 'guardian', 'mage', 'healer'],

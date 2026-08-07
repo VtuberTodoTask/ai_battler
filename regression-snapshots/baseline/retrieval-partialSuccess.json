@@ -1,0 +1,464 @@
+{
+  "outcome": "partialSuccess",
+  "state": {
+    "avoidedThreats": [],
+    "battleEntrySnapshot": {
+      "environmentEffects": [],
+      "initialHp": {
+        "C-guardian-s0-guardian-1": 75,
+        "C-healer-s0-healer-3": 52,
+        "C-mage-s0-mage-2": 67,
+        "C-vanguard-s0-vanguard-0": 69
+      },
+      "initialMorale": {
+        "C-guardian-s0-guardian-1": 52,
+        "C-healer-s0-healer-3": 66,
+        "C-mage-s0-mage-2": 47,
+        "C-vanguard-s0-vanguard-0": 51
+      },
+      "initialMp": {
+        "C-guardian-s0-guardian-1": 16,
+        "C-healer-s0-healer-3": 45,
+        "C-mage-s0-mage-2": 43,
+        "C-vanguard-s0-vanguard-0": 11
+      },
+      "initialStatusEffects": {
+        "C-guardian-s0-guardian-1": [],
+        "C-healer-s0-healer-3": [],
+        "C-mage-s0-mage-2": [],
+        "C-vanguard-s0-vanguard-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "neutral"
+    },
+    "battles": [],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": [],
+    "elapsedTime": 12.65,
+    "incapacitated": [],
+    "information": [],
+    "injuries": [],
+    "logs": [
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 71,
+          "result": "partialSuccess",
+          "roll": 73,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "準備は整ったが、計画に若干の無理があった",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 66,
+          "result": "success",
+          "roll": 33,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["マルチナ サンドが安全な接近経路を確保した"],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 10,
+          "result": "failure",
+          "roll": 80,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 10,
+          "result": "partialSuccess",
+          "roll": 30,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["チェルシー グレイが断片的な手がかりを得た"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 10,
+          "result": "failure",
+          "roll": 48,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "retrievalIntegrity",
+            "value": 100
+          },
+          {
+            "type": "retrievalInitialIntegrity",
+            "value": 100
+          },
+          {
+            "type": "retrievalMinimumIntegrity",
+            "value": 98
+          },
+          {
+            "type": "retrievalLocated",
+            "value": 1
+          },
+          {
+            "type": "retrievalReached",
+            "value": 0
+          },
+          {
+            "type": "retrievalProgress",
+            "value": 15
+          }
+        ],
+        "facts": [
+          "回収対象「回収対象」の回収依頼を引き受けた",
+          "bulk=portable, handling=standard, fragility=standard"
+        ],
+        "phase": "preparation",
+        "type": "retrievalTargetAssigned"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "retrievalLocated",
+            "value": 1
+          },
+          {
+            "type": "retrievalProgress",
+            "value": 15
+          }
+        ],
+        "facts": ["事前情報から回収対象の位置は既に判明していた"],
+        "phase": "contact",
+        "type": "retrievalTargetLocated"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 58,
+          "result": "partialSuccess",
+          "roll": 70,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "retrievalReached",
+            "value": 1
+          },
+          {
+            "type": "retrievalProgress",
+            "value": 30
+          }
+        ],
+        "facts": [
+          "マルチナ サンドは回収対象のもとへ到達したが、多少の遅延が生じた"
+        ],
+        "phase": "contact",
+        "type": "retrievalAccess"
+      },
+      {
+        "actorIds": [
+          "C-mage-s0-mage-2",
+          "C-healer-s0-healer-3",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 48,
+          "result": "success",
+          "roll": 16,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "targetId": "tools",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "type": "retrievalSecured",
+            "value": 1
+          },
+          {
+            "type": "retrievalProtectedForTransport",
+            "value": 1
+          },
+          {
+            "type": "retrievalSecuringDamage",
+            "value": 0
+          },
+          {
+            "type": "retrievalIntegrity",
+            "value": 100
+          },
+          {
+            "type": "retrievalProgress",
+            "value": 55
+          }
+        ],
+        "facts": [
+          "チェルシー グレイは回収対象を確保し、運搬可能な状態にした",
+          "用具を1消費して回収作業を助けた"
+        ],
+        "phase": "objective",
+        "type": "retrievalSecuring"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2",
+          "C-vanguard-s0-vanguard-0"
+        ],
+        "check": {
+          "effectiveValue": 68,
+          "result": "partialSuccess",
+          "roll": 85,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "retrievalDamage",
+            "value": 4
+          },
+          {
+            "type": "retrievalExtracted",
+            "value": 1
+          },
+          {
+            "type": "retrievalExtractionDamage",
+            "value": 4
+          },
+          {
+            "type": "retrievalIntegrity",
+            "value": 96
+          },
+          {
+            "type": "retrievalProgress",
+            "value": 75
+          }
+        ],
+        "facts": [
+          "運搬担当: ベル ムーン（vanguard）",
+          "マルチナ サンドは回収対象を搬出したが、4の損傷を受けた"
+        ],
+        "phase": "return",
+        "type": "retrievalExtraction"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s0-guardian-1",
+          "C-vanguard-s0-vanguard-0",
+          "C-mage-s0-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 66,
+          "result": "partialSuccess",
+          "roll": 81,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": ["マルチナ サンドが経路を確保したが、多少の遅延が発生した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": ["C-healer-s0-healer-3"],
+        "check": {
+          "effectiveValue": 92,
+          "result": "success",
+          "roll": 86,
+          "skill": "firstAid"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "アメリア スカイが帰還中の負傷者を手当てした"
+        ],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": ["C-vanguard-s0-vanguard-0"],
+        "effects": [
+          {
+            "type": "retrievalReturned",
+            "value": 1
+          },
+          {
+            "type": "retrievalIntegrity",
+            "value": 96
+          },
+          {
+            "type": "retrievalProgress",
+            "value": 100
+          }
+        ],
+        "facts": ["回収対象を酒場まで持ち帰った"],
+        "phase": "return",
+        "type": "retrievalReturned"
+      },
+      {
+        "actorIds": ["C-healer-s0-healer-3"],
+        "check": {
+          "effectiveValue": 97,
+          "result": "success",
+          "roll": 57,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          }
+        ],
+        "facts": ["アメリア スカイによる治療判定: success"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "回収対象は発見済み・到達済み・確保済み・搬出済み・帰還済み。回収進捗は100%",
+          "医薬品を2消費した",
+          "アメリア スカイが負傷者の治療を行った"
+        ],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": 0,
+      "requestFeatures": [],
+      "returnTimeBonus": 0,
+      "threatFeatures": []
+    },
+    "objectiveCompleted": false,
+    "objectiveProgress": 100,
+    "objectiveState": {
+      "abandoned": false,
+      "battleExposureDamage": 0,
+      "bulk": "portable",
+      "carrierIds": ["C-vanguard-s0-vanguard-0"],
+      "completed": false,
+      "currentIntegrity": 96,
+      "extracted": true,
+      "extractionDamage": 4,
+      "fragility": "standard",
+      "handling": "standard",
+      "initialIntegrity": 100,
+      "located": true,
+      "lostDuringReturn": false,
+      "minimumAcceptableIntegrity": 98,
+      "progress": 100,
+      "protectedForTransport": true,
+      "reached": true,
+      "returned": true,
+      "secured": true,
+      "securingDamage": 0,
+      "targetId": "target-1",
+      "targetName": "回収対象",
+      "type": "retrieval"
+    },
+    "partyHp": {
+      "C-guardian-s0-guardian-1": 75,
+      "C-healer-s0-healer-3": 52,
+      "C-mage-s0-mage-2": 67,
+      "C-vanguard-s0-vanguard-0": 69
+    },
+    "partyMorale": {
+      "C-guardian-s0-guardian-1": 57,
+      "C-healer-s0-healer-3": 71,
+      "C-mage-s0-mage-2": 52,
+      "C-vanguard-s0-vanguard-0": 56
+    },
+    "partyMp": {
+      "C-guardian-s0-guardian-1": 16,
+      "C-healer-s0-healer-3": 45,
+      "C-mage-s0-mage-2": 43,
+      "C-vanguard-s0-vanguard-0": 11
+    },
+    "partyStatusEffects": {
+      "C-guardian-s0-guardian-1": [],
+      "C-healer-s0-healer-3": [],
+      "C-mage-s0-mage-2": [],
+      "C-vanguard-s0-vanguard-0": []
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 1,
+      "tools": 2
+    }
+  }
+}

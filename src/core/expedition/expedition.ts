@@ -20,6 +20,7 @@ import { investigationHandler } from './objectives/investigation.ts'
 import { eliminationHandler } from './objectives/elimination.ts'
 import { rescueHandler } from './objectives/rescue.ts'
 import { escortHandler } from './objectives/escort.ts'
+import { retrievalHandler } from './objectives/retrieval.ts'
 
 export const EXPEDITION_PHASES = [
   'preparation',
@@ -33,7 +34,7 @@ export const EXPEDITION_PHASES = [
 ] as const
 
 type ImplementedObjectiveType =
-  'investigation' | 'elimination' | 'rescue' | 'escort'
+  'investigation' | 'elimination' | 'rescue' | 'escort' | 'retrieval'
 
 export const OBJECTIVE_HANDLERS: Record<
   ImplementedObjectiveType,
@@ -43,6 +44,7 @@ export const OBJECTIVE_HANDLERS: Record<
   elimination: eliminationHandler,
   rescue: rescueHandler,
   escort: escortHandler,
+  retrieval: retrievalHandler,
 }
 
 function shouldSkipObjectiveAfterBattle(
@@ -69,14 +71,16 @@ export function runExpedition(
     objectiveType !== 'investigation' &&
     objectiveType !== 'elimination' &&
     objectiveType !== 'rescue' &&
-    objectiveType !== 'escort'
+    objectiveType !== 'escort' &&
+    objectiveType !== 'retrieval'
   ) {
-    throw new Error(`Unsupported objectiveType in Phase 3.4: ${objectiveType}`)
+    throw new Error(`Unsupported objectiveType in Phase 3.5: ${objectiveType}`)
   }
 
   const handler =
     OBJECTIVE_HANDLERS[
-      objectiveType as 'investigation' | 'elimination' | 'rescue' | 'escort'
+      objectiveType as
+        'investigation' | 'elimination' | 'rescue' | 'escort' | 'retrieval'
     ]
   const flow = handler.flow
 
