@@ -11,6 +11,7 @@ import type {
   ExpeditionState,
   RescueObjectiveConfig,
   RetrievalObjectiveConfig,
+  SurveyObjectiveConfig,
 } from './types.ts'
 import { runExpedition } from './expedition.ts'
 
@@ -346,6 +347,67 @@ export function makeRetrievalRequest(
 }
 
 export function makeRetrievalParty(
+  seedBase: string,
+  rank: AdventurerRank,
+  roles: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer'],
+): Adventurer[] {
+  return makeParty(roles, seedBase, rank)
+}
+
+export function makeSurveyArea(
+  overrides?: Partial<SurveyObjectiveConfig['area']>,
+): NonNullable<ExpeditionRequest['survey']> {
+  return {
+    area: {
+      id: 'area-1',
+      name: '測量地域',
+      minimumAcceptableQuality: 70,
+      sectors: [
+        {
+          id: 'north',
+          name: '北区画',
+          focus: 'route',
+          difficulty: 15,
+        },
+        {
+          id: 'center',
+          name: '中央区画',
+          focus: 'terrain',
+          difficulty: 15,
+        },
+        {
+          id: 'south',
+          name: '南区画',
+          focus: 'arcane',
+          difficulty: 15,
+        },
+      ],
+      ...overrides,
+    },
+  }
+}
+
+export function makeSurveyRequest(
+  seed: string,
+  rank: AdventurerRank = 'C',
+  areaOverrides?: Partial<SurveyObjectiveConfig['area']>,
+  battleEnabled = true,
+  requestOverrides: Partial<ExpeditionRequest> = {},
+): ExpeditionRequest {
+  return makeRequest(seed, {
+    objectiveType: 'survey',
+    rank,
+    environment: 'forest',
+    hiddenInformation: [],
+    battle: battleEnabled
+      ? battleConfig({ seed: `${seed}:battle:0` })
+      : undefined,
+    survey: makeSurveyArea(areaOverrides),
+    ...requestOverrides,
+  })
+}
+
+export function makeSurveyParty(
   seedBase: string,
   rank: AdventurerRank,
   roles: AdventurerRole[] = ['vanguard', 'guardian', 'mage', 'healer'],

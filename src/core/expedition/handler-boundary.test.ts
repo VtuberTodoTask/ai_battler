@@ -141,8 +141,10 @@ describe('State initialization', () => {
 
 describe('Outcome dispatch', () => {
   it('rejects unimplemented objective types instead of treating them as investigation', () => {
-    const request = makeRequest('unimplemented-survey', {
-      objectiveType: 'survey',
+    const request = makeRequest('unimplemented-unknownType', {
+      objectiveType: 'unknownType' as unknown as NonNullable<
+        Parameters<typeof makeRequest>[1]
+      >['objectiveType'],
     })
     const party = makeParty(
       ['vanguard', 'guardian', 'mage', 'healer'],

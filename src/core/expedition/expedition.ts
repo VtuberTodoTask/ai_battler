@@ -21,6 +21,7 @@ import { eliminationHandler } from './objectives/elimination.ts'
 import { rescueHandler } from './objectives/rescue.ts'
 import { escortHandler } from './objectives/escort.ts'
 import { retrievalHandler } from './objectives/retrieval.ts'
+import { surveyHandler } from './objectives/survey.ts'
 
 export const EXPEDITION_PHASES = [
   'preparation',
@@ -34,7 +35,7 @@ export const EXPEDITION_PHASES = [
 ] as const
 
 type ImplementedObjectiveType =
-  'investigation' | 'elimination' | 'rescue' | 'escort' | 'retrieval'
+  'investigation' | 'elimination' | 'rescue' | 'escort' | 'retrieval' | 'survey'
 
 export const OBJECTIVE_HANDLERS: Record<
   ImplementedObjectiveType,
@@ -45,6 +46,7 @@ export const OBJECTIVE_HANDLERS: Record<
   rescue: rescueHandler,
   escort: escortHandler,
   retrieval: retrievalHandler,
+  survey: surveyHandler,
 }
 
 function shouldSkipObjectiveAfterBattle(
@@ -67,21 +69,12 @@ export function runExpedition(
   party: Adventurer[],
 ): ExpeditionResult {
   const objectiveType = request.objectiveType
-  if (
-    objectiveType !== 'investigation' &&
-    objectiveType !== 'elimination' &&
-    objectiveType !== 'rescue' &&
-    objectiveType !== 'escort' &&
-    objectiveType !== 'retrieval'
-  ) {
-    throw new Error(`Unsupported objectiveType in Phase 3.5: ${objectiveType}`)
+  if (!(objectiveType in OBJECTIVE_HANDLERS)) {
+    throw new Error(`Unsupported objectiveType: ${objectiveType}`)
   }
 
   const handler =
-    OBJECTIVE_HANDLERS[
-      objectiveType as
-        'investigation' | 'elimination' | 'rescue' | 'escort' | 'retrieval'
-    ]
+    OBJECTIVE_HANDLERS[objectiveType as keyof typeof OBJECTIVE_HANDLERS]
   const flow = handler.flow
 
   handler.validateRequest(request)

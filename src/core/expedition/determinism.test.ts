@@ -38,7 +38,9 @@ describe('Expedition determinism', () => {
 })
 
 describe('Objective type rejection', () => {
-  const unsupported: Array<ExpeditionRequest['objectiveType']> = ['survey']
+  const unsupported: Array<ExpeditionRequest['objectiveType']> = [
+    'unknownType' as ExpeditionRequest['objectiveType'],
+  ]
 
   for (const objectiveType of unsupported) {
     it(`rejects ${objectiveType}`, () => {
@@ -50,7 +52,7 @@ describe('Objective type rejection', () => {
         `reject-${objectiveType}`,
       )
       expect(() => runExpedition(request, party)).toThrow(
-        `Unsupported objectiveType in Phase 3.5: ${objectiveType}`,
+        `Unsupported objectiveType: ${objectiveType}`,
       )
     })
   }
