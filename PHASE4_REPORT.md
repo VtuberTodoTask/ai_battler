@@ -48,27 +48,35 @@ Phase 4では、既存の決定論的 `runExpedition()` エンジンを変更せ
 ## スクリーンショット
 
 ### 遠征設定画面
+
 ![遠征設定画面](https://app.devin.ai/attachments/ec2a9430-5da6-4478-b819-4ce4d6fb83/ss_f1548ee1.png)
 
 ### Investigation
+
 ![investigation](https://app.devin.ai/attachments/9ee83053-0f2f-4c20-8eb6-01d4a596d25b/ss_15384065.png)
 
 ### Elimination
+
 ![elimination](https://app.devin.ai/attachments/cfb146fa-b8cd-45db-a0e7-f0caf78cdc31/ss_6a0bb745.png)
 
 ### Rescue
+
 ![rescue](https://app.devin.ai/attachments/62cbd370-4e14-4f7d-8c31-52415dc8bc38/ss_2d99476a.png)
 
 ### Escort
+
 ![escort](https://app.devin.ai/attachments/ccc71058-96db-48a9-902a-ff0e57d5d634/ss_8c50034d.png)
 
 ### Retrieval
+
 ![retrieval](https://app.devin.ai/attachments/e8de86cd-d3e9-4567-a363-5269184122b9/ss_0c11fe1e.png)
 
 ### Survey
+
 ![survey](https://app.devin.ai/attachments/2a3fa1d4-a257-4698-9167-7d4f7efac9ce/ss_0b785fa3.png)
 
 ### 最終結果例（Survey）
+
 ![survey-final](https://app.devin.ai/attachments/2528978c-51b1-4280-bd0f-69ef398fa234/ss_58e9d5da.png)
 
 ## ブラウザスモークテスト
