@@ -77,6 +77,47 @@ export function makeEliminationRequest(
   }
 }
 
+export function makeRescueRequest(
+  seed: string,
+  rank: AdventurerRank,
+  battleEnabled = true,
+): ExpeditionRequest {
+  return {
+    id: `phase3-3-${seed}`,
+    seed,
+    rank,
+    difficulty: 'normal',
+    objectiveType: 'rescue',
+    environment: 'forest',
+    distance: 3,
+    features: ['traps', 'poorVisibility'],
+    knownInformation: [],
+    hiddenInformation: [],
+    battle: battleEnabled
+      ? {
+          enabled: true,
+          seed: `${seed}:battle:0`,
+          triggerPhase: 'afterExploration',
+        }
+      : undefined,
+    rescue: {
+      target: {
+        id: 'target-1',
+        name: '救出対象',
+        maxHp: 40,
+        initialHp: 40,
+        mobility: 'mobile',
+        initialStatusEffects: [],
+        locationKnown: false,
+        discoveryDifficulty: 15,
+        accessDifficulty: 15,
+        stabilizationDifficulty: 15,
+        evacuationDifficulty: 15,
+      },
+    },
+  }
+}
+
 export function makeParty(
   roles: AdventurerRole[],
   seedBase: string,
@@ -144,6 +185,26 @@ export const regressionScenarios: RegressionScenario[] = [
     name: 'elimination-failedObjective',
     request: makeEliminationRequest('s45', 'S', true),
     party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's45', 'S'),
+  },
+  {
+    name: 'rescue-completeSuccess',
+    request: makeRescueRequest('s2', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's2', 'C'),
+  },
+  {
+    name: 'rescue-success',
+    request: makeRescueRequest('s22', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's22', 'C'),
+  },
+  {
+    name: 'rescue-partialSuccess',
+    request: makeRescueRequest('s5', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's5', 'C'),
+  },
+  {
+    name: 'rescue-failedObjective',
+    request: makeRescueRequest('s1', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's1', 'C'),
   },
 ]
 

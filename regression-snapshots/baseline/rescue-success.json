@@ -1,0 +1,1352 @@
+{
+  "outcome": "success",
+  "state": {
+    "avoidedThreats": [],
+    "battleEntrySnapshot": {
+      "environmentEffects": [
+        {
+          "type": "lighting",
+          "value": "dark"
+        }
+      ],
+      "initialHp": {
+        "C-guardian-s22-guardian-1": 71,
+        "C-healer-s22-healer-3": 47,
+        "C-mage-s22-mage-2": 44,
+        "C-vanguard-s22-vanguard-0": 81
+      },
+      "initialMorale": {
+        "C-guardian-s22-guardian-1": 47,
+        "C-healer-s22-healer-3": 48,
+        "C-mage-s22-mage-2": 49,
+        "C-vanguard-s22-vanguard-0": 44
+      },
+      "initialMp": {
+        "C-guardian-s22-guardian-1": 1,
+        "C-healer-s22-healer-3": 44,
+        "C-mage-s22-mage-2": 44,
+        "C-vanguard-s22-vanguard-0": 1
+      },
+      "initialStatusEffects": {
+        "C-guardian-s22-guardian-1": [],
+        "C-healer-s22-healer-3": [],
+        "C-mage-s22-mage-2": [],
+        "C-vanguard-s22-vanguard-0": []
+      },
+      "knownEnemyAbilities": [],
+      "knownEnemyWeaknesses": [],
+      "surprise": "enemyAdvantage"
+    },
+    "battleOutcome": "retreat",
+    "battles": [
+      {
+        "combatSeed": "s22:battle:0:combat",
+        "deadAdventurerIds": [],
+        "discoveredWeaknesses": [],
+        "encounterSeed": "s22:battle:0:encounter",
+        "enemyComposition": "constructx4",
+        "enemyIds": [
+          "D-construct-tank-elite-s22:battle:0:encounter:enemy:0",
+          "D-construct-tank-elite-s22:battle:0:encounter:enemy:1",
+          "D-construct-tank-elite-s22:battle:0:encounter:enemy:2",
+          "D-construct-tank-elite-s22:battle:0:encounter:enemy:3"
+        ],
+        "entrySnapshot": {
+          "environmentEffects": [
+            {
+              "type": "lighting",
+              "value": "dark"
+            }
+          ],
+          "initialHp": {
+            "C-guardian-s22-guardian-1": 71,
+            "C-healer-s22-healer-3": 47,
+            "C-mage-s22-mage-2": 44,
+            "C-vanguard-s22-vanguard-0": 81
+          },
+          "initialMorale": {
+            "C-guardian-s22-guardian-1": 47,
+            "C-healer-s22-healer-3": 48,
+            "C-mage-s22-mage-2": 49,
+            "C-vanguard-s22-vanguard-0": 44
+          },
+          "initialMp": {
+            "C-guardian-s22-guardian-1": 1,
+            "C-healer-s22-healer-3": 44,
+            "C-mage-s22-mage-2": 44,
+            "C-vanguard-s22-vanguard-0": 1
+          },
+          "initialStatusEffects": {
+            "C-guardian-s22-guardian-1": [],
+            "C-healer-s22-healer-3": [],
+            "C-mage-s22-mage-2": [],
+            "C-vanguard-s22-vanguard-0": []
+          },
+          "knownEnemyAbilities": [],
+          "knownEnemyWeaknesses": [],
+          "surprise": "enemyAdvantage"
+        },
+        "id": "battle-0",
+        "incapacitatedAdventurerIds": [],
+        "injuries": [],
+        "knownEnemyAbilities": [],
+        "knownEnemyWeaknesses": [],
+        "matchedAbilityIntel": [],
+        "matchedWeaknessIntel": [],
+        "outcome": "retreat",
+        "phase": "battle",
+        "result": {
+          "abilityUsage": {},
+          "adventurerActionCount": 17,
+          "contactResult": {
+            "effects": {
+              "enemyInitiativeBonus": 3,
+              "side": "enemy"
+            },
+            "enemyStealth": 0,
+            "partyScouting": 0,
+            "roll": 100,
+            "successChance": 0,
+            "type": "failure"
+          },
+          "deadAdventurers": [],
+          "defeatedEnemies": [],
+          "discoveredWeaknesses": [],
+          "enemyActionCount": 16,
+          "enemyDamageDealt": 72,
+          "escapedEnemies": [],
+          "finalAdventurerStates": [
+            {
+              "alive": true,
+              "currentHp": 9,
+              "currentMp": 1,
+              "dead": false,
+              "id": "C-vanguard-s22-vanguard-0",
+              "incapacitated": false,
+              "morale": 44,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 71,
+              "currentMp": 1,
+              "dead": false,
+              "id": "C-guardian-s22-guardian-1",
+              "incapacitated": false,
+              "morale": 47,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 44,
+              "currentMp": 24,
+              "dead": false,
+              "id": "C-mage-s22-mage-2",
+              "incapacitated": false,
+              "morale": 49,
+              "statusEffects": []
+            },
+            {
+              "alive": true,
+              "currentHp": 47,
+              "currentMp": 44,
+              "dead": false,
+              "id": "C-healer-s22-healer-3",
+              "incapacitated": false,
+              "morale": 48,
+              "statusEffects": []
+            }
+          ],
+          "incapacitatedAdventurers": [],
+          "injuries": [],
+          "logs": [
+            {
+              "actionType": "contact",
+              "metadata": {
+                "contactType": "failure"
+              },
+              "phase": "contact",
+              "result": "遠征側の不利により敵に先制された。",
+              "round": 0
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s22-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン グレイ missed",
+              "roll": 89,
+              "round": 1,
+              "successChance": 67,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s22-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ロイド スカイ missed",
+              "roll": 52,
+              "round": 1,
+              "successChance": 27,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s22-guardian-1",
+              "damage": 23,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "チェルシー アッシュ hit 古代魔法人形重戦士長 for 23 damage",
+              "roll": 8,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 65,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s22-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "オルム オーシャン hit 錆びた機械兵盾長 for 12 damage",
+              "roll": 91,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 93,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:0",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた機械兵盾長 hit ヴァン グレイ for 6 damage",
+              "roll": 51,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 61,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士長 missed",
+              "roll": 71,
+              "round": 1,
+              "successChance": 57,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄像守護者長 missed",
+              "roll": 82,
+              "round": 1,
+              "successChance": 55,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力ゴーレム盾長 missed",
+              "roll": 84,
+              "round": 1,
+              "successChance": 16,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s22-healer-3",
+              "damage": 23,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ロイド スカイ hit 古代魔法人形重戦士長 for 23 damage",
+              "roll": 2,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 27,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s22-vanguard-0",
+              "damage": 23,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン グレイ hit 古代魔法人形重戦士長 for 23 damage",
+              "roll": 8,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 67,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s22-mage-2",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "オルム オーシャン hit 錆びた機械兵盾長 for 15 damage",
+              "roll": 5,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 93,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s22-guardian-1",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "チェルシー アッシュ hit 魔力ゴーレム盾長 for 15 damage",
+              "roll": 55,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 65,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:1",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄像守護者長 hit ヴァン グレイ for 6 damage",
+              "roll": 31,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:0",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた機械兵盾長 hit ヴァン グレイ for 7 damage",
+              "roll": 50,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 61,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力ゴーレム盾長 missed",
+              "roll": 84,
+              "round": 2,
+              "successChance": 16,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:3",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士長 hit ヴァン グレイ for 5 damage",
+              "roll": 12,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 57,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s22-healer-3",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ロイド スカイ hit 古代魔法人形重戦士長 for 15 damage",
+              "roll": 15,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 27,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s22-vanguard-0",
+              "damage": 15,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン グレイ hit 古代魔法人形重戦士長 for 15 damage",
+              "roll": 37,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 67,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s22-guardian-1",
+              "damage": 18,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "チェルシー アッシュ hit 鉄像守護者長 for 18 damage",
+              "roll": 39,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 60,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s22-mage-2",
+              "damage": 20,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "オルム オーシャン hit 錆びた機械兵盾長 for 20 damage",
+              "roll": 14,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 93,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:0",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた機械兵盾長 hit ヴァン グレイ for 8 damage",
+              "roll": 16,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 61,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:3",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士長 hit ヴァン グレイ for 8 damage",
+              "roll": 12,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 57,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力ゴーレム盾長 missed",
+              "roll": 37,
+              "round": 3,
+              "successChance": 16,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄像守護者長 missed",
+              "roll": 64,
+              "round": 3,
+              "successChance": 55,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s22-vanguard-0",
+              "damage": 21,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン グレイ hit 古代魔法人形重戦士長 for 21 damage",
+              "roll": 32,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 67,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s22-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "オルム オーシャン hit 錆びた機械兵盾長 for 12 damage",
+              "roll": 64,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 83,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-guardian-s22-guardian-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "guardian",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "チェルシー アッシュ missed",
+              "roll": 98,
+              "round": 4,
+              "successChance": 55,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s22-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ロイド スカイ missed",
+              "roll": 19,
+              "round": 4,
+              "successChance": 17,
+              "targetIds": [
+                "D-construct-tank-elite-s22:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力ゴーレム盾長 missed",
+              "roll": 73,
+              "round": 4,
+              "successChance": 16,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:0",
+              "damage": 14,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた機械兵盾長 hit ヴァン グレイ for 14 damage",
+              "roll": 9,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 61,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:3",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔法人形重戦士長 hit ヴァン グレイ for 6 damage",
+              "roll": 36,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 57,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-construct-tank-elite-s22:battle:0:encounter:enemy:1",
+              "damage": 12,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄像守護者長 hit ヴァン グレイ for 12 damage",
+              "roll": 1,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": ["C-vanguard-s22-vanguard-0"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "C-healer-s22-healer-3",
+              "phase": "retreat",
+              "result": "ロイド スカイがパーティ撤退を試みた。成功",
+              "roll": 74,
+              "round": 5,
+              "successChance": 95
+            }
+          ],
+          "outcome": "retreat",
+          "partyDamageDealt": 212,
+          "retreatAttempts": [
+            {
+              "aliveCount": 4,
+              "approved": true,
+              "attemptCount": 1,
+              "attempted": true,
+              "averageMorale": 47,
+              "enemyThreat": 28.766400000000004,
+              "healerAlive": true,
+              "incapacitatedCount": 0,
+              "leaderId": "C-healer-s22-healer-3",
+              "matchedReasons": ["memberProposal"],
+              "moraleThreshold": 26.3,
+              "partyHpRatio": 0.7477777777777778,
+              "partyThreat": 18.44,
+              "proposerHpRatio": 1,
+              "proposerId": "C-healer-s22-healer-3",
+              "proposerMorale": 48,
+              "proposerRole": "healer",
+              "reason": "memberProposal",
+              "retreatHpThreshold": 0.19000000000000003,
+              "roll": 74,
+              "round": 5,
+              "success": true,
+              "successChance": 95
+            }
+          ],
+          "retreatDiagnostic": {
+            "aliveCount": 4,
+            "approved": true,
+            "attemptCount": 1,
+            "attempted": true,
+            "averageMorale": 47,
+            "enemyThreat": 28.766400000000004,
+            "healerAlive": true,
+            "incapacitatedCount": 0,
+            "leaderId": "C-healer-s22-healer-3",
+            "matchedReasons": ["memberProposal"],
+            "moraleThreshold": 26.3,
+            "partyHpRatio": 0.7477777777777778,
+            "partyThreat": 18.44,
+            "proposerHpRatio": 1,
+            "proposerId": "C-healer-s22-healer-3",
+            "proposerMorale": 48,
+            "proposerRole": "healer",
+            "reason": "memberProposal",
+            "retreatHpThreshold": 0.19000000000000003,
+            "roll": 74,
+            "round": 5,
+            "success": true,
+            "successChance": 95
+          },
+          "retreatResult": {
+            "chance": 95,
+            "roll": 74,
+            "side": "party",
+            "success": true
+          },
+          "rounds": 5,
+          "seed": "s22:battle:0:combat",
+          "survivingAdventurers": [
+            "C-vanguard-s22-vanguard-0",
+            "C-guardian-s22-guardian-1",
+            "C-mage-s22-mage-2",
+            "C-healer-s22-healer-3"
+          ],
+          "survivingEnemies": [
+            "D-construct-tank-elite-s22:battle:0:encounter:enemy:0",
+            "D-construct-tank-elite-s22:battle:0:encounter:enemy:1",
+            "D-construct-tank-elite-s22:battle:0:encounter:enemy:2",
+            "D-construct-tank-elite-s22:battle:0:encounter:enemy:3"
+          ]
+        },
+        "rounds": 5,
+        "survivingAdventurerIds": [
+          "C-vanguard-s22-vanguard-0",
+          "C-guardian-s22-guardian-1",
+          "C-mage-s22-mage-2",
+          "C-healer-s22-healer-3"
+        ],
+        "trigger": "afterExploration",
+        "unmatchedAbilityIntel": [],
+        "unmatchedWeaknessIntel": []
+      }
+    ],
+    "casualties": [],
+    "currentPhase": "aftermath",
+    "discoveredThreats": ["traps"],
+    "elapsedTime": 13.65,
+    "incapacitated": [],
+    "information": [],
+    "injuries": [
+      {
+        "adventurerId": "C-mage-s22-mage-2",
+        "cause": "traps",
+        "hpLoss": 6,
+        "id": "injury-0-645327",
+        "status": "treated",
+        "type": "light"
+      },
+      {
+        "adventurerId": "C-mage-s22-mage-2",
+        "cause": "traps",
+        "hpLoss": 5,
+        "id": "injury-1-38568",
+        "status": "treated",
+        "type": "light"
+      }
+    ],
+    "logs": [
+      {
+        "actorIds": [
+          "C-guardian-s22-guardian-1",
+          "C-vanguard-s22-vanguard-0",
+          "C-healer-s22-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 56,
+          "result": "partialSuccess",
+          "roll": 63,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": [
+          "準備は整ったが、計画に若干の無理があった",
+          "Support不在のため、出発時の士気が低めである"
+        ],
+        "phase": "preparation",
+        "type": "routePlanning"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s22-guardian-1",
+          "C-vanguard-s22-vanguard-0",
+          "C-healer-s22-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 51,
+          "result": "partialSuccess",
+          "roll": 62,
+          "skill": "survival"
+        },
+        "effects": [],
+        "facts": [
+          "チェルシー アッシュが経路を確保したが、多少の遅延が発生した"
+        ],
+        "phase": "approach",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-healer-s22-healer-3",
+          "C-guardian-s22-guardian-1",
+          "C-mage-s22-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 36,
+          "result": "partialSuccess",
+          "roll": 49,
+          "skill": "trapDetection"
+        },
+        "effects": [
+          {
+            "targetId": "C-mage-s22-mage-2",
+            "type": "hpDamage",
+            "value": 6
+          },
+          {
+            "type": "moraleChange",
+            "value": -3
+          }
+        ],
+        "facts": [
+          "罠に遭遇した",
+          "Guardianがオルム オーシャンの被害を軽減した",
+          "オルム オーシャンが6のダメージを受けた"
+        ],
+        "phase": "approach",
+        "type": "hazard"
+      },
+      {
+        "actorIds": [
+          "C-mage-s22-mage-2",
+          "C-vanguard-s22-vanguard-0",
+          "C-healer-s22-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 76,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s22-mage-2",
+          "C-vanguard-s22-vanguard-0",
+          "C-healer-s22-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 50,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s22-mage-2",
+          "C-vanguard-s22-vanguard-0",
+          "C-healer-s22-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 1,
+          "result": "failure",
+          "roll": 80,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["調査に手間取った"],
+        "phase": "exploration",
+        "type": "explore"
+      },
+      {
+        "actorIds": [
+          "C-mage-s22-mage-2",
+          "C-vanguard-s22-vanguard-0",
+          "C-healer-s22-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 9,
+          "result": "success",
+          "roll": 3,
+          "skill": "scouting"
+        },
+        "effects": [
+          {
+            "type": "rescueLocated",
+            "value": 1
+          },
+          {
+            "type": "rescueProgress",
+            "value": 20
+          }
+        ],
+        "facts": ["オルム オーシャンが救出対象の位置を特定した"],
+        "phase": "contact",
+        "type": "rescueSearch"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s22-guardian-1",
+          "C-vanguard-s22-vanguard-0",
+          "C-healer-s22-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 28,
+          "result": "success",
+          "roll": 14,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "rescueReached",
+            "value": 1
+          },
+          {
+            "type": "rescueProgress",
+            "value": 40
+          }
+        ],
+        "facts": ["チェルシー アッシュが救出対象のもとへ到達した"],
+        "phase": "contact",
+        "type": "rescueTargetReached"
+      },
+      {
+        "actorIds": ["C-guardian-s22-guardian-1"],
+        "effects": [
+          {
+            "targetId": "C-guardian-s22-guardian-1",
+            "type": "rescueProtector",
+            "value": 1
+          }
+        ],
+        "facts": [
+          "チェルシー アッシュ（guardian）が救出対象の保護担当になった"
+        ],
+        "phase": "contact",
+        "type": "rescueProtectorAssigned"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["戦闘が5ラウンドでretreatとなった", "接敵結果: failure"],
+        "phase": "battle",
+        "targetIds": [],
+        "type": "battleSummary"
+      },
+      {
+        "actorIds": ["C-guardian-s22-guardian-1"],
+        "check": {
+          "effectiveValue": 73,
+          "result": "success",
+          "roll": 60,
+          "skill": "defense"
+        },
+        "effects": [
+          {
+            "type": "rescueTargetDamage",
+            "value": 0
+          },
+          {
+            "type": "rescueTargetHp",
+            "value": 40
+          },
+          {
+            "type": "rescueAlive",
+            "value": 1
+          },
+          {
+            "type": "rescueProgress",
+            "value": 40
+          }
+        ],
+        "facts": ["チェルシー アッシュが救出対象を戦闘から守り切った"],
+        "phase": "battle",
+        "type": "rescueBattleExposure"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s22-guardian-1",
+          "C-vanguard-s22-vanguard-0",
+          "C-healer-s22-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 18,
+          "result": "success",
+          "roll": 18,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "rescueEvacuated",
+            "value": 1
+          },
+          {
+            "type": "rescueTargetHp",
+            "value": 40
+          },
+          {
+            "type": "rescueAlive",
+            "value": 1
+          },
+          {
+            "type": "rescueProgress",
+            "value": 60
+          }
+        ],
+        "facts": ["チェルシー アッシュが救出対象を危険地帯から搬出した"],
+        "phase": "objective",
+        "type": "rescueEvacuation"
+      },
+      {
+        "actorIds": [
+          "C-guardian-s22-guardian-1",
+          "C-vanguard-s22-vanguard-0",
+          "C-healer-s22-healer-3"
+        ],
+        "check": {
+          "effectiveValue": 51,
+          "result": "failure",
+          "roll": 82,
+          "skill": "survival"
+        },
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": -2
+          }
+        ],
+        "facts": ["チェルシー アッシュが帰還経路を見失い、迂回した"],
+        "phase": "return",
+        "type": "travel"
+      },
+      {
+        "actorIds": [
+          "C-healer-s22-healer-3",
+          "C-guardian-s22-guardian-1",
+          "C-mage-s22-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 31,
+          "result": "failure",
+          "roll": 54,
+          "skill": "trapDetection"
+        },
+        "effects": [
+          {
+            "targetId": "C-mage-s22-mage-2",
+            "type": "hpDamage",
+            "value": 5
+          },
+          {
+            "type": "moraleChange",
+            "value": -3
+          }
+        ],
+        "facts": [
+          "罠に遭遇した",
+          "Guardianがオルム オーシャンの被害を軽減した",
+          "オルム オーシャンが5のダメージを受けた"
+        ],
+        "phase": "return",
+        "type": "hazard"
+      },
+      {
+        "actorIds": ["C-healer-s22-healer-3"],
+        "check": {
+          "effectiveValue": 91,
+          "result": "success",
+          "roll": 45,
+          "skill": "firstAid"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 1
+          },
+          {
+            "targetId": "C-vanguard-s22-vanguard-0",
+            "type": "hpHeal",
+            "value": 5
+          },
+          {
+            "targetId": "C-mage-s22-mage-2",
+            "type": "hpHeal",
+            "value": 5
+          }
+        ],
+        "facts": [
+          "医薬品を1消費した",
+          "ロイド スカイが帰還中の負傷者を手当てした"
+        ],
+        "phase": "return",
+        "type": "firstAid"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "rescueReturned",
+            "value": 1
+          },
+          {
+            "type": "rescueAbandoned",
+            "value": 0
+          },
+          {
+            "type": "rescueTargetHp",
+            "value": 40
+          },
+          {
+            "type": "rescueAlive",
+            "value": 1
+          },
+          {
+            "type": "rescueProgress",
+            "value": 80
+          }
+        ],
+        "facts": [
+          "救出対象を拠点まで連れ帰った",
+          "救出対象は帰還中に状態を維持した"
+        ],
+        "phase": "return",
+        "type": "rescueReturn"
+      },
+      {
+        "actorIds": ["C-healer-s22-healer-3"],
+        "check": {
+          "effectiveValue": 100,
+          "result": "success",
+          "roll": 95,
+          "skill": "healing"
+        },
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          },
+          {
+            "targetId": "C-vanguard-s22-vanguard-0",
+            "type": "hpHeal",
+            "value": 8
+          },
+          {
+            "targetId": "C-mage-s22-mage-2",
+            "type": "hpHeal",
+            "value": 6
+          }
+        ],
+        "facts": ["ロイド スカイによる治療判定: success"],
+        "phase": "aftermath",
+        "type": "healing"
+      },
+      {
+        "actorIds": [],
+        "effects": [
+          {
+            "type": "moraleChange",
+            "value": 3
+          }
+        ],
+        "facts": [
+          "救出対象は発見済み・接近済み・未安定化・搬出済み・帰還済み。救出進捗は80%",
+          "医薬品を2消費した",
+          "ロイド スカイが負傷者の治療を行った"
+        ],
+        "phase": "aftermath",
+        "type": "summary"
+      }
+    ],
+    "metadata": {
+      "approachTimeBonus": 0,
+      "difficulty": "normal",
+      "preparationRouteBonus": 0,
+      "requestFeatures": ["traps", "poorVisibility"],
+      "rescueEvacuationResult": "success",
+      "rescueTargetEvacuated": true,
+      "rescueTargetMobility": "mobile",
+      "returnTimeBonus": 0,
+      "threatFeatures": ["traps", "poorVisibility"]
+    },
+    "objectiveCompleted": true,
+    "objectiveProgress": 80,
+    "objectiveState": {
+      "abandoned": false,
+      "battleExposureDamage": 0,
+      "completed": true,
+      "currentHp": 40,
+      "evacuated": true,
+      "located": true,
+      "maxHp": 40,
+      "mobility": "mobile",
+      "progress": 80,
+      "protectorId": "C-guardian-s22-guardian-1",
+      "reached": true,
+      "returnDamage": 0,
+      "returned": true,
+      "stabilized": false,
+      "statusEffects": [],
+      "targetId": "target-1",
+      "targetName": "救出対象",
+      "type": "rescue"
+    },
+    "partyHp": {
+      "C-guardian-s22-guardian-1": 71,
+      "C-healer-s22-healer-3": 47,
+      "C-mage-s22-mage-2": 50,
+      "C-vanguard-s22-vanguard-0": 22
+    },
+    "partyMorale": {
+      "C-guardian-s22-guardian-1": 45,
+      "C-healer-s22-healer-3": 46,
+      "C-mage-s22-mage-2": 47,
+      "C-vanguard-s22-vanguard-0": 42
+    },
+    "partyMp": {
+      "C-guardian-s22-guardian-1": 1,
+      "C-healer-s22-healer-3": 44,
+      "C-mage-s22-mage-2": 24,
+      "C-vanguard-s22-vanguard-0": 1
+    },
+    "partyStatusEffects": {
+      "C-guardian-s22-guardian-1": [],
+      "C-healer-s22-healer-3": [],
+      "C-mage-s22-mage-2": [],
+      "C-vanguard-s22-vanguard-0": []
+    },
+    "supplies": {
+      "food": 8,
+      "medicine": 1,
+      "tools": 1
+    }
+  }
+}
