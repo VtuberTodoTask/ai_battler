@@ -506,8 +506,9 @@ The Healer row uses a max-stats controlled party and compares Healer against a n
 ## Regression
 
 - Existing baselines: 18 (investigation 3, elimination 4, rescue 3, escort 4, retrieval 4)
-- Existing baseline diff: 0
+- Escort regression fixture seeds were adjusted so that scenario name suffixes match their actual outcomes; the new outcome-name guard in Phase 3.6.1 revealed the prior mismatch (escort-completeSuccess, escort-success, and escort-partialSuccess did not match their captured outcomes).
 - Survey baselines: 4 (completeSuccess, success, partialSuccess, failedObjective)
+- All regression scenario names now match their captured outcomes.
 
 ## Verification
 

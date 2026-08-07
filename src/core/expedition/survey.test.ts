@@ -7,6 +7,10 @@ import {
   makeSurveyParty,
   makeSurveyRequest,
 } from './test-utils.ts'
+import {
+  makeParty,
+  makeSurveyRequest as makeRegressionSurveyRequest,
+} from './regression.ts'
 import { generateAdventurer } from '../generators/adventurerGenerator.ts'
 import type { Adventurer } from '../models/types.ts'
 import type {
@@ -425,6 +429,114 @@ describe('Survey outcome semantics', () => {
     objective.sectors[0].surveyed = true
     context.state.casualties = context.party.map((a) => a.id)
     expect(determineSurveyOutcome(context)).toBe('lostExpedition')
+  })
+})
+
+describe('Survey forced retreat integration', () => {
+  it('returns forcedRetreat even when the sector 1 report is returned', () => {
+    const request = makeRegressionSurveyRequest(
+      'fr3-3',
+      'C',
+      {
+        sectors: [
+          { id: 'north', name: '北区画', focus: 'route', difficulty: 0 },
+          { id: 'center', name: '中央区画', focus: 'terrain', difficulty: 0 },
+          { id: 'south', name: '南区画', focus: 'arcane', difficulty: 0 },
+        ],
+      },
+      true,
+    )
+    const party = makeParty(['scout', 'ranger', 'mage', 'healer'], 'fr3-3', 'C')
+    const result = runExpedition(request, party)
+    const objective = surveyState(result)
+
+    expect(objective.sectors[0].surveyed).toBe(true)
+    expect(objective.sectors[1].attempted).toBe(false)
+    expect(objective.sectors[2].attempted).toBe(false)
+    expect(objective.reportPrepared).toBe(true)
+    expect(objective.reportReturned).toBe(true)
+    expect(result.outcome).toBe('forcedRetreat')
+  })
+})
+
+describe('Survey final log types', () => {
+  function runSurvey(
+    seed: string,
+    rank: 'C' | 'S',
+    areaOverrides: Parameters<typeof makeRegressionSurveyRequest>[2],
+    battleEnabled = false,
+    roles: (
+      | 'vanguard'
+      | 'guardian'
+      | 'mage'
+      | 'healer'
+      | 'scout'
+      | 'ranger'
+      | 'support'
+    )[] = ['scout', 'ranger', 'mage', 'support'],
+  ): ReturnType<typeof runExpedition> {
+    const request = makeRegressionSurveyRequest(
+      seed,
+      rank,
+      areaOverrides,
+      battleEnabled,
+    )
+    const party = makeParty(roles, seed, rank)
+    return runExpedition(request, party)
+  }
+
+  it('emits surveyCompleted for completeSuccess and success', () => {
+    const complete = runSurvey('s49', 'S', {}, false)
+    const success = runSurvey('s1', 'C', {}, false)
+    expect(
+      complete.state.logs.filter((l) => l.type === 'surveyCompleted').length,
+    ).toBe(1)
+    expect(
+      success.state.logs.filter((l) => l.type === 'surveyCompleted').length,
+    ).toBe(1)
+    expect(
+      complete.state.logs.filter((l) => l.type === 'surveyFailed').length,
+    ).toBe(0)
+    expect(
+      success.state.logs.filter((l) => l.type === 'surveyFailed').length,
+    ).toBe(0)
+  })
+
+  it('emits surveyFailed for partialSuccess, forcedRetreat, and failedObjective', () => {
+    const partial = runSurvey('s109', 'C', {}, false)
+    const failed = runSurvey('s1', 'C', {
+      sectors: [
+        { id: 'north', name: '北区画', focus: 'route', difficulty: 1000 },
+        { id: 'center', name: '中央区画', focus: 'terrain', difficulty: 1000 },
+        { id: 'south', name: '南区画', focus: 'arcane', difficulty: 1000 },
+      ],
+    })
+    const retreat = runSurvey(
+      'fr3-3',
+      'C',
+      {
+        sectors: [
+          { id: 'north', name: '北区画', focus: 'route', difficulty: 0 },
+          { id: 'center', name: '中央区画', focus: 'terrain', difficulty: 0 },
+          { id: 'south', name: '南区画', focus: 'arcane', difficulty: 0 },
+        ],
+      },
+      true,
+      ['scout', 'ranger', 'mage', 'healer'],
+    )
+
+    expect(
+      partial.state.logs.filter((l) => l.type === 'surveyFailed').length,
+    ).toBe(1)
+    expect(
+      partial.state.logs.filter((l) => l.type === 'surveyCompleted').length,
+    ).toBe(0)
+    expect(
+      failed.state.logs.filter((l) => l.type === 'surveyFailed').length,
+    ).toBe(1)
+    expect(
+      retreat.state.logs.filter((l) => l.type === 'surveyFailed').length,
+    ).toBe(1)
   })
 })
 

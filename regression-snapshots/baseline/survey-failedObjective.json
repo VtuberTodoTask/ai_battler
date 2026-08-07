@@ -1767,7 +1767,7 @@
         "facts": ["測量地域の測量進捗: 0% (0/3区画, 平均精度0)"],
         "phase": "aftermath",
         "targetIds": ["area-1"],
-        "type": "surveyCompleted"
+        "type": "surveyFailed"
       },
       {
         "actorIds": [],

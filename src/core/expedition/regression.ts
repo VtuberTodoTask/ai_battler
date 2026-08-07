@@ -360,18 +360,18 @@ export const regressionScenarios: RegressionScenario[] = [
   },
   {
     name: 'escort-completeSuccess',
-    request: makeEscortRequest('s4', 'C'),
-    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's4', 'C'),
-  },
-  {
-    name: 'escort-success',
     request: makeEscortRequest('s17', 'C'),
     party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's17', 'C'),
   },
   {
+    name: 'escort-success',
+    request: makeEscortRequest('s21', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's21', 'C'),
+  },
+  {
     name: 'escort-partialSuccess',
-    request: makeEscortRequest('s0', 'C'),
-    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's0', 'C'),
+    request: makeEscortRequest('s9', 'C'),
+    party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's9', 'C'),
   },
   {
     name: 'escort-failedObjective',
@@ -475,10 +475,8 @@ export const regressionScenarios: RegressionScenario[] = [
   },
   {
     name: 'survey-partialSuccess',
-    request: makeSurveyRequest('s1', 'C', {
-      minimumAcceptableQuality: 95,
-    }),
-    party: makeParty(['scout', 'ranger', 'mage', 'support'], 's1', 'C'),
+    request: makeSurveyRequest('s109', 'C'),
+    party: makeParty(['scout', 'ranger', 'mage', 'support'], 's109', 'C'),
   },
   {
     name: 'survey-failedObjective',

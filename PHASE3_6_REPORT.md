@@ -65,37 +65,37 @@
 
 ### B: success: 全3区画を測量し報告したがcomplete閾値には至らない
 
+- outcome: success
+- areaId: area-1
+- areaName: 測量地域
+- minimumAcceptableQuality: 70
+- coveragePercent: 100.00%
+- averageQuality: 71.67
+- reportPrepared: true
+- reportReturned: true
+- reportLostDuringReturn: false
+- progress: 100%
+- sectors:
+- 北区画 (route): surveyed=true, quality=80, result=success
+- 中央区画 (terrain): surveyed=true, quality=55, result=partialSuccess
+- 南区画 (arcane): surveyed=true, quality=80, result=success
+
+### C: partialSuccess: 2区画の測量記録を持ち帰ったが1区画の測量に失敗した
+
 - outcome: partialSuccess
 - areaId: area-1
 - areaName: 測量地域
 - minimumAcceptableQuality: 70
 - coveragePercent: 66.67%
-- averageQuality: 67.50
+- averageQuality: 100.00
 - reportPrepared: true
 - reportReturned: true
 - reportLostDuringReturn: false
 - progress: 75%
 - sectors:
-- 北区画 (route): surveyed=true, quality=55, result=partialSuccess
+- 北区画 (route): surveyed=true, quality=100, result=criticalSuccess
 - 中央区画 (terrain): surveyed=false, quality=0, result=failure
-- 南区画 (arcane): surveyed=true, quality=80, result=success
-
-### C: partialSuccess: 全3区画を測量したが要求品質を下回った
-
-- outcome: partialSuccess
-- areaId: area-1
-- areaName: 測量地域
-- minimumAcceptableQuality: 95
-- coveragePercent: 66.67%
-- averageQuality: 67.50
-- reportPrepared: true
-- reportReturned: true
-- reportLostDuringReturn: false
-- progress: 75%
-- sectors:
-- 北区画 (route): surveyed=true, quality=55, result=partialSuccess
-- 中央区画 (terrain): surveyed=false, quality=0, result=failure
-- 南区画 (arcane): surveyed=true, quality=80, result=success
+- 南区画 (arcane): surveyed=true, quality=100, result=criticalSuccess
 
 ### D: failedObjective: 全ての区画で測量に失敗し報告も作成できない
 
@@ -114,20 +114,20 @@
 - 中央区画 (terrain): surveyed=false, quality=0, result=failure
 - 南区画 (arcane): surveyed=false, quality=0, result=failure
 
-### E: forcedRetreat: 戦闘で敗退し測量を中止
+### E: forcedRetreat: 最初の区画は測量できたが、戦闘から撤退したため残りの測量を中止。取得済みの測量記録だけを持ち帰った
 
 - outcome: forcedRetreat
 - areaId: area-1
 - areaName: 測量地域
 - minimumAcceptableQuality: 70
-- coveragePercent: 0.00%
-- averageQuality: 0.00
-- reportPrepared: false
-- reportReturned: false
+- coveragePercent: 33.33%
+- averageQuality: 100.00
+- reportPrepared: true
+- reportReturned: true
 - reportLostDuringReturn: false
-- progress: 0%
+- progress: 50%
 - sectors:
-- 北区画 (route): surveyed=false, quality=0, result=failure
+- 北区画 (route): surveyed=true, quality=100, result=criticalSuccess
 - 中央区画 (terrain): surveyed=false, quality=0, result=none
 - 南区画 (arcane): surveyed=false, quality=0, result=none
 
@@ -151,8 +151,9 @@ The Healer row uses a max-stats controlled party and compares Healer against a n
 ## Regression
 
 - Existing baselines: 18 (investigation 3, elimination 4, rescue 3, escort 4, retrieval 4)
-- Existing baseline diff: 0
+- Escort regression fixture seeds were adjusted so that scenario name suffixes match their actual outcomes; the new outcome-name guard in Phase 3.6.1 revealed the prior mismatch (escort-completeSuccess, escort-success, and escort-partialSuccess did not match their captured outcomes).
 - Survey baselines: 4 (completeSuccess, success, partialSuccess, failedObjective)
+- All regression scenario names now match their captured outcomes.
 
 ## Verification
 

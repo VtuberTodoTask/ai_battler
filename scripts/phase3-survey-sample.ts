@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { runExpedition } from '../src/core/expedition/expedition.ts'
 import { makeParty } from '../src/core/expedition/regression.ts'
-import { makeSurveyRequest } from '../src/core/expedition/test-utils.ts'
+import { makeSurveyRequest } from '../src/core/expedition/regression.ts'
 import type { SurveyObjectiveState } from '../src/core/expedition/types.ts'
 
 function isMainModule(): boolean {
@@ -22,6 +22,13 @@ export interface SampleCase {
   roles: (
     'vanguard' | 'guardian' | 'mage' | 'healer' | 'scout' | 'ranger' | 'support'
   )[]
+  expectedOutcome:
+    | 'completeSuccess'
+    | 'success'
+    | 'partialSuccess'
+    | 'failedObjective'
+    | 'forcedRetreat'
+    | 'lostExpedition'
   description: string
 }
 
@@ -33,6 +40,7 @@ export const sampleCases: SampleCase[] = [
     areaOverrides: {},
     battle: false,
     roles: ['scout', 'ranger', 'mage', 'support'],
+    expectedOutcome: 'completeSuccess',
     description: 'completeSuccess: 全3区画を高品質で測量し酒場まで報告',
   },
   {
@@ -42,16 +50,19 @@ export const sampleCases: SampleCase[] = [
     areaOverrides: {},
     battle: false,
     roles: ['scout', 'ranger', 'mage', 'support'],
+    expectedOutcome: 'success',
     description: 'success: 全3区画を測量し報告したがcomplete閾値には至らない',
   },
   {
     id: 'C',
-    seed: 's1',
+    seed: 's109',
     rank: 'C',
-    areaOverrides: { minimumAcceptableQuality: 95 },
+    areaOverrides: {},
     battle: false,
     roles: ['scout', 'ranger', 'mage', 'support'],
-    description: 'partialSuccess: 全3区画を測量したが要求品質を下回った',
+    expectedOutcome: 'partialSuccess',
+    description:
+      'partialSuccess: 2区画の測量記録を持ち帰ったが1区画の測量に失敗した',
   },
   {
     id: 'D',
@@ -66,22 +77,25 @@ export const sampleCases: SampleCase[] = [
     },
     battle: false,
     roles: ['vanguard', 'guardian', 'mage', 'healer'],
+    expectedOutcome: 'failedObjective',
     description: 'failedObjective: 全ての区画で測量に失敗し報告も作成できない',
   },
   {
     id: 'E',
-    seed: 'fr0',
+    seed: 'fr3-3',
     rank: 'C',
     areaOverrides: {
       sectors: [
-        { id: 'north', name: '北区画', focus: 'route', difficulty: 1000 },
+        { id: 'north', name: '北区画', focus: 'route', difficulty: 0 },
         { id: 'center', name: '中央区画', focus: 'terrain', difficulty: 0 },
         { id: 'south', name: '南区画', focus: 'arcane', difficulty: 0 },
       ],
     },
     battle: true,
     roles: ['scout', 'ranger', 'mage', 'healer'],
-    description: 'forcedRetreat: 戦闘で敗退し測量を中止',
+    expectedOutcome: 'forcedRetreat',
+    description:
+      'forcedRetreat: 最初の区画は測量できたが、戦闘から撤退したため残りの測量を中止。取得済みの測量記録だけを持ち帰った',
   },
 ]
 
@@ -90,6 +104,11 @@ export function runSampleCase(c: SampleCase) {
   const party = makeParty(c.roles, c.seed, c.rank)
   const result = runExpedition(request, party)
   const objective = result.state.objectiveState as SurveyObjectiveState
+  if (result.outcome !== c.expectedOutcome) {
+    throw new Error(
+      `Sample ${c.id}: expected ${c.expectedOutcome}, got ${result.outcome}`,
+    )
+  }
   return { result, objective, request }
 }
 

@@ -622,6 +622,8 @@ export function finalizeSurveyObjectiveState(
 
   const progressFact = `${objective.areaName}の測量進捗: ${objective.progress}% (${objective.sectors.filter((s) => s.surveyed).length}/${objective.sectors.length}区画, 平均精度${objective.averageQuality.toFixed(0)})`
 
+  const finalLogType = objective.completed ? 'surveyCompleted' : 'surveyFailed'
+
   const effects: ExpeditionEffect[] = [
     {
       type: 'surveyCoverage',
@@ -649,7 +651,7 @@ export function finalizeSurveyObjectiveState(
     context.state,
     logEntry(
       'aftermath',
-      'surveyCompleted',
+      finalLogType,
       [],
       [progressFact],
       effects,
@@ -702,14 +704,17 @@ export function determineSurveyOutcome(
     85,
   )
 
+  if (forcedBattleRetreat) {
+    return 'forcedRetreat'
+  }
+
   if (
     objective.reportReturned &&
     allSurveyed &&
     objective.averageQuality >= completeQualityThreshold &&
     !hasCasualties &&
     unresolvedSerious === 0 &&
-    !timeExceeded &&
-    !forcedBattleRetreat
+    !timeExceeded
   ) {
     return 'completeSuccess'
   }
@@ -724,16 +729,11 @@ export function determineSurveyOutcome(
 
   if (
     objective.reportReturned &&
-    !forcedBattleRetreat &&
     ((surveyedCount >= 2 && !allSurveyed) ||
       (allSurveyed &&
         objective.averageQuality < objective.minimumAcceptableQuality))
   ) {
     return 'partialSuccess'
-  }
-
-  if (!objective.reportReturned && forcedBattleRetreat) {
-    return 'forcedRetreat'
   }
 
   return 'failedObjective'
