@@ -179,6 +179,60 @@ export function makeParty(
   )
 }
 
+export function makeSurveyRequest(
+  seed: string,
+  rank: AdventurerRank,
+  areaOverrides: {
+    id?: string
+    name?: string
+    minimumAcceptableQuality?: number
+    sectors?: {
+      id: string
+      name: string
+      focus: 'route' | 'terrain' | 'hazard' | 'arcane'
+      difficulty: number
+    }[]
+  } = {},
+  battleEnabled = true,
+): ExpeditionRequest {
+  const area = {
+    id: 'area-1',
+    name: '測量地域',
+    minimumAcceptableQuality: 70,
+    sectors: [
+      { id: 'north', name: '北区画', focus: 'route' as const, difficulty: 15 },
+      {
+        id: 'center',
+        name: '中央区画',
+        focus: 'terrain' as const,
+        difficulty: 15,
+      },
+      { id: 'south', name: '南区画', focus: 'arcane' as const, difficulty: 15 },
+    ],
+    ...areaOverrides,
+  }
+  return {
+    id: `phase3-6-${seed}`,
+    seed,
+    rank,
+    difficulty: 'normal',
+    objectiveType: 'survey',
+    environment: 'forest',
+    distance: 3,
+    features: [],
+    knownInformation: [],
+    hiddenInformation: [],
+    battle: battleEnabled
+      ? {
+          enabled: true,
+          seed: `${seed}:battle:0`,
+          triggerPhase: 'afterExploration',
+        }
+      : undefined,
+    survey: { area },
+  }
+}
+
 export function makeRetrievalRequest(
   seed: string,
   rank: AdventurerRank,
@@ -408,6 +462,49 @@ export const regressionScenarios: RegressionScenario[] = [
       features: [],
     },
     party: makeParty(['vanguard', 'guardian', 'mage', 'healer'], 's0', 'C'),
+  },
+  {
+    name: 'survey-completeSuccess',
+    request: makeSurveyRequest('s49', 'S'),
+    party: makeParty(['scout', 'ranger', 'mage', 'support'], 's49', 'S'),
+  },
+  {
+    name: 'survey-success',
+    request: makeSurveyRequest('s1', 'C'),
+    party: makeParty(['scout', 'ranger', 'mage', 'support'], 's1', 'C'),
+  },
+  {
+    name: 'survey-partialSuccess',
+    request: makeSurveyRequest('s1', 'C', {
+      minimumAcceptableQuality: 95,
+    }),
+    party: makeParty(['scout', 'ranger', 'mage', 'support'], 's1', 'C'),
+  },
+  {
+    name: 'survey-failedObjective',
+    request: makeSurveyRequest('s1', 'C', {
+      sectors: [
+        {
+          id: 'north',
+          name: '北区画',
+          focus: 'route' as const,
+          difficulty: 1000,
+        },
+        {
+          id: 'center',
+          name: '中央区画',
+          focus: 'terrain' as const,
+          difficulty: 1000,
+        },
+        {
+          id: 'south',
+          name: '南区画',
+          focus: 'arcane' as const,
+          difficulty: 1000,
+        },
+      ],
+    }),
+    party: makeParty(['scout', 'ranger', 'mage', 'support'], 's1', 'C'),
   },
 ]
 

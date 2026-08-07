@@ -23,9 +23,9 @@ export type ExpeditionPhase =
   | 'aftermath'
 
 export type ImplementedObjectiveType =
-  'investigation' | 'elimination' | 'rescue' | 'escort' | 'retrieval'
+  'investigation' | 'elimination' | 'rescue' | 'escort' | 'retrieval' | 'survey'
 
-export type ObjectiveType = ImplementedObjectiveType | 'survey'
+export type ObjectiveType = ImplementedObjectiveType
 
 export type EnvironmentType =
   | 'forest'
@@ -234,6 +234,54 @@ export interface RetrievalObjectiveConfig {
   target: RetrievalTargetConfig
 }
 
+export type SurveySectorFocus = 'route' | 'terrain' | 'hazard' | 'arcane'
+
+export interface SurveySectorConfig {
+  id: string
+  name: string
+  focus: SurveySectorFocus
+  difficulty: number
+}
+
+export interface SurveyAreaConfig {
+  id: string
+  name: string
+  sectors: SurveySectorConfig[]
+  minimumAcceptableQuality: number
+}
+
+export interface SurveyObjectiveConfig {
+  area: SurveyAreaConfig
+}
+
+export interface SurveySectorState {
+  id: string
+  name: string
+  focus: SurveySectorFocus
+  difficulty: number
+  attempted: boolean
+  surveyed: boolean
+  result?: CheckResult
+  quality: number
+  responsibleMemberIds: string[]
+  assistanceMemberIds: string[]
+}
+
+export interface SurveyObjectiveState {
+  type: 'survey'
+  areaId: string
+  areaName: string
+  minimumAcceptableQuality: number
+  sectors: SurveySectorState[]
+  coveragePercent: number
+  averageQuality: number
+  reportPrepared: boolean
+  reportReturned: boolean
+  reportLostDuringReturn: boolean
+  progress: number
+  completed: boolean
+}
+
 export interface RetrievalObjectiveState {
   type: 'retrieval'
   targetId: string
@@ -267,6 +315,7 @@ export type ExpeditionObjectiveState =
   | RescueObjectiveState
   | EscortObjectiveState
   | RetrievalObjectiveState
+  | SurveyObjectiveState
 
 export interface ExpeditionState {
   currentPhase: ExpeditionPhase
@@ -382,6 +431,7 @@ export interface ExpeditionRequest {
   rescue?: RescueObjectiveConfig
   escort?: EscortObjectiveConfig
   retrieval?: RetrievalObjectiveConfig
+  survey?: SurveyObjectiveConfig
 }
 
 export interface EnvironmentEffect {
