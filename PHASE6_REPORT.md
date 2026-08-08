@@ -211,7 +211,7 @@ npm run update:expedition-regression
 結果:
 
 - `typecheck`: 成功
-- `test`: 全 624 テスト passed
+- `test`: 全 625 テスト passed
 - `lint`: 成功
 - `build`: 成功
 - `update:expedition-regression`: 既存 22 スナップショット diff 0

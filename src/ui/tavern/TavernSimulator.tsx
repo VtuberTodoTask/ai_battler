@@ -41,12 +41,18 @@ export function TavernSimulator() {
     setError(null)
   }, [])
 
-  const handleSelectRequest = useCallback((id: string) => {
-    setSelectedRequestId(id)
-    setSelectedPartyId(null)
-    setSelectedResultId(null)
-    setError(null)
-  }, [])
+  const handleSelectRequest = useCallback(
+    (id: string) => {
+      if (day.status === 'resolved') {
+        return
+      }
+      setSelectedRequestId(id)
+      setSelectedPartyId(null)
+      setSelectedResultId(null)
+      setError(null)
+    },
+    [day.status],
+  )
 
   const handleSelectParty = useCallback((id: string) => {
     setSelectedPartyId(id)

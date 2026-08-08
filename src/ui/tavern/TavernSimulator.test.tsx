@@ -143,7 +143,7 @@ describe('TavernSimulator UI', () => {
     ).toBeNull()
   })
 
-  it('displays final HP from ExpeditionState in result detail', () => {
+  it('displays final HP/MP/Morale from ExpeditionState in result detail', () => {
     render(<TavernSimulator />)
     findAcceptingPair()
     fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
@@ -153,6 +153,28 @@ describe('TavernSimulator UI', () => {
     fireEvent.click(resultCards[0])
 
     expect(screen.getAllByText(/HP \d+\/\d+/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/MP \d+\/\d+/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Morale \d+/).length).toBeGreaterThan(0)
+    expect(screen.getByText('受諾パーティ')).toBeTruthy()
+  })
+
+  it('does not hide result detail when a request card is clicked after resolve', () => {
+    render(<TavernSimulator />)
+    findAcceptingPair()
+    fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
+
+    const results = screen.getByText('本日の仲介結果').parentElement!
+    const resultCards = within(results).getAllByRole('heading', { level: 4 })
+    fireEvent.click(resultCards[0])
+
+    expect(screen.getByText('受諾パーティ')).toBeTruthy()
+
+    const requestBoard = screen.getByTestId('request-board')
+    const requestCards = within(requestBoard).getAllByRole('heading', {
+      level: 4,
+    })
+    fireEvent.click(requestCards[0])
+
     expect(screen.getByText('受諾パーティ')).toBeTruthy()
   })
 
