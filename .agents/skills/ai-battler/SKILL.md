@@ -59,6 +59,25 @@ The landing page has six sections in this order:
 - Battle logs are rendered inside a `<details>` element and can be expanded/
   collapsed.
 
+## Phase 4 Expedition simulator (`遠征シミュレーター`)
+
+A second tab, `遠征シミュレーター`, renders the expedition flow:
+
+- Preset select uses `OBJECTIVE_LABELS` with objectiveType (`investigation`,
+  `elimination`, `rescue`, `escort`, `retrieval`, `survey`).
+- UI is a three-column layout: timeline list, event detail, party/objective/battle
+  panel. Below those is the final result summary and a togglable Raw JSON panel.
+- `遠征開始` runs `runExpedition(request, party)`; results include `request`,
+  `outcome`, `state`, and `party`.
+- `Seedを変更して再実行` regenerates `expeditionSeed` and `partySeed` and re-runs
+  the expedition.
+- `同じ条件でもう一度` re-runs with the current seeds.
+- Timeline controls: `最初へ`, `前へ`, `再生`/`停止`, `次へ`, `最後へ`.
+- `判定` blocks in `イベント詳細` are only shown when an event has a check.
+- Objective panels are per-type (e.g. rescue shows target HP/progress, retrieval
+  shows integrity/carrier/extracted/returned, survey shows coverage/sector
+  quality/report).
+
 ## Test-harness notes
 
 Native mouse clicks sometimes did not register on lower-page buttons (e.g.

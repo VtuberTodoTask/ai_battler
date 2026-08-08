@@ -1,0 +1,340 @@
+.expedition-simulator {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.expedition-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.expedition-header label,
+.party-config label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  gap: 0.25rem;
+}
+
+.expedition-header input,
+.expedition-header select,
+.party-config select,
+.party-config input {
+  padding: 0.35rem 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.party-config {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.party-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.5rem;
+}
+
+.adventurer-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.adventurer-card h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+}
+
+.adventurer-card .role {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.expedition-main {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .expedition-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+.timeline-panel,
+.detail-panel,
+.side-panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.timeline-panel h3,
+.detail-panel h3,
+.side-panel h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.25rem;
+}
+
+.timeline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.timeline-item {
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  border-left: 4px solid transparent;
+}
+
+.timeline-item:hover {
+  background: #f3f4f6;
+}
+
+.timeline-item.active {
+  background: #eff6ff;
+  border-left-color: #2563eb;
+}
+
+.timeline-item.summary {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.timeline-phase {
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.timeline-fact {
+  display: block;
+  color: #1f2937;
+}
+
+.timeline-check {
+  display: block;
+  color: #2563eb;
+  font-size: 0.8rem;
+}
+
+.timeline-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.timeline-controls button {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.event-detail {
+  font-size: 0.9rem;
+}
+
+.event-detail .event-type {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.event-detail .event-phase {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.event-actors,
+.event-targets,
+.event-facts,
+.event-effects {
+  margin: 0.75rem 0;
+}
+
+.event-actors h4,
+.event-targets h4,
+.event-facts h4,
+.event-effects h4,
+.check-detail h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.check-detail {
+  background: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.75rem;
+}
+
+.effect-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.effect-list li {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.battle-panel {
+  margin-top: 0.75rem;
+}
+
+.battle-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+.battle-summary div {
+  background: #f9fafb;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.party-final-panel {
+  margin-top: 0.75rem;
+}
+
+.member-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.member-list li {
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.objective-panel {
+  margin-top: 0.75rem;
+}
+
+.objective-panel table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.objective-panel th,
+.objective-panel td {
+  text-align: left;
+  padding: 0.3rem 0.4rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.sector-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.5rem;
+}
+
+.sector-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.progress-bar {
+  height: 0.75rem;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+
+.progress-bar > div {
+  height: 100%;
+  background: #2563eb;
+  transition: width 0.2s ease;
+}
+
+.progress-bar.incomplete > div {
+  background: #f59e0b;
+}
+
+.final-result {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.outcome-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.outcome-badge.completeSuccess {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.outcome-badge.success {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.outcome-badge.partialSuccess {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.outcome-badge.failedObjective,
+.outcome-badge.forcedRetreat,
+.outcome-badge.lostExpedition {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.raw-json {
+  margin-top: 0.75rem;
+}
+
+.raw-json pre {
+  max-height: 360px;
+  overflow: auto;
+  background: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.error-banner {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
