@@ -122,7 +122,7 @@ export function ExpeditionControls({
           />
         </label>
         <button onClick={onNewSeeds} disabled={disabled}>
-          Seedを変更
+          Seedを変更して再実行
         </button>
       </div>
 

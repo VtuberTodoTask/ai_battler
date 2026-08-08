@@ -3,6 +3,12 @@ import { describe, expect, it } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ExpeditionSimulator } from './ExpeditionSimulator.tsx'
 
+function findRawJsonPre() {
+  const pre = document.querySelector('.raw-json pre')
+  if (!pre?.textContent) return null
+  return JSON.parse(pre.textContent)
+}
+
 describe('ExpeditionSimulator UI', () => {
   it('renders six objective options in the preset select', () => {
     render(<ExpeditionSimulator />)
@@ -31,6 +37,21 @@ describe('ExpeditionSimulator UI', () => {
     expect((screen.getByLabelText('Slot 4') as HTMLSelectElement).value).toBe(
       'healer',
     )
+  })
+
+  it('clears the previous result when any configuration changes', async () => {
+    render(<ExpeditionSimulator />)
+    fireEvent.click(screen.getByRole('button', { name: '遠征開始' }))
+    await waitFor(() => {
+      expect(screen.getByTestId('expedition-timeline')).toBeTruthy()
+    })
+
+    fireEvent.change(screen.getByLabelText('Party Seed'), {
+      target: { value: 'new-party-seed' },
+    })
+
+    expect(screen.queryByTestId('expedition-timeline')).toBeNull()
+    expect(screen.queryByText('最終結果')).toBeNull()
   })
 
   it('starts an expedition and shows a timeline', async () => {
@@ -66,7 +87,7 @@ describe('ExpeditionSimulator UI', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Raw JSONを表示' }))
     await waitFor(() => {
-      expect(screen.getByText(/"request"/)).toBeTruthy()
+      expect(document.querySelector('.raw-json pre')).toBeTruthy()
     })
   })
 
@@ -79,12 +100,27 @@ describe('ExpeditionSimulator UI', () => {
     const items = screen
       .getByTestId('expedition-timeline')
       .querySelectorAll('li')
+    let found = false
     for (const item of Array.from(items)) {
       fireEvent.click(item)
       const detail = screen.queryByText(/使用技能/)
-      if (detail) return
+      if (detail) {
+        found = true
+        break
+      }
     }
-    expect(true).toBe(true)
+    expect(found).toBe(true)
+  })
+
+  it('disables autoplay when the timeline is at the last item', async () => {
+    render(<ExpeditionSimulator />)
+    fireEvent.click(screen.getByRole('button', { name: '遠征開始' }))
+    await waitFor(() => {
+      expect(screen.getByTestId('expedition-timeline')).toBeTruthy()
+    })
+    fireEvent.click(screen.getByRole('button', { name: '最後へ' }))
+    const playButton = screen.getByRole('button', { name: '再生' })
+    expect((playButton as HTMLButtonElement).disabled).toBe(true)
   })
 
   it('shows the battle panel for an elimination expedition', async () => {
@@ -108,5 +144,33 @@ describe('ExpeditionSimulator UI', () => {
       expect(screen.getByText('戦闘結果')).toBeTruthy()
     })
     expect(screen.getByText(/依頼結果/)).toBeTruthy()
+  })
+
+  it('changes seeds and reruns when "Seedを変更して再実行" is clicked', async () => {
+    render(<ExpeditionSimulator />)
+    fireEvent.click(screen.getByRole('button', { name: '遠征開始' }))
+    await waitFor(() => {
+      expect(screen.getByTestId('expedition-timeline')).toBeTruthy()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Raw JSONを表示' }))
+    const first = await waitFor(() => {
+      const pre = findRawJsonPre()
+      expect(pre).not.toBeNull()
+      return pre
+    })
+    const firstSeed = first!.request.seed as string
+
+    const rerunButtons = screen.getAllByRole('button', {
+      name: 'Seedを変更して再実行',
+    })
+    fireEvent.click(rerunButtons[rerunButtons.length - 1])
+    const second = await waitFor(() => {
+      const pre = findRawJsonPre()
+      expect(pre).not.toBeNull()
+      expect(pre!.request.seed).not.toBe(firstSeed)
+      return pre
+    })
+    expect(second).not.toBeNull()
   })
 })

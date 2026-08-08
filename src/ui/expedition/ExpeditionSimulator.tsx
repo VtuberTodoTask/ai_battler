@@ -49,59 +49,70 @@ export function ExpeditionSimulator() {
     return buildReplayItems(result)
   }, [result])
 
-  useEffect(() => {
-    if (!playing || currentIndex >= replayItems.length - 1) return
-    const timer = window.setTimeout(() => {
-      const next = currentIndex + 1
-      setCurrentIndex(next)
-      if (next >= replayItems.length - 1) {
-        setPlaying(false)
-      }
-    }, AUTOPLAY_INTERVAL_MS)
-    return () => window.clearTimeout(timer)
-  }, [playing, currentIndex, replayItems.length])
-
-  const start = useCallback(() => {
-    setRunning(true)
-    setError(null)
+  const clearReplayState = useCallback(() => {
     setResult(null)
     setCurrentIndex(0)
     setPlaying(false)
-    try {
-      const preset = EXPEDITION_PRESETS.find((p) => p.id === config.presetId)
-      if (!preset) throw new Error('Preset not found')
-      const request = preset.buildRequest(
-        config.expeditionSeed,
-        config.rank,
-        preset.objectiveType === 'elimination' ? true : config.battleEnabled,
-      )
-      const party = buildParty(config.partyRoles, config.partySeed, config.rank)
-      const expeditionResult = runExpedition(request, party)
-      setResult(expeditionResult)
-    } catch (e) {
-      setError(
-        e instanceof Error
-          ? `遠征を実行できませんでした\n${e.message}`
-          : '遠征を実行できませんでした',
-      )
-    } finally {
-      setRunning(false)
-    }
-  }, [config])
-
-  const rerunSame = useCallback(() => {
-    start()
-  }, [start])
-
-  const newSeeds = useCallback(() => {
-    setConfig((prev) => ({
-      ...prev,
-      expeditionSeed: makeRandomSeed(),
-      partySeed: makeRandomSeed(),
-    }))
+    setError(null)
   }, [])
 
+  const updateConfig = useCallback(
+    (next: ExpeditionConfig) => {
+      setConfig(next)
+      clearReplayState()
+    },
+    [clearReplayState],
+  )
+
+  const runWithConfig = useCallback(
+    (cfg: ExpeditionConfig) => {
+      setRunning(true)
+      clearReplayState()
+      try {
+        const preset = EXPEDITION_PRESETS.find((p) => p.id === cfg.presetId)
+        if (!preset) throw new Error('Preset not found')
+        const request = preset.buildRequest(
+          cfg.expeditionSeed,
+          cfg.rank,
+          preset.objectiveType === 'elimination' ? true : cfg.battleEnabled,
+        )
+        const party = buildParty(cfg.partyRoles, cfg.partySeed, cfg.rank)
+        const expeditionResult = runExpedition(request, party)
+        setResult(expeditionResult)
+      } catch (e) {
+        setError(
+          e instanceof Error
+            ? `遠征を実行できませんでした\n${e.message}`
+            : '遠征を実行できませんでした',
+        )
+      } finally {
+        setRunning(false)
+      }
+    },
+    [clearReplayState],
+  )
+
+  const start = useCallback(() => {
+    runWithConfig(config)
+  }, [config, runWithConfig])
+
+  const rerunSame = useCallback(() => {
+    runWithConfig(config)
+  }, [config, runWithConfig])
+
+  const newSeeds = useCallback(() => {
+    const next: ExpeditionConfig = {
+      ...config,
+      expeditionSeed: makeRandomSeed(),
+      partySeed: makeRandomSeed(),
+    }
+    updateConfig(next)
+    runWithConfig(next)
+  }, [config, updateConfig, runWithConfig])
+
   const currentItem = replayItems[currentIndex] ?? null
+  const atEnd =
+    replayItems.length === 0 || currentIndex >= replayItems.length - 1
 
   const goFirst = useCallback(() => {
     setCurrentIndex(0)
@@ -116,19 +127,42 @@ export function ExpeditionSimulator() {
   }, [replayItems.length])
 
   const goLast = useCallback(() => {
-    setCurrentIndex(replayItems.length - 1)
+    setCurrentIndex(Math.max(0, replayItems.length - 1))
   }, [replayItems.length])
 
   const togglePlay = useCallback(() => {
+    if (atEnd) {
+      setPlaying(false)
+      return
+    }
     setPlaying((p) => !p)
-  }, [])
+  }, [atEnd])
+
+  useEffect(() => {
+    if (currentIndex >= replayItems.length - 1) {
+      if (playing) window.setTimeout(() => setPlaying(false), 0)
+      return
+    }
+    if (!playing) return
+    const timer = window.setTimeout(() => {
+      setCurrentIndex((i) => {
+        const next = i + 1
+        if (next >= replayItems.length - 1) {
+          setPlaying(false)
+          return Math.min(next, replayItems.length - 1)
+        }
+        return next
+      })
+    }, AUTOPLAY_INTERVAL_MS)
+    return () => window.clearTimeout(timer)
+  }, [playing, currentIndex, replayItems.length])
 
   return (
     <div className="expedition-simulator">
       <ExpeditionControls
         config={config}
         partyPreview={partyPreview}
-        onChange={setConfig}
+        onChange={updateConfig}
         onStart={start}
         onNewSeeds={newSeeds}
         disabled={running}
@@ -146,6 +180,7 @@ export function ExpeditionSimulator() {
               items={replayItems}
               currentIndex={currentIndex}
               playing={playing}
+              playDisabled={atEnd}
               onSelect={setCurrentIndex}
               onFirst={goFirst}
               onPrev={goPrev}

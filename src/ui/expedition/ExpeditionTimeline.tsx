@@ -5,6 +5,7 @@ interface ExpeditionTimelineProps {
   items: ReplayItem[]
   currentIndex: number
   playing: boolean
+  playDisabled?: boolean
   onSelect: (index: number) => void
   onFirst: () => void
   onPrev: () => void
@@ -28,6 +29,7 @@ export function ExpeditionTimeline({
   items,
   currentIndex,
   playing,
+  playDisabled,
   onSelect,
   onFirst,
   onPrev,
@@ -59,7 +61,9 @@ export function ExpeditionTimeline({
       <div className="timeline-controls">
         <button onClick={onFirst}>最初へ</button>
         <button onClick={onPrev}>前へ</button>
-        <button onClick={onPlayPause}>{playing ? '停止' : '再生'}</button>
+        <button onClick={onPlayPause} disabled={playDisabled}>
+          {playing ? '停止' : '再生'}
+        </button>
         <button onClick={onNext}>次へ</button>
         <button onClick={onLast}>最後へ</button>
       </div>
