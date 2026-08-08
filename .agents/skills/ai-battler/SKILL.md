@@ -136,3 +136,56 @@ buttons[1].click() // for example
 
 Use this only when native clicks fail; the UI buttons are correct and respond
 normally to real user input.
+
+## Phase 6 Campaign simulator (`酒場キャンペーン`)
+
+A fourth tab, `酒場キャンペーン`, renders a multi-day campaign:
+
+- Default seed `tavern-campaign-001`; `新しいキャンペーン` regenerates the seed.
+- The day board shows 3 `.request-card` elements and 4 `.party-card` elements.
+- `本日の仲介を確定` resolves matched offers; `翌日へ` advances to the next day.
+- After resolve, `本日の仲介結果` / `本日の結果` cards appear; click a result to
+  open `TavernResultDetail` with `受諾パーティ` HP/MP/Morale.
+- Parties can enter `療養中` status; after `advanceCampaignDay` they recover to
+  full HP/MP and `Morale = max(old + 20, 70)` when their recovery window ends.
+
+## Phase 6.1 Expedition success prediction (`遠征予測`)
+
+- `ExpeditionPredictionPanel` appears while `day.status === 'planning'` once a
+  request and a non-recovering party are selected.
+- It shows a transient `遠征見込みを計算中…` message, then `推定依頼達成率 N%`,
+  a danger label (`非常に有望` / `有望` / `五分以上` / `危険` / `非常に危険`),
+  and an expandable `内訳を見る` with six outcome rates.
+- The prediction runs `runExpedition()` 200 times with seed
+  `prediction:v1:<requestId>:<partyId>:<index>`.  It takes ~100–120 ms in
+  Chrome on this machine.
+- The panel caches predictions by request id + party id + member state; selecting
+  a previously viewed pair reuses the cache and displays the same rate
+  immediately.
+- Selecting a recovering party shows `療養中のため遠征予測できません`.
+- Prediction is computed from the raw `requestOffer` + `AdventurerParty` and is
+  independent of the leader `Acceptance` decision shown in `BrokeragePanel`.
+
+## Test-harness notes for Phase 6.x
+
+- For Phase 6.1 the user requested `npm run dev -- --host` so the dev server
+  binds `0.0.0.0`; `http://localhost:5173` still works locally.
+- `.request-card` and `.party-card` are `<div>` elements with React `onClick`.
+  If native clicks miss, trigger them from the browser console:
+
+  ```js
+  document.querySelectorAll('.request-card')[0].click()
+  document.querySelectorAll('.party-card')[2].click()
+  document
+    .querySelectorAll('button')
+    .find((b) => b.textContent.trim() === 'この依頼を紹介する')
+    ?.click()
+  document
+    .querySelectorAll('button')
+    .find((b) => b.textContent.trim() === '本日の仲介を確定')
+    ?.click()
+  document
+    .querySelectorAll('button')
+    .find((b) => b.textContent.trim() === '翌日へ')
+    ?.click()
+  ```
