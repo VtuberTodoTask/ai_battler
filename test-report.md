@@ -1,14 +1,22 @@
-# Phase 5 酒場MVP E2E テストレポート
+# Phase 5.0.1 酒場MVP 短縮 E2E テストレポート
 
 ## 概要
 
 - リポジトリ: `/home/ubuntu/repos/ai_battler`
 - ブランチ: `devin/phase5-tavern`
-- テスト対象コミット: `b059f3eccc2c10e75eefabdcf9a177c666a1aba0`
+- テスト対象コミット: `9e4fd7e1e74d6254e7a33bcbe76a44495a7e19d3`
 - PR: `https://github.com/VtuberTodoTask/ai_battler/pull/14`
 - テスト日時: 2025-08-08
 - 実行環境: Vite dev server `http://localhost:5173`（Node.js 20.18.1 警告あり）
-- 録画: `/home/ubuntu/screencasts/ai_battler_phase5_test/ai_battler_phase5_test-edited.mp4`
+- 録画: `/home/ubuntu/screencasts/ai_battler_phase5_01_test/ai_battler_phase5_01_test-edited.mp4`
+
+## 修正対象
+
+- `src/core/tavern/report.ts`: `DispatchReport.party` を `result.state.partyHp/Mp/Morale` から構築
+- `src/core/tavern/dispatch.ts`: 重複依頼割り当て拒否、解決済み日の再解決 throw
+- `src/ui/tavern/AdventurerBoard.tsx` / `TavernSimulator.tsx`: 解決後の冒険者ボード read-only
+- `src/core/tavern/types.ts`: `EscortDispatchSummary.handoffStatus` の型絞り込み
+- テスト追加/更新: `report.test.ts`, `dispatch.test.ts`, `TavernSimulator.test.tsx`
 
 ## 静的チェック結果
 
@@ -22,7 +30,7 @@ npm run typecheck && npm run lint && npm run test && rm -rf dist && npm run buil
 | ------------------------------ | -------------------------------------------- |
 | `npm run typecheck`            | 成功                                         |
 | `npm run lint`                 | 成功                                         |
-| `npm run test`                 | 588 tests passed                             |
+| `npm run test`                 | 594 tests passed                             |
 | `rm -rf dist && npm run build` | 成功（Vite Node バージョン警告あり、exit 0） |
 
 ## テストフロー結果
@@ -30,71 +38,60 @@ npm run typecheck && npm run lint && npm run test && rm -rf dist && npm run buil
 ### 1. 酒場MVP タブを開く
 
 - `http://localhost:5173` を開き、3 番目のタブ `酒場MVP` をクリック。
-- 酒場シミュレーター UI が表示され、`Day Seed` 入力欄と `このSeedで生成` / `新しい日` ボタンが表示された。
+- 酒場 UI が表示され、`Day Seed` 入力とボタンが表示された。
 
-![酒場MVP 初期表示](https://app.devin.ai/attachments/230aa37e-12da-489b-b669-78e59f9a2bb3/ss_df7c92b9.png)
+![酒場MVP 初期表示](https://app.devin.ai/attachments/2fc050b6-2596-47db-a38e-deae20c331fd/ss_37f87be1.png)
 
 ### 2. 固定 Seed で日付を生成
 
-- `Day Seed` を `tavern-001` にして `このSeedで生成` をクリック。
-- 依頼カードが 3 枚、冒険者カードが 8 枚表示された。
-- `Day: tavern-001` になった。
+- `Day Seed: tavern-001` で `このSeedで生成` をクリック。
+- 依頼カード 3 枚、冒険者カード 8 枚が表示された。
 
-### 3. 依頼 A に 4 人を編成
+### 3. 依頼 A/B に 4 人ずつ編成
 
-- 1 枚目の依頼 `魔物出没原因の調査` を選択。
-- 冒険者 0〜3 をクリックして編成。
-- `編成: 4 / 4` となり、派遣編成パネルに 4 人の名前・役割が表示された。
+- 依頼 A `魔物出没原因の調査` に冒険者 0〜3 を割り当て、`編成: 4 / 4` となった。
 
-![依頼A 4人編成](https://app.devin.ai/attachments/35dca213-200c-4156-8f32-1101833f2f80/ss_a1e2b018.png)
+![依頼A 4人編成](https://app.devin.ai/attachments/b9ea43a8-18c8-43ca-aa78-03a2c983e499/ss_47b8be56.png)
 
-### 4. 依頼 B に残り 4 人を編成
+- 依頼 B `学者の護衛` に残り 4 人を割り当て、`編成: 4 / 4` となった。
 
-- 2 枚目の依頼 `学者の護衛` を選択。
-- 残りの冒険者 4〜7 をクリックして編成。
-- `編成: 4 / 4` となり、A とは異なる 4 人が B に割り当てられた。
+![依頼B 4人編成](https://app.devin.ai/attachments/6e254bfe-4eca-4c13-851a-370f55065dd0/ss_e1e19a94.png)
 
-![依頼B 4人編成](https://app.devin.ai/attachments/25596333-bc6d-41c2-bde1-97cbc7f83062/ss_f7625aa3.png)
-
-### 5. 依頼 C は編成不可
-
-- 3 枚目の依頼 `負傷した冒険者の救出` を選択。
-- 既に A/B に割り当て済みの冒険者カードをクリックしても、C の編成に追加されなかった。
-- 依頼 C は `編成: 0 / 4` のままだった。
-
-![依頼C 編成不可](https://app.devin.ai/attachments/4cbd85bc-7eb5-4dfb-aee3-966410b586c6/ss_4fb303c4.png)
-
-### 6. 派遣実行と結果確認
+### 4. 派遣実行
 
 - `本日の派遣を実行` をクリック。
-- 結果一覧に A/B/C の 3 枚が表示された。
-  - A `魔物出没原因の調査`: `撤退 (forcedRetreat)`
-  - B `学者の護衛`: `依頼失敗 (failedObjective)`
-  - C `負傷した冒険者の救出`: `未派遣`
+- A は `撤退 (forcedRetreat)`、B は `依頼失敗 (failedObjective)`、C は `未派遣` で結果が表示された。
 
-![派遣結果](https://app.devin.ai/attachments/43300ec4-f258-4487-90af-c81bbcfc1e47/ss_2b27a6dc.png)
+### 5. 結果詳細で final HP を確認
 
-### 7. 結果詳細を開く
+- A の結果詳細を開く。
+- `派遣メンバー` に `result.state.partyHp` 由来の final HP が表示された。
+  - レオ アイヴィー (ranger C) — HP `56/56`
+  - シエラ アッシュ (vanguard D) — HP `20/76`（max から減少）
+  - ヴァン ドラグナー (mage D) — HP `45/45`
+  - レオ リーフ (guardian C) — HP `64/71`（max から減少）
 
-- A の結果カードが選択され、詳細パネルが表示された。
-- `派遣メンバー`、`重要facts`、`最終結果`（依頼結果・Objective progress）、`戦闘結果`、`Objective summary` が確認できた。
+![結果詳細 final HP](https://app.devin.ai/attachments/2cf9e001-1d9e-42cc-b34d-9c10626544e5/ss_5568ac3b.png)
 
-![結果詳細](https://app.devin.ai/attachments/d10f50bb-ced1-460d-9782-46a5d663f928/ss_b44fab01.png)
+### 6. 解決後の read-only 確認
 
-### 8. 新しい日を生成
+- 日が `resolved` になった後、冒険者カードをクリックしても編成が変化しなかった。
+- `本日の派遣を実行` ボタンは disabled のままで、結果一覧・詳細が維持された。
+
+### 7. 新しい日を生成
 
 - `新しい日` ボタンをクリック。
-- `Day Seed` と `Day:` 表示が `tavern-001` から `7zofdkg9` に変更された。
-- 依頼タイトルと冒険者名が異なる内容に更新された。
-- 依頼カードは 3 枚、冒険者カードは 8 枚、編成はリセットされた。
+- `Day Seed` と `Day:` が `tavern-001` から `tg3qkjkw` に変更された。
+- 依頼タイトルと冒険者名が異なる内容に更新され、編成と結果がリセットされた。
+- 依頼カード 3 枚、冒険者カード 8 枚が表示された。
 
-![新しい日](https://app.devin.ai/attachments/9707106a-5cfc-4ea9-84f9-adf63ee92137/ss_bc84d40a.png)
+![新しい日](https://app.devin.ai/attachments/aa8e115f-d444-45eb-91d2-1b2117443647/ss_dfbfb43d.png)
 
-### 9. Console エラー
+### 8. Console エラー
 
 - ブラウザ console と `window.onerror` / `unhandledrejection` リスナーでエラーは検出されなかった。
 
 ## 注意事項
 
-- テストハーネス上で、一部ボタン（`本日の派遣を実行` など）のネイティブマウスクリックが反応しないことがあった。MVP/Phase 4 と同様の現象で、UI ハンドラ自体は正常に動作しており、`document.querySelectorAll('button').find(...).click()` でフォールバックした。
-- Node.js 20.18.1 では `npm run build` / `npm run dev` で Vite バージョン警告が表示されるが、ビルド・dev server ともに成功している。
+- テストハーネス上で、下部ボタンのネイティブマウスクリックが反応しないことがあった。以前のテストと同様に `document.querySelectorAll('button').find(...).click()` でフォールバックした。UI ハンドラ自体は正常に動作した。
+- Node.js 20.18.1 では Vite のバージョン警告が出るが、dev server / build は成功している。
