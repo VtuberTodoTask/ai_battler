@@ -90,7 +90,7 @@ Phase 4では、既存の決定論的 `runExpedition()` エンジンを変更せ
 
 ```text
 npm run typecheck   0 errors
-npm run test        547 passed (34 test files)
+npm run test        550 passed (34 test files)
 npm run lint        passed
 npm run build       passed
 npm run update:expedition-regression  passed, existing baseline diff: 0
@@ -103,3 +103,66 @@ npm run update:expedition-regression  passed, existing baseline diff: 0
 - 既存の戦闘シミュレーター UI を維持し、`App.tsx` に最小限のタブ切り替えのみ追加した。
 - 外部 UI ライブラリは追加していない。
 - AI 文章生成機能は追加していない。
+
+## 録画付き E2E テスト
+
+`npm run dev` で `http://localhost:5173` を起動し、Chrome で Phase 4 遠征シミュレーターの A–D フローを録画付きで実施した。
+
+- テスト対象コミット: `0d3bac13fbe0a3a1f91268b2ac1c3263edacf0f0`
+- テストブラウザ: Chrome（最大化、80% ズーム）
+- 録画: `/home/ubuntu/screencasts/ai_battler_phase4_test/ai_battler_phase4_test-edited.mp4`
+
+### A. Rescue
+
+- 遠征シミュレーター タブに切り替え、`救出：負傷した冒険者の救出` を選択し `遠征開始`。
+- タイムラインを数イベント進め、`routePlanning` / `hazard` の判定詳細（使用技能、有効値、Roll、結果）を確認。
+- 戦闘結果パネル（`victory 勝利`）と遠征最終結果（`依頼失敗 failedObjective`）が別々に表示された。
+- Objective パネルで救出対象の HP、発見、到達、Progress、Completed を確認。
+- Raw JSON を開き、`request.objectiveType === "rescue"`、`request.seed` / `party[*].seed`、最終 `outcome` が画面表示と一致することを確認。
+
+### B. Retrieval
+
+- `回収：古代魔導核の回収` を選択し、Slot 1 の役割を `scout` → `ranger` に変更。
+- `Seedを変更して再実行` をクリックし、遠征 Seed / Party Seed が更新されたことを確認。
+- Raw JSON の `request.seed` と `party[*].seed` も新しい Seed に基づいていることを確認。
+- Objective パネルで Integrity（75/80）、運搬者なし、回収未完了、最終 outcome `forcedRetreat` を確認。
+
+### C. Survey
+
+- `測量：旧坑道東部の測量` を選択し `遠征開始`。
+- タイムラインの `再生` で自動再生し、最後の `最終結果` で正常停止（再生ボタン disabled）したことを確認。
+- Objective パネルで Coverage `33.3%`、平均品質 `80.0`、最低品質 `70`、報告書作成/帰還済み、東一区画 quality `80` を確認。
+
+### D. 全 6 Objective スモークテスト
+
+| 目的                  | 最終結果                    | Objective パネル確認          |
+| --------------------- | --------------------------- | ----------------------------- |
+| 調査（investigation） | `依頼失敗(failedObjective)` | `Type: investigation`         |
+| 討伐（elimination）   | `完全成功(completeSuccess)` | 対象数 4、撃破、Progress 100% |
+| 護衛（escort）        | `撤退(forcedRetreat)`       | 対象/目的地、HP 36/40         |
+| 救出（rescue）        | `依頼失敗(failedObjective)` | Flow A で実施                 |
+| 回収（retrieval）     | `撤退(forcedRetreat)`       | Flow B で実施                 |
+| 測量（survey）        | `撤退(forcedRetreat)`       | Flow C で実施                 |
+
+全目的でブラウザ console エラーは発生しなかった。
+
+### E2E 確認事項
+
+- 設定と表示結果が一致している
+- 戦闘結果と依頼結果が別表示
+- タイムライン選択とイベント詳細が一致
+- Objective パネルが選択した Objective と一致
+- 前へ / 次へ / 最初 / 最後が正常に動作
+- autoplay が最後で正常停止
+- Raw JSON と画面表示が矛盾しない
+
+## 既知の制約
+
+- `runExpedition()` は one-shot 呼び出しであり、リアルタイムの逐次エンジンではない。
+- UI は `runExpedition()` で生成済みのログを再生しているだけである。
+- 中間 party HP（遠征中の各イベント時点での HP）を完全に再構築していない。
+- 戦闘ラウンドの自動再生はない。
+- 遠征 request の全項目を編集する UI はない。
+- 本番酒場 UI ではない。
+- AI による文章生成は行っていない。
+- persistence（保存/読み込み/履歴）機能はない。
