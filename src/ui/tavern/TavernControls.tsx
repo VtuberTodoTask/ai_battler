@@ -1,22 +1,20 @@
 export interface TavernControlsProps {
   seed: string
   onSeedChange: (seed: string) => void
-  onGenerate: (seed: string) => void
-  onNewDay: () => void
+  onNewCampaign: (seed: string) => void
   disabled?: boolean
 }
 
 export function TavernControls({
   seed,
   onSeedChange,
-  onGenerate,
-  onNewDay,
+  onNewCampaign,
   disabled,
 }: TavernControlsProps) {
   return (
     <div className="tavern-controls controls">
       <label>
-        Day Seed
+        Campaign Seed
         <input
           type="text"
           value={seed}
@@ -24,11 +22,8 @@ export function TavernControls({
           disabled={disabled}
         />
       </label>
-      <button onClick={() => onGenerate(seed)} disabled={disabled || !seed}>
-        このSeedで生成
-      </button>
-      <button onClick={onNewDay} disabled={disabled}>
-        新しい日
+      <button onClick={() => onNewCampaign(seed)} disabled={disabled || !seed}>
+        新しいキャンペーン
       </button>
     </div>
   )

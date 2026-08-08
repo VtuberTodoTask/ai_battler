@@ -14,6 +14,20 @@ import type {
   ObjectiveType,
 } from '../expedition/types.ts'
 
+export type CampaignPartyEventType =
+  | 'arrived'
+  | 'departedScheduled'
+  | 'departedCasualty'
+  | 'startedRecovery'
+  | 'finishedRecovery'
+
+export interface CampaignPartyEvent {
+  type: CampaignPartyEventType
+  partyId: string
+  partyName: string
+  dayNumber: number
+}
+
 export interface TavernDayState {
   id: string
   seed: string
@@ -23,6 +37,7 @@ export interface TavernDayState {
   matches: BrokerageMatch[]
   status: 'planning' | 'resolved'
   results: ResolvedDispatch[]
+  partyEvents?: CampaignPartyEvent[]
 }
 
 export interface TavernRequestOffer {
@@ -58,6 +73,11 @@ export interface TavernParty {
   id: string
   party: AdventurerParty
   acceptedRequestId?: string
+  availability?: 'available' | 'recovering'
+  recoveryDaysRemaining?: number
+  arrivalDay?: number
+  plannedDepartureDay?: number
+  isNew?: boolean
 }
 
 export interface PartyTemplate {

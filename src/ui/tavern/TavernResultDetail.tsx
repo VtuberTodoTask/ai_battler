@@ -47,7 +47,8 @@ export function TavernResultDetail({ resolved }: TavernResultDetailProps) {
           <ul className="party-list">
             {report.party.map((p) => (
               <li key={p.adventurerId}>
-                {p.name} ({p.role} {p.rank}) — HP {p.finalHp}/{p.maxHp}
+                {p.name} ({p.role} {p.rank}) — HP {p.finalHp}/{p.maxHp} MP{' '}
+                {p.finalMp}/{p.maxMp} Morale {p.finalMorale}
                 {p.dead ? ' [死亡]' : p.incapacitated ? ' [戦闘不能]' : ''}
               </li>
             ))}

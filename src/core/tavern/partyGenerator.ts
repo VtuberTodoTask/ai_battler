@@ -80,6 +80,8 @@ export function generatePartyPool(seed: string): TavernParty[] {
     return {
       id: party.id,
       party,
+      availability: 'available' as const,
+      isNew: false,
     }
   })
 }

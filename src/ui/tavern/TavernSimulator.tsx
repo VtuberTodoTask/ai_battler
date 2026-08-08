@@ -1,46 +1,45 @@
 import { useCallback, useMemo, useState } from 'react'
-import { generateTavernDay } from '../../core/tavern/dayGenerator.ts'
 import {
-  offerRequestToParty,
-  resolveTavernDay,
-} from '../../core/tavern/brokerage.ts'
-import { makeRandomSeed } from '../expedition/presets.ts'
-import type { TavernDayState } from '../../core/tavern/types.ts'
+  advanceCampaignDay,
+  createTavernCampaign,
+  resolveCampaignDay,
+} from '../../core/tavern/campaign/campaign.ts'
+import { offerRequestToParty } from '../../core/tavern/brokerage.ts'
+import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
 import { TavernControls } from './TavernControls.tsx'
+import { CampaignHeader } from './CampaignHeader.tsx'
 import { RequestBoard } from './RequestBoard.tsx'
 import { PartyBoard } from './PartyBoard.tsx'
 import { BrokeragePanel } from './BrokeragePanel.tsx'
 import { DispatchResults } from './DispatchResults.tsx'
 import { TavernResultDetail } from './TavernResultDetail.tsx'
+import { CampaignResultSummary } from './CampaignResultSummary.tsx'
+import { CampaignHistory } from './CampaignHistory.tsx'
 import './tavern.css'
 
-const DEFAULT_SEED = 'tavern-001'
-const initialDay = generateTavernDay(DEFAULT_SEED)
+const DEFAULT_CAMPAIGN_SEED = 'tavern-campaign-001'
+const initialCampaign = createTavernCampaign(DEFAULT_CAMPAIGN_SEED)
 
 export function TavernSimulator() {
-  const [day, setDay] = useState<TavernDayState>(initialDay)
+  const [campaign, setCampaign] = useState<TavernCampaignState>(initialCampaign)
+  const [seedInput, setSeedInput] = useState(DEFAULT_CAMPAIGN_SEED)
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(
-    initialDay.requests[0]?.id ?? null,
+    initialCampaign.currentDay.requests[0]?.id ?? null,
   )
   const [selectedPartyId, setSelectedPartyId] = useState<string | null>(null)
   const [selectedResultId, setSelectedResultId] = useState<string | null>(null)
-  const [seedInput, setSeedInput] = useState(DEFAULT_SEED)
   const [error, setError] = useState<string | null>(null)
 
-  const generateDay = useCallback((seed: string) => {
-    const nextDay = generateTavernDay(seed)
-    setDay(nextDay)
-    setSelectedRequestId(nextDay.requests[0]?.id ?? null)
+  const day = campaign.currentDay
+
+  const startCampaign = useCallback((seed: string) => {
+    const next = createTavernCampaign(seed)
+    setCampaign(next)
+    setSelectedRequestId(next.currentDay.requests[0]?.id ?? null)
     setSelectedPartyId(null)
     setSelectedResultId(null)
     setError(null)
   }, [])
-
-  const handleNewDay = useCallback(() => {
-    const seed = makeRandomSeed()
-    setSeedInput(seed)
-    generateDay(seed)
-  }, [generateDay])
 
   const handleSelectRequest = useCallback((id: string) => {
     setSelectedRequestId(id)
@@ -59,54 +58,74 @@ export function TavernSimulator() {
     if (!selectedRequestId || !selectedPartyId) return
     try {
       const nextDay = offerRequestToParty(
-        day,
+        campaign.currentDay,
         selectedRequestId,
         selectedPartyId,
       )
-      setDay(nextDay)
+      setCampaign((prev) => ({ ...prev, currentDay: nextDay }))
       setError(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : '紹介に失敗しました')
     }
-  }, [day, selectedRequestId, selectedPartyId])
+  }, [campaign, selectedRequestId, selectedPartyId])
 
   const handleResolve = useCallback(() => {
     try {
-      const results = resolveTavernDay(day)
-      const nextDay: TavernDayState = { ...day, status: 'resolved', results }
-      setDay(nextDay)
-      const firstResolved = results.find((r) => r.status === 'resolved')
+      const next = resolveCampaignDay(campaign)
+      setCampaign(next)
+      const firstResolved = next.currentDay.results.find(
+        (r) => r.status === 'resolved',
+      )
       setSelectedResultId(
-        firstResolved?.requestId ?? results[0]?.requestId ?? null,
+        firstResolved?.requestId ??
+          next.currentDay.results[0]?.requestId ??
+          null,
       )
       setError(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : '仲介確定に失敗しました')
     }
-  }, [day])
+  }, [campaign])
+
+  const handleAdvance = useCallback(() => {
+    try {
+      const next = advanceCampaignDay(campaign)
+      setCampaign(next)
+      setSelectedRequestId(next.currentDay.requests[0]?.id ?? selectedRequestId)
+      setSelectedPartyId(null)
+      setSelectedResultId(null)
+      setError(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '翌日への進行に失敗しました')
+    }
+  }, [campaign, selectedRequestId])
 
   const canResolve = useMemo(() => {
-    if (day.status === 'resolved') return false
-    return day.matches.length > 0
+    return day.status === 'planning'
+  }, [day])
+
+  const canAdvance = useMemo(() => {
+    return day.status === 'resolved'
   }, [day])
 
   const selectedResolved = useMemo(() => {
-    if (!day || !selectedResultId) return null
+    if (!selectedResultId) return null
     return day.results.find((r) => r.requestId === selectedResultId) ?? null
   }, [day, selectedResultId])
 
-  if (!day) {
-    return <div className="tavern-simulator">Loading...</div>
-  }
+  const currentDayRecord = useMemo(() => {
+    return campaign.history.find((h) => h.dayNumber === campaign.dayNumber)
+  }, [campaign])
 
   return (
     <div className="tavern-simulator">
       <TavernControls
         seed={seedInput}
         onSeedChange={setSeedInput}
-        onGenerate={generateDay}
-        onNewDay={handleNewDay}
+        onNewCampaign={startCampaign}
       />
+
+      <CampaignHeader campaign={campaign} />
 
       <div className="tavern-day-header">
         <h2>酒場仲介ボード</h2>
@@ -132,13 +151,19 @@ export function TavernSimulator() {
         selectedRequestId={selectedRequestId}
         selectedPartyId={selectedPartyId}
         canResolve={canResolve}
+        canAdvance={canAdvance}
         error={error}
         onOffer={handleOffer}
         onResolve={handleResolve}
+        onAdvance={handleAdvance}
       />
 
-      {day.status === 'resolved' && (
+      {day.status === 'resolved' && currentDayRecord && (
         <>
+          <CampaignResultSummary
+            results={day.results}
+            reputationChange={currentDayRecord.reputationChange}
+          />
           <DispatchResults
             results={day.results}
             selectedResultId={selectedResultId}
@@ -149,6 +174,8 @@ export function TavernSimulator() {
           )}
         </>
       )}
+
+      <CampaignHistory history={campaign.history} />
     </div>
   )
 }

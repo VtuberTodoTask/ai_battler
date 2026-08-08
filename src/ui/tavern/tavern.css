@@ -199,6 +199,16 @@
   color: #92400e;
 }
 
+.rank-badge.rank-A {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.rank-badge.rank-S {
+  background: #fae8ff;
+  color: #86198f;
+}
+
 .dispatch-panel {
   background: white;
   border: 1px solid #e5e7eb;
@@ -308,4 +318,139 @@
 
 .tavern-controls {
   margin-bottom: 1rem;
+}
+
+.campaign-header {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.campaign-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.campaign-title h2 {
+  margin: 0;
+}
+
+.campaign-seed {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.reputation-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reputation-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.reputation-bar progress {
+  width: 100%;
+  height: 1rem;
+}
+
+.reputation-next {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.party-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.party-stay {
+  color: #6b7280;
+}
+
+.party-status.recovering {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.new-badge {
+  background: #dc2626;
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  margin-right: 0.25rem;
+}
+
+.campaign-result-summary {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.campaign-result-summary h3 {
+  margin-top: 0;
+}
+
+.reputation-delta {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.reputation-total {
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+.campaign-history {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.campaign-history h3 {
+  margin-top: 0;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-entry {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.history-toggle {
+  background: none;
+  border: none;
+  padding: 0.5rem 0;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.history-detail {
+  padding: 0.5rem 0 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+
+.history-events {
+  margin-top: 0.5rem;
 }

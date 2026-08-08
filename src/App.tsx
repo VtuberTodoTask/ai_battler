@@ -124,7 +124,7 @@ export default function App() {
             className={mode === 'tavern' ? 'active' : ''}
             onClick={() => setMode('tavern')}
           >
-            酒場MVP
+            酒場キャンペーン
           </button>
         </div>
         {mode === 'battle' && (
