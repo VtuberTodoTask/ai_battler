@@ -10,9 +10,11 @@ export interface BrokeragePanelProps {
   selectedRequestId: string | null
   selectedPartyId: string | null
   canResolve: boolean
+  canAdvance: boolean
   error?: string | null
   onOffer: () => void
   onResolve: () => void
+  onAdvance?: () => void
 }
 
 export function BrokeragePanel({
@@ -20,9 +22,11 @@ export function BrokeragePanel({
   selectedRequestId,
   selectedPartyId,
   canResolve,
+  canAdvance,
   error,
   onOffer,
   onResolve,
+  onAdvance,
 }: BrokeragePanelProps) {
   const request = selectedRequestId
     ? (day.requests.find((r) => r.id === selectedRequestId) ?? null)
@@ -137,9 +141,15 @@ export function BrokeragePanel({
       )}
 
       <div className="resolve-action">
-        <button onClick={onResolve} disabled={!canResolve}>
-          本日の仲介を確定
-        </button>
+        {day.status === 'planning' ? (
+          <button onClick={onResolve} disabled={!canResolve}>
+            本日の仲介を確定
+          </button>
+        ) : (
+          <button onClick={onAdvance} disabled={!canAdvance}>
+            翌日へ
+          </button>
+        )}
       </div>
 
       {error && <div className="dispatch-error">{error}</div>}

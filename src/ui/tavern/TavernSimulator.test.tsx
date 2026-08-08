@@ -3,16 +3,46 @@ import { describe, expect, it } from 'vitest'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { TavernSimulator } from './TavernSimulator.tsx'
 
+function findAcceptingPair() {
+  const requestBoard = screen.getByTestId('request-board')
+  const partyBoard = screen.getByTestId('party-board')
+  const requestCards = within(requestBoard).getAllByRole('heading', {
+    level: 4,
+  })
+  const partyCards = within(partyBoard).getAllByRole('heading', { level: 4 })
+
+  outer: for (const requestCard of requestCards) {
+    fireEvent.click(requestCard)
+    for (const partyCard of partyCards) {
+      fireEvent.click(partyCard)
+      const offerButton = screen.queryByRole('button', {
+        name: 'この依頼を紹介する',
+      })
+      if (offerButton) {
+        fireEvent.click(offerButton)
+      }
+      const panel = screen.getByTestId('brokerage-panel')
+      if (panel.textContent?.includes('受諾')) {
+        break outer
+      }
+    }
+  }
+}
+
 describe('TavernSimulator UI', () => {
-  it('renders the tavern board with 3 requests and 4 parties', () => {
+  it('renders the campaign header and board with 3 requests and 4 parties', () => {
     render(<TavernSimulator />)
-    const requestBoard = screen.getByTestId('request-board')
-    const partyBoard = screen.getByTestId('party-board')
+    expect(screen.getByTestId('campaign-header')).toBeTruthy()
+    expect(screen.getByTestId('reputation-bar')).toBeTruthy()
     expect(
-      within(requestBoard).getAllByRole('heading', { level: 4 }).length,
+      within(screen.getByTestId('request-board')).getAllByRole('heading', {
+        level: 4,
+      }).length,
     ).toBe(3)
     expect(
-      within(partyBoard).getAllByRole('heading', { level: 4 }).length,
+      within(screen.getByTestId('party-board')).getAllByRole('heading', {
+        level: 4,
+      }).length,
     ).toBe(4)
   })
 
@@ -42,49 +72,57 @@ describe('TavernSimulator UI', () => {
     ).toBe(true)
   })
 
-  it('enables resolve only after an accepted match', () => {
+  it('allows resolving the day even with no accepted match', () => {
     render(<TavernSimulator />)
-    const requestBoard = screen.getByTestId('request-board')
-    const partyBoard = screen.getByTestId('party-board')
-
-    const requestCards = within(requestBoard).getAllByRole('heading', {
-      level: 4,
-    })
-    const partyCards = within(partyBoard).getAllByRole('heading', {
-      level: 4,
-    })
-
     const resolveButton = screen.getByRole('button', {
       name: '本日の仲介を確定',
     })
-    expect(resolveButton.hasAttribute('disabled')).toBe(true)
-
-    // Try each request against each party until an acceptance occurs.
-    outer: for (const requestCard of requestCards) {
-      fireEvent.click(requestCard)
-      for (const partyCard of partyCards) {
-        fireEvent.click(partyCard)
-        const offerButton = screen.queryByRole('button', {
-          name: 'この依頼を紹介する',
-        })
-        if (offerButton) {
-          fireEvent.click(offerButton)
-        }
-        const panel = screen.getByTestId('brokerage-panel')
-        if (panel.textContent?.includes('受諾')) {
-          break outer
-        }
-      }
-    }
-
     expect(resolveButton.hasAttribute('disabled')).toBe(false)
+    fireEvent.click(resolveButton)
+    expect(screen.getByTestId('campaign-result-summary')).toBeTruthy()
+    expect(screen.getByText('本日の仲介結果')).toBeTruthy()
+  })
+
+  it('resolves the day and shows results after an accepted match', () => {
+    render(<TavernSimulator />)
+    findAcceptingPair()
+    fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
+    expect(screen.getByTestId('campaign-result-summary')).toBeTruthy()
+    expect(screen.getByText('本日の仲介結果')).toBeTruthy()
+  })
+
+  it('advances to the next day and persists parties', () => {
+    render(<TavernSimulator />)
+    findAcceptingPair()
+    fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
+
+    const partyBoard = screen.getByTestId('party-board')
+    const partyCardsBefore = within(partyBoard).getAllByRole('heading', {
+      level: 4,
+    })
+    const firstPartyNameBefore = partyCardsBefore[0].textContent?.replace(
+      /NEW\s+/,
+      '',
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '翌日へ' }))
+
+    expect(screen.getByText(/Day 2/)).toBeTruthy()
+    const partyCardsAfter = within(
+      screen.getByTestId('party-board'),
+    ).getAllByRole('heading', { level: 4 })
+    expect(partyCardsAfter.length).toBe(4)
+    expect(
+      partyCardsAfter.some(
+        (c) => c.textContent?.replace(/NEW\s+/, '') === firstPartyNameBefore,
+      ),
+    ).toBe(true)
   })
 
   it('prevents offering the same request-party pair twice', () => {
     render(<TavernSimulator />)
     const requestBoard = screen.getByTestId('request-board')
     const partyBoard = screen.getByTestId('party-board')
-
     const requestCards = within(requestBoard).getAllByRole('heading', {
       level: 4,
     })
@@ -100,129 +138,59 @@ describe('TavernSimulator UI', () => {
     })
     fireEvent.click(offerButton)
 
-    // After the first offer the same party is still selected.
     expect(
       screen.queryByRole('button', { name: 'この依頼を紹介する' }),
     ).toBeNull()
   })
 
-  it('resolves the day and shows results', () => {
+  it('displays final HP/MP/Morale from ExpeditionState in result detail', () => {
     render(<TavernSimulator />)
-    const requestBoard = screen.getByTestId('request-board')
-    const partyBoard = screen.getByTestId('party-board')
-
-    const requestCards = within(requestBoard).getAllByRole('heading', {
-      level: 4,
-    })
-    const partyCards = within(partyBoard).getAllByRole('heading', {
-      level: 4,
-    })
-
-    // Find any accepting pair.
-    outer: for (const requestCard of requestCards) {
-      fireEvent.click(requestCard)
-      for (const partyCard of partyCards) {
-        fireEvent.click(partyCard)
-        const offerButton = screen.queryByRole('button', {
-          name: 'この依頼を紹介する',
-        })
-        if (offerButton) {
-          fireEvent.click(offerButton)
-        }
-        const panel = screen.getByTestId('brokerage-panel')
-        if (panel.textContent?.includes('受諾')) {
-          break outer
-        }
-      }
-    }
-
-    const resolveButton = screen.getByRole('button', {
-      name: '本日の仲介を確定',
-    })
-    fireEvent.click(resolveButton)
-
-    expect(screen.getByText('本日の仲介結果')).toBeTruthy()
-    expect(screen.getAllByRole('heading', { level: 4 }).length).toBeGreaterThan(
-      0,
-    )
-  })
-
-  it('displays final HP from ExpeditionState in result detail', () => {
-    render(<TavernSimulator />)
-    const requestBoard = screen.getByTestId('request-board')
-    const partyBoard = screen.getByTestId('party-board')
-
-    const requestCards = within(requestBoard).getAllByRole('heading', {
-      level: 4,
-    })
-    const partyCards = within(partyBoard).getAllByRole('heading', {
-      level: 4,
-    })
-
-    outer: for (const requestCard of requestCards) {
-      fireEvent.click(requestCard)
-      for (const partyCard of partyCards) {
-        fireEvent.click(partyCard)
-        const offerButton = screen.queryByRole('button', {
-          name: 'この依頼を紹介する',
-        })
-        if (offerButton) {
-          fireEvent.click(offerButton)
-        }
-        const panel = screen.getByTestId('brokerage-panel')
-        if (panel.textContent?.includes('受諾')) {
-          break outer
-        }
-      }
-    }
-
+    findAcceptingPair()
     fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
 
-    // The result board shows cards with h4 headings; click the first resolved one.
     const results = screen.getByText('本日の仲介結果').parentElement!
     const resultCards = within(results).getAllByRole('heading', { level: 4 })
     fireEvent.click(resultCards[0])
 
     expect(screen.getAllByText(/HP \d+\/\d+/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/MP \d+\/\d+/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Morale \d+/).length).toBeGreaterThan(0)
     expect(screen.getByText('受諾パーティ')).toBeTruthy()
   })
 
-  it('prevents offering after the day is resolved', () => {
+  it('does not hide result detail when a request card is clicked after resolve', () => {
     render(<TavernSimulator />)
-    const requestBoard = screen.getByTestId('request-board')
-    const partyBoard = screen.getByTestId('party-board')
+    findAcceptingPair()
+    fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
 
+    const results = screen.getByText('本日の仲介結果').parentElement!
+    const resultCards = within(results).getAllByRole('heading', { level: 4 })
+    fireEvent.click(resultCards[0])
+
+    expect(screen.getByText('受諾パーティ')).toBeTruthy()
+
+    const requestBoard = screen.getByTestId('request-board')
     const requestCards = within(requestBoard).getAllByRole('heading', {
       level: 4,
     })
-    const partyCards = within(partyBoard).getAllByRole('heading', {
-      level: 4,
-    })
+    fireEvent.click(requestCards[0])
 
-    outer: for (const requestCard of requestCards) {
-      fireEvent.click(requestCard)
-      for (const partyCard of partyCards) {
-        fireEvent.click(partyCard)
-        const offerButton = screen.queryByRole('button', {
-          name: 'この依頼を紹介する',
-        })
-        if (offerButton) {
-          fireEvent.click(offerButton)
-        }
-        const panel = screen.getByTestId('brokerage-panel')
-        if (panel.textContent?.includes('受諾')) {
-          break outer
-        }
-      }
-    }
+    expect(screen.getByText('受諾パーティ')).toBeTruthy()
+  })
 
+  it('starts a new campaign from the seed input', () => {
+    render(<TavernSimulator />)
+    const input = screen.getByDisplayValue('tavern-campaign-001')
+    fireEvent.change(input, { target: { value: 'tavern-campaign-test-007' } })
+    fireEvent.click(screen.getByRole('button', { name: '新しいキャンペーン' }))
+    expect(screen.getByTestId('campaign-header').textContent).toContain(
+      'tavern-campaign-test-007',
+    )
+  })
+
+  it('shows campaign history after resolving a day', () => {
+    render(<TavernSimulator />)
     fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
-
-    expect(screen.getByText('本日の仲介結果')).toBeTruthy()
-
-    fireEvent.click(partyCards[1])
-    expect(
-      screen.queryByRole('button', { name: 'この依頼を紹介する' }),
-    ).toBeNull()
+    expect(screen.getByTestId('campaign-history')).toBeTruthy()
   })
 })

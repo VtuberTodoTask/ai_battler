@@ -32,6 +32,8 @@ export function getOfferErrors(
   const party = state.parties.find((p) => p.id === partyId)
   if (!party) {
     errors.push(`未知のパーティID: ${partyId}`)
+  } else if (party.availability === 'recovering') {
+    errors.push('このパーティは療養中です')
   }
 
   const matchedRequest = state.matches.find((m) => m.requestId === requestId)

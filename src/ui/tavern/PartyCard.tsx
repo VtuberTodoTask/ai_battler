@@ -16,15 +16,26 @@ export function PartyCard({
   const { party: ap } = party
   const leader = ap.members.find((m) => m.id === ap.leaderId)
 
-  const status = party.acceptedRequestId ? '受諾済み' : '受諾可能'
+  const isRecovering = party.availability === 'recovering'
+  const isAccepted = party.acceptedRequestId !== undefined
+  const isDisabled = disabled || isRecovering || isAccepted
+
+  let status = '受諾可能'
+  if (isRecovering) {
+    status = `療養中${party.recoveryDaysRemaining !== undefined ? `（あと${party.recoveryDaysRemaining}日）` : ''}`
+  } else if (isAccepted) {
+    status = '受諾済み'
+  }
 
   return (
     <div
-      className={`tavern-card party-card ${selected ? 'selected' : ''} ${disabled ? 'disabled' : ''}`}
-      onClick={disabled ? undefined : onClick}
+      className={`tavern-card party-card ${selected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
+      onClick={isDisabled ? undefined : onClick}
     >
       <div className="party-header">
-        <h4>《{ap.name}》</h4>
+        <h4>
+          {party.isNew && <span className="new-badge">NEW </span>}《{ap.name}》
+        </h4>
         <span className={`rank-badge rank-${ap.rank}`}>{ap.rank}</span>
       </div>
       <div className="party-leader">
@@ -35,12 +46,23 @@ export function PartyCard({
           <span key={m.id} className="party-member">
             {m.name}{' '}
             <small>
-              ({m.rank} {m.role})
+              ({m.rank} {m.role}) HP {m.currentHp}/{m.maxHp} MP {m.currentMp}/
+              {m.maxMp} M {m.morale}
             </small>
           </span>
         ))}
       </div>
-      <div className="party-status">{status}</div>
+      <div className="party-meta">
+        {party.arrivalDay !== undefined &&
+          party.plannedDepartureDay !== undefined && (
+            <span className="party-stay">
+              滞在 {party.arrivalDay}〜{party.plannedDepartureDay}日
+            </span>
+          )}
+        <span className={`party-status ${isRecovering ? 'recovering' : ''}`}>
+          {status}
+        </span>
+      </div>
     </div>
   )
 }
