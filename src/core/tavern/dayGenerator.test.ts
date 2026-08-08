@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import { generateTavernDay } from './dayGenerator.ts'
-import { ADVENTURER_ROLES } from '../models/types.ts'
 import { TAVERN_REQUEST_TEMPLATES } from './requestTemplates.ts'
 
 const TEST_SEED = 'tavern-demo-001'
@@ -58,32 +57,45 @@ describe('generateTavernDay', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  it('generates 8 adventurers', () => {
+  it('generates 4 parties', () => {
     const day = generateTavernDay(TEST_SEED)
-    expect(day.adventurers.length).toBe(8)
+    expect(day.parties.length).toBe(4)
   })
 
-  it('covers all 7 roles at least once', () => {
+  it('each party has 4 members and a leader inside the party', () => {
     const day = generateTavernDay(TEST_SEED)
-    const roles = new Set(day.adventurers.map((a) => a.adventurer.role))
-    for (const role of ADVENTURER_ROLES) {
-      expect(roles.has(role)).toBe(true)
+    for (const tavernParty of day.parties) {
+      const party = tavernParty.party
+      expect(party.members.length).toBe(4)
+      const leader = party.members.find((m) => m.id === party.leaderId)
+      expect(leader).toBeTruthy()
     }
   })
 
-  it('uses only E-D-C-B ranks for adventurers', () => {
+  it('uses only E-D-C-B ranks for parties', () => {
     for (let i = 0; i < 50; i++) {
-      const day = generateTavernDay(`adv-rank-${i}`)
-      for (const a of day.adventurers) {
-        expect(RANKS_ALLOWED).toContain(a.adventurer.rank)
+      const day = generateTavernDay(`party-rank-${i}`)
+      for (const tavernParty of day.parties) {
+        expect(RANKS_ALLOWED).toContain(tavernParty.party.rank)
       }
     }
   })
 
-  it('has unique adventurer IDs', () => {
+  it('has unique adventurer IDs across all parties', () => {
     const day = generateTavernDay(TEST_SEED)
-    const ids = day.adventurers.map((a) => a.id)
+    const ids: string[] = []
+    for (const tavernParty of day.parties) {
+      for (const member of tavernParty.party.members) {
+        ids.push(member.id)
+      }
+    }
     expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('has unique party names', () => {
+    const day = generateTavernDay(TEST_SEED)
+    const names = day.parties.map((p) => p.party.name)
+    expect(new Set(names).size).toBe(names.length)
   })
 
   it('uses 12+ request templates', () => {

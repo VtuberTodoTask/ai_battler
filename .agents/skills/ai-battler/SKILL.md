@@ -96,6 +96,27 @@ A third tab, `酒場MVP`, renders the tavern dispatch flow:
   `派遣メンバー`, `重要facts`, expedition outcome, battle outcome, and objective
   summary.
 
+## Phase 5.5 Tavern brokerage (`酒場MVP`)
+
+The `酒場MVP` tab now uses a brokerage/acceptance engine:
+
+- 3 `.request-card` elements and 4 `.party-card` elements per generated day.
+- Select a `.request-card`, then a `.party-card`, then click
+  `この依頼を紹介する`.
+- The `brokerage-panel` shows the party's response (`受諾` or `辞退`) and a
+  flavor reason.
+- Acceptance reasons include `appropriate`, `challengingButSuitable`,
+  `tooDangerous`, and `poorFit`. Expand `判定詳細` to see `rankGap`,
+  `relevantRoleCount`, and `leaderJudgment`.
+- Once at least one match exists, `本日の仲介を確定` runs expeditions and renders
+  `本日の仲介結果`. Click a `.result-card` to open `.result-detail` and see
+  `受諾パーティ` with `HP {finalHp}/{maxHp}`.
+- Useful sample seeds:
+  - `tavern-005`: includes `elimination`, `survey`, and `rescue` requests, plus
+    a `D` ranked party (`鉄梟`) that accepts the `C` ranked `survey` as
+    `challengingButSuitable` and an `E` ranked party (`森影`) that declines the
+    same `survey` as `tooDangerous`.
+
 ## Test-harness notes
 
 Native mouse clicks sometimes did not register on lower-page buttons (e.g.

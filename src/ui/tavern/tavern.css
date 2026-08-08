@@ -120,6 +120,11 @@
   font-weight: 600;
 }
 
+.request-status {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
 .outcome-label {
   font-size: 0.75rem;
   background: #dbeafe;
@@ -128,34 +133,40 @@
   border-radius: 4px;
 }
 
-.adventurer-card .adventurer-header {
+.party-card .party-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.adventurer-card h4 {
+.party-card h4 {
   margin: 0 0 0.25rem 0;
 }
 
-.adventurer-role {
+.party-leader {
   font-size: 0.85rem;
-  color: #2563eb;
-  font-weight: 600;
+  color: #4b5563;
   margin-bottom: 0.25rem;
 }
 
-.adventurer-stats,
-.adventurer-skills,
-.assignment-status {
+.party-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: #374151;
+  margin: 0.25rem 0;
+}
+
+.party-member small {
+  color: #6b7280;
+}
+
+.party-status {
   font-size: 0.75rem;
   color: #4b5563;
   margin-top: 0.25rem;
-}
-
-.assignment-status {
   font-weight: 600;
-  color: #047857;
 }
 
 .rank-badge {
@@ -203,9 +214,32 @@
   margin-bottom: 0.5rem;
 }
 
-.party-composition,
-.party-roles {
+.selected-party {
   margin: 0.5rem 0;
+}
+
+.selected-party h4 {
+  margin: 0 0 0.25rem 0;
+}
+
+.offer-result {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: #f9fafb;
+  border-radius: 4px;
+}
+
+.offer-history {
+  margin-top: 1rem;
+}
+
+.offer-history ul {
+  padding-left: 1.25rem;
+  margin: 0.25rem 0;
+}
+
+.resolve-action {
+  margin-top: 1rem;
 }
 
 .dispatch-warning {

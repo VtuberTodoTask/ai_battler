@@ -16,15 +16,15 @@ export function DispatchResults({
 
   return (
     <div className="dispatch-results">
-      <h3>本日の派遣結果</h3>
+      <h3>本日の仲介結果</h3>
       <div className="card-list">
         {results.map((result) => {
-          const isResolved = result.status === 'resolved'
-          const outcomeText = isResolved
+          const isBrokered = result.status === 'resolved'
+          const outcomeText = isBrokered
             ? result.report
               ? `${OUTCOME_LABELS[result.report.outcome]} (${result.report.outcome})`
               : '解決済み'
-            : '未派遣'
+            : '仲介不成立'
           return (
             <div
               key={result.requestId}
@@ -33,7 +33,8 @@ export function DispatchResults({
             >
               <h4>{result.request.title}</h4>
               <p>{outcomeText}</p>
-              {isResolved && result.report?.battleOutcome && (
+              {result.partyName && <p>《{result.partyName}》</p>}
+              {isBrokered && result.report?.battleOutcome && (
                 <p>
                   戦闘: {BATTLE_OUTCOME_LABELS[result.report.battleOutcome]} (
                   {result.report.battleOutcome})

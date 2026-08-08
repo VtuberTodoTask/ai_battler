@@ -8,11 +8,11 @@ export interface TavernResultDetailProps {
 }
 
 export function TavernResultDetail({ resolved }: TavernResultDetailProps) {
-  if (resolved.status === 'notDispatched') {
+  if (resolved.status === 'notBrokered') {
     return (
-      <div className="result-detail not-dispatched">
+      <div className="result-detail not-brokered">
         <h3>{resolved.request.title}</h3>
-        <p>この依頼には派遣されませんでした。</p>
+        <p>この依頼には成立したパーティがありませんでした。</p>
       </div>
     )
   }
@@ -37,7 +37,13 @@ export function TavernResultDetail({ resolved }: TavernResultDetailProps) {
         <ExpeditionResultSummary result={result} />
 
         <div className="result-section">
-          <h4>派遣メンバー</h4>
+          <h4>受諾パーティ</h4>
+          {resolved.partyName && <p>《{resolved.partyName}》</p>}
+          {resolved.leaderName && (
+            <p>
+              Leader: {resolved.leaderName} ({resolved.memberIds.length}名)
+            </p>
+          )}
           <ul className="party-list">
             {report.party.map((p) => (
               <li key={p.adventurerId}>

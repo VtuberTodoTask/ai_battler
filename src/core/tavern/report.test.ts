@@ -116,9 +116,7 @@ describe('buildDispatchReport', () => {
   it('uses final party state from ExpeditionState', () => {
     const day = generateTavernDay('tavern-001')
     const request = day.requests[0].expeditionRequest
-    const party = day.adventurers
-      .slice(0, 4)
-      .map((ta) => deepClone(ta.adventurer))
+    const party = day.parties[0].party.members.map((m) => deepClone(m))
     const result = runExpedition(request, party)
     const report = buildDispatchReport(request.id, result)
 

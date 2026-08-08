@@ -4,170 +4,144 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { TavernSimulator } from './TavernSimulator.tsx'
 
 describe('TavernSimulator UI', () => {
-  it('renders the tavern board with 3 requests and 8 adventurers', () => {
+  it('renders the tavern board with 3 requests and 4 parties', () => {
     render(<TavernSimulator />)
     const requestBoard = screen.getByTestId('request-board')
-    const adventurerBoard = screen.getByTestId('adventurer-board')
+    const partyBoard = screen.getByTestId('party-board')
     expect(
       within(requestBoard).getAllByRole('heading', { level: 4 }).length,
     ).toBe(3)
     expect(
-      within(adventurerBoard).getAllByRole('heading', { level: 4 }).length,
-    ).toBe(8)
+      within(partyBoard).getAllByRole('heading', { level: 4 }).length,
+    ).toBe(4)
   })
 
-  it('selects a request and assigns adventurers', () => {
+  it('selects a request and party and records an offer', () => {
     render(<TavernSimulator />)
     const requestBoard = screen.getByTestId('request-board')
+    const partyBoard = screen.getByTestId('party-board')
     const requestCards = within(requestBoard).getAllByRole('heading', {
       level: 4,
     })
-
-    fireEvent.click(requestCards[0])
-
-    const adventurerBoard = screen.getByTestId('adventurer-board')
-    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
+    const partyCards = within(partyBoard).getAllByRole('heading', {
       level: 4,
     })
-
-    fireEvent.click(adventurerCards[0])
-    fireEvent.click(adventurerCards[1])
-
-    const panel = screen.getByTestId('dispatch-panel')
-    expect(panel.textContent).toMatch(/編成:\s*2\s*\/\s*4/)
-  })
-
-  it('prevents assigning the same adventurer to two requests', () => {
-    render(<TavernSimulator />)
-    const requestBoard = screen.getByTestId('request-board')
-    const requestCards = within(requestBoard).getAllByRole('heading', {
-      level: 4,
-    })
-
-    fireEvent.click(requestCards[0])
-
-    const adventurerBoard = screen.getByTestId('adventurer-board')
-    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
-      level: 4,
-    })
-
-    fireEvent.click(adventurerCards[0])
 
     fireEvent.click(requestCards[1])
-    fireEvent.click(adventurerCards[0])
+    fireEvent.click(partyCards[0])
 
-    fireEvent.click(requestCards[0])
-    const panel = screen.getByTestId('dispatch-panel')
-    expect(panel.textContent).toMatch(/編成:\s*1\s*\/\s*4/)
+    const offerButton = screen.getByRole('button', {
+      name: 'この依頼を紹介する',
+    })
+    fireEvent.click(offerButton)
+
+    const panel = screen.getByTestId('brokerage-panel')
+    expect(
+      panel.textContent?.includes('受諾') ||
+        panel.textContent?.includes('辞退'),
+    ).toBe(true)
   })
 
-  it('shows resolve button enabled only with a full 4-person party', () => {
+  it('enables resolve only after an accepted match', () => {
     render(<TavernSimulator />)
     const requestBoard = screen.getByTestId('request-board')
+    const partyBoard = screen.getByTestId('party-board')
+
     const requestCards = within(requestBoard).getAllByRole('heading', {
       level: 4,
     })
-
-    fireEvent.click(requestCards[0])
-
-    const adventurerBoard = screen.getByTestId('adventurer-board')
-    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
+    const partyCards = within(partyBoard).getAllByRole('heading', {
       level: 4,
     })
 
     const resolveButton = screen.getByRole('button', {
-      name: '本日の派遣を実行',
+      name: '本日の仲介を確定',
     })
     expect(resolveButton.hasAttribute('disabled')).toBe(true)
 
-    fireEvent.click(adventurerCards[0])
-    fireEvent.click(adventurerCards[1])
-    fireEvent.click(adventurerCards[2])
-    expect(resolveButton.hasAttribute('disabled')).toBe(true)
+    // Try each request against each party until an acceptance occurs.
+    outer: for (const requestCard of requestCards) {
+      fireEvent.click(requestCard)
+      for (const partyCard of partyCards) {
+        fireEvent.click(partyCard)
+        const offerButton = screen.queryByRole('button', {
+          name: 'この依頼を紹介する',
+        })
+        if (offerButton) {
+          fireEvent.click(offerButton)
+        }
+        const panel = screen.getByTestId('brokerage-panel')
+        if (panel.textContent?.includes('受諾')) {
+          break outer
+        }
+      }
+    }
 
-    fireEvent.click(adventurerCards[3])
     expect(resolveButton.hasAttribute('disabled')).toBe(false)
   })
 
-  it('warns and disables resolve with a 3-person party', () => {
+  it('prevents offering the same request-party pair twice', () => {
     render(<TavernSimulator />)
     const requestBoard = screen.getByTestId('request-board')
+    const partyBoard = screen.getByTestId('party-board')
+
     const requestCards = within(requestBoard).getAllByRole('heading', {
+      level: 4,
+    })
+    const partyCards = within(partyBoard).getAllByRole('heading', {
       level: 4,
     })
 
     fireEvent.click(requestCards[0])
+    fireEvent.click(partyCards[0])
 
-    const adventurerBoard = screen.getByTestId('adventurer-board')
-    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
-      level: 4,
+    const offerButton = screen.getByRole('button', {
+      name: 'この依頼を紹介する',
     })
+    fireEvent.click(offerButton)
 
-    fireEvent.click(adventurerCards[0])
-    fireEvent.click(adventurerCards[1])
-    fireEvent.click(adventurerCards[2])
-
-    const resolveButton = screen.getByRole('button', {
-      name: '本日の派遣を実行',
-    })
-    expect(resolveButton.hasAttribute('disabled')).toBe(true)
-    expect(screen.getByTestId('dispatch-panel').textContent).toContain(
-      '派遣には4人必要',
-    )
-  })
-
-  it('can staff two requests with 4 adventurers each and leaves the third impossible', () => {
-    render(<TavernSimulator />)
-    const requestBoard = screen.getByTestId('request-board')
-    const requestCards = within(requestBoard).getAllByRole('heading', {
-      level: 4,
-    })
-
-    const adventurerBoard = screen.getByTestId('adventurer-board')
-    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
-      level: 4,
-    })
-
-    fireEvent.click(requestCards[0])
-    for (let i = 0; i < 4; i++) {
-      fireEvent.click(adventurerCards[i])
-    }
-
-    fireEvent.click(requestCards[1])
-    for (let i = 4; i < 8; i++) {
-      fireEvent.click(adventurerCards[i])
-    }
-
-    fireEvent.click(requestCards[2])
-    for (let i = 0; i < 8; i++) {
-      fireEvent.click(adventurerCards[i])
-    }
-
-    const panel = screen.getByTestId('dispatch-panel')
-    expect(panel.textContent).toMatch(/編成:\s*0\s*\/\s*4/)
+    // After the first offer the same party is still selected.
+    expect(
+      screen.queryByRole('button', { name: 'この依頼を紹介する' }),
+    ).toBeNull()
   })
 
   it('resolves the day and shows results', () => {
     render(<TavernSimulator />)
     const requestBoard = screen.getByTestId('request-board')
+    const partyBoard = screen.getByTestId('party-board')
+
     const requestCards = within(requestBoard).getAllByRole('heading', {
       level: 4,
     })
-
-    fireEvent.click(requestCards[0])
-
-    const adventurerBoard = screen.getByTestId('adventurer-board')
-    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
+    const partyCards = within(partyBoard).getAllByRole('heading', {
       level: 4,
     })
 
-    for (let i = 0; i < 4; i++) {
-      fireEvent.click(adventurerCards[i])
+    // Find any accepting pair.
+    outer: for (const requestCard of requestCards) {
+      fireEvent.click(requestCard)
+      for (const partyCard of partyCards) {
+        fireEvent.click(partyCard)
+        const offerButton = screen.queryByRole('button', {
+          name: 'この依頼を紹介する',
+        })
+        if (offerButton) {
+          fireEvent.click(offerButton)
+        }
+        const panel = screen.getByTestId('brokerage-panel')
+        if (panel.textContent?.includes('受諾')) {
+          break outer
+        }
+      }
     }
 
-    fireEvent.click(screen.getByRole('button', { name: '本日の派遣を実行' }))
+    const resolveButton = screen.getByRole('button', {
+      name: '本日の仲介を確定',
+    })
+    fireEvent.click(resolveButton)
 
-    expect(screen.getByText('本日の派遣結果')).toBeTruthy()
+    expect(screen.getByText('本日の仲介結果')).toBeTruthy()
     expect(screen.getAllByRole('heading', { level: 4 }).length).toBeGreaterThan(
       0,
     )
@@ -176,79 +150,79 @@ describe('TavernSimulator UI', () => {
   it('displays final HP from ExpeditionState in result detail', () => {
     render(<TavernSimulator />)
     const requestBoard = screen.getByTestId('request-board')
+    const partyBoard = screen.getByTestId('party-board')
+
     const requestCards = within(requestBoard).getAllByRole('heading', {
       level: 4,
     })
-
-    fireEvent.click(requestCards[0])
-
-    const adventurerBoard = screen.getByTestId('adventurer-board')
-    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
+    const partyCards = within(partyBoard).getAllByRole('heading', {
       level: 4,
     })
 
-    for (let i = 0; i < 4; i++) {
-      fireEvent.click(adventurerCards[i])
+    outer: for (const requestCard of requestCards) {
+      fireEvent.click(requestCard)
+      for (const partyCard of partyCards) {
+        fireEvent.click(partyCard)
+        const offerButton = screen.queryByRole('button', {
+          name: 'この依頼を紹介する',
+        })
+        if (offerButton) {
+          fireEvent.click(offerButton)
+        }
+        const panel = screen.getByTestId('brokerage-panel')
+        if (panel.textContent?.includes('受諾')) {
+          break outer
+        }
+      }
     }
 
-    fireEvent.click(screen.getByRole('button', { name: '本日の派遣を実行' }))
+    fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
 
-    expect(screen.getByText(/HP 20\/76/)).toBeTruthy()
-  })
-
-  it('shows result details with party and key facts after resolve', () => {
-    render(<TavernSimulator />)
-    const requestBoard = screen.getByTestId('request-board')
-    const requestCards = within(requestBoard).getAllByRole('heading', {
-      level: 4,
-    })
-
-    fireEvent.click(requestCards[0])
-
-    const adventurerBoard = screen.getByTestId('adventurer-board')
-    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
-      level: 4,
-    })
-
-    for (let i = 0; i < 4; i++) {
-      fireEvent.click(adventurerCards[i])
-    }
-
-    fireEvent.click(screen.getByRole('button', { name: '本日の派遣を実行' }))
-
-    const results = screen.getByText('本日の派遣結果').parentElement!
+    // The result board shows cards with h4 headings; click the first resolved one.
+    const results = screen.getByText('本日の仲介結果').parentElement!
     const resultCards = within(results).getAllByRole('heading', { level: 4 })
     fireEvent.click(resultCards[0])
 
-    expect(screen.getByText('派遣メンバー')).toBeTruthy()
-    expect(screen.getByText('重要facts')).toBeTruthy()
+    expect(screen.getAllByText(/HP \d+\/\d+/).length).toBeGreaterThan(0)
+    expect(screen.getByText('受諾パーティ')).toBeTruthy()
   })
 
-  it('prevents editing assignments after resolve', () => {
+  it('prevents offering after the day is resolved', () => {
     render(<TavernSimulator />)
     const requestBoard = screen.getByTestId('request-board')
+    const partyBoard = screen.getByTestId('party-board')
+
     const requestCards = within(requestBoard).getAllByRole('heading', {
       level: 4,
     })
-
-    fireEvent.click(requestCards[0])
-
-    const adventurerBoard = screen.getByTestId('adventurer-board')
-    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
+    const partyCards = within(partyBoard).getAllByRole('heading', {
       level: 4,
     })
 
-    for (let i = 0; i < 4; i++) {
-      fireEvent.click(adventurerCards[i])
+    outer: for (const requestCard of requestCards) {
+      fireEvent.click(requestCard)
+      for (const partyCard of partyCards) {
+        fireEvent.click(partyCard)
+        const offerButton = screen.queryByRole('button', {
+          name: 'この依頼を紹介する',
+        })
+        if (offerButton) {
+          fireEvent.click(offerButton)
+        }
+        const panel = screen.getByTestId('brokerage-panel')
+        if (panel.textContent?.includes('受諾')) {
+          break outer
+        }
+      }
     }
 
-    fireEvent.click(screen.getByRole('button', { name: '本日の派遣を実行' }))
+    fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
 
-    expect(screen.getByText('本日の派遣結果')).toBeTruthy()
+    expect(screen.getByText('本日の仲介結果')).toBeTruthy()
 
-    fireEvent.click(adventurerCards[0])
-
-    expect(screen.getByText('本日の派遣結果')).toBeTruthy()
-    expect(screen.getByText(/HP 20\/76/)).toBeTruthy()
+    fireEvent.click(partyCards[1])
+    expect(
+      screen.queryByRole('button', { name: 'この依頼を紹介する' }),
+    ).toBeNull()
   })
 })
