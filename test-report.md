@@ -7,6 +7,7 @@
 - テスト日時: 2025-08-08
 - 実行環境: Vite dev server `http://localhost:5173`、Chrome（最大化、80% ズーム）
 - 録画: `/home/ubuntu/screencasts/ai_battler_phase4_test/ai_battler_phase4_test-edited.mp4`
+- 録画 URL: https://app.devin.ai/attachments/d473f13f-b172-4c90-a2da-353f4fab863d/ai_battler_phase4_test-edited.mp4
 
 ## 静的チェック結果
 
@@ -85,5 +86,6 @@
 ## 追加成果物
 
 - 録画: `/home/ubuntu/screencasts/ai_battler_phase4_test/ai_battler_phase4_test-edited.mp4`
+- 録画 URL: https://app.devin.ai/attachments/d473f13f-b172-4c90-a2da-353f4fab863d/ai_battler_phase4_test-edited.mp4
 - スクリーンショット: `/home/ubuntu/screenshots/` 内の `ss_*.png`
 - テスト計画: `/home/ubuntu/test-plan-phase4.md`
