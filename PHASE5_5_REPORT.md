@@ -20,12 +20,86 @@ Phase 5.5 では、`酒場MVP` タブに **仲介（brokerage）/ 受諾判定�
   - `rankGap == 1` かつ `relevantRoleCount >= 3` かつ `leaderJudgment >= 55` → `accepted` / `challengingButSuitable`
   - `rankGap == 1` かつ `relevantRoleCount < 3` → `declined` / `poorFit`
   - `rankGap == 1` かつ `relevantRoleCount >= 3` かつ `leaderJudgment < 55` → `declined` / `tooDangerous`
-  - `rankGap <= 0` かつ `relevantRoleCount >= 1` → `accepted` / `appropriate`
-  - `rankGap <= 0` かつ `relevantRoleCount == 0` → `declined` / `poorFit`
+  - `rankGap == 0` かつ `relevantRoleCount >= 1` → `accepted` / `appropriate`
+  - `rankGap == 0` かつ `relevantRoleCount == 0` → `declined` / `poorFit`
+  - `rankGap < 0` → `accepted` / `appropriate`
 - 関連 Role は依頼の `objectiveType` と `environment` から決まる。
 - リーダー判断力は `(int + per + leadership) / 3` を四捨五入した値（0–100）。
 
 UI 上では `BrokeragePanel.tsx` が `acceptanceReasonText(reason)` で各理由に対応した flavor テキストを表示する。
+
+## Acceptance Statistics
+
+Evaluated 1000 day seeds × 12 pairs = 12000 request-party pairs.
+
+### Overall
+
+| Metric                | Count | Percentage |
+| --------------------- | ----- | ---------- |
+| Total evaluated pairs | 12000 | 100.00     |
+| Accepted              | 8641  | 72.01      |
+| Declined              | 3359  | 27.99      |
+| Acceptance rate       | —     | 72.01      |
+
+### By reason
+
+| Reason                 | Count | Percentage |
+| ---------------------- | ----- | ---------- |
+| appropriate            | 8243  | 68.69      |
+| challengingButSuitable | 398   | 3.32       |
+| tooDangerous           | 1953  | 16.28      |
+| poorFit                | 1406  | 11.72      |
+
+### By rankGap
+
+| rankGap | Offers | Accepted | Declined | Acceptance rate |
+| ------- | ------ | -------- | -------- | --------------- |
+| <= -2   | 1922   | 1922     | 0        | 100.00          |
+| -1      | 2976   | 2976     | 0        | 100.00          |
+| 0       | 3494   | 3345     | 149      | 95.74           |
+| 1       | 2467   | 398      | 2069     | 16.13           |
+| >= 2    | 1141   | 0        | 1141     | 0.00            |
+
+### rankGap = 1 breakdown
+
+| Decision               | Count | Percentage within rankGap=1 |
+| ---------------------- | ----- | --------------------------- |
+| Total rankGap=1        | 2467  | 100.00                      |
+| challengingButSuitable | 398   | 16.13                       |
+| poorFit                | 1257  | 50.95                       |
+| tooDangerous           | 812   | 32.91                       |
+
+### By objective
+
+| Objective     | Evaluated | Accepted | Declined | Acceptance rate |
+| ------------- | --------- | -------- | -------- | --------------- |
+| investigation | 1992      | 1437     | 555      | 72.14           |
+| elimination   | 1968      | 1443     | 525      | 73.32           |
+| rescue        | 2064      | 1476     | 588      | 71.51           |
+| escort        | 2020      | 1481     | 539      | 73.32           |
+| retrieval     | 1944      | 1377     | 567      | 70.83           |
+| survey        | 2012      | 1427     | 585      | 70.92           |
+
+### By party template
+
+| Template           | Offers | Accepted | Declined | Acceptance rate |
+| ------------------ | ------ | -------- | -------- | --------------- |
+| arcane             | 1482   | 1125     | 357      | 75.91           |
+| arcane-exploration | 1530   | 1106     | 424      | 72.29           |
+| assault            | 1557   | 971      | 586      | 62.36           |
+| balanced           | 1455   | 1020     | 435      | 70.10           |
+| exploration        | 1434   | 1054     | 380      | 73.50           |
+| ranged             | 1494   | 1113     | 381      | 74.50           |
+| support-heavy      | 1497   | 1036     | 461      | 69.21           |
+| versatile          | 1551   | 1216     | 335      | 78.40           |
+
+### Invariant checks
+
+- rankGap >= 2 → accepted = 0: PASS
+- rankGap < 0 → declined = 0: PASS
+- challengingButSuitable → rankGap == 1, relevantRoleCount >= 3, leaderJudgment >= 55: PASS
+
+Acceptance engine code was not modified; these statistics are observational only.
 
 ## Day Generation
 
@@ -181,6 +255,18 @@ UI 上では `BrokeragePanel.tsx` が `acceptanceReasonText(reason)` で各理�
 - テストハーネス上では、画面下部のボタンや座標ベースの入力がネイティブクリックで反応しないことがある。`browser_console` から `document.querySelector(...).click()` や `input.focus()` + `computer` ツールの `type` を併用することで回避した。UI ハンドラ自体に問題はない。
 - `npm run build` / `npm run dev` 実行時に Node.js 20.18.1 に対する Vite バージョン警告が出力されるが、ビルド・dev server ともに成功する。
 - `BrokeragePanel` の判定詳細 `<details>` 要素はデフォルトで折りたたまれており、録画では `▼ 判定詳細` をクリックして展開する必要がある。
+- Party は毎日生成し直される。
+- Party 永続化はない。
+- Party 実績はない。
+- Party Rank 成長はない。
+- Member 加入/脱退はない。
+- 性格や人間関係はない。
+- 報酬による受諾判断はない。
+- 酒場評判の影響はない。
+- 複数日 campaign はない。
+- Acceptance は deterministic rule-based である。
+- AI 会話や LLM 受諾判断はない。
+- 未来の遠征結果は参照しない。
 
 ## 参考ファイル
 
