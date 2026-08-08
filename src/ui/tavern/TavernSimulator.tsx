@@ -15,6 +15,7 @@ import { DispatchResults } from './DispatchResults.tsx'
 import { TavernResultDetail } from './TavernResultDetail.tsx'
 import { CampaignResultSummary } from './CampaignResultSummary.tsx'
 import { CampaignHistory } from './CampaignHistory.tsx'
+import { ExpeditionPredictionPanel } from './ExpeditionPredictionPanel.tsx'
 import './tavern.css'
 
 const DEFAULT_CAMPAIGN_SEED = 'tavern-campaign-001'
@@ -123,6 +124,16 @@ export function TavernSimulator() {
     return campaign.history.find((h) => h.dayNumber === campaign.dayNumber)
   }, [campaign])
 
+  const selectedRequest = useMemo(() => {
+    return (
+      day.requests.find((request) => request.id === selectedRequestId) ?? null
+    )
+  }, [day, selectedRequestId])
+
+  const selectedParty = useMemo(() => {
+    return day.parties.find((party) => party.id === selectedPartyId) ?? null
+  }, [day, selectedPartyId])
+
   return (
     <div className="tavern-simulator">
       <TavernControls
@@ -151,6 +162,13 @@ export function TavernSimulator() {
           onSelectParty={handleSelectParty}
         />
       </div>
+
+      {day.status === 'planning' && (
+        <ExpeditionPredictionPanel
+          requestOffer={selectedRequest}
+          tavernParty={selectedParty}
+        />
+      )}
 
       <BrokeragePanel
         day={day}

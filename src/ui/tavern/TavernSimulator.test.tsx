@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { TavernSimulator } from './TavernSimulator.tsx'
 
 function findAcceptingPair() {
@@ -192,5 +198,65 @@ describe('TavernSimulator UI', () => {
     render(<TavernSimulator />)
     fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
     expect(screen.getByTestId('campaign-history')).toBeTruthy()
+  })
+
+  it('shows the prediction panel after selecting a request and party', async () => {
+    render(<TavernSimulator />)
+    const requestBoard = screen.getByTestId('request-board')
+    const partyBoard = screen.getByTestId('party-board')
+    const requestCards = within(requestBoard).getAllByRole('heading', {
+      level: 4,
+    })
+    const partyCards = within(partyBoard).getAllByRole('heading', { level: 4 })
+
+    fireEvent.click(requestCards[0])
+    expect(
+      screen.getByText('パーティを選択すると遠征見込みを確認できます'),
+    ).toBeTruthy()
+
+    fireEvent.click(partyCards[0])
+    await waitFor(() => {
+      expect(screen.getByTestId('prediction-rate')).toBeTruthy()
+    })
+    expect(screen.getByTestId('prediction-danger')).toBeTruthy()
+  })
+
+  it('does not keep stale prediction when the selection changes', async () => {
+    render(<TavernSimulator />)
+    const requestBoard = screen.getByTestId('request-board')
+    const partyBoard = screen.getByTestId('party-board')
+    const requestCards = within(requestBoard).getAllByRole('heading', {
+      level: 4,
+    })
+    const partyCards = within(partyBoard).getAllByRole('heading', { level: 4 })
+
+    fireEvent.click(requestCards[0])
+    fireEvent.click(partyCards[0])
+    await waitFor(() => {
+      expect(screen.getByTestId('prediction-rate')).toBeTruthy()
+    })
+    const firstRate = screen.getByTestId('prediction-rate').textContent
+
+    fireEvent.click(requestCards[1])
+    expect(
+      screen.getByText('パーティを選択すると遠征見込みを確認できます'),
+    ).toBeTruthy()
+
+    fireEvent.click(partyCards[1])
+    await waitFor(() => {
+      expect(screen.getByTestId('prediction-rate').textContent).not.toBe(
+        firstRate,
+      )
+    })
+  })
+
+  it('hides the prediction panel after resolving the day', async () => {
+    render(<TavernSimulator />)
+    findAcceptingPair()
+    await waitFor(() => {
+      expect(screen.getByTestId('prediction-rate')).toBeTruthy()
+    })
+    fireEvent.click(screen.getByRole('button', { name: '本日の仲介を確定' }))
+    expect(screen.queryByTestId('prediction-panel')).toBeNull()
   })
 })
