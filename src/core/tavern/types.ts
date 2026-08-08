@@ -6,6 +6,7 @@ import type {
 } from '../models/types.ts'
 import type {
   EnvironmentType,
+  EscortHandoffStatus,
   ExpeditionFeature,
   ExpeditionOutcome,
   ExpeditionRequest,
@@ -112,7 +113,7 @@ export interface EscortDispatchSummary {
   stress: number
   routeProgress: number
   destinationReached: boolean
-  handoffStatus: string
+  handoffStatus: EscortHandoffStatus
   delivered: boolean
   returnedToOrigin: boolean
   stranded: boolean

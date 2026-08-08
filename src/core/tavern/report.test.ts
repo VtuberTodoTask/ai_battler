@@ -3,6 +3,8 @@ import { generateAdventurer } from '../generators/adventurerGenerator.ts'
 import { runExpedition } from '../expedition/expedition.ts'
 import { buildDispatchReport } from './report.ts'
 import { TAVERN_REQUEST_TEMPLATES } from './requestTemplates.ts'
+import { generateTavernDay } from './dayGenerator.ts'
+import { deepClone } from '../util.ts'
 import type { Adventurer, AdventurerRole } from '../models/types.ts'
 import type { ObjectiveType } from '../expedition/types.ts'
 
@@ -109,5 +111,43 @@ describe('buildDispatchReport', () => {
     expect(report.objective.evacuated !== undefined).toBe(true)
     expect(report.objective.returned !== undefined).toBe(true)
     expect(report.objective.abandoned !== undefined).toBe(true)
+  })
+
+  it('uses final party state from ExpeditionState', () => {
+    const day = generateTavernDay('tavern-001')
+    const request = day.requests[0].expeditionRequest
+    const party = day.adventurers
+      .slice(0, 4)
+      .map((ta) => deepClone(ta.adventurer))
+    const result = runExpedition(request, party)
+    const report = buildDispatchReport(request.id, result)
+
+    let changed = false
+    for (const member of report.party) {
+      expect(member.finalHp).toBe(result.state.partyHp[member.adventurerId])
+      expect(member.finalMp).toBe(result.state.partyMp[member.adventurerId])
+      expect(member.finalMorale).toBe(
+        result.state.partyMorale[member.adventurerId],
+      )
+      if (
+        member.finalHp <
+        (result.party.find((a) => a.id === member.adventurerId)?.maxHp ??
+          member.maxHp)
+      ) {
+        changed = true
+      }
+    }
+    expect(changed).toBe(true)
+  })
+
+  it('matches DispatchReport invariants to ExpeditionResult state', () => {
+    const { result, report } = runFor('investigation')
+    expect(report.outcome).toBe(result.outcome)
+    expect(report.objectiveCompleted).toBe(result.state.objectiveCompleted)
+    expect(report.objectiveProgress).toBe(result.state.objectiveProgress)
+    expect(report.elapsedTime).toBe(result.state.elapsedTime)
+    expect(report.battleOutcome).toBe(result.state.battleOutcome)
+    expect(report.casualties).toEqual(result.state.casualties)
+    expect(report.incapacitated).toEqual(result.state.incapacitated)
   })
 })

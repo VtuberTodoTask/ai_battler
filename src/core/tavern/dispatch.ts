@@ -17,9 +17,14 @@ export function validateAssignments(
   const errors: string[] = []
   const requestIds = new Set(requests.map((r) => r.id))
   const adventurerIds = new Set(adventurers.map((a) => a.id))
+  const assignedRequestIds = new Set<string>()
   const assignedIds = new Set<string>()
 
   for (const assignment of assignments) {
+    if (assignedRequestIds.has(assignment.requestId)) {
+      errors.push(`依頼 ${assignment.requestId} に複数の編成が存在します`)
+    }
+    assignedRequestIds.add(assignment.requestId)
     if (!requestIds.has(assignment.requestId)) {
       errors.push(`未知の依頼ID: ${assignment.requestId}`)
     }
@@ -60,6 +65,10 @@ export function validateAssignments(
 }
 
 export function resolveTavernDay(state: TavernDayState): ResolvedDispatch[] {
+  if (state.status !== 'planning') {
+    throw new Error('解決済みの酒場日は再解決できません')
+  }
+
   const errors = validateAssignments(
     state.assignments,
     state.adventurers,

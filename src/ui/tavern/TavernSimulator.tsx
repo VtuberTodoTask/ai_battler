@@ -124,6 +124,9 @@ export function TavernSimulator() {
     if (!requestId) return
 
     setDay((currentDay) => {
+      if (currentDay.status === 'resolved') {
+        return currentDay
+      }
       const adventurer = currentDay.adventurers.find(
         (ta) => ta.id === adventurerId,
       )
@@ -244,6 +247,7 @@ export function TavernSimulator() {
           adventurers={day.adventurers}
           requests={day.requests}
           selectedRequestId={selectedRequestId}
+          readOnly={day.status === 'resolved'}
           onToggleAdventurer={handleToggleAdventurer}
         />
       </div>

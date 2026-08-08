@@ -173,6 +173,29 @@ describe('TavernSimulator UI', () => {
     )
   })
 
+  it('displays final HP from ExpeditionState in result detail', () => {
+    render(<TavernSimulator />)
+    const requestBoard = screen.getByTestId('request-board')
+    const requestCards = within(requestBoard).getAllByRole('heading', {
+      level: 4,
+    })
+
+    fireEvent.click(requestCards[0])
+
+    const adventurerBoard = screen.getByTestId('adventurer-board')
+    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
+      level: 4,
+    })
+
+    for (let i = 0; i < 4; i++) {
+      fireEvent.click(adventurerCards[i])
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: '本日の派遣を実行' }))
+
+    expect(screen.getByText(/HP 20\/76/)).toBeTruthy()
+  })
+
   it('shows result details with party and key facts after resolve', () => {
     render(<TavernSimulator />)
     const requestBoard = screen.getByTestId('request-board')
@@ -199,5 +222,33 @@ describe('TavernSimulator UI', () => {
 
     expect(screen.getByText('派遣メンバー')).toBeTruthy()
     expect(screen.getByText('重要facts')).toBeTruthy()
+  })
+
+  it('prevents editing assignments after resolve', () => {
+    render(<TavernSimulator />)
+    const requestBoard = screen.getByTestId('request-board')
+    const requestCards = within(requestBoard).getAllByRole('heading', {
+      level: 4,
+    })
+
+    fireEvent.click(requestCards[0])
+
+    const adventurerBoard = screen.getByTestId('adventurer-board')
+    const adventurerCards = within(adventurerBoard).getAllByRole('heading', {
+      level: 4,
+    })
+
+    for (let i = 0; i < 4; i++) {
+      fireEvent.click(adventurerCards[i])
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: '本日の派遣を実行' }))
+
+    expect(screen.getByText('本日の派遣結果')).toBeTruthy()
+
+    fireEvent.click(adventurerCards[0])
+
+    expect(screen.getByText('本日の派遣結果')).toBeTruthy()
+    expect(screen.getByText(/HP 20\/76/)).toBeTruthy()
   })
 })

@@ -8,6 +8,7 @@ export interface AdventurerBoardProps {
   adventurers: TavernAdventurer[]
   requests: TavernRequestOffer[]
   selectedRequestId: string | null
+  readOnly?: boolean
   onToggleAdventurer: (adventurerId: string) => void
 }
 
@@ -15,6 +16,7 @@ export function AdventurerBoard({
   adventurers,
   requests,
   selectedRequestId,
+  readOnly = false,
   onToggleAdventurer,
 }: AdventurerBoardProps) {
   const requestTitleById = new Map(requests.map((r) => [r.id, r.title]))
@@ -27,9 +29,10 @@ export function AdventurerBoard({
             selectedRequestId !== null &&
             ta.assignedRequestId === selectedRequestId
           const disabled =
-            selectedRequestId !== null &&
-            ta.assignedRequestId !== undefined &&
-            ta.assignedRequestId !== selectedRequestId
+            readOnly ||
+            (selectedRequestId !== null &&
+              ta.assignedRequestId !== undefined &&
+              ta.assignedRequestId !== selectedRequestId)
           return (
             <AdventurerCard
               key={ta.id}

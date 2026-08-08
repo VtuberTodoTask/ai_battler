@@ -159,7 +159,7 @@ describe('dispatch', () => {
     expect(resolved?.report?.requestId).toBe(day.requests[0].id)
   })
 
-  it('is independent of resolution order', () => {
+  it('assignment array order does not affect results', () => {
     const day = generateTavernDay(TEST_SEED)
     const assignments = [
       {
@@ -198,5 +198,34 @@ describe('dispatch', () => {
     resolveTavernDay({ ...day, assignments })
     const afterHp = day.adventurers.map((a) => a.adventurer.currentHp)
     expect(afterHp).toEqual(beforeHp)
+  })
+
+  it('rejects duplicate request assignments', () => {
+    const day = generateTavernDay(TEST_SEED)
+    const ids = day.adventurers.map((a) => a.id)
+    const assignments = [
+      { requestId: day.requests[0].id, adventurerIds: ids.slice(0, 4) },
+      { requestId: day.requests[0].id, adventurerIds: ids.slice(4, 8) },
+    ]
+    const errors = validateAssignments(
+      assignments,
+      day.adventurers,
+      day.requests,
+    )
+    expect(errors.some((e) => e.includes('複数の編成'))).toBe(true)
+  })
+
+  it('rejects resolving an already resolved day', () => {
+    const day = generateTavernDay(TEST_SEED)
+    const assignments = [
+      {
+        requestId: day.requests[0].id,
+        adventurerIds: day.adventurers.slice(0, 4).map((a) => a.id),
+      },
+    ]
+    const resolved = resolveTavernDay({ ...day, assignments })
+    expect(() =>
+      resolveTavernDay({ ...day, status: 'resolved', results: resolved }),
+    ).toThrow('解決済みの酒場日は再解決できません')
   })
 })
