@@ -454,3 +454,85 @@
 .history-events {
   margin-top: 0.5rem;
 }
+
+.prediction-panel {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.prediction-panel h4 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.prediction-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.prediction-label {
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.prediction-rate {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.prediction-danger {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.prediction-disclaimer {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0.25rem 0;
+}
+
+.prediction-hint {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.prediction-computing {
+  font-size: 0.85rem;
+  color: #2563eb;
+  margin: 0;
+}
+
+.prediction-breakdown {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.prediction-breakdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.prediction-breakdown li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.outcome-name {
+  color: #374151;
+}
+
+.outcome-rate {
+  font-weight: 600;
+  color: #111827;
+}
