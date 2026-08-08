@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ExpeditionSimulator } from './ui/expedition/ExpeditionSimulator.tsx'
+import { TavernSimulator } from './ui/tavern/TavernSimulator.tsx'
 import {
   Adventurer,
   BattleResult,
@@ -87,7 +88,7 @@ export default function App() {
   const [simAllowDuplicate, setSimAllowDuplicate] = useState(false)
   const [simRunning, setSimRunning] = useState(false)
   const [simResult, setSimResult] = useState<SimulationSummary | null>(null)
-  const [mode, setMode] = useState<'battle' | 'expedition'>('battle')
+  const [mode, setMode] = useState<'battle' | 'expedition' | 'tavern'>('battle')
   const OUTCOME_LABELS: Record<BattleOutcome, string> = {
     victory: '勝利',
     costlyVictory: '重傷勝利',
@@ -118,6 +119,12 @@ export default function App() {
             onClick={() => setMode('expedition')}
           >
             遠征シミュレーター
+          </button>
+          <button
+            className={mode === 'tavern' ? 'active' : ''}
+            onClick={() => setMode('tavern')}
+          >
+            酒場MVP
           </button>
         </div>
         {mode === 'battle' && (
@@ -702,6 +709,7 @@ export default function App() {
           </>
         )}
         {mode === 'expedition' && <ExpeditionSimulator />}
+        {mode === 'tavern' && <TavernSimulator />}
       </main>
     </div>
   )

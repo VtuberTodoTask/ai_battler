@@ -1,0 +1,277 @@
+.tavern-simulator {
+  padding: 1rem 0;
+}
+
+.tavern-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}
+
+.tavern-day-header h2 {
+  margin: 0;
+}
+
+.tavern-day-header .day-id {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.tavern-boards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 720px) {
+  .tavern-boards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.board h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tavern-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.tavern-card:hover {
+  border-color: #2563eb;
+}
+
+.tavern-card.selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.tavern-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.request-card .request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.request-card h4 {
+  margin: 0 0 0.25rem 0;
+}
+
+.request-meta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+.objective-type {
+  font-weight: 600;
+}
+
+.briefing {
+  font-size: 0.85rem;
+  color: #374151;
+  margin: 0.5rem 0;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.tag {
+  font-size: 0.75rem;
+  background: #f3f4f6;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.request-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.assigned-count {
+  font-weight: 600;
+}
+
+.outcome-label {
+  font-size: 0.75rem;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.adventurer-card .adventurer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.adventurer-card h4 {
+  margin: 0 0 0.25rem 0;
+}
+
+.adventurer-role {
+  font-size: 0.85rem;
+  color: #2563eb;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.adventurer-stats,
+.adventurer-skills,
+.assignment-status {
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-top: 0.25rem;
+}
+
+.assignment-status {
+  font-weight: 600;
+  color: #047857;
+}
+
+.rank-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.rank-badge.rank-E {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.rank-badge.rank-D {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.rank-badge.rank-C {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.rank-badge.rank-B {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.dispatch-panel {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.dispatch-meta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.party-composition,
+.party-roles {
+  margin: 0.5rem 0;
+}
+
+.dispatch-warning {
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+}
+
+.dispatch-error {
+  white-space: pre-wrap;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+}
+
+.dispatch-results {
+  margin-top: 1rem;
+}
+
+.dispatch-results .result-card {
+  cursor: pointer;
+}
+
+.dispatch-results .result-card.selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.result-detail {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.result-detail h3 {
+  margin-top: 0;
+}
+
+.result-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 720px) {
+  .result-sections {
+    grid-template-columns: 1fr;
+  }
+}
+
+.result-section {
+  margin-bottom: 1rem;
+}
+
+.party-list {
+  padding-left: 1.25rem;
+}
+
+.tavern-controls {
+  margin-bottom: 1rem;
+}
