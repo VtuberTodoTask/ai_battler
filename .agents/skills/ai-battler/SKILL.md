@@ -157,7 +157,7 @@ A fourth tab, `酒場キャンペーン`, renders a multi-day campaign:
   a danger label (`非常に有望` / `有望` / `五分以上` / `危険` / `非常に危険`),
   and an expandable `内訳を見る` with six outcome rates.
 - The prediction runs `runExpedition()` 200 times with seed
-  `prediction:v1:<requestId>:<partyId>:<index>`.  It takes ~100–120 ms in
+  `prediction:v1:<requestId>:<partyId>:<index>`. It takes ~100–120 ms in
   Chrome on this machine.
 - The panel caches predictions by request id + party id + member state; selecting
   a previously viewed pair reuses the cache and displays the same rate

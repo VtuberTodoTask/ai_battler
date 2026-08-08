@@ -22,12 +22,12 @@ PR #17 (`devin/phase6-1-prediction`) で追加された `ExpeditionPredictionPan
 
 ## 静的検証
 
-| コマンド | 結果 |
-|---|---|
-| `npm run typecheck` | PASS |
-| `npm run lint` | PASS |
-| `npm run test` | 648 tests passed |
-| `npm run build` | PASS（Node.js 20.18.1 バージョン警告のみ） |
+| コマンド            | 結果                                       |
+| ------------------- | ------------------------------------------ |
+| `npm run typecheck` | PASS                                       |
+| `npm run lint`      | PASS                                       |
+| `npm run test`      | 648 tests passed                           |
+| `npm run build`     | PASS（Node.js 20.18.1 バージョン警告のみ） |
 
 ## E2E 検証結果
 
