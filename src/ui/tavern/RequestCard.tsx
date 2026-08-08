@@ -3,26 +3,28 @@ import { OBJECTIVE_LABELS } from '../expedition/labels.ts'
 
 export interface RequestCardProps {
   request: TavernRequestOffer
-  assignedCount: number
+  offerCount: number
+  matched: boolean
   selected: boolean
-  resolved?: boolean
-  outcome?: string
   onClick: () => void
 }
 
 export function RequestCard({
   request,
-  assignedCount,
+  offerCount,
+  matched,
   selected,
-  resolved,
-  outcome,
   onClick,
 }: RequestCardProps) {
-  const full = assignedCount >= request.recommendedPartySize
+  const status = matched
+    ? '成立'
+    : offerCount > 0
+      ? `紹介履歴: ${offerCount}`
+      : '未紹介'
 
   return (
     <div
-      className={`tavern-card request-card ${selected ? 'selected' : ''} ${full ? 'full' : ''}`}
+      className={`tavern-card request-card ${selected ? 'selected' : ''}`}
       onClick={onClick}
     >
       <div className="request-header">
@@ -46,12 +48,7 @@ export function RequestCard({
         ))}
       </div>
       <div className="request-footer">
-        <span className="assigned-count">
-          編成: {assignedCount} / {request.recommendedPartySize}
-        </span>
-        {resolved && outcome && (
-          <span className="outcome-label">{outcome}</span>
-        )}
+        <span className="request-status">{status}</span>
       </div>
     </div>
   )

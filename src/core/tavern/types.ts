@@ -18,8 +18,9 @@ export interface TavernDayState {
   id: string
   seed: string
   requests: TavernRequestOffer[]
-  adventurers: TavernAdventurer[]
-  assignments: DispatchAssignment[]
+  parties: TavernParty[]
+  offers: BrokerageOfferAttempt[]
+  matches: BrokerageMatch[]
   status: 'planning' | 'resolved'
   results: ResolvedDispatch[]
 }
@@ -36,22 +37,71 @@ export interface TavernRequestOffer {
   expeditionRequest: ExpeditionRequest
 }
 
-export interface TavernAdventurer {
+export interface PublicRequestProfile {
   id: string
-  adventurer: Adventurer
-  assignedRequestId?: string
+  objectiveType: ObjectiveType
+  rank: AdventurerRank
+  environment: EnvironmentType
+  publicTags: string[]
 }
 
-export interface DispatchAssignment {
+export interface AdventurerParty {
+  id: string
+  name: string
+  rank: AdventurerRank
+  leaderId: string
+  members: Adventurer[]
+  archetypeId: string
+}
+
+export interface TavernParty {
+  id: string
+  party: AdventurerParty
+  acceptedRequestId?: string
+}
+
+export interface PartyTemplate {
+  id: string
+  roles: [AdventurerRole, AdventurerRole, AdventurerRole, AdventurerRole]
+  leaderSlot: 0 | 1 | 2 | 3
+}
+
+export type AcceptanceReasonCode =
+  'appropriate' | 'challengingButSuitable' | 'tooDangerous' | 'poorFit'
+
+export interface OfferEvaluation {
+  decision: 'accepted' | 'declined'
+  reason: AcceptanceReasonCode
+  requestRank: AdventurerRank
+  partyRank: AdventurerRank
+  rankGap: number
+  relevantRoleCount: number
+  leaderJudgment: number
+}
+
+export interface BrokerageOfferAttempt {
+  id: string
   requestId: string
-  adventurerIds: string[]
+  partyId: string
+  decision: 'accepted' | 'declined'
+  reason: AcceptanceReasonCode
+  evaluation: OfferEvaluation
+}
+
+export interface BrokerageMatch {
+  requestId: string
+  partyId: string
+  acceptedOfferId: string
 }
 
 export interface ResolvedDispatch {
   requestId: string
   request: TavernRequestOffer
-  partyIds: string[]
-  status: 'resolved' | 'notDispatched'
+  partyId?: string
+  partyName?: string
+  leaderName?: string
+  memberIds: string[]
+  status: 'resolved' | 'notBrokered'
   result?: ExpeditionResult
   report?: DispatchReport
 }
