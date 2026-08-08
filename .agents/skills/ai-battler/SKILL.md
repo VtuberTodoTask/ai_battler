@@ -78,6 +78,24 @@ A second tab, `遠征シミュレーター`, renders the expedition flow:
   shows integrity/carrier/extracted/returned, survey shows coverage/sector
   quality/report).
 
+## Phase 5 Tavern simulator (`酒場MVP`)
+
+A third tab, `酒場MVP`, renders the tavern dispatch flow:
+
+- Controls: `Day Seed` text input, `このSeedで生成`, `新しい日`.
+- `generateTavernDay(seed)` produces 3 `.request-card` elements and 8
+  `.adventurer-card` elements deterministically.
+- Click a `.request-card` to select it; click `.adventurer-card` elements to
+  assign/remove them from the selected request.
+- Each dispatched request needs exactly 4 adventurers. Adventurers already
+  assigned to another request show `...へ編成済み` and are disabled for other
+  requests.
+- `本日の派遣を実行` resolves all assignments; unstaffed requests are labelled
+  `未派遣`.
+- After resolve, click a `.result-card` to open `.result-detail` showing
+  `派遣メンバー`, `重要facts`, expedition outcome, battle outcome, and objective
+  summary.
+
 ## Test-harness notes
 
 Native mouse clicks sometimes did not register on lower-page buttons (e.g.
