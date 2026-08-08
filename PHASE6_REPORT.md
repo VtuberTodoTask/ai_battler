@@ -184,6 +184,8 @@ Seed: `campaign-report-sample`
 - `reputation` は常に `0 <= reputation <= 100`
 - 各日のメンバー ID は 16 名で重複なし
 - `history.length === 30` で最終日が 30 日目
+- 各 `CampaignParty.stats` で排他的アウトカムカテゴリの合計が `totalExpeditions` と一致
+- active roster に scheduled departure 済みパーティが残留しない
 
 ## 20×20 観察
 
@@ -209,7 +211,7 @@ npm run update:expedition-regression
 結果:
 
 - `typecheck`: 成功
-- `test`: 全 619 テスト passed
+- `test`: 全 624 テスト passed
 - `lint`: 成功
 - `build`: 成功
 - `update:expedition-regression`: 既存 22 スナップショット diff 0

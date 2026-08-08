@@ -7,6 +7,7 @@ import {
   calculateRecoveryDays,
   isRecoveringOnDay,
   updateCampaignPartyFromResult,
+  updateCampaignPartyStats,
 } from './partyState.ts'
 import {
   buildTavernDay,
@@ -64,7 +65,6 @@ export function resolveCampaignDay(
     results,
   }
 
-  const matchedPartyIds = new Set<string>()
   const postEvents: CampaignPartyEvent[] = []
 
   for (const resolved of results) {
@@ -77,23 +77,10 @@ export function resolveCampaignDay(
       continue
     }
 
-    matchedPartyIds.add(party.id)
     updateCampaignPartyFromResult(party, resolved.result)
 
     const outcome = resolved.result.outcome
-    party.stats.totalExpeditions += 1
-    if (outcome === 'completeSuccess') {
-      party.stats.completeSuccesses += 1
-      party.stats.successes += 1
-    } else if (outcome === 'success') {
-      party.stats.successes += 1
-    } else if (outcome === 'partialSuccess') {
-      party.stats.partialSuccesses += 1
-    } else if (outcome === 'failedObjective') {
-      party.stats.failures += 1
-    } else if (outcome === 'forcedRetreat' || outcome === 'lostExpedition') {
-      party.stats.retreats += 1
-    }
+    updateCampaignPartyStats(party, outcome)
 
     if (party.departingCasualty) {
       postEvents.push({
@@ -160,23 +147,7 @@ export function advanceCampaignDay(
   const parties = nextCampaign.parties
   const preEvents: CampaignPartyEvent[] = []
 
-  // Complete recovery for parties whose recovery window has passed.
-  for (const party of parties) {
-    if (
-      party.recoveringThroughDay !== undefined &&
-      party.recoveringThroughDay < nextDayNumber
-    ) {
-      applyRecoveryCompletion(party)
-      preEvents.push({
-        type: 'finishedRecovery',
-        partyId: party.id,
-        partyName: party.party.name,
-        dayNumber: nextDayNumber,
-      })
-    }
-  }
-
-  // Remove parties that are departing (scheduled or casualty).
+  // 1. Remove parties that are departing (casualty first, then scheduled).
   const remaining: CampaignParty[] = []
   for (const party of parties) {
     if (party.departingCasualty) {
@@ -195,8 +166,29 @@ export function advanceCampaignDay(
     remaining.push(party)
   }
 
-  // Overnight recovery for available parties.
+  // 2. Complete recovery for remaining parties whose recovery window has passed.
+  const recoveredToday = new Set<string>()
   for (const party of remaining) {
+    if (
+      party.recoveringThroughDay !== undefined &&
+      party.recoveringThroughDay < nextDayNumber
+    ) {
+      applyRecoveryCompletion(party)
+      recoveredToday.add(party.id)
+      preEvents.push({
+        type: 'finishedRecovery',
+        partyId: party.id,
+        partyName: party.party.name,
+        dayNumber: nextDayNumber,
+      })
+    }
+  }
+
+  // 3. Overnight recovery for available parties (skip same-day recovery completes).
+  for (const party of remaining) {
+    if (recoveredToday.has(party.id)) {
+      continue
+    }
     if (!isRecoveringOnDay(party, nextDayNumber)) {
       applyOvernightRecovery(party)
     }
@@ -228,7 +220,7 @@ export function advanceCampaignDay(
     nextCampaign.reputation,
   )
   const currentDay = buildTavernDay(daySeed, requests, remaining, nextDayNumber)
-  currentDay.partyEvents = [...(currentDay.partyEvents ?? []), ...preEvents]
+  currentDay.partyEvents = [...preEvents, ...(currentDay.partyEvents ?? [])]
 
   nextCampaign.dayNumber = nextDayNumber
   nextCampaign.parties = remaining

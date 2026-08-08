@@ -14,7 +14,7 @@
 | ------------------------------ | --------------------------------------------------- |
 | `npm run typecheck`            | 成功                                                |
 | `npm run lint`                 | 成功                                                |
-| `npm run test`                 | 620 tests passed（30 日間キャンペーンスモーク含む） |
+| `npm run test`                 | 624 tests passed（30 日間キャンペーンスモーク含む） |
 | `rm -rf dist && npm run build` | 成功（Node.js 20.18.1 の警告のみ）                  |
 
 ## E2E 実行サマリー
@@ -41,7 +41,7 @@
 
 ## 注意・未満たし事項
 
-- `TavernResultDetail` の `受諾パーティ` リストは **最終 HP のみ**を表示しており、`report.party` に含まれる `finalMp` / `finalMorale` は UI にレンダリングされていません。要求「result detail shows final HP/MP/Morale from ExpeditionState」に対しては HP しか確認できていません。MP/Morale の最終値は翌日以降の party card で `currentMp` / `morale` として確認できました。
+- Phase 6.0.1 修正後、`TavernResultDetail` の `受諾パーティ` リストには **最終 HP / MP / Morale** が表示されるようになり、それらの値が `report.party` の `finalHp` / `finalMp` / `finalMorale` と一致することを確認しました。
 - テストハーネス上で一部下部ボタンのネイティブクリックが反応しないため、`document.querySelectorAll(...)` / `document.querySelector(...).click()` でフォールバックしました。UI ハンドラ自体は正常に動作しました。
 
 ## スクリーンショット

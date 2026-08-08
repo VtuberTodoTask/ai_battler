@@ -1,6 +1,9 @@
 import { deepClone } from '../../util.ts'
 import { isUnresolvedSeriousInjury } from '../../expedition/injuries.ts'
-import type { ExpeditionResult } from '../../expedition/types.ts'
+import type {
+  ExpeditionOutcome,
+  ExpeditionResult,
+} from '../../expedition/types.ts'
 import type { CampaignParty } from './types.ts'
 
 export function updateCampaignPartyFromResult(
@@ -75,6 +78,24 @@ export function applyOvernightRecovery(party: CampaignParty): void {
     )
     member.currentMp = member.maxMp
     member.morale = clamp(member.morale + 10, 0, 100)
+  }
+}
+
+export function updateCampaignPartyStats(
+  party: CampaignParty,
+  outcome: ExpeditionOutcome,
+): void {
+  party.stats.totalExpeditions += 1
+  if (outcome === 'completeSuccess') {
+    party.stats.completeSuccesses += 1
+  } else if (outcome === 'success') {
+    party.stats.successes += 1
+  } else if (outcome === 'partialSuccess') {
+    party.stats.partialSuccesses += 1
+  } else if (outcome === 'failedObjective') {
+    party.stats.failures += 1
+  } else if (outcome === 'forcedRetreat' || outcome === 'lostExpedition') {
+    party.stats.retreats += 1
   }
 }
 

@@ -57,6 +57,11 @@ describe('Campaign 30-day smoke', () => {
         expect(campaign.currentDay.requests).toHaveLength(3)
         expect(campaign.currentDay.status).toBe('planning')
 
+        // No stale scheduled departures in the active roster.
+        for (const party of campaign.parties) {
+          expect(party.plannedDepartureDay).toBeGreaterThanOrEqual(day)
+        }
+
         const memberIds = new Set(
           campaign.parties.flatMap((p) => p.party.members.map((m) => m.id)),
         )
@@ -65,6 +70,17 @@ describe('Campaign 30-day smoke', () => {
 
         campaign = resolveWithOptionalOffer(campaign)
         expect(campaign.currentDay.status).toBe('resolved')
+
+        // PartyStats invariant: outcome categories sum to totalExpeditions.
+        for (const party of campaign.parties) {
+          const sum =
+            party.stats.completeSuccesses +
+            party.stats.successes +
+            party.stats.partialSuccesses +
+            party.stats.failures +
+            party.stats.retreats
+          expect(sum).toBe(party.stats.totalExpeditions)
+        }
 
         if (day < 30) {
           campaign = advanceCampaignDay(campaign)

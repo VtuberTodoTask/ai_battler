@@ -6,7 +6,10 @@ import {
 } from './campaign.ts'
 import { offerRequestToParty, getOfferErrors } from '../brokerage.ts'
 import { buildTavernDay } from './generators.ts'
-import { calculateRecoveryDays } from './partyState.ts'
+import {
+  calculateRecoveryDays,
+  updateCampaignPartyStats,
+} from './partyState.ts'
 import { getPartyRankWeights, getRequestRankWeights } from './rankWeights.ts'
 import {
   getReputationTier,
@@ -172,6 +175,180 @@ describe('Campaign domain', () => {
     expect(summary.after).toBe(100)
     expect(summary.rawDelta).toBe(9)
     expect(summary.appliedDelta).toBe(5)
+  })
+
+  it('recovery completion gives minimum 70 morale and avoids double overnight recovery', () => {
+    let campaign = createTavernCampaign('tavern-campaign-recovery-morale-001')
+    campaign = resolveCampaignDay(campaign)
+
+    const party = campaign.parties[0]
+    party.recoveringThroughDay = 1
+    for (const member of party.party.members) {
+      member.morale = 40
+      member.currentHp = 1
+      member.currentMp = 1
+    }
+    party.condition.injuries = [
+      {
+        id: 'inj-1',
+        adventurerId: party.party.members[0].id,
+        type: 'light',
+        cause: 'test',
+        hpLoss: 5,
+        status: 'active',
+      },
+    ]
+    party.condition.incapacitatedIds = [party.party.members[1].id]
+    party.party.members[1].statusEffects = [
+      { type: 'stunned', duration: 1, sourceId: 'test' },
+    ]
+
+    campaign = advanceCampaignDay(campaign)
+
+    const recoveredParty = campaign.parties.find((p) => p.id === party.id)!
+    expect(recoveredParty).toBeDefined()
+    expect(recoveredParty.recoveringThroughDay).toBeUndefined()
+    expect(recoveredParty.party.members[0].morale).toBe(70)
+    expect(
+      recoveredParty.party.members.every((m) => m.currentHp === m.maxHp),
+    ).toBe(true)
+    expect(
+      recoveredParty.party.members.every((m) => m.currentMp === m.maxMp),
+    ).toBe(true)
+    expect(recoveredParty.condition.injuries).toHaveLength(0)
+    expect(recoveredParty.condition.incapacitatedIds).toHaveLength(0)
+    expect(recoveredParty.party.members[1].statusEffects).toHaveLength(0)
+
+    const tavernParty = campaign.currentDay.parties.find(
+      (p) => p.id === party.id,
+    )!
+    expect(tavernParty.availability).toBe('available')
+  })
+
+  it('prioritizes scheduled departure over recovery completion', () => {
+    let campaign = createTavernCampaign(
+      'tavern-campaign-departure-over-recovery-001',
+    )
+    const targetId = campaign.parties[0].id
+
+    campaign = resolveCampaignDay(campaign)
+    campaign.parties[0].plannedDepartureDay = 2
+    campaign.parties[0].recoveringThroughDay = 2
+
+    campaign = advanceCampaignDay(campaign)
+    campaign = resolveCampaignDay(campaign)
+    campaign = advanceCampaignDay(campaign)
+
+    expect(campaign.parties.some((p) => p.id === targetId)).toBe(false)
+    const day3Events = campaign.currentDay.partyEvents ?? []
+    expect(day3Events.some((e) => e.type === 'departedScheduled')).toBe(true)
+    expect(day3Events.some((e) => e.type === 'finishedRecovery')).toBe(false)
+    expect(
+      day3Events.filter((e) => e.partyId === targetId).map((e) => e.type),
+    ).toEqual(['departedScheduled'])
+  })
+
+  it('orders departure, recovery completion, and overnight recovery correctly', () => {
+    let campaign = createTavernCampaign('tavern-campaign-event-order-001')
+    campaign = resolveCampaignDay(campaign)
+
+    const [departingParty, recoveringParty, overnightParty] = campaign.parties
+
+    departingParty.plannedDepartureDay = 1
+
+    recoveringParty.recoveringThroughDay = 1
+    for (const member of recoveringParty.party.members) {
+      member.morale = 40
+      member.currentHp = 1
+      member.currentMp = 1
+    }
+    recoveringParty.condition.injuries = [
+      {
+        id: 'inj-2',
+        adventurerId: recoveringParty.party.members[0].id,
+        type: 'light',
+        cause: 'test',
+        hpLoss: 5,
+        status: 'active',
+      },
+    ]
+
+    const beforeOvernightHp = Math.floor(
+      overnightParty.party.members[0].maxHp * 0.5,
+    )
+    for (const member of overnightParty.party.members) {
+      member.morale = 40
+      member.currentMp = 1
+      member.currentHp = beforeOvernightHp
+    }
+
+    campaign = advanceCampaignDay(campaign)
+
+    expect(
+      campaign.currentDay.partyEvents
+        ?.filter((e) => e.partyId === departingParty.id)
+        .map((e) => e.type),
+    ).toEqual(['departedScheduled'])
+    expect(
+      campaign.currentDay.partyEvents
+        ?.filter((e) => e.partyId === recoveringParty.id)
+        .map((e) => e.type),
+    ).toEqual(['finishedRecovery'])
+    expect(
+      campaign.currentDay.partyEvents?.some(
+        (e) => e.type === 'arrived' && e.partyId !== departingParty.id,
+      ),
+    ).toBe(true)
+
+    const updatedRecovering = campaign.parties.find(
+      (p) => p.id === recoveringParty.id,
+    )!
+    expect(updatedRecovering.party.members[0].morale).toBe(70)
+
+    const updatedOvernight = campaign.parties.find(
+      (p) => p.id === overnightParty.id,
+    )!
+    expect(updatedOvernight.party.members[0].currentMp).toBe(
+      updatedOvernight.party.members[0].maxMp,
+    )
+    expect(updatedOvernight.party.members[0].morale).toBe(50)
+    expect(updatedOvernight.party.members[0].currentHp).toBeGreaterThan(
+      beforeOvernightHp,
+    )
+  })
+
+  it('counts completeSuccess and success stats exclusively', () => {
+    const campaign = createTavernCampaign('tavern-campaign-stats-001')
+    const party = campaign.parties[0]
+
+    expect(party.stats.totalExpeditions).toBe(0)
+
+    updateCampaignPartyStats(party, 'completeSuccess')
+    expect(party.stats.totalExpeditions).toBe(1)
+    expect(party.stats.completeSuccesses).toBe(1)
+    expect(party.stats.successes).toBe(0)
+
+    updateCampaignPartyStats(party, 'success')
+    expect(party.stats.totalExpeditions).toBe(2)
+    expect(party.stats.completeSuccesses).toBe(1)
+    expect(party.stats.successes).toBe(1)
+
+    updateCampaignPartyStats(party, 'partialSuccess')
+    expect(party.stats.partialSuccesses).toBe(1)
+
+    updateCampaignPartyStats(party, 'failedObjective')
+    expect(party.stats.failures).toBe(1)
+
+    updateCampaignPartyStats(party, 'forcedRetreat')
+    expect(party.stats.retreats).toBe(1)
+
+    expect(
+      party.stats.completeSuccesses +
+        party.stats.successes +
+        party.stats.partialSuccesses +
+        party.stats.failures +
+        party.stats.retreats,
+    ).toBe(party.stats.totalExpeditions)
   })
 
   it('returns rank weights by reputation tier', () => {
