@@ -80,20 +80,20 @@ function makeEscortContextForTrial(
 function runDeliveryTrial(
   request: ExpeditionRequest,
   party: Adventurer[],
-): boolean {
+): number {
   const context = makeEscortContextForTrial(request, party)
   runEscortDeparture(context)
   const objective = context.state.objectiveState as EscortObjectiveState
-  if (objective.currentHp <= 0) return false
+  if (objective.currentHp <= 0) return 0
   runEscortRoute(context, 1)
-  if (objective.currentHp <= 0) return false
+  if (objective.currentHp <= 0) return 0
   runEscortRoute(context, 2)
-  if (objective.currentHp <= 0) return false
+  if (objective.currentHp <= 0) return 0
   if (objective.routeProgress >= 100) {
     objective.destinationReached = true
     runEscortHandoff(context)
   }
-  return objective.delivered
+  return objective.currentHp
 }
 
 function runCareTrial(request: ExpeditionRequest, party: Adventurer[]): number {
@@ -192,7 +192,7 @@ describe('Escort role contribution statistics', () => {
         `scout-${i}`,
         'C',
         {
-          routeDifficulty: 20,
+          routeDifficulty: 30,
           coordinationDifficulty: 5,
           careDifficulty: 15,
         },
@@ -202,14 +202,14 @@ describe('Escort role contribution statistics', () => {
       )
       const withoutParty = makePairedParty(baseRoles, `scout-${i}`, 'C')
       const withParty = makePairedParty(withRoles, `scout-${i}`, 'C')
-      withValues.push(runDeliveryTrial(request, withParty) ? 1 : 0)
-      withoutValues.push(runDeliveryTrial(request, withoutParty) ? 1 : 0)
+      withValues.push(runDeliveryTrial(request, withParty))
+      withoutValues.push(runDeliveryTrial(request, withoutParty))
     }
     const withAvg = average(withValues)
     const withoutAvg = average(withoutValues)
     reports.push({
       role: 'Scout',
-      metric: 'cave到達率',
+      metric: 'cave到達時対象HP',
       withRole: withAvg,
       withoutRole: withoutAvg,
       pairedDelta: delta(withAvg, withoutAvg),
@@ -233,7 +233,7 @@ describe('Escort role contribution statistics', () => {
         `ranger-${i}`,
         'C',
         {
-          routeDifficulty: 20,
+          routeDifficulty: 30,
           coordinationDifficulty: 5,
           careDifficulty: 15,
         },
@@ -243,14 +243,14 @@ describe('Escort role contribution statistics', () => {
       )
       const withoutParty = makePairedParty(baseRoles, `ranger-${i}`, 'C')
       const withParty = makePairedParty(withRoles, `ranger-${i}`, 'C')
-      withValues.push(runDeliveryTrial(request, withParty) ? 1 : 0)
-      withoutValues.push(runDeliveryTrial(request, withoutParty) ? 1 : 0)
+      withValues.push(runDeliveryTrial(request, withParty))
+      withoutValues.push(runDeliveryTrial(request, withoutParty))
     }
     const withAvg = average(withValues)
     const withoutAvg = average(withoutValues)
     reports.push({
       role: 'Ranger',
-      metric: 'forest到達率',
+      metric: 'forest到達時対象HP',
       withRole: withAvg,
       withoutRole: withoutAvg,
       pairedDelta: delta(withAvg, withoutAvg),
@@ -274,7 +274,7 @@ describe('Escort role contribution statistics', () => {
         `mage-${i}`,
         'C',
         {
-          routeDifficulty: 20,
+          routeDifficulty: 30,
           coordinationDifficulty: 5,
           careDifficulty: 15,
         },
@@ -284,14 +284,14 @@ describe('Escort role contribution statistics', () => {
       )
       const withoutParty = makePairedParty(baseRoles, `mage-${i}`, 'C')
       const withParty = makePairedParty(withRoles, `mage-${i}`, 'C')
-      withValues.push(runDeliveryTrial(request, withParty) ? 1 : 0)
-      withoutValues.push(runDeliveryTrial(request, withoutParty) ? 1 : 0)
+      withValues.push(runDeliveryTrial(request, withParty))
+      withoutValues.push(runDeliveryTrial(request, withoutParty))
     }
     const withAvg = average(withValues)
     const withoutAvg = average(withoutValues)
     reports.push({
       role: 'Mage',
-      metric: 'magical到達率',
+      metric: 'magical到達時対象HP',
       withRole: withAvg,
       withoutRole: withoutAvg,
       pairedDelta: delta(withAvg, withoutAvg),
@@ -310,7 +310,7 @@ describe('Escort role contribution statistics', () => {
         `vanguard-${i}`,
         'C',
         {
-          routeDifficulty: 25,
+          routeDifficulty: 35,
           coordinationDifficulty: 5,
           careDifficulty: 15,
           mobility: 'immobile',
@@ -321,14 +321,14 @@ describe('Escort role contribution statistics', () => {
       )
       const withoutParty = makePairedParty(baseRoles, `vanguard-${i}`, 'C')
       const withParty = makePairedParty(withRoles, `vanguard-${i}`, 'C')
-      withValues.push(runDeliveryTrial(request, withParty) ? 1 : 0)
-      withoutValues.push(runDeliveryTrial(request, withoutParty) ? 1 : 0)
+      withValues.push(runDeliveryTrial(request, withParty))
+      withoutValues.push(runDeliveryTrial(request, withoutParty))
     }
     const withAvg = average(withValues)
     const withoutAvg = average(withoutValues)
     reports.push({
       role: 'Vanguard',
-      metric: 'immobile到達率',
+      metric: 'immobile到達時対象HP',
       withRole: withAvg,
       withoutRole: withoutAvg,
       pairedDelta: delta(withAvg, withoutAvg),

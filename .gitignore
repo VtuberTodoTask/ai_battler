@@ -33,6 +33,8 @@ reports/ability-ablation-1.7.json
 reports/ability-ablation-1.7-summary.json
 reports/ability-baseline-grid.json
 reports/phase1-7b-sensitivity.json
+reports/phase6_2_*.json
+reports/phase6_2_*.partial.json
 
 # Regression snapshots generated at runtime
 regression-snapshots/current/

@@ -1,0 +1,227 @@
+{
+  "changedCount": 22,
+  "total": 22,
+  "categoryCounts": {
+    "partyHp": 22,
+    "partyMp": 22,
+    "partyMorale": 22,
+    "battleState": 18,
+    "objectiveProgress": 6,
+    "outcome": 6,
+    "battleOutcome": 6
+  },
+  "perScenario": {
+    "investigation-completeSuccess": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "investigation-failedObjective": {
+      "changed": true,
+      "categories": [
+        "objectiveProgress",
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "investigation-partialSuccess": {
+      "changed": true,
+      "categories": [
+        "objectiveProgress",
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "elimination-completeSuccess": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "elimination-success": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "elimination-partialSuccess": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "elimination-failedObjective": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "rescue-completeSuccess": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "rescue-success": {
+      "changed": true,
+      "categories": [
+        "outcome",
+        "objectiveProgress",
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleOutcome",
+        "battleState"
+      ]
+    },
+    "rescue-failedObjective": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "escort-completeSuccess": {
+      "changed": true,
+      "categories": [
+        "outcome",
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleOutcome",
+        "battleState"
+      ]
+    },
+    "escort-success": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "escort-partialSuccess": {
+      "changed": true,
+      "categories": [
+        "outcome",
+        "objectiveProgress",
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "escort-failedObjective": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleState"
+      ]
+    },
+    "retrieval-completeSuccess": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale"
+      ]
+    },
+    "retrieval-success": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale"
+      ]
+    },
+    "retrieval-partialSuccess": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale"
+      ]
+    },
+    "retrieval-failedObjective": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale"
+      ]
+    },
+    "survey-completeSuccess": {
+      "changed": true,
+      "categories": [
+        "outcome",
+        "objectiveProgress",
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleOutcome",
+        "battleState"
+      ]
+    },
+    "survey-success": {
+      "changed": true,
+      "categories": [
+        "outcome",
+        "objectiveProgress",
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleOutcome",
+        "battleState"
+      ]
+    },
+    "survey-partialSuccess": {
+      "changed": true,
+      "categories": [
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleOutcome",
+        "battleState"
+      ]
+    },
+    "survey-failedObjective": {
+      "changed": true,
+      "categories": [
+        "outcome",
+        "partyHp",
+        "partyMp",
+        "partyMorale",
+        "battleOutcome",
+        "battleState"
+      ]
+    }
+  }
+}

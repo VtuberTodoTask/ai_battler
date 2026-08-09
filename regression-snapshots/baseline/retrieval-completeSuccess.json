@@ -36,9 +36,17 @@
     "casualties": [],
     "currentPhase": "aftermath",
     "discoveredThreats": [],
-    "elapsedTime": 10.65,
+    "elapsedTime": 8.65,
     "incapacitated": [],
-    "information": [],
+    "information": [
+      {
+        "completeness": "complete",
+        "description": "",
+        "id": "generic-363679",
+        "name": "獣道を発見した",
+        "source": "scouting"
+      }
+    ],
     "injuries": [],
     "logs": [
       {
@@ -48,7 +56,7 @@
           "S-healer-s1-healer-3"
         ],
         "check": {
-          "effectiveValue": 96,
+          "effectiveValue": 100,
           "result": "success",
           "roll": 42,
           "skill": "survival"
@@ -129,7 +137,7 @@
           "S-healer-s1-healer-3"
         ],
         "check": {
-          "effectiveValue": 91,
+          "effectiveValue": 100,
           "result": "success",
           "roll": 76,
           "skill": "survival"
@@ -146,7 +154,7 @@
           "S-healer-s1-healer-3"
         ],
         "check": {
-          "effectiveValue": 19,
+          "effectiveValue": 37,
           "result": "failure",
           "roll": 93,
           "skill": "scouting"
@@ -163,7 +171,7 @@
           "S-healer-s1-healer-3"
         ],
         "check": {
-          "effectiveValue": 19,
+          "effectiveValue": 37,
           "result": "failure",
           "roll": 93,
           "skill": "scouting"
@@ -180,13 +188,16 @@
           "S-healer-s1-healer-3"
         ],
         "check": {
-          "effectiveValue": 19,
-          "result": "partialSuccess",
+          "effectiveValue": 37,
+          "result": "success",
           "roll": 22,
           "skill": "scouting"
         },
         "effects": [],
-        "facts": ["フェイ アイヴィーが断片的な手がかりを得た"],
+        "facts": [
+          "フェイ アイヴィーが調査対象に関する手がかりを発見した",
+          "獣道を発見したに関する情報を得た"
+        ],
         "phase": "exploration",
         "type": "explore"
       },
@@ -216,7 +227,7 @@
           "S-healer-s1-healer-3"
         ],
         "check": {
-          "effectiveValue": 71,
+          "effectiveValue": 81,
           "result": "success",
           "roll": 58,
           "skill": "survival"
@@ -245,7 +256,7 @@
           "S-healer-s1-healer-3"
         ],
         "check": {
-          "effectiveValue": 69,
+          "effectiveValue": 92,
           "result": "success",
           "roll": 55,
           "skill": "scouting"
@@ -316,7 +327,7 @@
           "S-vanguard-s1-vanguard-0"
         ],
         "check": {
-          "effectiveValue": 81,
+          "effectiveValue": 91,
           "result": "success",
           "roll": 60,
           "skill": "survival"
@@ -358,18 +369,13 @@
           "S-healer-s1-healer-3"
         ],
         "check": {
-          "effectiveValue": 91,
-          "result": "criticalFailure",
-          "roll": 98,
+          "effectiveValue": 100,
+          "result": "success",
+          "roll": 45,
           "skill": "survival"
         },
-        "effects": [
-          {
-            "type": "moraleChange",
-            "value": -5
-          }
-        ],
-        "facts": ["トール スカイが帰還経路を見失い、迂回した"],
+        "effects": [],
+        "facts": ["トール スカイが安全な帰還経路を確保した"],
         "phase": "return",
         "type": "travel"
       },
@@ -378,7 +384,7 @@
         "check": {
           "effectiveValue": 100,
           "result": "success",
-          "roll": 67,
+          "roll": 44,
           "skill": "firstAid"
         },
         "effects": [
@@ -424,7 +430,7 @@
         "check": {
           "effectiveValue": 100,
           "result": "success",
-          "roll": 45,
+          "roll": 36,
           "skill": "healing"
         },
         "effects": [
@@ -497,10 +503,10 @@
       "S-vanguard-s1-vanguard-0": 84
     },
     "partyMorale": {
-      "S-guardian-s1-guardian-1": 69,
-      "S-healer-s1-healer-3": 62,
-      "S-mage-s1-mage-2": 69,
-      "S-vanguard-s1-vanguard-0": 65
+      "S-guardian-s1-guardian-1": 74,
+      "S-healer-s1-healer-3": 67,
+      "S-mage-s1-mage-2": 74,
+      "S-vanguard-s1-vanguard-0": 70
     },
     "partyMp": {
       "S-guardian-s1-guardian-1": 4,

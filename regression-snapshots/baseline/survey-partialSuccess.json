@@ -1,5 +1,5 @@
 {
-  "outcome": "partialSuccess",
+  "outcome": "success",
   "state": {
     "avoidedThreats": [],
     "battleEntrySnapshot": {
@@ -32,7 +32,7 @@
       "knownEnemyWeaknesses": [],
       "surprise": "neutral"
     },
-    "battleOutcome": "partialVictory",
+    "battleOutcome": "victory",
     "battles": [
       {
         "combatSeed": "s109:battle:0:combat",
@@ -41,10 +41,10 @@
         "encounterSeed": "s109:battle:0:encounter",
         "enemyComposition": "insectx4",
         "enemyIds": [
-          "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
-          "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
-          "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
-          "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
+          "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
+          "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
+          "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+          "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
         ],
         "entrySnapshot": {
           "environmentEffects": [],
@@ -83,16 +83,16 @@
         "knownEnemyWeaknesses": [],
         "matchedAbilityIntel": [],
         "matchedWeaknessIntel": [],
-        "outcome": "partialVictory",
+        "outcome": "victory",
         "phase": "battle",
         "result": {
           "abilityUsage": {},
-          "adventurerActionCount": 28,
+          "adventurerActionCount": 21,
           "contactResult": {
             "effects": {
               "initiativeBonus": 2
             },
-            "enemyStealth": 57,
+            "enemyStealth": 46,
             "partyScouting": 117.9,
             "roll": 78,
             "successChance": 95,
@@ -100,19 +100,20 @@
           },
           "deadAdventurers": [],
           "defeatedEnemies": [
-            "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
-            "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
+            "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
+            "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+            "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
           ],
           "discoveredWeaknesses": [],
-          "enemyActionCount": 21,
-          "enemyDamageDealt": 36,
+          "enemyActionCount": 15,
+          "enemyDamageDealt": 16,
           "escapedEnemies": [
-            "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
+            "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
           ],
           "finalAdventurerStates": [
             {
               "alive": true,
-              "currentHp": 35,
+              "currentHp": 55,
               "currentMp": 6,
               "dead": false,
               "id": "C-scout-s109-scout-0",
@@ -140,7 +141,7 @@
             {
               "alive": true,
               "currentHp": 55,
-              "currentMp": 7,
+              "currentMp": 17,
               "dead": false,
               "id": "C-mage-s109-mage-2",
               "incapacitated": false,
@@ -191,13 +192,13 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ ドラグナー hit 群れ蟲の群れ for 9 damage",
+              "result": "マルチナ ドラグナー hit 群れ蜘蛛雑兵 for 9 damage",
               "roll": 42,
               "round": 1,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
               ]
             },
             {
@@ -213,62 +214,29 @@
               "result": "アリス スカイ missed",
               "roll": 75,
               "round": 1,
-              "successChance": 71,
+              "successChance": 72,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
               ]
             },
             {
               "actionType": "magic",
               "actorId": "C-mage-s109-mage-2",
-              "damage": 8,
+              "damage": 15,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ガルド サンド hit 大甲虫の群れ for 8 damage",
+              "result": "ガルド サンド hit 大甲虫の群れ for 15 damage",
               "roll": 9,
               "round": 1,
               "statusApplied": [],
-              "successChance": 92,
+              "successChance": 93,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
               ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
-              "damage": 6,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "群れ蜘蛛雑兵 hit アリス スカイ for 6 damage",
-              "roll": 21,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 66,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "甲殻蜘蛛子分 missed",
-              "roll": 91,
-              "round": 1,
-              "successChance": 59,
-              "targetIds": ["C-scout-s109-scout-0"]
             },
             {
               "actionType": "guard",
@@ -285,7 +253,27 @@
             },
             {
               "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "damage": 1,
+              "metadata": {
+                "guardPrevented": 3,
+                "guardSourceId": "C-support-s109-support-3",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "甲殻蜘蛛子分 hit アリス スカイ for 1 damage",
+              "roll": 21,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 46,
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -294,14 +282,30 @@
               },
               "phase": "combat",
               "result": "群れ蟲の群れ missed",
-              "roll": 93,
+              "roll": 91,
               "round": 1,
-              "successChance": 48,
+              "successChance": 51,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "群れ蜘蛛雑兵 missed",
+              "roll": 93,
+              "round": 1,
+              "successChance": 47,
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -312,7 +316,7 @@
               "result": "大甲虫の群れ missed",
               "roll": 66,
               "round": 1,
-              "successChance": 54,
+              "successChance": 53,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
@@ -325,13 +329,13 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ ドラグナー hit 群れ蟲の群れ for 9 damage",
+              "result": "マルチナ ドラグナー hit 群れ蜘蛛雑兵 for 9 damage",
               "roll": 31,
               "round": 2,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
               ]
             },
             {
@@ -344,13 +348,13 @@
                 "isFlank": true
               },
               "phase": "combat",
-              "result": "アリス スカイ hit 群れ蟲の群れ for 9 damage",
+              "result": "アリス スカイ hit 群れ蜘蛛雑兵 for 9 damage",
               "roll": 63,
               "round": 2,
               "statusApplied": [],
-              "successChance": 76,
+              "successChance": 77,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
               ]
             },
             {
@@ -368,42 +372,7 @@
             },
             {
               "actionType": "melee",
-              "actorId": "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "群れ蜘蛛雑兵 missed",
-              "roll": 89,
-              "round": 2,
-              "successChance": 61,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s109-mage-2",
-              "damage": 5,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ガルド サンド hit 大甲虫の群れ for 5 damage",
-              "roll": 28,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 92,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -412,14 +381,49 @@
               },
               "phase": "combat",
               "result": "群れ蟲の群れ missed",
+              "roll": 89,
+              "round": 2,
+              "successChance": 51,
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s109-mage-2",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ガルド サンド hit 大甲虫の群れ for 10 damage",
+              "roll": 28,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 93,
+              "targetIds": [
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "群れ蜘蛛雑兵 missed",
               "roll": 76,
               "round": 2,
-              "successChance": 48,
+              "successChance": 47,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
               "damage": 1,
               "metadata": {
                 "guardPrevented": 5,
@@ -430,17 +434,17 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "甲殻蜘蛛子分 hit アリス スカイ for 1 damage",
+              "result": "大甲虫の群れ hit アリス スカイ for 1 damage",
               "roll": 11,
               "round": 2,
               "statusApplied": [],
-              "successChance": 54,
+              "successChance": 53,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
-              "damage": 4,
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "damage": 3,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-support-s109-support-3",
@@ -450,11 +454,11 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "大甲虫の群れ hit アリス スカイ for 4 damage",
+              "result": "甲殻蜘蛛子分 hit アリス スカイ for 3 damage",
               "roll": 21,
               "round": 2,
               "statusApplied": [],
-              "successChance": 54,
+              "successChance": 46,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
@@ -467,13 +471,13 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ ドラグナー hit 群れ蟲の群れ for 7 damage",
+              "result": "マルチナ ドラグナー hit 群れ蜘蛛雑兵 for 7 damage",
               "roll": 43,
               "round": 3,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
               ]
             },
             {
@@ -486,32 +490,32 @@
                 "isFlank": true
               },
               "phase": "combat",
-              "result": "アリス スカイ hit 群れ蟲の群れ for 8 damage",
+              "result": "アリス スカイ hit 群れ蜘蛛雑兵 for 8 damage",
               "roll": 61,
               "round": 3,
               "statusApplied": [],
-              "successChance": 76,
+              "successChance": 77,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
               ]
             },
             {
               "actionType": "magic",
               "actorId": "C-mage-s109-mage-2",
-              "damage": 9,
+              "damage": 14,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ガルド サンド hit 大甲虫の群れ for 9 damage",
+              "result": "ガルド サンド hit 大甲虫の群れ for 14 damage",
               "roll": 59,
               "round": 3,
               "statusApplied": [],
-              "successChance": 92,
+              "successChance": 93,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
               ]
             },
             {
@@ -529,7 +533,7 @@
             },
             {
               "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
               "damage": 2,
               "metadata": {
                 "guardPrevented": 5,
@@ -544,147 +548,12 @@
               "roll": 17,
               "round": 3,
               "statusApplied": [],
-              "successChance": 54,
+              "successChance": 53,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
-              "damage": 2,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-support-s109-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "群れ蜘蛛雑兵 hit アリス スカイ for 2 damage",
-              "roll": 49,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 61,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
-              "damage": 4,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-support-s109-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "甲殻蜘蛛子分 hit アリス スカイ for 4 damage",
-              "roll": 32,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 54,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "群れ蟲の群れ missed",
-              "roll": 57,
-              "round": 3,
-              "successChance": 48,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-ranger-s109-ranger-1",
-              "damage": 7,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "マルチナ ドラグナー hit 群れ蟲の群れ for 7 damage",
-              "roll": 77,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "incapacitate",
-              "phase": "combat",
-              "result": "群れ蟲の群れが戦闘不能になった。",
-              "round": 4,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-scout-s109-scout-0",
-              "damage": 7,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "アリス スカイ hit 大甲虫の群れ for 7 damage",
-              "roll": 53,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 68,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-support-s109-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "リナ リーフがアリス スカイを防護した。",
-              "round": 4,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s109-mage-2",
-              "damage": 8,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ガルド サンド hit 大甲虫の群れ for 8 damage",
-              "roll": 10,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 92,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -693,34 +562,14 @@
               },
               "phase": "combat",
               "result": "甲殻蜘蛛子分 missed",
-              "roll": 88,
-              "round": 4,
-              "successChance": 54,
+              "roll": 49,
+              "round": 3,
+              "successChance": 46,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
-              "damage": 4,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-support-s109-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "群れ蜘蛛雑兵 hit アリス スカイ for 4 damage",
-              "roll": 28,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 61,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
               "damage": 1,
               "metadata": {
                 "guardPrevented": 5,
@@ -731,105 +580,16 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "大甲虫の群れ hit アリス スカイ for 1 damage",
-              "roll": 51,
-              "round": 4,
+              "result": "群れ蟲の群れ hit アリス スカイ for 1 damage",
+              "roll": 22,
+              "round": 3,
               "statusApplied": [],
-              "successChance": 54,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-ranger-s109-ranger-1",
-              "damage": 5,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "マルチナ ドラグナー hit 大甲虫の群れ for 5 damage",
-              "roll": 50,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 94,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s109-mage-2",
-              "damage": 7,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ガルド サンド hit 大甲虫の群れ for 7 damage",
-              "roll": 34,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 92,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-scout-s109-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "アリス スカイ missed",
-              "roll": 84,
-              "round": 5,
-              "successChance": 68,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-support-s109-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "リナ リーフがアリス スカイを防護した。",
-              "round": 5,
+              "successChance": 51,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
-              "damage": 2,
-              "metadata": {
-                "guardPrevented": 7,
-                "guardSourceId": "C-support-s109-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "甲殻蜘蛛子分 hit アリス スカイ for 2 damage",
-              "roll": 3,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 54,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -838,203 +598,84 @@
               },
               "phase": "combat",
               "result": "群れ蜘蛛雑兵 missed",
-              "roll": 83,
-              "round": 5,
-              "successChance": 61,
+              "roll": 89,
+              "round": 3,
+              "successChance": 47,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
-              "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
-              "damage": 2,
+              "actionType": "ranged",
+              "actorId": "C-ranger-s109-ranger-1",
+              "damage": 10,
               "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-support-s109-support-3",
+                "attackerRole": "ranger",
                 "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
+                "isFlank": false
               },
               "phase": "combat",
-              "result": "大甲虫の群れ hit アリス スカイ for 2 damage",
-              "roll": 49,
-              "round": 5,
+              "result": "マルチナ ドラグナー hit 群れ蜘蛛雑兵 for 10 damage",
+              "roll": 42,
+              "round": 4,
               "statusApplied": [],
-              "successChance": 54,
-              "targetIds": ["C-scout-s109-scout-0"]
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "群れ蜘蛛雑兵が戦闘不能になった。",
+              "round": 4,
+              "targetIds": [
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
+              ]
             },
             {
               "actionType": "melee",
               "actorId": "C-scout-s109-scout-0",
-              "damage": 7,
+              "damage": 14,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
                 "isFlank": true
               },
               "phase": "combat",
-              "result": "アリス スカイ hit 大甲虫の群れ for 7 damage",
-              "roll": 34,
-              "round": 6,
+              "result": "アリス スカイ hit 大甲虫の群れ for 14 damage",
+              "roll": 1,
+              "round": 4,
               "statusApplied": [],
-              "successChance": 68,
+              "successChance": 69,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
               ]
             },
             {
               "actionType": "incapacitate",
               "phase": "combat",
               "result": "大甲虫の群れが戦闘不能になった。",
-              "round": 6,
+              "round": 4,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0"
               ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-ranger-s109-ranger-1",
-              "damage": 9,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "マルチナ ドラグナー hit 群れ蜘蛛雑兵 for 9 damage",
-              "roll": 34,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 88,
-              "targetIds": [
-                "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-support-s109-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "リナ リーフがアリス スカイを防護した。",
-              "round": 6,
-              "targetIds": ["C-scout-s109-scout-0"]
             },
             {
               "actionType": "magic",
               "actorId": "C-mage-s109-mage-2",
-              "damage": 21,
+              "damage": 15,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ガルド サンド hit 甲殻蜘蛛子分 for 21 damage",
-              "roll": 5,
-              "round": 6,
+              "result": "ガルド サンド hit 甲殻蜘蛛子分 for 15 damage",
+              "roll": 8,
+              "round": 4,
               "statusApplied": [],
-              "successChance": 88,
+              "successChance": 95,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
-              "damage": 1,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-support-s109-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "甲殻蜘蛛子分 hit アリス スカイ for 1 damage",
-              "roll": 45,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 54,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
-              "damage": 5,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-support-s109-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "群れ蜘蛛雑兵 hit アリス スカイ for 5 damage",
-              "roll": 40,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 61,
-              "targetIds": ["C-scout-s109-scout-0"]
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
-              "phase": "retreat",
-              "result": "甲殻蜘蛛子分は撤退に失敗した。",
-              "roll": 73,
-              "round": 7,
-              "successChance": 33
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
-              "phase": "retreat",
-              "result": "群れ蜘蛛雑兵が撤退した。",
-              "roll": 11,
-              "round": 7,
-              "successChance": 31
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-scout-s109-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "アリス スカイ missed",
-              "roll": 65,
-              "round": 7,
-              "successChance": 64,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-ranger-s109-ranger-1",
-              "damage": 11,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "マルチナ ドラグナー hit 甲殻蜘蛛子分 for 11 damage",
-              "roll": 56,
-              "round": 7,
-              "statusApplied": [],
-              "successChance": 90,
-              "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
               ]
             },
             {
@@ -1047,12 +688,32 @@
               },
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
-              "round": 7,
+              "round": 4,
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
+              "damage": 6,
+              "metadata": {
+                "guardPrevented": 8,
+                "guardSourceId": "C-support-s109-support-3",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "群れ蟲の群れ hit アリス スカイ for 6 damage",
+              "roll": 8,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 51,
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
               "damage": 2,
               "metadata": {
                 "guardPrevented": 5,
@@ -1064,102 +725,157 @@
               },
               "phase": "combat",
               "result": "甲殻蜘蛛子分 hit アリス スカイ for 2 damage",
-              "roll": 14,
-              "round": 7,
+              "roll": 28,
+              "round": 4,
               "statusApplied": [],
-              "successChance": 54,
+              "successChance": 46,
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "phase": "retreat",
+              "result": "甲殻蜘蛛子分は撤退に失敗した。",
+              "roll": 51,
+              "round": 5,
+              "successChance": 25
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
+              "phase": "retreat",
+              "result": "群れ蟲の群れが撤退した。",
+              "roll": 22,
+              "round": 5,
+              "successChance": 37
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "C-ranger-s109-ranger-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ ドラグナー missed",
+              "roll": 97,
+              "round": 5,
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
+              ]
             },
             {
               "actionType": "magic",
               "actorId": "C-mage-s109-mage-2",
-              "damage": 10,
+              "damage": 18,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ガルド サンド hit 甲殻蜘蛛子分 for 10 damage",
-              "roll": 40,
-              "round": 7,
+              "result": "ガルド サンド hit 甲殻蜘蛛子分 for 18 damage",
+              "roll": 17,
+              "round": 5,
               "statusApplied": [],
-              "successChance": 88,
+              "successChance": 95,
               "targetIds": [
-                "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
               ]
             },
             {
-              "actionType": "retreat",
-              "actorId": "C-support-s109-support-3",
-              "phase": "retreat",
-              "result": "リナ リーフがパーティ撤退を試みた。成功",
-              "roll": 45,
-              "round": 8,
-              "successChance": 95
-            }
-          ],
-          "outcome": "partialVictory",
-          "partyDamageDealt": 156,
-          "retreatAttempts": [
+              "actionType": "melee",
+              "actorId": "C-scout-s109-scout-0",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "scout",
+                "isCounter": false,
+                "isFlank": true
+              },
+              "phase": "combat",
+              "result": "アリス スカイ hit 甲殻蜘蛛子分 for 12 damage",
+              "roll": 36,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 72,
+              "targetIds": [
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
+              ]
+            },
             {
-              "aliveCount": 4,
-              "approved": true,
-              "attemptCount": 1,
-              "attempted": true,
-              "averageMorale": 59,
-              "enemyThreat": 7.191600000000001,
-              "healerAlive": false,
-              "incapacitatedCount": 0,
-              "leaderId": "C-support-s109-support-3",
-              "matchedReasons": ["healerLostWithWounded"],
-              "moraleThreshold": 32,
-              "partyHpRatio": 0.8732394366197183,
-              "partyThreat": 18.44,
-              "proposerHpRatio": 1,
-              "proposerId": "C-support-s109-support-3",
-              "proposerMorale": 59,
-              "proposerRole": "support",
-              "reason": "healerLostWithWounded",
-              "retreatHpThreshold": 0.275,
-              "roll": 45,
-              "round": 8,
-              "success": true,
-              "successChance": 95
+              "actionType": "guard",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "support",
+                "guardTargetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "リナ リーフがアリス スカイを防護した。",
+              "round": 5,
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "甲殻蜘蛛子分 missed",
+              "roll": 57,
+              "round": 5,
+              "successChance": 46,
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "phase": "retreat",
+              "result": "甲殻蜘蛛子分は撤退に失敗した。",
+              "roll": 84,
+              "round": 6,
+              "successChance": 25
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "C-ranger-s109-ranger-1",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ ドラグナー hit 甲殻蜘蛛子分 for 12 damage",
+              "roll": 46,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "甲殻蜘蛛子分が戦闘不能になった。",
+              "round": 6,
+              "targetIds": [
+                "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1"
+              ]
             }
           ],
-          "retreatDiagnostic": {
-            "aliveCount": 4,
-            "approved": true,
-            "attemptCount": 1,
-            "attempted": true,
-            "averageMorale": 59,
-            "enemyThreat": 7.191600000000001,
-            "healerAlive": false,
-            "incapacitatedCount": 0,
-            "leaderId": "C-support-s109-support-3",
-            "matchedReasons": ["healerLostWithWounded"],
-            "moraleThreshold": 32,
-            "partyHpRatio": 0.8732394366197183,
-            "partyThreat": 18.44,
-            "proposerHpRatio": 1,
-            "proposerId": "C-support-s109-support-3",
-            "proposerMorale": 59,
-            "proposerRole": "support",
-            "reason": "healerLostWithWounded",
-            "retreatHpThreshold": 0.275,
-            "roll": 45,
-            "round": 8,
-            "success": true,
-            "successChance": 95
-          },
-          "retreatResult": {
-            "chance": 95,
-            "roll": 45,
-            "side": "party",
-            "success": true
-          },
-          "rounds": 8,
+          "outcome": "victory",
+          "partyDamageDealt": 162,
+          "retreatAttempts": [],
+          "rounds": 6,
           "seed": "s109:battle:0:combat",
           "survivingAdventurers": [
             "C-scout-s109-scout-0",
@@ -1168,11 +884,10 @@
             "C-support-s109-support-3"
           ],
           "survivingEnemies": [
-            "C-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
-            "B-insect-swarm-standard-s109:battle:0:encounter:enemy:3"
+            "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2"
           ]
         },
-        "rounds": 8,
+        "rounds": 6,
         "survivingAdventurerIds": [
           "C-scout-s109-scout-0",
           "C-ranger-s109-ranger-1",
@@ -1221,7 +936,7 @@
           "C-mage-s109-mage-2"
         ],
         "check": {
-          "effectiveValue": 77,
+          "effectiveValue": 87,
           "result": "success",
           "roll": 59,
           "skill": "survival"
@@ -1314,7 +1029,7 @@
           "C-mage-s109-mage-2"
         ],
         "check": {
-          "effectiveValue": 72,
+          "effectiveValue": 82,
           "result": "success",
           "roll": 60,
           "skill": "survival"
@@ -1339,7 +1054,7 @@
           "C-mage-s109-mage-2"
         ],
         "check": {
-          "effectiveValue": 72,
+          "effectiveValue": 82,
           "result": "criticalSuccess",
           "roll": 7,
           "skill": "scouting"
@@ -1364,7 +1079,7 @@
           "C-mage-s109-mage-2"
         ],
         "check": {
-          "effectiveValue": 77,
+          "effectiveValue": 87,
           "result": "criticalSuccess",
           "roll": 1,
           "skill": "scouting"
@@ -1389,7 +1104,7 @@
           "C-mage-s109-mage-2"
         ],
         "check": {
-          "effectiveValue": 77,
+          "effectiveValue": 87,
           "result": "success",
           "roll": 49,
           "skill": "scouting"
@@ -1495,10 +1210,7 @@
       {
         "actorIds": [],
         "effects": [],
-        "facts": [
-          "戦闘が8ラウンドでpartialVictoryとなった",
-          "接敵結果: success"
-        ],
+        "facts": ["戦闘が6ラウンドでvictoryとなった", "接敵結果: success"],
         "phase": "battle",
         "targetIds": [],
         "type": "battleSummary"
@@ -1510,7 +1222,7 @@
           "C-mage-s109-mage-2"
         ],
         "check": {
-          "effectiveValue": 64,
+          "effectiveValue": 74,
           "result": "failure",
           "roll": 95,
           "skill": "survival"
@@ -1587,7 +1299,7 @@
           "C-ranger-s109-ranger-1"
         ],
         "check": {
-          "effectiveValue": 84,
+          "effectiveValue": 94,
           "result": "criticalSuccess",
           "roll": 1,
           "skill": "defenseMagic"
@@ -1709,7 +1421,7 @@
           "C-mage-s109-mage-2"
         ],
         "check": {
-          "effectiveValue": 72,
+          "effectiveValue": 82,
           "result": "success",
           "roll": 19,
           "skill": "survival"
@@ -1774,13 +1486,13 @@
           {
             "targetId": "area-1",
             "type": "surveyCompleted",
-            "value": 0
+            "value": 1
           }
         ],
         "facts": ["測量地域の測量進捗: 75% (2/3区画, 平均精度100)"],
         "phase": "aftermath",
         "targetIds": ["area-1"],
-        "type": "surveyFailed"
+        "type": "surveyCompleted"
       },
       {
         "actorIds": [],
@@ -1803,13 +1515,13 @@
       "returnTimeBonus": 0,
       "threatFeatures": []
     },
-    "objectiveCompleted": false,
+    "objectiveCompleted": true,
     "objectiveProgress": 75,
     "objectiveState": {
       "areaId": "area-1",
       "areaName": "測量地域",
       "averageQuality": 100,
-      "completed": false,
+      "completed": true,
       "coveragePercent": 66.66666666666666,
       "minimumAcceptableQuality": 70,
       "progress": 75,
@@ -1865,7 +1577,7 @@
     "partyHp": {
       "C-mage-s109-mage-2": 55,
       "C-ranger-s109-ranger-1": 50,
-      "C-scout-s109-scout-0": 35,
+      "C-scout-s109-scout-0": 55,
       "C-support-s109-support-3": 60
     },
     "partyMorale": {
@@ -1875,7 +1587,7 @@
       "C-support-s109-support-3": 64
     },
     "partyMp": {
-      "C-mage-s109-mage-2": 7,
+      "C-mage-s109-mage-2": 17,
       "C-ranger-s109-ranger-1": 13,
       "C-scout-s109-scout-0": 6,
       "C-support-s109-support-3": 42

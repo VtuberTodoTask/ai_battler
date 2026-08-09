@@ -362,7 +362,7 @@ describe('Rescue role contribution statistics', () => {
         locationKnown: true,
         accessDifficulty: 0,
         stabilizationDifficulty: 0,
-        evacuationDifficulty: 15,
+        evacuationDifficulty: 20,
         mobility: 'assisted',
       })
       const baseParty = makePairedParty(baseRoles, `support-${i}`, 'C')

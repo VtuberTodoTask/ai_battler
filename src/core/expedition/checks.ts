@@ -111,11 +111,8 @@ export function absencePenaltyForSkill(
     defenseMagic: ['mage'],
   }
   const roles = mapping[skill] ?? []
-  let penalty = 0
-  for (const role of roles) {
-    if (!hasRole(party, role)) penalty += 8
-  }
-  return penalty
+  if (roles.length === 0) return 0
+  return roles.some((role) => hasRole(party, role)) ? 0 : 8
 }
 
 export function resolveSkillCheck(
@@ -252,15 +249,15 @@ export function calculateInformationBonus(
 export function difficultyBasePenalty(difficulty: string): number {
   switch (difficulty) {
     case 'easy':
-      return 0
+      return -10
     case 'normal':
-      return 10
+      return 0
     case 'hard':
-      return 20
-    case 'deadly':
-      return 30
-    default:
       return 10
+    case 'deadly':
+      return 20
+    default:
+      return 0
   }
 }
 

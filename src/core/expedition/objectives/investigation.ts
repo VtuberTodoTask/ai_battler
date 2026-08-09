@@ -16,7 +16,6 @@ import {
   averagePartyMorale,
   getActiveParty,
   getNonDeadParty,
-  hasFeature,
 } from '../state.ts'
 import { isUnresolvedSeriousInjury } from '../injuries.ts'
 import { rankPenaltyForRequest, resolveSkillCheck } from '../checks.ts'
@@ -50,41 +49,71 @@ export function runObjective(
       : 'scouting'
   const preferredRole: AdventurerRole | undefined =
     skill === 'monsterKnowledge' ? 'mage' : 'scout'
-
-  const difficulty =
-    10 +
-    (hasFeature(request.features, 'poorVisibility') ? 5 : 0) +
-    (hasFeature(request.features, 'navigationDifficulty') ? 5 : 0) +
-    (state.objectiveProgress < 40 ? 10 : 0)
   const rankPenalty = rankPenaltyForRequest(request)
 
-  const { result, primary, assistants, effectiveValue, roll } =
-    resolveSkillCheck(
-      rng,
-      party,
+  const maxAttempts = 2
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (getActiveParty(party, state).length === 0) break
+
+    const difficulty = state.objectiveProgress < 40 ? 5 : 0
+    const { result, primary, assistants, effectiveValue, roll } =
+      resolveSkillCheck(
+        rng,
+        party,
+        state,
+        'objective',
+        skill,
+        preferredRole,
+        difficulty,
+        rankPenalty,
+      )
+
+    const facts: string[] = []
+    const effects: ExpeditionEffect[] = []
+
+    if (result === 'criticalSuccess' || result === 'success') {
+      facts.push(`${primary.name}が目標となる情報を確認した`)
+      state.objectiveProgress = 100
+    } else if (result === 'partialSuccess') {
+      state.objectiveProgress = Math.min(100, state.objectiveProgress + 20)
+      if (state.objectiveProgress >= 60 && state.objectiveProgress < 100) {
+        facts.push('最低限の目的を達成した')
+      }
+    } else {
+      facts.push('目的の達成に失敗した')
+      if (result === 'criticalFailure') {
+        state.elapsedTime += 3
+      }
+    }
+
+    if (result === 'criticalSuccess') {
+      addMoraleAll(state, party, 5)
+      effects.push({ type: 'moraleChange', value: 5 })
+    }
+
+    addLog(
       state,
-      'objective',
-      skill,
-      preferredRole,
-      difficulty,
-      rankPenalty,
+      logEntry(
+        'objective',
+        'objectiveCheck',
+        [primary.id, ...assistants.map((a) => a.id)],
+        facts,
+        effects,
+        {
+          skill,
+          effectiveValue,
+          roll,
+          result,
+        },
+      ),
     )
 
-  const facts: string[] = []
-  const effects: ExpeditionEffect[] = []
-
-  if (result === 'criticalSuccess' || result === 'success') {
-    facts.push(`${primary.name}が目標となる情報を確認した`)
-    state.objectiveProgress = 100
-  } else if (result === 'partialSuccess') {
-    state.objectiveProgress = Math.min(100, state.objectiveProgress + 20)
-    if (state.objectiveProgress >= 60 && state.objectiveProgress < 100) {
-      facts.push('最低限の目的を達成した')
-    }
-  } else {
-    facts.push('目的の達成に失敗した')
-    if (result === 'criticalFailure') {
-      state.elapsedTime += 3
+    if (
+      result === 'criticalSuccess' ||
+      result === 'success' ||
+      state.objectiveProgress >= 60
+    ) {
+      break
     }
   }
 
@@ -92,31 +121,21 @@ export function runObjective(
     request.timeLimit !== undefined &&
     state.elapsedTime > request.timeLimit
   ) {
-    facts.push('制限時間を超過した')
+    addLog(
+      state,
+      logEntry('objective', 'timeLimit', [], ['制限時間を超過した'], []),
+    )
   }
 
   setObjectiveCompletedFromProgress(state)
-  facts.push(objectiveProgressFact(state.objectiveProgress))
-
-  if (result === 'criticalSuccess') {
-    addMoraleAll(state, party, 5)
-    effects.push({ type: 'moraleChange', value: 5 })
-  }
-
   addLog(
     state,
     logEntry(
       'objective',
-      'objectiveCheck',
-      [primary.id, ...assistants.map((a) => a.id)],
-      facts,
-      effects,
-      {
-        skill,
-        effectiveValue,
-        roll,
-        result,
-      },
+      'objectiveSummary',
+      [],
+      [objectiveProgressFact(state.objectiveProgress)],
+      [],
     ),
   )
 }

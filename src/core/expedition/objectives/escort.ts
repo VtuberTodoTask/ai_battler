@@ -558,11 +558,11 @@ export function runEscortRoute(
       fact = `${primary.name}は移動経路を何とか進んだが、護衛対象に負担がかかった`
       break
     case 'failure':
-      progressDelta = 25
+      progressDelta = 50
       stressDelta = 20
       timeDelta = 2
       damage = 4
-      fact = `${primary.name}は移動経路で迷い、護衛対象が怪我をした`
+      fact = `${primary.name}は道を大きく外れ、負傷と遅延を出しながらも先へ進んだ`
       break
     case 'criticalFailure':
       progressDelta = 0

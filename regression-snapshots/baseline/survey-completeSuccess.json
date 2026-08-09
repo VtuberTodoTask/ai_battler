@@ -1,5 +1,5 @@
 {
-  "outcome": "completeSuccess",
+  "outcome": "forcedRetreat",
   "state": {
     "avoidedThreats": [],
     "battleEntrySnapshot": {
@@ -32,7 +32,7 @@
       "knownEnemyWeaknesses": [],
       "surprise": "neutral"
     },
-    "battleOutcome": "victory",
+    "battleOutcome": "retreat",
     "battles": [
       {
         "combatSeed": "s49:battle:0:combat",
@@ -41,12 +41,12 @@
         "encounterSeed": "s49:battle:0:encounter",
         "enemyComposition": "humanoidx6, beastx1",
         "enemyIds": [
-          "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
-          "D-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
-          "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-          "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:4",
+          "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+          "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
+          "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+          "E-humanoid-tank-minion-s49:battle:0:encounter:enemy:4",
+          "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
           "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2",
-          "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
           "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
         ],
         "entrySnapshot": {
@@ -86,16 +86,16 @@
         "knownEnemyWeaknesses": [],
         "matchedAbilityIntel": [],
         "matchedWeaknessIntel": [],
-        "outcome": "victory",
+        "outcome": "retreat",
         "phase": "battle",
         "result": {
           "abilityUsage": {},
-          "adventurerActionCount": 51,
+          "adventurerActionCount": 28,
           "contactResult": {
             "effects": {
               "initiativeBonus": 2
             },
-            "enemyStealth": 85,
+            "enemyStealth": 88,
             "partyScouting": 135,
             "roll": 78,
             "successChance": 95,
@@ -104,22 +104,16 @@
           "deadAdventurers": [],
           "defeatedEnemies": [
             "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2",
-            "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
             "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
           ],
           "discoveredWeaknesses": [],
-          "enemyActionCount": 40,
-          "enemyDamageDealt": 76,
-          "escapedEnemies": [
-            "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
-            "D-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
-            "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-            "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:4"
-          ],
+          "enemyActionCount": 26,
+          "enemyDamageDealt": 53,
+          "escapedEnemies": [],
           "finalAdventurerStates": [
             {
               "alive": true,
-              "currentHp": 31,
+              "currentHp": 28,
               "currentMp": 5,
               "dead": false,
               "id": "S-scout-s49-scout-0",
@@ -136,7 +130,7 @@
             },
             {
               "alive": true,
-              "currentHp": 77,
+              "currentHp": 85,
               "currentMp": 3,
               "dead": false,
               "id": "S-ranger-s49-ranger-1",
@@ -146,8 +140,8 @@
             },
             {
               "alive": true,
-              "currentHp": 60,
-              "currentMp": 4,
+              "currentHp": 68,
+              "currentMp": 19,
               "dead": false,
               "id": "S-mage-s49-mage-2",
               "incapacitated": false,
@@ -156,7 +150,7 @@
             },
             {
               "alive": true,
-              "currentHp": 52,
+              "currentHp": 62,
               "currentMp": 55,
               "dead": false,
               "id": "S-support-s49-support-3",
@@ -201,7 +195,7 @@
               "result": "ベル エルウィン missed",
               "roll": 76,
               "round": 1,
-              "successChance": 49,
+              "successChance": 59,
               "targetIds": [
                 "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
               ]
@@ -219,7 +213,7 @@
               "result": "ゼクス ハインド missed",
               "roll": 96,
               "round": 1,
-              "successChance": 64,
+              "successChance": 74,
               "targetIds": [
                 "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
               ]
@@ -251,118 +245,35 @@
               "roll": 68,
               "round": 1,
               "statusApplied": [],
-              "successChance": 73,
+              "successChance": 84,
               "targetIds": [
                 "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
               ]
             },
             {
-              "actionType": "ranged",
-              "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "actionType": "magic",
+              "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
               "damage": 4,
               "metadata": {
-                "guardPrevented": 3,
+                "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
                 "isCounter": false,
                 "isFlank": false,
                 "preventedIncap": false,
-                "targetRole": "support"
+                "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "暗殺者傭兵斥候 hit グスタフ アイヴィー for 4 damage",
+              "result": "強盗傭兵盾 hit ベル エルウィン for 4 damage",
               "roll": 48,
               "round": 1,
               "statusApplied": [],
-              "successChance": 72,
-              "targetIds": ["S-support-s49-support-3"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2",
-              "damage": 5,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "S-support-s49-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "荒野kobold重戦士 hit ベル エルウィン for 5 damage",
-              "roll": 18,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 31,
+              "successChance": 55,
               "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:4",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "洞窟兵士重戦士 missed",
-              "roll": 83,
-              "round": 1,
-              "successChance": 20,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "damage": 2,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "S-support-s49-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "毒クマ雑兵 hit ベル エルウィン for 2 damage",
-              "roll": 35,
-              "round": 1,
-              "statusApplied": ["bleeding"],
-              "successChance": 36,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "bleed",
-              "damage": 3,
-              "phase": "combat",
-              "result": "ベル エルウィンは出血のダメージを受けた。-3 HP",
-              "round": 1,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "S-scout-s49-scout-0",
-              "damage": 8,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ベル エルウィン hit 荒野kobold重戦士 for 8 damage",
-              "roll": 25,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 54,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
             },
             {
               "actionType": "ranged",
               "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
-              "damage": 4,
+              "damage": 6,
               "metadata": {
                 "guardPrevented": 3,
                 "guardSourceId": "S-support-s49-support-3",
@@ -372,81 +283,16 @@
                 "targetRole": "support"
               },
               "phase": "combat",
-              "result": "暗殺者傭兵斥候 hit グスタフ アイヴィー for 4 damage",
-              "roll": 15,
-              "round": 2,
+              "result": "暗殺者傭兵斥候 hit グスタフ アイヴィー for 6 damage",
+              "roll": 18,
+              "round": 1,
               "statusApplied": [],
-              "successChance": 72,
+              "successChance": 61,
               "targetIds": ["S-support-s49-support-3"]
             },
             {
-              "actionType": "ranged",
-              "actorId": "S-ranger-s49-ranger-1",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス ハインド missed",
-              "roll": 72,
-              "round": 2,
-              "successChance": 64,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "S-support-s49-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 2,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ユリ ムーン missed",
-              "roll": 95,
-              "round": 2,
-              "successChance": 73,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "荒野kobold重戦士 missed",
-              "roll": 80,
-              "round": 2,
-              "successChance": 31,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
               "actionType": "melee",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -455,14 +301,14 @@
               },
               "phase": "combat",
               "result": "毒クマ雑兵 missed",
-              "roll": 79,
-              "round": 2,
-              "successChance": 36,
+              "roll": 83,
+              "round": 1,
+              "successChance": 40,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:4",
+              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -470,38 +316,11 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "洞窟兵士重戦士 missed",
-              "roll": 71,
-              "round": 2,
-              "successChance": 20,
+              "result": "強盗ゴブリン盾 missed",
+              "roll": 35,
+              "round": 1,
+              "successChance": 26,
               "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "bleed",
-              "damage": 3,
-              "phase": "combat",
-              "result": "ベル エルウィンは出血のダメージを受けた。-3 HP",
-              "round": 2,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "S-ranger-s49-ranger-1",
-              "damage": 8,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス ハインド hit 荒野kobold重戦士 for 8 damage",
-              "roll": 6,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 64,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
             },
             {
               "actionType": "melee",
@@ -514,28 +333,50 @@
               },
               "phase": "combat",
               "result": "ベル エルウィン missed",
-              "roll": 69,
-              "round": 3,
-              "successChance": 54,
+              "roll": 86,
+              "round": 2,
+              "successChance": 64,
               "targetIds": [
                 "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
               ]
             },
             {
               "actionType": "ranged",
-              "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "actorId": "S-ranger-s49-ranger-1",
               "damage": 0,
               "metadata": {
+                "attackerRole": "ranger",
                 "isCounter": false,
-                "isFlank": false,
-                "targetRole": "support"
+                "isFlank": false
               },
               "phase": "combat",
-              "result": "暗殺者傭兵斥候 missed",
-              "roll": 73,
-              "round": 3,
-              "successChance": 72,
-              "targetIds": ["S-support-s49-support-3"]
+              "result": "ゼクス ハインド missed",
+              "roll": 86,
+              "round": 2,
+              "successChance": 74,
+              "targetIds": [
+                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "damage": 5,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "S-support-s49-support-3",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "強盗傭兵盾 hit ベル エルウィン for 5 damage",
+              "roll": 25,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 55,
+              "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "magic",
@@ -548,10 +389,127 @@
               },
               "phase": "combat",
               "result": "ユリ ムーン hit 荒野kobold重戦士 for 8 damage",
-              "roll": 70,
+              "roll": 15,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 84,
+              "targetIds": [
+                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "support"
+              },
+              "phase": "combat",
+              "result": "暗殺者傭兵斥候 missed",
+              "roll": 72,
+              "round": 2,
+              "successChance": 61,
+              "targetIds": ["S-support-s49-support-3"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "support",
+                "guardTargetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
+              "round": 2,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "暗殺者kobold盾 missed",
+              "roll": 95,
+              "round": 2,
+              "successChance": 28,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "強盗ゴブリン盾 missed",
+              "roll": 80,
+              "round": 2,
+              "successChance": 26,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "S-ranger-s49-ranger-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ゼクス ハインド missed",
+              "roll": 97,
+              "round": 3,
+              "successChance": 74,
+              "targetIds": [
+                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-scout-s49-scout-0",
+              "damage": 6,
+              "metadata": {
+                "attackerRole": "scout",
+                "isCounter": false,
+                "isFlank": true
+              },
+              "phase": "combat",
+              "result": "ベル エルウィン hit 荒野kobold重戦士 for 6 damage",
+              "roll": 22,
               "round": 3,
               "statusApplied": [],
-              "successChance": 73,
+              "successChance": 64,
+              "targetIds": [
+                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s49-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ ムーン hit 荒野kobold重戦士 for 12 damage",
+              "roll": 9,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 84,
               "targetIds": [
                 "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
               ]
@@ -570,40 +528,8 @@
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
-              "actionType": "melee",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "毒クマ雑兵 missed",
-              "roll": 37,
-              "round": 3,
-              "successChance": 36,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
               "actionType": "magic",
-              "actorId": "D-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "強盗ゴブリン盾 missed",
-              "roll": 84,
-              "round": 3,
-              "successChance": 21,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -612,17 +538,61 @@
               },
               "phase": "combat",
               "result": "強盗傭兵盾 missed",
-              "roll": 94,
+              "roll": 73,
               "round": 3,
-              "successChance": 17,
+              "successChance": 55,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
-              "actionType": "bleed",
-              "damage": 3,
+              "actionType": "ranged",
+              "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "support"
+              },
               "phase": "combat",
-              "result": "ベル エルウィンは出血のダメージを受けた。-3 HP",
+              "result": "暗殺者傭兵斥候 missed",
+              "roll": 70,
               "round": 3,
+              "successChance": 61,
+              "targetIds": ["S-support-s49-support-3"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "暗殺者kobold盾 missed",
+              "roll": 67,
+              "round": 3,
+              "successChance": 28,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "damage": 6,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "S-support-s49-support-3",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "毒クマ雑兵 hit ベル エルウィン for 6 damage",
+              "roll": 37,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 40,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -636,146 +606,9 @@
               },
               "phase": "combat",
               "result": "ベル エルウィン missed",
-              "roll": 95,
+              "roll": 96,
               "round": 4,
-              "successChance": 54,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
-              "damage": 4,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "S-support-s49-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "暗殺者傭兵斥候 hit ベル エルウィン for 4 damage",
-              "roll": 47,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 73,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "S-ranger-s49-ranger-1",
-              "damage": 6,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス ハインド hit 荒野kobold重戦士 for 6 damage",
-              "roll": 41,
-              "round": 4,
-              "statusApplied": [],
               "successChance": 64,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "S-support-s49-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 4,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ユリ ムーン missed",
-              "roll": 87,
-              "round": 4,
-              "successChance": 73,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "荒野kobold重戦士 missed",
-              "roll": 90,
-              "round": 4,
-              "successChance": 31,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "暗殺者kobold盾 missed",
-              "roll": 65,
-              "round": 4,
-              "successChance": 22,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "強盗傭兵盾 missed",
-              "roll": 47,
-              "round": 4,
-              "successChance": 17,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "S-scout-s49-scout-0",
-              "damage": 7,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ベル エルウィン hit 荒野kobold重戦士 for 7 damage",
-              "roll": 52,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 54,
               "targetIds": [
                 "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
               ]
@@ -791,35 +624,17 @@
               },
               "phase": "combat",
               "result": "ゼクス ハインド missed",
-              "roll": 78,
-              "round": 5,
-              "successChance": 64,
+              "roll": 95,
+              "round": 4,
+              "successChance": 74,
               "targetIds": [
                 "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
               ]
             },
             {
               "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ユリ ムーン missed",
-              "roll": 91,
-              "round": 5,
-              "successChance": 73,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
-              "damage": 1,
+              "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "damage": 7,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -829,11 +644,11 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "暗殺者傭兵斥候 hit ベル エルウィン for 1 damage",
-              "roll": 43,
-              "round": 5,
+              "result": "強盗傭兵盾 hit ベル エルウィン for 7 damage",
+              "roll": 47,
+              "round": 4,
               "statusApplied": [],
-              "successChance": 73,
+              "successChance": 55,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -846,125 +661,7 @@
               },
               "phase": "combat",
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 5,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "荒野kobold重戦士 missed",
-              "roll": 86,
-              "round": 5,
-              "successChance": 31,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "暗殺者kobold盾 missed",
-              "roll": 23,
-              "round": 5,
-              "successChance": 22,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "damage": 4,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "S-support-s49-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "毒クマ雑兵 hit ベル エルウィン for 4 damage",
-              "roll": 15,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 36,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "S-ranger-s49-ranger-1",
-              "damage": 6,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス ハインド hit 荒野kobold重戦士 for 6 damage",
-              "roll": 20,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 64,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "S-scout-s49-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ベル エルウィン missed",
-              "roll": 77,
-              "round": 6,
-              "successChance": 54,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "暗殺者傭兵斥候 missed",
-              "roll": 84,
-              "round": 6,
-              "successChance": 73,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "S-support-s49-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 6,
+              "round": 4,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -978,104 +675,10 @@
               },
               "phase": "combat",
               "result": "ユリ ムーン hit 荒野kobold重戦士 for 5 damage",
-              "roll": 61,
-              "round": 6,
+              "roll": 41,
+              "round": 4,
               "statusApplied": [],
-              "successChance": 73,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "荒野kobold重戦士 missed",
-              "roll": 45,
-              "round": 6,
-              "successChance": 31,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "強盗傭兵盾 missed",
-              "roll": 44,
-              "round": 6,
-              "successChance": 17,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:4",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "洞窟兵士重戦士 missed",
-              "roll": 78,
-              "round": 6,
-              "successChance": 20,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "S-ranger-s49-ranger-1",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス ハインド missed",
-              "roll": 70,
-              "round": 7,
-              "successChance": 64,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "S-scout-s49-scout-0",
-              "damage": 7,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ベル エルウィン hit 荒野kobold重戦士 for 7 damage",
-              "roll": 22,
-              "round": 7,
-              "statusApplied": [],
-              "successChance": 54,
-              "targetIds": [
-                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "incapacitate",
-              "phase": "combat",
-              "result": "荒野kobold重戦士が戦闘不能になった。",
-              "round": 7,
+              "successChance": 84,
               "targetIds": [
                 "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
               ]
@@ -1083,58 +686,38 @@
             {
               "actionType": "ranged",
               "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
-              "damage": 1,
+              "damage": 0,
               "metadata": {
-                "guardPrevented": 4,
-                "guardSourceId": "S-support-s49-support-3",
                 "isCounter": false,
                 "isFlank": false,
-                "preventedIncap": false,
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "暗殺者傭兵斥候 hit ベル エルウィン for 1 damage",
-              "roll": 37,
-              "round": 7,
-              "statusApplied": [],
-              "successChance": 73,
+              "result": "暗殺者傭兵斥候 missed",
+              "roll": 87,
+              "round": 4,
+              "successChance": 62,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 6,
+              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "damage": 0,
               "metadata": {
-                "attackerRole": "mage",
                 "isCounter": false,
-                "isFlank": false
+                "isFlank": false,
+                "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "ユリ ムーン hit 暗殺者傭兵斥候 for 6 damage",
-              "roll": 21,
-              "round": 7,
-              "statusApplied": [],
-              "successChance": 92,
-              "targetIds": [
-                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "S-support-s49-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 7,
+              "result": "暗殺者kobold盾 missed",
+              "roll": 90,
+              "round": 4,
+              "successChance": 28,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -1143,78 +726,28 @@
               },
               "phase": "combat",
               "result": "毒クマ雑兵 missed",
-              "roll": 57,
-              "round": 7,
-              "successChance": 36,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "D-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "強盗ゴブリン盾 missed",
-              "roll": 86,
-              "round": 7,
-              "successChance": 21,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "強盗傭兵盾 missed",
-              "roll": 31,
-              "round": 7,
-              "successChance": 17,
+              "roll": 65,
+              "round": 4,
+              "successChance": 40,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
-              "damage": 0,
+              "damage": 7,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ゼクス ハインド missed",
-              "roll": 83,
-              "round": 8,
-              "successChance": 80,
-              "targetIds": [
-                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 6,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ユリ ムーン hit 暗殺者傭兵斥候 for 6 damage",
-              "roll": 69,
-              "round": 8,
+              "result": "ゼクス ハインド hit 荒野kobold重戦士 for 7 damage",
+              "roll": 50,
+              "round": 5,
               "statusApplied": [],
-              "successChance": 92,
+              "successChance": 74,
               "targetIds": [
-                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
+                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
               ]
             },
             {
@@ -1227,11 +760,193 @@
                 "isFlank": true
               },
               "phase": "combat",
-              "result": "ベル エルウィン hit 暗殺者傭兵斥候 for 9 damage",
-              "roll": 60,
-              "round": 8,
+              "result": "ベル エルウィン hit 荒野kobold重戦士 for 9 damage",
+              "roll": 35,
+              "round": 5,
               "statusApplied": [],
-              "successChance": 70,
+              "successChance": 64,
+              "targetIds": [
+                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "荒野kobold重戦士が戦闘不能になった。",
+              "round": 5,
+              "targetIds": [
+                "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "support",
+                "guardTargetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
+              "round": 5,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "強盗傭兵盾 missed",
+              "roll": 91,
+              "round": 5,
+              "successChance": 55,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s49-mage-2",
+              "damage": 6,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ ムーン hit 暗殺者傭兵斥候 for 6 damage",
+              "roll": 43,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "暗殺者傭兵斥候 missed",
+              "roll": 86,
+              "round": 5,
+              "successChance": 62,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "damage": 9,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "S-support-s49-support-3",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "暗殺者kobold盾 hit ベル エルウィン for 9 damage",
+              "roll": 23,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 28,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "毒クマ雑兵 missed",
+              "roll": 74,
+              "round": 5,
+              "successChance": 40,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "S-scout-s49-scout-0",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "scout",
+                "isCounter": false,
+                "isFlank": true
+              },
+              "phase": "combat",
+              "result": "ベル エルウィン hit 暗殺者傭兵斥候 for 12 damage",
+              "roll": 20,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 79,
+              "targetIds": [
+                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "S-ranger-s49-ranger-1",
+              "damage": 8,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ゼクス ハインド hit 暗殺者傭兵斥候 for 8 damage",
+              "roll": 20,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 89,
+              "targetIds": [
+                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "強盗傭兵盾 missed",
+              "roll": 77,
+              "round": 6,
+              "successChance": 55,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-mage-s49-mage-2",
+              "damage": 8,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ ムーン hit 暗殺者傭兵斥候 for 8 damage",
+              "roll": 84,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
               "targetIds": [
                 "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
               ]
@@ -1246,13 +961,13 @@
               },
               "phase": "combat",
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 8,
+              "round": 6,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "ranged",
               "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
-              "damage": 3,
+              "damage": 1,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -1262,16 +977,16 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "暗殺者傭兵斥候 hit ベル エルウィン for 3 damage",
-              "roll": 54,
-              "round": 8,
+              "result": "暗殺者傭兵斥候 hit ベル エルウィン for 1 damage",
+              "roll": 24,
+              "round": 6,
               "statusApplied": [],
-              "successChance": 73,
+              "successChance": 62,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -1279,42 +994,36 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "強盗傭兵盾 missed",
-              "roll": 74,
-              "round": 8,
-              "successChance": 17,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "暗殺者kobold盾 missed",
-              "roll": 63,
-              "round": 8,
-              "successChance": 22,
+              "result": "強盗ゴブリン盾 missed",
+              "roll": 44,
+              "round": 6,
+              "successChance": 26,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
-              "damage": 0,
+              "damage": 11,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ゼクス ハインド missed",
-              "roll": 84,
-              "round": 9,
-              "successChance": 80,
+              "result": "ゼクス ハインド hit 暗殺者傭兵斥候 for 11 damage",
+              "roll": 47,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 89,
+              "targetIds": [
+                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "暗殺者傭兵斥候が戦闘不能になった。",
+              "round": 7,
               "targetIds": [
                 "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
               ]
@@ -1322,25 +1031,58 @@
             {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
-              "damage": 0,
+              "damage": 7,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
                 "isFlank": true
               },
               "phase": "combat",
-              "result": "ベル エルウィン missed",
-              "roll": 91,
-              "round": 9,
-              "successChance": 70,
+              "result": "ベル エルウィン hit 毒クマ雑兵 for 7 damage",
+              "roll": 70,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 82,
               "targetIds": [
-                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
+                "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5"
               ]
             },
             {
-              "actionType": "ranged",
-              "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
-              "damage": 3,
+              "actionType": "magic",
+              "actorId": "S-mage-s49-mage-2",
+              "damage": 9,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ユリ ムーン hit 強盗傭兵盾 for 9 damage",
+              "roll": 32,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 49,
+              "targetIds": [
+                "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "support",
+                "guardTargetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
+              "round": 7,
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "damage": 6,
               "metadata": {
                 "guardPrevented": 8,
                 "guardSourceId": "S-support-s49-support-3",
@@ -1350,49 +1092,17 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "暗殺者傭兵斥候 hit ベル エルウィン for 3 damage",
-              "roll": 9,
-              "round": 9,
+              "result": "強盗傭兵盾 hit ベル エルウィン for 6 damage",
+              "roll": 4,
+              "round": 7,
               "statusApplied": [],
-              "successChance": 73,
+              "successChance": 55,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 6,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ユリ ムーン hit 暗殺者傭兵斥候 for 6 damage",
-              "roll": 52,
-              "round": 9,
-              "statusApplied": [],
-              "successChance": 92,
-              "targetIds": [
-                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "S-support-s49-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 9,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "damage": 2,
+              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "damage": 9,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -1402,284 +1112,16 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "毒クマ雑兵 hit ベル エルウィン for 2 damage",
-              "roll": 22,
-              "round": 9,
+              "result": "暗殺者kobold盾 hit ベル エルウィン for 9 damage",
+              "roll": 27,
+              "round": 7,
               "statusApplied": [],
-              "successChance": 36,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:4",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "洞窟兵士重戦士 missed",
-              "roll": 29,
-              "round": 9,
-              "successChance": 20,
+              "successChance": 28,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "S-scout-s49-scout-0",
-              "damage": 8,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ベル エルウィン hit 暗殺者傭兵斥候 for 8 damage",
-              "roll": 54,
-              "round": 10,
-              "statusApplied": [],
-              "successChance": 70,
-              "targetIds": [
-                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "S-ranger-s49-ranger-1",
-              "damage": 7,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス ハインド hit 暗殺者傭兵斥候 for 7 damage",
-              "roll": 28,
-              "round": 10,
-              "statusApplied": [],
-              "successChance": 80,
-              "targetIds": [
-                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
-              ]
-            },
-            {
-              "actionType": "incapacitate",
-              "phase": "combat",
-              "result": "暗殺者傭兵斥候が戦闘不能になった。",
-              "round": 10,
-              "targetIds": [
-                "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 11,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ユリ ムーン hit 強盗傭兵盾 for 11 damage",
-              "roll": 86,
-              "round": 10,
-              "statusApplied": [],
-              "successChance": 89,
-              "targetIds": [
-                "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "S-support-s49-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 10,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "強盗傭兵盾 missed",
-              "roll": 78,
-              "round": 10,
-              "successChance": 17,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "暗殺者kobold盾 missed",
-              "roll": 46,
-              "round": 10,
-              "successChance": 22,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:4",
-              "damage": 2,
-              "metadata": {
-                "guardPrevented": 7,
-                "guardSourceId": "S-support-s49-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "洞窟兵士重戦士 hit ベル エルウィン for 2 damage",
-              "roll": 2,
-              "round": 10,
-              "statusApplied": [],
-              "successChance": 20,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "regen",
-              "phase": "combat",
-              "result": "強盗傭兵盾が再生した。+5 HP",
-              "round": 10,
-              "targetIds": [
-                "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
-              "phase": "retreat",
-              "result": "強盗傭兵盾が撤退した。",
-              "roll": 3,
-              "round": 11,
-              "successChance": 92
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "D-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
-              "phase": "retreat",
-              "result": "強盗ゴブリン盾が撤退した。",
-              "roll": 63,
-              "round": 11,
-              "successChance": 77
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-              "phase": "retreat",
-              "result": "暗殺者kobold盾は撤退に失敗した。",
-              "roll": 100,
-              "round": 11,
-              "successChance": 76
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:4",
-              "phase": "retreat",
-              "result": "洞窟兵士重戦士が撤退した。",
-              "roll": 76,
-              "round": 11,
-              "successChance": 90
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "phase": "retreat",
-              "result": "毒クマ雑兵は撤退に失敗した。",
-              "roll": 37,
-              "round": 11,
-              "successChance": 31
-            },
-            {
-              "actionType": "melee",
-              "actorId": "S-scout-s49-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ベル エルウィン missed",
-              "roll": 66,
-              "round": 11,
-              "successChance": 46,
-              "targetIds": [
-                "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "S-ranger-s49-ranger-1",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス ハインド missed",
-              "roll": 77,
-              "round": 11,
-              "successChance": 71,
-              "targetIds": [
-                "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "S-support-s49-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 11,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ユリ ムーン missed",
-              "roll": 87,
-              "round": 11,
-              "successChance": 84,
-              "targetIds": [
-                "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -1688,255 +1130,82 @@
               },
               "phase": "combat",
               "result": "毒クマ雑兵 missed",
-              "roll": 97,
-              "round": 11,
-              "successChance": 36,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "暗殺者kobold盾 missed",
-              "roll": 80,
-              "round": 11,
-              "successChance": 22,
+              "roll": 86,
+              "round": 7,
+              "successChance": 40,
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
               "actionType": "retreat",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-              "phase": "retreat",
-              "result": "暗殺者kobold盾は撤退に失敗した。",
-              "roll": 91,
-              "round": 12,
-              "successChance": 76
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "phase": "retreat",
-              "result": "毒クマ雑兵は撤退に失敗した。",
-              "roll": 32,
-              "round": 12,
-              "successChance": 31
-            },
-            {
-              "actionType": "melee",
-              "actorId": "S-scout-s49-scout-0",
-              "damage": 11,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ベル エルウィン hit 毒クマ雑兵 for 11 damage",
-              "roll": 29,
-              "round": 12,
-              "statusApplied": [],
-              "successChance": 46,
-              "targetIds": [
-                "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "S-ranger-s49-ranger-1",
-              "damage": 8,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス ハインド hit 暗殺者kobold盾 for 8 damage",
-              "roll": 10,
-              "round": 12,
-              "statusApplied": [],
-              "successChance": 71,
-              "targetIds": [
-                "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3"
-              ]
-            },
-            {
-              "actionType": "guard",
               "actorId": "S-support-s49-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
-              "round": 12,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 9,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ユリ ムーン hit 暗殺者kobold盾 for 9 damage",
-              "roll": 38,
-              "round": 12,
-              "statusApplied": [],
-              "successChance": 84,
-              "targetIds": [
-                "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "暗殺者kobold盾 missed",
-              "roll": 96,
-              "round": 12,
-              "successChance": 22,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
               "phase": "retreat",
-              "result": "暗殺者kobold盾が撤退した。",
-              "roll": 60,
-              "round": 13,
-              "successChance": 76
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "phase": "retreat",
-              "result": "毒クマ雑兵は撤退に失敗した。",
-              "roll": 87,
-              "round": 13,
-              "successChance": 31
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "S-ranger-s49-ranger-1",
-              "damage": 15,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス ハインド hit 毒クマ雑兵 for 15 damage",
-              "roll": 16,
-              "round": 13,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "S-scout-s49-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ベル エルウィン missed",
-              "roll": 80,
-              "round": 13,
-              "successChance": 46,
-              "targetIds": [
-                "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "S-mage-s49-mage-2",
-              "damage": 20,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ユリ ムーン hit 毒クマ雑兵 for 20 damage",
-              "roll": 72,
-              "round": 13,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5"
-              ]
-            },
-            {
-              "actionType": "incapacitate",
-              "phase": "combat",
-              "result": "毒クマ雑兵が戦闘不能になった。",
-              "round": 13,
-              "targetIds": [
-                "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5"
-              ]
-            },
-            {
-              "actionType": "corpseExplosion",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "damage": 8,
-              "phase": "combat",
-              "result": "毒クマ雑兵の死体が爆発し、ベル エルウィンに8ダメージ。",
-              "round": 13,
-              "targetIds": ["S-scout-s49-scout-0"]
-            },
-            {
-              "actionType": "corpseExplosion",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "damage": 8,
-              "phase": "combat",
-              "result": "毒クマ雑兵の死体が爆発し、ゼクス ハインドに8ダメージ。",
-              "round": 13,
-              "targetIds": ["S-ranger-s49-ranger-1"]
-            },
-            {
-              "actionType": "corpseExplosion",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "damage": 8,
-              "phase": "combat",
-              "result": "毒クマ雑兵の死体が爆発し、ユリ ムーンに8ダメージ。",
-              "round": 13,
-              "targetIds": ["S-mage-s49-mage-2"]
-            },
-            {
-              "actionType": "corpseExplosion",
-              "actorId": "A-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
-              "damage": 8,
-              "phase": "combat",
-              "result": "毒クマ雑兵の死体が爆発し、グスタフ アイヴィーに8ダメージ。",
-              "round": 13,
-              "targetIds": ["S-support-s49-support-3"]
+              "result": "グスタフ アイヴィーがパーティ撤退を試みた。成功",
+              "roll": 31,
+              "round": 8,
+              "successChance": 95
             }
           ],
-          "outcome": "victory",
-          "partyDamageDealt": 175,
-          "retreatAttempts": [],
-          "rounds": 13,
+          "outcome": "retreat",
+          "partyDamageDealt": 112,
+          "retreatAttempts": [
+            {
+              "aliveCount": 4,
+              "approved": true,
+              "attemptCount": 1,
+              "attempted": true,
+              "averageMorale": 75.75,
+              "enemyThreat": 18.264387142857142,
+              "healerAlive": false,
+              "incapacitatedCount": 0,
+              "leaderId": "S-support-s49-support-3",
+              "matchedReasons": ["healerLostWithWounded"],
+              "moraleThreshold": 37.2,
+              "partyHpRatio": 0.8212745098039215,
+              "partyThreat": 28.96,
+              "proposerHpRatio": 0.9117647058823529,
+              "proposerId": "S-support-s49-support-3",
+              "proposerMorale": 79,
+              "proposerRole": "support",
+              "reason": "healerLostWithWounded",
+              "retreatHpThreshold": 0.13999999999999999,
+              "roll": 31,
+              "round": 8,
+              "success": true,
+              "successChance": 95
+            }
+          ],
+          "retreatDiagnostic": {
+            "aliveCount": 4,
+            "approved": true,
+            "attemptCount": 1,
+            "attempted": true,
+            "averageMorale": 75.75,
+            "enemyThreat": 18.264387142857142,
+            "healerAlive": false,
+            "incapacitatedCount": 0,
+            "leaderId": "S-support-s49-support-3",
+            "matchedReasons": ["healerLostWithWounded"],
+            "moraleThreshold": 37.2,
+            "partyHpRatio": 0.8212745098039215,
+            "partyThreat": 28.96,
+            "proposerHpRatio": 0.9117647058823529,
+            "proposerId": "S-support-s49-support-3",
+            "proposerMorale": 79,
+            "proposerRole": "support",
+            "reason": "healerLostWithWounded",
+            "retreatHpThreshold": 0.13999999999999999,
+            "roll": 31,
+            "round": 8,
+            "success": true,
+            "successChance": 95
+          },
+          "retreatResult": {
+            "chance": 95,
+            "roll": 31,
+            "side": "party",
+            "success": true
+          },
+          "rounds": 8,
           "seed": "s49:battle:0:combat",
           "survivingAdventurers": [
             "S-scout-s49-scout-0",
@@ -1945,13 +1214,14 @@
             "S-support-s49-support-3"
           ],
           "survivingEnemies": [
-            "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
-            "D-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
-            "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
-            "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:4"
+            "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+            "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
+            "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+            "E-humanoid-tank-minion-s49:battle:0:encounter:enemy:4",
+            "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5"
           ]
         },
-        "rounds": 13,
+        "rounds": 8,
         "survivingAdventurerIds": [
           "S-scout-s49-scout-0",
           "S-ranger-s49-ranger-1",
@@ -2118,7 +1388,7 @@
           "S-mage-s49-mage-2"
         ],
         "check": {
-          "effectiveValue": 68,
+          "effectiveValue": 78,
           "result": "criticalSuccess",
           "roll": 9,
           "skill": "scouting"
@@ -2143,7 +1413,7 @@
           "S-mage-s49-mage-2"
         ],
         "check": {
-          "effectiveValue": 73,
+          "effectiveValue": 83,
           "result": "success",
           "roll": 71,
           "skill": "scouting"
@@ -2168,7 +1438,7 @@
           "S-mage-s49-mage-2"
         ],
         "check": {
-          "effectiveValue": 73,
+          "effectiveValue": 83,
           "result": "success",
           "roll": 61,
           "skill": "scouting"
@@ -2274,187 +1544,17 @@
       {
         "actorIds": [],
         "effects": [],
-        "facts": ["戦闘が13ラウンドでvictoryとなった", "接敵結果: success"],
+        "facts": ["戦闘が8ラウンドでretreatとなった", "接敵結果: success"],
         "phase": "battle",
         "targetIds": [],
         "type": "battleSummary"
-      },
-      {
-        "actorIds": [
-          "S-ranger-s49-ranger-1",
-          "S-scout-s49-scout-0",
-          "S-mage-s49-mage-2"
-        ],
-        "check": {
-          "effectiveValue": 88,
-          "result": "criticalSuccess",
-          "roll": 12,
-          "skill": "survival"
-        },
-        "effects": [
-          {
-            "targetId": "tools",
-            "type": "supplyConsume",
-            "value": 1
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "sectorId": "center"
-            },
-            "targetId": "center",
-            "type": "surveySectorSurveyed",
-            "value": 1
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "sectorId": "center"
-            },
-            "targetId": "center",
-            "type": "surveySectorQuality",
-            "value": 100
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "assistanceMemberIds": [
-                "S-scout-s49-scout-0",
-                "S-mage-s49-mage-2"
-              ],
-              "focus": "terrain",
-              "quality": 100,
-              "responsibleMemberIds": ["S-ranger-s49-ranger-1"],
-              "result": "criticalSuccess",
-              "sectorId": "center",
-              "sectorName": "中央区画",
-              "skill": "survival",
-              "surveyed": true
-            },
-            "targetId": "center",
-            "type": "surveySectorResult",
-            "value": 100
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyCoverage",
-            "value": 66.66666666666666
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyAverageQuality",
-            "value": 90
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveySurveyedSectorCount",
-            "value": 2
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyProgress",
-            "value": 50
-          }
-        ],
-        "facts": [
-          "中央区画の測量を完了した。測量精度は100だった",
-          "用具を1消費して測量を助けた"
-        ],
-        "phase": "objective",
-        "targetIds": ["area-1", "center"],
-        "type": "surveySectorResult"
-      },
-      {
-        "actorIds": [
-          "S-mage-s49-mage-2",
-          "S-ranger-s49-ranger-1",
-          "S-support-s49-support-3"
-        ],
-        "check": {
-          "effectiveValue": 96,
-          "result": "success",
-          "roll": 20,
-          "skill": "defenseMagic"
-        },
-        "effects": [
-          {
-            "targetId": "tools",
-            "type": "supplyConsume",
-            "value": 1
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "sectorId": "south"
-            },
-            "targetId": "south",
-            "type": "surveySectorSurveyed",
-            "value": 1
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "sectorId": "south"
-            },
-            "targetId": "south",
-            "type": "surveySectorQuality",
-            "value": 80
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "assistanceMemberIds": [
-                "S-ranger-s49-ranger-1",
-                "S-support-s49-support-3"
-              ],
-              "focus": "arcane",
-              "quality": 80,
-              "responsibleMemberIds": ["S-mage-s49-mage-2"],
-              "result": "success",
-              "sectorId": "south",
-              "sectorName": "南区画",
-              "skill": "defenseMagic",
-              "surveyed": true
-            },
-            "targetId": "south",
-            "type": "surveySectorResult",
-            "value": 80
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyCoverage",
-            "value": 100
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyAverageQuality",
-            "value": 86.66666666666667
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveySurveyedSectorCount",
-            "value": 3
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyProgress",
-            "value": 75
-          }
-        ],
-        "facts": [
-          "南区画の測量を完了した。測量精度は80だった",
-          "用具を1消費して測量を助けた"
-        ],
-        "phase": "objective",
-        "targetIds": ["area-1", "south"],
-        "type": "surveySectorResult"
       },
       {
         "actorIds": [],
         "effects": [
           {
             "metadata": {
-              "surveyedSectorIds": ["north", "center", "south"]
+              "surveyedSectorIds": ["north"]
             },
             "targetId": "area-1",
             "type": "surveyReportPrepared",
@@ -2463,25 +1563,25 @@
           {
             "targetId": "area-1",
             "type": "surveyCoverage",
-            "value": 100
+            "value": 33.33333333333333
           },
           {
             "targetId": "area-1",
             "type": "surveyAverageQuality",
-            "value": 86.66666666666667
+            "value": 80
           },
           {
             "targetId": "area-1",
             "type": "surveySurveyedSectorCount",
-            "value": 3
+            "value": 1
           },
           {
             "targetId": "area-1",
             "type": "surveyProgress",
-            "value": 75
+            "value": 25
           }
         ],
-        "facts": ["3区画分の測量記録を整理し、持ち帰る準備を行った"],
+        "facts": ["1区画分の測量記録を整理し、持ち帰る準備を行った"],
         "phase": "return",
         "targetIds": ["area-1"],
         "type": "surveyReportPrepared"
@@ -2529,7 +1629,7 @@
           {
             "targetId": "area-1",
             "type": "surveyProgress",
-            "value": 100
+            "value": 50
           }
         ],
         "facts": ["測量記録を酒場まで持ち帰った"],
@@ -2543,38 +1643,33 @@
           {
             "targetId": "area-1",
             "type": "surveyCoverage",
-            "value": 100
+            "value": 33.33333333333333
           },
           {
             "targetId": "area-1",
             "type": "surveyAverageQuality",
-            "value": 86.66666666666667
+            "value": 80
           },
           {
             "targetId": "area-1",
             "type": "surveyProgress",
-            "value": 100
+            "value": 50
           },
           {
             "targetId": "area-1",
             "type": "surveyCompleted",
-            "value": 1
+            "value": 0
           }
         ],
-        "facts": ["測量地域の測量進捗: 100% (3/3区画, 平均精度87)"],
+        "facts": ["測量地域の測量進捗: 50% (1/3区画, 平均精度80)"],
         "phase": "aftermath",
         "targetIds": ["area-1"],
-        "type": "surveyCompleted"
+        "type": "surveyFailed"
       },
       {
         "actorIds": [],
-        "effects": [
-          {
-            "type": "moraleChange",
-            "value": 5
-          }
-        ],
-        "facts": ["測量地域の測量進捗: 100% (3/3区画, 平均精度87)"],
+        "effects": [],
+        "facts": ["測量地域の測量進捗: 50% (1/3区画, 平均精度80)"],
         "phase": "aftermath",
         "type": "summary"
       }
@@ -2587,16 +1682,16 @@
       "returnTimeBonus": 0,
       "threatFeatures": []
     },
-    "objectiveCompleted": true,
-    "objectiveProgress": 100,
+    "objectiveCompleted": false,
+    "objectiveProgress": 50,
     "objectiveState": {
       "areaId": "area-1",
       "areaName": "測量地域",
-      "averageQuality": 86.66666666666667,
-      "completed": true,
-      "coveragePercent": 100,
+      "averageQuality": 80,
+      "completed": false,
+      "coveragePercent": 33.33333333333333,
       "minimumAcceptableQuality": 70,
-      "progress": 100,
+      "progress": 50,
       "reportLostDuringReturn": false,
       "reportPrepared": true,
       "reportReturned": true,
@@ -2614,49 +1709,44 @@
           "surveyed": true
         },
         {
-          "assistanceMemberIds": ["S-scout-s49-scout-0", "S-mage-s49-mage-2"],
-          "attempted": true,
+          "assistanceMemberIds": [],
+          "attempted": false,
           "difficulty": 15,
           "focus": "terrain",
           "id": "center",
           "name": "中央区画",
-          "quality": 100,
-          "responsibleMemberIds": ["S-ranger-s49-ranger-1"],
-          "result": "criticalSuccess",
-          "surveyed": true
+          "quality": 0,
+          "responsibleMemberIds": [],
+          "surveyed": false
         },
         {
-          "assistanceMemberIds": [
-            "S-ranger-s49-ranger-1",
-            "S-support-s49-support-3"
-          ],
-          "attempted": true,
+          "assistanceMemberIds": [],
+          "attempted": false,
           "difficulty": 15,
           "focus": "arcane",
           "id": "south",
           "name": "南区画",
-          "quality": 80,
-          "responsibleMemberIds": ["S-mage-s49-mage-2"],
-          "result": "success",
-          "surveyed": true
+          "quality": 0,
+          "responsibleMemberIds": [],
+          "surveyed": false
         }
       ],
       "type": "survey"
     },
     "partyHp": {
-      "S-mage-s49-mage-2": 60,
-      "S-ranger-s49-ranger-1": 77,
-      "S-scout-s49-scout-0": 31,
-      "S-support-s49-support-3": 52
+      "S-mage-s49-mage-2": 68,
+      "S-ranger-s49-ranger-1": 85,
+      "S-scout-s49-scout-0": 28,
+      "S-support-s49-support-3": 62
     },
     "partyMorale": {
-      "S-mage-s49-mage-2": 86,
-      "S-ranger-s49-ranger-1": 78,
-      "S-scout-s49-scout-0": 81,
-      "S-support-s49-support-3": 86
+      "S-mage-s49-mage-2": 81,
+      "S-ranger-s49-ranger-1": 73,
+      "S-scout-s49-scout-0": 76,
+      "S-support-s49-support-3": 81
     },
     "partyMp": {
-      "S-mage-s49-mage-2": 4,
+      "S-mage-s49-mage-2": 19,
       "S-ranger-s49-ranger-1": 3,
       "S-scout-s49-scout-0": 5,
       "S-support-s49-support-3": 55
@@ -2684,7 +1774,7 @@
     "supplies": {
       "food": 8,
       "medicine": 4,
-      "tools": 0
+      "tools": 2
     }
   }
 }

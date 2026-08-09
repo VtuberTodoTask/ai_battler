@@ -46,10 +46,10 @@
         "encounterSeed": "s23:battle:0:encounter",
         "enemyComposition": "beastx4",
         "enemyIds": [
-          "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
-          "B-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
-          "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
-          "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+          "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+          "D-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
+          "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+          "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
         ],
         "entrySnapshot": {
           "environmentEffects": [
@@ -97,7 +97,7 @@
         "phase": "battle",
         "result": {
           "abilityUsage": {},
-          "adventurerActionCount": 21,
+          "adventurerActionCount": 33,
           "contactResult": {
             "effects": {
               "enemyInitiativeBonus": 3,
@@ -111,15 +111,15 @@
           },
           "deadAdventurers": [],
           "defeatedEnemies": [
-            "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
-            "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+            "D-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
+            "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+            "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
           ],
           "discoveredWeaknesses": [],
-          "enemyActionCount": 16,
+          "enemyActionCount": 17,
           "enemyDamageDealt": 0,
           "escapedEnemies": [
-            "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
-            "B-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
+            "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
           ],
           "finalAdventurerStates": [
             {
@@ -159,7 +159,7 @@
             {
               "alive": true,
               "currentHp": 52,
-              "currentMp": 19,
+              "currentMp": 4,
               "dead": false,
               "id": "C-mage-s23-mage-2",
               "incapacitated": false,
@@ -212,13 +212,13 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ジーク オーシャン hit 爪オオカミの群れ for 12 damage",
+              "result": "ジーク オーシャン hit 森ワームの群れ for 12 damage",
               "roll": 2,
               "round": 1,
               "statusApplied": [],
-              "successChance": 41,
+              "successChance": 43,
               "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
               ]
             },
             {
@@ -232,34 +232,18 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ヴァン リーフ hit 爪オオカミの群れ for 12 damage",
+              "result": "ヴァン リーフ hit 森ワームの群れ for 12 damage",
               "roll": 50,
               "round": 1,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "森ワームの群れ missed",
-              "roll": 75,
-              "round": 1,
-              "successChance": 20,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -268,7 +252,7 @@
               },
               "phase": "combat",
               "result": "爪オオカミの群れ missed",
-              "roll": 68,
+              "roll": 75,
               "round": 1,
               "successChance": 7,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
@@ -276,7 +260,7 @@
             {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
-              "damage": 11,
+              "damage": 13,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -284,175 +268,18 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ジーク アイヴィー hit 爪オオカミの群れ for 11 damage",
-              "roll": 72,
+              "result": "ジーク アイヴィー hit 森ワームの群れ for 13 damage",
+              "roll": 68,
               "round": 1,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "森大蛇雑兵 missed",
-              "roll": 35,
-              "round": 1,
-              "successChance": 19,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "毒オオカミ雑兵 missed",
-              "roll": 28,
-              "round": 1,
-              "successChance": 5,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "regen",
-              "phase": "combat",
-              "result": "爪オオカミの群れが再生した。+5 HP",
-              "round": 1,
-              "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-vanguard-s23-vanguard-0",
-              "damage": 17,
-              "metadata": {
-                "attackerRole": "vanguard",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ヴァン リーフ hit 爪オオカミの群れ for 17 damage",
-              "roll": 2,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-guardian-s23-guardian-1",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "ジーク ハインドがヴァン リーフを防護した。",
-              "round": 2,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "森大蛇雑兵 missed",
-              "roll": 26,
-              "round": 2,
-              "successChance": 19,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "森ワームの群れ missed",
-              "roll": 69,
-              "round": 2,
-              "successChance": 20,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "爪オオカミの群れ missed",
-              "roll": 70,
-              "round": 2,
-              "successChance": 7,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s23-mage-2",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ジーク アイヴィー missed",
-              "roll": 90,
-              "round": 2,
-              "successChance": 85,
-              "targetIds": [
-                "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-healer-s23-healer-3",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "healer",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ジーク オーシャン missed",
-              "roll": 81,
-              "round": 2,
-              "successChance": 41,
-              "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -462,117 +289,13 @@
               "phase": "combat",
               "result": "毒オオカミ雑兵 missed",
               "roll": 37,
-              "round": 2,
+              "round": 1,
               "successChance": 5,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
-              "actionType": "regen",
-              "phase": "combat",
-              "result": "爪オオカミの群れが再生した。+5 HP",
-              "round": 2,
-              "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
               "actionType": "melee",
-              "actorId": "C-vanguard-s23-vanguard-0",
-              "damage": 11,
-              "metadata": {
-                "attackerRole": "vanguard",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ヴァン リーフ hit 爪オオカミの群れ for 11 damage",
-              "roll": 43,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "incapacitate",
-              "phase": "combat",
-              "result": "爪オオカミの群れが戦闘不能になった。",
-              "round": 3,
-              "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "森大蛇雑兵 missed",
-              "roll": 88,
-              "round": 3,
-              "successChance": 19,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s23-mage-2",
-              "damage": 13,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ジーク アイヴィー hit 森ワームの群れ for 13 damage",
-              "roll": 55,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 85,
-              "targetIds": [
-                "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-healer-s23-healer-3",
-              "damage": 10,
-              "metadata": {
-                "attackerRole": "healer",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ジーク オーシャン hit 森ワームの群れ for 10 damage",
-              "roll": 23,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 29,
-              "targetIds": [
-                "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-guardian-s23-guardian-1",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "ジーク ハインドがヴァン リーフを防護した。",
-              "round": 3,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -581,14 +304,14 @@
               },
               "phase": "combat",
               "result": "森ワームの群れ missed",
-              "roll": 86,
-              "round": 3,
-              "successChance": 20,
+              "roll": 35,
+              "round": 1,
+              "successChance": 5,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -596,9 +319,9 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "毒オオカミ雑兵 missed",
-              "roll": 57,
-              "round": 3,
+              "result": "森大蛇雑兵 missed",
+              "roll": 28,
+              "round": 1,
               "successChance": 5,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
@@ -613,17 +336,39 @@
               },
               "phase": "combat",
               "result": "ヴァン リーフ hit 森ワームの群れ for 17 damage",
-              "roll": 5,
-              "round": 4,
+              "roll": 2,
+              "round": 2,
               "statusApplied": [],
-              "successChance": 85,
+              "successChance": 95,
               "targetIds": [
-                "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
               ]
             },
             {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "森ワームの群れが戦闘不能になった。",
+              "round": 2,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドがヴァン リーフを防護した。",
+              "round": 2,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
               "actionType": "melee",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -631,15 +376,279 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "森ワームの群れ missed",
-              "roll": 100,
-              "round": 4,
-              "successChance": 20,
+              "result": "爪オオカミの群れ missed",
+              "roll": 26,
+              "round": 2,
+              "successChance": 7,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s23-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク アイヴィー hit 毒オオカミ雑兵 for 13 damage",
+              "roll": 69,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s23-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク オーシャン missed",
+              "roll": 90,
+              "round": 2,
+              "successChance": 41,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "森大蛇雑兵 missed",
+              "roll": 81,
+              "round": 2,
+              "successChance": 5,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "毒オオカミ雑兵 missed",
+              "roll": 37,
+              "round": 2,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s23-vanguard-0",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン リーフ hit 毒オオカミ雑兵 for 12 damage",
+              "roll": 80,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s23-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク アイヴィー hit 毒オオカミ雑兵 for 14 damage",
+              "roll": 33,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s23-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク オーシャン missed",
+              "roll": 55,
+              "round": 3,
+              "successChance": 41,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドがヴァン リーフを防護した。",
+              "round": 3,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "爪オオカミの群れ missed",
+              "roll": 62,
+              "round": 3,
+              "successChance": 7,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "森大蛇雑兵 missed",
+              "roll": 23,
+              "round": 3,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "毒オオカミ雑兵 missed",
+              "roll": 73,
+              "round": 3,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s23-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン リーフ missed",
+              "roll": 100,
+              "round": 4,
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s23-mage-2",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク アイヴィー hit 毒オオカミ雑兵 for 10 damage",
+              "roll": 82,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドがヴァン リーフを防護した。",
+              "round": 4,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s23-healer-3",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク オーシャン hit 毒オオカミ雑兵 for 11 damage",
+              "roll": 34,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 41,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "毒オオカミ雑兵が戦闘不能になった。",
+              "round": 4,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -650,8 +659,61 @@
               "result": "森大蛇雑兵 missed",
               "roll": 86,
               "round": 4,
-              "successChance": 19,
+              "successChance": 5,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "爪オオカミの群れ missed",
+              "roll": 59,
+              "round": 4,
+              "successChance": 7,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "phase": "retreat",
+              "result": "爪オオカミの群れは撤退に失敗した。",
+              "roll": 44,
+              "round": 5,
+              "successChance": 18
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "phase": "retreat",
+              "result": "森大蛇雑兵は撤退に失敗した。",
+              "roll": 31,
+              "round": 5,
+              "successChance": 18
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s23-vanguard-0",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン リーフ hit 森大蛇雑兵 for 10 damage",
+              "roll": 72,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
+              ]
             },
             {
               "actionType": "guard",
@@ -663,27 +725,8 @@
               },
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
-              "round": 4,
+              "round": 5,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s23-mage-2",
-              "damage": 12,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ジーク アイヴィー hit 森ワームの群れ for 12 damage",
-              "roll": 59,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 85,
-              "targetIds": [
-                "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
-              ]
             },
             {
               "actionType": "melee",
@@ -696,92 +739,36 @@
               },
               "phase": "combat",
               "result": "ジーク オーシャン missed",
-              "roll": 31,
-              "round": 4,
-              "successChance": 29,
-              "targetIds": [
-                "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "毒オオカミ雑兵 missed",
-              "roll": 52,
-              "round": 4,
-              "successChance": 5,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-vanguard-s23-vanguard-0",
-              "damage": 13,
-              "metadata": {
-                "attackerRole": "vanguard",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ヴァン リーフ hit 森ワームの群れ for 13 damage",
               "roll": 85,
               "round": 5,
-              "statusApplied": [],
-              "successChance": 85,
+              "successChance": 42,
               "targetIds": [
-                "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "incapacitate",
-              "phase": "combat",
-              "result": "森ワームの群れが戦闘不能になった。",
-              "round": 5,
-              "targetIds": [
-                "B-beast-swarm-standard-s23:battle:0:encounter:enemy:0"
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
               ]
             },
             {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
-              "damage": 21,
+              "damage": 10,
               "metadata": {
                 "attackerRole": "mage",
+                "followedLeaderTarget": true,
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ジーク アイヴィー hit 毒オオカミ雑兵 for 21 damage",
-              "roll": 19,
+              "result": "ジーク アイヴィー hit 森大蛇雑兵 for 10 damage",
+              "roll": 78,
               "round": 5,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
               ]
             },
             {
-              "actionType": "guard",
-              "actorId": "C-guardian-s23-guardian-1",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "ジーク ハインドがヴァン リーフを防護した。",
-              "round": 5,
-              "targetIds": ["C-vanguard-s23-vanguard-0"]
-            },
-            {
               "actionType": "melee",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -790,9 +777,216 @@
               },
               "phase": "combat",
               "result": "森大蛇雑兵 missed",
+              "roll": 85,
+              "round": 5,
+              "successChance": 5,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "爪オオカミの群れ missed",
               "roll": 35,
               "round": 5,
-              "successChance": 19,
+              "successChance": 7,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "phase": "retreat",
+              "result": "爪オオカミの群れは撤退に失敗した。",
+              "roll": 61,
+              "round": 6,
+              "successChance": 18
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "phase": "retreat",
+              "result": "森大蛇雑兵は撤退に失敗した。",
+              "roll": 100,
+              "round": 6,
+              "successChance": 18
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s23-healer-3",
+              "damage": 7,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク オーシャン hit 森大蛇雑兵 for 7 damage",
+              "roll": 40,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 42,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s23-vanguard-0",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン リーフ hit 森大蛇雑兵 for 13 damage",
+              "roll": 25,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s23-mage-2",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク アイヴィー hit 森大蛇雑兵 for 11 damage",
+              "roll": 80,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "森大蛇雑兵が戦闘不能になった。",
+              "round": 6,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドがヴァン リーフを防護した。",
+              "round": 6,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "爪オオカミの群れ missed",
+              "roll": 62,
+              "round": 6,
+              "successChance": 7,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "phase": "retreat",
+              "result": "爪オオカミの群れは撤退に失敗した。",
+              "roll": 19,
+              "round": 7,
+              "successChance": 18
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s23-vanguard-0",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン リーフ hit 爪オオカミの群れ for 12 damage",
+              "roll": 34,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s23-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク アイヴィー hit 爪オオカミの群れ for 13 damage",
+              "roll": 83,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドがヴァン リーフを防護した。",
+              "round": 7,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "爪オオカミの群れ missed",
+              "roll": 19,
+              "round": 7,
+              "successChance": 7,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
@@ -806,16 +1000,94 @@
               },
               "phase": "combat",
               "result": "ジーク オーシャン missed",
-              "roll": 61,
-              "round": 5,
+              "roll": 92,
+              "round": 7,
               "successChance": 41,
               "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "phase": "retreat",
+              "result": "爪オオカミの群れは撤退に失敗した。",
+              "roll": 97,
+              "round": 8,
+              "successChance": 18
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s23-vanguard-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ヴァン リーフ missed",
+              "roll": 100,
+              "round": 8,
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドがヴァン リーフを防護した。",
+              "round": 8,
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s23-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク オーシャン missed",
+              "roll": 79,
+              "round": 8,
+              "successChance": 41,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s23-mage-2",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ジーク アイヴィー hit 爪オオカミの群れ for 11 damage",
+              "roll": 85,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -823,44 +1095,26 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "毒オオカミ雑兵 missed",
-              "roll": 100,
-              "round": 5,
-              "successChance": 5,
+              "result": "爪オオカミの群れ missed",
+              "roll": 25,
+              "round": 8,
+              "successChance": 7,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
-              "actionType": "regen",
-              "phase": "combat",
-              "result": "毒オオカミ雑兵が再生した。+5 HP",
-              "round": 5,
-              "targetIds": [
-                "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
               "actionType": "retreat",
-              "actorId": "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+              "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
               "phase": "retreat",
-              "result": "毒オオカミ雑兵が撤退した。",
-              "roll": 16,
-              "round": 6,
-              "successChance": 19
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "B-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
-              "phase": "retreat",
-              "result": "森大蛇雑兵が撤退した。",
-              "roll": 23,
-              "round": 6,
-              "successChance": 33
+              "result": "爪オオカミの群れが撤退した。",
+              "roll": 15,
+              "round": 9,
+              "successChance": 18
             }
           ],
           "outcome": "victory",
-          "partyDamageDealt": 149,
+          "partyDamageDealt": 201,
           "retreatAttempts": [],
-          "rounds": 6,
+          "rounds": 9,
           "seed": "s23:battle:0:combat",
           "survivingAdventurers": [
             "C-vanguard-s23-vanguard-0",
@@ -869,11 +1123,10 @@
             "C-healer-s23-healer-3"
           ],
           "survivingEnemies": [
-            "C-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
-            "B-beast-swarm-standard-s23:battle:0:encounter:enemy:3"
+            "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
           ]
         },
-        "rounds": 6,
+        "rounds": 9,
         "survivingAdventurerIds": [
           "C-vanguard-s23-vanguard-0",
           "C-guardian-s23-guardian-1",
@@ -888,7 +1141,7 @@
     "casualties": [],
     "currentPhase": "aftermath",
     "discoveredThreats": ["traps", "poorVisibility"],
-    "elapsedTime": 8.65,
+    "elapsedTime": 7.65,
     "incapacitated": [],
     "information": [],
     "injuries": [
@@ -917,7 +1170,7 @@
           "C-mage-s23-mage-2"
         ],
         "check": {
-          "effectiveValue": 58,
+          "effectiveValue": 68,
           "result": "success",
           "roll": 41,
           "skill": "survival"
@@ -942,7 +1195,7 @@
           "C-mage-s23-mage-2"
         ],
         "check": {
-          "effectiveValue": 53,
+          "effectiveValue": 63,
           "result": "criticalSuccess",
           "roll": 4,
           "skill": "survival"
@@ -959,7 +1212,7 @@
           "C-vanguard-s23-vanguard-0"
         ],
         "check": {
-          "effectiveValue": 32,
+          "effectiveValue": 42,
           "result": "success",
           "roll": 13,
           "skill": "trapDetection"
@@ -1010,7 +1263,7 @@
           "C-healer-s23-healer-3"
         ],
         "check": {
-          "effectiveValue": 17,
+          "effectiveValue": 35,
           "result": "failure",
           "roll": 84,
           "skill": "scouting"
@@ -1054,8 +1307,8 @@
           "C-healer-s23-healer-3"
         ],
         "check": {
-          "effectiveValue": 7,
-          "result": "success",
+          "effectiveValue": 25,
+          "result": "criticalSuccess",
           "roll": 2,
           "skill": "scouting"
         },
@@ -1069,7 +1322,7 @@
             "value": 20
           }
         ],
-        "facts": ["ジーク アイヴィーが救出対象の位置を特定した"],
+        "facts": ["ジーク アイヴィーが即座に救出対象の位置を特定した"],
         "phase": "contact",
         "type": "rescueSearch"
       },
@@ -1080,17 +1333,12 @@
           "C-mage-s23-mage-2"
         ],
         "check": {
-          "effectiveValue": 30,
-          "result": "partialSuccess",
+          "effectiveValue": 50,
+          "result": "success",
           "roll": 34,
           "skill": "survival"
         },
         "effects": [
-          {
-            "targetId": "tools",
-            "type": "supplyConsume",
-            "value": 1
-          },
           {
             "type": "rescueReached",
             "value": 1
@@ -1100,10 +1348,7 @@
             "value": 40
           }
         ],
-        "facts": [
-          "用具を1消費して道を切り開いた",
-          "ヴァン リーフは救出対象のもとへ到達したが、多少の遅延が生じた"
-        ],
+        "facts": ["ヴァン リーフが救出対象のもとへ到達した"],
         "phase": "contact",
         "type": "rescueTargetReached"
       },
@@ -1123,7 +1368,7 @@
       {
         "actorIds": [],
         "effects": [],
-        "facts": ["戦闘が6ラウンドでvictoryとなった", "接敵結果: failure"],
+        "facts": ["戦闘が9ラウンドでvictoryとなった", "接敵結果: failure"],
         "phase": "battle",
         "targetIds": [],
         "type": "battleSummary"
@@ -1131,7 +1376,7 @@
       {
         "actorIds": ["C-guardian-s23-guardian-1"],
         "check": {
-          "effectiveValue": 81,
+          "effectiveValue": 88,
           "result": "success",
           "roll": 32,
           "skill": "defense"
@@ -1185,7 +1430,7 @@
           "C-guardian-s23-guardian-1"
         ],
         "check": {
-          "effectiveValue": 83,
+          "effectiveValue": 93,
           "result": "success",
           "roll": 51,
           "skill": "healing"
@@ -1227,7 +1472,7 @@
           "C-mage-s23-mage-2"
         ],
         "check": {
-          "effectiveValue": 30,
+          "effectiveValue": 40,
           "result": "criticalSuccess",
           "roll": 5,
           "skill": "survival"
@@ -1261,7 +1506,7 @@
           "C-mage-s23-mage-2"
         ],
         "check": {
-          "effectiveValue": 53,
+          "effectiveValue": 63,
           "result": "success",
           "roll": 13,
           "skill": "survival"
@@ -1278,7 +1523,7 @@
           "C-vanguard-s23-vanguard-0"
         ],
         "check": {
-          "effectiveValue": 32,
+          "effectiveValue": 42,
           "result": "failure",
           "roll": 73,
           "skill": "trapDetection"
@@ -1305,7 +1550,7 @@
       {
         "actorIds": ["C-healer-s23-healer-3"],
         "check": {
-          "effectiveValue": 86,
+          "effectiveValue": 96,
           "result": "success",
           "roll": 33,
           "skill": "firstAid"
@@ -1365,7 +1610,7 @@
       {
         "actorIds": ["C-healer-s23-healer-3"],
         "check": {
-          "effectiveValue": 96,
+          "effectiveValue": 100,
           "result": "success",
           "roll": 86,
           "skill": "healing"
@@ -1408,6 +1653,7 @@
       "difficulty": "normal",
       "preparationRouteBonus": 1,
       "requestFeatures": ["traps", "poorVisibility"],
+      "rescueAccessBonus": 10,
       "rescueEvacuationResult": "criticalSuccess",
       "rescueTargetEvacuated": true,
       "rescueTargetMobility": "mobile",
@@ -1451,7 +1697,7 @@
     "partyMp": {
       "C-guardian-s23-guardian-1": 4,
       "C-healer-s23-healer-3": 54,
-      "C-mage-s23-mage-2": 19,
+      "C-mage-s23-mage-2": 4,
       "C-vanguard-s23-vanguard-0": 5
     },
     "partyStatusEffects": {
@@ -1477,7 +1723,7 @@
     "supplies": {
       "food": 8,
       "medicine": 0,
-      "tools": 0
+      "tools": 1
     }
   }
 }

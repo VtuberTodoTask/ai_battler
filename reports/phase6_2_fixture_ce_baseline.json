@@ -1,0 +1,91 @@
+{
+  "objectiveType": "investigation",
+  "requestTemplateId": "investigation-monster-signs",
+  "requestRank": "E",
+  "partyTemplateId": "assault",
+  "partyRank": "C",
+  "scenarioSeed": "phase6-2:scenario:2",
+  "rankAdvantage": 2,
+  "sampleCount": 200,
+  "estimatedSuccessRate": 0.005,
+  "completeSuccessRate": 0.005,
+  "successRate": 0,
+  "partialSuccessRate": 0.03,
+  "failedObjectiveRate": 0.9,
+  "forcedRetreatRate": 0.01,
+  "lostExpeditionRate": 0.055,
+  "objectiveCompletedRate": 0.005,
+  "avgObjectiveProgress": 11.1,
+  "medianObjectiveProgress": 5,
+  "objectiveProgressP10": 0,
+  "objectiveProgressP90": 25,
+  "battleOccurredRate": 1,
+  "battleOutcomeCounts": {
+    "victory": 187,
+    "retreat": 3,
+    "costlyVictory": 9,
+    "partialVictory": 1
+  },
+  "battleFavorableRate": 0.985,
+  "favorableBattleThenExpeditionFailureRate": 0.95,
+  "avgPreBattleHpTotal": 257.78,
+  "avgFinalHpTotal": 246.7,
+  "avgCasualties": 0.055,
+  "avgIncapacitated": 0.05,
+  "acceptanceDecision": "accepted",
+  "acceptanceReason": "appropriate",
+  "relevantRoleCount": 0,
+  "leaderJudgment": 54,
+  "objectiveDiagnosticsSummary": {
+    "objectiveProgress": {
+      "count": 200,
+      "mean": 11.1,
+      "median": 5,
+      "p10": 0,
+      "p25": 0,
+      "p75": 20,
+      "p90": 25,
+      "trueRate": 0
+    },
+    "objectiveCompleted": {
+      "count": 200,
+      "mean": 0,
+      "median": 0,
+      "p10": 0,
+      "p25": 0,
+      "p75": 0,
+      "p90": 0,
+      "trueRate": 0.005
+    },
+    "discoveredInformationCount": {
+      "count": 200,
+      "mean": 0.745,
+      "median": 1,
+      "p10": 0,
+      "p25": 0,
+      "p75": 1,
+      "p90": 2,
+      "trueRate": 0
+    },
+    "completeInformationCount": {
+      "count": 200,
+      "mean": 0.22,
+      "median": 0,
+      "p10": 0,
+      "p25": 0,
+      "p75": 0,
+      "p90": 1,
+      "trueRate": 0
+    },
+    "discoveredThreatsCount": {
+      "count": 200,
+      "mean": 1.615,
+      "median": 2,
+      "p10": 1,
+      "p25": 1,
+      "p75": 2,
+      "p90": 2,
+      "trueRate": 0
+    }
+  }
+}

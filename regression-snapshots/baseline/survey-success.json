@@ -1,5 +1,5 @@
 {
-  "outcome": "success",
+  "outcome": "forcedRetreat",
   "state": {
     "avoidedThreats": [],
     "battleEntrySnapshot": {
@@ -32,7 +32,7 @@
       "knownEnemyWeaknesses": [],
       "surprise": "neutral"
     },
-    "battleOutcome": "partialVictory",
+    "battleOutcome": "retreat",
     "battles": [
       {
         "combatSeed": "s1:battle:0:combat",
@@ -41,9 +41,9 @@
         "encounterSeed": "s1:battle:0:encounter",
         "enemyComposition": "insectx4",
         "enemyIds": [
+          "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
           "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
           "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
-          "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
           "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
         ],
         "entrySnapshot": {
@@ -83,34 +83,33 @@
         "knownEnemyWeaknesses": [],
         "matchedAbilityIntel": [],
         "matchedWeaknessIntel": [],
-        "outcome": "partialVictory",
+        "outcome": "retreat",
         "phase": "battle",
         "result": {
           "abilityUsage": {},
-          "adventurerActionCount": 28,
+          "adventurerActionCount": 16,
           "contactResult": {
             "effects": {
               "initiativeBonus": 2
             },
-            "enemyStealth": 105,
+            "enemyStealth": 99,
             "partyScouting": 118.85,
             "roll": 54,
-            "successChance": 63.849999999999994,
+            "successChance": 69.85,
             "type": "success"
           },
           "deadAdventurers": [],
           "defeatedEnemies": [
-            "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
             "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
           ],
           "discoveredWeaknesses": [],
-          "enemyActionCount": 23,
-          "enemyDamageDealt": 38,
+          "enemyActionCount": 15,
+          "enemyDamageDealt": 33,
           "escapedEnemies": [],
           "finalAdventurerStates": [
             {
               "alive": true,
-              "currentHp": 65,
+              "currentHp": 68,
               "currentMp": 7,
               "dead": false,
               "id": "C-scout-s1-scout-0",
@@ -130,8 +129,8 @@
             },
             {
               "alive": true,
-              "currentHp": 18,
-              "currentMp": 8,
+              "currentHp": 20,
+              "currentMp": 23,
               "dead": false,
               "id": "C-mage-s1-mage-2",
               "incapacitated": false,
@@ -177,24 +176,7 @@
               "result": "冒険者側が接敵に成功。",
               "roll": 54,
               "round": 0,
-              "successChance": 63.849999999999994
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
-              "damage": 6,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲忍長 hit フェイ アイヴィー for 6 damage",
-              "roll": 39,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 82,
-              "targetIds": ["C-mage-s1-mage-2"]
+              "successChance": 69.85
             },
             {
               "actionType": "ranged",
@@ -207,13 +189,30 @@
               },
               "phase": "combat",
               "result": "エルナ エルウィン hit 甲殻甲虫雑兵長 for 9 damage",
-              "roll": 26,
+              "roll": 39,
               "round": 1,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": [
                 "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
               ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲忍長 hit フェイ アイヴィー for 5 damage",
+              "roll": 26,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 76,
+              "targetIds": ["C-mage-s1-mage-2"]
             },
             {
               "actionType": "melee",
@@ -229,7 +228,7 @@
               "roll": 16,
               "round": 1,
               "statusApplied": [],
-              "successChance": 81,
+              "successChance": 84,
               "targetIds": [
                 "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
               ]
@@ -279,7 +278,7 @@
               "result": "甲殻蟻雑兵長 missed",
               "roll": 58,
               "round": 1,
-              "successChance": 31,
+              "successChance": 28,
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
@@ -295,7 +294,7 @@
               "result": "甲殻甲虫雑兵長 missed",
               "roll": 80,
               "round": 1,
-              "successChance": 34,
+              "successChance": 30,
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
@@ -311,39 +310,23 @@
               "result": "砂蟻の群れ長 missed",
               "roll": 79,
               "round": 1,
-              "successChance": 30,
+              "successChance": 27,
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
               "actionType": "ranged",
-              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
-              "damage": 5,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲忍長 hit フェイ アイヴィー for 5 damage",
-              "roll": 43,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 82,
-              "targetIds": ["C-mage-s1-mage-2"]
-            },
-            {
-              "actionType": "ranged",
               "actorId": "C-ranger-s1-ranger-1",
-              "damage": 0,
+              "damage": 8,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "エルナ エルウィン missed",
-              "roll": 99,
+              "result": "エルナ エルウィン hit 甲殻甲虫雑兵長 for 8 damage",
+              "roll": 43,
               "round": 2,
+              "statusApplied": [],
               "successChance": 95,
               "targetIds": [
                 "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
@@ -352,18 +335,17 @@
             {
               "actionType": "melee",
               "actorId": "C-scout-s1-scout-0",
-              "damage": 14,
+              "damage": 0,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
                 "isFlank": true
               },
               "phase": "combat",
-              "result": "ドラン オーシャン hit 甲殻甲虫雑兵長 for 14 damage",
-              "roll": 63,
+              "result": "ドラン オーシャン missed",
+              "roll": 99,
               "round": 2,
-              "statusApplied": [],
-              "successChance": 86,
+              "successChance": 89,
               "targetIds": [
                 "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
               ]
@@ -380,6 +362,23 @@
               "result": "マルチナ スカイがドラン オーシャンを防護した。",
               "round": 2,
               "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲忍長 hit フェイ アイヴィー for 8 damage",
+              "roll": 63,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 76,
+              "targetIds": ["C-mage-s1-mage-2"]
             },
             {
               "actionType": "magic",
@@ -403,26 +402,6 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
-              "damage": 1,
-              "metadata": {
-                "guardPrevented": 3,
-                "guardSourceId": "C-support-s1-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "甲殻蟻雑兵長 hit ドラン オーシャン for 1 damage",
-              "roll": 29,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 31,
-              "targetIds": ["C-scout-s1-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -430,10 +409,30 @@
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "甲殻甲虫雑兵長 missed",
-              "roll": 35,
+              "result": "甲殻蟻雑兵長 missed",
+              "roll": 29,
               "round": 2,
-              "successChance": 34,
+              "successChance": 28,
+              "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3",
+              "damage": 1,
+              "metadata": {
+                "guardPrevented": 4,
+                "guardSourceId": "C-support-s1-support-3",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "scout"
+              },
+              "phase": "combat",
+              "result": "甲殻甲虫雑兵長 hit ドラン オーシャン for 1 damage",
+              "roll": 17,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 30,
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
@@ -449,43 +448,44 @@
               "result": "砂蟻の群れ長 missed",
               "roll": 91,
               "round": 2,
-              "successChance": 30,
+              "successChance": 27,
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
               "actionType": "ranged",
-              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲忍長 missed",
-              "roll": 93,
-              "round": 3,
-              "successChance": 82,
-              "targetIds": ["C-mage-s1-mage-2"]
-            },
-            {
-              "actionType": "ranged",
               "actorId": "C-ranger-s1-ranger-1",
-              "damage": 9,
+              "damage": 11,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "エルナ エルウィン hit 甲殻甲虫雑兵長 for 9 damage",
-              "roll": 61,
+              "result": "エルナ エルウィン hit 甲殻甲虫雑兵長 for 11 damage",
+              "roll": 93,
               "round": 3,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": [
                 "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
               ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲忍長 hit フェイ アイヴィー for 8 damage",
+              "roll": 32,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 76,
+              "targetIds": ["C-mage-s1-mage-2"]
             },
             {
               "actionType": "guard",
@@ -503,17 +503,18 @@
             {
               "actionType": "melee",
               "actorId": "C-scout-s1-scout-0",
-              "damage": 0,
+              "damage": 10,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
                 "isFlank": true
               },
               "phase": "combat",
-              "result": "ドラン オーシャン missed",
-              "roll": 88,
+              "result": "ドラン オーシャン hit 甲殻甲虫雑兵長 for 10 damage",
+              "roll": 85,
               "round": 3,
-              "successChance": 86,
+              "statusApplied": [],
+              "successChance": 89,
               "targetIds": [
                 "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
               ]
@@ -529,7 +530,7 @@
               },
               "phase": "combat",
               "result": "フェイ アイヴィー hit 甲殻蟻雑兵長 for 12 damage",
-              "roll": 85,
+              "roll": 49,
               "round": 3,
               "statusApplied": [],
               "successChance": 95,
@@ -548,29 +549,25 @@
               },
               "phase": "combat",
               "result": "甲殻甲虫雑兵長 missed",
-              "roll": 49,
+              "roll": 57,
               "round": 3,
-              "successChance": 34,
+              "successChance": 30,
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
-              "damage": 1,
+              "damage": 0,
               "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-support-s1-support-3",
                 "isCounter": false,
                 "isFlank": false,
-                "preventedIncap": false,
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "砂蟻の群れ長 hit ドラン オーシャン for 1 damage",
-              "roll": 27,
+              "result": "砂蟻の群れ長 missed",
+              "roll": 82,
               "round": 3,
-              "statusApplied": [],
-              "successChance": 30,
+              "successChance": 27,
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
@@ -584,236 +581,26 @@
               },
               "phase": "combat",
               "result": "甲殻蟻雑兵長 missed",
-              "roll": 82,
+              "roll": 87,
               "round": 3,
-              "successChance": 31,
+              "successChance": 28,
               "targetIds": ["C-scout-s1-scout-0"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-ranger-s1-ranger-1",
-              "damage": 8,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "エルナ エルウィン hit 甲殻甲虫雑兵長 for 8 damage",
-              "roll": 41,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
-              "damage": 9,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲忍長 hit フェイ アイヴィー for 9 damage",
-              "roll": 31,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 82,
-              "targetIds": ["C-mage-s1-mage-2"]
             },
             {
               "actionType": "melee",
               "actorId": "C-scout-s1-scout-0",
-              "damage": 0,
+              "damage": 16,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
                 "isFlank": true
               },
               "phase": "combat",
-              "result": "ドラン オーシャン missed",
-              "roll": 79,
-              "round": 4,
-              "successChance": 76,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-support-s1-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "マルチナ スカイがドラン オーシャンを防護した。",
-              "round": 4,
-              "targetIds": ["C-scout-s1-scout-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s1-mage-2",
-              "damage": 11,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "フェイ アイヴィー hit 甲殻蟻雑兵長 for 11 damage",
-              "roll": 58,
+              "result": "ドラン オーシャン hit 甲殻甲虫雑兵長 for 16 damage",
+              "roll": 8,
               "round": 4,
               "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
-              "damage": 2,
-              "metadata": {
-                "guardPrevented": 4,
-                "guardSourceId": "C-support-s1-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "甲殻蟻雑兵長 hit ドラン オーシャン for 2 damage",
-              "roll": 6,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 31,
-              "targetIds": ["C-scout-s1-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "甲殻甲虫雑兵長 missed",
-              "roll": 66,
-              "round": 4,
-              "successChance": 34,
-              "targetIds": ["C-scout-s1-scout-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
-              "damage": 2,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-support-s1-support-3",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "砂蟻の群れ長 hit ドラン オーシャン for 2 damage",
-              "roll": 23,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 30,
-              "targetIds": ["C-scout-s1-scout-0"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-ranger-s1-ranger-1",
-              "damage": 10,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "エルナ エルウィン hit 甲殻甲虫雑兵長 for 10 damage",
-              "roll": 62,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
-              "damage": 7,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲忍長 hit フェイ アイヴィー for 7 damage",
-              "roll": 32,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 82,
-              "targetIds": ["C-mage-s1-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s1-mage-2",
-              "damage": 17,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "フェイ アイヴィー hit 甲殻蟻雑兵長 for 17 damage",
-              "roll": 17,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-support-s1-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "マルチナ スカイがフェイ アイヴィーを防護した。",
-              "round": 5,
-              "targetIds": ["C-mage-s1-mage-2"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-scout-s1-scout-0",
-              "damage": 13,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ドラン オーシャン hit 甲殻甲虫雑兵長 for 13 damage",
-              "roll": 59,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 76,
+              "successChance": 79,
               "targetIds": [
                 "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
               ]
@@ -822,33 +609,84 @@
               "actionType": "incapacitate",
               "phase": "combat",
               "result": "甲殻甲虫雑兵長が戦闘不能になった。",
-              "round": 5,
+              "round": 4,
               "targetIds": [
                 "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3"
               ]
             },
             {
-              "actionType": "melee",
-              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+              "actionType": "ranged",
+              "actorId": "C-ranger-s1-ranger-1",
               "damage": 0,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "エルナ エルウィン missed",
+              "roll": 97,
+              "round": 4,
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s1-mage-2",
+              "damage": 13,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ アイヴィー hit 甲殻蟻雑兵長 for 13 damage",
+              "roll": 79,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "damage": 6,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
-                "targetRole": "scout"
+                "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "甲殻蟻雑兵長 missed",
-              "roll": 85,
-              "round": 5,
-              "successChance": 31,
-              "targetIds": ["C-scout-s1-scout-0"]
+              "result": "毒蟲忍長 hit フェイ アイヴィー for 6 damage",
+              "roll": 2,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 76,
+              "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-support-s1-support-3",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "support",
+                "guardTargetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "マルチナ スカイがフェイ アイヴィーを防護した。",
+              "round": 4,
+              "targetIds": ["C-mage-s1-mage-2"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
               "damage": 3,
               "metadata": {
-                "guardPrevented": 5,
+                "guardPrevented": 8,
                 "guardSourceId": "C-support-s1-support-3",
                 "isCounter": false,
                 "isFlank": false,
@@ -857,24 +695,15 @@
               },
               "phase": "combat",
               "result": "砂蟻の群れ長 hit ドラン オーシャン for 3 damage",
-              "roll": 26,
-              "round": 5,
+              "roll": 3,
+              "round": 4,
               "statusApplied": [],
-              "successChance": 30,
+              "successChance": 27,
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
-              "actionType": "retreat",
-              "actorId": "C-support-s1-support-3",
-              "phase": "retreat",
-              "result": "マルチナ スカイがパーティ撤退を試みた。失敗",
-              "roll": 98,
-              "round": 6,
-              "successChance": 95
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "actionType": "melee",
+              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
               "damage": 2,
               "metadata": {
                 "guardPrevented": 5,
@@ -882,228 +711,14 @@
                 "isCounter": false,
                 "isFlank": false,
                 "preventedIncap": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲忍長 hit フェイ アイヴィー for 2 damage",
-              "roll": 74,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 77,
-              "targetIds": ["C-mage-s1-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-ranger-s1-ranger-1",
-              "damage": 13,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "エルナ エルウィン hit 甲殻蟻雑兵長 for 13 damage",
-              "roll": 74,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "incapacitate",
-              "phase": "combat",
-              "result": "甲殻蟻雑兵長が戦闘不能になった。",
-              "round": 6,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-scout-s1-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ドラン オーシャン missed",
-              "roll": 82,
-              "round": 6,
-              "successChance": 69,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-support-s1-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "マルチナ スカイがフェイ アイヴィーを防護した。",
-              "round": 6,
-              "targetIds": ["C-mage-s1-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s1-mage-2",
-              "damage": 21,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "フェイ アイヴィー hit 砂蟻の群れ長 for 21 damage",
-              "roll": 15,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
                 "targetRole": "scout"
               },
               "phase": "combat",
-              "result": "砂蟻の群れ長 missed",
-              "roll": 69,
-              "round": 6,
-              "successChance": 35,
-              "targetIds": ["C-scout-s1-scout-0"]
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
-              "phase": "retreat",
-              "result": "砂蟻の群れ長は撤退に失敗した。",
-              "roll": 19,
-              "round": 7,
-              "successChance": 14
-            },
-            {
-              "actionType": "retreat",
-              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
-              "phase": "retreat",
-              "result": "毒蟲忍長は撤退に失敗した。",
-              "roll": 88,
-              "round": 7,
-              "successChance": 86
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-ranger-s1-ranger-1",
-              "damage": 12,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "エルナ エルウィン hit 砂蟻の群れ長 for 12 damage",
-              "roll": 21,
-              "round": 7,
+              "result": "甲殻蟻雑兵長 hit ドラン オーシャン for 2 damage",
+              "roll": 23,
+              "round": 4,
               "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲忍長 missed",
-              "roll": 88,
-              "round": 7,
-              "successChance": 77,
-              "targetIds": ["C-mage-s1-mage-2"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-scout-s1-scout-0",
-              "damage": 10,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "ドラン オーシャン hit 砂蟻の群れ長 for 10 damage",
-              "roll": 35,
-              "round": 7,
-              "statusApplied": [],
-              "successChance": 69,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-support-s1-support-3",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "support",
-                "guardTargetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "マルチナ スカイがフェイ アイヴィーを防護した。",
-              "round": 7,
-              "targetIds": ["C-mage-s1-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s1-mage-2",
-              "damage": 13,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "フェイ アイヴィー hit 砂蟻の群れ長 for 13 damage",
-              "roll": 82,
-              "round": 7,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": [
-                "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "scout"
-              },
-              "phase": "combat",
-              "result": "砂蟻の群れ長 missed",
-              "roll": 83,
-              "round": 7,
-              "successChance": 35,
+              "successChance": 28,
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
@@ -1111,13 +726,13 @@
               "actorId": "C-support-s1-support-3",
               "phase": "retreat",
               "result": "マルチナ スカイがパーティ撤退を試みた。成功",
-              "roll": 66,
-              "round": 8,
+              "roll": 19,
+              "round": 5,
               "successChance": 95
             }
           ],
-          "outcome": "partialVictory",
-          "partyDamageDealt": 211,
+          "outcome": "retreat",
+          "partyDamageDealt": 118,
           "retreatAttempts": [
             {
               "aliveCount": 4,
@@ -1125,13 +740,13 @@
               "attemptCount": 1,
               "attempted": true,
               "averageMorale": 59.5,
-              "enemyThreat": 21.574800000000003,
+              "enemyThreat": 18.33858,
               "healerAlive": false,
               "incapacitatedCount": 0,
               "leaderId": "C-support-s1-support-3",
               "matchedReasons": ["healerLostWithWounded"],
               "moraleThreshold": 12.1,
-              "partyHpRatio": 0.8259775733179989,
+              "partyHpRatio": 0.836112708453134,
               "partyThreat": 18.44,
               "proposerHpRatio": 1,
               "proposerId": "C-support-s1-support-3",
@@ -1139,33 +754,8 @@
               "proposerRole": "support",
               "reason": "healerLostWithWounded",
               "retreatHpThreshold": 0.23,
-              "roll": 98,
-              "round": 6,
-              "success": false,
-              "successChance": 95
-            },
-            {
-              "aliveCount": 4,
-              "approved": true,
-              "attemptCount": 2,
-              "attempted": true,
-              "averageMorale": 59.5,
-              "enemyThreat": 14.383200000000002,
-              "healerAlive": false,
-              "incapacitatedCount": 0,
-              "leaderId": "C-support-s1-support-3",
-              "matchedReasons": ["healerLostWithWounded"],
-              "moraleThreshold": 12.1,
-              "partyHpRatio": 0.8153392754456584,
-              "partyThreat": 18.44,
-              "proposerHpRatio": 1,
-              "proposerId": "C-support-s1-support-3",
-              "proposerMorale": 61,
-              "proposerRole": "support",
-              "reason": "healerLostWithWounded",
-              "retreatHpThreshold": 0.23,
-              "roll": 66,
-              "round": 8,
+              "roll": 19,
+              "round": 5,
               "success": true,
               "successChance": 95
             }
@@ -1173,16 +763,16 @@
           "retreatDiagnostic": {
             "aliveCount": 4,
             "approved": true,
-            "attemptCount": 2,
+            "attemptCount": 1,
             "attempted": true,
             "averageMorale": 59.5,
-            "enemyThreat": 14.383200000000002,
+            "enemyThreat": 18.33858,
             "healerAlive": false,
             "incapacitatedCount": 0,
             "leaderId": "C-support-s1-support-3",
             "matchedReasons": ["healerLostWithWounded"],
             "moraleThreshold": 12.1,
-            "partyHpRatio": 0.8153392754456584,
+            "partyHpRatio": 0.836112708453134,
             "partyThreat": 18.44,
             "proposerHpRatio": 1,
             "proposerId": "C-support-s1-support-3",
@@ -1190,18 +780,18 @@
             "proposerRole": "support",
             "reason": "healerLostWithWounded",
             "retreatHpThreshold": 0.23,
-            "roll": 66,
-            "round": 8,
+            "roll": 19,
+            "round": 5,
             "success": true,
             "successChance": 95
           },
           "retreatResult": {
             "chance": 95,
-            "roll": 66,
+            "roll": 19,
             "side": "party",
             "success": true
           },
-          "rounds": 8,
+          "rounds": 5,
           "seed": "s1:battle:0:combat",
           "survivingAdventurers": [
             "C-scout-s1-scout-0",
@@ -1210,11 +800,12 @@
             "C-support-s1-support-3"
           ],
           "survivingEnemies": [
+            "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
             "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
             "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2"
           ]
         },
-        "rounds": 8,
+        "rounds": 5,
         "survivingAdventurerIds": [
           "C-scout-s1-scout-0",
           "C-ranger-s1-ranger-1",
@@ -1229,7 +820,7 @@
     "casualties": [],
     "currentPhase": "aftermath",
     "discoveredThreats": [],
-    "elapsedTime": 8.3225,
+    "elapsedTime": 4.3225,
     "incapacitated": [],
     "information": [
       {
@@ -1249,7 +840,7 @@
           "C-support-s1-support-3"
         ],
         "check": {
-          "effectiveValue": 79,
+          "effectiveValue": 89,
           "result": "success",
           "roll": 42,
           "skill": "survival"
@@ -1342,8 +933,8 @@
           "C-support-s1-support-3"
         ],
         "check": {
-          "effectiveValue": 74,
-          "result": "partialSuccess",
+          "effectiveValue": 84,
+          "result": "success",
           "roll": 76,
           "skill": "survival"
         },
@@ -1354,7 +945,7 @@
           }
         ],
         "facts": [
-          "エルナ エルウィンが経路を確保したが、多少の遅延が発生した",
+          "エルナ エルウィンが安全な接近経路を確保した",
           "Supportが行程を管理し、士気を保った"
         ],
         "phase": "approach",
@@ -1367,8 +958,8 @@
           "C-mage-s1-mage-2"
         ],
         "check": {
-          "effectiveValue": 69,
-          "result": "failure",
+          "effectiveValue": 79,
+          "result": "partialSuccess",
           "roll": 93,
           "skill": "scouting"
         },
@@ -1378,7 +969,7 @@
             "value": 1
           }
         ],
-        "facts": ["調査に手間取った"],
+        "facts": ["ドラン オーシャンが断片的な手がかりを得た"],
         "phase": "exploration",
         "type": "explore"
       },
@@ -1389,8 +980,8 @@
           "C-mage-s1-mage-2"
         ],
         "check": {
-          "effectiveValue": 69,
-          "result": "failure",
+          "effectiveValue": 79,
+          "result": "partialSuccess",
           "roll": 93,
           "skill": "scouting"
         },
@@ -1400,7 +991,7 @@
             "value": 1
           }
         ],
-        "facts": ["調査に手間取った"],
+        "facts": ["ドラン オーシャンが断片的な手がかりを得た"],
         "phase": "exploration",
         "type": "explore"
       },
@@ -1411,7 +1002,7 @@
           "C-mage-s1-mage-2"
         ],
         "check": {
-          "effectiveValue": 69,
+          "effectiveValue": 79,
           "result": "success",
           "roll": 22,
           "skill": "scouting"
@@ -1517,190 +1108,17 @@
       {
         "actorIds": [],
         "effects": [],
-        "facts": [
-          "戦闘が8ラウンドでpartialVictoryとなった",
-          "接敵結果: success"
-        ],
+        "facts": ["戦闘が5ラウンドでretreatとなった", "接敵結果: success"],
         "phase": "battle",
         "targetIds": [],
         "type": "battleSummary"
-      },
-      {
-        "actorIds": [
-          "C-ranger-s1-ranger-1",
-          "C-scout-s1-scout-0",
-          "C-support-s1-support-3"
-        ],
-        "check": {
-          "effectiveValue": 66,
-          "result": "partialSuccess",
-          "roll": 82,
-          "skill": "survival"
-        },
-        "effects": [
-          {
-            "targetId": "tools",
-            "type": "supplyConsume",
-            "value": 1
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "sectorId": "center"
-            },
-            "targetId": "center",
-            "type": "surveySectorSurveyed",
-            "value": 1
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "sectorId": "center"
-            },
-            "targetId": "center",
-            "type": "surveySectorQuality",
-            "value": 55
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "assistanceMemberIds": [
-                "C-scout-s1-scout-0",
-                "C-support-s1-support-3"
-              ],
-              "focus": "terrain",
-              "quality": 55,
-              "responsibleMemberIds": ["C-ranger-s1-ranger-1"],
-              "result": "partialSuccess",
-              "sectorId": "center",
-              "sectorName": "中央区画",
-              "skill": "survival",
-              "surveyed": true
-            },
-            "targetId": "center",
-            "type": "surveySectorResult",
-            "value": 55
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyCoverage",
-            "value": 66.66666666666666
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyAverageQuality",
-            "value": 67.5
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveySurveyedSectorCount",
-            "value": 2
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyProgress",
-            "value": 50
-          }
-        ],
-        "facts": [
-          "中央区画について不完全ながら測量記録を取得した。測量精度は55だった",
-          "用具を1消費して測量を助けた"
-        ],
-        "phase": "objective",
-        "targetIds": ["area-1", "center"],
-        "type": "surveySectorResult"
-      },
-      {
-        "actorIds": [
-          "C-mage-s1-mage-2",
-          "C-support-s1-support-3",
-          "C-ranger-s1-ranger-1"
-        ],
-        "check": {
-          "effectiveValue": 79,
-          "result": "success",
-          "roll": 54,
-          "skill": "defenseMagic"
-        },
-        "effects": [
-          {
-            "targetId": "tools",
-            "type": "supplyConsume",
-            "value": 1
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "sectorId": "south"
-            },
-            "targetId": "south",
-            "type": "surveySectorSurveyed",
-            "value": 1
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "sectorId": "south"
-            },
-            "targetId": "south",
-            "type": "surveySectorQuality",
-            "value": 80
-          },
-          {
-            "metadata": {
-              "areaId": "area-1",
-              "assistanceMemberIds": [
-                "C-support-s1-support-3",
-                "C-ranger-s1-ranger-1"
-              ],
-              "focus": "arcane",
-              "quality": 80,
-              "responsibleMemberIds": ["C-mage-s1-mage-2"],
-              "result": "success",
-              "sectorId": "south",
-              "sectorName": "南区画",
-              "skill": "defenseMagic",
-              "surveyed": true
-            },
-            "targetId": "south",
-            "type": "surveySectorResult",
-            "value": 80
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyCoverage",
-            "value": 100
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyAverageQuality",
-            "value": 71.66666666666667
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveySurveyedSectorCount",
-            "value": 3
-          },
-          {
-            "targetId": "area-1",
-            "type": "surveyProgress",
-            "value": 75
-          }
-        ],
-        "facts": [
-          "南区画の測量を完了した。測量精度は80だった",
-          "用具を1消費して測量を助けた"
-        ],
-        "phase": "objective",
-        "targetIds": ["area-1", "south"],
-        "type": "surveySectorResult"
       },
       {
         "actorIds": [],
         "effects": [
           {
             "metadata": {
-              "surveyedSectorIds": ["north", "center", "south"]
+              "surveyedSectorIds": ["north"]
             },
             "targetId": "area-1",
             "type": "surveyReportPrepared",
@@ -1709,25 +1127,25 @@
           {
             "targetId": "area-1",
             "type": "surveyCoverage",
-            "value": 100
+            "value": 33.33333333333333
           },
           {
             "targetId": "area-1",
             "type": "surveyAverageQuality",
-            "value": 71.66666666666667
+            "value": 80
           },
           {
             "targetId": "area-1",
             "type": "surveySurveyedSectorCount",
-            "value": 3
+            "value": 1
           },
           {
             "targetId": "area-1",
             "type": "surveyProgress",
-            "value": 75
+            "value": 25
           }
         ],
-        "facts": ["3区画分の測量記録を整理し、持ち帰る準備を行った"],
+        "facts": ["1区画分の測量記録を整理し、持ち帰る準備を行った"],
         "phase": "return",
         "targetIds": ["area-1"],
         "type": "surveyReportPrepared"
@@ -1739,7 +1157,7 @@
           "C-support-s1-support-3"
         ],
         "check": {
-          "effectiveValue": 74,
+          "effectiveValue": 84,
           "result": "success",
           "roll": 45,
           "skill": "survival"
@@ -1775,7 +1193,7 @@
           {
             "targetId": "area-1",
             "type": "surveyProgress",
-            "value": 100
+            "value": 50
           }
         ],
         "facts": ["測量記録を酒場まで持ち帰った"],
@@ -1789,38 +1207,33 @@
           {
             "targetId": "area-1",
             "type": "surveyCoverage",
-            "value": 100
+            "value": 33.33333333333333
           },
           {
             "targetId": "area-1",
             "type": "surveyAverageQuality",
-            "value": 71.66666666666667
+            "value": 80
           },
           {
             "targetId": "area-1",
             "type": "surveyProgress",
-            "value": 100
+            "value": 50
           },
           {
             "targetId": "area-1",
             "type": "surveyCompleted",
-            "value": 1
+            "value": 0
           }
         ],
-        "facts": ["測量地域の測量進捗: 100% (3/3区画, 平均精度72)"],
+        "facts": ["測量地域の測量進捗: 50% (1/3区画, 平均精度80)"],
         "phase": "aftermath",
         "targetIds": ["area-1"],
-        "type": "surveyCompleted"
+        "type": "surveyFailed"
       },
       {
         "actorIds": [],
-        "effects": [
-          {
-            "type": "moraleChange",
-            "value": 5
-          }
-        ],
-        "facts": ["測量地域の測量進捗: 100% (3/3区画, 平均精度72)"],
+        "effects": [],
+        "facts": ["測量地域の測量進捗: 50% (1/3区画, 平均精度80)"],
         "phase": "aftermath",
         "type": "summary"
       }
@@ -1833,16 +1246,16 @@
       "returnTimeBonus": 0,
       "threatFeatures": []
     },
-    "objectiveCompleted": true,
-    "objectiveProgress": 100,
+    "objectiveCompleted": false,
+    "objectiveProgress": 50,
     "objectiveState": {
       "areaId": "area-1",
       "areaName": "測量地域",
-      "averageQuality": 71.66666666666667,
-      "completed": true,
-      "coveragePercent": 100,
+      "averageQuality": 80,
+      "completed": false,
+      "coveragePercent": 33.33333333333333,
       "minimumAcceptableQuality": 70,
-      "progress": 100,
+      "progress": 50,
       "reportLostDuringReturn": false,
       "reportPrepared": true,
       "reportReturned": true,
@@ -1860,52 +1273,44 @@
           "surveyed": true
         },
         {
-          "assistanceMemberIds": [
-            "C-scout-s1-scout-0",
-            "C-support-s1-support-3"
-          ],
-          "attempted": true,
+          "assistanceMemberIds": [],
+          "attempted": false,
           "difficulty": 15,
           "focus": "terrain",
           "id": "center",
           "name": "中央区画",
-          "quality": 55,
-          "responsibleMemberIds": ["C-ranger-s1-ranger-1"],
-          "result": "partialSuccess",
-          "surveyed": true
+          "quality": 0,
+          "responsibleMemberIds": [],
+          "surveyed": false
         },
         {
-          "assistanceMemberIds": [
-            "C-support-s1-support-3",
-            "C-ranger-s1-ranger-1"
-          ],
-          "attempted": true,
+          "assistanceMemberIds": [],
+          "attempted": false,
           "difficulty": 15,
           "focus": "arcane",
           "id": "south",
           "name": "南区画",
-          "quality": 80,
-          "responsibleMemberIds": ["C-mage-s1-mage-2"],
-          "result": "success",
-          "surveyed": true
+          "quality": 0,
+          "responsibleMemberIds": [],
+          "surveyed": false
         }
       ],
       "type": "survey"
     },
     "partyHp": {
-      "C-mage-s1-mage-2": 18,
+      "C-mage-s1-mage-2": 20,
       "C-ranger-s1-ranger-1": 53,
-      "C-scout-s1-scout-0": 65,
+      "C-scout-s1-scout-0": 68,
       "C-support-s1-support-3": 66
     },
     "partyMorale": {
-      "C-mage-s1-mage-2": 74,
-      "C-ranger-s1-ranger-1": 69,
-      "C-scout-s1-scout-0": 55,
-      "C-support-s1-support-3": 68
+      "C-mage-s1-mage-2": 69,
+      "C-ranger-s1-ranger-1": 64,
+      "C-scout-s1-scout-0": 50,
+      "C-support-s1-support-3": 63
     },
     "partyMp": {
-      "C-mage-s1-mage-2": 8,
+      "C-mage-s1-mage-2": 23,
       "C-ranger-s1-ranger-1": 3,
       "C-scout-s1-scout-0": 7,
       "C-support-s1-support-3": 43
@@ -1933,7 +1338,7 @@
     "supplies": {
       "food": 8,
       "medicine": 4,
-      "tools": 0
+      "tools": 2
     }
   }
 }

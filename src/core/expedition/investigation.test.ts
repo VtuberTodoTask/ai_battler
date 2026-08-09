@@ -88,13 +88,14 @@ describe('Outcome and fact consistency', () => {
     }
   })
 
-  it('failedObjective does not claim partial success', () => {
+  it('failedObjective corresponds to progress below the success threshold', () => {
     const results = runBatch(makeRequest, ['vanguard', 'mage'], 100)
     const failed = results.filter((r) => r.outcome === 'failedObjective')
     expect(failed.length).toBeGreaterThan(0)
     for (const r of failed) {
+      expect(r.state.objectiveProgress).toBeLessThan(60)
       const facts = r.state.logs.flatMap((l) => l.facts)
-      expect(facts.some((f) => f.includes('部分的に達成'))).toBe(false)
+      expect(facts.some((f) => f.includes('完全に達成した'))).toBe(false)
     }
   })
 

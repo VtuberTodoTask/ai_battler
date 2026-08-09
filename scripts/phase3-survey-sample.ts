@@ -60,9 +60,8 @@ export const sampleCases: SampleCase[] = [
     areaOverrides: {},
     battle: false,
     roles: ['scout', 'ranger', 'mage', 'support'],
-    expectedOutcome: 'partialSuccess',
-    description:
-      'partialSuccess: 2区画の測量記録を持ち帰ったが1区画の測量に失敗した',
+    expectedOutcome: 'success',
+    description: 'success: 2区画の測量記録を持ち帰ったが1区画の測量に失敗した',
   },
   {
     id: 'D',
@@ -82,7 +81,7 @@ export const sampleCases: SampleCase[] = [
   },
   {
     id: 'E',
-    seed: 'fr3-3',
+    seed: 'fr-search-C-C-3',
     rank: 'C',
     areaOverrides: {
       sectors: [
