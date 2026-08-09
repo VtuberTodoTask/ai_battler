@@ -10,6 +10,10 @@ import type {
   TavernDayState,
   TavernPartyStats,
 } from '../types.ts'
+import type {
+  NarrativeCandidate,
+  NarrativeGenerationRecord,
+} from '../../narrative/types.ts'
 
 export type TavernReputationTier =
   'unknown' | 'local' | 'trusted' | 'renowned' | 'legendary'
@@ -164,4 +168,6 @@ export interface TavernCampaignState {
   parties: CampaignParty[]
   currentDay: TavernDayState
   history: TavernDayRecord[]
+  narrativeCandidates: NarrativeCandidate[]
+  narrativeGenerations: NarrativeGenerationRecord[]
 }

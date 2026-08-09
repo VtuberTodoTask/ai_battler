@@ -16,6 +16,10 @@ import { TavernResultDetail } from './TavernResultDetail.tsx'
 import { CampaignResultSummary } from './CampaignResultSummary.tsx'
 import { CampaignHistory } from './CampaignHistory.tsx'
 import { ExpeditionPredictionPanel } from './ExpeditionPredictionPanel.tsx'
+import { NarrativeQueue } from './NarrativeQueue.tsx'
+import { NarrativeSettings } from './NarrativeSettings.tsx'
+import type { NarrativeProvider } from '../../ai/narrative/types.ts'
+import type { NarrativeProviderConfig } from './NarrativeSettings.tsx'
 import './tavern.css'
 
 const DEFAULT_CAMPAIGN_SEED = 'tavern-campaign-001'
@@ -30,6 +34,15 @@ export function TavernSimulator() {
   const [selectedPartyId, setSelectedPartyId] = useState<string | null>(null)
   const [selectedResultId, setSelectedResultId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const [narrativeProvider, setNarrativeProvider] =
+    useState<NarrativeProvider | null>(null)
+  const [narrativeConfig, setNarrativeConfig] =
+    useState<NarrativeProviderConfig>({
+      endpoint: '',
+      model: '',
+      apiKey: '',
+    })
 
   const day = campaign.currentDay
 
@@ -106,6 +119,13 @@ export function TavernSimulator() {
       setError(e instanceof Error ? e.message : '翌日への進行に失敗しました')
     }
   }, [campaign, selectedRequestId])
+
+  const handleUpdateCampaign = useCallback(
+    (updater: (c: TavernCampaignState) => TavernCampaignState) => {
+      setCampaign((prev) => updater(prev))
+    },
+    [],
+  )
 
   const canResolve = useMemo(() => {
     return day.status === 'planning'
@@ -199,7 +219,23 @@ export function TavernSimulator() {
         </>
       )}
 
-      <CampaignHistory history={campaign.history} />
+      <CampaignHistory
+        history={campaign.history}
+        candidates={campaign.narrativeCandidates}
+      />
+
+      <NarrativeQueue
+        campaign={campaign}
+        provider={narrativeProvider}
+        onUpdateCampaign={handleUpdateCampaign}
+      />
+
+      <NarrativeSettings
+        provider={narrativeProvider}
+        config={narrativeConfig}
+        onChange={setNarrativeConfig}
+        onProviderChange={setNarrativeProvider}
+      />
     </div>
   )
 }
