@@ -166,6 +166,23 @@ A fourth tab, `酒場キャンペーン`, renders a multi-day campaign:
 - Prediction is computed from the raw `requestOffer` + `AdventurerParty` and is
   independent of the leader `Acceptance` decision shown in `BrokeragePanel`.
 
+## Phase 6.2 Rank calibration (`devin/phase6-2-rank-calibration`)
+
+- Balance changes affect `ADVENTURER_THREAT`, `ENEMY_BASE_THREAT`,
+  `EXPEDITION_ENCOUNTER_THREAT_MULTIPLIER`, `DIFFICULTY_BUDGET_MULTIPLIER`,
+  `DIFFICULTY_TARGET_WINRATE`, `EXPEDITION_RANK_PENALTY`, and the effective
+  skill-check formula in `src/core/expedition/checks.ts`.
+- A natural rank-calibration E2E scenario requires a request and parties whose
+  ranks differ by the same fixture. With seed `tavern-campaign-001`, advance to
+  Day 5: `洞窟の魔物討伐` (rank E) is paired with same-rank E parties and the
+  `《森影》` party (rank C, +2), so the prediction panel should update across the
+  rank gap without stale values.
+- Build and preview for this branch: `npm run build && npm run preview -- --host`
+  serves `http://localhost:4173/`; `npm run dev` is not required.
+- When verifying elimination consistency, scroll the `TavernResultDetail` panel
+  to view the target table (`対象数`, `撃破`, `逃走`, `生存`, `Progress`,
+  `Completed`) and confirm it matches the displayed outcome and facts.
+
 ## Test-harness notes for Phase 6.x
 
 - For Phase 6.1 the user requested `npm run dev -- --host` so the dev server

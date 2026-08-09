@@ -12,6 +12,17 @@ Date: 2026-08-09T01:17:55.673Z
 - 30-day campaign smoke: passed
 - Browser Prediction spot check: passed (no console errors)
 
+## Phase 6.2.1 Final Verification
+
+- npm run typecheck: passed
+- npm run lint: passed
+- npm test: 656 passed / 656 total
+- npm run build: passed
+- npm run test:expedition-regression: 22 passed / 22 total
+- GitHub Actions build-and-test (push and pull_request): passed
+- Recorded browser E2E: passed (no console errors)
+- Full E2E report: `test-report-phase6-2.md`
+
 ## Structural Changes (Pass 2)
 
 Pass 1 levers kept unchanged:
@@ -152,3 +163,15 @@ Total cells: 10368 (10,368) | Output: reports/phase6_2_after_coarse.json
 
 - `npm run test:expedition-regression`: 22 passed after updating `regression-snapshots/baseline/elimination-partialSuccess.json` to reflect the intended `objective.completed=true` / `success` change for `confirmationRequired=false` with neutralized targets.
 - No unrelated snapshots changed.
+
+### Recorded Browser E2E
+
+A persistent testing agent ran the recorded Tavern Campaign E2E against the built preview (`npm run preview -- --host`). The full report is in `test-report-phase6-2.md`; summary:
+
+- Tavern campaign started with default seed.
+- Same-rank E party prediction shown at 77%, +2 rank C party prediction updated to 100%, stale prediction prevented, cache reuse verified when returning to the original party.
+- Acceptance response is independent of prediction (leader accepted with `appropriate`).
+- Actual expedition result displayed separately from prediction.
+- Elimination result detail showed 3 defeated / 1 escaped / 0 surviving, objective progress 75%, objective completed `yes`, outcome `success` — consistent with `!confirmationRequired && allNeutralized`.
+- Post-expedition HP/MP/Morale, reputation (+2), and campaign history updated correctly.
+- No console errors detected.
