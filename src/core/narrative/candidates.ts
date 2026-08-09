@@ -12,6 +12,7 @@ import {
 import type {
   CharacterEventNarrativeContext,
   CharacterNarrativeEventType,
+  ExpeditionNarrativeContext,
   NarrativeCandidate,
 } from './types.ts'
 import type { BrokerageOfferAttempt } from '../tavern/types.ts'
@@ -198,6 +199,21 @@ export function deriveResolveCandidates(
 
     const acceptedOffer = findAcceptedOffer(day, request.id, party.id)
 
+    const fullExpeditionContext = buildExpeditionNarrativeContext(
+      party,
+      request,
+      resolved.report,
+      acceptedOffer,
+      resolved.result,
+    )
+    // Persist only the compact timeline and metrics; the full simulation state
+    // is intentionally dropped from the campaign snapshot to avoid expensive
+    // deep clones each day.
+    const compactExpeditionContext: ExpeditionNarrativeContext = {
+      ...fullExpeditionContext,
+      state: undefined,
+    }
+
     candidates.push(
       makeCandidate(
         dayNumber,
@@ -205,13 +221,7 @@ export function deriveResolveCandidates(
         party.party.name,
         'expedition',
         `遠征レポート：${request.title}`,
-        buildExpeditionNarrativeContext(
-          party,
-          request,
-          resolved.report,
-          acceptedOffer,
-          resolved.result,
-        ),
+        compactExpeditionContext,
         {
           requestId: request.id,
           requestTitle: request.title,

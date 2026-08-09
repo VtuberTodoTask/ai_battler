@@ -5,7 +5,6 @@ import {
 } from '../src/core/tavern/campaign/campaign.ts'
 import { offerRequestToParty } from '../src/core/tavern/brokerage.ts'
 import { buildNarrativePrompt } from '../src/core/narrative/prompt.ts'
-import { buildExpeditionNarrativeTimeline } from '../src/core/narrative/timeline.ts'
 import type { TavernCampaignState } from '../src/core/tavern/campaign/types.ts'
 import type { ExpeditionNarrativeContext } from '../src/core/narrative/types.ts'
 
@@ -57,10 +56,10 @@ for (const seed of seeds) {
     for (const c of campaign.narrativeCandidates) {
       if (c.category !== 'expedition') continue
       const context = c.context as ExpeditionNarrativeContext
-      if (!context.state) continue
+      if (!context.timeline) continue
       totalCandidates++
 
-      const timeline = buildExpeditionNarrativeTimeline(context)
+      const timeline = context.timeline
       totalTimelineBeats += timeline.length
       maxTimelineBeats = Math.max(maxTimelineBeats, timeline.length)
 
@@ -69,11 +68,12 @@ for (const seed of seeds) {
       totalPromptChars += promptText.length
       maxPromptChars = Math.max(maxPromptChars, promptText.length)
 
-      for (const battle of context.state.battles) {
-        battleRecordCount++
-        totalBattleSourceEvents += battle.result.logs.length
-        const battleBeats = timeline.filter((b) => b.phase === 'battle').length
-        totalBattleBeats += battleBeats
+      if (context.battleMetrics) {
+        for (const metric of context.battleMetrics) {
+          battleRecordCount++
+          totalBattleSourceEvents += metric.sourceEvents
+          totalBattleBeats += metric.beats
+        }
       }
     }
   }

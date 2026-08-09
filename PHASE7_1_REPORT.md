@@ -23,9 +23,7 @@ Only the narrative presentation layer changed.
 - `scripts/phase7-1-smoke.ts` (new, manual smoke harness)
 
 A small utility change (`src/core/util.ts`) switched `deepClone` from
-`JSON.parse(JSON.stringify())` to `structuredClone` to keep 30-day campaign
-smoke tests fast now that expedition narrative contexts carry the full
-simulation state.
+`JSON.parse(JSON.stringify())` to `structuredClone`.
 
 No gameplay, simulation, provider, candidate trigger, priority, or cost-control
 changes were made.
@@ -65,6 +63,10 @@ Phases reuse the `ExpeditionPhase` concept but are mapped to narrative phases:
 is available and attaches it to the context. `buildExpeditionPrompt` prefers
 `context.timeline` and falls back to building from `context.state` if needed.
 
+`candidates.ts` stores only the compact `timeline` and `battleMetrics` on the
+persisted `NarrativeCandidate`; the full `state` is dropped from the campaign
+snapshot to keep daily `deepClone` fast.
+
 Battle timeline compression (`buildBattleTimeline`):
 
 - Mandatory beats preserved: start, contact, casualties, incapacitation,
@@ -77,9 +79,10 @@ Battle timeline compression (`buildBattleTimeline`):
 
 To give the builder full access to the deterministic trace, an optional `state`
 field was added to `ExpeditionNarrativeContext` and `resolved.result` is now
-threaded through `buildExpeditionNarrativeContext` in `candidates.ts`. An
-optional `timeline` field was also added so the narrative candidate can carry
-the precomputed, compact timeline without rebuilding it at prompt time.
+threaded through `buildExpeditionNarrativeContext` in `candidates.ts`. Optional
+`timeline` and `battleMetrics` fields were also added so the narrative candidate
+can carry the precomputed, compact timeline and audit counts without rebuilding
+them at prompt time and without storing the full simulation state.
 
 ## Prompt v4 changes
 

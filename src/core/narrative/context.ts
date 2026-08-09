@@ -103,6 +103,11 @@ export function buildExpeditionNarrativeContext(
   }
   if (state) {
     context.timeline = buildExpeditionNarrativeTimeline(context)
+    context.battleMetrics = state.battles.map((battle) => ({
+      sourceEvents: battle.result.logs.length,
+      beats: (context.timeline ?? []).filter((b) => b.phase === 'battle')
+        .length,
+    }))
   }
   return context
 }

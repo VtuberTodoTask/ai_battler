@@ -96,6 +96,11 @@ export interface NarrativeAcceptanceInfo {
   specializationMatch: 'strong' | 'neutral' | 'weak'
 }
 
+export interface ExpeditionBattleMetric {
+  sourceEvents: number
+  beats: number
+}
+
 export interface ExpeditionNarrativeContext {
   kind: 'expedition'
   party: NarrativePartySnapshot
@@ -106,6 +111,8 @@ export interface ExpeditionNarrativeContext {
   state?: ExpeditionState
   /** Precomputed deterministic narrative timeline. Preferred over state for prompts. */
   timeline?: NarrativeTimelineBeat[]
+  /** Per-battle source event and compressed beat counts for audit/metrics. */
+  battleMetrics?: ExpeditionBattleMetric[]
 }
 
 export interface NarrativeHistoryHighlight {
