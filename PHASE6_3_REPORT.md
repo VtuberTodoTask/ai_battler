@@ -272,7 +272,19 @@ The `requestRanks.test.ts` campaign smoke advances 30 days and verifies that, wh
 
 ## Browser E2E
 
-Recorded E2E advanced the tavern campaign and confirmed that daily request ranks now align with the available roster instead of overrunning it.
+A recorded 7-day tavern campaign E2E verified the roster-aware behavior end-to-end (full report: `test-report-phase6-3.md`, recording: `phase6-3-e2e-edited.mp4`).
+
+Key observations:
+
+- Day 1: D party accepted an E request and returned `forcedRetreat`; reputation dropped from 10 to 9.
+- Day 2: the D party was recovering, leaving only E parties available. Generated request ranks were `[E, E, D]` — D is exactly `highest available E + 1` (challenge slot), with no C/B/A/S.
+- Day 4: an E-only roster produced E-only requests.
+- Day 6: with a C-ranked party available, request ranks were `[E, D, D]` — all `<= C + 1`.
+- Prediction panel updated correctly across same-rank E (77%) and +2 rank C (100%), stale values did not persist, and returning to a previously viewed pair reused the cached prediction.
+- After resolving, the prediction panel hid and the actual expedition result (`success` / `victory`) displayed separately; reputation updated from 9 to 11.
+- Post-expedition HP/MP fully recovered and Morale updated as expected.
+- Campaign history accumulated 6 days of records.
+- No console errors detected.
 
 ## Known limitations
 
@@ -287,6 +299,8 @@ Recorded E2E advanced the tavern campaign and confirmed that daily request ranks
 
 - `npm run typecheck`: passed
 - `npm run lint`: passed
-- `npm test`: passed
+- `npm test`: 667 passed
 - `npm run build`: passed
 - `npm run test:expedition-regression`: 22/22 passed
+- 1000-day request rank audit: hard invariants satisfied (`daysWithLessThan2Serviceable = 0`, `requestsAboveMaxPartyRankPlus1 = 0`)
+- Recorded browser E2E: passed, no console errors
