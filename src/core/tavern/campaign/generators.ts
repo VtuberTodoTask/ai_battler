@@ -12,6 +12,7 @@ import type {
   TavernRequestOffer,
 } from '../types.ts'
 import { getPartyRankWeights, getRequestRankWeights } from './rankWeights.ts'
+import { createInitialRelationship } from './relationship.ts'
 import type { CampaignParty } from './types.ts'
 
 const PARTY_NAMES = [
@@ -87,6 +88,7 @@ export function generateCampaignParty(
   const stayLength = stayRng.integer(3, 6)
 
   const party = generateAdventurerParty(seed, 0, '', rank, template.id)
+  const leader = party.members.find((m) => m.id === party.leaderId)
 
   return {
     id: party.id,
@@ -112,6 +114,7 @@ export function generateCampaignParty(
       growthMilestones: 0,
       trainingDays: 0,
     },
+    relationship: createInitialRelationship(campaignSeed, serial, leader),
   }
 }
 
@@ -298,6 +301,13 @@ export function buildTavernDay(
         growthXp: cp.progression.growthXp,
         growthMilestones: cp.progression.growthMilestones,
         trainingDays: cp.progression.trainingDays,
+      },
+      stats: { ...cp.stats },
+      relationship: {
+        affinity: cp.relationship.affinity,
+        financialPressure: cp.relationship.financialPressure,
+        riskTolerance: cp.relationship.riskTolerance,
+        stayExtensionDaysUsed: cp.relationship.stayExtensionDaysUsed,
       },
     }
   })

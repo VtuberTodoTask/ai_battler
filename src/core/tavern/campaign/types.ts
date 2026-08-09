@@ -5,8 +5,10 @@ import type {
 import type {
   AdventurerParty,
   CampaignPartyEvent,
+  PartyRiskTolerance,
   ResolvedDispatch,
   TavernDayState,
+  TavernPartyStats,
 } from '../types.ts'
 
 export type TavernReputationTier =
@@ -19,20 +21,20 @@ export interface CampaignPartyCondition {
 
 export type CampaignInjurySnapshot = ExpeditionInjury
 
-export interface CampaignPartyStats {
-  totalExpeditions: number
-  completeSuccesses: number
-  successes: number
-  partialSuccesses: number
-  failures: number
-  retreats: number
-}
+export type CampaignPartyStats = TavernPartyStats
 
 export interface CampaignPartyProgression {
   growthXp: number
   totalGrowthXp: number
   growthMilestones: number
   trainingDays: number
+}
+
+export interface CampaignPartyRelationship {
+  affinity: number
+  financialPressure: number
+  riskTolerance: PartyRiskTolerance
+  stayExtensionDaysUsed: number
 }
 
 export type CampaignProgressionSource =
@@ -81,6 +83,38 @@ export type CampaignProgressionEvent =
       reason: string
     }
 
+export type CampaignRelationshipEvent =
+  | {
+      type: 'affinityChanged'
+      partyId: string
+      partyName: string
+      dayNumber: number
+      outcome: ExpeditionOutcome
+      before: number
+      delta: number
+      after: number
+    }
+  | {
+      type: 'financialPressureChanged'
+      partyId: string
+      partyName: string
+      dayNumber: number
+      source: 'expedition' | 'idle' | 'recovery'
+      before: number
+      delta: number
+      after: number
+    }
+  | {
+      type: 'stayExtended'
+      partyId: string
+      partyName: string
+      dayNumber: number
+      previousDepartureDay: number
+      newDepartureDay: number
+      extensionDays: number
+      affinity: number
+    }
+
 export interface CampaignParty {
   id: string
   party: AdventurerParty
@@ -91,6 +125,7 @@ export interface CampaignParty {
   condition: CampaignPartyCondition
   stats: CampaignPartyStats
   progression: CampaignPartyProgression
+  relationship: CampaignPartyRelationship
   departingCasualty?: boolean
 }
 
@@ -117,6 +152,7 @@ export interface TavernDayRecord {
   results: ResolvedDispatch[]
   partyEvents: CampaignPartyEvent[]
   progressionEvents: CampaignProgressionEvent[]
+  relationshipEvents: CampaignRelationshipEvent[]
 }
 
 export interface TavernCampaignState {

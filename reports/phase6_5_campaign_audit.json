@@ -1,0 +1,87 @@
+{
+  "dayCount": 30,
+  "seedCount": 3,
+  "totalAccepted": 90,
+  "totalDeclined": 0,
+  "totalRelationshipEvents": 450,
+  "totalAffinityChanges": 90,
+  "totalFinancialPressureChanges": 360,
+  "totalStayExtensions": 0,
+  "totalStayExtensionDays": 0,
+  "outcomeCounts": {
+    "completeSuccess": 43,
+    "success": 21,
+    "partialSuccess": 2,
+    "failedObjective": 12,
+    "forcedRetreat": 12,
+    "lostExpedition": 0
+  },
+  "finalAffinityAverage": 18.666666666666668,
+  "finalPressureAverage": 43.833333333333336,
+  "seeds": [
+    {
+      "seed": "phase6-5-campaign-001",
+      "finalReputation": 52,
+      "acceptedOffers": 30,
+      "declinedOffers": 0,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "finalAffinityAverage": 20,
+      "finalPressureAverage": 43.75,
+      "outcomeCounts": {
+        "completeSuccess": 15,
+        "success": 6,
+        "partialSuccess": 0,
+        "failedObjective": 6,
+        "forcedRetreat": 3,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0
+    },
+    {
+      "seed": "phase6-5-campaign-002",
+      "finalReputation": 47,
+      "acceptedOffers": 30,
+      "declinedOffers": 0,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "finalAffinityAverage": 18,
+      "finalPressureAverage": 36.75,
+      "outcomeCounts": {
+        "completeSuccess": 12,
+        "success": 8,
+        "partialSuccess": 0,
+        "failedObjective": 5,
+        "forcedRetreat": 5,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0
+    },
+    {
+      "seed": "phase6-5-campaign-003",
+      "finalReputation": 66,
+      "acceptedOffers": 30,
+      "declinedOffers": 0,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "finalAffinityAverage": 18,
+      "finalPressureAverage": 51,
+      "outcomeCounts": {
+        "completeSuccess": 16,
+        "success": 7,
+        "partialSuccess": 2,
+        "failedObjective": 1,
+        "forcedRetreat": 4,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0
+    }
+  ],
+  "acceptanceRate": 1
+}

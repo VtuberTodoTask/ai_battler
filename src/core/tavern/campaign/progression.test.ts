@@ -41,6 +41,12 @@ function makeParty(seed: string, rank: AdventurerRank = 'E'): CampaignParty {
       growthMilestones: 0,
       trainingDays: 0,
     },
+    relationship: {
+      affinity: 10,
+      financialPressure: 40,
+      riskTolerance: 'balanced',
+      stayExtensionDaysUsed: 0,
+    },
   }
 }
 

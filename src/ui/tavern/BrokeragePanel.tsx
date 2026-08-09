@@ -2,6 +2,10 @@ import {
   acceptanceReasonText,
   getOfferErrors,
 } from '../../core/tavern/brokerage.ts'
+import {
+  getAffinityTier,
+  getFinancialPressureTier,
+} from '../../core/tavern/campaign/relationship.ts'
 import type { TavernDayState, TavernParty } from '../../core/tavern/types.ts'
 import { OBJECTIVE_LABELS } from '../expedition/labels.ts'
 
@@ -90,7 +94,9 @@ export function BrokeragePanel({
             <div className="offer-result">
               <p>{acceptanceReasonText(selectedOffer.reason)}</p>
               <p>
-                判断: {selectedOffer.decision === 'accepted' ? '受諾' : '辞退'}
+                判断: {selectedOffer.decision === 'accepted' ? '受諾' : '辞退'}{' '}
+                （{selectedOffer.evaluation.acceptanceScore} /
+                {selectedOffer.evaluation.acceptanceThreshold}）
               </p>
               <details>
                 <summary>判定詳細</summary>
@@ -104,7 +110,53 @@ export function BrokeragePanel({
                   <li>
                     リーダー判断力: {selectedOffer.evaluation.leaderJudgment}
                   </li>
+                  <li>
+                    お気に入り: {selectedOffer.evaluation.affinity} （
+                    {getAffinityTier(selectedOffer.evaluation.affinity)}）
+                  </li>
+                  <li>
+                    懐事情: {selectedOffer.evaluation.financialPressure} （
+                    {getFinancialPressureTier(
+                      selectedOffer.evaluation.financialPressure,
+                    )}
+                    ）
+                  </li>
+                  <li>
+                    危険志向:{' '}
+                    {selectedOffer.evaluation.riskTolerance === 'cautious'
+                      ? '慎重'
+                      : selectedOffer.evaluation.riskTolerance === 'bold'
+                        ? '大胆'
+                        : '標準'}
+                  </li>
                   <li>理由: {selectedOffer.reason}</li>
+                </ul>
+                <p>Score breakdown:</p>
+                <ul>
+                  <li>ベース: {selectedOffer.evaluation.modifiers.base}</li>
+                  <li>適性: {selectedOffer.evaluation.modifiers.roleFit}</li>
+                  <li>
+                    リーダー判断:{' '}
+                    {selectedOffer.evaluation.modifiers.leaderJudgment}
+                  </li>
+                  <li>
+                    実力認識:{' '}
+                    {selectedOffer.evaluation.modifiers.relevantCapability}
+                  </li>
+                  <li>成長: {selectedOffer.evaluation.modifiers.growth}</li>
+                  <li>信頼: {selectedOffer.evaluation.modifiers.affinity}</li>
+                  <li>
+                    懐事情:{' '}
+                    {selectedOffer.evaluation.modifiers.financialPressure}
+                  </li>
+                  <li>危険志向: {selectedOffer.evaluation.modifiers.risk}</li>
+                  <li>
+                    HP状態: {selectedOffer.evaluation.modifiers.hpReadiness}
+                  </li>
+                  <li>
+                    Morale状態:{' '}
+                    {selectedOffer.evaluation.modifiers.moraleReadiness}
+                  </li>
                 </ul>
               </details>
             </div>
@@ -132,7 +184,8 @@ export function BrokeragePanel({
                 <li key={offer.id}>
                   《{p?.party.name ?? offer.partyId}》 →{' '}
                   {offer.decision === 'accepted' ? '受諾' : '辞退'}：
-                  {offer.reason}
+                  {offer.reason} ({offer.evaluation.acceptanceScore}/
+                  {offer.evaluation.acceptanceThreshold})
                 </li>
               )
             })}

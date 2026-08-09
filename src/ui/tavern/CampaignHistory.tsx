@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { OUTCOME_LABELS } from '../expedition/labels.ts'
 import type { TavernDayRecord } from '../../core/tavern/campaign/types.ts'
-import type { CampaignProgressionEvent } from '../../core/tavern/campaign/types.ts'
+import type {
+  CampaignProgressionEvent,
+  CampaignRelationshipEvent,
+} from '../../core/tavern/campaign/types.ts'
 
 export interface CampaignHistoryProps {
   history: TavernDayRecord[]
@@ -56,6 +59,16 @@ export function CampaignHistory({ history }: CampaignHistoryProps) {
                     </ul>
                   </div>
                 )}
+                {record.relationshipEvents.length > 0 && (
+                  <div className="history-events">
+                    <strong>Relationship:</strong>
+                    <ul>
+                      {record.relationshipEvents.map((e, i) => (
+                        <li key={i}>{relationshipLabel(e)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {record.progressionEvents.length > 0 && (
                   <div className="history-events">
                     <strong>成長 / 鍛錬:</strong>
@@ -86,10 +99,44 @@ function eventLabel(type: string): string {
   return labels[type] ?? type
 }
 
+function relationshipLabel(event: CampaignRelationshipEvent): string {
+  switch (event.type) {
+    case 'affinityChanged':
+      return `《${event.partyName}》 お気に入り ${event.before} → ${event.after} (${outcomeLabel(event.outcome)})`
+    case 'financialPressureChanged':
+      return `《${event.partyName}》 懐事情 ${event.before} → ${event.after} (${sourceLabel(event.source)})`
+    case 'stayExtended':
+      return `《${event.partyName}》 滞在延長 Day ${event.previousDepartureDay} → ${event.newDepartureDay}（+${event.extensionDays}日）`
+    default:
+      return `《${(event as CampaignRelationshipEvent).partyName}》 ${(event as CampaignRelationshipEvent).type}`
+  }
+}
+
+function sourceLabel(source: string): string {
+  const labels: Record<string, string> = {
+    expedition: '遠征結果',
+    idle: '仕事なし',
+    recovery: '療養',
+  }
+  return labels[source] ?? source
+}
+
+function outcomeLabel(outcome: string): string {
+  const labels: Record<string, string> = {
+    completeSuccess: '完全成功',
+    success: '成功',
+    partialSuccess: '部分成功',
+    failedObjective: '失敗',
+    forcedRetreat: '強制撤退',
+    lostExpedition: '全滅',
+  }
+  return labels[outcome] ?? outcome
+}
+
 function progressionLabel(event: CampaignProgressionEvent): string {
   switch (event.type) {
     case 'experienceGained':
-      return `《${event.partyName}》 ${sourceLabel(event.source)} +${event.amount} XP (計 ${event.totalGrowthXpAfter})`
+      return `《${event.partyName}》 ${sourceLabelExpedition(event.source)} +${event.amount} XP (計 ${event.totalGrowthXpAfter})`
     case 'training':
       return `《${event.partyName}》 自主鍛錬 +${event.amount} XP`
     case 'skillImproved':
@@ -101,7 +148,7 @@ function progressionLabel(event: CampaignProgressionEvent): string {
   }
 }
 
-function sourceLabel(source: string): string {
+function sourceLabelExpedition(source: string): string {
   const labels: Record<string, string> = {
     completeSuccess: '完全成功',
     success: '成功',

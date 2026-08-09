@@ -132,7 +132,7 @@ describe('evaluateOffer', () => {
       { int: 60, per: 60, leadership: 55 },
     )
     const request = makeRequest('rescue', 'B')
-    const result = evaluateOffer(request, party)
+    const result = evaluateOffer(request, party, { affinity: 40 })
     expect(result.decision).toBe('accepted')
     expect(result.reason).toBe('challengingButSuitable')
     expect(result.rankGap).toBe(1)
@@ -274,6 +274,178 @@ describe('evaluateOffer', () => {
 
     expect(resultA).toEqual(resultB)
   })
+
+  describe('dynamic score modifiers', () => {
+    it('keeps rank gap >=2 as a hard gate', () => {
+      const party = makeParty(
+        'D',
+        ['vanguard', 'guardian', 'mage', 'healer'],
+        0,
+      )
+      const request = makeRequest('elimination', 'B')
+      const result = evaluateOffer(request, party, {
+        affinity: 100,
+        financialPressure: 100,
+        riskTolerance: 'bold',
+        growthMilestones: 4,
+      })
+      expect(result.decision).toBe('declined')
+      expect(result.reason).toBe('tooDangerous')
+    })
+
+    it('accepts same-rank requests with at least one relevant role', () => {
+      const party = makeParty(
+        'C',
+        ['vanguard', 'guardian', 'mage', 'healer'],
+        0,
+      )
+      const request = makeRequest('elimination', 'C')
+      const result = evaluateOffer(request, party)
+      expect(result.decision).toBe('accepted')
+      expect(result.reason).toBe('appropriate')
+      expect(result.acceptanceScore).toBeGreaterThanOrEqual(
+        result.acceptanceThreshold,
+      )
+    })
+
+    it('supports poor-fit +1 acceptance when affinity and risk are high', () => {
+      const party = makeParty(
+        'C',
+        ['ranger', 'mage', 'support', 'vanguard'],
+        0,
+        {
+          int: 80,
+          per: 80,
+          leadership: 80,
+        },
+      )
+      party.members[3].skills.melee = 70
+      party.members[3].skills.defense = 70
+      const request = makeRequest('rescue', 'B', 'cave')
+      const result = evaluateOffer(request, party, {
+        affinity: 40,
+        financialPressure: 40,
+        riskTolerance: 'bold',
+        growthMilestones: 0,
+      })
+      expect(result.decision).toBe('accepted')
+      expect(result.reason).toBe('boldChallenge')
+      expect(result.modifiers.roleFit).toBe(-10)
+    })
+
+    it('reflects high affinity as trustedBroker', () => {
+      const party = makeParty(
+        'C',
+        ['scout', 'guardian', 'healer', 'vanguard'],
+        0,
+      )
+      const request = makeRequest('rescue', 'B')
+      const result = evaluateOffer(request, party, {
+        affinity: 80,
+        financialPressure: 40,
+        riskTolerance: 'balanced',
+        growthMilestones: 0,
+      })
+      expect(result.decision).toBe('accepted')
+      expect(result.reason).toBe('trustedBroker')
+      expect(result.modifiers.affinity).toBe(18)
+    })
+
+    it('reflects financial pressure as needsIncome', () => {
+      const party = makeParty(
+        'C',
+        ['scout', 'guardian', 'healer', 'vanguard'],
+        0,
+      )
+      const request = makeRequest('rescue', 'B')
+      const result = evaluateOffer(request, party, {
+        affinity: 40,
+        financialPressure: 85,
+        riskTolerance: 'balanced',
+        growthMilestones: 0,
+      })
+      expect(result.decision).toBe('accepted')
+      expect(result.reason).toBe('needsIncome')
+      expect(result.modifiers.financialPressure).toBe(15)
+    })
+
+    it('penalizes cautious risk tolerance', () => {
+      const party = makeParty(
+        'C',
+        ['scout', 'guardian', 'healer', 'vanguard'],
+        0,
+      )
+      const request = makeRequest('rescue', 'B')
+      const result = evaluateOffer(request, party, {
+        affinity: 80,
+        financialPressure: 40,
+        riskTolerance: 'cautious',
+        growthMilestones: 0,
+      })
+      expect(result.decision).toBe('declined')
+      expect(result.reason).toBe('cautious')
+      expect(result.modifiers.risk).toBe(-10)
+    })
+
+    it('penalizes low HP readiness', () => {
+      const party = makeParty(
+        'C',
+        ['vanguard', 'guardian', 'mage', 'healer'],
+        0,
+      )
+      party.members.forEach((m) => {
+        m.currentHp = 30
+      })
+      const request = makeRequest('elimination', 'C')
+      const result = evaluateOffer(request, party, { financialPressure: 10 })
+      expect(result.decision).toBe('declined')
+      expect(result.reason).toBe('notReady')
+      expect(result.modifiers.hpReadiness).toBe(-15)
+    })
+
+    it('penalizes low morale readiness', () => {
+      const party = makeParty(
+        'C',
+        ['vanguard', 'guardian', 'mage', 'healer'],
+        0,
+      )
+      party.members.forEach((m) => {
+        m.morale = 30
+      })
+      const request = makeRequest('elimination', 'C')
+      const result = evaluateOffer(request, party, { financialPressure: 10 })
+      expect(result.decision).toBe('declined')
+      expect(result.reason).toBe('notReady')
+      expect(result.modifiers.moraleReadiness).toBe(-10)
+    })
+
+    it('rewards growth milestones', () => {
+      const party = makeParty(
+        'C',
+        ['vanguard', 'guardian', 'mage', 'healer'],
+        0,
+      )
+      const request = makeRequest('elimination', 'C')
+      const base = evaluateOffer(request, party)
+      const grown = evaluateOffer(request, party, { growthMilestones: 4 })
+      expect(grown.modifiers.growth).toBe(base.modifiers.growth + 4 * 3)
+      expect(grown.acceptanceScore - base.acceptanceScore).toBe(12)
+    })
+
+    it('exposes score, threshold and modifier breakdown', () => {
+      const party = makeParty(
+        'C',
+        ['vanguard', 'guardian', 'mage', 'healer'],
+        0,
+      )
+      const request = makeRequest('elimination', 'C')
+      const result = evaluateOffer(request, party)
+      expect(result.acceptanceScore).toBeGreaterThan(0)
+      expect(result.acceptanceThreshold).toBe(50)
+      expect(result.modifiers.base).toBe(60)
+      expect(result.modifiers.roleFit).toBe(15)
+    })
+  })
 })
 
 describe('acceptanceReasonText', () => {
@@ -281,8 +453,13 @@ describe('acceptanceReasonText', () => {
     for (const reason of [
       'appropriate',
       'challengingButSuitable',
+      'trustedBroker',
+      'needsIncome',
+      'boldChallenge',
       'tooDangerous',
       'poorFit',
+      'cautious',
+      'notReady',
     ] as const) {
       expect(acceptanceReasonText(reason)).toBeTruthy()
     }

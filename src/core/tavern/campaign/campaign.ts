@@ -10,6 +10,13 @@ import {
   updateCampaignPartyStats,
 } from './partyState.ts'
 import {
+  applyAffinityFromOutcome,
+  applyFinancialPressureFromOutcome,
+  applyIdleFinancialPressure,
+  applyRecoveryFinancialPressure,
+  tryExtendStay,
+} from './relationship.ts'
+import {
   EXPEDITION_GROWTH_XP,
   TRAINING_GROWTH_XP,
   awardPartyGrowthXp,
@@ -25,6 +32,7 @@ import type {
   CampaignParty,
   CampaignProgressionEvent,
   CampaignProgressionSource,
+  CampaignRelationshipEvent,
   TavernCampaignState,
   TavernDayRecord,
 } from './types.ts'
@@ -79,6 +87,7 @@ export function resolveCampaignDay(
 
   const postEvents: CampaignPartyEvent[] = []
   const progressionEvents: CampaignProgressionEvent[] = []
+  const relationshipEvents: CampaignRelationshipEvent[] = []
 
   for (const resolved of results) {
     if (resolved.status !== 'resolved' || !resolved.result) {
@@ -94,6 +103,11 @@ export function resolveCampaignDay(
 
     const outcome = resolved.result.outcome
     updateCampaignPartyStats(party, outcome)
+
+    relationshipEvents.push(applyAffinityFromOutcome(party, outcome, dayNumber))
+    relationshipEvents.push(
+      applyFinancialPressureFromOutcome(party, outcome, dayNumber),
+    )
 
     if (party.departingCasualty) {
       postEvents.push({
@@ -142,13 +156,14 @@ export function resolveCampaignDay(
   )
 
   for (const party of nextCampaign.parties) {
-    if (
-      party.departingCasualty ||
-      dispatchedPartyIds.has(party.id) ||
-      isRecoveringOnDay(party, dayNumber)
-    ) {
+    if (party.departingCasualty || dispatchedPartyIds.has(party.id)) {
       continue
     }
+    if (isRecoveringOnDay(party, dayNumber)) {
+      relationshipEvents.push(applyRecoveryFinancialPressure(party, dayNumber))
+      continue
+    }
+    relationshipEvents.push(applyIdleFinancialPressure(party, dayNumber))
     progressionEvents.push(
       ...awardPartyGrowthXp(nextCampaign.seed, party, TRAINING_GROWTH_XP, {
         source: 'training',
@@ -188,6 +203,7 @@ export function resolveCampaignDay(
       ...postEvents,
     ],
     progressionEvents,
+    relationshipEvents,
   }
   nextCampaign.history.push(dayRecord)
 
@@ -209,6 +225,13 @@ function syncCurrentDayParties(
         growthMilestones: campaignParty.progression.growthMilestones,
         trainingDays: campaignParty.progression.trainingDays,
       },
+      relationship: {
+        affinity: campaignParty.relationship.affinity,
+        financialPressure: campaignParty.relationship.financialPressure,
+        riskTolerance: campaignParty.relationship.riskTolerance,
+        stayExtensionDaysUsed: campaignParty.relationship.stayExtensionDaysUsed,
+      },
+      stats: { ...campaignParty.stats },
     }
   })
   return { ...currentDay, parties: updated }
@@ -226,8 +249,10 @@ export function advanceCampaignDay(
 
   const parties = nextCampaign.parties
   const preEvents: CampaignPartyEvent[] = []
+  const extensionEvents: CampaignRelationshipEvent[] = []
 
-  // 1. Remove parties that are departing (casualty first, then scheduled).
+  // 1. Evaluate stay extensions for non-casualty parties, then remove
+  //    parties whose scheduled departure is not extended.
   const remaining: CampaignParty[] = []
   for (const party of parties) {
     if (party.departingCasualty) {
@@ -235,6 +260,12 @@ export function advanceCampaignDay(
       continue
     }
     if (party.plannedDepartureDay < nextDayNumber) {
+      const stayEvent = tryExtendStay(party, nextDayNumber, nextDayNumber)
+      if (stayEvent) {
+        extensionEvents.push(stayEvent)
+        remaining.push(party)
+        continue
+      }
       preEvents.push({
         type: 'departedScheduled',
         partyId: party.id,
@@ -309,6 +340,14 @@ export function advanceCampaignDay(
   nextCampaign.dayNumber = nextDayNumber
   nextCampaign.parties = remaining
   nextCampaign.currentDay = currentDay
+
+  const previousRecord = nextCampaign.history[nextCampaign.history.length - 1]
+  if (previousRecord && extensionEvents.length > 0) {
+    previousRecord.relationshipEvents = [
+      ...previousRecord.relationshipEvents,
+      ...extensionEvents,
+    ]
+  }
 
   return nextCampaign
 }
