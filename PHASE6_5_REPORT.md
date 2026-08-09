@@ -36,7 +36,10 @@
 | `lostExpedition`  | -12      | +15               |                        |
 | 非派遣 / 待機     | —        | +8                | idle                   |
 | 療養中            | —        | +4                | recovery               |
-| 依頼辞退 / 鍛錬   | 変更なし | 変更なし          |                        |
+| 依頼辞退そのもの  | —        | 変更なし          |                        |
+| 鍛錬              | —        | 変更なし          |                        |
+
+（依頼辞退そのものでは関係性は変化しない。ただしその日最終的に非派遣なら idle として `Financial Pressure +8`、鍛錬対象なら `Training XP +1` となる。）
 
 `financialPressure` は 0–100 に clamp する。
 
@@ -209,3 +212,103 @@ Phase 6.5 のみを実装した。以下は**未実装**であり、この PR �
 動的スコア判定は既存の `rankGap` hard gate を維持しつつ、
 affinity・financial pressure・risk tolerance・成長・HP/morale を受諾判断に組み込み、
 酒場主人と Party の循環を実装した。
+
+## Phase 6.5.1 Verification Completion
+
+### 7.1 Expanded Acceptance Audit
+
+`scripts/phase6-5-acceptance-audit.ts` を拡張し、固定 corpus で再実行した。
+
+```text
+corpus: 12 request templates × 8 party templates × 3 party ranks (E/D/C)
+        × 3 rank gaps (0/+1/+2) × 3 scenario seeds × 6 contexts
+        = 15,552 acceptance records
++1 prediction cross-audit: 864 cells × 200 samples = 172,800 expedition runs
+```
+
+### 7.2 +2 Hard Gate
+
+`rankGap >= 2` の 5,184 件すべて `declined` — **PASS**。
+
+### 7.3 +1 Acceptance by Context
+
+| context            | total | accepted | rate  |
+| ------------------ | ----- | -------- | ----- |
+| Newcomer           | 864   | 19       | 2.2%  |
+| Trusted            | 864   | 588      | 68.1% |
+| Broke              | 864   | 378      | 43.8% |
+| Bold               | 864   | 378      | 43.8% |
+| Veteran            | 864   | 754      | 87.3% |
+| Trusted+Broke+Bold | 864   | 828      | 95.8% |
+
+### 7.4 High-Prediction (+1) Cross-Audit
+
+`predictExpeditionOutcome()` 200 samples で推定成功率 >= 80% の +1 cells に限定：
+
+| context            | total cells | accepted | rate  |
+| ------------------ | ----------- | -------- | ----- |
+| Newcomer           | 117         | 3        | 2.6%  |
+| Trusted            | 117         | 87       | 74.4% |
+| Broke              | 117         | 68       | 58.1% |
+| Bold               | 117         | 68       | 58.1% |
+| Veteran            | 117         | 98       | 83.8% |
+| Trusted+Broke+Bold | 117         | 112      | 95.7% |
+
+Sanity target (`>=80% prediction` + `Trusted+Broke+Bold` >= 50%): **met** (95.7%)。
+Trends: `Trusted > Newcomer`, `Broke > Newcomer`, `Bold > Newcomer`, `Veteran >= Newcomer` すべて確認。
+
+### 7.5 Representative E→D Fixtures
+
+全て `E Party → D Request`、Prediction >= 80%：
+
+1. `balanced` / `遺跡の異変調査` / prediction 80%
+   - relevant roles: 1 / leader judgment: 40 / relevant skill avg: 83
+   - Newcomer/Trusted/Broke/Bold/Veteran: `declined` (`poorFit`)
+   - Trusted+Broke+Bold: `accepted` (`trustedBroker`, 76/50)
+2. `arcane` / `遺跡の異変調査` / prediction 98.5%
+   - relevant roles: 3 / leader judgment: 48 / relevant skill avg: 71.3
+   - Newcomer: `declined` (`tooDangerous`, 40/50)
+   - Trusted: `accepted` (`trustedBroker`, 57/50)
+   - Broke: `accepted` (`needsIncome`, 50/50)
+   - Bold: `accepted` (`boldChallenge`, 50/50)
+   - Veteran: `accepted` (`challengingButSuitable`, 63/50)
+   - Trusted+Broke+Bold: `accepted` (`trustedBroker`, 95/50)
+3. `versatile` / `遺跡の異変調査` / prediction 100%
+   - relevant roles: 3 / leader judgment: 52 / relevant skill avg: 76.3
+   - Newcomer: `declined` (`tooDangerous`, 40/50)
+   - Trusted/Broke/Bold/Veteran/Trusted+Broke+Bold: all `accepted`
+
+Fixture 2 が「90% problem」の実例：Prediction 98.5% でも `Newcomer` では `tooDangerous` で decline し、`Trusted`/`Broke`/`Bold`/`Veteran`/`Trusted+Broke+Bold` では accept へ変化する。
+
+### 7.6 Corrected 30-Day Campaign Audit
+
+`scripts/phase6-5-campaign-audit.ts` の decline 計測を修正し、Offer state を逐次保持。30 days × 10 seeds で再実行。
+
+```text
+accepted offers: 300
+declined offers: 41
+acceptance rate: 88.0%
+
+scheduled departures: 200
+new arrivals: 248
+average stay (departed): 5.08 days
+stay extensions: 0 (seed-dependent; 自然発生観測なし)
+
+outcome counts:
+  completeSuccess: 126
+  success: 79
+  partialSuccess: 15
+  failedObjective: 43
+  forcedRetreat: 37
+  lostExpedition: 0
+
+acceptance by rank gap:
+  0: 94.8% (145/153)
+  +1: 37.9% (11/29)
+  +2: 0.0% (0/13)
+  negative gaps: 100%
+```
+
+### 7.7 Production Code Unchanged
+
+Phase 6.5.1 で変更したのは監査 script と Report のみである。`acceptance.ts` / `relationship.ts` の定数、閾値、UI 表示ロジック、Expedition balance、Prediction、Request generation、Party rank up、Growth、Recovery、Reputation は変更していない。
