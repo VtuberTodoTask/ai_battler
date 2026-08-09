@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { predictExpeditionOutcome } from '../../core/tavern/prediction/prediction.ts'
+import { buildPredictionCacheKey } from '../../core/tavern/prediction/predictionCacheKey.ts'
 import {
   EXPEDITION_PREDICTION_SAMPLES,
   type ExpeditionPrediction,
@@ -14,26 +15,6 @@ export interface ExpeditionPredictionPanelProps {
   requestOffer: TavernRequestOffer | null
   tavernParty: TavernParty | null
   sampleCount?: number
-}
-
-function buildCacheKey(
-  requestOffer: TavernRequestOffer,
-  tavernParty: TavernParty,
-  sampleCount: number,
-): string {
-  const members = tavernParty.party.members.map((m) => ({
-    id: m.id,
-    currentHp: m.currentHp,
-    currentMp: m.currentMp,
-    morale: m.morale,
-    statusEffects: m.statusEffects,
-  }))
-  return JSON.stringify({
-    requestId: requestOffer.id,
-    partyId: tavernParty.id,
-    sampleCount,
-    members,
-  })
 }
 
 export function ExpeditionPredictionPanel({
@@ -56,7 +37,7 @@ export function ExpeditionPredictionPanel({
 
   const currentKey = useMemo(() => {
     if (!canPredict || !requestOffer || !tavernParty) return null
-    return buildCacheKey(requestOffer, tavernParty, sampleCount)
+    return buildPredictionCacheKey(requestOffer, tavernParty, sampleCount)
   }, [canPredict, requestOffer, tavernParty, sampleCount])
 
   const isMatch = useMemo(() => {

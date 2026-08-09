@@ -106,6 +106,12 @@ export function generateCampaignParty(
       failures: 0,
       retreats: 0,
     },
+    progression: {
+      growthXp: 0,
+      totalGrowthXp: 0,
+      growthMilestones: 0,
+      trainingDays: 0,
+    },
   }
 }
 
@@ -288,6 +294,11 @@ export function buildTavernDay(
       arrivalDay: cp.arrivalDay,
       plannedDepartureDay: cp.plannedDepartureDay,
       isNew: cp.arrivalDay === dayNumber,
+      progression: {
+        growthXp: cp.progression.growthXp,
+        growthMilestones: cp.progression.growthMilestones,
+        trainingDays: cp.progression.trainingDays,
+      },
     }
   })
 

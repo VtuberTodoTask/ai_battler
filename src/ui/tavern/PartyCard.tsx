@@ -63,6 +63,13 @@ export function PartyCard({
           {status}
         </span>
       </div>
+      {party.progression && (
+        <div className="party-progression">
+          成長 XP {party.progression.growthXp}/4 · 成長{' '}
+          {party.progression.growthMilestones}回 · 鍛錬{' '}
+          {party.progression.trainingDays}日
+        </div>
+      )}
     </div>
   )
 }
