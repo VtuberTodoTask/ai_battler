@@ -204,6 +204,59 @@ describe('survey facts', () => {
     expect(confirmedFacts).toContain('予定された範囲をすべて測量した')
   })
 
+  it('treats zero surveyed sectors as having no record to evaluate or return', () => {
+    const objective: DispatchObjectiveSummary = {
+      type: 'survey',
+      areaName: '未踏洞窟',
+      coveragePercent: 0,
+      averageQuality: 0,
+      minimumAcceptableQuality: 60,
+      reportReturned: false,
+      surveyedSectorCount: 0,
+      completed: false,
+    }
+    const report = baseReport('failedObjective', objective)
+    const { confirmedFacts, unknownDetails } = buildExpeditionNarrativeFacts(
+      makeContext(report),
+    )
+
+    expect(confirmedFacts).toContain('予定された範囲を測量できなかった')
+    expect(confirmedFacts).toContain('測量記録を作成できなかった')
+    expect(unknownDetails).toContain(
+      '測量できなかった具体的な原因は記録されていない',
+    )
+
+    const all = [...confirmedFacts, ...unknownDetails].join('\n')
+    expect(all).not.toContain('測量記録の品質')
+    expect(all).not.toContain('測量記録を持ち帰る')
+    expect(all).not.toContain('品質が基準に届かなかった')
+    expect(all).not.toContain('持ち帰れなかった')
+  })
+
+  it('never contains both no-record and quality or return facts for zero sectors', () => {
+    const objective: DispatchObjectiveSummary = {
+      type: 'survey',
+      areaName: '未踏洞窟',
+      coveragePercent: 0,
+      averageQuality: 0,
+      minimumAcceptableQuality: 60,
+      reportReturned: false,
+      surveyedSectorCount: 0,
+      completed: false,
+    }
+    const report = baseReport('failedObjective', objective)
+    const { confirmedFacts, unknownDetails } = buildExpeditionNarrativeFacts(
+      makeContext(report),
+    )
+
+    const all = [...confirmedFacts, ...unknownDetails].join('\n')
+    const hasNoRecord = all.includes('測量記録を作成できなかった')
+    const hasQuality = all.includes('測量記録の品質')
+    const hasReturn = all.includes('測量記録を持ち帰る')
+    expect(hasNoRecord && hasQuality).toBe(false)
+    expect(hasNoRecord && hasReturn).toBe(false)
+  })
+
   it('reports full coverage with quality failure without claiming range was limited', () => {
     const objective: DispatchObjectiveSummary = {
       type: 'survey',

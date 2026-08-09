@@ -215,6 +215,13 @@ function surveyFacts(summary: {
   const confirmed: string[] = []
   const unknown: string[] = []
 
+  if (summary.surveyedSectorCount === 0) {
+    confirmed.push('予定された範囲を測量できなかった')
+    confirmed.push('測量記録を作成できなかった')
+    unknown.push('測量できなかった具体的な原因は記録されていない')
+    return { confirmed, unknown }
+  }
+
   if (summary.coveragePercent <= 0) {
     confirmed.push('予定された範囲を測量できなかった')
   } else if (summary.coveragePercent < 50) {

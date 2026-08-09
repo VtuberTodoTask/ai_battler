@@ -239,6 +239,10 @@ The system prompt contains a dedicated `【店主＝プレイヤーについて�
   create romances.
 - Do not invent the causes of failure, retreat, injury, depletion, low progress,
   or success when those causes are not listed in CONFIRMED FACTS.
+- Only characters explicitly named in the input data and the tavernkeeper may
+  appear. Do not invent clerks, clients, guards, doctors, travelers, etc., unless
+  explicitly listed as an NPC in a character event. This rule applies to both
+  expedition and character-event narratives.
 - Do not infer equipment, spells, weapons, or actions from a member's `role`
   (e.g., `mage` casting magic, `guardian` using a shield, `scout` finding traps)
   unless the FACTS explicitly record them.
@@ -786,6 +790,9 @@ Phase 7.0.3.
   narrated only when the party has actually interacted with the target
   (`secured || extracted || returned`). Hidden engine state for an unobserved
   target no longer leaks into `CONFIRMED FACTS`.
-- Character-event actor restrictions now refer to people explicitly present in the
-  input data rather than depending on the Expedition-only `CONFIRMED FACTS`
-  section.
+- Character-event actor restrictions now refer to people explicitly present in
+  the input data (`入力データに人物として明示されている者と店主`) rather than
+  depending on the Expedition-only `CONFIRMED FACTS` section.
+- Survey with zero `surveyedSectorCount` is treated as having no survey record to
+  evaluate or return; quality and report-return facts are emitted only when at
+  least one sector was surveyed.
