@@ -24,6 +24,11 @@ export const ADVENTURER_THREAT: Record<AdventurerRank, number> = {
   S: 7.24,
 }
 
+// Expedition-only encounter budget multiplier. This is applied only when
+// generating encounters inside an expedition, so Phase 1 battle balance stays
+// untouched.
+export const EXPEDITION_ENCOUNTER_THREAT_MULTIPLIER = 0.85
+
 export const ENEMY_RANK_BASE: Record<EnemyRank, number> = {
   E: 40,
   D: 48,

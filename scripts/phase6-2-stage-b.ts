@@ -797,6 +797,57 @@ export function runStageB(options?: {
   return { records, summary, eliminationDecomposition, outputPath }
 }
 
+export function runFixture(options: {
+  objectiveType: ObjectiveType
+  requestTemplateId: string
+  requestRank: AdventurerRank
+  partyTemplateId: string
+  partyRank: AdventurerRank
+  scenarioSeed: string
+  sampleCount: number
+  outputPath: string
+  includeBattleAblation?: boolean
+}) {
+  const requestTemplate = TAVERN_REQUEST_TEMPLATES.find(
+    (t) => t.id === options.requestTemplateId,
+  )
+  if (!requestTemplate) {
+    throw new Error(`Unknown request template: ${options.requestTemplateId}`)
+  }
+  const partyTemplateIndex = PARTY_TEMPLATES.findIndex(
+    (t) => t.id === options.partyTemplateId,
+  )
+  if (partyTemplateIndex === -1) {
+    throw new Error(`Unknown party template: ${options.partyTemplateId}`)
+  }
+  const requestOffer = generateRequestOffer(
+    options.requestTemplateId,
+    options.requestRank,
+    options.scenarioSeed,
+  )
+  const party = generateParty(
+    options.partyTemplateId,
+    options.partyRank,
+    options.scenarioSeed,
+    partyTemplateIndex,
+  )
+  const cellRecord = buildCellRecord(
+    options.objectiveType,
+    options.requestTemplateId,
+    options.requestRank,
+    options.partyTemplateId,
+    options.partyRank,
+    options.scenarioSeed,
+    requestOffer,
+    party,
+    options.sampleCount,
+    options.includeBattleAblation ?? false,
+  )
+  fs.mkdirSync(path.dirname(options.outputPath), { recursive: true })
+  fs.writeFileSync(options.outputPath, JSON.stringify(cellRecord, null, 2))
+  return cellRecord
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   const start = Date.now()
   const { summary, outputPath } = runStageB()

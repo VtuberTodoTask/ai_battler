@@ -1,4 +1,7 @@
-import { ADVENTURER_THREAT } from '../balance/constants.ts'
+import {
+  ADVENTURER_THREAT,
+  EXPEDITION_ENCOUNTER_THREAT_MULTIPLIER,
+} from '../balance/constants.ts'
 import { Adventurer, BattleResult } from '../models/types.ts'
 import {
   BattleIntel,
@@ -196,7 +199,10 @@ export function runExpeditionBattle(
   const battleId = `battle-${state.battles.length}`
   const config = request.battle
   const partySize = config?.recommendedPartySize ?? 4
-  const requestPartyThreat = ADVENTURER_THREAT[request.rank] * partySize
+  const requestPartyThreat =
+    ADVENTURER_THREAT[request.rank] *
+    partySize *
+    EXPEDITION_ENCOUNTER_THREAT_MULTIPLIER
 
   const battleSeedBase = config?.seed ?? `${request.seed}:battle:0`
   const encounterSeed = `${battleSeedBase}:encounter`

@@ -252,15 +252,15 @@ export function calculateInformationBonus(
 export function difficultyBasePenalty(difficulty: string): number {
   switch (difficulty) {
     case 'easy':
-      return 0
+      return -10
     case 'normal':
-      return 10
+      return 0
     case 'hard':
-      return 20
-    case 'deadly':
-      return 30
-    default:
       return 10
+    case 'deadly':
+      return 20
+    default:
+      return 0
   }
 }
 

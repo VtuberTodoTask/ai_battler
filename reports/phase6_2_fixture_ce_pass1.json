@@ -1,0 +1,91 @@
+{
+  "objectiveType": "investigation",
+  "requestTemplateId": "investigation-monster-signs",
+  "requestRank": "E",
+  "partyTemplateId": "assault",
+  "partyRank": "C",
+  "scenarioSeed": "phase6-2:scenario:2",
+  "rankAdvantage": 2,
+  "sampleCount": 200,
+  "estimatedSuccessRate": 0.08,
+  "completeSuccessRate": 0.075,
+  "successRate": 0.005,
+  "partialSuccessRate": 0.06,
+  "failedObjectiveRate": 0.825,
+  "forcedRetreatRate": 0.01,
+  "lostExpeditionRate": 0.025,
+  "objectiveCompletedRate": 0.085,
+  "avgObjectiveProgress": 19.925,
+  "medianObjectiveProgress": 15,
+  "objectiveProgressP10": 0,
+  "objectiveProgressP90": 45.49999999999997,
+  "battleOccurredRate": 1,
+  "battleOutcomeCounts": {
+    "victory": 190,
+    "costlyVictory": 6,
+    "retreat": 2,
+    "partialVictory": 2
+  },
+  "battleFavorableRate": 0.99,
+  "favorableBattleThenExpeditionFailureRate": 0.85,
+  "avgPreBattleHpTotal": 258.06,
+  "avgFinalHpTotal": 248.065,
+  "avgCasualties": 0.03,
+  "avgIncapacitated": 0.045,
+  "acceptanceDecision": "accepted",
+  "acceptanceReason": "appropriate",
+  "relevantRoleCount": 0,
+  "leaderJudgment": 54,
+  "objectiveDiagnosticsSummary": {
+    "objectiveProgress": {
+      "count": 200,
+      "mean": 19.925,
+      "median": 15,
+      "p10": 0,
+      "p25": 5,
+      "p75": 20,
+      "p90": 45.49999999999997,
+      "trueRate": 0
+    },
+    "objectiveCompleted": {
+      "count": 200,
+      "mean": 0,
+      "median": 0,
+      "p10": 0,
+      "p25": 0,
+      "p75": 0,
+      "p90": 0,
+      "trueRate": 0.085
+    },
+    "discoveredInformationCount": {
+      "count": 200,
+      "mean": 0.855,
+      "median": 1,
+      "p10": 0,
+      "p25": 0,
+      "p75": 1,
+      "p90": 2,
+      "trueRate": 0
+    },
+    "completeInformationCount": {
+      "count": 200,
+      "mean": 0.335,
+      "median": 0,
+      "p10": 0,
+      "p25": 0,
+      "p75": 1,
+      "p90": 1,
+      "trueRate": 0
+    },
+    "discoveredThreatsCount": {
+      "count": 200,
+      "mean": 1.625,
+      "median": 2,
+      "p10": 1,
+      "p25": 1,
+      "p75": 2,
+      "p90": 2,
+      "trueRate": 0
+    }
+  }
+}
