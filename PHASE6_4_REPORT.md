@@ -130,6 +130,7 @@ The failure-farming guard holds: even over many days, `completeSuccess > success
 - `npm test`: 692 passed
 - `npm run build`: passed
 - `npm run test:expedition-regression`: 22/22 passed
+- Browser E2E: passed (seed `tavern-campaign-001`, 8 days)
 
 ## Known limitations
 
@@ -145,4 +146,16 @@ The failure-farming guard holds: even over many days, `completeSuccess > success
 
 ## Browser E2E
 
-(TBD after recorded E2E run.)
+Recorded browser E2E was performed on the built preview (`npm run build && npm run preview -- --host`) with campaign seed `tavern-campaign-001`, advancing 8 days. See `test-report-phase6-4.md` and the video at `/home/ubuntu/screencasts/phase64-tavern-campaign/phase64-tavern-campaign-edited.mp4` for the full run.
+
+Key checks:
+
+- Day 1: `未踏洞窟の経路測量(E)` + `《鋼の絆》(E)` predicted **65%**. Switching to `街道周辺の魔物排除(E)` updated the prediction to **32%**; no stale prediction remained.
+- Day 1 resolve: `completeSuccess` / `victory`, reputation `10 → 13 (+3)`. `《鋼の絆》` received `+4 XP`, reached the first milestone, and all members gained `+2` in one role-relevant skill. Other available parties each received `自主鍛錬 +1 XP`.
+- Day 2: `《鋼の絆》` was `療養中` and gained no progression; other parties continued training.
+- Day 4: after recovery, the same `未踏洞窟の経路測量(E)` + `《鋼の絆》(E)` recomputed to **33%** because `buildPredictionCacheKey` now includes `skills` and `stats`.
+- Day 6: `商人の護衛(E)` + `《森影》(C)` predicted **90%** and resolved `completeSuccess`, reputation `13 → 16 (+3)`.
+- Day 8: all request ranks stayed within the highest available party rank + 1, and idle training XP continued for non-recovering, non-dispatched parties.
+- Browser console: no errors or unhandled rejections.
+
+All checked scenarios passed.

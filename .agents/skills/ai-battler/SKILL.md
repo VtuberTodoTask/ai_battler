@@ -223,3 +223,48 @@ A fourth tab, `酒場キャンペーン`, renders a multi-day campaign:
     .find((b) => b.textContent.trim() === '翌日へ')
     ?.click()
   ```
+
+## Phase 6.4 Party growth, idle training, and skill growth (`devin/phase6-4-party-growth`)
+
+- `awardPartyGrowthXp` in `src/core/tavern/campaign/progression.ts` grants
+  `EXPEDITION_GROWTH_XP[outcome]` to resolved parties (4 for `completeSuccess`,
+  3 for `success`, etc.) and `TRAINING_GROWTH_XP` (1) to non-dispatched,
+  non-recovering, non-departing parties at day resolution.
+- When `growthXp` reaches `PARTY_GROWTH_XP_THRESHOLD` (4), `applyGrowthMilestones`
+  awards one milestone, improves one role-relevant skill by
+  `SKILL_GROWTH_PER_MILESTONE` (2), and resets `growthXp`.
+- `resolveCampaignDay` skips recovering parties entirely (`isRecoveringOnDay`),
+  so they gain neither expedition XP nor training XP.
+- `syncCurrentDayParties` writes grown progression/skills back to
+  `currentDay.parties`, so the UI sees updated values immediately.
+- `buildPredictionCacheKey` includes each member's `skills`, `currentHp`,
+  `currentMp`, `morale`, `statusEffects`, and `stats`; selecting the same
+  `request + party` after a milestone/skill change produces a fresh prediction
+  instead of reusing a stale cached value.
+
+### Natural E2E scenario with `tavern-campaign-001`
+
+- Day 1: dispatch `街道周辺の魔物排除(E)` to `《鋼の絆》(E)` and resolve.
+  - Outcome is `completeSuccess`; reputation `10 → 13`.
+  - `《鋼の絆》` gains `+4 XP`, reaches the first milestone, and all four
+    members improve a skill by 2.
+  - Other available parties each gain `自主鍛錬 +1 XP (計 1)`.
+- Day 2: `《鋼の絆》` is `療養中` and gains no XP/training; the other parties
+  gain another `+1 XP`.
+- Day 4: `《鋼の絆》` has recovered and its skills have grown. Selecting the
+  same request + party again should recompute the prediction; for this seed it
+  drops from ~65% to ~33%, proving the cache invalidation works.
+- Day 6+: dispatch another available party (e.g. `《森影》(C)` on an `E` escort)
+  and continue advancing. After each successful expedition, confirm reputation
+  and final HP/MP/Morale update, and that idle parties continue gaining training
+  XP until they hit the next milestone.
+
+### UI checks
+
+- `PartyCard` shows `成長 XP {growthXp}/4 · 成長 {milestones}回 · 鍛錬 {days}日`.
+- `CampaignHistory` expands to show `成長 / 鍛錬:` events, including
+  `完全成功 +4 XP (計 4)`, per-member `skill 46 → 48`, and
+  `自主鍛錬 +1 XP (計 N)`.
+- `TavernResultDetail` shows final per-member `HP {finalHp}/{maxHp}`
+  `MP {finalMp}/{maxMp} Morale {morale}`.
+- `CampaignHeader` shows `酒場評判 {reputation} / 100`.
