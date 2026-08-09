@@ -198,95 +198,149 @@ produce a coherent goodbye.
 
 ## Prompt contract
 
-`NARRATIVE_PROMPT_VERSION = 'v1'`.
+`NARRATIVE_PROMPT_VERSION = 'v2'`.
 
-The system prompt instructs the AI that all supplied FACTS are immutable and
-forbids inventing new game state. It explicitly forbids return-date guarantees,
-new destinations, family/backstory/debt creation, new injuries or illnesses,
-romance, new NPCs, rewards, items, or new requests. Personality values may
-influence speech and reactions, but they must not be used to invent a character's
-past, family, debt, or employment history.
+The v2 bump reflects a meaningful contract change: the tavernkeeper is now
+explicitly defined as the player, not an NPC the AI can act for.
+
+### Player-owned tavernkeeper
+
+The system prompt contains a dedicated `【店主＝プレイヤーについて】` section:
+
+- The tavernkeeper is not an NPC; the tavernkeeper is the player operating the game.
+- The AI must not decide the tavernkeeper's personality, speech, emotions,
+  thoughts, decisions, promises, or course of action.
+- Unless provided as a FACT, the AI must not invent the tavernkeeper's name,
+  gender, age, appearance, personality, past, feelings, tone, or lines.
+- If no tavernkeeper name is given as a FACT, refer to them only as `店主`.
+  Do not assign proper names like "アルフレッド" or "マリナ".
+- The narrative camera is placed with the adventurer party; do not enter the
+  tavernkeeper's interior perspective.
+- Avoid phrases such as `店主は満足げに頷いた`, `店主は寂しそうに笑った`,
+  `店主は彼らを誇らしく思った`, etc.
+- Party-to-tavernkeeper actions and dialogue are allowed (e.g. reporting,
+  greeting, saying goodbye). Tavernkeeper-to-party actions or dialogue are
+  forbidden unless explicitly listed in FACTS.
+
+### Other fact constraints
+
+- All supplied FACTS are immutable.
+- Do not change outcomes, names, ranks, injuries, deaths, request content,
+  success/failure, or relationship values.
+- Do not invent new incidents, NPCs, requests, rewards, items, past events,
+  promises, permanent relationships, family settings, hometowns, or debts.
+- Do not promise return dates or invent fixed destinations.
+- Do not resurrect the dead, kill survivors, invent new injuries/illnesses, or
+  create romances.
+
+### Personality usage
+
+Personality values (bravery, caution, cooperation, discipline, altruism, greed)
+may influence how a party member speaks or reacts, but they must not be used to
+invent new backstory, family, debt, or employment history.
 
 ### Expedition output
 
 - Length: 400–800 Japanese characters.
-- Scene: the party returns to the tavern and reports the result to the owner.
-- Include important events in natural prose, short member dialogue, and do not read
-  HP/MP/Morale numbers verbatim.
+- Scene: the party returns to the tavern and reports the result to the player.
+- Tell the story in natural prose, include short party-member dialogue, and do
+  not read HP/MP/Morale numbers verbatim.
+- Dialogue should come from the party members, not from the tavernkeeper.
+- Do not write the tavernkeeper's reaction; advance the scene without it.
 - Do not change the outcome.
 
 ### Character event output
 
 - Length: 300–700 Japanese characters.
-- Scene: a short tavern conversation focusing on the primary event.
-- `secondaryTriggers` may be touched on naturally but do not need to be included all.
-- Do not invent the owner's name, gender, or age.
+- Scene: a short tavern conversation focused on the primary event.
+- `secondaryTriggers` may be touched on naturally but do not need to be included.
+- The tavernkeeper is the player; do not invent their name, gender, age,
+  appearance, personality, lines, feelings, thoughts, judgments, promises, or
+  actions.
+- Party-to-tavernkeeper address is allowed; tavernkeeper-to-party address is not.
 
 ### Event-specific guidance
 
 A `characterEventInstruction(eventType)` helper appends tailored writing guidance
 for every supported event:
 
-- `partyArrival` — first impression and leader greeting; use party name, rank,
-  and strong/weak objectives; do not invent past adventures or visit reasons.
-- `riskyRequestAccepted` — the moment just before accepting a higher-rank request;
-  respect `acceptanceReason`; express confidence for `specializationMatch`, trust
-  for `trustedBroker`, or financial need for `needsIncome`; do not invent
-  circumstances.
-- `weakObjectiveSuccess` — the party succeeded in their weak field this time, but
-  do not declare "fully overcome" their weakness.
-- `recoveryFinished` — recovery ends and the party can act again; do not invent
-  disease names, treatments, or doctors.
-- `stayExtended` — the party tells the owner they are extending their stay; do
-  not become permanent residents.
+- `partyArrival` — the newly arrived party is the subject; the leader may
+  introduce themselves to the tavernkeeper; describe the first impression from
+  the party's side; the tavernkeeper must not introduce themselves, offer
+  welcome lines, or have a fixed first impression.
+- `riskyRequestAccepted` — moment just before accepting a higher-rank request;
+  party may say "we'll take it"; do not make the tavernkeeper ask
+  "are you sure?"; respect `acceptanceReason`; express confidence for
+  `specializationMatch`, trust for `trustedBroker`, or financial need for
+  `needsIncome` from the party's side only.
+- `weakObjectiveSuccess` — the party succeeded in their weak field this time;
+  the party may report it to the tavernkeeper; do not say they "fully overcame"
+  the weakness; do not invent praising lines from the tavernkeeper.
+- `recoveryFinished` — recovery ends and the party can act again; party may say
+  "we can move now"; do not make the tavernkeeper say "don't overdo it"; do not
+  invent disease names, treatments, or doctors.
+- `stayExtended` — the party informs the tavernkeeper they are extending their
+  stay; do not write the tavernkeeper's reply; do not make them permanent
+  residents.
 - `becameRegular` — the party has settled in as regulars; generic "usual seat"
-  references are fine, but do not fabricate specific dishes or order history.
-- `becameFavorite` — strong trust or favor toward the owner; do not escalate to
+  references are fine; do not state the tavernkeeper thinks of them as family.
+- `becameFavorite` — describe strong trust from the party toward the
+  tavernkeeper (e.g. "if you bring it, it's worth listening to"); do not
+  infer equivalent feelings from the tavernkeeper's side; do not escalate to
   family/best-friend/romance.
-- `farewell` — a high-affinity goodbye; use `stayDays`, expedition history,
-  growth, and recent highlights; do not promise a return date or invent a
-  destination.
-- `casualtyDeparture` — respect `deadMemberNames` and `survivorNames` exactly; do
-  not resurrect the dead, kill survivors, or invent funerals, bereaved
-  relatives, or revenge quests.
+- `farewell` — high-affinity goodbye; the party tells the tavernkeeper they are
+  leaving, reflects on their time, offers thanks/farewell words, then leaves;
+  do not write the tavernkeeper's response; do not promise a return date or
+  invent a destination.
+- `casualtyDeparture` — respect `deadMemberNames` and `survivorNames` exactly;
+  do not resurrect the dead or kill survivors; do not invent funerals,
+  bereaved relatives, or revenge quests; party grief is allowed; do not make
+  the tavernkeeper cry, rage, comfort, or swear revenge.
 
 ## Expedition prompt example
 
 ```text
 【遠征レポート】
-依頼タイトル: 未踏洞窟の経路測量
+依頼タイトル: 魔物出没原因の調査
 依頼ランク: E
-目的: survey
-環境: mountain
-Public Tags: 測量, 山岳, 3区画
-依頼内容: 未踏洞窟の内部経路と危険箇所を測量する。
+目的: investigation
+環境: forest
+Public Tags: 調査, 森林, 待ち伏せの可能性
+依頼内容: 街道沿いで増えている魔物の出没理由を探る。
 
-Party: 流水の滴 (Rank C)
-Leader: チェルシー クォーツ
+Party: 風鳴り (Rank D)
+Leader: オルム ピーク
 Affinity: 10
-Financial Pressure: 43
+Financial Pressure: 32
 Risk Tolerance: balanced
-Specialization Match: neutral
-Strong Objective: elimination
-Weak Objective: escort
-Leader Personality: bravery 1, caution 0, cooperation -3, discipline -2, altruism -2, greed 0
+Specialization Match: weak
+Strong Objective: survey
+Weak Objective: investigation
+Leader Personality: bravery 0, caution -1, cooperation 2, discipline 3, altruism 2, greed -2
 Members:
-  - チェルシー クォーツ (C vanguard)
-      Personality: bravery 1, caution 0, cooperation -3, discipline -2, altruism -2, greed 0
-  - ...
+  - オルム ピーク (D vanguard)
+      Personality: bravery 0, caution -1, cooperation 2, discipline 3, altruism 2, greed -2
+  - ゴウ オーシャン (D scout)
+      Personality: bravery -3, caution 0, cooperation -1, discipline -2, altruism -3, greed -3
+  - チェルシー ピーク (D healer)
+      Personality: bravery 1, caution 2, cooperation -2, discipline -1, altruism 1, greed 0
+  - シエラ ムーン (D support)
+      Personality: bravery -3, caution -1, cooperation -3, discipline 0, altruism -3, greed -3
 
 Acceptance Reason: appropriate
-Rank Gap: -2
+Rank Gap: -1
 Outcome: success
 Objective Completed: Yes
 Objective Progress: 80%
 
 Member Final States:
-  - チェルシー クォーツ (vanguard C) — HP 68/68, MP 8/8, Morale 46
-  - ...
+  - オルム ピーク (vanguard D) — HP 75/75, MP 12/12, Morale 47
+  - ゴウ オーシャン (scout D) — HP 64/64, MP 9/9, Morale 44
+  - チェルシー ピーク (healer D) — HP 62/62, MP 39/39, Morale 62
+  - シエラ ムーン (support D) — HP 52/52, MP 39/39, Morale 48
 
 Key Facts:
-  - 未踏洞窟の経路測量を完了
+  - 魔物出没原因の調査を完了
   - 全員無事に帰還
 
 WRITING INSTRUCTIONS:
@@ -294,6 +348,9 @@ WRITING INSTRUCTIONS:
 - Partyが酒場へ帰還し、店主へ結果を報告する短編
 - 重要な出来事を自然な文章にする
 - Party Memberの短い会話を含めてよい
+- 会話を入れる場合は原則Party Member側の台詞にする
+- 店主はプレイヤー本人なので、店主の台詞・感情・判断を作らない
+- 店主の反応を必要とする場面では、反応そのものを書かずに場面を進める
 - HP/MP/Morale等の数値をそのまま読み上げない
 - Outcomeを変更しない
 ```
@@ -305,6 +362,41 @@ System:
 ```text
 あなたはファンタジー世界の酒場を舞台とするゲームのナレーターです。
 
+【店主＝プレイヤーについて】
+この酒場の店主はNPCではありません。店主は、このゲームを操作しているプレイヤー本人です。
+店主の人格や意思をAIが代わりに決定してはいけません。
+FACTSに明示されていない限り、店主について以下を創作してはいけません。
+
+- 名前
+- 性別
+- 年齢
+- 外見
+- 性格
+- 過去
+- 感情
+- 思考
+- 口調
+- 台詞
+- 約束
+- 判断
+- 行動方針
+
+店主の名前がFACTSとして与えられていない場合、必ず「店主」とだけ表記してください。
+「アルフレッド」「マリナ」など、店主へ新しい固有名を与えてはいけません。
+
+FACTSとして店主の発言内容が明示されている場合を除き、店主の台詞を新しく作ってはいけません。
+店主はプレイヤー本人であるため、AIがプレイヤーに代わって発言してはいけません。
+
+店主の内面を描写しないでください。次のような表現を避けてください。
+- 店主は満足げに頷いた。
+- 店主は寂しそうに笑った。
+- 店主は驚いて目を見開いた。
+- 店主は彼らを誇らしく思った。
+- 店主は失敗に落胆した。
+
+物語のカメラは主に冒険者Party側へ置いてください。店主の内面を描写する視点には入らないでください。
+
+【その他の事実制約】
 提供されたFACTSはゲームエンジンが確定した事実です。FACTSと矛盾する内容を書いてはいけません。
 結果、人物名、Party名、Rank、負傷、死亡、依頼内容、成功・失敗、関係値などを変更してはいけません。
 FACTSに存在しない新しい事件、NPC、依頼、報酬、アイテム、過去、約束、恒久的な人間関係、家族設定、故郷設定、借金額を事実として追加してはいけません。
@@ -314,7 +406,7 @@ FACTSに存在しない新しい事件、NPC、依頼、報酬、アイテム、
 
 Personality値（勇敢さ、慎重さ、協調性、規律、利他、貪欲）は話し方や反応の参考にしてよいです。ただし、それを根拠に人物の過去、家族、借金、職歴等の新しい設定を作らないでください。
 
-ただし、物語表現としての一時的な表情、仕草、口調、空気、短い会話などは創作して構いません。それらは新たなゲーム上の事実を作らない範囲にしてください。
+ただし、物語表現としての一時的な表情、仕草、口調、空気、短い会話などは創作して構いません。それらは新たなゲーム上の事実を作らない範囲にしてください。ただし、店主の感情、思考、台詞、意思決定を創作してはいけません。
 
 ゲームシステムの数値をそのまま読み上げるのではなく、自然な日本語の物語として描写してください。
 ```
@@ -324,25 +416,25 @@ User (farewell fixture):
 ```text
 【キャラクターイベント】
 Event Type: farewell
-Party: 玻璃の鏡 (Rank C)
-Leader: ロイド ムーン
-Leader Personality: bravery -1, caution -2, cooperation -1, discipline -2, altruism 3, greed 0
+Party: 赤鴉団 (Rank D)
+Leader: フェイ アイヴィー
+Leader Personality: bravery -3, caution -1, cooperation 3, discipline -2, altruism 3, greed -1
 Affinity: 60
-Financial Pressure: 54
-Risk Tolerance: balanced
+Financial Pressure: 38
+Risk Tolerance: cautious
 Growth Milestones: 0
 Training Days: 0
-Strong Objective: survey
+Strong Objective: retrieval
 Weak Objective: investigation
 Members:
-  - ロイド ムーン (C vanguard)
-      Personality: bravery -1, caution -2, cooperation -1, discipline -2, altruism 3, greed 0
-  - ティア サンド (C vanguard)
-      Personality: bravery 2, caution -2, cooperation 3, discipline -1, altruism -3, greed -3
-  - エルナ クォーツ (C guardian)
-      Personality: bravery 2, caution 1, cooperation 1, discipline -1, altruism -2, greed 0
-  - ロイド ドラグナー (C healer)
-      Personality: bravery 0, caution -1, cooperation -1, discipline -3, altruism 0, greed 3
+  - フェイ アイヴィー (D scout)
+      Personality: bravery -3, caution -1, cooperation 3, discipline -2, altruism 3, greed -1
+  - オルム クォーツ (D ranger)
+      Personality: bravery -2, caution 3, cooperation -1, discipline 1, altruism -3, greed 2
+  - シエラ アイヴィー (D mage)
+      Personality: bravery -3, caution 3, cooperation 3, discipline -1, altruism 2, greed -3
+  - チェルシー アイヴィー (D support)
+      Personality: bravery 0, caution -1, cooperation 2, discipline 2, altruism -2, greed -1
 
 Recent Highlights:
 なし
@@ -360,12 +452,20 @@ WRITING INSTRUCTIONS:
 - 酒場を舞台とする短い会話シーン
 - Primary Eventを中心に描写する
 - secondaryTriggersは自然なら触れてよいが、全部入れる必要はない
-- 店主の名前・性別・年齢を捏造しない
-
+- 店主はNPCではなくプレイヤー本人である
+- 店主の名前・性別・年齢・外見・性格を創作しない
+- 店主の台詞を作らない
+- 店主の感情・思考を決めない
+- 店主に新しい判断・約束・行動方針を与えない
+- Party側から店主へ話しかける描写は可
+- 店主からPartyへの新規行動・発話は原則禁止（FACTSに明示されている場合を除く）
 farewell:
-- 高Affinity Partyとの別れを中心にする
+- 高Affinity Partyが店主へ旅立ちを告げる場面
 - stayDays / actual expedition history / growth / recentHighlightsを利用する
 - 実際に紹介した依頼を振り返ってよい
+- Party側から感謝・別れの言葉を告げる
+- 最後にPartyが酒場を去る
+- 店主の返答を作らない
 - 再訪予定は存在しない
 - 「必ず戻る」「来月戻る」等を確約させない
 - 「また近くへ来たら寄る」「機会があれば」程度は可
@@ -374,8 +474,10 @@ farewell:
 
 ## Creative freedom boundary
 
-- ✅ Expressions, gestures, tone, tavern atmosphere, short improvised dialogue,
-  and Personality-influenced speech.
+- ✅ Party-side expressions, gestures, tone, tavern atmosphere, short improvised
+  dialogue, and Personality-influenced speech.
+- ❌ Tavernkeeper proper names, gender, age, appearance, personality, emotions,
+  thoughts, speech, decisions, promises, or actions unless provided as FACTS.
 - ❌ Unknown NPCs, romance, rewards, items, backstory, debts, fixed destinations,
   return guarantees, raising the dead, inventing injuries/illnesses, family
   settings, hometown settings.
