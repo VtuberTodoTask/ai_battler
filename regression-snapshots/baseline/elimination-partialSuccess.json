@@ -906,7 +906,7 @@
           },
           {
             "type": "eliminationCompleted",
-            "value": 0
+            "value": 1
           }
         ],
         "facts": [
@@ -1036,10 +1036,10 @@
       "returnTimeBonus": 0,
       "threatFeatures": ["traps", "poorVisibility"]
     },
-    "objectiveCompleted": false,
+    "objectiveCompleted": true,
     "objectiveProgress": 50,
     "objectiveState": {
-      "completed": false,
+      "completed": true,
       "confirmationRequired": false,
       "confirmedTargetIds": [
         "D-insect-swarm-standard-s1:battle:0:encounter:enemy:0",

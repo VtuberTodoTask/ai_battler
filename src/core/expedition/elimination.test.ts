@@ -6,12 +6,19 @@ import {
   makeParty,
   makeRequest,
 } from './test-utils.ts'
-import type { BattleOutcome, BattleResult } from '../models/types.ts'
+import type {
+  AdventurerRank,
+  BattleOutcome,
+  BattleResult,
+} from '../models/types.ts'
 import type { EliminationObjectiveState } from './types.ts'
 import { runExpedition } from './expedition.ts'
 import { initializeExpeditionState } from './state.ts'
 import { expeditionTestInternals } from './test-internals.ts'
-import { initializeEliminationObjectiveState } from './objectives/elimination.ts'
+import {
+  initializeEliminationObjectiveState,
+  updateEliminationCompleted,
+} from './objectives/elimination.ts'
 
 describe('Outcome separation', () => {
   function outcomeWith(
@@ -432,5 +439,186 @@ describe('Elimination final outcomes', () => {
     expect(obj.type).toBe('elimination')
     expect(result.state.battles[0]?.outcome).toBe('victory')
     expect(result.outcome).toBe('failedObjective')
+  })
+})
+
+describe('Elimination confirmationRequired and neutralized semantics', () => {
+  function buildState(
+    requestSeed: string,
+    rank: AdventurerRank,
+    confirmationRequired: boolean,
+    targetStatus: {
+      defeated: string[]
+      escaped: string[]
+      surviving: string[]
+      unknown: string[]
+    },
+  ) {
+    const request = makeEliminationRequest(
+      requestSeed,
+      rank,
+      confirmationRequired,
+    )
+    const party = makeEliminationParty(requestSeed, rank)
+    const state = initializeExpeditionState(request, party)
+    const obj = initializeEliminationObjectiveState(
+      request,
+    ) as EliminationObjectiveState
+    obj.requiredTargetIds = [
+      ...targetStatus.defeated,
+      ...targetStatus.escaped,
+      ...targetStatus.surviving,
+      ...targetStatus.unknown,
+    ]
+    obj.defeatedTargetIds = targetStatus.defeated
+    obj.escapedTargetIds = targetStatus.escaped
+    obj.survivingTargetIds = targetStatus.surviving
+    obj.unknownTargetIds = targetStatus.unknown
+    obj.confirmedTargetIds = confirmationRequired
+      ? []
+      : [...targetStatus.defeated]
+    if (confirmationRequired) {
+      obj.confirmedTargetIds = targetStatus.defeated
+    }
+    updateEliminationCompleted(obj)
+    obj.progress =
+      obj.requiredTargetIds.length === 0
+        ? 0
+        : Math.round(
+            (obj.defeatedTargetIds.length / obj.requiredTargetIds.length) * 100,
+          )
+    state.objectiveState = obj
+    state.objectiveProgress = obj.progress
+    state.objectiveCompleted = obj.completed
+    return { request, party, state, obj }
+  }
+
+  it('Test A: confirmationRequired=false, 3 defeated + 1 escaped -> success and completed', () => {
+    const { request, state, party, obj } = buildState(
+      'test-a-no-confirm-neutralized',
+      'C',
+      false,
+      {
+        defeated: ['t-0', 't-1', 't-2'],
+        escaped: ['t-3'],
+        surviving: [],
+        unknown: [],
+      },
+    )
+    expect(obj.completed).toBe(true)
+    expect(state.objectiveCompleted).toBe(true)
+    expect(obj.defeatedTargetIds.length).toBe(3)
+    expect(obj.escapedTargetIds.length).toBe(1)
+    const outcome = expeditionTestInternals.determineOutcome(
+      request,
+      state,
+      party,
+    )
+    expect(outcome).toBe('success')
+  })
+
+  it('Test B: confirmationRequired=true, 3 defeated + 1 escaped -> not success, completed false', () => {
+    const { request, state, party, obj } = buildState(
+      'test-b-confirm-neutralized',
+      'C',
+      true,
+      {
+        defeated: ['t-0', 't-1', 't-2'],
+        escaped: ['t-3'],
+        surviving: [],
+        unknown: [],
+      },
+    )
+    expect(obj.completed).toBe(false)
+    expect(state.objectiveCompleted).toBe(false)
+    const outcome = expeditionTestInternals.determineOutcome(
+      request,
+      state,
+      party,
+    )
+    expect(outcome).not.toBe('success')
+    expect(outcome).not.toBe('completeSuccess')
+  })
+
+  it('Test C: confirmationRequired=false, 4 defeated -> completeSuccess', () => {
+    const { request, state, party, obj } = buildState(
+      'test-c-no-confirm-defeated',
+      'C',
+      false,
+      {
+        defeated: ['t-0', 't-1', 't-2', 't-3'],
+        escaped: [],
+        surviving: [],
+        unknown: [],
+      },
+    )
+    expect(obj.completed).toBe(true)
+    const outcome = expeditionTestInternals.determineOutcome(
+      request,
+      state,
+      party,
+    )
+    expect(outcome).toBe('completeSuccess')
+  })
+
+  it('Test D: confirmationRequired=true, 4 defeated + confirmed -> success or completeSuccess', () => {
+    const { request, state, party, obj } = buildState(
+      'test-d-confirm-defeated',
+      'C',
+      true,
+      {
+        defeated: ['t-0', 't-1', 't-2', 't-3'],
+        escaped: [],
+        surviving: [],
+        unknown: [],
+      },
+    )
+    obj.confirmedTargetIds = [...obj.defeatedTargetIds]
+    updateEliminationCompleted(obj)
+    state.objectiveCompleted = obj.completed
+    expect(obj.completed).toBe(true)
+    const outcome = expeditionTestInternals.determineOutcome(
+      request,
+      state,
+      party,
+    )
+    expect(['success', 'completeSuccess'] as string[]).toContain(outcome)
+  })
+
+  it('Test E: 2 defeated + 1 escaped + 1 surviving -> success forbidden, completed false', () => {
+    const { request, state, party, obj } = buildState(
+      'test-e-surviving',
+      'C',
+      false,
+      {
+        defeated: ['t-0', 't-1'],
+        escaped: ['t-2'],
+        surviving: ['t-3'],
+        unknown: [],
+      },
+    )
+    expect(obj.completed).toBe(false)
+    expect(state.objectiveCompleted).toBe(false)
+    const outcome = expeditionTestInternals.determineOutcome(
+      request,
+      state,
+      party,
+    )
+    expect(outcome).not.toBe('success')
+    expect(outcome).not.toBe('completeSuccess')
+  })
+
+  it('Test F: escaped and defeated target IDs stay separate', () => {
+    const { obj } = buildState('test-f-ids', 'C', false, {
+      defeated: ['t-0', 't-1'],
+      escaped: ['t-2', 't-3'],
+      surviving: [],
+      unknown: [],
+    })
+    expect(obj.defeatedTargetIds).toEqual(['t-0', 't-1'])
+    expect(obj.escapedTargetIds).toEqual(['t-2', 't-3'])
+    const defeatedSet = new Set(obj.defeatedTargetIds)
+    const escapedSet = new Set(obj.escapedTargetIds)
+    expect([...defeatedSet].some((id) => escapedSet.has(id))).toBe(false)
   })
 })

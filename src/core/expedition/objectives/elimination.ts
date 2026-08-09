@@ -38,7 +38,7 @@ export function eliminationProgressFact(
     unknownTargetIds,
     confirmedTargetIds,
     progress,
-    completed,
+    confirmationRequired,
   } = objectiveState
   const parts: string[] = [
     `討伐対象として${requiredTargetIds.length}体が指定された`,
@@ -59,23 +59,36 @@ export function eliminationProgressFact(
       `撃破した${defeatedTargetIds.length}体のうち${confirmedTargetIds.length}体の討伐を確認した`,
     )
   }
-  const allNeutralized =
-    unknownTargetIds.length === 0 &&
-    survivingTargetIds.length === 0 &&
-    requiredTargetIds.length > 0
 
-  if (completed) {
-    parts.push('全対象の討伐を確認した')
-  } else if (
-    allNeutralized &&
+  const hasUnknown = unknownTargetIds.length > 0
+  const hasSurviving = survivingTargetIds.length > 0
+  const allDefeated =
+    !hasUnknown &&
+    !hasSurviving &&
+    requiredTargetIds.length > 0 &&
     defeatedTargetIds.length === requiredTargetIds.length
-  ) {
+  const allConfirmed =
+    !hasUnknown && confirmedTargetIds.length === requiredTargetIds.length
+  const allNeutralized =
+    !hasUnknown &&
+    !hasSurviving &&
+    requiredTargetIds.length > 0 &&
+    defeatedTargetIds.length + escapedTargetIds.length ===
+      requiredTargetIds.length
+
+  if (allDefeated && allConfirmed) {
+    parts.push('全対象の討伐を確認した')
+  } else if (allDefeated) {
     parts.push('全対象を撃破したが討伐確認が未完了のため依頼目的は未完了')
-  } else if (allNeutralized) {
+  } else if (!confirmationRequired && allNeutralized) {
     parts.push(
       `対象${defeatedTargetIds.length}体を撃破し、${escapedTargetIds.length}体を退却させた`,
     )
     parts.push('周辺の脅威排除には成功した')
+  } else if (allNeutralized) {
+    parts.push(
+      `対象${defeatedTargetIds.length}体を撃破し、${escapedTargetIds.length}体を退却させたが、討伐確認が未完了のため依頼目的は未完了`,
+    )
   } else {
     parts.push('討伐対象が残っているため依頼目的は未完了')
   }
@@ -120,27 +133,28 @@ export function determineEliminationOutcome(
     unknownTargetIds,
     confirmedTargetIds,
     progress,
+    confirmationRequired,
   } = obj
   const hasUnknown = unknownTargetIds.length > 0
   const hasSurviving = survivingTargetIds.length > 0
   const allDefeated =
     !hasUnknown &&
     !hasSurviving &&
+    requiredTargetIds.length > 0 &&
     defeatedTargetIds.length === requiredTargetIds.length
   const allConfirmed =
-    !hasUnknown && confirmedTargetIds.length === requiredTargetIds.length
+    !hasUnknown &&
+    requiredTargetIds.length > 0 &&
+    confirmedTargetIds.length === requiredTargetIds.length
   const allNeutralized =
     !hasUnknown &&
     !hasSurviving &&
+    requiredTargetIds.length > 0 &&
     defeatedTargetIds.length + escapedTargetIds.length ===
       requiredTargetIds.length
   const hasCasualties = state.casualties.length > 0
   const majorDamage = hasCasualties || unresolvedSerious > 0
   const returnIssues = timeExceeded || noSupplies || avgMorale < 40
-
-  if (allDefeated && !allConfirmed) {
-    return 'failedObjective'
-  }
 
   if (allDefeated && allConfirmed) {
     if (!majorDamage && !returnIssues) {
@@ -149,7 +163,11 @@ export function determineEliminationOutcome(
     return 'success'
   }
 
-  if (allNeutralized && requiredTargetIds.length > 0) {
+  if (allDefeated && !allConfirmed) {
+    return 'failedObjective'
+  }
+
+  if (!confirmationRequired && allNeutralized) {
     return 'success'
   }
 
@@ -233,24 +251,21 @@ export function resolveEliminationTargets(
     0,
     100,
   )
-  const completed =
-    unknownTargetIds.length === 0 &&
-    defeatedTargetIds.length === requiredTargetIds.length &&
-    confirmedTargetIds.length === requiredTargetIds.length
 
   const requiredSet = new Set(requiredTargetIds)
   const confirmedUnique = confirmedTargetIds.filter((id) => requiredSet.has(id))
 
+  obj.confirmationRequired = confirmationRequired
   obj.defeatedTargetIds = defeatedTargetIds
   obj.escapedTargetIds = escapedTargetIds
   obj.survivingTargetIds = survivingTargetIds
   obj.unknownTargetIds = unknownTargetIds
   obj.confirmedTargetIds = confirmedUnique
   obj.progress = progress
-  obj.completed = completed
+  updateEliminationCompleted(obj)
 
   state.objectiveProgress = progress
-  state.objectiveCompleted = completed
+  state.objectiveCompleted = obj.completed
 
   addLog(
     state,
@@ -334,10 +349,32 @@ export function logEliminationConfirmationState(
 export function updateEliminationCompleted(
   objective: EliminationObjectiveState,
 ): void {
-  objective.completed =
-    objective.unknownTargetIds.length === 0 &&
-    objective.defeatedTargetIds.length === objective.requiredTargetIds.length &&
-    objective.confirmedTargetIds.length === objective.requiredTargetIds.length
+  const hasUnknown = objective.unknownTargetIds.length > 0
+  const hasSurviving = objective.survivingTargetIds.length > 0
+  const requiredTargetIds = objective.requiredTargetIds
+  const allDefeated =
+    !hasUnknown &&
+    !hasSurviving &&
+    requiredTargetIds.length > 0 &&
+    objective.defeatedTargetIds.length === requiredTargetIds.length
+  const allConfirmed =
+    !hasUnknown &&
+    requiredTargetIds.length > 0 &&
+    objective.confirmedTargetIds.length === requiredTargetIds.length
+  const allNeutralized =
+    !hasUnknown &&
+    !hasSurviving &&
+    requiredTargetIds.length > 0 &&
+    objective.defeatedTargetIds.length + objective.escapedTargetIds.length ===
+      requiredTargetIds.length
+
+  if (allDefeated && allConfirmed) {
+    objective.completed = true
+  } else if (!objective.confirmationRequired && allNeutralized) {
+    objective.completed = true
+  } else {
+    objective.completed = false
+  }
 }
 
 export function runEliminationObjective(

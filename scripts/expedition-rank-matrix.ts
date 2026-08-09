@@ -68,7 +68,7 @@ function percentile(sorted: number[], p: number): number {
   return sorted[lower] * (1 - weight) + sorted[upper] * weight
 }
 
-function generateRequestOffer(
+export function generateRequestOffer(
   templateId: string,
   rank: AdventurerRank,
   scenarioSeed: string,
@@ -108,6 +108,7 @@ export function runMatrixAudit(options?: {
     requestRank: AdventurerRank,
     partyRank: AdventurerRank,
   ) => boolean
+  objectiveFilter?: (objectiveType: string) => boolean
 }): {
   records: MatrixRecord[]
   summary: ReturnType<typeof buildSummary>
@@ -147,6 +148,9 @@ export function runMatrixAudit(options?: {
   let recordIndex = 0
 
   for (const objective of OBJECTIVES) {
+    if (options?.objectiveFilter && !options.objectiveFilter(objective)) {
+      continue
+    }
     const templates = TAVERN_REQUEST_TEMPLATES.filter(
       (t) => t.objectiveType === objective,
     )

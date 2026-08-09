@@ -4,7 +4,7 @@ Date: 2026-08-09T01:17:55.673Z
 
 ## Test Summary
 
-- npm test: 650 passed / 650 total
+- npm test: 656 passed / 656 total
 - npm run typecheck: passed
 - npm run lint: passed
 - npm run build: passed
@@ -110,3 +110,45 @@ Total cells: 10368 (10,368) | Output: reports/phase6_2_after_coarse.json
 - reports/phase6_2_after_early_rank_deep.json
 - reports/phase6_2_after_coarse.json
 - reports/phase6_2_fixtures.json
+- reports/phase6_2_1_elimination_spot.json
+- scripts/elim-spot.ts
+
+## Phase 6.2.1 final consistency fix
+
+### Problem
+
+`determineEliminationOutcome` treated `allNeutralized` (all required targets defeated or escaped) as `success` regardless of `confirmationRequired`. This allowed an escaped target to satisfy a request that required explicit confirmation, and `objective.completed` could be `false` while the outcome was `success`.
+
+### Fix
+
+- `determineEliminationOutcome` now branches on `confirmationRequired`:
+  - `confirmationRequired = true`: only `allDefeated && allConfirmed` can yield `success` / `completeSuccess`; escaped-only neutralization is not a success.
+  - `confirmationRequired = false`: `allNeutralized` yields `success`, and `allDefeated && allConfirmed` yields `completeSuccess`.
+- `updateEliminationCompleted` uses the same branching and no longer requires `allDefeated` for `confirmationRequired = false`.
+- `resolveEliminationTargets` calls `updateEliminationCompleted` instead of an inline `completed` formula.
+- `eliminationProgressFact` no longer emits "全対象の討伐を確認した" when escaped targets remain, and avoids "周辺の脅威排除" wording when confirmation is required.
+- `defeatedTargetIds` and `escapedTargetIds` remain separate in structured state.
+
+### Added domain tests
+
+- Test A: `confirmationRequired=false`, 3 defeated + 1 escaped -> `success` and `objective.completed=true`.
+- Test B: `confirmationRequired=true`, 3 defeated + 1 escaped -> not `success` / `completeSuccess`, `objective.completed=false`.
+- Test C: `confirmationRequired=false`, 4 defeated -> `completeSuccess`.
+- Test D: `confirmationRequired=true`, 4 defeated + confirmed -> `success`/`completeSuccess`.
+- Test E: 2 defeated + 1 escaped + 1 surviving -> `success` forbidden, `completed=false`.
+- Test F: `defeatedTargetIds` and `escapedTargetIds` are not mixed.
+
+### Elimination spot measurement after fix
+
+288 cells × 100 samples across the two elimination request templates, 8 party templates, 3 scenario seeds, and rank pairs E→E / D→E / D→D / C→E / C→D / C→C.
+
+| rankAdvantage | samples | avg defeated | avg escaped | avg surviving | completeSuccess | success | partialSuccess | forcedRetreat | failedObjective |
+| ------------- | ------- | ------------ | ----------- | ------------- | --------------- | ------- | -------------- | ------------- | --------------- |
+| same-rank     | 14400   | 1.83         | 0.58        | 1.59          | 13.2%           | 34.7%   | 13.2%          | 38.9%         | 0.0%            |
+| +1            | 9600    | 2.49         | 0.43        | 1.08          | 37.5%           | 26.0%   | 11.5%          | 25.0%         | 0.0%            |
+| +2            | 4800    | 2.65         | 0.48        | 0.88          | 39.6%           | 29.2%   | 8.3%           | 22.9%         | 0.0%            |
+
+### Regression
+
+- `npm run test:expedition-regression`: 22 passed after updating `regression-snapshots/baseline/elimination-partialSuccess.json` to reflect the intended `objective.completed=true` / `success` change for `confirmationRequired=false` with neutralized targets.
+- No unrelated snapshots changed.
