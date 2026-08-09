@@ -521,7 +521,10 @@ export function cleanForCompare(value: unknown): unknown {
   if (value && typeof value === 'object') {
     const sorted: Record<string, unknown> = {}
     for (const key of Object.keys(value).sort()) {
-      sorted[key] = cleanForCompare((value as Record<string, unknown>)[key])
+      const v = cleanForCompare((value as Record<string, unknown>)[key])
+      if (v !== undefined) {
+        sorted[key] = v
+      }
     }
     return sorted
   }

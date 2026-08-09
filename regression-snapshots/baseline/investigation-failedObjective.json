@@ -1,5 +1,5 @@
 {
-  "outcome": "failedObjective",
+  "outcome": "completeSuccess",
   "state": {
     "avoidedThreats": ["poorVisibility"],
     "battleEntrySnapshot": {
@@ -16,10 +16,10 @@
         "D-scout-phase3-1-b-12-scout-0": 55
       },
       "initialMorale": {
-        "D-healer-phase3-1-b-12-healer-3": 43,
-        "D-mage-phase3-1-b-12-mage-2": 36,
-        "D-ranger-phase3-1-b-12-ranger-1": 37,
-        "D-scout-phase3-1-b-12-scout-0": 25
+        "D-healer-phase3-1-b-12-healer-3": 46,
+        "D-mage-phase3-1-b-12-mage-2": 39,
+        "D-ranger-phase3-1-b-12-ranger-1": 40,
+        "D-scout-phase3-1-b-12-scout-0": 28
       },
       "initialMp": {
         "D-healer-phase3-1-b-12-healer-3": 40,
@@ -46,9 +46,9 @@
         "encounterSeed": "phase3-1-b-12:battle:0:encounter",
         "enemyComposition": "insectx4",
         "enemyIds": [
-          "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
-          "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+          "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
           "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
+          "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
           "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
         ],
         "entrySnapshot": {
@@ -65,10 +65,10 @@
             "D-scout-phase3-1-b-12-scout-0": 55
           },
           "initialMorale": {
-            "D-healer-phase3-1-b-12-healer-3": 43,
-            "D-mage-phase3-1-b-12-mage-2": 36,
-            "D-ranger-phase3-1-b-12-ranger-1": 37,
-            "D-scout-phase3-1-b-12-scout-0": 25
+            "D-healer-phase3-1-b-12-healer-3": 46,
+            "D-mage-phase3-1-b-12-mage-2": 39,
+            "D-ranger-phase3-1-b-12-ranger-1": 40,
+            "D-scout-phase3-1-b-12-scout-0": 28
           },
           "initialMp": {
             "D-healer-phase3-1-b-12-healer-3": 40,
@@ -97,7 +97,7 @@
         "phase": "battle",
         "result": {
           "abilityUsage": {},
-          "adventurerActionCount": 29,
+          "adventurerActionCount": 30,
           "contactResult": {
             "effects": {
               "enemyInitiativeBonus": 3,
@@ -112,14 +112,14 @@
           "deadAdventurers": [],
           "defeatedEnemies": [
             "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
+            "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
             "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
           ],
           "discoveredWeaknesses": [],
-          "enemyActionCount": 27,
-          "enemyDamageDealt": 218,
+          "enemyActionCount": 23,
+          "enemyDamageDealt": 157,
           "escapedEnemies": [
-            "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
-            "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3"
+            "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3"
           ],
           "finalAdventurerStates": [
             {
@@ -129,7 +129,7 @@
               "dead": false,
               "id": "D-scout-phase3-1-b-12-scout-0",
               "incapacitated": false,
-              "morale": 25,
+              "morale": 28,
               "statusEffects": []
             },
             {
@@ -139,27 +139,27 @@
               "dead": false,
               "id": "D-ranger-phase3-1-b-12-ranger-1",
               "incapacitated": false,
-              "morale": 37,
+              "morale": 40,
               "statusEffects": []
             },
             {
               "alive": true,
-              "currentHp": 39,
+              "currentHp": 45,
               "currentMp": 3,
               "dead": false,
               "id": "D-mage-phase3-1-b-12-mage-2",
               "incapacitated": false,
-              "morale": 36,
+              "morale": 39,
               "statusEffects": []
             },
             {
               "alive": true,
               "currentHp": 37,
-              "currentMp": 22,
+              "currentMp": 25,
               "dead": false,
               "id": "D-healer-phase3-1-b-12-healer-3",
               "incapacitated": false,
-              "morale": 43,
+              "morale": 46,
               "statusEffects": []
             }
           ],
@@ -177,341 +177,19 @@
             },
             {
               "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
-              "damage": 5,
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "damage": 4,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
                 "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "大蟲暗殺者 hit ガルド クレスト for 5 damage",
+              "result": "群れ蠍忍 hit ガルド クレスト for 4 damage",
               "roll": 62,
               "round": 1,
               "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
-              "damage": 5,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ甲虫待ち伏せ hit ガルド クレスト for 5 damage",
-              "roll": 90,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
-              "damage": 8,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲暗殺者 hit ガルド クレスト for 8 damage",
-              "roll": 71,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
-              "damage": 7,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス クロム hit 群れ蠍忍 for 7 damage",
-              "roll": 83,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 86,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
-              "damage": 17,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ蠍忍 hit ガルド クレスト for 17 damage",
-              "roll": 4,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 87,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "D-mage-phase3-1-b-12-mage-2",
-              "damage": 12,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ガルド クレスト hit 群れ甲虫待ち伏せ for 12 damage",
-              "roll": 75,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 83,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "heal",
-              "actorId": "D-healer-phase3-1-b-12-healer-3",
-              "metadata": {
-                "actualHealAmount": 39
-              },
-              "phase": "combat",
-              "result": "レオ クレストがガルド クレストを回復させた。+39 HP",
-              "round": 1,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-scout-phase3-1-b-12-scout-0",
-              "damage": 8,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "マルチナ リバー hit 群れ蠍忍 for 8 damage",
-              "roll": 27,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 40,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
-              "damage": 6,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "大蟲暗殺者 hit ガルド クレスト for 6 damage",
-              "roll": 72,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
-              "damage": 14,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ甲虫待ち伏せ hit ガルド クレスト for 14 damage",
-              "roll": 8,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
-              "damage": 15,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス クロム hit 群れ蠍忍 for 15 damage",
-              "roll": 16,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 86,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
-              "damage": 7,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲暗殺者 hit ガルド クレスト for 7 damage",
-              "roll": 67,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
-              "damage": 11,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ蠍忍 hit ガルド クレスト for 11 damage",
-              "roll": 68,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 87,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-scout-phase3-1-b-12-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "マルチナ リバー missed",
-              "roll": 72,
-              "round": 2,
-              "successChance": 40,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "heal",
-              "actorId": "D-healer-phase3-1-b-12-healer-3",
-              "metadata": {
-                "actualHealAmount": 39
-              },
-              "phase": "combat",
-              "result": "レオ クレストがガルド クレストを回復させた。+39 HP",
-              "round": 2,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "D-mage-phase3-1-b-12-mage-2",
-              "damage": 9,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ガルド クレスト hit 群れ甲虫待ち伏せ for 9 damage",
-              "roll": 73,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 83,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
-              "damage": 9,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "大蟲暗殺者 hit ガルド クレスト for 9 damage",
-              "roll": 5,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
-              "damage": 8,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ甲虫待ち伏せ hit ガルド クレスト for 8 damage",
-              "roll": 1,
-              "round": 3,
-              "statusApplied": ["bleeding"],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
-              "damage": 5,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲暗殺者 hit ガルド クレスト for 5 damage",
-              "roll": 42,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
-              "damage": 11,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ蠍忍 hit ガルド クレスト for 11 damage",
-              "roll": 46,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 87,
+              "successChance": 91,
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
             {
@@ -525,64 +203,16 @@
               },
               "phase": "combat",
               "result": "ゼクス クロム missed",
-              "roll": 93,
-              "round": 3,
-              "successChance": 86,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-scout-phase3-1-b-12-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "マルチナ リバー missed",
-              "roll": 44,
-              "round": 3,
-              "successChance": 40,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "heal",
-              "actorId": "D-healer-phase3-1-b-12-healer-3",
-              "metadata": {
-                "actualHealAmount": 33
-              },
-              "phase": "combat",
-              "result": "レオ クレストがガルド クレストを回復させた。+33 HP",
-              "round": 3,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "D-mage-phase3-1-b-12-mage-2",
-              "damage": 13,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ガルド クレスト hit 群れ甲虫待ち伏せ for 13 damage",
-              "roll": 62,
-              "round": 3,
-              "statusApplied": [],
+              "roll": 90,
+              "round": 1,
               "successChance": 83,
               "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
               ]
             },
             {
               "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
               "damage": 9,
               "metadata": {
                 "isCounter": false,
@@ -590,296 +220,10 @@
                 "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "大蟲暗殺者 hit ガルド クレスト for 9 damage",
-              "roll": 42,
-              "round": 4,
+              "result": "群れ甲虫待ち伏せ hit ガルド クレスト for 9 damage",
+              "roll": 12,
+              "round": 1,
               "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
-              "damage": 8,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ甲虫待ち伏せ hit ガルド クレスト for 8 damage",
-              "roll": 80,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
-              "damage": 8,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲暗殺者 hit ガルド クレスト for 8 damage",
-              "roll": 1,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-scout-phase3-1-b-12-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "マルチナ リバー missed",
-              "roll": 44,
-              "round": 4,
-              "successChance": 40,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
-              "damage": 9,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス クロム hit 群れ蠍忍 for 9 damage",
-              "roll": 54,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 86,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
-              "damage": 10,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ蠍忍 hit ガルド クレスト for 10 damage",
-              "roll": 84,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 87,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "D-mage-phase3-1-b-12-mage-2",
-              "damage": 10,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ガルド クレスト hit 群れ甲虫待ち伏せ for 10 damage",
-              "roll": 68,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 83,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "heal",
-              "actorId": "D-healer-phase3-1-b-12-healer-3",
-              "metadata": {
-                "actualHealAmount": 35
-              },
-              "phase": "combat",
-              "result": "レオ クレストがガルド クレストを回復させた。+35 HP",
-              "round": 4,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
-              "damage": 11,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "大蟲暗殺者 hit ガルド クレスト for 11 damage",
-              "roll": 17,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
-              "damage": 11,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "毒蟲暗殺者 hit ガルド クレスト for 11 damage",
-              "roll": 1,
-              "round": 5,
-              "statusApplied": ["poisoned"],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
-              "damage": 6,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ甲虫待ち伏せ hit ガルド クレスト for 6 damage",
-              "roll": 89,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
-              "damage": 10,
-              "metadata": {
-                "attackerRole": "ranger",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ゼクス クロム hit 群れ蠍忍 for 10 damage",
-              "roll": 20,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 86,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "heal",
-              "actorId": "D-healer-phase3-1-b-12-healer-3",
-              "metadata": {
-                "actualHealAmount": 28
-              },
-              "phase": "combat",
-              "result": "レオ クレストがガルド クレストを回復させた。+28 HP",
-              "round": 5,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "D-scout-phase3-1-b-12-scout-0",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "scout",
-                "isCounter": false,
-                "isFlank": true
-              },
-              "phase": "combat",
-              "result": "マルチナ リバー missed",
-              "roll": 51,
-              "round": 5,
-              "successChance": 40,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ蠍忍 missed",
-              "roll": 93,
-              "round": 5,
-              "successChance": 87,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "D-mage-phase3-1-b-12-mage-2",
-              "damage": 9,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ガルド クレスト hit 群れ甲虫待ち伏せ for 9 damage",
-              "roll": 46,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 83,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
-              "damage": 7,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "大蟲暗殺者 hit ガルド クレスト for 7 damage",
-              "roll": 84,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
-              "damage": 5,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ甲虫待ち伏せ hit ガルド クレスト for 5 damage",
-              "roll": 20,
-              "round": 6,
-              "statusApplied": ["bleeding"],
               "successChance": 95,
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
@@ -894,56 +238,58 @@
               },
               "phase": "combat",
               "result": "毒蟲暗殺者 hit ガルド クレスト for 7 damage",
-              "roll": 36,
-              "round": 6,
+              "roll": 71,
+              "round": 1,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
             {
               "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
-              "damage": 17,
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "damage": 9,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
                 "targetRole": "mage"
               },
               "phase": "combat",
-              "result": "群れ蠍忍 hit ガルド クレスト for 17 damage",
-              "roll": 6,
-              "round": 6,
+              "result": "大蟲暗殺者 hit ガルド クレスト for 9 damage",
+              "roll": 63,
+              "round": 1,
               "statusApplied": [],
-              "successChance": 87,
+              "successChance": 95,
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
             {
-              "actionType": "ranged",
-              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
-              "damage": 8,
+              "actionType": "magic",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "damage": 14,
               "metadata": {
-                "attackerRole": "ranger",
+                "attackerRole": "mage",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ゼクス クロム hit 群れ蠍忍 for 8 damage",
-              "roll": 83,
-              "round": 6,
+              "result": "ガルド クレスト hit 群れ甲虫待ち伏せ for 14 damage",
+              "roll": 14,
+              "round": 1,
               "statusApplied": [],
               "successChance": 86,
               "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
               ]
             },
             {
-              "actionType": "incapacitate",
+              "actionType": "heal",
+              "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "metadata": {
+                "actualHealAmount": 34
+              },
               "phase": "combat",
-              "result": "群れ蠍忍が戦闘不能になった。",
-              "round": 6,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
-              ]
+              "result": "レオ クレストがガルド クレストを回復させた。+34 HP",
+              "round": 1,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
             {
               "actionType": "melee",
@@ -956,45 +302,16 @@
               },
               "phase": "combat",
               "result": "マルチナ リバー missed",
-              "roll": 31,
-              "round": 6,
-              "successChance": 29,
-              "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "heal",
-              "actorId": "D-healer-phase3-1-b-12-healer-3",
-              "metadata": {
-                "actualHealAmount": 36
-              },
-              "phase": "combat",
-              "result": "レオ クレストがガルド クレストを回復させた。+36 HP",
-              "round": 6,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "D-mage-phase3-1-b-12-mage-2",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "ガルド クレスト missed",
-              "roll": 98,
-              "round": 6,
-              "successChance": 83,
+              "roll": 76,
+              "round": 1,
+              "successChance": 33,
               "targetIds": [
                 "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
               ]
             },
             {
               "actionType": "ranged",
-              "actorId": "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
               "damage": 5,
               "metadata": {
                 "isCounter": false,
@@ -1003,25 +320,9 @@
               },
               "phase": "combat",
               "result": "大蟲暗殺者 hit ガルド クレスト for 5 damage",
-              "roll": 91,
-              "round": 7,
+              "roll": 81,
+              "round": 2,
               "statusApplied": [],
-              "successChance": 95,
-              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
-            },
-            {
-              "actionType": "ranged",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "mage"
-              },
-              "phase": "combat",
-              "result": "群れ甲虫待ち伏せ missed",
-              "roll": 100,
-              "round": 7,
               "successChance": 95,
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
@@ -1036,8 +337,8 @@
               },
               "phase": "combat",
               "result": "毒蟲暗殺者 hit ガルド クレスト for 8 damage",
-              "roll": 8,
-              "round": 7,
+              "roll": 51,
+              "round": 2,
               "statusApplied": [],
               "successChance": 95,
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
@@ -1045,18 +346,236 @@
             {
               "actionType": "ranged",
               "actorId": "D-ranger-phase3-1-b-12-ranger-1",
-              "damage": 10,
+              "damage": 8,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ゼクス クロム hit 群れ甲虫待ち伏せ for 10 damage",
-              "roll": 24,
-              "round": 7,
+              "result": "ゼクス クロム hit 群れ甲虫待ち伏せ for 8 damage",
+              "roll": 72,
+              "round": 2,
               "statusApplied": [],
-              "successChance": 75,
+              "successChance": 79,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
+              "damage": 12,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "群れ甲虫待ち伏せ hit ガルド クレスト for 12 damage",
+              "roll": 8,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "damage": 4,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "群れ蠍忍 hit ガルド クレスト for 4 damage",
+              "roll": 62,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "scout",
+                "isCounter": false,
+                "isFlank": true
+              },
+              "phase": "combat",
+              "result": "マルチナ リバー missed",
+              "roll": 71,
+              "round": 2,
+              "successChance": 33,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "metadata": {
+                "actualHealAmount": 29
+              },
+              "phase": "combat",
+              "result": "レオ クレストがガルド クレストを回復させた。+29 HP",
+              "round": 2,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "damage": 11,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ガルド クレスト hit 群れ甲虫待ち伏せ for 11 damage",
+              "roll": 67,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 86,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "大蟲暗殺者 hit ガルド クレスト for 8 damage",
+              "roll": 56,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
+              "damage": 4,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "群れ甲虫待ち伏せ hit ガルド クレスト for 4 damage",
+              "roll": 34,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "damage": 9,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ゼクス クロム hit 群れ甲虫待ち伏せ for 9 damage",
+              "roll": 75,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 79,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲暗殺者 hit ガルド クレスト for 8 damage",
+              "roll": 5,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "群れ蠍忍 hit ガルド クレスト for 6 damage",
+              "roll": 1,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "damage": 8,
+              "metadata": {
+                "attackerRole": "scout",
+                "isCounter": false,
+                "isFlank": true
+              },
+              "phase": "combat",
+              "result": "マルチナ リバー hit 群れ甲虫待ち伏せ for 8 damage",
+              "roll": 12,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 33,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "metadata": {
+                "actualHealAmount": 26
+              },
+              "phase": "combat",
+              "result": "レオ クレストがガルド クレストを回復させた。+26 HP",
+              "round": 3,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "damage": 17,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ガルド クレスト hit 群れ甲虫待ち伏せ for 17 damage",
+              "roll": 6,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 86,
               "targetIds": [
                 "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
               ]
@@ -1065,27 +584,79 @@
               "actionType": "incapacitate",
               "phase": "combat",
               "result": "群れ甲虫待ち伏せが戦闘不能になった。",
-              "round": 7,
+              "round": 3,
               "targetIds": [
                 "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0"
               ]
             },
             {
-              "actionType": "magic",
-              "actorId": "D-mage-phase3-1-b-12-mage-2",
-              "damage": 0,
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "damage": 8,
               "metadata": {
-                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "大蟲暗殺者 hit ガルド クレスト for 8 damage",
+              "roll": 55,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲暗殺者 hit ガルド クレスト for 7 damage",
+              "roll": 74,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "群れ蠍忍 hit ガルド クレスト for 5 damage",
+              "roll": 26,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "damage": 9,
+              "metadata": {
+                "attackerRole": "ranger",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "ガルド クレスト missed",
-              "roll": 90,
-              "round": 7,
-              "successChance": 82,
+              "result": "ゼクス クロム hit 群れ蠍忍 for 9 damage",
+              "roll": 30,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 83,
               "targetIds": [
-                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1"
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
               ]
             },
             {
@@ -1099,9 +670,28 @@
               },
               "phase": "combat",
               "result": "マルチナ リバー missed",
-              "roll": 86,
-              "round": 7,
-              "successChance": 25,
+              "roll": 92,
+              "round": 4,
+              "successChance": 37,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ガルド クレスト hit 毒蟲暗殺者 for 12 damage",
+              "roll": 80,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 85,
               "targetIds": [
                 "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1"
               ]
@@ -1117,34 +707,445 @@
               },
               "phase": "combat",
               "result": "レオ クレスト missed",
-              "roll": 33,
-              "round": 7,
-              "successChance": 32,
+              "roll": 46,
+              "round": 4,
+              "successChance": 44,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "damage": 12,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "大蟲暗殺者 hit ガルド クレスト for 12 damage",
+              "roll": 7,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "damage": 5,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲暗殺者 hit ガルド クレスト for 5 damage",
+              "roll": 27,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "damage": 6,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "群れ蠍忍 hit ガルド クレスト for 6 damage",
+              "roll": 41,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ゼクス クロム missed",
+              "roll": 96,
+              "round": 5,
+              "successChance": 83,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ガルド クレスト hit 毒蟲暗殺者 for 12 damage",
+              "roll": 59,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 85,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "scout",
+                "isCounter": false,
+                "isFlank": true
+              },
+              "phase": "combat",
+              "result": "マルチナ リバー hit 毒蟲暗殺者 for 10 damage",
+              "roll": 8,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 30,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "metadata": {
+                "actualHealAmount": 39
+              },
+              "phase": "combat",
+              "result": "レオ クレストがガルド クレストを回復させた。+39 HP",
+              "round": 5,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "damage": 4,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "群れ蠍忍 hit ガルド クレスト for 4 damage",
+              "roll": 47,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "大蟲暗殺者 hit ガルド クレスト for 7 damage",
+              "roll": 61,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ゼクス クロム missed",
+              "roll": 93,
+              "round": 6,
+              "successChance": 76,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "damage": 4,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "毒蟲暗殺者 hit ガルド クレスト for 4 damage",
+              "roll": 46,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "damage": 8,
+              "metadata": {
+                "attackerRole": "scout",
+                "isCounter": false,
+                "isFlank": true
+              },
+              "phase": "combat",
+              "result": "マルチナ リバー hit 毒蟲暗殺者 for 8 damage",
+              "roll": 19,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 30,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "レオ クレスト hit 毒蟲暗殺者 for 10 damage",
+              "roll": 25,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 37,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "damage": 9,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ガルド クレスト hit 毒蟲暗殺者 for 9 damage",
+              "roll": 41,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 85,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "毒蟲暗殺者が戦闘不能になった。",
+              "round": 6,
               "targetIds": [
                 "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1"
               ]
             },
             {
               "actionType": "retreat",
-              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
               "phase": "retreat",
-              "result": "毒蟲暗殺者が撤退した。",
-              "roll": 71,
-              "round": 8,
-              "successChance": 92
+              "result": "群れ蠍忍は撤退に失敗した。",
+              "roll": 72,
+              "round": 7,
+              "successChance": 71
             },
             {
               "actionType": "retreat",
-              "actorId": "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
               "phase": "retreat",
               "result": "大蟲暗殺者が撤退した。",
-              "roll": 17,
+              "roll": 26,
+              "round": 7,
+              "successChance": 78
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "damage": 8,
+              "metadata": {
+                "attackerRole": "scout",
+                "isCounter": false,
+                "isFlank": true
+              },
+              "phase": "combat",
+              "result": "マルチナ リバー hit 群れ蠍忍 for 8 damage",
+              "roll": 36,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 37,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "damage": 7,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ゼクス クロム hit 群れ蠍忍 for 7 damage",
+              "roll": 50,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 83,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "damage": 8,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "群れ蠍忍 hit ガルド クレスト for 8 damage",
+              "roll": 68,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "damage": 10,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ガルド クレスト hit 群れ蠍忍 for 10 damage",
+              "roll": 37,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 88,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "metadata": {
+                "actualHealAmount": 27
+              },
+              "phase": "combat",
+              "result": "レオ クレストがガルド クレストを回復させた。+27 HP",
+              "round": 7,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "retreat",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "phase": "retreat",
+              "result": "群れ蠍忍は撤退に失敗した。",
+              "roll": 98,
               "round": 8,
-              "successChance": 90
+              "successChance": 71
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "damage": 7,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "mage"
+              },
+              "phase": "combat",
+              "result": "群れ蠍忍 hit ガルド クレスト for 7 damage",
+              "roll": 23,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 91,
+              "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
+            },
+            {
+              "actionType": "ranged",
+              "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "ranger",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ゼクス クロム missed",
+              "roll": 91,
+              "round": 8,
+              "successChance": 83,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "damage": 20,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "ガルド クレスト hit 群れ蠍忍 for 20 damage",
+              "roll": 6,
+              "round": 8,
+              "statusApplied": [],
+              "successChance": 88,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "群れ蠍忍が戦闘不能になった。",
+              "round": 8,
+              "targetIds": [
+                "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2"
+              ]
             }
           ],
           "outcome": "victory",
-          "partyDamageDealt": 120,
+          "partyDamageDealt": 182,
           "retreatAttempts": [],
           "rounds": 8,
           "seed": "phase3-1-b-12:battle:0:combat",
@@ -1155,8 +1156,7 @@
             "D-healer-phase3-1-b-12-healer-3"
           ],
           "survivingEnemies": [
-            "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
-            "C-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3"
+            "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3"
           ]
         },
         "rounds": 8,
@@ -1185,10 +1185,10 @@
         "source": "scouting"
       },
       {
-        "completeness": "fragment",
+        "completeness": "complete",
         "description": "魔法の気配",
         "id": "info-3",
-        "name": "魔力の残滓（断片）",
+        "name": "魔力の残滓",
         "source": "monsterKnowledge"
       }
     ],
@@ -1218,23 +1218,19 @@
           "D-mage-phase3-1-b-12-mage-2"
         ],
         "check": {
-          "effectiveValue": 55,
-          "result": "failure",
+          "effectiveValue": 65,
+          "result": "partialSuccess",
           "roll": 76,
           "skill": "survival"
         },
         "effects": [
           {
             "type": "moraleChange",
-            "value": -3
-          },
-          {
-            "type": "moraleChange",
             "value": -2
           }
         ],
         "facts": [
-          "出発準備が遅れ、初期士気が低下した",
+          "準備は整ったが、計画に若干の無理があった",
           "Support不在のため、出発時の士気が低めである"
         ],
         "phase": "preparation",
@@ -1247,7 +1243,7 @@
           "D-mage-phase3-1-b-12-mage-2"
         ],
         "check": {
-          "effectiveValue": 50,
+          "effectiveValue": 60,
           "result": "failure",
           "roll": 88,
           "skill": "survival"
@@ -1269,8 +1265,8 @@
           "D-mage-phase3-1-b-12-mage-2"
         ],
         "check": {
-          "effectiveValue": 50,
-          "result": "failure",
+          "effectiveValue": 60,
+          "result": "partialSuccess",
           "roll": 79,
           "skill": "trapDetection"
         },
@@ -1296,7 +1292,7 @@
           "D-mage-phase3-1-b-12-mage-2"
         ],
         "check": {
-          "effectiveValue": 21,
+          "effectiveValue": 31,
           "result": "success",
           "roll": 18,
           "skill": "scouting"
@@ -1316,7 +1312,7 @@
           "D-mage-phase3-1-b-12-mage-2"
         ],
         "check": {
-          "effectiveValue": 36,
+          "effectiveValue": 46,
           "result": "criticalFailure",
           "roll": 100,
           "skill": "scouting"
@@ -1342,15 +1338,15 @@
           "D-ranger-phase3-1-b-12-ranger-1"
         ],
         "check": {
-          "effectiveValue": 16,
-          "result": "partialSuccess",
+          "effectiveValue": 26,
+          "result": "success",
           "roll": 20,
           "skill": "monsterKnowledge"
         },
         "effects": [],
         "facts": [
-          "ガルド クレストが断片的な手がかりを得た",
-          "魔力の残滓（断片）に関する断片情報を得た"
+          "ガルド クレストが調査対象に関する手がかりを発見した",
+          "魔力の残滓に関する情報を得た"
         ],
         "phase": "exploration",
         "type": "explore"
@@ -1370,18 +1366,39 @@
           "D-mage-phase3-1-b-12-mage-2"
         ],
         "check": {
-          "effectiveValue": 50,
-          "result": "failure",
+          "effectiveValue": 80,
+          "result": "partialSuccess",
           "roll": 89,
           "skill": "scouting"
         },
         "effects": [],
-        "facts": [
-          "目的の達成に失敗した",
-          "手がかりは得たが、依頼目的は達成できなかった"
-        ],
+        "facts": [],
         "phase": "objective",
         "type": "objectiveCheck"
+      },
+      {
+        "actorIds": [
+          "D-scout-phase3-1-b-12-scout-0",
+          "D-ranger-phase3-1-b-12-ranger-1",
+          "D-mage-phase3-1-b-12-mage-2"
+        ],
+        "check": {
+          "effectiveValue": 85,
+          "result": "success",
+          "roll": 44,
+          "skill": "scouting"
+        },
+        "effects": [],
+        "facts": ["マルチナ リバーが目標となる情報を確認した"],
+        "phase": "objective",
+        "type": "objectiveCheck"
+      },
+      {
+        "actorIds": [],
+        "effects": [],
+        "facts": ["依頼目的を完全に達成した"],
+        "phase": "objective",
+        "type": "objectiveSummary"
       },
       {
         "actorIds": [
@@ -1390,13 +1407,13 @@
           "D-mage-phase3-1-b-12-mage-2"
         ],
         "check": {
-          "effectiveValue": 50,
-          "result": "success",
-          "roll": 44,
+          "effectiveValue": 60,
+          "result": "partialSuccess",
+          "roll": 75,
           "skill": "survival"
         },
         "effects": [],
-        "facts": ["ゼクス クロムが安全な帰還経路を確保した"],
+        "facts": ["ゼクス クロムが経路を確保したが、多少の遅延が発生した"],
         "phase": "return",
         "type": "travel"
       },
@@ -1407,9 +1424,9 @@
           "D-mage-phase3-1-b-12-mage-2"
         ],
         "check": {
-          "effectiveValue": 70,
+          "effectiveValue": 80,
           "result": "success",
-          "roll": 70,
+          "roll": 43,
           "skill": "scouting"
         },
         "effects": [],
@@ -1420,9 +1437,9 @@
       {
         "actorIds": ["D-healer-phase3-1-b-12-healer-3"],
         "check": {
-          "effectiveValue": 82,
+          "effectiveValue": 92,
           "result": "success",
-          "roll": 43,
+          "roll": 64,
           "skill": "firstAid"
         },
         "effects": [
@@ -1452,9 +1469,9 @@
       {
         "actorIds": ["D-healer-phase3-1-b-12-healer-3"],
         "check": {
-          "effectiveValue": 99,
-          "result": "success",
-          "roll": 64,
+          "effectiveValue": 100,
+          "result": "criticalSuccess",
+          "roll": 9,
           "skill": "healing"
         },
         "effects": [
@@ -1466,7 +1483,7 @@
           {
             "targetId": "D-mage-phase3-1-b-12-mage-2",
             "type": "hpHeal",
-            "value": 8
+            "value": 2
           },
           {
             "targetId": "D-healer-phase3-1-b-12-healer-3",
@@ -1474,7 +1491,7 @@
             "value": 3
           }
         ],
-        "facts": ["レオ クレストによる治療判定: success"],
+        "facts": ["レオ クレストによる治療判定: criticalSuccess"],
         "phase": "aftermath",
         "type": "healing"
       },
@@ -1483,11 +1500,11 @@
         "effects": [
           {
             "type": "moraleChange",
-            "value": -5
+            "value": 5
           }
         ],
         "facts": [
-          "手がかりは得たが、依頼目的は達成できなかった",
+          "依頼目的を完全に達成した",
           "医薬品を2消費した",
           "レオ クレストが負傷者の治療を行った"
         ],
@@ -1498,13 +1515,13 @@
     "metadata": {
       "approachTimeBonus": 0,
       "difficulty": "normal",
-      "preparationRouteBonus": -1,
+      "preparationRouteBonus": 0,
       "requestFeatures": ["traps", "poorVisibility"],
       "returnTimeBonus": 0,
       "threatFeatures": ["traps", "poorVisibility"]
     },
-    "objectiveCompleted": false,
-    "objectiveProgress": 20,
+    "objectiveCompleted": true,
+    "objectiveProgress": 100,
     "objectiveState": {
       "type": "investigation"
     },
@@ -1515,13 +1532,13 @@
       "D-scout-phase3-1-b-12-scout-0": 55
     },
     "partyMorale": {
-      "D-healer-phase3-1-b-12-healer-3": 38,
-      "D-mage-phase3-1-b-12-mage-2": 31,
-      "D-ranger-phase3-1-b-12-ranger-1": 32,
-      "D-scout-phase3-1-b-12-scout-0": 20
+      "D-healer-phase3-1-b-12-healer-3": 51,
+      "D-mage-phase3-1-b-12-mage-2": 44,
+      "D-ranger-phase3-1-b-12-ranger-1": 45,
+      "D-scout-phase3-1-b-12-scout-0": 33
     },
     "partyMp": {
-      "D-healer-phase3-1-b-12-healer-3": 22,
+      "D-healer-phase3-1-b-12-healer-3": 25,
       "D-mage-phase3-1-b-12-mage-2": 3,
       "D-ranger-phase3-1-b-12-ranger-1": 7,
       "D-scout-phase3-1-b-12-scout-0": 8

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { absencePenaltyForSkill } from './checks.ts'
 import {
   averageMetric,
   cloneParty,
@@ -281,5 +282,37 @@ describe('Role-specific expedition contributions', () => {
         'lostExpedition',
       ]).toContain(result.outcome)
     }
+  })
+})
+
+describe('absencePenaltyForSkill', () => {
+  it('gives no penalty when any acceptable role is present', () => {
+    expect(
+      absencePenaltyForSkill(
+        makeParty(['vanguard', 'guardian', 'mage', 'scout'], 'scout-only'),
+        'scouting',
+      ),
+    ).toBe(0)
+    expect(
+      absencePenaltyForSkill(
+        makeParty(['vanguard', 'guardian', 'mage', 'ranger'], 'ranger-only'),
+        'scouting',
+      ),
+    ).toBe(0)
+    expect(
+      absencePenaltyForSkill(
+        makeParty(['vanguard', 'guardian', 'scout', 'ranger'], 'both'),
+        'scouting',
+      ),
+    ).toBe(0)
+  })
+
+  it('gives penalty only when no acceptable role is present', () => {
+    expect(
+      absencePenaltyForSkill(
+        makeParty(['vanguard', 'guardian', 'mage', 'healer'], 'neither'),
+        'scouting',
+      ),
+    ).toBe(8)
   })
 })

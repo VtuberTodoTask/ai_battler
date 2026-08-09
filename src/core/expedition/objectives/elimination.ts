@@ -59,13 +59,23 @@ export function eliminationProgressFact(
       `撃破した${defeatedTargetIds.length}体のうち${confirmedTargetIds.length}体の討伐を確認した`,
     )
   }
+  const allNeutralized =
+    unknownTargetIds.length === 0 &&
+    survivingTargetIds.length === 0 &&
+    requiredTargetIds.length > 0
+
   if (completed) {
     parts.push('全対象の討伐を確認した')
   } else if (
-    unknownTargetIds.length === 0 &&
+    allNeutralized &&
     defeatedTargetIds.length === requiredTargetIds.length
   ) {
     parts.push('全対象を撃破したが討伐確認が未完了のため依頼目的は未完了')
+  } else if (allNeutralized) {
+    parts.push(
+      `対象${defeatedTargetIds.length}体を撃破し、${escapedTargetIds.length}体を退却させた`,
+    )
+    parts.push('周辺の脅威排除には成功した')
   } else {
     parts.push('討伐対象が残っているため依頼目的は未完了')
   }
@@ -105,15 +115,25 @@ export function determineEliminationOutcome(
   const {
     requiredTargetIds,
     defeatedTargetIds,
+    escapedTargetIds,
+    survivingTargetIds,
     unknownTargetIds,
     confirmedTargetIds,
     progress,
   } = obj
   const hasUnknown = unknownTargetIds.length > 0
+  const hasSurviving = survivingTargetIds.length > 0
   const allDefeated =
-    !hasUnknown && defeatedTargetIds.length === requiredTargetIds.length
+    !hasUnknown &&
+    !hasSurviving &&
+    defeatedTargetIds.length === requiredTargetIds.length
   const allConfirmed =
     !hasUnknown && confirmedTargetIds.length === requiredTargetIds.length
+  const allNeutralized =
+    !hasUnknown &&
+    !hasSurviving &&
+    defeatedTargetIds.length + escapedTargetIds.length ===
+      requiredTargetIds.length
   const hasCasualties = state.casualties.length > 0
   const majorDamage = hasCasualties || unresolvedSerious > 0
   const returnIssues = timeExceeded || noSupplies || avgMorale < 40
@@ -126,6 +146,10 @@ export function determineEliminationOutcome(
     if (!majorDamage && !returnIssues) {
       return 'completeSuccess'
     }
+    return 'success'
+  }
+
+  if (allNeutralized && requiredTargetIds.length > 0) {
     return 'success'
   }
 

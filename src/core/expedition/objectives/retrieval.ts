@@ -853,85 +853,117 @@ export function runRetrievalSecuring(
     return
   }
   const target = getRetrievalConfig(request).target
-  const rng = retrievalRng(request, 'securing')
   const rankPenalty = rankPenaltyForRequest(request)
   const { skill, preferredRole } = securingSkillAndPreferredRole(
     objective.handling,
   )
 
-  const support = supportBonus(party, state, objective.handling)
+  const facts: string[] = []
+  const effects: ExpeditionEffect[] = []
+  let finalResult: CheckResult | undefined
+  let finalPrimary: Adventurer | undefined
+  let finalAssistants: Adventurer[] = []
+  let finalEffectiveValue = 0
+  let finalRoll = 0
+
   const hasTools = state.supplies.tools >= 1
   const toolsBonus = hasTools ? 10 : 0
 
-  const difficultyModifier =
-    target.securingDifficulty +
-    retrievalFragilityModifier(objective.fragility) -
-    support -
-    toolsBonus
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (
+      objective.secured ||
+      isRetrievalTargetDestroyed(objective) ||
+      getActiveParty(party, state).length === 0
+    ) {
+      break
+    }
 
-  const { result, primary, assistants, effectiveValue, roll } =
-    resolveSkillCheck(
-      rng,
-      party,
-      state,
-      'objective',
-      skill,
-      preferredRole,
-      difficultyModifier,
-      rankPenalty,
+    const rng = retrievalRng(
+      request,
+      attempt === 0 ? 'securing' : 'securing-retry',
     )
+    const support = supportBonus(party, state, objective.handling)
 
-  const facts: string[] = []
-  const effects: ExpeditionEffect[] = []
+    const difficultyModifier =
+      target.securingDifficulty +
+      retrievalFragilityModifier(objective.fragility) -
+      support -
+      toolsBonus
 
-  if (result === 'criticalSuccess' || result === 'success') {
-    objective.secured = true
-    objective.protectedForTransport = true
-    facts.push(
-      `${primary.name}は${objective.targetName}を確保し、運搬可能な状態にした`,
-    )
-  } else if (result === 'partialSuccess') {
-    objective.secured = true
-    objective.protectedForTransport = false
-    const actual = applyRetrievalDamage(
-      state,
-      objective,
-      RETRIEVAL_SECURING_DAMAGE.partialSuccess,
-      '確保作業の失敗',
-      'objective',
-      'securing',
-    )
-    facts.push(
-      `${primary.name}は${objective.targetName}を確保したが、${actual}の損傷を受けた`,
-    )
-    effects.push({
-      type: 'retrievalDamage',
-      value: actual,
-      targetId: objective.targetId,
-    })
-  } else if (result === 'failure') {
-    objective.secured = false
-    objective.protectedForTransport = false
-    facts.push(`${primary.name}は${objective.targetName}を確保できなかった`)
-  } else {
-    objective.secured = false
-    objective.protectedForTransport = false
-    const actual = applyRetrievalDamage(
-      state,
-      objective,
-      RETRIEVAL_SECURING_DAMAGE.criticalFailure,
-      '確保作業の重大な失敗',
-      'objective',
-      'securing',
-    )
-    facts.push(
-      `${primary.name}は${objective.targetName}の確保に失敗し、${actual}の損傷を与えた`,
-    )
-    effects.push({
-      type: 'retrievalDamage',
-      value: actual,
-      targetId: objective.targetId,
-    })
+    const { result, primary, assistants, effectiveValue, roll } =
+      resolveSkillCheck(
+        rng,
+        party,
+        state,
+        'objective',
+        skill,
+        preferredRole,
+        difficultyModifier,
+        rankPenalty,
+      )
+
+    finalResult = result
+    finalPrimary = primary
+    finalAssistants = assistants
+    finalEffectiveValue = effectiveValue
+    finalRoll = roll
+
+    if (result === 'criticalSuccess' || result === 'success') {
+      objective.secured = true
+      objective.protectedForTransport = true
+      facts.push(
+        `${primary.name}は${objective.targetName}を確保し、運搬可能な状態にした`,
+      )
+    } else if (result === 'partialSuccess') {
+      objective.secured = true
+      objective.protectedForTransport = false
+      const actual = applyRetrievalDamage(
+        state,
+        objective,
+        RETRIEVAL_SECURING_DAMAGE.partialSuccess,
+        '確保作業の失敗',
+        'objective',
+        'securing',
+      )
+      facts.push(
+        `${primary.name}は${objective.targetName}を確保したが、${actual}の損傷を受けた`,
+      )
+      effects.push({
+        type: 'retrievalDamage',
+        value: actual,
+        targetId: objective.targetId,
+      })
+    } else if (result === 'failure') {
+      if (attempt === 0) {
+        continue
+      }
+      objective.secured = false
+      objective.protectedForTransport = false
+      facts.push(`${primary.name}は${objective.targetName}を確保できなかった`)
+    } else {
+      objective.secured = false
+      objective.protectedForTransport = false
+      const actual = applyRetrievalDamage(
+        state,
+        objective,
+        RETRIEVAL_SECURING_DAMAGE.criticalFailure,
+        '確保作業の重大な失敗',
+        'objective',
+        'securing',
+      )
+      facts.push(
+        `${primary.name}は${objective.targetName}の確保に失敗し、${actual}の損傷を与えた`,
+      )
+      effects.push({
+        type: 'retrievalDamage',
+        value: actual,
+        targetId: objective.targetId,
+      })
+    }
+
+    if (result !== 'failure' || attempt === 1) {
+      break
+    }
   }
 
   if (isRetrievalTargetDestroyed(objective)) {
@@ -940,9 +972,10 @@ export function runRetrievalSecuring(
   }
 
   if (
-    (result === 'criticalSuccess' ||
-      result === 'success' ||
-      result === 'partialSuccess') &&
+    finalResult &&
+    (finalResult === 'criticalSuccess' ||
+      finalResult === 'success' ||
+      finalResult === 'partialSuccess') &&
     hasTools
   ) {
     consumeSupplies(state, 0, 0, 1)
@@ -981,15 +1014,19 @@ export function runRetrievalSecuring(
     logEntry(
       'objective',
       'retrievalSecuring',
-      [primary.id, ...assistants.map((a) => a.id)],
+      [finalPrimary?.id ?? '', ...finalAssistants.map((a) => a.id)].filter(
+        Boolean,
+      ),
       facts,
       effects,
-      {
-        skill,
-        effectiveValue,
-        roll,
-        result,
-      },
+      finalResult
+        ? {
+            skill,
+            effectiveValue: finalEffectiveValue,
+            roll: finalRoll,
+            result: finalResult,
+          }
+        : undefined,
       [objective.targetId],
     ),
   )

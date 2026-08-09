@@ -111,11 +111,8 @@ export function absencePenaltyForSkill(
     defenseMagic: ['mage'],
   }
   const roles = mapping[skill] ?? []
-  let penalty = 0
-  for (const role of roles) {
-    if (!hasRole(party, role)) penalty += 8
-  }
-  return penalty
+  if (roles.length === 0) return 0
+  return roles.some((role) => hasRole(party, role)) ? 0 : 8
 }
 
 export function resolveSkillCheck(

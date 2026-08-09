@@ -94,7 +94,11 @@ function findSectorSeed(
   party: Adventurer[]
 } {
   const difficulty =
-    targetResult === 'failure' || targetResult === 'criticalFailure' ? 1000 : 0
+    targetResult === 'failure' || targetResult === 'criticalFailure'
+      ? 1000
+      : targetResult === 'partialSuccess'
+        ? 35
+        : 0
   const sectors = [
     { id: 'a', name: 'A', focus: 'route' as const, difficulty },
     { id: 'b', name: 'B', focus: 'terrain' as const, difficulty },
@@ -365,8 +369,8 @@ describe('Survey outcome semantics', () => {
     expect(determineSurveyOutcome(context)).toBe('success')
   })
 
-  it('returns partialSuccess for 2/3 surveyed with returned report', () => {
-    const { context, objective } = setupOutcome('partial', {
+  it('returns success for 2/3 surveyed with returned report', () => {
+    const { context, objective } = setupOutcome('2of3', {
       minimumAcceptableQuality: 70,
     })
     objective.sectors[0].attempted = true
@@ -379,7 +383,7 @@ describe('Survey outcome semantics', () => {
     objective.sectors[1].quality = 80
     objective.averageQuality = calculateSurveyAverageQuality(objective)
     objective.reportReturned = true
-    expect(determineSurveyOutcome(context)).toBe('partialSuccess')
+    expect(determineSurveyOutcome(context)).toBe('success')
   })
 
   it('returns partialSuccess for full survey with insufficient average quality', () => {
@@ -435,7 +439,7 @@ describe('Survey outcome semantics', () => {
 describe('Survey forced retreat integration', () => {
   it('returns forcedRetreat even when the sector 1 report is returned', () => {
     const request = makeRegressionSurveyRequest(
-      'fr3-3',
+      'fr-search-C-C-3',
       'C',
       {
         sectors: [
@@ -446,7 +450,11 @@ describe('Survey forced retreat integration', () => {
       },
       true,
     )
-    const party = makeParty(['scout', 'ranger', 'mage', 'healer'], 'fr3-3', 'C')
+    const party = makeParty(
+      ['scout', 'ranger', 'mage', 'healer'],
+      'fr-search-C-C-3',
+      'C',
+    )
     const result = runExpedition(request, party)
     const objective = surveyState(result)
 
@@ -503,7 +511,7 @@ describe('Survey final log types', () => {
   })
 
   it('emits surveyFailed for partialSuccess, forcedRetreat, and failedObjective', () => {
-    const partial = runSurvey('s109', 'C', {}, false)
+    const partial = runSurvey('s95', 'C', {}, false)
     const failed = runSurvey('s1', 'C', {
       sectors: [
         { id: 'north', name: '北区画', focus: 'route', difficulty: 1000 },
@@ -512,7 +520,7 @@ describe('Survey final log types', () => {
       ],
     })
     const retreat = runSurvey(
-      'fr3-3',
+      'fr-search-C-C-3',
       'C',
       {
         sectors: [

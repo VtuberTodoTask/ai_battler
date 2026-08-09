@@ -36,7 +36,7 @@
     "casualties": [],
     "currentPhase": "aftermath",
     "discoveredThreats": [],
-    "elapsedTime": 11.65,
+    "elapsedTime": 9.65,
     "incapacitated": [],
     "information": [],
     "injuries": [],
@@ -48,8 +48,8 @@
           "C-mage-s0-mage-2"
         ],
         "check": {
-          "effectiveValue": 71,
-          "result": "partialSuccess",
+          "effectiveValue": 81,
+          "result": "success",
           "roll": 73,
           "skill": "survival"
         },
@@ -60,7 +60,7 @@
           }
         ],
         "facts": [
-          "準備は整ったが、計画に若干の無理があった",
+          "マルチナ サンドが効率的なルートと補給計画を立てた",
           "Support不在のため、出発時の士気が低めである"
         ],
         "phase": "preparation",
@@ -129,7 +129,7 @@
           "C-mage-s0-mage-2"
         ],
         "check": {
-          "effectiveValue": 66,
+          "effectiveValue": 76,
           "result": "success",
           "roll": 33,
           "skill": "survival"
@@ -146,7 +146,7 @@
           "C-vanguard-s0-vanguard-0"
         ],
         "check": {
-          "effectiveValue": 10,
+          "effectiveValue": 28,
           "result": "failure",
           "roll": 80,
           "skill": "scouting"
@@ -163,7 +163,7 @@
           "C-vanguard-s0-vanguard-0"
         ],
         "check": {
-          "effectiveValue": 10,
+          "effectiveValue": 28,
           "result": "partialSuccess",
           "roll": 30,
           "skill": "scouting"
@@ -180,13 +180,13 @@
           "C-vanguard-s0-vanguard-0"
         ],
         "check": {
-          "effectiveValue": 10,
-          "result": "failure",
+          "effectiveValue": 28,
+          "result": "partialSuccess",
           "roll": 48,
           "skill": "scouting"
         },
         "effects": [],
-        "facts": ["調査に手間取った"],
+        "facts": ["チェルシー グレイが断片的な手がかりを得た"],
         "phase": "exploration",
         "type": "explore"
       },
@@ -216,7 +216,7 @@
           "C-mage-s0-mage-2"
         ],
         "check": {
-          "effectiveValue": 58,
+          "effectiveValue": 68,
           "result": "partialSuccess",
           "roll": 70,
           "skill": "survival"
@@ -323,7 +323,7 @@
           "C-mage-s0-mage-2"
         ],
         "check": {
-          "effectiveValue": 66,
+          "effectiveValue": 76,
           "result": "partialSuccess",
           "roll": 81,
           "skill": "survival"
@@ -336,7 +336,7 @@
       {
         "actorIds": ["C-healer-s0-healer-3"],
         "check": {
-          "effectiveValue": 92,
+          "effectiveValue": 100,
           "result": "success",
           "roll": 86,
           "skill": "firstAid"
@@ -358,7 +358,7 @@
       {
         "actorIds": ["C-healer-s0-healer-3"],
         "check": {
-          "effectiveValue": 97,
+          "effectiveValue": 100,
           "result": "success",
           "roll": 57,
           "skill": "healing"
@@ -394,7 +394,7 @@
     "metadata": {
       "approachTimeBonus": 0,
       "difficulty": "normal",
-      "preparationRouteBonus": 0,
+      "preparationRouteBonus": 1,
       "requestFeatures": [],
       "returnTimeBonus": 0,
       "threatFeatures": []

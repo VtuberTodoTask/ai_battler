@@ -597,13 +597,13 @@ describe('Escort care', () => {
   it('removes no status effects on care partialSuccess', () => {
     const result = runExpedition(
       makeEscortRequest(
-        's1026',
+        's0',
         'C',
         {
           initialHp: 40,
           routeDifficulty: 1,
           coordinationDifficulty: 1,
-          careDifficulty: 1,
+          careDifficulty: 40,
           initialStatusEffects: [
             { type: 'poisoned', duration: 3, sourceId: 'x' },
             { type: 'bleeding', duration: 3, sourceId: 'x' },
@@ -613,7 +613,7 @@ describe('Escort care', () => {
         false,
         { features: [] },
       ),
-      makeEscortParty('s1026', 'C', ['support', 'ranger', 'mage', 'healer']),
+      makeEscortParty('s0', 'C', ['support', 'ranger', 'mage', 'healer']),
     )
     const obj = escortState(result)
     const careLog = result.state.logs.find((l) => l.type === 'escortCare')

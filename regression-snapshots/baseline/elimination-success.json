@@ -46,10 +46,10 @@
         "encounterSeed": "s325:battle:0:encounter",
         "enemyComposition": "constructx4",
         "enemyIds": [
-          "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
-          "C-construct-assault-standard-s325:battle:0:encounter:enemy:1",
-          "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-          "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+          "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+          "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+          "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+          "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
         ],
         "entrySnapshot": {
           "environmentEffects": [
@@ -97,7 +97,7 @@
         "phase": "battle",
         "result": {
           "abilityUsage": {},
-          "adventurerActionCount": 47,
+          "adventurerActionCount": 45,
           "contactResult": {
             "effects": {
               "enemyInitiativeBonus": 3,
@@ -111,19 +111,19 @@
           },
           "deadAdventurers": [],
           "defeatedEnemies": [
-            "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
-            "C-construct-assault-standard-s325:battle:0:encounter:enemy:1",
-            "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-            "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+            "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+            "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+            "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+            "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
           ],
           "discoveredWeaknesses": [],
           "enemyActionCount": 28,
-          "enemyDamageDealt": 89,
+          "enemyDamageDealt": 84,
           "escapedEnemies": [],
           "finalAdventurerStates": [
             {
               "alive": true,
-              "currentHp": 71,
+              "currentHp": 36,
               "currentMp": 6,
               "dead": false,
               "id": "C-vanguard-s325-vanguard-0",
@@ -131,7 +131,7 @@
               "morale": 33,
               "statusEffects": [
                 {
-                  "duration": 2,
+                  "duration": 1,
                   "sourceId": "C-guardian-s325-guardian-1",
                   "type": "guarded",
                   "value": 5
@@ -148,7 +148,7 @@
               "morale": 46,
               "statusEffects": [
                 {
-                  "duration": 2,
+                  "duration": 1,
                   "sourceId": "C-guardian-s325-guardian-1",
                   "type": "guarded",
                   "value": 3
@@ -168,7 +168,7 @@
             {
               "alive": true,
               "currentHp": 46,
-              "currentMp": 37,
+              "currentMp": 40,
               "dead": false,
               "id": "C-healer-s325-healer-3",
               "incapacitated": false,
@@ -198,13 +198,13 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ サンド hit 古代魔導砲狂戦士 for 21 damage",
+              "result": "マルチナ サンド hit 魔力ゴーレム戦士 for 21 damage",
               "roll": 68,
               "round": 1,
               "statusApplied": [],
-              "successChance": 78,
+              "successChance": 73,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:1"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
               ]
             },
             {
@@ -221,9 +221,9 @@
               "roll": 10,
               "round": 1,
               "statusApplied": [],
-              "successChance": 92,
+              "successChance": 95,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
               ]
             },
             {
@@ -252,14 +252,14 @@
               "result": "チェルシー クォーツ missed",
               "roll": 71,
               "round": 1,
-              "successChance": 37,
+              "successChance": 32,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:1"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:3",
               "damage": 8,
               "metadata": {
                 "guardPrevented": 5,
@@ -274,13 +274,13 @@
               "roll": 35,
               "round": 1,
               "statusApplied": [],
-              "successChance": 38,
+              "successChance": 37,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
-              "damage": 11,
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+              "damage": 5,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -290,37 +290,17 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "錆びた魔法人形突撃兵 hit マルチナ サンド for 11 damage",
+              "result": "錆びた魔法人形突撃兵 hit マルチナ サンド for 5 damage",
               "roll": 19,
               "round": 1,
               "statusApplied": [],
-              "successChance": 34,
+              "successChance": 33,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-              "damage": 12,
-              "metadata": {
-                "guardPrevented": 8,
-                "guardSourceId": "C-guardian-s325-guardian-1",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "鉄機械兵突撃兵 hit マルチナ サンド for 12 damage",
-              "roll": 8,
-              "round": 1,
-              "statusApplied": [],
-              "successChance": 42,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:1",
-              "damage": 2,
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "damage": 8,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -330,7 +310,27 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "古代魔導砲狂戦士 hit マルチナ サンド for 2 damage",
+              "result": "古代魔導砲狂戦士 hit マルチナ サンド for 8 damage",
+              "roll": 8,
+              "round": 1,
+              "statusApplied": [],
+              "successChance": 36,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "damage": 3,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s325-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄機械兵突撃兵 hit マルチナ サンド for 3 damage",
               "roll": 24,
               "round": 1,
               "statusApplied": [],
@@ -347,34 +347,14 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ サンド hit 古代魔導砲狂戦士 for 20 damage",
+              "result": "マルチナ サンド hit 魔力ゴーレム戦士 for 20 damage",
               "roll": 54,
               "round": 2,
               "statusApplied": [],
-              "successChance": 83,
+              "successChance": 78,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:1"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
               ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
-              "damage": 6,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-guardian-s325-guardian-1",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "魔力ゴーレム戦士 hit マルチナ サンド for 6 damage",
-              "roll": 28,
-              "round": 2,
-              "statusApplied": [],
-              "successChance": 38,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "guard",
@@ -392,20 +372,20 @@
             {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
-              "damage": 11,
+              "damage": 13,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "フェイ ジェム hit 錆びた魔法人形突撃兵 for 11 damage",
-              "roll": 79,
+              "result": "フェイ ジェム hit 錆びた魔法人形突撃兵 for 13 damage",
+              "roll": 28,
               "round": 2,
               "statusApplied": [],
-              "successChance": 92,
+              "successChance": 95,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
               ]
             },
             {
@@ -419,16 +399,36 @@
               },
               "phase": "combat",
               "result": "チェルシー クォーツ missed",
-              "roll": 92,
+              "roll": 79,
               "round": 2,
-              "successChance": 37,
+              "successChance": 32,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:1"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:3",
+              "damage": 8,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s325-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力ゴーレム戦士 hit マルチナ サンド for 8 damage",
+              "roll": 8,
+              "round": 2,
+              "statusApplied": [],
+              "successChance": 37,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -439,12 +439,12 @@
               "result": "古代魔導砲狂戦士 missed",
               "roll": 89,
               "round": 2,
-              "successChance": 29,
+              "successChance": 36,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -455,12 +455,12 @@
               "result": "錆びた魔法人形突撃兵 missed",
               "roll": 85,
               "round": 2,
-              "successChance": 34,
+              "successChance": 33,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -471,152 +471,10 @@
               "result": "鉄機械兵突撃兵 missed",
               "roll": 75,
               "round": 2,
-              "successChance": 42,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-vanguard-s325-vanguard-0",
-              "damage": 20,
-              "metadata": {
-                "attackerRole": "vanguard",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "マルチナ サンド hit 古代魔導砲狂戦士 for 20 damage",
-              "roll": 31,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 83,
-              "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-healer-s325-healer-3",
-              "damage": 17,
-              "metadata": {
-                "attackerRole": "healer",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "チェルシー クォーツ hit 古代魔導砲狂戦士 for 17 damage",
-              "roll": 16,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 37,
-              "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "鉄機械兵突撃兵 missed",
-              "roll": 97,
-              "round": 3,
-              "successChance": 42,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-guardian-s325-guardian-1",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "ベル ヴァレスがマルチナ サンドを防護した。",
-              "round": 3,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "錆びた魔法人形突撃兵 missed",
-              "roll": 47,
-              "round": 3,
-              "successChance": 34,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:1",
-              "damage": 2,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-guardian-s325-guardian-1",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "古代魔導砲狂戦士 hit マルチナ サンド for 2 damage",
-              "roll": 27,
-              "round": 3,
-              "statusApplied": [],
               "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
-              "actionType": "magic",
-              "actorId": "C-mage-s325-mage-2",
-              "damage": 11,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "フェイ ジェム hit 錆びた魔法人形突撃兵 for 11 damage",
-              "roll": 56,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 92,
-              "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
-              "damage": 6,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-guardian-s325-guardian-1",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "魔力ゴーレム戦士 hit マルチナ サンド for 6 damage",
-              "roll": 27,
-              "round": 3,
-              "statusApplied": [],
-              "successChance": 38,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
               "damage": 20,
@@ -626,168 +484,62 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ サンド hit 古代魔導砲狂戦士 for 20 damage",
-              "roll": 48,
-              "round": 4,
+              "result": "マルチナ サンド hit 魔力ゴーレム戦士 for 20 damage",
+              "roll": 31,
+              "round": 3,
               "statusApplied": [],
-              "successChance": 83,
+              "successChance": 78,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:1"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
               ]
             },
             {
-              "actionType": "incapacitate",
-              "phase": "combat",
-              "result": "古代魔導砲狂戦士が戦闘不能になった。",
-              "round": 4,
-              "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:1"
-              ]
-            },
-            {
-              "actionType": "heal",
+              "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
-              "metadata": {
-                "actualHealAmount": 40
-              },
-              "phase": "combat",
-              "result": "チェルシー クォーツがマルチナ サンドを回復させた。+40 HP",
-              "round": 4,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s325-mage-2",
-              "damage": 14,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "フェイ ジェム hit 錆びた魔法人形突撃兵 for 14 damage",
-              "roll": 52,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 92,
-              "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "錆びた魔法人形突撃兵 missed",
-              "roll": 75,
-              "round": 4,
-              "successChance": 34,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-guardian-s325-guardian-1",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "ベル ヴァレスがマルチナ サンドを防護した。",
-              "round": 4,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
-              "damage": 4,
-              "metadata": {
-                "guardPrevented": 5,
-                "guardSourceId": "C-guardian-s325-guardian-1",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "魔力ゴーレム戦士 hit マルチナ サンド for 4 damage",
-              "roll": 34,
-              "round": 4,
-              "statusApplied": [],
-              "successChance": 38,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "鉄機械兵突撃兵 missed",
-              "roll": 76,
-              "round": 4,
-              "successChance": 42,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-vanguard-s325-vanguard-0",
               "damage": 17,
-              "metadata": {
-                "attackerRole": "vanguard",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "マルチナ サンド hit 錆びた魔法人形突撃兵 for 17 damage",
-              "roll": 62,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 76,
-              "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-guardian-s325-guardian-1",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "ベル ヴァレスがマルチナ サンドを防護した。",
-              "round": 5,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-healer-s325-healer-3",
-              "damage": 0,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "チェルシー クォーツ missed",
-              "roll": 73,
-              "round": 5,
-              "successChance": 30,
+              "result": "チェルシー クォーツ hit 魔力ゴーレム戦士 for 17 damage",
+              "roll": 16,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 32,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
               ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s325-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ベル ヴァレスがマルチナ サンドを防護した。",
+              "round": 3,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔導砲狂戦士 missed",
+              "roll": 97,
+              "round": 3,
+              "successChance": 36,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "magic",
@@ -795,135 +547,22 @@
               "damage": 12,
               "metadata": {
                 "attackerRole": "mage",
-                "followedLeaderTarget": true,
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
               "result": "フェイ ジェム hit 錆びた魔法人形突撃兵 for 12 damage",
-              "roll": 27,
-              "round": 5,
+              "roll": 47,
+              "round": 3,
               "statusApplied": [],
-              "successChance": 92,
+              "successChance": 95,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "錆びた魔法人形突撃兵 missed",
-              "roll": 57,
-              "round": 5,
-              "successChance": 34,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-              "damage": 9,
-              "metadata": {
-                "guardPrevented": 8,
-                "guardSourceId": "C-guardian-s325-guardian-1",
-                "isCounter": false,
-                "isFlank": false,
-                "preventedIncap": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "鉄機械兵突撃兵 hit マルチナ サンド for 9 damage",
-              "roll": 4,
-              "round": 5,
-              "statusApplied": [],
-              "successChance": 42,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "魔力ゴーレム戦士 missed",
-              "roll": 92,
-              "round": 5,
-              "successChance": 38,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-vanguard-s325-vanguard-0",
-              "damage": 20,
-              "metadata": {
-                "attackerRole": "vanguard",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "マルチナ サンド hit 錆びた魔法人形突撃兵 for 20 damage",
-              "roll": 9,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 76,
-              "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "incapacitate",
-              "phase": "combat",
-              "result": "錆びた魔法人形突撃兵が戦闘不能になった。",
-              "round": 6,
-              "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:0"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s325-mage-2",
-              "damage": 14,
-              "metadata": {
-                "attackerRole": "mage",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "フェイ ジェム hit 鉄機械兵突撃兵 for 14 damage",
-              "roll": 32,
-              "round": 6,
-              "statusApplied": [],
-              "successChance": 79,
-              "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-guardian-s325-guardian-1",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "ベル ヴァレスがマルチナ サンドを防護した。",
-              "round": 6,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
               "damage": 5,
               "metadata": {
                 "guardPrevented": 5,
@@ -934,12 +573,76 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "鉄機械兵突撃兵 hit マルチナ サンド for 5 damage",
-              "roll": 21,
-              "round": 6,
+              "result": "錆びた魔法人形突撃兵 hit マルチナ サンド for 5 damage",
+              "roll": 16,
+              "round": 3,
               "statusApplied": [],
-              "successChance": 42,
+              "successChance": 33,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "damage": 6,
+              "metadata": {
+                "guardPrevented": 8,
+                "guardSourceId": "C-guardian-s325-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄機械兵突撃兵 hit マルチナ サンド for 6 damage",
+              "roll": 3,
+              "round": 3,
+              "statusApplied": [],
+              "successChance": 29,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:3",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "魔力ゴーレム戦士 missed",
+              "roll": 42,
+              "round": 3,
+              "successChance": 37,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s325-vanguard-0",
+              "damage": 20,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ サンド hit 魔力ゴーレム戦士 for 20 damage",
+              "roll": 48,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 78,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "魔力ゴーレム戦士が戦闘不能になった。",
+              "round": 4,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+              ]
             },
             {
               "actionType": "melee",
@@ -952,16 +655,36 @@
               },
               "phase": "combat",
               "result": "チェルシー クォーツ missed",
-              "roll": 87,
-              "round": 6,
-              "successChance": 22,
+              "roll": 52,
+              "round": 4,
+              "successChance": 31,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s325-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ ジェム hit 錆びた魔法人形突撃兵 for 14 damage",
+              "roll": 74,
+              "round": 4,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
               "damage": 4,
               "metadata": {
                 "guardPrevented": 5,
@@ -972,11 +695,56 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "魔力ゴーレム戦士 hit マルチナ サンド for 4 damage",
-              "roll": 17,
-              "round": 6,
+              "result": "古代魔導砲狂戦士 hit マルチナ サンド for 4 damage",
+              "roll": 34,
+              "round": 4,
               "statusApplied": [],
-              "successChance": 38,
+              "successChance": 36,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s325-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ベル ヴァレスがマルチナ サンドを防護した。",
+              "round": 4,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔法人形突撃兵 missed",
+              "roll": 76,
+              "round": 4,
+              "successChance": 33,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄機械兵突撃兵 missed",
+              "roll": 79,
+              "round": 4,
+              "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -990,11 +758,277 @@
               },
               "phase": "combat",
               "result": "マルチナ サンド missed",
+              "roll": 78,
+              "round": 5,
+              "successChance": 77,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "heal",
+              "actorId": "C-healer-s325-healer-3",
+              "metadata": {
+                "actualHealAmount": 40
+              },
+              "phase": "combat",
+              "result": "チェルシー クォーツがマルチナ サンドを回復させた。+40 HP",
+              "round": 5,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s325-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ ジェム hit 錆びた魔法人形突撃兵 for 12 damage",
+              "roll": 73,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s325-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ベル ヴァレスがマルチナ サンドを防護した。",
+              "round": 5,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔導砲狂戦士 missed",
+              "roll": 40,
+              "round": 5,
+              "successChance": 36,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄機械兵突撃兵 missed",
+              "roll": 57,
+              "round": 5,
+              "successChance": 29,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+              "damage": 8,
+              "metadata": {
+                "guardPrevented": 7,
+                "guardSourceId": "C-guardian-s325-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "錆びた魔法人形突撃兵 hit マルチナ サンド for 8 damage",
+              "roll": 4,
+              "round": 5,
+              "statusApplied": [],
+              "successChance": 33,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s325-vanguard-0",
+              "damage": 17,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ サンド hit 錆びた魔法人形突撃兵 for 17 damage",
+              "roll": 22,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 77,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "guard",
+              "actorId": "C-guardian-s325-guardian-1",
+              "metadata": {
+                "guardPotency": 5,
+                "guardSourceRole": "guardian",
+                "guardTargetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "ベル ヴァレスがマルチナ サンドを防護した。",
+              "round": 6,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s325-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "チェルシー クォーツ missed",
+              "roll": 33,
+              "round": 6,
+              "successChance": 31,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s325-mage-2",
+              "damage": 14,
+              "metadata": {
+                "attackerRole": "mage",
+                "followedLeaderTarget": true,
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ ジェム hit 錆びた魔法人形突撃兵 for 14 damage",
+              "roll": 32,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 95,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "incapacitate",
+              "phase": "combat",
+              "result": "錆びた魔法人形突撃兵が戦闘不能になった。",
+              "round": 6,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:0"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "damage": 5,
+              "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s325-guardian-1",
+                "isCounter": false,
+                "isFlank": false,
+                "preventedIncap": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "古代魔導砲狂戦士 hit マルチナ サンド for 5 damage",
+              "roll": 21,
+              "round": 6,
+              "statusApplied": [],
+              "successChance": 36,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄機械兵突撃兵 missed",
+              "roll": 87,
+              "round": 6,
+              "successChance": 29,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-vanguard-s325-vanguard-0",
+              "damage": 23,
+              "metadata": {
+                "attackerRole": "vanguard",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "マルチナ サンド hit 鉄機械兵突撃兵 for 23 damage",
+              "roll": 55,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 81,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "C-healer-s325-healer-3",
+              "damage": 0,
+              "metadata": {
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "チェルシー クォーツ missed",
               "roll": 93,
               "round": 7,
-              "successChance": 68,
+              "successChance": 35,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+              ]
+            },
+            {
+              "actionType": "magic",
+              "actorId": "C-mage-s325-mage-2",
+              "damage": 12,
+              "metadata": {
+                "attackerRole": "mage",
+                "isCounter": false,
+                "isFlank": false
+              },
+              "phase": "combat",
+              "result": "フェイ ジェム hit 古代魔導砲狂戦士 for 12 damage",
+              "roll": 91,
+              "round": 7,
+              "statusApplied": [],
+              "successChance": 92,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:1"
               ]
             },
             {
@@ -1012,61 +1046,27 @@
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
-              "damage": 0,
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "damage": 7,
               "metadata": {
+                "guardPrevented": 5,
+                "guardSourceId": "C-guardian-s325-guardian-1",
                 "isCounter": false,
                 "isFlank": false,
+                "preventedIncap": false,
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "魔力ゴーレム戦士 missed",
-              "roll": 91,
+              "result": "古代魔導砲狂戦士 hit マルチナ サンド for 7 damage",
+              "roll": 19,
               "round": 7,
-              "successChance": 38,
+              "statusApplied": [],
+              "successChance": 36,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-healer-s325-healer-3",
-              "damage": 0,
-              "metadata": {
-                "attackerRole": "healer",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "チェルシー クォーツ missed",
-              "roll": 34,
-              "round": 7,
-              "successChance": 22,
-              "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "magic",
-              "actorId": "C-mage-s325-mage-2",
-              "damage": 14,
-              "metadata": {
-                "attackerRole": "mage",
-                "followedLeaderTarget": true,
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "フェイ ジェム hit 鉄機械兵突撃兵 for 14 damage",
-              "roll": 19,
-              "round": 7,
-              "statusApplied": [],
-              "successChance": 79,
-              "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
-              ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -1077,7 +1077,7 @@
               "result": "鉄機械兵突撃兵 missed",
               "roll": 83,
               "round": 7,
-              "successChance": 42,
+              "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1106,9 +1106,9 @@
               "result": "チェルシー クォーツ missed",
               "roll": 88,
               "round": 8,
-              "successChance": 22,
+              "successChance": 35,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
               ]
             },
             {
@@ -1125,9 +1125,9 @@
               "result": "マルチナ サンド missed",
               "roll": 95,
               "round": 8,
-              "successChance": 68,
+              "successChance": 81,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
               ]
             },
             {
@@ -1136,23 +1136,22 @@
               "damage": 14,
               "metadata": {
                 "attackerRole": "mage",
-                "followedLeaderTarget": true,
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "フェイ ジェム hit 鉄機械兵突撃兵 for 14 damage",
+              "result": "フェイ ジェム hit 古代魔導砲狂戦士 for 14 damage",
               "roll": 26,
               "round": 8,
               "statusApplied": [],
-              "successChance": 79,
+              "successChance": 92,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:1"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -1160,18 +1159,18 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "鉄機械兵突撃兵 missed",
+              "result": "古代魔導砲狂戦士 missed",
               "roll": 66,
               "round": 8,
-              "successChance": 42,
+              "successChance": 36,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
-              "damage": 9,
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "damage": 8,
               "metadata": {
-                "guardPrevented": 8,
+                "guardPrevented": 7,
                 "guardSourceId": "C-guardian-s325-guardian-1",
                 "isCounter": false,
                 "isFlank": false,
@@ -1179,11 +1178,11 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "魔力ゴーレム戦士 hit マルチナ サンド for 9 damage",
+              "result": "鉄機械兵突撃兵 hit マルチナ サンド for 8 damage",
               "roll": 2,
               "round": 8,
               "statusApplied": [],
-              "successChance": 38,
+              "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1196,13 +1195,13 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ サンド hit 鉄機械兵突撃兵 for 34 damage",
+              "result": "マルチナ サンド hit 古代魔導砲狂戦士 for 34 damage",
               "roll": 4,
               "round": 9,
               "statusApplied": [],
-              "successChance": 68,
+              "successChance": 75,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:1"
               ]
             },
             {
@@ -1215,13 +1214,13 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "フェイ ジェム hit 鉄機械兵突撃兵 for 11 damage",
+              "result": "フェイ ジェム hit 古代魔導砲狂戦士 for 11 damage",
               "roll": 25,
               "round": 9,
               "statusApplied": [],
-              "successChance": 79,
+              "successChance": 92,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:1"
               ]
             },
             {
@@ -1237,26 +1236,10 @@
               "result": "チェルシー クォーツ missed",
               "roll": 31,
               "round": 9,
-              "successChance": 22,
+              "successChance": 29,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:1"
               ]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-              "damage": 0,
-              "metadata": {
-                "isCounter": false,
-                "isFlank": false,
-                "targetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "鉄機械兵突撃兵 missed",
-              "roll": 82,
-              "round": 9,
-              "successChance": 42,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "guard",
@@ -1273,7 +1256,7 @@
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -1281,10 +1264,26 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "魔力ゴーレム戦士 missed",
+              "result": "古代魔導砲狂戦士 missed",
+              "roll": 82,
+              "round": 9,
+              "successChance": 36,
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "melee",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "damage": 0,
+              "metadata": {
+                "isCounter": false,
+                "isFlank": false,
+                "targetRole": "vanguard"
+              },
+              "phase": "combat",
+              "result": "鉄機械兵突撃兵 missed",
               "roll": 41,
               "round": 9,
-              "successChance": 38,
+              "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1297,22 +1296,22 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ サンド hit 鉄機械兵突撃兵 for 23 damage",
+              "result": "マルチナ サンド hit 古代魔導砲狂戦士 for 23 damage",
               "roll": 20,
               "round": 10,
               "statusApplied": [],
-              "successChance": 68,
+              "successChance": 75,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:1"
               ]
             },
             {
               "actionType": "incapacitate",
               "phase": "combat",
-              "result": "鉄機械兵突撃兵が戦闘不能になった。",
+              "result": "古代魔導砲狂戦士が戦闘不能になった。",
               "round": 10,
               "targetIds": [
-                "B-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:1"
               ]
             },
             {
@@ -1341,15 +1340,15 @@
               "result": "チェルシー クォーツ missed",
               "roll": 85,
               "round": 10,
-              "successChance": 30,
+              "successChance": 35,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
               ]
             },
             {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
-              "damage": 10,
+              "damage": 15,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -1357,21 +1356,21 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "フェイ ジェム hit 魔力ゴーレム戦士 for 10 damage",
+              "result": "フェイ ジェム hit 鉄機械兵突撃兵 for 15 damage",
               "roll": 26,
               "round": 10,
               "statusApplied": [],
-              "successChance": 89,
+              "successChance": 93,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
               ]
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
-              "damage": 11,
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "damage": 9,
               "metadata": {
-                "guardPrevented": 7,
+                "guardPrevented": 8,
                 "guardSourceId": "C-guardian-s325-guardian-1",
                 "isCounter": false,
                 "isFlank": false,
@@ -1379,11 +1378,11 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "魔力ゴーレム戦士 hit マルチナ サンド for 11 damage",
+              "result": "鉄機械兵突撃兵 hit マルチナ サンド for 9 damage",
               "roll": 3,
               "round": 10,
               "statusApplied": [],
-              "successChance": 38,
+              "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1396,13 +1395,13 @@
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ サンド hit 魔力ゴーレム戦士 for 21 damage",
+              "result": "マルチナ サンド hit 鉄機械兵突撃兵 for 21 damage",
               "roll": 59,
               "round": 11,
               "statusApplied": [],
-              "successChance": 76,
+              "successChance": 81,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
               ]
             },
             {
@@ -1421,36 +1420,43 @@
             {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
-              "damage": 15,
+              "damage": 23,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "フェイ ジェム hit 魔力ゴーレム戦士 for 15 damage",
+              "result": "フェイ ジェム hit 鉄機械兵突撃兵 for 23 damage",
               "roll": 5,
               "round": 11,
               "statusApplied": [],
-              "successChance": 89,
+              "successChance": 93,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
               ]
             },
             {
-              "actionType": "heal",
+              "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "damage": 0,
               "metadata": {
-                "actualHealAmount": 40
+                "attackerRole": "healer",
+                "isCounter": false,
+                "isFlank": false
               },
               "phase": "combat",
-              "result": "チェルシー クォーツがマルチナ サンドを回復させた。+40 HP",
+              "result": "チェルシー クォーツ missed",
+              "roll": 61,
               "round": 11,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
+              "successChance": 35,
+              "targetIds": [
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
+              ]
             },
             {
               "actionType": "melee",
-              "actorId": "C-construct-assault-standard-s325:battle:0:encounter:enemy:3",
+              "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
               "damage": 0,
               "metadata": {
                 "isCounter": false,
@@ -1458,75 +1464,43 @@
                 "targetRole": "vanguard"
               },
               "phase": "combat",
-              "result": "魔力ゴーレム戦士 missed",
-              "roll": 61,
+              "result": "鉄機械兵突撃兵 missed",
+              "roll": 89,
               "round": 11,
-              "successChance": 38,
+              "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
-              "damage": 29,
+              "damage": 18,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
                 "isFlank": false
               },
               "phase": "combat",
-              "result": "マルチナ サンド hit 魔力ゴーレム戦士 for 29 damage",
-              "roll": 5,
+              "result": "マルチナ サンド hit 鉄機械兵突撃兵 for 18 damage",
+              "roll": 44,
               "round": 12,
               "statusApplied": [],
-              "successChance": 76,
+              "successChance": 81,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
-              ]
-            },
-            {
-              "actionType": "guard",
-              "actorId": "C-guardian-s325-guardian-1",
-              "metadata": {
-                "guardPotency": 5,
-                "guardSourceRole": "guardian",
-                "guardTargetRole": "vanguard"
-              },
-              "phase": "combat",
-              "result": "ベル ヴァレスがマルチナ サンドを防護した。",
-              "round": 12,
-              "targetIds": ["C-vanguard-s325-vanguard-0"]
-            },
-            {
-              "actionType": "melee",
-              "actorId": "C-healer-s325-healer-3",
-              "damage": 12,
-              "metadata": {
-                "attackerRole": "healer",
-                "isCounter": false,
-                "isFlank": false
-              },
-              "phase": "combat",
-              "result": "チェルシー クォーツ hit 魔力ゴーレム戦士 for 12 damage",
-              "roll": 21,
-              "round": 12,
-              "statusApplied": [],
-              "successChance": 30,
-              "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
               ]
             },
             {
               "actionType": "incapacitate",
               "phase": "combat",
-              "result": "魔力ゴーレム戦士が戦闘不能になった。",
+              "result": "鉄機械兵突撃兵が戦闘不能になった。",
               "round": 12,
               "targetIds": [
-                "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+                "D-construct-assault-standard-s325:battle:0:encounter:enemy:2"
               ]
             }
           ],
           "outcome": "victory",
-          "partyDamageDealt": 400,
+          "partyDamageDealt": 394,
           "retreatAttempts": [],
           "rounds": 12,
           "seed": "s325:battle:0:combat",
@@ -1590,7 +1564,7 @@
           "C-mage-s325-mage-2"
         ],
         "check": {
-          "effectiveValue": 58,
+          "effectiveValue": 68,
           "result": "criticalFailure",
           "roll": 99,
           "skill": "survival"
@@ -1619,7 +1593,7 @@
           "C-mage-s325-mage-2"
         ],
         "check": {
-          "effectiveValue": 53,
+          "effectiveValue": 63,
           "result": "criticalFailure",
           "roll": 98,
           "skill": "survival"
@@ -1641,7 +1615,7 @@
           "C-guardian-s325-guardian-1"
         ],
         "check": {
-          "effectiveValue": 30,
+          "effectiveValue": 40,
           "result": "criticalFailure",
           "roll": 100,
           "skill": "trapDetection"
@@ -1706,7 +1680,7 @@
           "C-vanguard-s325-vanguard-0"
         ],
         "check": {
-          "effectiveValue": 16,
+          "effectiveValue": 34,
           "result": "failure",
           "roll": 91,
           "skill": "scouting"
@@ -1813,7 +1787,7 @@
           "C-mage-s325-mage-2"
         ],
         "check": {
-          "effectiveValue": 53,
+          "effectiveValue": 63,
           "result": "success",
           "roll": 31,
           "skill": "survival"
@@ -1830,7 +1804,7 @@
           "C-guardian-s325-guardian-1"
         ],
         "check": {
-          "effectiveValue": 40,
+          "effectiveValue": 50,
           "result": "criticalFailure",
           "roll": 99,
           "skill": "trapDetection"
@@ -1857,7 +1831,7 @@
       {
         "actorIds": ["C-healer-s325-healer-3"],
         "check": {
-          "effectiveValue": 86,
+          "effectiveValue": 96,
           "result": "success",
           "roll": 58,
           "skill": "firstAid"
@@ -1894,7 +1868,7 @@
       {
         "actorIds": ["C-healer-s325-healer-3"],
         "check": {
-          "effectiveValue": 95,
+          "effectiveValue": 100,
           "result": "criticalSuccess",
           "roll": 19,
           "skill": "healing"
@@ -1908,7 +1882,7 @@
           {
             "targetId": "C-vanguard-s325-vanguard-0",
             "type": "hpHeal",
-            "value": 4
+            "value": 15
           },
           {
             "targetId": "C-mage-s325-mage-2",
@@ -1951,25 +1925,25 @@
       "completed": true,
       "confirmationRequired": false,
       "confirmedTargetIds": [
-        "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
-        "C-construct-assault-standard-s325:battle:0:encounter:enemy:1",
-        "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-        "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
       ],
       "defeatedTargetIds": [
-        "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
-        "C-construct-assault-standard-s325:battle:0:encounter:enemy:1",
-        "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-        "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
       ],
       "escapedTargetIds": [],
       "mode": "allEnemies",
       "progress": 100,
       "requiredTargetIds": [
-        "C-construct-assault-standard-s325:battle:0:encounter:enemy:0",
-        "C-construct-assault-standard-s325:battle:0:encounter:enemy:1",
-        "B-construct-assault-standard-s325:battle:0:encounter:enemy:2",
-        "C-construct-assault-standard-s325:battle:0:encounter:enemy:3"
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+        "D-construct-assault-standard-s325:battle:0:encounter:enemy:3"
       ],
       "survivingTargetIds": [],
       "type": "elimination",
@@ -1979,7 +1953,7 @@
       "C-guardian-s325-guardian-1": 71,
       "C-healer-s325-healer-3": 47,
       "C-mage-s325-mage-2": 50,
-      "C-vanguard-s325-vanguard-0": 80
+      "C-vanguard-s325-vanguard-0": 56
     },
     "partyMorale": {
       "C-guardian-s325-guardian-1": 45,
@@ -1989,14 +1963,14 @@
     },
     "partyMp": {
       "C-guardian-s325-guardian-1": 0,
-      "C-healer-s325-healer-3": 37,
+      "C-healer-s325-healer-3": 40,
       "C-mage-s325-mage-2": 3,
       "C-vanguard-s325-vanguard-0": 6
     },
     "partyStatusEffects": {
       "C-guardian-s325-guardian-1": [
         {
-          "duration": 2,
+          "duration": 1,
           "sourceId": "C-guardian-s325-guardian-1",
           "type": "guarded",
           "value": 3
@@ -2006,7 +1980,7 @@
       "C-mage-s325-mage-2": [],
       "C-vanguard-s325-vanguard-0": [
         {
-          "duration": 2,
+          "duration": 1,
           "sourceId": "C-guardian-s325-guardian-1",
           "type": "guarded",
           "value": 5

@@ -46,10 +46,10 @@
         "encounterSeed": "s21:battle:0:encounter",
         "enemyComposition": "humanoidx4",
         "enemyIds": [
-          "B-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:0",
-          "B-humanoid-assault-standard-s21:battle:0:encounter:enemy:1",
-          "C-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:2",
-          "C-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:3"
+          "D-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:0",
+          "D-humanoid-assault-standard-s21:battle:0:encounter:enemy:1",
+          "D-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:2",
+          "D-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:3"
         ],
         "entrySnapshot": {
           "environmentEffects": [
@@ -176,7 +176,7 @@
               "result": "ベル クロムがパーティ撤退を試みた。成功",
               "roll": 2,
               "round": 1,
-              "successChance": 64.125
+              "successChance": 75.125
             }
           ],
           "outcome": "retreat",
@@ -188,7 +188,7 @@
               "attemptCount": 1,
               "attempted": true,
               "averageMorale": 41.25,
-              "enemyThreat": 28.766400000000004,
+              "enemyThreat": 24.45144,
               "healerAlive": true,
               "incapacitatedCount": 0,
               "leaderId": "C-healer-s21-healer-3",
@@ -205,7 +205,7 @@
               "roll": 2,
               "round": 1,
               "success": true,
-              "successChance": 64.125
+              "successChance": 75.125
             }
           ],
           "retreatDiagnostic": {
@@ -214,7 +214,7 @@
             "attemptCount": 1,
             "attempted": true,
             "averageMorale": 41.25,
-            "enemyThreat": 28.766400000000004,
+            "enemyThreat": 24.45144,
             "healerAlive": true,
             "incapacitatedCount": 0,
             "leaderId": "C-healer-s21-healer-3",
@@ -231,10 +231,10 @@
             "roll": 2,
             "round": 1,
             "success": true,
-            "successChance": 64.125
+            "successChance": 75.125
           },
           "retreatResult": {
-            "chance": 64.125,
+            "chance": 75.125,
             "roll": 2,
             "side": "party",
             "success": true
@@ -248,10 +248,10 @@
             "C-healer-s21-healer-3"
           ],
           "survivingEnemies": [
-            "B-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:0",
-            "B-humanoid-assault-standard-s21:battle:0:encounter:enemy:1",
-            "C-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:2",
-            "C-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:3"
+            "D-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:0",
+            "D-humanoid-assault-standard-s21:battle:0:encounter:enemy:1",
+            "D-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:2",
+            "D-humanoid-skirmisher-standard-s21:battle:0:encounter:enemy:3"
           ]
         },
         "rounds": 1,
@@ -278,7 +278,7 @@
         "cause": "traps",
         "hpLoss": 4,
         "id": "injury-0-144541",
-        "status": "active",
+        "status": "treated",
         "type": "light"
       },
       {
@@ -286,7 +286,7 @@
         "cause": "explorationAccident",
         "hpLoss": 5,
         "id": "injury-1-704507",
-        "status": "active",
+        "status": "treated",
         "type": "light"
       }
     ],
@@ -298,7 +298,7 @@
           "C-healer-s21-healer-3"
         ],
         "check": {
-          "effectiveValue": 60,
+          "effectiveValue": 70,
           "result": "success",
           "roll": 56,
           "skill": "survival"
@@ -347,7 +347,7 @@
           "C-mage-s21-mage-2"
         ],
         "check": {
-          "effectiveValue": 42,
+          "effectiveValue": 52,
           "result": "criticalFailure",
           "roll": 98,
           "skill": "leadership"
@@ -377,7 +377,7 @@
           "C-healer-s21-healer-3"
         ],
         "check": {
-          "effectiveValue": 55,
+          "effectiveValue": 65,
           "result": "failure",
           "roll": 88,
           "skill": "survival"
@@ -399,7 +399,7 @@
           "C-guardian-s21-guardian-1"
         ],
         "check": {
-          "effectiveValue": 41,
+          "effectiveValue": 51,
           "result": "partialSuccess",
           "roll": 56,
           "skill": "trapDetection"
@@ -490,7 +490,7 @@
           "C-healer-s21-healer-3"
         ],
         "check": {
-          "effectiveValue": 30,
+          "effectiveValue": 40,
           "result": "criticalSuccess",
           "roll": 5,
           "skill": "survival"
@@ -547,7 +547,7 @@
           "C-healer-s21-healer-3"
         ],
         "check": {
-          "effectiveValue": 57,
+          "effectiveValue": 67,
           "result": "success",
           "roll": 45,
           "skill": "defense"
@@ -580,7 +580,7 @@
           "C-healer-s21-healer-3"
         ],
         "check": {
-          "effectiveValue": 20,
+          "effectiveValue": 30,
           "result": "partialSuccess",
           "roll": 35,
           "skill": "survival"
@@ -632,7 +632,7 @@
           "C-mage-s21-mage-2"
         ],
         "check": {
-          "effectiveValue": 42,
+          "effectiveValue": 52,
           "result": "success",
           "roll": 30,
           "skill": "leadership"
@@ -662,7 +662,7 @@
           "C-healer-s21-healer-3"
         ],
         "check": {
-          "effectiveValue": 55,
+          "effectiveValue": 65,
           "result": "success",
           "roll": 51,
           "skill": "survival"
@@ -679,7 +679,7 @@
           "C-guardian-s21-guardian-1"
         ],
         "check": {
-          "effectiveValue": 46,
+          "effectiveValue": 56,
           "result": "success",
           "roll": 16,
           "skill": "trapDetection"
@@ -692,7 +692,7 @@
       {
         "actorIds": ["C-healer-s21-healer-3"],
         "check": {
-          "effectiveValue": 86,
+          "effectiveValue": 96,
           "result": "criticalFailure",
           "roll": 99,
           "skill": "firstAid"
@@ -705,13 +705,24 @@
       {
         "actorIds": ["C-healer-s21-healer-3"],
         "check": {
-          "effectiveValue": 93,
-          "result": "criticalFailure",
+          "effectiveValue": 100,
+          "result": "success",
           "roll": 97,
           "skill": "healing"
         },
-        "effects": [],
-        "facts": ["ベル クロムによる治療判定: criticalFailure"],
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          },
+          {
+            "targetId": "C-mage-s21-mage-2",
+            "type": "hpHeal",
+            "value": 8
+          }
+        ],
+        "facts": ["ベル クロムによる治療判定: success"],
         "phase": "aftermath",
         "type": "healing"
       },
@@ -725,7 +736,8 @@
         ],
         "facts": [
           "護衛対象は出発済み・移動進捗100%・目的地到達・引き渡し完了。護衛進捗は100%",
-          "治療は不十分だった"
+          "医薬品を2消費した",
+          "ベル クロムが負傷者の治療を行った"
         ],
         "phase": "aftermath",
         "type": "summary"
@@ -773,7 +785,7 @@
     "partyHp": {
       "C-guardian-s21-guardian-1": 71,
       "C-healer-s21-healer-3": 53,
-      "C-mage-s21-mage-2": 41,
+      "C-mage-s21-mage-2": 49,
       "C-vanguard-s21-vanguard-0": 68
     },
     "partyMorale": {
@@ -796,7 +808,7 @@
     },
     "supplies": {
       "food": 8,
-      "medicine": 4,
+      "medicine": 2,
       "tools": 1
     }
   }

@@ -211,8 +211,8 @@ describe('Rescue search and access', () => {
   })
 
   it('does not access or treat target before it is located', () => {
-    const request = makeRescueRequest('s1', 'C')
-    const party = makeRescueParty('s1', 'C')
+    const request = makeRescueRequest('s6', 'C')
+    const party = makeRescueParty('s6', 'C')
     const result = runExpedition(request, party)
     const obj = rescueState(result)
     expect(obj.located).toBe(false)
@@ -805,7 +805,7 @@ describe('Rescue Phase 3.3.1 fixes', () => {
       'stab-547',
       'C',
       {
-        stabilizationDifficulty: 7,
+        stabilizationDifficulty: 20,
         initialHp: 40,
         maxHp: 40,
       },

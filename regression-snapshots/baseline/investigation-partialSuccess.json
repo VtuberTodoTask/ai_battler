@@ -16,10 +16,10 @@
         "D-scout-phase3-1-c-77-scout-0": 56
       },
       "initialMorale": {
-        "D-healer-phase3-1-c-77-healer-3": 40,
-        "D-mage-phase3-1-c-77-mage-2": 40,
-        "D-ranger-phase3-1-c-77-ranger-1": 33,
-        "D-scout-phase3-1-c-77-scout-0": 34
+        "D-healer-phase3-1-c-77-healer-3": 43,
+        "D-mage-phase3-1-c-77-mage-2": 43,
+        "D-ranger-phase3-1-c-77-ranger-1": 36,
+        "D-scout-phase3-1-c-77-scout-0": 37
       },
       "initialMp": {
         "D-healer-phase3-1-c-77-healer-3": 41,
@@ -48,7 +48,7 @@
         "enemyIds": [
           "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:0",
           "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:1",
-          "C-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:2",
+          "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:2",
           "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:3"
         ],
         "entrySnapshot": {
@@ -65,10 +65,10 @@
             "D-scout-phase3-1-c-77-scout-0": 56
           },
           "initialMorale": {
-            "D-healer-phase3-1-c-77-healer-3": 40,
-            "D-mage-phase3-1-c-77-mage-2": 40,
-            "D-ranger-phase3-1-c-77-ranger-1": 33,
-            "D-scout-phase3-1-c-77-scout-0": 34
+            "D-healer-phase3-1-c-77-healer-3": 43,
+            "D-mage-phase3-1-c-77-mage-2": 43,
+            "D-ranger-phase3-1-c-77-ranger-1": 36,
+            "D-scout-phase3-1-c-77-scout-0": 37
           },
           "initialMp": {
             "D-healer-phase3-1-c-77-healer-3": 41,
@@ -123,7 +123,7 @@
               "dead": false,
               "id": "D-scout-phase3-1-c-77-scout-0",
               "incapacitated": false,
-              "morale": 34,
+              "morale": 37,
               "statusEffects": []
             },
             {
@@ -133,7 +133,7 @@
               "dead": false,
               "id": "D-ranger-phase3-1-c-77-ranger-1",
               "incapacitated": false,
-              "morale": 33,
+              "morale": 36,
               "statusEffects": []
             },
             {
@@ -143,7 +143,7 @@
               "dead": false,
               "id": "D-mage-phase3-1-c-77-mage-2",
               "incapacitated": false,
-              "morale": 40,
+              "morale": 43,
               "statusEffects": []
             },
             {
@@ -153,7 +153,7 @@
               "dead": false,
               "id": "D-healer-phase3-1-c-77-healer-3",
               "incapacitated": false,
-              "morale": 40,
+              "morale": 43,
               "statusEffects": []
             }
           ],
@@ -176,7 +176,7 @@
               "result": "レオ アッシュがパーティ撤退を試みた。成功",
               "roll": 34,
               "round": 1,
-              "successChance": 66.25
+              "successChance": 71.625
             }
           ],
           "outcome": "retreat",
@@ -187,8 +187,8 @@
               "approved": true,
               "attemptCount": 1,
               "attempted": true,
-              "averageMorale": 36.75,
-              "enemyThreat": 24.336,
+              "averageMorale": 39.75,
+              "enemyThreat": 20.6856,
               "healerAlive": true,
               "incapacitatedCount": 0,
               "leaderId": "D-healer-phase3-1-c-77-healer-3",
@@ -198,14 +198,14 @@
               "partyThreat": 15.6,
               "proposerHpRatio": 1,
               "proposerId": "D-healer-phase3-1-c-77-healer-3",
-              "proposerMorale": 40,
+              "proposerMorale": 43,
               "proposerRole": "healer",
               "reason": "lowMorale",
               "retreatHpThreshold": 0.24500000000000002,
               "roll": 34,
               "round": 1,
               "success": true,
-              "successChance": 66.25
+              "successChance": 71.625
             }
           ],
           "retreatDiagnostic": {
@@ -213,8 +213,8 @@
             "approved": true,
             "attemptCount": 1,
             "attempted": true,
-            "averageMorale": 36.75,
-            "enemyThreat": 24.336,
+            "averageMorale": 39.75,
+            "enemyThreat": 20.6856,
             "healerAlive": true,
             "incapacitatedCount": 0,
             "leaderId": "D-healer-phase3-1-c-77-healer-3",
@@ -224,17 +224,17 @@
             "partyThreat": 15.6,
             "proposerHpRatio": 1,
             "proposerId": "D-healer-phase3-1-c-77-healer-3",
-            "proposerMorale": 40,
+            "proposerMorale": 43,
             "proposerRole": "healer",
             "reason": "lowMorale",
             "retreatHpThreshold": 0.24500000000000002,
             "roll": 34,
             "round": 1,
             "success": true,
-            "successChance": 66.25
+            "successChance": 71.625
           },
           "retreatResult": {
-            "chance": 66.25,
+            "chance": 71.625,
             "roll": 34,
             "side": "party",
             "success": true
@@ -250,7 +250,7 @@
           "survivingEnemies": [
             "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:0",
             "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:1",
-            "C-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:2",
+            "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:2",
             "D-aberration-skirmisher-standard-phase3-1-c-77:battle:0:encounter:enemy:3"
           ]
         },
@@ -269,7 +269,7 @@
     "casualties": [],
     "currentPhase": "aftermath",
     "discoveredThreats": ["traps", "poorVisibility"],
-    "elapsedTime": 11.9875,
+    "elapsedTime": 9.9875,
     "incapacitated": [],
     "information": [
       {
@@ -287,10 +287,10 @@
         "source": "scouting"
       },
       {
-        "completeness": "fragment",
+        "completeness": "complete",
         "description": "魔法の気配",
         "id": "info-3",
-        "name": "魔力の残滓（断片）",
+        "name": "魔力の残滓",
         "source": "monsterKnowledge"
       }
     ],
@@ -312,23 +312,19 @@
           "D-healer-phase3-1-c-77-healer-3"
         ],
         "check": {
-          "effectiveValue": 56,
-          "result": "failure",
+          "effectiveValue": 66,
+          "result": "partialSuccess",
           "roll": 82,
           "skill": "survival"
         },
         "effects": [
           {
             "type": "moraleChange",
-            "value": -3
-          },
-          {
-            "type": "moraleChange",
             "value": -2
           }
         ],
         "facts": [
-          "出発準備が遅れ、初期士気が低下した",
+          "準備は整ったが、計画に若干の無理があった",
           "Support不在のため、出発時の士気が低めである"
         ],
         "phase": "preparation",
@@ -341,7 +337,7 @@
           "D-healer-phase3-1-c-77-healer-3"
         ],
         "check": {
-          "effectiveValue": 51,
+          "effectiveValue": 61,
           "result": "criticalFailure",
           "roll": 99,
           "skill": "survival"
@@ -363,7 +359,7 @@
           "D-healer-phase3-1-c-77-healer-3"
         ],
         "check": {
-          "effectiveValue": 61,
+          "effectiveValue": 71,
           "result": "partialSuccess",
           "roll": 81,
           "skill": "trapDetection"
@@ -390,7 +386,7 @@
           "D-mage-phase3-1-c-77-mage-2"
         ],
         "check": {
-          "effectiveValue": 20,
+          "effectiveValue": 30,
           "result": "failure",
           "roll": 56,
           "skill": "scouting"
@@ -407,7 +403,7 @@
           "D-mage-phase3-1-c-77-mage-2"
         ],
         "check": {
-          "effectiveValue": 20,
+          "effectiveValue": 30,
           "result": "criticalSuccess",
           "roll": 1,
           "skill": "scouting"
@@ -427,7 +423,7 @@
           "D-mage-phase3-1-c-77-mage-2"
         ],
         "check": {
-          "effectiveValue": 35,
+          "effectiveValue": 45,
           "result": "success",
           "roll": 16,
           "skill": "scouting"
@@ -447,7 +443,7 @@
           "D-mage-phase3-1-c-77-mage-2"
         ],
         "check": {
-          "effectiveValue": 69,
+          "effectiveValue": 79,
           "result": "success",
           "roll": 29,
           "skill": "scouting"
@@ -472,18 +468,13 @@
           "D-healer-phase3-1-c-77-healer-3"
         ],
         "check": {
-          "effectiveValue": 51,
-          "result": "failure",
+          "effectiveValue": 61,
+          "result": "partialSuccess",
           "roll": 77,
           "skill": "survival"
         },
-        "effects": [
-          {
-            "type": "moraleChange",
-            "value": -2
-          }
-        ],
-        "facts": ["ルーカス アッシュが帰還経路を見失い、迂回した"],
+        "effects": [],
+        "facts": ["ルーカス アッシュが経路を確保したが、多少の遅延が発生した"],
         "phase": "return",
         "type": "travel"
       },
@@ -494,7 +485,7 @@
           "D-healer-phase3-1-c-77-healer-3"
         ],
         "check": {
-          "effectiveValue": 66,
+          "effectiveValue": 81,
           "result": "success",
           "roll": 62,
           "skill": "trapDetection"
@@ -502,7 +493,7 @@
         "effects": [],
         "facts": [
           "エルナ ピークが罠を事前に察知・回避した",
-          "魔力の残滓（断片）に関する情報を得た"
+          "魔力の残滓に関する情報を得た"
         ],
         "phase": "return",
         "type": "hazard"
@@ -510,7 +501,7 @@
       {
         "actorIds": ["D-healer-phase3-1-c-77-healer-3"],
         "check": {
-          "effectiveValue": 83,
+          "effectiveValue": 93,
           "result": "success",
           "roll": 70,
           "skill": "firstAid"
@@ -537,20 +528,35 @@
       {
         "actorIds": ["D-healer-phase3-1-c-77-healer-3"],
         "check": {
-          "effectiveValue": 88,
-          "result": "partialSuccess",
+          "effectiveValue": 98,
+          "result": "success",
           "roll": 89,
           "skill": "healing"
         },
-        "effects": [],
-        "facts": ["レオ アッシュによる治療判定: partialSuccess"],
+        "effects": [
+          {
+            "targetId": "medicine",
+            "type": "supplyConsume",
+            "value": 2
+          },
+          {
+            "targetId": "D-ranger-phase3-1-c-77-ranger-1",
+            "type": "hpHeal",
+            "value": 1
+          }
+        ],
+        "facts": ["レオ アッシュによる治療判定: success"],
         "phase": "aftermath",
         "type": "healing"
       },
       {
         "actorIds": [],
         "effects": [],
-        "facts": ["依頼目的を部分的に達成した", "治療は不十分だった"],
+        "facts": [
+          "依頼目的を部分的に達成した",
+          "医薬品を2消費した",
+          "レオ アッシュが負傷者の治療を行った"
+        ],
         "phase": "aftermath",
         "type": "summary"
       }
@@ -558,27 +564,27 @@
     "metadata": {
       "approachTimeBonus": 0,
       "difficulty": "normal",
-      "preparationRouteBonus": -1,
+      "preparationRouteBonus": 0,
       "requestFeatures": ["traps", "poorVisibility"],
       "returnTimeBonus": 0,
       "threatFeatures": ["traps", "poorVisibility"]
     },
     "objectiveCompleted": false,
-    "objectiveProgress": 40,
+    "objectiveProgress": 50,
     "objectiveState": {
       "type": "investigation"
     },
     "partyHp": {
       "D-healer-phase3-1-c-77-healer-3": 50,
       "D-mage-phase3-1-c-77-mage-2": 52,
-      "D-ranger-phase3-1-c-77-ranger-1": 44,
+      "D-ranger-phase3-1-c-77-ranger-1": 45,
       "D-scout-phase3-1-c-77-scout-0": 56
     },
     "partyMorale": {
-      "D-healer-phase3-1-c-77-healer-3": 38,
-      "D-mage-phase3-1-c-77-mage-2": 38,
-      "D-ranger-phase3-1-c-77-ranger-1": 31,
-      "D-scout-phase3-1-c-77-scout-0": 32
+      "D-healer-phase3-1-c-77-healer-3": 43,
+      "D-mage-phase3-1-c-77-mage-2": 43,
+      "D-ranger-phase3-1-c-77-ranger-1": 36,
+      "D-scout-phase3-1-c-77-scout-0": 37
     },
     "partyMp": {
       "D-healer-phase3-1-c-77-healer-3": 41,
@@ -594,7 +600,7 @@
     },
     "supplies": {
       "food": 8,
-      "medicine": 3,
+      "medicine": 1,
       "tools": 1
     }
   }

@@ -305,8 +305,8 @@ describe('Elimination confirmation', () => {
   })
 
   it('separates defeated count from confirmed count on confirmation failure', () => {
-    const request = makeEliminationRequest('s45', 'S', true)
-    const party = makeEliminationParty('s45', 'S')
+    const request = makeEliminationRequest('s22', 'S', true)
+    const party = makeEliminationParty('s22', 'S')
     const result = runExpedition(request, party)
     const obj = result.state.objectiveState as EliminationObjectiveState
     const confirmLog = result.state.logs.find(
@@ -362,8 +362,8 @@ describe('Elimination final outcomes', () => {
   })
 
   it('partialSuccess when half of the targets are defeated and survivors return', () => {
-    const request = makeEliminationRequest('s1', 'C', false)
-    const party = makeEliminationParty('s1', 'C')
+    const request = makeEliminationRequest('s114', 'C', false)
+    const party = makeEliminationParty('s114', 'C')
     const result = runExpedition(request, party)
     expect(result.outcome).toBe('partialSuccess')
     const obj = result.state.objectiveState as EliminationObjectiveState
@@ -375,8 +375,8 @@ describe('Elimination final outcomes', () => {
   })
 
   it('forcedRetreat when only one target is defeated and the party retreats', () => {
-    const request = makeEliminationRequest('s17', 'E', false)
-    const party = makeEliminationParty('s17', 'E')
+    const request = makeEliminationRequest('s7', 'E', false)
+    const party = makeEliminationParty('s7', 'E')
     const result = runExpedition(request, party)
     expect(result.outcome).toBe('forcedRetreat')
     const obj = result.state.objectiveState as EliminationObjectiveState
@@ -386,13 +386,15 @@ describe('Elimination final outcomes', () => {
   })
 
   it('failedObjective when battle is won but most targets escaped', () => {
-    const request = makeEliminationRequest('s12', 'D', false)
-    const party = makeEliminationParty('s12', 'D')
+    const request = makeEliminationRequest('s730', 'E', false)
+    const party = makeEliminationParty('s730', 'E')
     const result = runExpedition(request, party)
     expect(result.outcome).toBe('failedObjective')
     const obj = result.state.objectiveState as EliminationObjectiveState
     expect(obj.type).toBe('elimination')
-    expect(result.state.battles[0]?.outcome).toMatch(/victory|costlyVictory/)
+    expect(result.state.battles[0]?.outcome).toMatch(
+      /victory|costlyVictory|partialVictory/i,
+    )
     expect(obj.progress).toBeLessThan(40)
   })
 

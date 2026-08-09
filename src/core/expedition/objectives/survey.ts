@@ -609,12 +609,10 @@ export function finalizeSurveyObjectiveState(
   objective.coveragePercent = calculateSurveyCoverage(objective)
   objective.averageQuality = calculateSurveyAverageQuality(objective)
   objective.progress = calculateSurveyProgress(objective)
-  const allSurveyed =
-    objective.sectors.filter((s) => s.surveyed).length ===
-    objective.sectors.length
+  const surveyedCount = objective.sectors.filter((s) => s.surveyed).length
   objective.completed =
     objective.reportReturned &&
-    allSurveyed &&
+    surveyedCount >= 2 &&
     objective.averageQuality >= objective.minimumAcceptableQuality
 
   context.state.objectiveProgress = objective.progress
@@ -721,7 +719,7 @@ export function determineSurveyOutcome(
 
   if (
     objective.reportReturned &&
-    allSurveyed &&
+    surveyedCount >= 2 &&
     objective.averageQuality >= objective.minimumAcceptableQuality
   ) {
     return 'success'
@@ -729,9 +727,8 @@ export function determineSurveyOutcome(
 
   if (
     objective.reportReturned &&
-    ((surveyedCount >= 2 && !allSurveyed) ||
-      (allSurveyed &&
-        objective.averageQuality < objective.minimumAcceptableQuality))
+    surveyedCount >= 2 &&
+    objective.averageQuality < objective.minimumAcceptableQuality
   ) {
     return 'partialSuccess'
   }
