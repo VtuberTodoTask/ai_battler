@@ -5,6 +5,7 @@ import {
   evaluateOffer,
   toPublicRequestProfile,
 } from './acceptance.ts'
+import { getMissionSpecializationMatch } from './specialization.ts'
 import { buildDispatchReport } from './report.ts'
 import type {
   BrokerageMatch,
@@ -145,7 +146,13 @@ export function resolveTavernDay(state: TavernDayState): ResolvedDispatch[] {
     }
 
     const members = deepClone(party.party.members)
-    const result = runExpedition(request.expeditionRequest, members)
+    const missionSpecializationMatch = getMissionSpecializationMatch(
+      party.party.missionSpecialization,
+      request.objectiveType,
+    )
+    const result = runExpedition(request.expeditionRequest, members, {
+      missionSpecializationMatch,
+    })
     const report = buildDispatchReport(request.id, result)
 
     results.push({

@@ -13,6 +13,10 @@ import type {
   ExpeditionResult,
   ObjectiveType,
 } from '../expedition/types.ts'
+import type {
+  MissionSpecializationMatch,
+  PartyMissionSpecialization,
+} from './specialization.ts'
 
 export type PartyRiskTolerance = 'cautious' | 'balanced' | 'bold'
 
@@ -69,6 +73,7 @@ export interface AdventurerParty {
   leaderId: string
   members: Adventurer[]
   archetypeId: string
+  missionSpecialization: PartyMissionSpecialization
 }
 
 export interface TavernPartyProgressionSnapshot {
@@ -123,6 +128,8 @@ export type AcceptanceReasonCode =
   | 'poorFit'
   | 'cautious'
   | 'notReady'
+  | 'specialtyMatch'
+  | 'specialtyMismatch'
 
 export interface AcceptanceContext {
   affinity: number
@@ -152,7 +159,9 @@ export interface OfferEvaluation {
     risk: number
     hpReadiness: number
     moraleReadiness: number
+    specialization: number
   }
+  specializationMatch: MissionSpecializationMatch
   affinity: number
   financialPressure: number
   riskTolerance: PartyRiskTolerance

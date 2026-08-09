@@ -15,6 +15,10 @@ import {
 } from './types.ts'
 import { SeededRng } from '../rng/seededRng.ts'
 import { clamp } from '../util.ts'
+import {
+  MISSION_SPECIALIZATION_CHECK_MODIFIER,
+  type MissionSpecializationMatch,
+} from '../tavern/specialization.ts'
 import { getActiveParty, hasFeature } from './state.ts'
 import { requestFeaturesFromState } from './information.ts'
 
@@ -161,13 +165,20 @@ export function resolveSkillCheck(
     skill,
   )
 
+  const specializationMatch =
+    (state.metadata?.missionSpecializationMatch as
+      MissionSpecializationMatch | undefined) ?? 'neutral'
+  const specializationModifier =
+    MISSION_SPECIALIZATION_CHECK_MODIFIER[specializationMatch]
+
   const base = primary.skills[skill]
   const effectiveValue = clamp(
     base +
       assistance +
       equipment +
       info +
-      roleBonus -
+      roleBonus +
+      specializationModifier -
       difficultyModifier -
       rankPenalty -
       difficultyBasePenalty(

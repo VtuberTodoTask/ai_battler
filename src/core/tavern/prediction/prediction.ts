@@ -2,6 +2,7 @@ import { runExpedition } from '../../expedition/expedition.ts'
 import { deepClone } from '../../util.ts'
 import type { AdventurerParty } from '../types.ts'
 import type { TavernRequestOffer } from '../types.ts'
+import { getMissionSpecializationMatch } from '../specialization.ts'
 import {
   EXPEDITION_PREDICTION_SAMPLES,
   PREDICTION_MODEL_VERSION,
@@ -19,6 +20,10 @@ export function predictExpeditionOutcome(
   const requestId = requestOffer.id
   const partyId = party.id
   const originalRequest = requestOffer.expeditionRequest
+  const missionSpecializationMatch = getMissionSpecializationMatch(
+    party.missionSpecialization,
+    requestOffer.objectiveType,
+  )
 
   const counts = {
     completeSuccess: 0,
@@ -38,7 +43,9 @@ export function predictExpeditionOutcome(
     }
 
     const sampleParty = deepClone(party)
-    const result = runExpedition(sampleRequest, sampleParty.members)
+    const result = runExpedition(sampleRequest, sampleParty.members, {
+      missionSpecializationMatch,
+    })
     counts[result.outcome] += 1
   }
 

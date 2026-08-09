@@ -101,6 +101,29 @@ describe('buildPredictionCacheKey', () => {
     expect(after).toBe(before)
   })
 
+  it('changes the key when party mission specialization changes', () => {
+    const day = generateTavernDay('prediction-cache-specialization')
+    const requestOffer = day.requests[0]
+    const party = day.parties[0]
+
+    const before = buildPredictionCacheKey(requestOffer, party, 20)
+
+    const changedParty = {
+      ...party,
+      party: {
+        ...party.party,
+        missionSpecialization: {
+          strongObjective: party.party.missionSpecialization.weakObjective,
+          weakObjective: party.party.missionSpecialization.strongObjective,
+        },
+      },
+    }
+
+    const after = buildPredictionCacheKey(requestOffer, changedParty, 20)
+
+    expect(after).not.toBe(before)
+  })
+
   it('changes the key when HP/MP/Morale/status change', () => {
     const day = generateTavernDay('prediction-cache-004')
     const requestOffer = day.requests[0]
