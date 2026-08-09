@@ -2,6 +2,7 @@ import { generateAdventurer } from '../generators/adventurerGenerator.ts'
 import type { AdventurerRank } from '../models/types.ts'
 import { SeededRng } from '../rng/seededRng.ts'
 import { PARTY_TEMPLATES } from './partyTemplates.ts'
+import { generateMissionSpecialization } from './specialization.ts'
 import type { AdventurerParty, TavernParty } from './types.ts'
 
 const PARTY_NAMES = [
@@ -57,6 +58,7 @@ export function generateAdventurerParty(
     leaderId: leader.id,
     members,
     archetypeId: templateId,
+    missionSpecialization: generateMissionSpecialization(seed, index),
   }
 }
 

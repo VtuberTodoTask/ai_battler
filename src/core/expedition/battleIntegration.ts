@@ -4,6 +4,10 @@ import {
 } from '../balance/constants.ts'
 import { Adventurer, BattleResult } from '../models/types.ts'
 import {
+  ELIMINATION_SPECIALIZATION_THREAT_MULTIPLIER,
+  type MissionSpecializationMatch,
+} from '../tavern/specialization.ts'
+import {
   BattleIntel,
   EnvironmentEffect,
   ExpeditionBattleExecutionResult,
@@ -199,10 +203,20 @@ export function runExpeditionBattle(
   const battleId = `battle-${state.battles.length}`
   const config = request.battle
   const partySize = config?.recommendedPartySize ?? 4
+
+  const specializationMatch =
+    (state.metadata?.missionSpecializationMatch as
+      MissionSpecializationMatch | undefined) ?? 'neutral'
+  const eliminationSpecializationMultiplier =
+    request.objectiveType === 'elimination'
+      ? ELIMINATION_SPECIALIZATION_THREAT_MULTIPLIER[specializationMatch]
+      : 1.0
+
   const requestPartyThreat =
     ADVENTURER_THREAT[request.rank] *
     partySize *
-    EXPEDITION_ENCOUNTER_THREAT_MULTIPLIER
+    EXPEDITION_ENCOUNTER_THREAT_MULTIPLIER *
+    eliminationSpecializationMultiplier
 
   const battleSeedBase = config?.seed ?? `${request.seed}:battle:0`
   const encounterSeed = `${battleSeedBase}:encounter`

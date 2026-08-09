@@ -1,0 +1,331 @@
+{
+  "phase": "6.6",
+  "timestamp": "2026-08-09T08:40:40.579Z",
+  "distribution": {
+    "records": [
+      {
+        "seed": "0",
+        "templateId": "balanced",
+        "strongObjective": "elimination",
+        "weakObjective": "rescue"
+      },
+      {
+        "seed": "0",
+        "templateId": "exploration",
+        "strongObjective": "rescue",
+        "weakObjective": "escort"
+      },
+      {
+        "seed": "0",
+        "templateId": "arcane",
+        "strongObjective": "rescue",
+        "weakObjective": "survey"
+      },
+      {
+        "seed": "0",
+        "templateId": "assault",
+        "strongObjective": "retrieval",
+        "weakObjective": "survey"
+      },
+      {
+        "seed": "0",
+        "templateId": "versatile",
+        "strongObjective": "escort",
+        "weakObjective": "investigation"
+      },
+      {
+        "seed": "0",
+        "templateId": "support-heavy",
+        "strongObjective": "escort",
+        "weakObjective": "elimination"
+      },
+      {
+        "seed": "0",
+        "templateId": "ranged",
+        "strongObjective": "survey",
+        "weakObjective": "retrieval"
+      },
+      {
+        "seed": "0",
+        "templateId": "arcane-exploration",
+        "strongObjective": "elimination",
+        "weakObjective": "survey"
+      },
+      {
+        "seed": "1",
+        "templateId": "balanced",
+        "strongObjective": "rescue",
+        "weakObjective": "retrieval"
+      },
+      {
+        "seed": "1",
+        "templateId": "exploration",
+        "strongObjective": "elimination",
+        "weakObjective": "investigation"
+      },
+      {
+        "seed": "1",
+        "templateId": "arcane",
+        "strongObjective": "survey",
+        "weakObjective": "escort"
+      },
+      {
+        "seed": "1",
+        "templateId": "assault",
+        "strongObjective": "retrieval",
+        "weakObjective": "investigation"
+      },
+      {
+        "seed": "1",
+        "templateId": "versatile",
+        "strongObjective": "rescue",
+        "weakObjective": "escort"
+      },
+      {
+        "seed": "1",
+        "templateId": "support-heavy",
+        "strongObjective": "investigation",
+        "weakObjective": "elimination"
+      },
+      {
+        "seed": "1",
+        "templateId": "ranged",
+        "strongObjective": "elimination",
+        "weakObjective": "survey"
+      },
+      {
+        "seed": "1",
+        "templateId": "arcane-exploration",
+        "strongObjective": "elimination",
+        "weakObjective": "escort"
+      },
+      {
+        "seed": "2",
+        "templateId": "balanced",
+        "strongObjective": "retrieval",
+        "weakObjective": "escort"
+      },
+      {
+        "seed": "2",
+        "templateId": "exploration",
+        "strongObjective": "rescue",
+        "weakObjective": "elimination"
+      },
+      {
+        "seed": "2",
+        "templateId": "arcane",
+        "strongObjective": "elimination",
+        "weakObjective": "survey"
+      },
+      {
+        "seed": "2",
+        "templateId": "assault",
+        "strongObjective": "escort",
+        "weakObjective": "elimination"
+      }
+    ],
+    "strongCounts": {
+      "investigation": 1391,
+      "elimination": 1307,
+      "rescue": 1287,
+      "escort": 1302,
+      "retrieval": 1357,
+      "survey": 1356
+    },
+    "weakCounts": {
+      "investigation": 1321,
+      "elimination": 1377,
+      "rescue": 1360,
+      "escort": 1311,
+      "retrieval": 1283,
+      "survey": 1348
+    },
+    "templateBias": {
+      "balanced": {
+        "investigation": 175,
+        "elimination": 170,
+        "rescue": 153,
+        "escort": 155,
+        "retrieval": 167,
+        "survey": 180
+      },
+      "exploration": {
+        "investigation": 171,
+        "elimination": 163,
+        "rescue": 160,
+        "escort": 155,
+        "retrieval": 179,
+        "survey": 172
+      },
+      "arcane": {
+        "investigation": 183,
+        "elimination": 154,
+        "rescue": 178,
+        "escort": 164,
+        "retrieval": 162,
+        "survey": 159
+      },
+      "assault": {
+        "investigation": 181,
+        "elimination": 151,
+        "rescue": 155,
+        "escort": 151,
+        "retrieval": 182,
+        "survey": 180
+      },
+      "versatile": {
+        "investigation": 180,
+        "elimination": 155,
+        "rescue": 157,
+        "escort": 176,
+        "retrieval": 165,
+        "survey": 167
+      },
+      "support-heavy": {
+        "investigation": 150,
+        "elimination": 160,
+        "rescue": 168,
+        "escort": 180,
+        "retrieval": 175,
+        "survey": 167
+      },
+      "ranged": {
+        "investigation": 183,
+        "elimination": 175,
+        "rescue": 161,
+        "escort": 159,
+        "retrieval": 159,
+        "survey": 163
+      },
+      "arcane-exploration": {
+        "investigation": 168,
+        "elimination": 179,
+        "rescue": 155,
+        "escort": 162,
+        "retrieval": 168,
+        "survey": 168
+      }
+    },
+    "assertion": "PASS: objective distribution within 30% of expected"
+  },
+  "pairedSuccess": {
+    "perObjective": {
+      "investigation": {
+        "strong": 0.66,
+        "neutral": 0.53,
+        "weak": 0.44
+      },
+      "elimination": {
+        "strong": 0.95,
+        "neutral": 0.93,
+        "weak": 0.85
+      },
+      "rescue": {
+        "strong": 0.51,
+        "neutral": 0.37,
+        "weak": 0.25
+      },
+      "escort": {
+        "strong": 0.57,
+        "neutral": 0.49,
+        "weak": 0.42
+      },
+      "retrieval": {
+        "strong": 0.48,
+        "neutral": 0.34,
+        "weak": 0.22
+      },
+      "survey": {
+        "strong": 0.81,
+        "neutral": 0.67,
+        "weak": 0.52
+      }
+    },
+    "assertion": "PASS: strong >= neutral >= weak for every objective"
+  },
+  "scoreShift": {
+    "samples": 1200,
+    "avgStrongNeutral": 8,
+    "avgNeutralWeak": 8,
+    "assertion": "PASS: acceptance score shifts are exactly +8 and -8"
+  },
+  "acceptance": {
+    "sameRank": {
+      "strong": {
+        "total": 4000,
+        "accepted": 3829,
+        "rate": 0.95725,
+        "scoreSum": 304258,
+        "avgScore": 76.0645
+      },
+      "neutral": {
+        "total": 16000,
+        "accepted": 15345,
+        "rate": 0.9590625,
+        "scoreSum": 1090574,
+        "avgScore": 68.160875
+      },
+      "weak": {
+        "total": 4000,
+        "accepted": 3497,
+        "rate": 0.87425,
+        "scoreSum": 240921,
+        "avgScore": 60.23025
+      }
+    },
+    "plusOne": {
+      "strong": {
+        "total": 4000,
+        "accepted": 2007,
+        "rate": 0.50175,
+        "scoreSum": 184258,
+        "avgScore": 46.0645
+      },
+      "neutral": {
+        "total": 16000,
+        "accepted": 1088,
+        "rate": 0.068,
+        "scoreSum": 610574,
+        "avgScore": 38.160875
+      },
+      "weak": {
+        "total": 4000,
+        "accepted": 0,
+        "rate": 0,
+        "scoreSum": 120921,
+        "avgScore": 30.23025
+      }
+    },
+    "avgScoreDiff": {
+      "sameRankStrongNeutral": 7.903624999999991,
+      "sameRankNeutralWeak": 7.930625000000006,
+      "plusOneStrongNeutral": 7.903625000000005,
+      "plusOneNeutralWeak": 7.930624999999996
+    },
+    "hardGate": {
+      "total": 24000,
+      "accepted": 0
+    },
+    "sameRankReasons": {
+      "appropriate": 22671,
+      "poorFit": 1000,
+      "specialtyMismatch": 328,
+      "notReady": 1
+    },
+    "plusOneReasons": {
+      "poorFit": 12000,
+      "specialtyMatch": 1737,
+      "tooDangerous": 3732,
+      "notReady": 4882,
+      "specialtyMismatch": 291,
+      "challengingButSuitable": 1358
+    },
+    "assertion": "PASS: score shifts are ~+8/-8 and +2 hard gate is 0%"
+  },
+  "campaignSmoke": {
+    "daysRun": 30,
+    "expeditions": 70,
+    "errors": [],
+    "assertion": "PASS: 30-day campaign smoke completed"
+  }
+}

@@ -525,6 +525,10 @@ export interface ExpeditionBattleExecutionResult {
   initialEnemyIds: string[]
 }
 
+export interface ExpeditionExecutionOptions {
+  missionSpecializationMatch?: 'strong' | 'neutral' | 'weak'
+}
+
 export interface ExpeditionObjectiveHandler {
   flow: ExpeditionFlowDefinition
   validateRequest(request: ExpeditionRequest): void

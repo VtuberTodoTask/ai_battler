@@ -83,6 +83,7 @@ function makeParty(
   roles: string[],
   leaderSlot: 0 | 1 | 2 | 3,
   leaderOverrides?: { int?: number; per?: number; leadership?: number },
+  specialization?: { strongObjective?: string; weakObjective?: string },
 ): AdventurerParty {
   const members = roles.map((role, i) =>
     i === leaderSlot
@@ -96,6 +97,12 @@ function makeParty(
     leaderId: members[leaderSlot].id,
     members,
     archetypeId: 'test',
+    missionSpecialization: {
+      strongObjective: (specialization?.strongObjective ??
+        'survey') as AdventurerParty['missionSpecialization']['strongObjective'],
+      weakObjective: (specialization?.weakObjective ??
+        'investigation') as AdventurerParty['missionSpecialization']['weakObjective'],
+    },
   }
 }
 
@@ -240,6 +247,10 @@ describe('evaluateOffer', () => {
       leaderId: members[0].id,
       members,
       archetypeId: 'test',
+      missionSpecialization: {
+        strongObjective: 'survey',
+        weakObjective: 'investigation',
+      },
     }
     const request = makeRequest('elimination', 'C')
     const result = evaluateOffer(request, party)
@@ -460,6 +471,8 @@ describe('acceptanceReasonText', () => {
       'poorFit',
       'cautious',
       'notReady',
+      'specialtyMatch',
+      'specialtyMismatch',
     ] as const) {
       expect(acceptanceReasonText(reason)).toBeTruthy()
     }

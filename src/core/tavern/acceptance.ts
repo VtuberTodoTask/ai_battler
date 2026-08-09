@@ -1,5 +1,10 @@
 import { ROLE_MAP } from '../../data/roles.ts'
 import { clamp } from '../util.ts'
+import {
+  getMissionSpecializationMatch,
+  MISSION_SPECIALIZATION_CHECK_MODIFIER,
+  type MissionSpecializationMatch,
+} from './specialization.ts'
 import type {
   AcceptanceContext,
   AcceptanceReasonCode,
@@ -143,6 +148,10 @@ function riskModifier(riskTolerance: PartyRiskTolerance): number {
   return 0
 }
 
+function specializationModifier(match: MissionSpecializationMatch): number {
+  return MISSION_SPECIALIZATION_CHECK_MODIFIER[match]
+}
+
 function roleFitModifier(relevantRoleCount: number): number {
   if (relevantRoleCount === 0) return -25
   if (relevantRoleCount === 1) return -10
@@ -172,6 +181,10 @@ export function computeAcceptanceModifiers(
   const relevantCapability = computeRelevantCapability(party, relevantRoles)
 
   const rankGap = rankValue(request.rank) - rankValue(party.rank)
+  const specializationMatch = getMissionSpecializationMatch(
+    party.missionSpecialization,
+    request.objectiveType,
+  )
 
   const modifiers = {
     base: baseModifier(rankGap),
@@ -184,6 +197,7 @@ export function computeAcceptanceModifiers(
     risk: riskModifier(context.riskTolerance),
     hpReadiness: hpReadiness(party),
     moraleReadiness: moraleReadiness(party),
+    specialization: specializationModifier(specializationMatch),
   }
 
   const score = Object.values(modifiers).reduce((a, b) => a + b, 0)
@@ -193,6 +207,7 @@ export function computeAcceptanceModifiers(
     leaderJudgment,
     modifiers,
     score,
+    specializationMatch,
   }
 }
 
@@ -204,7 +219,17 @@ function thresholdFor(rankGap: number, relevantRoleCount: number): number {
 function chooseAcceptedReason(
   context: AcceptanceContext,
   modifiers: OfferEvaluation['modifiers'],
+  score: number,
+  threshold: number,
 ): AcceptanceReasonCode {
+  if (
+    modifiers.specialization > 0 &&
+    score - modifiers.specialization < threshold &&
+    score >= threshold
+  ) {
+    return 'specialtyMatch'
+  }
+
   const candidates = [
     { key: 'affinity', value: modifiers.affinity, min: 12 },
     { key: 'financialPressure', value: modifiers.financialPressure, min: 10 },
@@ -243,6 +268,15 @@ function chooseDeclinedReason(
   threshold: number,
 ): AcceptanceReasonCode {
   if (rankGap >= 2) return 'tooDangerous'
+
+  if (
+    modifiers.specialization < 0 &&
+    score - modifiers.specialization >= threshold &&
+    score < threshold
+  ) {
+    return 'specialtyMismatch'
+  }
+
   if (relevantRoleCount === 0) return 'poorFit'
   if (rankGap === 1 && relevantRoleCount < 3) return 'poorFit'
 
@@ -278,8 +312,14 @@ export function evaluateOffer(
     ...context,
   }
 
-  const { rankGap, relevantRoleCount, leaderJudgment, modifiers, score } =
-    computeAcceptanceModifiers(party, request, fullContext)
+  const {
+    rankGap,
+    relevantRoleCount,
+    leaderJudgment,
+    modifiers,
+    score,
+    specializationMatch,
+  } = computeAcceptanceModifiers(party, request, fullContext)
 
   const threshold = thresholdFor(rankGap, relevantRoleCount)
 
@@ -298,7 +338,7 @@ export function evaluateOffer(
       reason =
         rankGap === 0
           ? 'appropriate'
-          : chooseAcceptedReason(fullContext, modifiers)
+          : chooseAcceptedReason(fullContext, modifiers, score, threshold)
     } else {
       reason = chooseDeclinedReason(
         fullContext,
@@ -322,6 +362,7 @@ export function evaluateOffer(
     acceptanceScore: score,
     acceptanceThreshold: threshold,
     modifiers,
+    specializationMatch,
     affinity: fullContext.affinity,
     financialPressure: fullContext.financialPressure,
     riskTolerance: fullContext.riskTolerance,
@@ -348,6 +389,10 @@ export function acceptanceReasonText(reason: AcceptanceReasonCode): string {
       return '「やれなくはないかもしれないが、今は無理をする時じゃない」'
     case 'notReady':
       return '「今の状態でこの仕事を受けるのは危険だ。今回は断る」'
+    case 'specialtyMatch':
+      return '「格上ではあるが、この手の仕事は俺たちの得意分野だ。引き受けよう」'
+    case 'specialtyMismatch':
+      return '「この手の仕事は俺たちの苦手分野だ。今回は見送らせてくれ」'
   }
 }
 

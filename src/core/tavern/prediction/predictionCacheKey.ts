@@ -19,5 +19,6 @@ export function buildPredictionCacheKey(
     partyId: tavernParty.id,
     sampleCount,
     members,
+    missionSpecialization: tavernParty.party.missionSpecialization,
   })
 }

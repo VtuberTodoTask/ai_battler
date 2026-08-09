@@ -4,6 +4,7 @@ import {
   getPositiveBrokerageText,
 } from '../../core/tavern/campaign/relationship.ts'
 import type { TavernParty } from '../../core/tavern/types.ts'
+import { OBJECTIVE_LABELS } from '../expedition/labels.ts'
 
 export interface PartyCardProps {
   party: TavernParty
@@ -59,6 +60,12 @@ export function PartyCard({
           </span>
         ))}
       </div>
+      {ap.missionSpecialization && (
+        <div className="party-specialization">
+          得意：{OBJECTIVE_LABELS[ap.missionSpecialization.strongObjective]} ·
+          苦手：{OBJECTIVE_LABELS[ap.missionSpecialization.weakObjective]}
+        </div>
+      )}
       <div className="party-meta">
         {party.arrivalDay !== undefined &&
           party.plannedDepartureDay !== undefined && (

@@ -1,6 +1,7 @@
 import { Adventurer } from '../models/types.ts'
 import type {
   ExpeditionExecutionContext,
+  ExpeditionExecutionOptions,
   ExpeditionFlowDefinition,
   ExpeditionObjectiveHandler,
   ExpeditionOutcome,
@@ -67,6 +68,7 @@ function shouldSkipObjectiveAfterBattle(
 export function runExpedition(
   request: ExpeditionRequest,
   party: Adventurer[],
+  options?: ExpeditionExecutionOptions,
 ): ExpeditionResult {
   const objectiveType = request.objectiveType
   if (!(objectiveType in OBJECTIVE_HANDLERS)) {
@@ -86,6 +88,10 @@ export function runExpedition(
     requestFeatures: request.features,
     threatFeatures: request.features,
     ...state.metadata,
+  }
+  if (options?.missionSpecializationMatch !== undefined) {
+    state.metadata.missionSpecializationMatch =
+      options.missionSpecializationMatch
   }
   state.objectiveState = handler.initializeObjectiveState(request)
 

@@ -343,3 +343,49 @@ A fourth tab, `酒場キャンペーン`, renders a multi-day campaign:
   different window than `computer` captures. Verify the active window by
   setting `document.title = 'UNIQUE'` and using `wmctrl -l | grep UNIQUE`;
   then raise that window with `wmctrl -i -a <window-id>` before recording.
+
+## Phase 6.6 Mission specialization (`devin/phase6-6-mission-specialization`)
+
+- Every `AdventurerParty` now has `missionSpecialization` with one `strongObjective`
+  and one `weakObjective` drawn from the six objective types.
+- `PartyCard` shows `得意：{label} · 苦手：{label}`.
+- `BrokeragePanel` shows `依頼適性：得意（{label}）`, `苦手（{label}）`, or `通常`,
+  and `Score breakdown` includes `専門分野: {+8 / -8 / 0}`.
+- `runExpedition` and `predictExpeditionOutcome` apply
+  `MISSION_SPECIALIZATION_CHECK_MODIFIER` (`strong: +8`, `weak: -8`) and, for
+  `elimination` requests, an `ELIMINATION_SPECIALIZATION_THREAT_MULTIPLIER`
+  (`strong: 0.92`, `weak: 1.08`).
+- Acceptance reason codes include `specialtyMatch` (positive modifier pushed the
+  party over the threshold) and `specialtyMismatch` (negative modifier pushed it
+  under).
+- `buildPredictionCacheKey` includes `missionSpecialization`, so predictions are
+  invalidated when a party's specialization-relevant state changes.
+
+### Natural E2E scenario with `tavern-campaign-324`
+
+- Day 1 board has three requests including `遺跡の異変調査 [C] 調査`.
+- Parties include `黒曜の斧 [D]` (`得意：調査 · 苦手：回収`) and
+  `炎獅子団 [E]` (`得意：護衛 · 苦手：調査`).
+- Select `遺跡の異変調査` and `黒曜の斧`:
+  - `依頼適性：得意（調査）`, prediction `90% 非常に有望`.
+  - `この依頼を紹介する` → `specialtyMatch`, `受諾（54 / 50）`, `専門分野: 8`.
+- Switch to `炎獅子団`:
+  - `依頼適性：苦手（調査）`, prediction `100% 非常に有望`.
+  - `この依頼を紹介する` → `tooDangerous (-3 / 50)`, `専門分野: -8` in the
+    `Score breakdown`.
+- Switch back to `黒曜の斧` to confirm the cached `90%` reappears.
+- `本日の仲介を確定` → result detail shows `completeSuccess`, `Objective 100%`,
+  per-member HP/MP/Morale, and reputation `10 → 13`.
+- Day 2: `黒曜の斧` is `療養中（あと1日）`.
+- Day 3: `黒曜の斧` is `受諾可能` with full HP/MP and increased Morale.
+- `CampaignHistory` Day 1 expands to show Relationship, growth/training, and
+  `療養開始` party events.
+
+### UI checks
+
+- `PartyCard` displays `得意：… / 苦手：…` labels.
+- `BrokeragePanel` displays `依頼適性` and `Score breakdown` `専門分野`.
+- Acceptance response may use `specialtyMatch` / `specialtyMismatch`.
+- `ExpeditionPredictionPanel` updates correctly across party switches and reuses
+  cached values when returning to a previously selected pair.
+- `TavernResultDetail` shows the actual outcome separately from the prediction.

@@ -6,6 +6,7 @@ import {
   getAffinityTier,
   getFinancialPressureTier,
 } from '../../core/tavern/campaign/relationship.ts'
+import { getMissionSpecializationMatch } from '../../core/tavern/specialization.ts'
 import type { TavernDayState, TavernParty } from '../../core/tavern/types.ts'
 import { OBJECTIVE_LABELS } from '../expedition/labels.ts'
 
@@ -90,6 +91,23 @@ export function BrokeragePanel({
             ))}
           </div>
 
+          {request && (
+            <div className="party-specialization-match">
+              依頼適性：
+              {(() => {
+                const match = getMissionSpecializationMatch(
+                  party.party.missionSpecialization,
+                  request.objectiveType,
+                )
+                if (match === 'strong')
+                  return `得意（${OBJECTIVE_LABELS[request.objectiveType]}）`
+                if (match === 'weak')
+                  return `苦手（${OBJECTIVE_LABELS[request.objectiveType]}）`
+                return '通常'
+              })()}
+            </div>
+          )}
+
           {selectedOffer ? (
             <div className="offer-result">
               <p>{acceptanceReasonText(selectedOffer.reason)}</p>
@@ -150,6 +168,10 @@ export function BrokeragePanel({
                     {selectedOffer.evaluation.modifiers.financialPressure}
                   </li>
                   <li>危険志向: {selectedOffer.evaluation.modifiers.risk}</li>
+                  <li>
+                    専門分野:{' '}
+                    {selectedOffer.evaluation.modifiers.specialization}
+                  </li>
                   <li>
                     HP状態: {selectedOffer.evaluation.modifiers.hpReadiness}
                   </li>
