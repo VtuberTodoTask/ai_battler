@@ -277,7 +277,7 @@ export function buildExpeditionPrompt(
 ): string {
   const request = context.request
   const facts = buildExpeditionNarrativeFacts(context)
-  const timeline = buildExpeditionNarrativeTimeline(context)
+  const timeline = context.timeline ?? buildExpeditionNarrativeTimeline(context)
   const timelineText = formatNarrativeTimeline(timeline)
   const match = context.acceptance?.specializationMatch ?? 'neutral'
   const reason = context.acceptance?.reason ?? 'appropriate'

@@ -22,6 +22,11 @@ Only the narrative presentation layer changed.
 - `scripts/phase7-1-timeline-audit.ts` (new)
 - `scripts/phase7-1-smoke.ts` (new, manual smoke harness)
 
+A small utility change (`src/core/util.ts`) switched `deepClone` from
+`JSON.parse(JSON.stringify())` to `structuredClone` to keep 30-day campaign
+smoke tests fast now that expedition narrative contexts carry the full
+simulation state.
+
 No gameplay, simulation, provider, candidate trigger, priority, or cost-control
 changes were made.
 
@@ -56,6 +61,10 @@ Phases reuse the `ExpeditionPhase` concept but are mapped to narrative phases:
 - De-duplicates exact text strings to avoid repeated identical beats.
 - Falls back to a report-only timeline when `context.state` is unavailable.
 
+`buildExpeditionNarrativeContext` precomputes the timeline when `result.state`
+is available and attaches it to the context. `buildExpeditionPrompt` prefers
+`context.timeline` and falls back to building from `context.state` if needed.
+
 Battle timeline compression (`buildBattleTimeline`):
 
 - Mandatory beats preserved: start, contact, casualties, incapacitation,
@@ -68,7 +77,9 @@ Battle timeline compression (`buildBattleTimeline`):
 
 To give the builder full access to the deterministic trace, an optional `state`
 field was added to `ExpeditionNarrativeContext` and `resolved.result` is now
-threaded through `buildExpeditionNarrativeContext` in `candidates.ts`.
+threaded through `buildExpeditionNarrativeContext` in `candidates.ts`. An
+optional `timeline` field was also added so the narrative candidate can carry
+the precomputed, compact timeline without rebuilding it at prompt time.
 
 ## Prompt v4 changes
 
@@ -153,8 +164,8 @@ After 3 manual generations: AI calls = 3
 
 ```text
 Expedition candidates:      30
-Avg prompt characters:      5052
-Avg estimated tokens:       7578
+Avg prompt characters:      4957
+Avg estimated tokens:       7435
 Avg raw context chars:      48359
 ```
 
@@ -162,10 +173,10 @@ Avg raw context chars:      48359
 
 ```text
 Candidate count:                   30
-Average timeline beat count:     28
-Max timeline beat count:         38
-Average prompt chars:            5045
-Max prompt chars:                5396
+Average timeline beat count:     25
+Max timeline beat count:         35
+Average prompt chars:            4957
+Max prompt chars:                5323
 Average battle source events:    61
 Average battle narrative beats:  6
 Compression ratio:               0.0989

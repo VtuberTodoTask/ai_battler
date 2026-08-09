@@ -18,6 +18,7 @@ import type {
   ObjectiveType,
 } from '../expedition/types.ts'
 import { rankIndex } from '../tavern/campaign/generators.ts'
+import { buildExpeditionNarrativeTimeline } from './timeline.ts'
 
 function memberIsDead(member: { currentHp: number }): boolean {
   return member.currentHp <= 0
@@ -81,7 +82,8 @@ export function buildExpeditionNarrativeContext(
     party.party.missionSpecialization,
     request.objectiveType,
   )
-  return {
+  const state = result?.state
+  const context: ExpeditionNarrativeContext = {
     kind: 'expedition',
     party: buildNarrativePartySnapshot(party),
     request: buildNarrativeRequestInfo(request),
@@ -97,8 +99,12 @@ export function buildExpeditionNarrativeContext(
           specializationMatch,
         },
     report,
-    state: result?.state,
+    state,
   }
+  if (state) {
+    context.timeline = buildExpeditionNarrativeTimeline(context)
+  }
+  return context
 }
 
 const OUTCOME_PRIORITY: Record<ExpeditionOutcome, number> = {

@@ -4,31 +4,20 @@ import type {
   ExpeditionPhase,
   ExpeditionState,
 } from '../expedition/types.ts'
-import type { NarrativeMemberSnapshot } from './types.ts'
-import type { ExpeditionNarrativeContext } from './types.ts'
+import type {
+  ExpeditionNarrativeContext,
+  NarrativeMemberSnapshot,
+  NarrativeTimelineBeat,
+  NarrativeTimelineBeatKind,
+  NarrativeTimelinePhase,
+} from './types.ts'
 import { battleOutcomeLabel, environmentLabel } from './facts.ts'
 
-export type NarrativeTimelinePhase =
-  | 'departure'
-  | 'approach'
-  | 'exploration'
-  | 'objective'
-  | 'battle'
-  | 'return'
-  | 'aftermath'
-
-export type NarrativeTimelineBeatKind =
-  'event' | 'transition' | 'battle' | 'outcome' | 'return'
-
-export interface NarrativeTimelineBeat {
-  id: string
-  phase: NarrativeTimelinePhase
-  kind: NarrativeTimelineBeatKind
-  text: string
-  actorIds?: string[]
-  targetIds?: string[]
-  importance: number
-}
+export type {
+  NarrativeTimelineBeat,
+  NarrativeTimelineBeatKind,
+  NarrativeTimelinePhase,
+} from './types.ts'
 
 const PHASE_MAP: Record<ExpeditionPhase, NarrativeTimelinePhase> = {
   preparation: 'departure',
