@@ -22,7 +22,7 @@ src/core/narrative/
   types.ts      — candidate, context, snapshot and generation record types
   candidates.ts — derive expedition/character-event candidates from campaign state
   context.ts    — build party/request snapshots and recent highlights
-  prompt.ts     — build v1 system/user prompts
+  prompt.ts     — build v3 system/user prompts
   generation.ts — single call + archive helper
 
 src/ai/narrative/
@@ -430,23 +430,18 @@ User (farewell fixture):
 Event Type: farewell
 Party: 赤鴉団 (Rank D)
 Leader: フェイ アイヴィー
-Leader Personality: bravery -3, caution -1, cooperation 3, discipline -2, altruism 3, greed -1
-Affinity: 60
-Financial Pressure: 38
-Risk Tolerance: cautious
-Growth Milestones: 0
-Training Days: 0
-Strong Objective: retrieval
-Weak Objective: investigation
+Leaderの傾向: 危険には慎重な姿勢を取りやすい / 仲間と歩調を合わせやすい / 他者への配慮が強い
+関係性: 新人関係
+リスクへの姿勢: 慎重
+成長段階: 0
+滞在訓練日数: 0
+得意分野: retrieval
+苦手分野: investigation
 Members:
-  - フェイ アイヴィー (D scout)
-      Personality: bravery -3, caution -1, cooperation 3, discipline -2, altruism 3, greed -1
-  - オルム クォーツ (D ranger)
-      Personality: bravery -2, caution 3, cooperation -1, discipline 1, altruism -3, greed 2
-  - シエラ アイヴィー (D mage)
-      Personality: bravery -3, caution 3, cooperation 3, discipline -1, altruism 2, greed -3
-  - チェルシー アイヴィー (D support)
-      Personality: bravery 0, caution -1, cooperation 2, discipline 2, altruism -2, greed -1
+  - フェイ アイヴィー（D scout）: 危険には慎重な姿勢を取りやすい / 仲間と歩調を合わせやすい / 他者への配慮が強い
+  - オルム クォーツ（D ranger）: 慎重に物事を考える / 自分の判断を優先しやすい / 金銭的利益への執着は弱い
+  - シエラ アイヴィー（D mage）: 慎重に物事を考える / 仲間と歩調を合わせやすい / 他者への配慮が強い
+  - チェルシー アイヴィー（D support）: 形式や手順にはあまり拘らない / 他者への配慮が強い / 金銭的利益への執着は弱い
 
 Recent Highlights:
 なし
@@ -758,8 +753,11 @@ Prompt compression audit
   Total raw context chars: 148283
 ```
 
-The v3 prompt is shorter than the raw JSON context and focuses on facts rather
-than numbers, improving fidelity while keeping token use reasonable.
+This audit compares the compressed v3 prompt actually sent to the LLM with
+the raw `NarrativeContext` JSON retained for debugging. It does not compare
+against the older v2 prompt, which is no longer reconstructed. The v3 prompt is
+shorter than the raw JSON context and focuses on facts rather than numbers,
+improving fidelity while keeping token use reasonable.
 
 ### LM Studio smoke test
 
@@ -776,3 +774,18 @@ Phase 7.0.3.
 - `npm run test:expedition-regression` — 22/22 passing
 - `npx tsx scripts/phase7-0-narrative-audit.ts` — 69 candidates, 0 AI calls
 - `npx tsx scripts/phase7-0-3-compression-audit.ts` — completed
+
+### Phase 7.0.3.1 consistency fixes
+
+- Survey unknown-detail derivation is based on the actual failing condition
+  (`coveragePercent < 100`, `averageQuality < minimumAcceptableQuality`,
+  `!reportReturned`) rather than `completed === false` alone. This prevents
+  contradictory facts such as "full coverage" and "range was limited" appearing
+  together.
+- Retrieval integrity (`finalIntegrity` vs `minimumAcceptableIntegrity`) is
+  narrated only when the party has actually interacted with the target
+  (`secured || extracted || returned`). Hidden engine state for an unobserved
+  target no longer leaks into `CONFIRMED FACTS`.
+- Character-event actor restrictions now refer to people explicitly present in the
+  input data rather than depending on the Expedition-only `CONFIRMED FACTS`
+  section.

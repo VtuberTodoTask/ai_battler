@@ -174,7 +174,7 @@ describe('survey facts', () => {
     )
     expect(confirmedFacts).toContain('測量記録を酒場まで持ち帰った')
     expect(unknownDetails).toContain(
-      '測量が限定された具体的な原因は記録されていない',
+      '測量範囲が限定された具体的な原因は記録されていない',
     )
 
     const all = [...confirmedFacts, ...unknownDetails].join('\n')
@@ -202,6 +202,89 @@ describe('survey facts', () => {
     )
     expect(confirmedFacts).toContain('依頼は完全な成功に終わった')
     expect(confirmedFacts).toContain('予定された範囲をすべて測量した')
+  })
+
+  it('reports full coverage with quality failure without claiming range was limited', () => {
+    const objective: DispatchObjectiveSummary = {
+      type: 'survey',
+      areaName: '未踏洞窟',
+      coveragePercent: 100,
+      averageQuality: 40,
+      minimumAcceptableQuality: 60,
+      reportReturned: true,
+      surveyedSectorCount: 3,
+      completed: false,
+    }
+    const report = baseReport('failedObjective', objective)
+    const { confirmedFacts, unknownDetails } = buildExpeditionNarrativeFacts(
+      makeContext(report),
+    )
+
+    expect(confirmedFacts).toContain('予定された範囲をすべて測量した')
+    expect(confirmedFacts).toContain('測量記録の品質は依頼の基準に届かなかった')
+    expect(unknownDetails).toContain(
+      '測量記録の品質が依頼基準に届かなかった具体的な原因は記録されていない',
+    )
+    expect(unknownDetails).not.toContain(
+      '測量範囲が限定された具体的な原因は記録されていない',
+    )
+
+    const all = [...confirmedFacts, ...unknownDetails].join('\n')
+    expect(all).not.toContain('測量範囲が限定された')
+  })
+
+  it('reports report not returned without blaming coverage or quality', () => {
+    const objective: DispatchObjectiveSummary = {
+      type: 'survey',
+      areaName: '未踏洞窟',
+      coveragePercent: 100,
+      averageQuality: 90,
+      minimumAcceptableQuality: 60,
+      reportReturned: false,
+      surveyedSectorCount: 3,
+      completed: false,
+    }
+    const report = baseReport('failedObjective', objective)
+    const { confirmedFacts, unknownDetails } = buildExpeditionNarrativeFacts(
+      makeContext(report),
+    )
+
+    expect(confirmedFacts).toContain('予定された範囲をすべて測量した')
+    expect(confirmedFacts).toContain(
+      '測量できた範囲の記録品質は依頼の基準を満たした',
+    )
+    expect(confirmedFacts).toContain('測量記録を持ち帰ることができなかった')
+    expect(unknownDetails).toContain(
+      '測量記録を持ち帰れなかった具体的な原因は記録されていない',
+    )
+    expect(unknownDetails).not.toContain(
+      '測量範囲が限定された具体的な原因は記録されていない',
+    )
+  })
+
+  it('never contains both full coverage and range-limited unknowns', () => {
+    const objective: DispatchObjectiveSummary = {
+      type: 'survey',
+      areaName: '未踏洞窟',
+      coveragePercent: 100,
+      averageQuality: 40,
+      minimumAcceptableQuality: 60,
+      reportReturned: true,
+      surveyedSectorCount: 3,
+      completed: false,
+    }
+    const report = baseReport('failedObjective', objective)
+    const { confirmedFacts, unknownDetails } = buildExpeditionNarrativeFacts(
+      makeContext(report),
+    )
+
+    const fullCoverage = confirmedFacts.some((f) =>
+      f.includes('予定された範囲をすべて測量した'),
+    )
+    const rangeLimited = unknownDetails.some((u) =>
+      u.includes('測量範囲が限定された'),
+    )
+    expect(fullCoverage && rangeLimited).toBe(false)
   })
 })
 
@@ -418,6 +501,75 @@ describe('retrieval facts', () => {
     const all = confirmedFacts.join('\n')
     expect(all).not.toContain('finalIntegrity: 30')
     expect(all).not.toContain('30/70')
+  })
+
+  it('does not report integrity when the target was never secured or reached', () => {
+    const objective: DispatchObjectiveSummary = {
+      type: 'retrieval',
+      targetName: '古代の石板',
+      finalIntegrity: 100,
+      minimumAcceptableIntegrity: 60,
+      secured: false,
+      extracted: false,
+      returned: false,
+      completed: false,
+    }
+    const report = baseReport('failedObjective', objective)
+    const { confirmedFacts } = buildExpeditionNarrativeFacts(
+      makeContext(report),
+    )
+
+    expect(confirmedFacts).toContain('古代の石板を確保できなかった')
+    expect(confirmedFacts).not.toContain(
+      '回収物の状態は依頼の許容基準を満たしている',
+    )
+    expect(confirmedFacts).not.toContain(
+      '回収物の状態は依頼の許容基準に届かなかった',
+    )
+  })
+
+  it('reports acceptable integrity after the target was secured', () => {
+    const objective: DispatchObjectiveSummary = {
+      type: 'retrieval',
+      targetName: '古代の石板',
+      finalIntegrity: 80,
+      minimumAcceptableIntegrity: 60,
+      secured: true,
+      extracted: false,
+      returned: false,
+      completed: false,
+    }
+    const report = baseReport('partialSuccess', objective)
+    const { confirmedFacts } = buildExpeditionNarrativeFacts(
+      makeContext(report),
+    )
+
+    expect(confirmedFacts).toContain('古代の石板を確保した')
+    expect(confirmedFacts).toContain(
+      '回収物の状態は依頼の許容基準を満たしている',
+    )
+  })
+
+  it('reports unacceptable integrity after the target was secured', () => {
+    const objective: DispatchObjectiveSummary = {
+      type: 'retrieval',
+      targetName: '古代の石板',
+      finalIntegrity: 40,
+      minimumAcceptableIntegrity: 60,
+      secured: true,
+      extracted: false,
+      returned: false,
+      completed: false,
+    }
+    const report = baseReport('failedObjective', objective)
+    const { confirmedFacts } = buildExpeditionNarrativeFacts(
+      makeContext(report),
+    )
+
+    expect(confirmedFacts).toContain('古代の石板を確保した')
+    expect(confirmedFacts).toContain(
+      '回収物の状態は依頼の許容基準に届かなかった',
+    )
   })
 })
 

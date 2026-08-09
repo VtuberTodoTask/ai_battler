@@ -7,6 +7,9 @@ import type {
 } from '../tavern/types.ts'
 import type { ExpeditionNarrativeContext } from './types.ts'
 
+// Narrative facts must represent facts available to the party,
+// not merely hidden engine state.
+
 export interface NarrativeFactBundle {
   confirmedFacts: string[]
   unknownDetails: string[]
@@ -234,8 +237,16 @@ function surveyFacts(summary: {
     confirmed.push('測量記録を持ち帰ることができなかった')
   }
 
-  if (!summary.completed) {
-    unknown.push('測量が限定された具体的な原因は記録されていない')
+  if (summary.coveragePercent < 100) {
+    unknown.push('測量範囲が限定された具体的な原因は記録されていない')
+  }
+  if (summary.averageQuality < summary.minimumAcceptableQuality) {
+    unknown.push(
+      '測量記録の品質が依頼基準に届かなかった具体的な原因は記録されていない',
+    )
+  }
+  if (!summary.reportReturned) {
+    unknown.push('測量記録を持ち帰れなかった具体的な原因は記録されていない')
   }
 
   return { confirmed, unknown }
@@ -407,10 +418,14 @@ function retrievalFacts(summary: {
   if (summary.extracted) confirmed.push(`${target}を回収地点から運び出した`)
   if (summary.returned) confirmed.push(`${target}を持ち帰った`)
 
-  if (summary.finalIntegrity >= summary.minimumAcceptableIntegrity) {
-    confirmed.push('回収物の状態は依頼の許容基準を満たしている')
-  } else {
-    confirmed.push('回収物の状態は依頼の許容基準に届かなかった')
+  // Only report the target's integrity if the party has actually
+  // interacted with it; hidden engine values must not leak into the narrative.
+  if (summary.secured || summary.extracted || summary.returned) {
+    if (summary.finalIntegrity >= summary.minimumAcceptableIntegrity) {
+      confirmed.push('回収物の状態は依頼の許容基準を満たしている')
+    } else {
+      confirmed.push('回収物の状態は依頼の許容基準に届かなかった')
+    }
   }
 
   if (summary.completed) {

@@ -662,7 +662,9 @@ describe('Narrative prompt integrity', () => {
     expect(system).toContain('盾')
     expect(system).toContain('最終文章に')
     expect(system).toContain('自然な日本語')
-    expect(system).toContain('「店員」「依頼人」「衛兵」「医師」')
+    expect(system).toContain('入力データに人物として明示されている者と店主')
+    expect(system).toContain('「店員」「依頼人」「衛兵」「医師」「旅人」')
+    expect(system).not.toContain('CONFIRMED FACTSに存在する人物')
   })
 
   it('farewell prompt forbids owner response and return guarantees', () => {
