@@ -427,50 +427,103 @@ describe('Narrative generation', () => {
 })
 
 describe('Narrative prompt integrity', () => {
-  it('expedition prompt includes key facts and excludes prohibited content', () => {
+  it('expedition prompt includes request, party, and writing instructions', () => {
     const campaign = createTavernCampaign('narrative-prompt-001')
     const resolved = makeResolved(campaign, 0, 0, 'success')
     const candidate = deriveResolveCandidates(
       withResults(campaign, [resolved]),
       [],
     )[0]
-    const { user } = buildNarrativePrompt(candidate.context)
+    const { system, user } = buildNarrativePrompt(candidate.context)
+
     expect(user).toContain(resolved.request.title)
+    expect(user).toContain(resolved.request.briefing)
+    expect(user).toContain(resolved.request.objectiveType)
+    expect(user).toContain(String(resolved.request.environment))
     expect(user).toContain(resolved.partyName ?? '')
+    expect(user).toContain('Specialization Match')
+    expect(user).toContain('Leader:')
+    expect(user).toContain('Leader Personality')
+    expect(user).toContain('bravery')
+    expect(user).toContain('caution')
+    expect(user).toContain('400～800字')
+    expect(user).toContain('WRITING INSTRUCTIONS')
     expect(user).toContain('success')
     for (const fact of resolved.report!.keyFacts) {
       expect(user).toContain(fact)
     }
+
+    expect(system).toContain('Personality値')
+    expect(system).toContain('再訪')
+    expect(system).toContain('死者を生き返らせ')
+
     expect(user).not.toContain('battleOutcome')
     expect(user).not.toContain('combatSeed')
     expect(user).not.toContain('predictionSeed')
     expect(user).not.toContain('apiKey')
     expect(user).not.toContain('Authorization')
+    expect(user).not.toContain('raw Battle Log')
   })
 
-  it('character event prompt includes event facts and excludes prohibited content', () => {
-    const campaign = createTavernCampaign('narrative-prompt-002')
+  it('farewell prompt includes no-return guarantee, stayDays, and length instruction', () => {
+    const campaign = createTavernCampaign('narrative-prompt-farewell')
     const party = campaign.parties[0]
-    party.relationship.affinity = 59
-    const event: CampaignRelationshipEvent = {
-      type: 'affinityChanged',
-      partyId: party.id,
-      partyName: party.party.name,
-      dayNumber: campaign.dayNumber,
-      outcome: 'success',
-      before: 59,
-      delta: 8,
-      after: 67,
-    }
-    const candidate = deriveResolveCandidates(withResults(campaign, []), [
-      event,
-    ]).find((c) => c.eventType === 'becameRegular')!
+    party.arrivalDay = 1
+    party.plannedDepartureDay = 1
+    party.relationship.affinity = 60
+    party.relationship.stayExtensionDaysUsed = 100
+    const next = advanceCampaignDay(withResults(campaign, []))
+    const farewell = next.narrativeCandidates.find(
+      (c) => c.eventType === 'farewell',
+    )!
+    const { user } = buildNarrativePrompt(farewell.context)
+
+    expect(user).toContain('farewell')
+    expect(user).toContain('300～700字')
+    expect(user).toContain('再訪')
+    expect(user).toContain('必ず戻る')
+    expect(user).toContain('Recent Highlights')
+    expect(user).toContain('finalAffinity')
+    expect(user).toContain('stayDays')
+  })
+
+  it('riskyRequestAccepted prompt includes acceptance reason and rank gap', () => {
+    const campaign = createTavernCampaign('narrative-prompt-risky')
+    const acceptedOffer = makeAcceptedOffer(campaign, 0, 0, 1)
+    campaign.currentDay.offers = [acceptedOffer]
+    const resolved = makeResolved(campaign, 0, 0, 'success')
+    const candidate = deriveResolveCandidates(
+      withResults(campaign, [resolved]),
+      [],
+    ).find((c) => c.eventType === 'riskyRequestAccepted')!
     const { user } = buildNarrativePrompt(candidate.context)
-    expect(user).toContain('becameRegular')
-    expect(user).toContain(party.party.name)
-    expect(user).toContain(String(event.before))
-    expect(user).toContain(String(event.after))
-    expect(user).not.toContain('apiKey')
+
+    expect(user).toContain('riskyRequestAccepted')
+    expect(user).toContain('acceptanceReason')
+    expect(user).toContain('boldChallenge')
+    expect(user).toContain('rankGap')
+    expect(user).toContain('格上依頼')
+  })
+
+  it('casualtyDeparture prompt includes dead and survivor names and fatality guard', () => {
+    const campaign = createTavernCampaign('narrative-prompt-casualty')
+    const party = campaign.parties[0]
+    party.departingCasualty = true
+    party.party.members[0].currentHp = 0
+    const next = advanceCampaignDay(withResults(campaign, []))
+    const casualty = next.narrativeCandidates.find(
+      (c) => c.eventType === 'casualtyDeparture',
+    )!
+    const { user } = buildNarrativePrompt(casualty.context)
+    const ctx =
+      casualty.context as import('./types.ts').CharacterEventNarrativeContext
+
+    expect(user).toContain('casualtyDeparture')
+    expect(user).toContain('deadMemberNames')
+    expect(user).toContain(ctx.party.members[0].name)
+    expect(user).toContain('survivorNames')
+    expect(user).toContain('死者')
+    expect(user).toContain('生存者')
   })
 })
 

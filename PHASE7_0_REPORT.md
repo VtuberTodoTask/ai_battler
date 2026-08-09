@@ -201,13 +201,102 @@ produce a coherent goodbye.
 `NARRATIVE_PROMPT_VERSION = 'v1'`.
 
 The system prompt instructs the AI that all supplied FACTS are immutable and
-forbids inventing new game state. Allowed creative freedom: expressions,
-gestures, tone, tavern atmosphere. Forbidden creative freedom: unknown NPCs,
-romance, new requests, rewards, items, backstory, debts, fixed destinations,
-return guarantees, raising the dead, inventing injuries.
+forbids inventing new game state. It explicitly forbids return-date guarantees,
+new destinations, family/backstory/debt creation, new injuries or illnesses,
+romance, new NPCs, rewards, items, or new requests. Personality values may
+influence speech and reactions, but they must not be used to invent a character's
+past, family, debt, or employment history.
 
-Expedition output target: ~400–800 Japanese characters.
-Character event output target: ~300–700 Japanese characters.
+### Expedition output
+
+- Length: 400–800 Japanese characters.
+- Scene: the party returns to the tavern and reports the result to the owner.
+- Include important events in natural prose, short member dialogue, and do not read
+  HP/MP/Morale numbers verbatim.
+- Do not change the outcome.
+
+### Character event output
+
+- Length: 300–700 Japanese characters.
+- Scene: a short tavern conversation focusing on the primary event.
+- `secondaryTriggers` may be touched on naturally but do not need to be included all.
+- Do not invent the owner's name, gender, or age.
+
+### Event-specific guidance
+
+A `characterEventInstruction(eventType)` helper appends tailored writing guidance
+for every supported event:
+
+- `partyArrival` — first impression and leader greeting; use party name, rank,
+  and strong/weak objectives; do not invent past adventures or visit reasons.
+- `riskyRequestAccepted` — the moment just before accepting a higher-rank request;
+  respect `acceptanceReason`; express confidence for `specializationMatch`, trust
+  for `trustedBroker`, or financial need for `needsIncome`; do not invent
+  circumstances.
+- `weakObjectiveSuccess` — the party succeeded in their weak field this time, but
+  do not declare "fully overcome" their weakness.
+- `recoveryFinished` — recovery ends and the party can act again; do not invent
+  disease names, treatments, or doctors.
+- `stayExtended` — the party tells the owner they are extending their stay; do
+  not become permanent residents.
+- `becameRegular` — the party has settled in as regulars; generic "usual seat"
+  references are fine, but do not fabricate specific dishes or order history.
+- `becameFavorite` — strong trust or favor toward the owner; do not escalate to
+  family/best-friend/romance.
+- `farewell` — a high-affinity goodbye; use `stayDays`, expedition history,
+  growth, and recent highlights; do not promise a return date or invent a
+  destination.
+- `casualtyDeparture` — respect `deadMemberNames` and `survivorNames` exactly; do
+  not resurrect the dead, kill survivors, or invent funerals, bereaved
+  relatives, or revenge quests.
+
+## Expedition prompt example
+
+```text
+【遠征レポート】
+依頼タイトル: 未踏洞窟の経路測量
+依頼ランク: E
+目的: survey
+環境: mountain
+Public Tags: 測量, 山岳, 3区画
+依頼内容: 未踏洞窟の内部経路と危険箇所を測量する。
+
+Party: 流水の滴 (Rank C)
+Leader: チェルシー クォーツ
+Affinity: 10
+Financial Pressure: 43
+Risk Tolerance: balanced
+Specialization Match: neutral
+Strong Objective: elimination
+Weak Objective: escort
+Leader Personality: bravery 1, caution 0, cooperation -3, discipline -2, altruism -2, greed 0
+Members:
+  - チェルシー クォーツ (C vanguard)
+      Personality: bravery 1, caution 0, cooperation -3, discipline -2, altruism -2, greed 0
+  - ...
+
+Acceptance Reason: appropriate
+Rank Gap: -2
+Outcome: success
+Objective Completed: Yes
+Objective Progress: 80%
+
+Member Final States:
+  - チェルシー クォーツ (vanguard C) — HP 68/68, MP 8/8, Morale 46
+  - ...
+
+Key Facts:
+  - 未踏洞窟の経路測量を完了
+  - 全員無事に帰還
+
+WRITING INSTRUCTIONS:
+- 400～800字程度の日本語
+- Partyが酒場へ帰還し、店主へ結果を報告する短編
+- 重要な出来事を自然な文章にする
+- Party Memberの短い会話を含めてよい
+- HP/MP/Morale等の数値をそのまま読み上げない
+- Outcomeを変更しない
+```
 
 ## Farewell prompt example
 
@@ -218,7 +307,12 @@ System:
 
 提供されたFACTSはゲームエンジンが確定した事実です。FACTSと矛盾する内容を書いてはいけません。
 結果、人物名、Party名、Rank、負傷、死亡、依頼内容、成功・失敗、関係値などを変更してはいけません。
-FACTSに存在しない新しい事件、NPC、依頼、報酬、アイテム、過去、約束、恒久的な人間関係を事実として追加してはいけません。
+FACTSに存在しない新しい事件、NPC、依頼、報酬、アイテム、過去、約束、恒久的な人間関係、家族設定、故郷設定、借金額を事実として追加してはいけません。
+
+再訪や戻ってくる日付を確約させないでください。「必ず戻る」「来月戻る」などは避け、「近くへ来たら寄る」「機会があれば」程度にとどめてください。
+目的地を新しく創作しないでください。生存者を死亡させたり、死者を生き返らせたりしないでください。新しい怪我や病気、恋愛関係を捏造しないでください。
+
+Personality値（勇敢さ、慎重さ、協調性、規律、利他、貪欲）は話し方や反応の参考にしてよいです。ただし、それを根拠に人物の過去、家族、借金、職歴等の新しい設定を作らないでください。
 
 ただし、物語表現としての一時的な表情、仕草、口調、空気、短い会話などは創作して構いません。それらは新たなゲーム上の事実を作らない範囲にしてください。
 
@@ -230,22 +324,29 @@ User (farewell fixture):
 ```text
 【キャラクターイベント】
 Event Type: farewell
-Party: 赤鴉団 (Rank D)
-Leader: フェイ アイヴィー
+Party: 玻璃の鏡 (Rank C)
+Leader: ロイド ムーン
+Leader Personality: bravery -1, caution -2, cooperation -1, discipline -2, altruism 3, greed 0
 Affinity: 60
-Financial Pressure: 38
-Risk Tolerance: cautious
+Financial Pressure: 54
+Risk Tolerance: balanced
 Growth Milestones: 0
 Training Days: 0
-Strong Objective: retrieval
+Strong Objective: survey
 Weak Objective: investigation
 Members:
-  - フェイ アイヴィー (D scout)
-  - オルム クォーツ (D ranger)
-  - シエラ アイヴィー (D mage)
-  - チェルシー アイヴィー (D support)
+  - ロイド ムーン (C vanguard)
+      Personality: bravery -1, caution -2, cooperation -1, discipline -2, altruism 3, greed 0
+  - ティア サンド (C vanguard)
+      Personality: bravery 2, caution -2, cooperation 3, discipline -1, altruism -3, greed -3
+  - エルナ クォーツ (C guardian)
+      Personality: bravery 2, caution 1, cooperation 1, discipline -1, altruism -2, greed 0
+  - ロイド ドラグナー (C healer)
+      Personality: bravery 0, caution -1, cooperation -1, discipline -3, altruism 0, greed 3
+
 Recent Highlights:
 なし
+
 Event Facts:
   - arrivalDay: 1
   - departureDay: 1
@@ -253,13 +354,31 @@ Event Facts:
   - finalAffinity: 60
   - totalExpeditions: 0
   - completeSuccesses: 0
+
+WRITING INSTRUCTIONS:
+- 300～700字程度の日本語
+- 酒場を舞台とする短い会話シーン
+- Primary Eventを中心に描写する
+- secondaryTriggersは自然なら触れてよいが、全部入れる必要はない
+- 店主の名前・性別・年齢を捏造しない
+
+farewell:
+- 高Affinity Partyとの別れを中心にする
+- stayDays / actual expedition history / growth / recentHighlightsを利用する
+- 実際に紹介した依頼を振り返ってよい
+- 再訪予定は存在しない
+- 「必ず戻る」「来月戻る」等を確約させない
+- 「また近くへ来たら寄る」「機会があれば」程度は可
+- 新しい目的地を確定しない
 ```
 
 ## Creative freedom boundary
 
-- ✅ Expressions, gestures, tone, tavern atmosphere, short improvised dialogue.
+- ✅ Expressions, gestures, tone, tavern atmosphere, short improvised dialogue,
+  and Personality-influenced speech.
 - ❌ Unknown NPCs, romance, rewards, items, backstory, debts, fixed destinations,
-  return guarantees, raising dead, inventing injuries.
+  return guarantees, raising the dead, inventing injuries/illnesses, family
+  settings, hometown settings.
 
 ## Provider abstraction
 
