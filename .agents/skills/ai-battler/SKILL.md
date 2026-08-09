@@ -268,3 +268,78 @@ A fourth tab, `酒場キャンペーン`, renders a multi-day campaign:
 - `TavernResultDetail` shows final per-member `HP {finalHp}/{maxHp}`
   `MP {finalMp}/{maxMp} Morale {morale}`.
 - `CampaignHeader` shows `酒場評判 {reputation} / 100`.
+
+## Phase 6.5 Relationship-driven acceptance and history (`devin/phase6-5-relationship-acceptance`)
+
+- `CampaignParty` now carries a `relationship` object with `affinity`
+  (お気に入り), `financialPressure` (懐事情), `riskTolerance` (危険志向:
+  `cautious` / `balanced` / `bold`), and `stayExtensionDaysUsed`.
+- `evaluateOffer` in `src/core/tavern/acceptance.ts` builds an acceptance
+  score from the request/party fit, the leader's `leaderJudgment`, and the
+  relationship context. The `BrokeragePanel` shows the response message,
+  score/threshold, and an expandable `判定詳細` with `お気に入り`,
+  `懐事情`, `危険志向`, and a full score breakdown.
+- `relationship.ts` updates `affinity` and `financialPressure` after every
+  expedition outcome, during idle/recovery turns, and before scheduled
+  departure via `tryExtendStay`. When a stay is extended, the campaign day
+  record carries a `stayExtended` relationship event.
+- `CampaignHistory` renders a `Relationship:` section for each expanded day
+  with `affinityChanged`, `financialPressureChanged`, and `stayExtended`
+  entries.
+
+### Natural E2E scenario with `tavern-campaign-001`
+
+- Day 1: select `未踏洞窟の経路測量(E)` and `《鋼の絆》(E)`. Prediction is
+  ~65% (`五分以上`). Switch to `《黒曜の斧》(D)`; prediction updates to
+  ~94% (`非常に有望`) and the old value does not linger. Switch back to
+  `《鋼の絆》`; the same 65% reappears immediately (cache reuse).
+- Select `街道周辺の魔物排除(E)` and `《鋼の絆》(E)`. Prediction drops to
+  ~32% (`非常に危険`), but the leader still accepts (`appropriate`,
+  `72/50`). Resolve: `completeSuccess`; reputation `10 → 13`. The
+  `BrokeragePanel` displays the relationship factors and score breakdown.
+- Continue through Days 2–14. `PartyCard` updates `お気に入り` and
+  `懐事情` after each expedition; recovering parties show `療養中（あとN日）`
+  and skip growth/training. `CampaignHistory` expands to show
+  `Relationship:` events such as `滞在延長 Day 4 → 6（+2日）`.
+- Day 5 naturally produces an elimination request (`洞窟の魔物討伐`) that
+  ends in `forcedRetreat`. The `TavernResultDetail` target table shows
+  `対象数 4`, `撃破 0`, `逃走 0`, `生存 0`, `Progress 0%`,
+  `Completed いいえ`, matching the `forcedRetreat` outcome.
+
+### UI checks
+
+- `PartyCard` shows `お気に入り {affinity}/100（{tier}）`,
+  `懐事情 {financialPressure}/100（{tier}）`, and `危険志向：` labels.
+- `BrokeragePanel` shows `判断: 受諾（{score}/{threshold}）` and expands to
+  `判定詳細` + `Score breakdown` including `お気に入り`, `懐事情`, and
+  `危険志向`.
+- `CampaignHistory` expands per day to show `Relationship:` entries:
+  `affinityChanged`, `financialPressureChanged`, and `stayExtended`.
+- `TavernResultDetail` still separates the prediction (hidden after resolve)
+  from the actual `依頼結果`, `戦闘結果`, per-member HP/MP/Morale, and
+  the target/defeated/escaped/surviving breakdown for elimination requests.
+
+### Test-harness notes for Phase 6.5
+
+- Use `npm run dev` on `http://localhost:5173` for Phase 6.5; the branch
+  does not require `preview`.
+- Native clicks can be unreliable in the test harness; use console helpers:
+
+  ```js
+  document.querySelectorAll('.request-card')[0].click()
+  document.querySelectorAll('.party-card')[2].click()
+  Array.from(document.querySelectorAll('button'))
+    .find((b) => b.textContent.trim() === 'この依頼を紹介する')
+    ?.click()
+  Array.from(document.querySelectorAll('button'))
+    .find((b) => b.textContent.trim() === '本日の仲介を確定')
+    ?.click()
+  Array.from(document.querySelectorAll('button'))
+    .find((b) => b.textContent.trim() === '翌日へ')
+    ?.click()
+  ```
+
+- If multiple Chrome windows are open, `browser_console` may attach to a
+  different window than `computer` captures. Verify the active window by
+  setting `document.title = 'UNIQUE'` and using `wmctrl -l | grep UNIQUE`;
+  then raise that window with `wmctrl -i -a <window-id>` before recording.
