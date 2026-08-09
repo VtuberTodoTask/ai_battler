@@ -363,7 +363,7 @@ describe('Narrative generation', () => {
     expect(candidate.state).toBe('generated')
     expect(candidate.activeGenerationId).toBe(record.id)
     expect(record.generatedText).toContain('Fake生成')
-    expect(record.promptVersion).toBe('v1')
+    expect(record.promptVersion).toBe('v2')
   })
 
   it('bulk generates candidates sequentially', async () => {
@@ -524,6 +524,82 @@ describe('Narrative prompt integrity', () => {
     expect(user).toContain('survivorNames')
     expect(user).toContain('死者')
     expect(user).toContain('生存者')
+    expect(user).not.toContain('葬葬儀')
+  })
+
+  it('system prompt treats tavernkeeper as the player, not an NPC', () => {
+    const campaign = createTavernCampaign('narrative-prompt-owner')
+    const resolved = makeResolved(campaign, 0, 0, 'success')
+    const candidate = deriveResolveCandidates(
+      withResults(campaign, [resolved]),
+      [],
+    )[0]
+    const { system } = buildNarrativePrompt(candidate.context)
+
+    expect(system).toContain('店主はNPCではありません')
+    expect(system).toContain('プレイヤー本人')
+    expect(system).toContain('店主の台詞')
+    expect(system).toContain('店主の感情')
+    expect(system).toContain('店主の名前')
+    expect(system).toContain('物語のカメラは主に冒険者Party側')
+  })
+
+  it('expedition prompt instructs the AI not to speak or decide for the player', () => {
+    const campaign = createTavernCampaign('narrative-prompt-owner-exp')
+    const resolved = makeResolved(campaign, 0, 0, 'success')
+    const candidate = deriveResolveCandidates(
+      withResults(campaign, [resolved]),
+      [],
+    )[0]
+    const { user } = buildNarrativePrompt(candidate.context)
+
+    expect(user).toContain('400～800字')
+    expect(user).toContain('店主はプレイヤー本人')
+    expect(user).toContain('店主の台詞')
+    expect(user).toContain('店主の反応')
+    expect(user).toContain('Party Member側の台詞')
+  })
+
+  it('partyArrival prompt allows leader greeting but forbids owner welcome lines', () => {
+    const campaign = createTavernCampaign('narrative-prompt-arrival')
+    const departing = campaign.parties[0]
+    departing.arrivalDay = 1
+    departing.plannedDepartureDay = 1
+    departing.relationship.affinity = 10
+    departing.relationship.stayExtensionDaysUsed = 100
+    const next = advanceCampaignDay(withResults(campaign, []))
+    const arrival = next.narrativeCandidates.find(
+      (c) => c.eventType === 'partyArrival',
+    )!
+    const { user } = buildNarrativePrompt(arrival.context)
+
+    expect(user).toContain('partyArrival')
+    expect(user).toContain('Leaderが店主へ自己紹介')
+    expect(user).toContain('店主が歓迎の台詞')
+  })
+
+  it('becameFavorite prompt describes party trust, not owner feelings', () => {
+    const campaign = createTavernCampaign('narrative-prompt-favorite')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 79
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 79,
+      delta: 8,
+      after: 87,
+    }
+    const candidate = deriveResolveCandidates(withResults(campaign, []), [
+      event,
+    ]).find((c) => c.eventType === 'becameFavorite')!
+    const { user } = buildNarrativePrompt(candidate.context)
+
+    expect(user).toContain('becameFavorite')
+    expect(user).toContain('Partyから店主への高い信頼')
+    expect(user).toContain('店主側にも同程度の感情')
   })
 })
 
