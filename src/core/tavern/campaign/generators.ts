@@ -50,7 +50,7 @@ const ALL_OBJECTIVE_TYPES: ObjectiveType[] = [
   'survey',
 ]
 
-const RANKS: AdventurerRank[] = ['E', 'D', 'C', 'B', 'A', 'S']
+export const RANKS: AdventurerRank[] = ['E', 'D', 'C', 'B', 'A', 'S']
 
 export function pickUniquePartyName(
   seed: string,
@@ -133,22 +133,96 @@ export function generateInitialCampaignParties(
   return { parties, nextSerial: serial }
 }
 
+export interface RequestRankPlan {
+  serviceableA: AdventurerRank
+  serviceableB: AdventurerRank
+  open: AdventurerRank
+}
+
+function rankIndex(rank: AdventurerRank): number {
+  return RANKS.indexOf(rank)
+}
+
+function pickRequestRank(
+  rankRng: SeededRng,
+  allowedMaxIndex: number,
+  reputation: number,
+  fallbackRank: AdventurerRank,
+): AdventurerRank {
+  const weights = getRequestRankWeights(reputation)
+  const allowedRanks = RANKS.slice(0, allowedMaxIndex + 1)
+  const allowedWeights = allowedRanks.map((r) => weights[r])
+  const total = allowedWeights.reduce((a, b) => a + b, 0)
+  if (total === 0) {
+    return fallbackRank
+  }
+  return rankRng.weightedPick(allowedRanks, allowedWeights)
+}
+
+export function planRequestRanksForDay(
+  daySeed: string,
+  reputation: number,
+  availablePartyRanks: AdventurerRank[],
+): RequestRankPlan {
+  const rankRng = new SeededRng(`${daySeed}:request-ranks`)
+
+  if (availablePartyRanks.length === 0) {
+    const weights = getRequestRankWeights(reputation)
+    const rankList = RANKS.map((r) => weights[r])
+    const total = rankList.reduce((a, b) => a + b, 0)
+    const pick = (): AdventurerRank => {
+      if (total === 0) return 'E'
+      return rankRng.weightedPick(RANKS, rankList)
+    }
+    return {
+      serviceableA: pick(),
+      serviceableB: pick(),
+      open: pick(),
+    }
+  }
+
+  const sortedRanks = [...availablePartyRanks].sort(
+    (a, b) => rankIndex(a) - rankIndex(b),
+  )
+  const shuffled = rankRng.shuffle(sortedRanks)
+  const anchorA = shuffled[0]
+  const anchorB = shuffled[1] ?? anchorA
+  const highestIndex = Math.max(...sortedRanks.map(rankIndex))
+  const highestAvailableRank = RANKS[highestIndex] ?? 'S'
+
+  const openMaxIndex = Math.min(highestIndex + 1, RANKS.length - 1)
+
+  return {
+    serviceableA: pickRequestRank(
+      rankRng,
+      rankIndex(anchorA),
+      reputation,
+      anchorA,
+    ),
+    serviceableB: pickRequestRank(
+      rankRng,
+      rankIndex(anchorB),
+      reputation,
+      anchorB,
+    ),
+    open: pickRequestRank(
+      rankRng,
+      openMaxIndex,
+      reputation,
+      highestAvailableRank,
+    ),
+  }
+}
+
 function generateRequestForCampaign(
   index: number,
   daySeed: string,
   objectiveType: ObjectiveType,
-  reputation: number,
+  rank: AdventurerRank,
 ): TavernRequestOffer {
   const selectionRng = new SeededRng(`${daySeed}:request:${index}:selection`)
   const templates = TEMPLATES_BY_OBJECTIVE_TYPE[objectiveType]
   const template = selectionRng.pick(templates)
-
-  const rankWeights = getRequestRankWeights(reputation)
-  const rankRng = new SeededRng(`${daySeed}:request:${index}:rank`)
-  const rank = rankRng.weightedPick(
-    RANKS,
-    RANKS.map((r) => rankWeights[r]),
-  )
 
   const battleEnabled =
     template.battleChance >= 100 || selectionRng.chance(template.battleChance)
@@ -167,11 +241,15 @@ function generateRequestForCampaign(
 export function generateTavernRequestsForDay(
   daySeed: string,
   reputation: number,
+  availablePartyRanks: AdventurerRank[],
 ): TavernRequestOffer[] {
+  const plan = planRequestRanksForDay(daySeed, reputation, availablePartyRanks)
   const objectiveRng = new SeededRng(`${daySeed}:objectives`)
   const objectiveTypes = objectiveRng
     .shuffle([...ALL_OBJECTIVE_TYPES])
     .slice(0, 3)
+
+  const rankPlan = [plan.serviceableA, plan.serviceableB, plan.open]
 
   const requests: TavernRequestOffer[] = []
   for (let i = 0; i < 3; i++) {
@@ -179,7 +257,7 @@ export function generateTavernRequestsForDay(
       i,
       daySeed,
       objectiveTypes[i],
-      reputation,
+      rankPlan[i],
     )
     requests.push(offer)
   }

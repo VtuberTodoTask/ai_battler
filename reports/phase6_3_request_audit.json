@@ -1,0 +1,357 @@
+{
+  "dayCount": 1000,
+  "scenarios": [
+    {
+      "name": "EEEE @ rep 10",
+      "reputation": 10,
+      "availableRanks": ["E", "E", "E", "E"],
+      "distribution": {
+        "E": 2437,
+        "D": 563,
+        "C": 0,
+        "B": 0,
+        "A": 0,
+        "S": 0
+      },
+      "slotDistributions": [
+        {
+          "E": 1000,
+          "D": 0,
+          "C": 0,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 1000,
+          "D": 0,
+          "C": 0,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 437,
+          "D": 563,
+          "C": 0,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        }
+      ],
+      "totalRequests": 3000,
+      "avgServiceable": 2.437,
+      "daysWithLessThan2Serviceable": 0,
+      "requestsAboveMaxParty": 563,
+      "requestsAboveMaxPartyPlus1": 0
+    },
+    {
+      "name": "EEDD @ rep 10",
+      "reputation": 10,
+      "availableRanks": ["E", "E", "D", "D"],
+      "distribution": {
+        "E": 1789,
+        "D": 999,
+        "C": 212,
+        "B": 0,
+        "A": 0,
+        "S": 0
+      },
+      "slotDistributions": [
+        {
+          "E": 715,
+          "D": 285,
+          "C": 0,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 713,
+          "D": 287,
+          "C": 0,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 361,
+          "D": 427,
+          "C": 212,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        }
+      ],
+      "totalRequests": 3000,
+      "avgServiceable": 2.788,
+      "daysWithLessThan2Serviceable": 0,
+      "requestsAboveMaxParty": 212,
+      "requestsAboveMaxPartyPlus1": 0
+    },
+    {
+      "name": "DDDD @ rep 30",
+      "reputation": 30,
+      "availableRanks": ["D", "D", "D", "D"],
+      "distribution": {
+        "E": 725,
+        "D": 1881,
+        "C": 394,
+        "B": 0,
+        "A": 0,
+        "S": 0
+      },
+      "slotDistributions": [
+        {
+          "E": 277,
+          "D": 723,
+          "C": 0,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 284,
+          "D": 716,
+          "C": 0,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 164,
+          "D": 442,
+          "C": 394,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        }
+      ],
+      "totalRequests": 3000,
+      "avgServiceable": 2.606,
+      "daysWithLessThan2Serviceable": 0,
+      "requestsAboveMaxParty": 394,
+      "requestsAboveMaxPartyPlus1": 0
+    },
+    {
+      "name": "DDCC @ rep 30",
+      "reputation": 30,
+      "availableRanks": ["D", "D", "C", "C"],
+      "distribution": {
+        "E": 616,
+        "D": 1536,
+        "C": 736,
+        "B": 112,
+        "A": 0,
+        "S": 0
+      },
+      "slotDistributions": [
+        {
+          "E": 236,
+          "D": 574,
+          "C": 190,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 239,
+          "D": 568,
+          "C": 193,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 141,
+          "D": 394,
+          "C": 353,
+          "B": 112,
+          "A": 0,
+          "S": 0
+        }
+      ],
+      "totalRequests": 3000,
+      "avgServiceable": 2.888,
+      "daysWithLessThan2Serviceable": 0,
+      "requestsAboveMaxParty": 112,
+      "requestsAboveMaxPartyPlus1": 0
+    },
+    {
+      "name": "CCCC @ rep 50",
+      "reputation": 50,
+      "availableRanks": ["C", "C", "C", "C"],
+      "distribution": {
+        "E": 0,
+        "D": 747,
+        "C": 1908,
+        "B": 345,
+        "A": 0,
+        "S": 0
+      },
+      "slotDistributions": [
+        {
+          "E": 0,
+          "D": 289,
+          "C": 711,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 0,
+          "D": 272,
+          "C": 728,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 0,
+          "D": 186,
+          "C": 469,
+          "B": 345,
+          "A": 0,
+          "S": 0
+        }
+      ],
+      "totalRequests": 3000,
+      "avgServiceable": 2.655,
+      "daysWithLessThan2Serviceable": 0,
+      "requestsAboveMaxParty": 345,
+      "requestsAboveMaxPartyPlus1": 0
+    },
+    {
+      "name": "CBBB @ rep 60",
+      "reputation": 60,
+      "availableRanks": ["C", "B", "B", "B"],
+      "distribution": {
+        "E": 0,
+        "D": 0,
+        "C": 1057,
+        "B": 1578,
+        "A": 365,
+        "S": 0
+      },
+      "slotDistributions": [
+        {
+          "E": 0,
+          "D": 0,
+          "C": 462,
+          "B": 538,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 0,
+          "D": 0,
+          "C": 444,
+          "B": 556,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 0,
+          "D": 0,
+          "C": 151,
+          "B": 484,
+          "A": 365,
+          "S": 0
+        }
+      ],
+      "totalRequests": 3000,
+      "avgServiceable": 2.635,
+      "daysWithLessThan2Serviceable": 0,
+      "requestsAboveMaxParty": 365,
+      "requestsAboveMaxPartyPlus1": 0
+    },
+    {
+      "name": "AAAA @ rep 90",
+      "reputation": 90,
+      "availableRanks": ["A", "A", "A", "A"],
+      "distribution": {
+        "E": 0,
+        "D": 0,
+        "C": 0,
+        "B": 677,
+        "A": 1892,
+        "S": 431
+      },
+      "slotDistributions": [
+        {
+          "E": 0,
+          "D": 0,
+          "C": 0,
+          "B": 262,
+          "A": 738,
+          "S": 0
+        },
+        {
+          "E": 0,
+          "D": 0,
+          "C": 0,
+          "B": 272,
+          "A": 728,
+          "S": 0
+        },
+        {
+          "E": 0,
+          "D": 0,
+          "C": 0,
+          "B": 143,
+          "A": 426,
+          "S": 431
+        }
+      ],
+      "totalRequests": 3000,
+      "avgServiceable": 2.569,
+      "daysWithLessThan2Serviceable": 0,
+      "requestsAboveMaxParty": 431,
+      "requestsAboveMaxPartyPlus1": 0
+    },
+    {
+      "name": "empty roster @ rep 10",
+      "reputation": 10,
+      "availableRanks": [],
+      "distribution": {
+        "E": 1082,
+        "D": 1331,
+        "C": 587,
+        "B": 0,
+        "A": 0,
+        "S": 0
+      },
+      "slotDistributions": [
+        {
+          "E": 389,
+          "D": 424,
+          "C": 187,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 351,
+          "D": 444,
+          "C": 205,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        },
+        {
+          "E": 342,
+          "D": 463,
+          "C": 195,
+          "B": 0,
+          "A": 0,
+          "S": 0
+        }
+      ],
+      "totalRequests": 3000,
+      "avgServiceable": null,
+      "daysWithLessThan2Serviceable": null,
+      "requestsAboveMaxParty": null,
+      "requestsAboveMaxPartyPlus1": null
+    }
+  ]
+}

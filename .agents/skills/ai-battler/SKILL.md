@@ -183,6 +183,23 @@ A fourth tab, `酒場キャンペーン`, renders a multi-day campaign:
   to view the target table (`対象数`, `撃破`, `逃走`, `生存`, `Progress`,
   `Completed`) and confirm it matches the displayed outcome and facts.
 
+## Phase 6.3 Roster-aware request ranks (`devin/phase6-3-roster-aware-requests`)
+
+- `planRequestRanksForDay` in `src/core/tavern/campaign/generators.ts` now
+  plans two serviceable slots and one challenge slot from the available party
+  ranks.
+- `advanceCampaignDay` excludes recovering parties when computing
+  `availablePartyRanks` for the next day's requests.
+- The standalone `generateTavernDay` in `src/core/tavern/dayGenerator.ts` also
+  uses the planner with the generated party pool.
+- With seed `tavern-campaign-001`, Day 1 `街道周辺の魔物排除` (E) x `《黒曜の斧》`
+  (D) causes `forcedRetreat`; on Day 2 `《黒曜の斧》` is `療養中` and the request
+  board shows `[E, E, D]` for an otherwise E-only available roster, which is the
+  `highest available (E) + 1` challenge slot.
+- Use `document.querySelectorAll('.request-card')` and
+  `document.querySelectorAll('.party-card')` for reliable JS clicks when native
+  clicks on lower-page elements do not register.
+
 ## Test-harness notes for Phase 6.x
 
 - For Phase 6.1 the user requested `npm run dev -- --host` so the dev server
