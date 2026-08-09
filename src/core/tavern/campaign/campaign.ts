@@ -1,5 +1,10 @@
 import { deepClone } from '../../util.ts'
 import { resolveTavernDay } from '../brokerage.ts'
+import {
+  deriveAdvanceCandidates,
+  deriveResolveCandidates,
+  mergeCandidates,
+} from '../../narrative/candidates.ts'
 import { computeReputationChange } from './reputation.ts'
 import {
   applyOvernightRecovery,
@@ -65,6 +70,8 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
     parties,
     currentDay,
     history: [],
+    narrativeCandidates: [],
+    narrativeGenerations: [],
   }
 }
 
@@ -191,6 +198,15 @@ export function resolveCampaignDay(
   )
   nextCampaign.reputation = reputationSummary.after
 
+  const resolveCandidates = deriveResolveCandidates(
+    nextCampaign,
+    relationshipEvents,
+  )
+  nextCampaign.narrativeCandidates = mergeCandidates(
+    nextCampaign.narrativeCandidates,
+    resolveCandidates,
+  )
+
   const dayRecord: TavernDayRecord = {
     dayNumber,
     daySeed: nextCampaign.currentDay.seed,
@@ -251,12 +267,17 @@ export function advanceCampaignDay(
   const preEvents: CampaignPartyEvent[] = []
   const extensionEvents: CampaignRelationshipEvent[] = []
 
+  // Context for narrative candidate derivation.
+  const departing: { party: CampaignParty; scheduled: boolean }[] = []
+  const recovered: CampaignParty[] = []
+
   // 1. Evaluate stay extensions for non-casualty parties, then remove
   //    parties whose scheduled departure is not extended.
   const remaining: CampaignParty[] = []
   for (const party of parties) {
     if (party.departingCasualty) {
       // departedCasualty event is recorded on the day it is determined.
+      departing.push({ party, scheduled: false })
       continue
     }
     if (party.plannedDepartureDay < nextDayNumber) {
@@ -272,6 +293,7 @@ export function advanceCampaignDay(
         partyName: party.party.name,
         dayNumber: nextDayNumber,
       })
+      departing.push({ party, scheduled: true })
       continue
     }
     remaining.push(party)
@@ -286,6 +308,7 @@ export function advanceCampaignDay(
     ) {
       applyRecoveryCompletion(party)
       recoveredToday.add(party.id)
+      recovered.push(party)
       preEvents.push({
         type: 'finishedRecovery',
         partyId: party.id,
@@ -307,6 +330,7 @@ export function advanceCampaignDay(
 
   // Fill roster to 4 with new arrivals.
   const usedNames = new Set(remaining.map((p) => p.party.name))
+  const arrivals: CampaignParty[] = []
   while (remaining.length < 4) {
     const serial = nextCampaign.nextPartySerial
     const newParty = generateCampaignParty(
@@ -322,6 +346,7 @@ export function advanceCampaignDay(
     newParty.party.name = name
     usedNames.add(name)
     remaining.push(newParty)
+    arrivals.push(newParty)
     nextCampaign.nextPartySerial += 1
   }
 
@@ -348,6 +373,18 @@ export function advanceCampaignDay(
       ...extensionEvents,
     ]
   }
+
+  const advanceCandidates = deriveAdvanceCandidates(nextCampaign, {
+    nextDayNumber,
+    departing,
+    recovered,
+    extended: extensionEvents,
+    arrivals,
+  })
+  nextCampaign.narrativeCandidates = mergeCandidates(
+    nextCampaign.narrativeCandidates,
+    advanceCandidates,
+  )
 
   return nextCampaign
 }

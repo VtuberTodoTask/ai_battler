@@ -148,7 +148,7 @@ export interface RequestRankPlan {
   open: AdventurerRank
 }
 
-function rankIndex(rank: AdventurerRank): number {
+export function rankIndex(rank: AdventurerRank): number {
   return RANKS.indexOf(rank)
 }
 

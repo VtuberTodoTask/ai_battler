@@ -5,12 +5,17 @@ import type {
   CampaignProgressionEvent,
   CampaignRelationshipEvent,
 } from '../../core/tavern/campaign/types.ts'
+import type { NarrativeCandidate } from '../../core/narrative/types.ts'
 
 export interface CampaignHistoryProps {
   history: TavernDayRecord[]
+  candidates?: NarrativeCandidate[]
 }
 
-export function CampaignHistory({ history }: CampaignHistoryProps) {
+export function CampaignHistory({
+  history,
+  candidates = [],
+}: CampaignHistoryProps) {
   const [expandedDay, setExpandedDay] = useState<number | null>(null)
 
   if (history.length === 0) return null
@@ -79,6 +84,10 @@ export function CampaignHistory({ history }: CampaignHistoryProps) {
                     </ul>
                   </div>
                 )}
+                <DayNarrativeCandidates
+                  dayNumber={record.dayNumber}
+                  candidates={candidates}
+                />
               </div>
             )}
           </li>
@@ -158,4 +167,32 @@ function sourceLabelExpedition(source: string): string {
     training: '自主鍛錬',
   }
   return labels[source] ?? source
+}
+
+function DayNarrativeCandidates({
+  dayNumber,
+  candidates,
+}: {
+  dayNumber: number
+  candidates: NarrativeCandidate[]
+}) {
+  const dayCandidates = candidates.filter((c) => c.dayNumber === dayNumber)
+  if (dayCandidates.length === 0) return null
+  return (
+    <div className="history-events">
+      <strong>AI文章候補:</strong>
+      <ul>
+        {dayCandidates.map((c) => (
+          <li key={c.id}>
+            {c.title} —{' '}
+            {c.state === 'generated'
+              ? '生成済み'
+              : c.state === 'dismissed'
+                ? '非表示'
+                : '未生成'}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
 }
