@@ -364,4 +364,139 @@ describe('Campaign domain', () => {
     expect(getRequestRankWeights(10).S).toBe(0)
     expect(getRequestRankWeights(90).S).toBeGreaterThan(0)
   })
+
+  describe('relationship and stay extension', () => {
+    it('applies affinity and financial pressure from an expedition outcome', () => {
+      let campaign = createTavernCampaign('tavern-relationship-outcome-001')
+      const pair = findAcceptingPair(campaign)
+      expect(pair).not.toBeNull()
+      if (!pair) return
+
+      const partyBefore = campaign.parties.find((p) => p.id === pair.partyId)!
+      partyBefore.relationship.financialPressure = 40
+
+      campaign = { ...campaign, currentDay: pair.next }
+      campaign = resolveCampaignDay(campaign)
+
+      const partyAfter = campaign.parties.find((p) => p.id === pair.partyId)!
+      const affinityEvent = campaign.history[0].relationshipEvents.find(
+        (e) => e.type === 'affinityChanged' && e.partyId === pair.partyId,
+      )
+      const pressureEvent = campaign.history[0].relationshipEvents.find(
+        (e) =>
+          e.type === 'financialPressureChanged' &&
+          e.partyId === pair.partyId &&
+          e.source === 'expedition',
+      )
+      expect(affinityEvent).toBeDefined()
+      expect(pressureEvent).toBeDefined()
+      expect(partyAfter.relationship.affinity).not.toBe(
+        partyBefore.relationship.affinity,
+      )
+    })
+
+    it('does not apply idle pressure to a dispatched party', () => {
+      let campaign = createTavernCampaign('tavern-relationship-idle-001')
+      const pair = findAcceptingPair(campaign)
+      expect(pair).not.toBeNull()
+      if (!pair) return
+
+      const partyId = pair.partyId
+      const pressureBefore = campaign.parties.find((p) => p.id === partyId)!
+        .relationship.financialPressure
+
+      campaign = { ...campaign, currentDay: pair.next }
+      campaign = resolveCampaignDay(campaign)
+
+      const idleEvents = campaign.history[0].relationshipEvents.filter(
+        (e) =>
+          e.type === 'financialPressureChanged' &&
+          e.partyId === partyId &&
+          e.source === 'idle',
+      )
+      expect(idleEvents).toHaveLength(0)
+
+      const dispatched = campaign.currentDay.results.find(
+        (r) => r.partyId === partyId,
+      )
+      if (dispatched && dispatched.status === 'resolved') {
+        const expeditionPressure = campaign.history[0].relationshipEvents.find(
+          (e) =>
+            e.type === 'financialPressureChanged' &&
+            e.partyId === partyId &&
+            e.source === 'expedition',
+        )!
+        expect(expeditionPressure?.type).toBe('financialPressureChanged')
+        if (expeditionPressure?.type === 'financialPressureChanged') {
+          expect(expeditionPressure.before).toBe(pressureBefore)
+        }
+      }
+    })
+
+    it('applies idle pressure only once per day for non-dispatched parties', () => {
+      let campaign = createTavernCampaign('tavern-relationship-idle-once-001')
+      campaign = resolveCampaignDay(campaign)
+
+      const party = campaign.parties[0]
+      const idleEvents = campaign.history[0].relationshipEvents.filter(
+        (e) =>
+          e.type === 'financialPressureChanged' &&
+          e.partyId === party.id &&
+          e.source === 'idle',
+      )
+      expect(idleEvents).toHaveLength(1)
+      expect(idleEvents[0].type).toBe('financialPressureChanged')
+      if (idleEvents[0].type === 'financialPressureChanged') {
+        expect(idleEvents[0].delta).toBe(8)
+      }
+    })
+
+    it('extends stay when affinity is high and updates history', () => {
+      let campaign = createTavernCampaign('tavern-relationship-stay-001')
+      const pair = findAcceptingPair(campaign)
+      expect(pair).not.toBeNull()
+      if (!pair) return
+
+      const party = campaign.parties.find((p) => p.id === pair.partyId)!
+      party.relationship.affinity = 50
+      party.plannedDepartureDay = campaign.dayNumber
+
+      campaign = { ...campaign, currentDay: pair.next }
+      campaign = resolveCampaignDay(campaign)
+      campaign = advanceCampaignDay(campaign)
+
+      const extendedParty = campaign.parties.find((p) => p.id === pair.partyId)
+      const extensionEvent = campaign.history[0].relationshipEvents.find(
+        (e) => e.type === 'stayExtended' && e.partyId === pair.partyId,
+      )
+      expect(extensionEvent).toBeDefined()
+      expect(extendedParty?.plannedDepartureDay).toBeGreaterThan(
+        campaign.dayNumber - 1,
+      )
+      expect(extendedParty?.relationship.stayExtensionDaysUsed).toBeGreaterThan(
+        0,
+      )
+    })
+
+    it('syncs relationship snapshots to the tavern day', () => {
+      let campaign = createTavernCampaign('tavern-relationship-sync-001')
+      const pair = findAcceptingPair(campaign)
+      expect(pair).not.toBeNull()
+      if (!pair) return
+
+      campaign = { ...campaign, currentDay: pair.next }
+      campaign = resolveCampaignDay(campaign)
+
+      const campaignParty = campaign.parties.find((p) => p.id === pair.partyId)!
+      const tavernParty = campaign.currentDay.parties.find(
+        (p) => p.id === pair.partyId,
+      )!
+      expect(tavernParty.relationship).toEqual({
+        affinity: campaignParty.relationship.affinity,
+        financialPressure: campaignParty.relationship.financialPressure,
+        riskTolerance: campaignParty.relationship.riskTolerance,
+        stayExtensionDaysUsed: campaignParty.relationship.stayExtensionDaysUsed,
+      })
+    })
+  })
 })

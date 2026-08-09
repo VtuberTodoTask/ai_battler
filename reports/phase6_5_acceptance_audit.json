@@ -1,0 +1,555 @@
+{
+  "deterministic": true,
+  "hardGatePassed": true,
+  "scenarioSeedCount": 3,
+  "totalAcceptanceRecords": 15552,
+  "byRankGap": {
+    "0": {
+      "total": 5184,
+      "accepted": 5030
+    },
+    "1": {
+      "total": 5184,
+      "accepted": 2945
+    },
+    "2": {
+      "total": 5184,
+      "accepted": 0
+    }
+  },
+  "byContext": {
+    "Newcomer": {
+      "total": 2592,
+      "accepted": 837,
+      "rate": 0.3229166666666667
+    },
+    "Trusted": {
+      "total": 2592,
+      "accepted": 1416,
+      "rate": 0.5462962962962963
+    },
+    "Broke": {
+      "total": 2592,
+      "accepted": 1206,
+      "rate": 0.4652777777777778
+    },
+    "Bold": {
+      "total": 2592,
+      "accepted": 1206,
+      "rate": 0.4652777777777778
+    },
+    "Veteran": {
+      "total": 2592,
+      "accepted": 1618,
+      "rate": 0.6242283950617284
+    },
+    "Trusted+Broke+Bold": {
+      "total": 2592,
+      "accepted": 1692,
+      "rate": 0.6527777777777778
+    }
+  },
+  "plusOneByContext": {
+    "Newcomer": {
+      "total": 864,
+      "accepted": 19,
+      "rate": 0.02199074074074074
+    },
+    "Trusted": {
+      "total": 864,
+      "accepted": 588,
+      "rate": 0.6805555555555556
+    },
+    "Broke": {
+      "total": 864,
+      "accepted": 378,
+      "rate": 0.4375
+    },
+    "Bold": {
+      "total": 864,
+      "accepted": 378,
+      "rate": 0.4375
+    },
+    "Veteran": {
+      "total": 864,
+      "accepted": 754,
+      "rate": 0.8726851851851852
+    },
+    "Trusted+Broke+Bold": {
+      "total": 864,
+      "accepted": 828,
+      "rate": 0.9583333333333334
+    }
+  },
+  "plusOneReasons": {
+    "Newcomer": {
+      "poorFit": 441,
+      "tooDangerous": 236,
+      "notReady": 168,
+      "challengingButSuitable": 19
+    },
+    "Trusted": {
+      "poorFit": 276,
+      "trustedBroker": 588
+    },
+    "Broke": {
+      "poorFit": 441,
+      "notReady": 45,
+      "needsIncome": 378
+    },
+    "Bold": {
+      "poorFit": 441,
+      "notReady": 45,
+      "boldChallenge": 378
+    },
+    "Veteran": {
+      "poorFit": 110,
+      "challengingButSuitable": 754
+    },
+    "Trusted+Broke+Bold": {
+      "trustedBroker": 828,
+      "poorFit": 36
+    }
+  },
+  "predictionBandSummary": {
+    "<50%": {
+      "Newcomer": {
+        "total": 455,
+        "accepted": 6,
+        "rate": 0.013186813186813187
+      },
+      "Trusted": {
+        "total": 455,
+        "accepted": 288,
+        "rate": 0.6329670329670329
+      },
+      "Broke": {
+        "total": 455,
+        "accepted": 172,
+        "rate": 0.378021978021978
+      },
+      "Bold": {
+        "total": 455,
+        "accepted": 172,
+        "rate": 0.378021978021978
+      },
+      "Veteran": {
+        "total": 455,
+        "accepted": 391,
+        "rate": 0.8593406593406593
+      },
+      "Trusted+Broke+Bold": {
+        "total": 455,
+        "accepted": 429,
+        "rate": 0.9428571428571428
+      }
+    },
+    "50-64%": {
+      "Newcomer": {
+        "total": 172,
+        "accepted": 6,
+        "rate": 0.03488372093023256
+      },
+      "Trusted": {
+        "total": 172,
+        "accepted": 124,
+        "rate": 0.7209302325581395
+      },
+      "Broke": {
+        "total": 172,
+        "accepted": 82,
+        "rate": 0.47674418604651164
+      },
+      "Bold": {
+        "total": 172,
+        "accepted": 82,
+        "rate": 0.47674418604651164
+      },
+      "Veteran": {
+        "total": 172,
+        "accepted": 158,
+        "rate": 0.9186046511627907
+      },
+      "Trusted+Broke+Bold": {
+        "total": 172,
+        "accepted": 170,
+        "rate": 0.9883720930232558
+      }
+    },
+    "65-79%": {
+      "Newcomer": {
+        "total": 120,
+        "accepted": 4,
+        "rate": 0.03333333333333333
+      },
+      "Trusted": {
+        "total": 120,
+        "accepted": 89,
+        "rate": 0.7416666666666667
+      },
+      "Broke": {
+        "total": 120,
+        "accepted": 56,
+        "rate": 0.4666666666666667
+      },
+      "Bold": {
+        "total": 120,
+        "accepted": 56,
+        "rate": 0.4666666666666667
+      },
+      "Veteran": {
+        "total": 120,
+        "accepted": 107,
+        "rate": 0.8916666666666667
+      },
+      "Trusted+Broke+Bold": {
+        "total": 120,
+        "accepted": 117,
+        "rate": 0.975
+      }
+    },
+    "80-89%": {
+      "Newcomer": {
+        "total": 46,
+        "accepted": 0,
+        "rate": 0
+      },
+      "Trusted": {
+        "total": 46,
+        "accepted": 28,
+        "rate": 0.6086956521739131
+      },
+      "Broke": {
+        "total": 46,
+        "accepted": 20,
+        "rate": 0.43478260869565216
+      },
+      "Bold": {
+        "total": 46,
+        "accepted": 20,
+        "rate": 0.43478260869565216
+      },
+      "Veteran": {
+        "total": 46,
+        "accepted": 36,
+        "rate": 0.782608695652174
+      },
+      "Trusted+Broke+Bold": {
+        "total": 46,
+        "accepted": 43,
+        "rate": 0.9347826086956522
+      }
+    },
+    ">=90%": {
+      "Newcomer": {
+        "total": 71,
+        "accepted": 3,
+        "rate": 0.04225352112676056
+      },
+      "Trusted": {
+        "total": 71,
+        "accepted": 59,
+        "rate": 0.8309859154929577
+      },
+      "Broke": {
+        "total": 71,
+        "accepted": 48,
+        "rate": 0.676056338028169
+      },
+      "Bold": {
+        "total": 71,
+        "accepted": 48,
+        "rate": 0.676056338028169
+      },
+      "Veteran": {
+        "total": 71,
+        "accepted": 62,
+        "rate": 0.8732394366197183
+      },
+      "Trusted+Broke+Bold": {
+        "total": 71,
+        "accepted": 69,
+        "rate": 0.971830985915493
+      }
+    }
+  },
+  "highPredictionByContext": {
+    "Newcomer": {
+      "total": 117,
+      "accepted": 3,
+      "rate": 0.02564102564102564
+    },
+    "Trusted": {
+      "total": 117,
+      "accepted": 87,
+      "rate": 0.7435897435897436
+    },
+    "Broke": {
+      "total": 117,
+      "accepted": 68,
+      "rate": 0.5811965811965812
+    },
+    "Bold": {
+      "total": 117,
+      "accepted": 68,
+      "rate": 0.5811965811965812
+    },
+    "Veteran": {
+      "total": 117,
+      "accepted": 98,
+      "rate": 0.8376068376068376
+    },
+    "Trusted+Broke+Bold": {
+      "total": 117,
+      "accepted": 112,
+      "rate": 0.9572649572649573
+    }
+  },
+  "highPredictionReasons": {
+    "Newcomer": {
+      "poorFit": 48,
+      "notReady": 39,
+      "tooDangerous": 27,
+      "challengingButSuitable": 3
+    },
+    "Trusted": {
+      "poorFit": 30,
+      "trustedBroker": 87
+    },
+    "Broke": {
+      "poorFit": 48,
+      "needsIncome": 68,
+      "notReady": 1
+    },
+    "Bold": {
+      "poorFit": 48,
+      "boldChallenge": 68,
+      "notReady": 1
+    },
+    "Veteran": {
+      "poorFit": 19,
+      "challengingButSuitable": 98
+    },
+    "Trusted+Broke+Bold": {
+      "trustedBroker": 112,
+      "poorFit": 5
+    }
+  },
+  "sanityTargetMet": true,
+  "highPredictionTrends": {
+    "trustedGreaterThanNewcomer": true,
+    "brokeGreaterThanNewcomer": true,
+    "boldGreaterThanNewcomer": true,
+    "veteranGreaterOrEqualNewcomer": true
+  },
+  "predictionCellCount": 864,
+  "eToDPredictionMedian": 0.445,
+  "eToDPredictionP10": 0.1385,
+  "eToDPredictionP90": 0.76,
+  "representativeFixtures": [
+    {
+      "seed": "phase6-5-accept-001",
+      "requestTemplateId": "investigation-ruins",
+      "requestTitle": "遺跡の異変調査",
+      "requestRank": "D",
+      "partyTemplateId": "balanced",
+      "partyRank": "E",
+      "partyName": "灰狼の牙",
+      "predictedSuccessRate": 0.8,
+      "relevantRoleCount": 1,
+      "leaderJudgment": 40,
+      "relevantSkillAverage": 83,
+      "contexts": {
+        "Newcomer": {
+          "decision": "declined",
+          "reason": "poorFit",
+          "score": 21,
+          "threshold": 50
+        },
+        "Trusted": {
+          "decision": "declined",
+          "reason": "poorFit",
+          "score": 38,
+          "threshold": 50
+        },
+        "Broke": {
+          "decision": "declined",
+          "reason": "poorFit",
+          "score": 31,
+          "threshold": 50
+        },
+        "Bold": {
+          "decision": "declined",
+          "reason": "poorFit",
+          "score": 31,
+          "threshold": 50
+        },
+        "Veteran": {
+          "decision": "declined",
+          "reason": "poorFit",
+          "score": 44,
+          "threshold": 50
+        },
+        "Trusted+Broke+Bold": {
+          "decision": "accepted",
+          "reason": "trustedBroker",
+          "score": 76,
+          "threshold": 50
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-accept-001",
+      "requestTemplateId": "investigation-ruins",
+      "requestTitle": "遺跡の異変調査",
+      "requestRank": "D",
+      "partyTemplateId": "arcane",
+      "partyRank": "E",
+      "partyName": "赤鴉団",
+      "predictedSuccessRate": 0.985,
+      "relevantRoleCount": 3,
+      "leaderJudgment": 48,
+      "relevantSkillAverage": 71.33333333333333,
+      "contexts": {
+        "Newcomer": {
+          "decision": "declined",
+          "reason": "tooDangerous",
+          "score": 40,
+          "threshold": 50
+        },
+        "Trusted": {
+          "decision": "accepted",
+          "reason": "trustedBroker",
+          "score": 57,
+          "threshold": 50
+        },
+        "Broke": {
+          "decision": "accepted",
+          "reason": "needsIncome",
+          "score": 50,
+          "threshold": 50
+        },
+        "Bold": {
+          "decision": "accepted",
+          "reason": "boldChallenge",
+          "score": 50,
+          "threshold": 50
+        },
+        "Veteran": {
+          "decision": "accepted",
+          "reason": "challengingButSuitable",
+          "score": 63,
+          "threshold": 50
+        },
+        "Trusted+Broke+Bold": {
+          "decision": "accepted",
+          "reason": "trustedBroker",
+          "score": 95,
+          "threshold": 50
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-accept-001",
+      "requestTemplateId": "investigation-ruins",
+      "requestTitle": "遺跡の異変調査",
+      "requestRank": "D",
+      "partyTemplateId": "versatile",
+      "partyRank": "E",
+      "partyName": "鉄靴団",
+      "predictedSuccessRate": 1,
+      "relevantRoleCount": 3,
+      "leaderJudgment": 52,
+      "relevantSkillAverage": 76.33333333333333,
+      "contexts": {
+        "Newcomer": {
+          "decision": "declined",
+          "reason": "tooDangerous",
+          "score": 40,
+          "threshold": 50
+        },
+        "Trusted": {
+          "decision": "accepted",
+          "reason": "trustedBroker",
+          "score": 57,
+          "threshold": 50
+        },
+        "Broke": {
+          "decision": "accepted",
+          "reason": "needsIncome",
+          "score": 50,
+          "threshold": 50
+        },
+        "Bold": {
+          "decision": "accepted",
+          "reason": "boldChallenge",
+          "score": 50,
+          "threshold": 50
+        },
+        "Veteran": {
+          "decision": "accepted",
+          "reason": "challengingButSuitable",
+          "score": 63,
+          "threshold": 50
+        },
+        "Trusted+Broke+Bold": {
+          "decision": "accepted",
+          "reason": "trustedBroker",
+          "score": 95,
+          "threshold": 50
+        }
+      }
+    }
+  ],
+  "problem90Fixture": {
+    "seed": "phase6-5-accept-001",
+    "requestTemplateId": "investigation-ruins",
+    "requestTitle": "遺跡の異変調査",
+    "requestRank": "D",
+    "partyTemplateId": "arcane",
+    "partyRank": "E",
+    "partyName": "赤鴉団",
+    "predictedSuccessRate": 0.985,
+    "relevantRoleCount": 3,
+    "leaderJudgment": 48,
+    "relevantSkillAverage": 71.33333333333333,
+    "contexts": {
+      "Newcomer": {
+        "decision": "declined",
+        "reason": "tooDangerous",
+        "score": 40,
+        "threshold": 50
+      },
+      "Trusted": {
+        "decision": "accepted",
+        "reason": "trustedBroker",
+        "score": 57,
+        "threshold": 50
+      },
+      "Broke": {
+        "decision": "accepted",
+        "reason": "needsIncome",
+        "score": 50,
+        "threshold": 50
+      },
+      "Bold": {
+        "decision": "accepted",
+        "reason": "boldChallenge",
+        "score": 50,
+        "threshold": 50
+      },
+      "Veteran": {
+        "decision": "accepted",
+        "reason": "challengingButSuitable",
+        "score": 63,
+        "threshold": 50
+      },
+      "Trusted+Broke+Bold": {
+        "decision": "accepted",
+        "reason": "trustedBroker",
+        "score": 95,
+        "threshold": 50
+      }
+    }
+  }
+}

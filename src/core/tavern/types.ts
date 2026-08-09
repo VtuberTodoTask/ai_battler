@@ -14,6 +14,8 @@ import type {
   ObjectiveType,
 } from '../expedition/types.ts'
 
+export type PartyRiskTolerance = 'cautious' | 'balanced' | 'bold'
+
 export type CampaignPartyEventType =
   | 'arrived'
   | 'departedScheduled'
@@ -75,6 +77,22 @@ export interface TavernPartyProgressionSnapshot {
   trainingDays: number
 }
 
+export interface TavernPartyRelationshipSnapshot {
+  affinity: number
+  financialPressure: number
+  riskTolerance: 'cautious' | 'balanced' | 'bold'
+  stayExtensionDaysUsed: number
+}
+
+export interface TavernPartyStats {
+  totalExpeditions: number
+  completeSuccesses: number
+  successes: number
+  partialSuccesses: number
+  failures: number
+  retreats: number
+}
+
 export interface TavernParty {
   id: string
   party: AdventurerParty
@@ -85,6 +103,8 @@ export interface TavernParty {
   plannedDepartureDay?: number
   isNew?: boolean
   progression?: TavernPartyProgressionSnapshot
+  relationship?: TavernPartyRelationshipSnapshot
+  stats?: TavernPartyStats
 }
 
 export interface PartyTemplate {
@@ -94,7 +114,22 @@ export interface PartyTemplate {
 }
 
 export type AcceptanceReasonCode =
-  'appropriate' | 'challengingButSuitable' | 'tooDangerous' | 'poorFit'
+  | 'appropriate'
+  | 'challengingButSuitable'
+  | 'trustedBroker'
+  | 'needsIncome'
+  | 'boldChallenge'
+  | 'tooDangerous'
+  | 'poorFit'
+  | 'cautious'
+  | 'notReady'
+
+export interface AcceptanceContext {
+  affinity: number
+  financialPressure: number
+  riskTolerance: PartyRiskTolerance
+  growthMilestones: number
+}
 
 export interface OfferEvaluation {
   decision: 'accepted' | 'declined'
@@ -104,6 +139,23 @@ export interface OfferEvaluation {
   rankGap: number
   relevantRoleCount: number
   leaderJudgment: number
+  acceptanceScore: number
+  acceptanceThreshold: number
+  modifiers: {
+    base: number
+    roleFit: number
+    leaderJudgment: number
+    relevantCapability: number
+    growth: number
+    affinity: number
+    financialPressure: number
+    risk: number
+    hpReadiness: number
+    moraleReadiness: number
+  }
+  affinity: number
+  financialPressure: number
+  riskTolerance: PartyRiskTolerance
 }
 
 export interface BrokerageOfferAttempt {

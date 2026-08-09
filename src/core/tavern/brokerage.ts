@@ -75,7 +75,13 @@ export function offerRequestToParty(
   const party = state.parties.find((p) => p.id === partyId)!
 
   const publicProfile = toPublicRequestProfile(request)
-  const evaluation = evaluateOffer(publicProfile, party.party)
+  const context = {
+    affinity: party.relationship?.affinity ?? 10,
+    financialPressure: party.relationship?.financialPressure ?? 40,
+    riskTolerance: party.relationship?.riskTolerance ?? 'balanced',
+    growthMilestones: party.progression?.growthMilestones ?? 0,
+  }
+  const evaluation = evaluateOffer(publicProfile, party.party, context)
 
   const offerId = `${state.seed}:offer:${state.offers.length}`
   const offer: BrokerageOfferAttempt = {

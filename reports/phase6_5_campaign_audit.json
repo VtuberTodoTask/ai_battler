@@ -1,0 +1,1300 @@
+{
+  "dayCount": 30,
+  "seedCount": 10,
+  "totalAccepted": 300,
+  "totalDeclined": 41,
+  "totalRelationshipEvents": 1500,
+  "totalAffinityChanges": 300,
+  "totalFinancialPressureChanges": 1200,
+  "totalStayExtensions": 0,
+  "totalStayExtensionDays": 0,
+  "totalScheduledDepartures": 200,
+  "totalNewArrivals": 248,
+  "averageStayDays": 5.08,
+  "outcomeCounts": {
+    "completeSuccess": 126,
+    "success": 79,
+    "partialSuccess": 15,
+    "failedObjective": 43,
+    "forcedRetreat": 37,
+    "lostExpedition": 0
+  },
+  "finalAffinityAverage": 18.3,
+  "finalPressureAverage": 44.55,
+  "acceptanceByRankGap": {
+    "0": {
+      "total": 153,
+      "accepted": 145,
+      "rate": 0.9477124183006536
+    },
+    "1": {
+      "total": 29,
+      "accepted": 11,
+      "rate": 0.3793103448275862
+    },
+    "2": {
+      "total": 13,
+      "accepted": 0,
+      "rate": 0
+    },
+    "3": {
+      "total": 2,
+      "accepted": 0,
+      "rate": 0
+    },
+    "-1": {
+      "total": 97,
+      "accepted": 97,
+      "rate": 1
+    },
+    "-3": {
+      "total": 11,
+      "accepted": 11,
+      "rate": 1
+    },
+    "-2": {
+      "total": 35,
+      "accepted": 35,
+      "rate": 1
+    },
+    "-4": {
+      "total": 1,
+      "accepted": 1,
+      "rate": 1
+    }
+  },
+  "acceptanceByAffinityTier": {
+    "一見": {
+      "total": 216,
+      "accepted": 180,
+      "rate": 0.8333333333333334
+    },
+    "顔なじみ": {
+      "total": 99,
+      "accepted": 94,
+      "rate": 0.9494949494949495
+    },
+    "信頼": {
+      "total": 19,
+      "accepted": 19,
+      "rate": 1
+    },
+    "常連": {
+      "total": 4,
+      "accepted": 4,
+      "rate": 1
+    },
+    "贔屓": {
+      "total": 3,
+      "accepted": 3,
+      "rate": 1
+    }
+  },
+  "acceptanceByFinancialTier": {
+    "安定": {
+      "total": 76,
+      "accepted": 66,
+      "rate": 0.868421052631579
+    },
+    "やや入用": {
+      "total": 105,
+      "accepted": 87,
+      "rate": 0.8285714285714286
+    },
+    "余裕あり": {
+      "total": 58,
+      "accepted": 56,
+      "rate": 0.9655172413793104
+    },
+    "苦しい": {
+      "total": 88,
+      "accepted": 78,
+      "rate": 0.8863636363636364
+    },
+    "切迫": {
+      "total": 14,
+      "accepted": 13,
+      "rate": 0.9285714285714286
+    }
+  },
+  "acceptanceByRiskTolerance": {
+    "bold": {
+      "total": 118,
+      "accepted": 111,
+      "rate": 0.940677966101695
+    },
+    "balanced": {
+      "total": 124,
+      "accepted": 113,
+      "rate": 0.9112903225806451
+    },
+    "cautious": {
+      "total": 99,
+      "accepted": 76,
+      "rate": 0.7676767676767676
+    }
+  },
+  "seeds": [
+    {
+      "seed": "phase6-5-campaign-001",
+      "finalReputation": 52,
+      "acceptedOffers": 30,
+      "declinedOffers": 2,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 21,
+      "newArrivals": 25,
+      "totalStayDays": 105,
+      "departedCount": 21,
+      "finalAffinityAverage": 20,
+      "finalPressureAverage": 43.75,
+      "outcomeCounts": {
+        "completeSuccess": 15,
+        "success": 6,
+        "partialSuccess": 0,
+        "failedObjective": 6,
+        "forcedRetreat": 3,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 19,
+          "accepted": 18,
+          "rate": 0.9473684210526315
+        },
+        "1": {
+          "total": 3,
+          "accepted": 2,
+          "rate": 0.6666666666666666
+        },
+        "-1": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        },
+        "-3": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 19,
+          "accepted": 18,
+          "rate": 0.9473684210526315
+        },
+        "顔なじみ": {
+          "total": 10,
+          "accepted": 9,
+          "rate": 0.9
+        },
+        "信頼": {
+          "total": 3,
+          "accepted": 3,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "安定": {
+          "total": 6,
+          "accepted": 4,
+          "rate": 0.6666666666666666
+        },
+        "やや入用": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        },
+        "余裕あり": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        },
+        "苦しい": {
+          "total": 10,
+          "accepted": 10,
+          "rate": 1
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "bold": {
+          "total": 8,
+          "accepted": 7,
+          "rate": 0.875
+        },
+        "balanced": {
+          "total": 18,
+          "accepted": 17,
+          "rate": 0.9444444444444444
+        },
+        "cautious": {
+          "total": 6,
+          "accepted": 6,
+          "rate": 1
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-campaign-002",
+      "finalReputation": 47,
+      "acceptedOffers": 30,
+      "declinedOffers": 3,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 21,
+      "newArrivals": 25,
+      "totalStayDays": 103,
+      "departedCount": 21,
+      "finalAffinityAverage": 18,
+      "finalPressureAverage": 36.75,
+      "outcomeCounts": {
+        "completeSuccess": 12,
+        "success": 8,
+        "partialSuccess": 0,
+        "failedObjective": 5,
+        "forcedRetreat": 5,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        },
+        "1": {
+          "total": 2,
+          "accepted": 1,
+          "rate": 0.5
+        },
+        "2": {
+          "total": 1,
+          "accepted": 0,
+          "rate": 0
+        },
+        "3": {
+          "total": 1,
+          "accepted": 0,
+          "rate": 0
+        },
+        "-1": {
+          "total": 14,
+          "accepted": 14,
+          "rate": 1
+        },
+        "-2": {
+          "total": 6,
+          "accepted": 6,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 21,
+          "accepted": 19,
+          "rate": 0.9047619047619048
+        },
+        "顔なじみ": {
+          "total": 11,
+          "accepted": 10,
+          "rate": 0.9090909090909091
+        },
+        "信頼": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "やや入用": {
+          "total": 12,
+          "accepted": 11,
+          "rate": 0.9166666666666666
+        },
+        "苦しい": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        },
+        "安定": {
+          "total": 7,
+          "accepted": 5,
+          "rate": 0.7142857142857143
+        },
+        "余裕あり": {
+          "total": 4,
+          "accepted": 4,
+          "rate": 1
+        },
+        "切迫": {
+          "total": 3,
+          "accepted": 3,
+          "rate": 1
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "cautious": {
+          "total": 11,
+          "accepted": 10,
+          "rate": 0.9090909090909091
+        },
+        "bold": {
+          "total": 19,
+          "accepted": 17,
+          "rate": 0.8947368421052632
+        },
+        "balanced": {
+          "total": 3,
+          "accepted": 3,
+          "rate": 1
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-campaign-003",
+      "finalReputation": 66,
+      "acceptedOffers": 30,
+      "declinedOffers": 5,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 20,
+      "newArrivals": 25,
+      "totalStayDays": 103,
+      "departedCount": 20,
+      "finalAffinityAverage": 18,
+      "finalPressureAverage": 51,
+      "outcomeCounts": {
+        "completeSuccess": 16,
+        "success": 7,
+        "partialSuccess": 2,
+        "failedObjective": 1,
+        "forcedRetreat": 4,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 18,
+          "accepted": 16,
+          "rate": 0.8888888888888888
+        },
+        "1": {
+          "total": 2,
+          "accepted": 1,
+          "rate": 0.5
+        },
+        "2": {
+          "total": 2,
+          "accepted": 0,
+          "rate": 0
+        },
+        "-1": {
+          "total": 10,
+          "accepted": 10,
+          "rate": 1
+        },
+        "-2": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        },
+        "-3": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 20,
+          "accepted": 15,
+          "rate": 0.75
+        },
+        "顔なじみ": {
+          "total": 14,
+          "accepted": 14,
+          "rate": 1
+        },
+        "信頼": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "やや入用": {
+          "total": 14,
+          "accepted": 12,
+          "rate": 0.8571428571428571
+        },
+        "安定": {
+          "total": 11,
+          "accepted": 10,
+          "rate": 0.9090909090909091
+        },
+        "苦しい": {
+          "total": 8,
+          "accepted": 6,
+          "rate": 0.75
+        },
+        "余裕あり": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "balanced": {
+          "total": 8,
+          "accepted": 8,
+          "rate": 1
+        },
+        "cautious": {
+          "total": 19,
+          "accepted": 14,
+          "rate": 0.7368421052631579
+        },
+        "bold": {
+          "total": 8,
+          "accepted": 8,
+          "rate": 1
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-campaign-004",
+      "finalReputation": 50,
+      "acceptedOffers": 30,
+      "declinedOffers": 6,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 20,
+      "newArrivals": 24,
+      "totalStayDays": 105,
+      "departedCount": 20,
+      "finalAffinityAverage": 18,
+      "finalPressureAverage": 42.5,
+      "outcomeCounts": {
+        "completeSuccess": 12,
+        "success": 7,
+        "partialSuccess": 5,
+        "failedObjective": 4,
+        "forcedRetreat": 2,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 22,
+          "accepted": 19,
+          "rate": 0.8636363636363636
+        },
+        "1": {
+          "total": 2,
+          "accepted": 0,
+          "rate": 0
+        },
+        "2": {
+          "total": 1,
+          "accepted": 0,
+          "rate": 0
+        },
+        "-1": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        },
+        "-2": {
+          "total": 4,
+          "accepted": 4,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 26,
+          "accepted": 20,
+          "rate": 0.7692307692307693
+        },
+        "顔なじみ": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        },
+        "信頼": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "安定": {
+          "total": 10,
+          "accepted": 7,
+          "rate": 0.7
+        },
+        "余裕あり": {
+          "total": 6,
+          "accepted": 6,
+          "rate": 1
+        },
+        "やや入用": {
+          "total": 10,
+          "accepted": 7,
+          "rate": 0.7
+        },
+        "苦しい": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        },
+        "切迫": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "cautious": {
+          "total": 14,
+          "accepted": 9,
+          "rate": 0.6428571428571429
+        },
+        "bold": {
+          "total": 7,
+          "accepted": 6,
+          "rate": 0.8571428571428571
+        },
+        "balanced": {
+          "total": 15,
+          "accepted": 15,
+          "rate": 1
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-campaign-005",
+      "finalReputation": 66,
+      "acceptedOffers": 30,
+      "declinedOffers": 7,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 20,
+      "newArrivals": 24,
+      "totalStayDays": 105,
+      "departedCount": 20,
+      "finalAffinityAverage": 18,
+      "finalPressureAverage": 48,
+      "outcomeCounts": {
+        "completeSuccess": 16,
+        "success": 7,
+        "partialSuccess": 2,
+        "failedObjective": 1,
+        "forcedRetreat": 4,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 11,
+          "accepted": 11,
+          "rate": 1
+        },
+        "1": {
+          "total": 7,
+          "accepted": 2,
+          "rate": 0.2857142857142857
+        },
+        "2": {
+          "total": 2,
+          "accepted": 0,
+          "rate": 0
+        },
+        "-1": {
+          "total": 11,
+          "accepted": 11,
+          "rate": 1
+        },
+        "-2": {
+          "total": 4,
+          "accepted": 4,
+          "rate": 1
+        },
+        "-3": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        },
+        "-4": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 23,
+          "accepted": 18,
+          "rate": 0.782608695652174
+        },
+        "顔なじみ": {
+          "total": 12,
+          "accepted": 10,
+          "rate": 0.8333333333333334
+        },
+        "信頼": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "やや入用": {
+          "total": 14,
+          "accepted": 10,
+          "rate": 0.7142857142857143
+        },
+        "安定": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        },
+        "余裕あり": {
+          "total": 8,
+          "accepted": 7,
+          "rate": 0.875
+        },
+        "苦しい": {
+          "total": 7,
+          "accepted": 5,
+          "rate": 0.7142857142857143
+        },
+        "切迫": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "balanced": {
+          "total": 13,
+          "accepted": 11,
+          "rate": 0.8461538461538461
+        },
+        "bold": {
+          "total": 14,
+          "accepted": 13,
+          "rate": 0.9285714285714286
+        },
+        "cautious": {
+          "total": 10,
+          "accepted": 6,
+          "rate": 0.6
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-campaign-006",
+      "finalReputation": 39,
+      "acceptedOffers": 30,
+      "declinedOffers": 2,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 22,
+      "newArrivals": 27,
+      "totalStayDays": 101,
+      "departedCount": 22,
+      "finalAffinityAverage": 19,
+      "finalPressureAverage": 46.5,
+      "outcomeCounts": {
+        "completeSuccess": 10,
+        "success": 9,
+        "partialSuccess": 1,
+        "failedObjective": 9,
+        "forcedRetreat": 1,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 17,
+          "accepted": 17,
+          "rate": 1
+        },
+        "1": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        },
+        "2": {
+          "total": 2,
+          "accepted": 0,
+          "rate": 0
+        },
+        "-1": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        },
+        "-2": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 24,
+          "accepted": 22,
+          "rate": 0.9166666666666666
+        },
+        "顔なじみ": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        },
+        "信頼": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "やや入用": {
+          "total": 11,
+          "accepted": 9,
+          "rate": 0.8181818181818182
+        },
+        "安定": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        },
+        "余裕あり": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        },
+        "切迫": {
+          "total": 3,
+          "accepted": 3,
+          "rate": 1
+        },
+        "苦しい": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "bold": {
+          "total": 17,
+          "accepted": 17,
+          "rate": 1
+        },
+        "balanced": {
+          "total": 8,
+          "accepted": 7,
+          "rate": 0.875
+        },
+        "cautious": {
+          "total": 7,
+          "accepted": 6,
+          "rate": 0.8571428571428571
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-campaign-007",
+      "finalReputation": 37,
+      "acceptedOffers": 30,
+      "declinedOffers": 2,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 18,
+      "newArrivals": 24,
+      "totalStayDays": 100,
+      "departedCount": 18,
+      "finalAffinityAverage": 16,
+      "finalPressureAverage": 38,
+      "outcomeCounts": {
+        "completeSuccess": 8,
+        "success": 10,
+        "partialSuccess": 1,
+        "failedObjective": 6,
+        "forcedRetreat": 5,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 13,
+          "accepted": 13,
+          "rate": 1
+        },
+        "1": {
+          "total": 2,
+          "accepted": 0,
+          "rate": 0
+        },
+        "-1": {
+          "total": 8,
+          "accepted": 8,
+          "rate": 1
+        },
+        "-2": {
+          "total": 5,
+          "accepted": 5,
+          "rate": 1
+        },
+        "-3": {
+          "total": 4,
+          "accepted": 4,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 19,
+          "accepted": 17,
+          "rate": 0.8947368421052632
+        },
+        "顔なじみ": {
+          "total": 10,
+          "accepted": 10,
+          "rate": 1
+        },
+        "信頼": {
+          "total": 3,
+          "accepted": 3,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "安定": {
+          "total": 7,
+          "accepted": 6,
+          "rate": 0.8571428571428571
+        },
+        "余裕あり": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        },
+        "切迫": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        },
+        "苦しい": {
+          "total": 9,
+          "accepted": 8,
+          "rate": 0.8888888888888888
+        },
+        "やや入用": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "balanced": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        },
+        "cautious": {
+          "total": 14,
+          "accepted": 12,
+          "rate": 0.8571428571428571
+        },
+        "bold": {
+          "total": 11,
+          "accepted": 11,
+          "rate": 1
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-campaign-008",
+      "finalReputation": 45,
+      "acceptedOffers": 30,
+      "declinedOffers": 8,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 19,
+      "newArrivals": 26,
+      "totalStayDays": 96,
+      "departedCount": 19,
+      "finalAffinityAverage": 11,
+      "finalPressureAverage": 52,
+      "outcomeCounts": {
+        "completeSuccess": 9,
+        "success": 11,
+        "partialSuccess": 1,
+        "failedObjective": 5,
+        "forcedRetreat": 4,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 15,
+          "accepted": 14,
+          "rate": 0.9333333333333333
+        },
+        "1": {
+          "total": 4,
+          "accepted": 2,
+          "rate": 0.5
+        },
+        "2": {
+          "total": 4,
+          "accepted": 0,
+          "rate": 0
+        },
+        "3": {
+          "total": 1,
+          "accepted": 0,
+          "rate": 0
+        },
+        "-1": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        },
+        "-2": {
+          "total": 4,
+          "accepted": 4,
+          "rate": 1
+        },
+        "-3": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 31,
+          "accepted": 24,
+          "rate": 0.7741935483870968
+        },
+        "顔なじみ": {
+          "total": 5,
+          "accepted": 4,
+          "rate": 0.8
+        },
+        "信頼": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "やや入用": {
+          "total": 13,
+          "accepted": 10,
+          "rate": 0.7692307692307693
+        },
+        "安定": {
+          "total": 7,
+          "accepted": 6,
+          "rate": 0.8571428571428571
+        },
+        "余裕あり": {
+          "total": 4,
+          "accepted": 3,
+          "rate": 0.75
+        },
+        "苦しい": {
+          "total": 12,
+          "accepted": 10,
+          "rate": 0.8333333333333334
+        },
+        "切迫": {
+          "total": 2,
+          "accepted": 1,
+          "rate": 0.5
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "balanced": {
+          "total": 22,
+          "accepted": 17,
+          "rate": 0.7727272727272727
+        },
+        "bold": {
+          "total": 7,
+          "accepted": 7,
+          "rate": 1
+        },
+        "cautious": {
+          "total": 9,
+          "accepted": 6,
+          "rate": 0.6666666666666666
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-campaign-009",
+      "finalReputation": 50,
+      "acceptedOffers": 30,
+      "declinedOffers": 5,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 20,
+      "newArrivals": 25,
+      "totalStayDays": 98,
+      "departedCount": 20,
+      "finalAffinityAverage": 24,
+      "finalPressureAverage": 35.25,
+      "outcomeCounts": {
+        "completeSuccess": 12,
+        "success": 8,
+        "partialSuccess": 1,
+        "failedObjective": 3,
+        "forcedRetreat": 6,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 18,
+          "accepted": 17,
+          "rate": 0.9444444444444444
+        },
+        "1": {
+          "total": 4,
+          "accepted": 1,
+          "rate": 0.25
+        },
+        "2": {
+          "total": 1,
+          "accepted": 0,
+          "rate": 0
+        },
+        "-1": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        },
+        "-2": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        },
+        "-3": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 22,
+          "accepted": 17,
+          "rate": 0.7727272727272727
+        },
+        "顔なじみ": {
+          "total": 11,
+          "accepted": 11,
+          "rate": 1
+        },
+        "信頼": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "やや入用": {
+          "total": 11,
+          "accepted": 8,
+          "rate": 0.7272727272727273
+        },
+        "苦しい": {
+          "total": 9,
+          "accepted": 7,
+          "rate": 0.7777777777777778
+        },
+        "切迫": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        },
+        "安定": {
+          "total": 10,
+          "accepted": 10,
+          "rate": 1
+        },
+        "余裕あり": {
+          "total": 4,
+          "accepted": 4,
+          "rate": 1
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "balanced": {
+          "total": 21,
+          "accepted": 19,
+          "rate": 0.9047619047619048
+        },
+        "bold": {
+          "total": 12,
+          "accepted": 10,
+          "rate": 0.8333333333333334
+        },
+        "cautious": {
+          "total": 2,
+          "accepted": 1,
+          "rate": 0.5
+        }
+      }
+    },
+    {
+      "seed": "phase6-5-campaign-010",
+      "finalReputation": 61,
+      "acceptedOffers": 30,
+      "declinedOffers": 1,
+      "relationshipEvents": 150,
+      "affinityChanges": 30,
+      "financialPressureChanges": 120,
+      "stayExtensions": 0,
+      "scheduledDepartures": 19,
+      "newArrivals": 23,
+      "totalStayDays": 100,
+      "departedCount": 19,
+      "finalAffinityAverage": 21,
+      "finalPressureAverage": 51.75,
+      "outcomeCounts": {
+        "completeSuccess": 16,
+        "success": 6,
+        "partialSuccess": 2,
+        "failedObjective": 3,
+        "forcedRetreat": 3,
+        "lostExpedition": 0
+      },
+      "stayExtensionsTotalDays": 0,
+      "acceptanceByRankGap": {
+        "0": {
+          "total": 11,
+          "accepted": 11,
+          "rate": 1
+        },
+        "1": {
+          "total": 1,
+          "accepted": 0,
+          "rate": 0
+        },
+        "-2": {
+          "total": 6,
+          "accepted": 6,
+          "rate": 1
+        },
+        "-1": {
+          "total": 11,
+          "accepted": 11,
+          "rate": 1
+        },
+        "-3": {
+          "total": 2,
+          "accepted": 2,
+          "rate": 1
+        }
+      },
+      "acceptanceByAffinityTier": {
+        "一見": {
+          "total": 11,
+          "accepted": 10,
+          "rate": 0.9090909090909091
+        },
+        "顔なじみ": {
+          "total": 10,
+          "accepted": 10,
+          "rate": 1
+        },
+        "信頼": {
+          "total": 3,
+          "accepted": 3,
+          "rate": 1
+        },
+        "常連": {
+          "total": 4,
+          "accepted": 4,
+          "rate": 1
+        },
+        "贔屓": {
+          "total": 3,
+          "accepted": 3,
+          "rate": 1
+        }
+      },
+      "acceptanceByFinancialTier": {
+        "やや入用": {
+          "total": 4,
+          "accepted": 4,
+          "rate": 1
+        },
+        "安定": {
+          "total": 4,
+          "accepted": 4,
+          "rate": 1
+        },
+        "余裕あり": {
+          "total": 14,
+          "accepted": 14,
+          "rate": 1
+        },
+        "苦しい": {
+          "total": 8,
+          "accepted": 7,
+          "rate": 0.875
+        },
+        "切迫": {
+          "total": 1,
+          "accepted": 1,
+          "rate": 1
+        }
+      },
+      "acceptanceByRiskTolerance": {
+        "bold": {
+          "total": 15,
+          "accepted": 15,
+          "rate": 1
+        },
+        "balanced": {
+          "total": 9,
+          "accepted": 9,
+          "rate": 1
+        },
+        "cautious": {
+          "total": 7,
+          "accepted": 6,
+          "rate": 0.8571428571428571
+        }
+      }
+    }
+  ],
+  "acceptanceRate": 0.8797653958944281
+}

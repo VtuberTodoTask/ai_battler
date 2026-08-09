@@ -1,3 +1,8 @@
+import {
+  getAffinityTier,
+  getFinancialPressureTier,
+  getPositiveBrokerageText,
+} from '../../core/tavern/campaign/relationship.ts'
 import type { TavernParty } from '../../core/tavern/types.ts'
 
 export interface PartyCardProps {
@@ -26,6 +31,8 @@ export function PartyCard({
   } else if (isAccepted) {
     status = '受諾済み'
   }
+
+  const relationship = party.relationship
 
   return (
     <div
@@ -68,6 +75,31 @@ export function PartyCard({
           成長 XP {party.progression.growthXp}/4 · 成長{' '}
           {party.progression.growthMilestones}回 · 鍛錬{' '}
           {party.progression.trainingDays}日
+        </div>
+      )}
+      {relationship && (
+        <div className="party-relationship">
+          <div>
+            お気に入り {relationship.affinity}/100（
+            {getAffinityTier(relationship.affinity)}）
+          </div>
+          <div>
+            懐事情 {relationship.financialPressure}/100（
+            {getFinancialPressureTier(relationship.financialPressure)}）
+          </div>
+          <div>
+            危険志向：
+            {relationship.riskTolerance === 'cautious'
+              ? '慎重'
+              : relationship.riskTolerance === 'bold'
+                ? '大胆'
+                : '標準'}
+          </div>
+        </div>
+      )}
+      {party.stats && (
+        <div className="party-brokerage-record">
+          {getPositiveBrokerageText(party.stats)}
         </div>
       )}
     </div>

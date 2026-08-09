@@ -66,6 +66,41 @@ describe('buildPredictionCacheKey', () => {
     expect(after).not.toBe(before)
   })
 
+  it('does not change the key when relationship, progression, or stats snapshot change', () => {
+    const day = generateTavernDay('prediction-cache-005')
+    const requestOffer = day.requests[0]
+    const party = day.parties[0]
+
+    const before = buildPredictionCacheKey(requestOffer, party, 20)
+
+    const changedParty = {
+      ...party,
+      relationship: {
+        affinity: 99,
+        financialPressure: 99,
+        riskTolerance: 'bold' as const,
+        stayExtensionDaysUsed: 99,
+      },
+      progression: {
+        growthXp: 99,
+        growthMilestones: 99,
+        trainingDays: 99,
+      },
+      stats: {
+        totalExpeditions: 99,
+        completeSuccesses: 99,
+        successes: 99,
+        partialSuccesses: 99,
+        failures: 99,
+        retreats: 99,
+      },
+    }
+
+    const after = buildPredictionCacheKey(requestOffer, changedParty, 20)
+
+    expect(after).toBe(before)
+  })
+
   it('changes the key when HP/MP/Morale/status change', () => {
     const day = generateTavernDay('prediction-cache-004')
     const requestOffer = day.requests[0]
