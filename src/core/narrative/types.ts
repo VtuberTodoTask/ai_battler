@@ -6,6 +6,7 @@ import type {
 import type {
   EnvironmentType,
   ExpeditionOutcome,
+  ExpeditionState,
   ObjectiveType,
 } from '../expedition/types.ts'
 import type {
@@ -79,6 +80,8 @@ export interface ExpeditionNarrativeContext {
   request: NarrativeRequestInfo
   acceptance?: NarrativeAcceptanceInfo
   report: DispatchReport
+  /** Full expedition state including logs and battles. Optional for backward compatibility. */
+  state?: ExpeditionState
 }
 
 export interface NarrativeHistoryHighlight {

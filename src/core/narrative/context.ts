@@ -12,7 +12,11 @@ import type {
   NarrativePartySnapshot,
   NarrativeRequestInfo,
 } from './types.ts'
-import type { ExpeditionOutcome, ObjectiveType } from '../expedition/types.ts'
+import type {
+  ExpeditionOutcome,
+  ExpeditionResult,
+  ObjectiveType,
+} from '../expedition/types.ts'
 import { rankIndex } from '../tavern/campaign/generators.ts'
 
 function memberIsDead(member: { currentHp: number }): boolean {
@@ -71,6 +75,7 @@ export function buildExpeditionNarrativeContext(
   request: TavernRequestOffer,
   report: DispatchReport,
   acceptedOffer: BrokerageOfferAttempt | undefined,
+  result?: ExpeditionResult,
 ): ExpeditionNarrativeContext {
   const specializationMatch = getMissionSpecializationMatch(
     party.party.missionSpecialization,
@@ -92,6 +97,7 @@ export function buildExpeditionNarrativeContext(
           specializationMatch,
         },
     report,
+    state: result?.state,
   }
 }
 

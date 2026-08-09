@@ -210,6 +210,7 @@ export function deriveResolveCandidates(
           request,
           resolved.report,
           acceptedOffer,
+          resolved.result,
         ),
         {
           requestId: request.id,
