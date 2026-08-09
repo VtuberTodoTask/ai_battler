@@ -6,8 +6,18 @@ import type {
   NarrativeHistoryHighlight,
   NarrativeMemberSnapshot,
 } from './types.ts'
+import {
+  acceptanceReasonText,
+  affinityBand,
+  buildExpeditionNarrativeFacts,
+  buildPersonalityHints,
+  environmentLabel,
+  objectiveLabel,
+  riskToleranceLabel,
+  specializationMatchText,
+} from './facts.ts'
 
-export const NARRATIVE_PROMPT_VERSION = 'v2'
+export const NARRATIVE_PROMPT_VERSION = 'v3'
 
 export interface NarrativePrompt {
   system: string
@@ -41,6 +51,13 @@ FACTSに明示されていない限り、店主について以下を創作して
 FACTSとして店主の発言内容が明示されている場合を除き、店主の台詞を新しく作ってはいけません。
 店主はプレイヤー本人であるため、AIがプレイヤーに代わって発言してはいけません。
 
+店主＝プレイヤーであることは、プレイヤーの感情を推測してよいという意味ではありません。
+「プレイヤーは期待した」「プレイヤーは喜んだ」「プレイヤーは不安を感じた」なども禁止です。
+
+店主について書いてよいのは、Party側の行為として
+「店主へ報告した」「店主へ話しかけた」「店主へ別れを告げた」
+などを記述する場合だけです。
+
 店主の内面を描写しないでください。次のような表現を避けてください。
 - 店主は満足げに頷いた。
 - 店主は寂しそうに笑った。
@@ -55,61 +72,84 @@ FACTSとして店主の発言内容が明示されている場合を除き、店
 結果、人物名、Party名、Rank、負傷、死亡、依頼内容、成功・失敗、関係値などを変更してはいけません。
 FACTSに存在しない新しい事件、NPC、依頼、報酬、アイテム、過去、約束、恒久的な人間関係、家族設定、故郷設定、借金額を事実として追加してはいけません。
 
+場面に登場させてよい人物は、CONFIRMED FACTSに存在する人物と店主だけです。
+「店員」「依頼人」「衛兵」「医師」などを新しく登場させてはいけません。
+Character Eventで明示されたNPCだけ例外です。
+
 再訪や戻ってくる日付を確約させないでください。「必ず戻る」「来月戻る」などは避け、「近くへ来たら寄る」「機会があれば」程度にとどめてください。
 目的地を新しく創作しないでください。生存者を死亡させたり、死者を生き返らせたりしないでください。新しい怪我や病気、恋愛関係を捏造しないでください。
 
+結果の具体的な原因がCONFIRMED FACTSに書かれていない場合、原因を推測・創作してはいけません。
+失敗、撤退、負傷、消耗、進捗不足、成功などについて、「なぜそうなったか」が書かれていなければ、原因は不明のまま描写してください。
+
+Coverage不足だからといって、落盤、狭い通路、水没、怪物、罠、悪天候、道迷いなどを勝手に原因として作ってはいけません。
+forcedRetreatだからといって、新しい敵や事故を作ってはいけません。
+
+MemberのRoleは人物の役割を示すだけです。
+Roleだけを根拠に、
+mageが魔法を使った、
+guardianが盾を使った、
+supportが治療した、
+scoutが罠を発見した、
+rangerが追跡した、
+などの実際の行動・装備を創作してはいけません。
+
+Request/FACTSに明示されていない場合、盾、杖、剣、弓、薬瓶、魔導書、地図、ロープ、ランタンなどの装備を創作してはいけません。
+
 Personality値（勇敢さ、慎重さ、協調性、規律、利他、貪欲）は話し方や反応の参考にしてよいです。ただし、それを根拠に人物の過去、家族、借金、職歴等の新しい設定を作らないでください。
+PERSONALITY HINTSは口調・反応の参考だけです。過去や実際の行動を示すFACTではありません。
 
 ただし、物語表現としての一時的な表情、仕草、口調、空気、短い会話などは創作して構いません。それらは新たなゲーム上の事実を作らない範囲にしてください。ただし、店主の感情、思考、台詞、意思決定を創作してはいけません。
 
+表情や仕草もGame Factを変更しない範囲にしてください。
+例えば「少し言葉を選んだ」「肩をすくめた」「静かに答えた」程度は可です。
+ただし「負傷で顔を歪めた」など、負傷FACTがない場合は禁止です。
+
+将来の行動を創作しないでください。
+「次はもっと上手くやろう」「次の依頼に備えよう」「再挑戦する」「新しい探索へ向かう」などは禁止です。
+
+最終文章に、enum名、内部フィールド名、ゲームシステムの注釈、FACTS一覧の引用、注意書き、解説、括弧書きのメタコメントを出力してはいけません。物語本文だけを出力してください。
+最終本文は自然な日本語だけで書いてください。意図しない英単語やsystem field名を混在させないでください。
+
 ゲームシステムの数値をそのまま読み上げるのではなく、自然な日本語の物語として描写してください。`
 
-function personalityLine(
-  personality: NarrativeMemberSnapshot['personality'],
-): string {
-  return `bravery ${personality.bravery}, caution ${personality.caution}, cooperation ${personality.cooperation}, discipline ${personality.discipline}, altruism ${personality.altruism}, greed ${personality.greed}`
-}
-
-function memberLines(
-  members: NarrativeMemberSnapshot[],
-  includePersonality: boolean,
-): string {
-  const lines: string[] = ['Members:']
+function memberHintLines(members: NarrativeMemberSnapshot[]): string[] {
+  const lines: string[] = []
   for (const m of members) {
-    const status = m.dead
-      ? ' [dead]'
-      : m.incapacitated
-        ? ' [incapacitated]'
-        : ''
-    lines.push(`  - ${m.name} (${m.rank} ${m.role})${status}`)
-    if (includePersonality) {
-      lines.push(`      Personality: ${personalityLine(m.personality)}`)
-    }
+    const hints = buildPersonalityHints(m.personality)
+    const hintText =
+      hints.length > 0
+        ? hints.join(' / ')
+        : '特に目立った傾向は記録されていない'
+    lines.push(`  - ${m.name}（${m.rank} ${m.role}）: ${hintText}`)
   }
-  return lines.join('\n')
+  return lines
 }
 
-function partyLines(
+function partyHeader(
   party: NarrativeContext['party'],
-  includeAllPersonalities: boolean,
+  includeSpecialization: boolean,
 ): string {
   const leader = party.members.find((m) => m.id === party.leaderId)
-  const leaderPersonality = leader
-    ? `Leader Personality: ${personalityLine(leader.personality)}`
+  const leaderHint = leader
+    ? `Leaderの傾向: ${buildPersonalityHints(leader.personality).join(' / ') || '特に目立った傾向は記録されていない'}`
     : ''
+
   const lines = [
     `Party: ${party.name} (Rank ${party.rank})`,
     `Leader: ${party.leaderName}`,
-    leaderPersonality,
-    `Affinity: ${party.affinity}`,
-    `Financial Pressure: ${party.financialPressure}`,
-    `Risk Tolerance: ${party.riskTolerance}`,
-    `Growth Milestones: ${party.growthMilestones}`,
-    `Training Days: ${party.trainingDays}`,
-    `Strong Objective: ${party.missionSpecialization.strongObjective}`,
-    `Weak Objective: ${party.missionSpecialization.weakObjective}`,
+    leaderHint,
+    `関係性: ${affinityBand(party.affinity)}`,
+    `リスクへの姿勢: ${riskToleranceLabel(party.riskTolerance)}`,
+    `成長段階: ${party.growthMilestones}`,
+    `滞在訓練日数: ${party.trainingDays}`,
   ]
-  lines.push(memberLines(party.members, includeAllPersonalities))
+
+  if (includeSpecialization) {
+    lines.push(`得意分野: ${party.missionSpecialization.strongObjective}`)
+    lines.push(`苦手分野: ${party.missionSpecialization.weakObjective}`)
+  }
+
   return lines.filter(Boolean).join('\n')
 }
 
@@ -127,7 +167,8 @@ export function characterEventInstruction(
 - 店主の感情・思考を決めない
 - 店主に新しい判断・約束・行動方針を与えない
 - Party側から店主へ話しかける描写は可
-- 店主からPartyへの新規行動・発話は原則禁止（FACTSに明示されている場合を除く）`
+- 店主からPartyへの新規行動・発話は原則禁止（FACTSに明示されている場合を除く）
+- 新しい出来事、新しい障害、新しい敵、新しい人物、新しい物品、新しい原因、新しい情報、新しい約束、新しい将来予定を作らない`
 
   const instructions: Record<CharacterNarrativeEventType, string> = {
     partyArrival: `partyArrival:
@@ -203,79 +244,60 @@ const EXPEDITION_WRITING_INSTRUCTIONS = `WRITING INSTRUCTIONS:
 - 店主はプレイヤー本人なので、店主の台詞・感情・判断を作らない
 - 店主の反応を必要とする場面では、反応そのものを書かずに場面を進める
 - HP/MP/Morale等の数値をそのまま読み上げない
-- Outcomeを変更しない`
+- 最終文章にenum名、内部フィールド名、ゲームシステムの注釈、FACTS一覧の引用、注意書き、解説、括弧書きのメタコメントを出力してはいけません
+- 最終本文は自然な日本語だけで書いてください
+- Outcomeを変更しない
+- 次の冒険、新たな依頼、新しい目的地へ勝手につなげない`
 
 export function buildExpeditionPrompt(
   context: ExpeditionNarrativeContext,
 ): string {
-  const report = context.report
   const request = context.request
+  const facts = buildExpeditionNarrativeFacts(context)
+  const match = context.acceptance?.specializationMatch ?? 'neutral'
+  const reason = context.acceptance?.reason ?? 'appropriate'
+
   const lines: string[] = [
-    '【遠征レポート】',
+    '=== CURRENT REQUEST ===',
     `依頼タイトル: ${request.title}`,
     `依頼ランク: ${request.rank}`,
-    `目的: ${request.objectiveType}`,
-    `環境: ${request.environment}`,
+    `今回の依頼種別: ${request.objectiveType}（${objectiveLabel(request.objectiveType)}）`,
+    `環境: ${request.environment}（${environmentLabel(request.environment)}）`,
     `Public Tags: ${request.publicTags.join(', ')}`,
     `依頼内容: ${request.briefing}`,
     '',
+    '=== PARTY ===',
     `Party: ${context.party.name} (Rank ${context.party.rank})`,
     `Leader: ${context.party.leaderName}`,
-    `Affinity: ${context.party.affinity}`,
-    `Financial Pressure: ${context.party.financialPressure}`,
-    `Risk Tolerance: ${context.party.riskTolerance}`,
-    `Specialization Match: ${context.acceptance?.specializationMatch ?? 'neutral'}`,
-    `Strong Objective: ${context.party.missionSpecialization.strongObjective}`,
-    `Weak Objective: ${context.party.missionSpecialization.weakObjective}`,
+    `関係性: ${affinityBand(context.party.affinity)}`,
+    `リスクへの姿勢: ${riskToleranceLabel(context.party.riskTolerance)}`,
+    `受諾理由: ${acceptanceReasonText(reason)}`,
+    `今回の依頼との専門適性: ${specializationMatchText(match)}`,
+    '',
+    'Members:',
+    ...memberHintLines(context.party.members),
+    '',
+    '=== CONFIRMED FACTS ===',
+    ...facts.confirmedFacts.map((f) => `- ${f}`),
+    '',
+    '=== DETAILS NOT RECORDED ===',
   ]
 
-  const leader = context.party.members.find(
-    (m) => m.id === context.party.leaderId,
-  )
-  if (leader) {
-    lines.push(`Leader Personality: ${personalityLine(leader.personality)}`)
+  if (facts.unknownDetails.length > 0) {
+    lines.push(...facts.unknownDetails.map((u) => `- ${u}`))
+  } else {
+    lines.push('- なし')
   }
-
-  lines.push(memberLines(context.party.members, true))
 
   lines.push(
     '',
-    `Acceptance Reason: ${context.acceptance?.reason ?? 'appropriate'}`,
-    `Rank Gap: ${context.acceptance?.rankGap ?? 0}`,
-    `Outcome: ${report.outcome}`,
-    `Objective Completed: ${report.objectiveCompleted ? 'Yes' : 'No'}`,
-    `Objective Progress: ${report.objectiveProgress}%`,
+    '=== NARRATIVE HINTS ===',
+    ...facts.presentationHints.map((h) => `- ${h}`),
+    '',
+    '=== WRITING INSTRUCTIONS ===',
+    EXPEDITION_WRITING_INSTRUCTIONS,
   )
 
-  if (report.battleOutcome) {
-    lines.push(`Battle Outcome: ${report.battleOutcome}`)
-  }
-
-  lines.push('', 'Member Final States:')
-  for (const m of report.party) {
-    const status = m.dead
-      ? ' [dead]'
-      : m.incapacitated
-        ? ' [incapacitated]'
-        : ''
-    lines.push(
-      `  - ${m.name} (${m.role} ${m.rank}) — HP ${m.finalHp}/${m.maxHp}, MP ${m.finalMp}/${m.maxMp}, Morale ${m.finalMorale}${status}`,
-    )
-  }
-
-  if (report.casualties.length > 0) {
-    lines.push(`Casualties: ${report.casualties.join(', ')}`)
-  }
-  if (report.incapacitated.length > 0) {
-    lines.push(`Incapacitated: ${report.incapacitated.join(', ')}`)
-  }
-
-  lines.push('', 'Key Facts:')
-  for (const fact of report.keyFacts) {
-    lines.push(`  - ${fact}`)
-  }
-
-  lines.push('', EXPEDITION_WRITING_INSTRUCTIONS)
   return lines.join('\n')
 }
 
@@ -284,7 +306,7 @@ function recentHighlightsText(highlights: NarrativeHistoryHighlight[]): string {
   return highlights
     .map(
       (h) =>
-        `Day ${h.dayNumber}: ${h.requestTitle} (${h.objectiveType}, ${h.outcome})`,
+        `Day ${h.dayNumber}: ${h.requestTitle}（${objectiveLabel(h.objectiveType)}、${h.outcome}）`,
     )
     .join('\n')
 }
@@ -292,10 +314,20 @@ function recentHighlightsText(highlights: NarrativeHistoryHighlight[]): string {
 export function buildCharacterEventPrompt(
   context: CharacterEventNarrativeContext,
 ): string {
+  const leader = context.party.members.find(
+    (m) => m.id === context.party.leaderId,
+  )
+  const leaderHint = leader
+    ? `Leaderの傾向: ${buildPersonalityHints(leader.personality).join(' / ') || '特に目立った傾向は記録されていない'}`
+    : ''
+
   const lines: string[] = [
     '【キャラクターイベント】',
     `Event Type: ${context.eventType}`,
-    partyLines(context.party, true),
+    partyHeader(context.party, true),
+    leaderHint,
+    'Memberの傾向:',
+    ...memberHintLines(context.party.members),
     '',
     'Recent Highlights:',
     recentHighlightsText(context.recentHighlights),
@@ -315,7 +347,7 @@ export function buildCharacterEventPrompt(
   }
 
   lines.push('', characterEventInstruction(context.eventType))
-  return lines.join('\n')
+  return lines.filter(Boolean).join('\n')
 }
 
 export function buildNarrativePrompt(

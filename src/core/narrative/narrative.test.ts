@@ -363,7 +363,7 @@ describe('Narrative generation', () => {
     expect(candidate.state).toBe('generated')
     expect(candidate.activeGenerationId).toBe(record.id)
     expect(record.generatedText).toContain('Fake生成')
-    expect(record.promptVersion).toBe('v2')
+    expect(record.promptVersion).toBe('v3')
   })
 
   it('bulk generates candidates sequentially', async () => {
@@ -441,21 +441,29 @@ describe('Narrative prompt integrity', () => {
     expect(user).toContain(resolved.request.objectiveType)
     expect(user).toContain(String(resolved.request.environment))
     expect(user).toContain(resolved.partyName ?? '')
-    expect(user).toContain('Specialization Match')
+    expect(user).toContain('=== CURRENT REQUEST ===')
+    expect(user).toContain('=== PARTY ===')
+    expect(user).toContain('=== CONFIRMED FACTS ===')
+    expect(user).toContain('=== DETAILS NOT RECORDED ===')
+    expect(user).toContain('=== NARRATIVE HINTS ===')
+    expect(user).toContain('=== WRITING INSTRUCTIONS ===')
     expect(user).toContain('Leader:')
-    expect(user).toContain('Leader Personality')
-    expect(user).toContain('bravery')
-    expect(user).toContain('caution')
+    expect(user).toContain('Members:')
+    expect(user).toContain('専門適性')
     expect(user).toContain('400～800字')
     expect(user).toContain('WRITING INSTRUCTIONS')
-    expect(user).toContain('success')
-    for (const fact of resolved.report!.keyFacts) {
-      expect(user).toContain(fact)
-    }
+    expect(user).toContain('依頼は成功した')
+    expect(user).toContain('調査によっていくつかの情報を得た')
 
     expect(system).toContain('Personality値')
     expect(system).toContain('再訪')
     expect(system).toContain('死者を生き返らせ')
+    expect(system).toContain('mage')
+    expect(system).toContain('魔法')
+    expect(system).toContain('guardian')
+    expect(system).toContain('盾')
+    expect(system).toContain('最終文章に')
+    expect(system).toContain('自然な日本語')
 
     expect(user).not.toContain('battleOutcome')
     expect(user).not.toContain('combatSeed')
@@ -463,6 +471,16 @@ describe('Narrative prompt integrity', () => {
     expect(user).not.toContain('apiKey')
     expect(user).not.toContain('Authorization')
     expect(user).not.toContain('raw Battle Log')
+    expect(user).not.toContain('HP ')
+    expect(user).not.toContain('MP ')
+    expect(user).not.toContain('Morale ')
+    expect(user).not.toContain('Strong Objective')
+    expect(user).not.toContain('Weak Objective')
+    expect(user).not.toContain('Objective Progress')
+    expect(user).not.toContain('Objective Completed')
+    expect(user).not.toContain('failedObjective')
+    expect(user).not.toContain('AverageQuality')
+    expect(user).not.toContain('Coverage')
   })
 
   it('farewell prompt includes no-return guarantee, stayDays, and length instruction', () => {
@@ -600,6 +618,69 @@ describe('Narrative prompt integrity', () => {
     expect(user).toContain('becameFavorite')
     expect(user).toContain('Partyから店主への高い信頼')
     expect(user).toContain('店主側にも同程度の感情')
+  })
+
+  it('character event prompt uses personality hints, not raw trait names or numbers', () => {
+    const campaign = createTavernCampaign('narrative-prompt-personality')
+    const party = campaign.parties[0]
+    party.arrivalDay = 1
+    party.plannedDepartureDay = 1
+    party.party.members[0].personality = {
+      bravery: 3,
+      caution: -2,
+      cooperation: 0,
+      discipline: 0,
+      altruism: 0,
+      greed: 0,
+    }
+    const next = advanceCampaignDay(withResults(campaign, []))
+    const arrival = next.narrativeCandidates.find(
+      (c) => c.eventType === 'partyArrival',
+    )!
+    const { user } = buildNarrativePrompt(arrival.context)
+
+    expect(user).toContain('Memberの傾向:')
+    expect(user).not.toContain('bravery')
+    expect(user).not.toContain('caution')
+    expect(user).not.toContain('bravery 3')
+    expect(user).not.toContain('caution -2')
+  })
+
+  it('system prompt forbids role hallucination, meta output, and non-Japanese prose', () => {
+    const campaign = createTavernCampaign('narrative-prompt-guards')
+    const resolved = makeResolved(campaign, 0, 0, 'success')
+    const candidate = deriveResolveCandidates(
+      withResults(campaign, [resolved]),
+      [],
+    )[0]
+    const { system } = buildNarrativePrompt(candidate.context)
+
+    expect(system).toContain('Roleだけを根拠に')
+    expect(system).toContain('mage')
+    expect(system).toContain('魔法')
+    expect(system).toContain('guardian')
+    expect(system).toContain('盾')
+    expect(system).toContain('最終文章に')
+    expect(system).toContain('自然な日本語')
+    expect(system).toContain('「店員」「依頼人」「衛兵」「医師」')
+  })
+
+  it('farewell prompt forbids owner response and return guarantees', () => {
+    const campaign = createTavernCampaign('narrative-prompt-farewell-guards')
+    const party = campaign.parties[0]
+    party.arrivalDay = 1
+    party.plannedDepartureDay = 1
+    party.relationship.affinity = 60
+    party.relationship.stayExtensionDaysUsed = 100
+    const next = advanceCampaignDay(withResults(campaign, []))
+    const farewell = next.narrativeCandidates.find(
+      (c) => c.eventType === 'farewell',
+    )!
+    const { user } = buildNarrativePrompt(farewell.context)
+
+    expect(user).toContain('店主の返答を作らない')
+    expect(user).toContain('必ず戻る')
+    expect(user).toContain('来月戻る')
   })
 })
 
