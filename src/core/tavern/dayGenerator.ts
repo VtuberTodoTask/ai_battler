@@ -3,6 +3,7 @@ import type { ObjectiveType } from '../expedition/types.ts'
 import { SeededRng } from '../rng/seededRng.ts'
 import { generatePartyPool } from './partyGenerator.ts'
 import { TEMPLATES_BY_OBJECTIVE_TYPE } from './requestTemplates.ts'
+import { planRequestRanksForDay } from './campaign/generators.ts'
 import type { TavernDayState, TavernRequestOffer } from './types.ts'
 
 const ALL_OBJECTIVE_TYPES: ObjectiveType[] = [
@@ -14,18 +15,17 @@ const ALL_OBJECTIVE_TYPES: ObjectiveType[] = [
   'survey',
 ]
 
-const REQUEST_RANKS: AdventurerRank[] = ['E', 'D', 'C', 'B']
-const REQUEST_RANK_WEIGHTS = [20, 35, 35, 10]
+const DEFAULT_REPUTATION = 10
 
 function generateRequest(
   index: number,
   seed: string,
   objectiveType: ObjectiveType,
+  rank: AdventurerRank,
 ): TavernRequestOffer {
   const selectionRng = new SeededRng(`${seed}:request:${index}:selection`)
   const templates = TEMPLATES_BY_OBJECTIVE_TYPE[objectiveType]
   const template = selectionRng.pick(templates)
-  const rank = selectionRng.weightedPick(REQUEST_RANKS, REQUEST_RANK_WEIGHTS)
   const battleEnabled =
     template.battleChance >= 100 || selectionRng.chance(template.battleChance)
 
@@ -41,18 +41,26 @@ function generateRequest(
 }
 
 export function generateTavernDay(seed: string): TavernDayState {
+  const parties = generatePartyPool(seed)
+  const availablePartyRanks = parties.map((p) => p.party.rank)
+  const rankPlan = planRequestRanksForDay(
+    seed,
+    DEFAULT_REPUTATION,
+    availablePartyRanks,
+  )
+
   const objectiveRng = new SeededRng(`${seed}:objectives`)
   const objectiveTypes = objectiveRng
     .shuffle([...ALL_OBJECTIVE_TYPES])
     .slice(0, 3)
 
+  const rankList = [rankPlan.serviceableA, rankPlan.serviceableB, rankPlan.open]
+
   const requests: TavernRequestOffer[] = []
   for (let i = 0; i < 3; i++) {
-    const offer = generateRequest(i, seed, objectiveTypes[i])
+    const offer = generateRequest(i, seed, objectiveTypes[i], rankList[i])
     requests.push(offer)
   }
-
-  const parties = generatePartyPool(seed)
 
   return {
     id: `tavern-day-${seed}`,

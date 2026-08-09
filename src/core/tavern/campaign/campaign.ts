@@ -33,7 +33,12 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
   )
 
   const daySeed = `${seed}:day:${dayNumber}`
-  const requests = generateTavernRequestsForDay(daySeed, reputation)
+  const availablePartyRanks = parties.map((p) => p.party.rank)
+  const requests = generateTavernRequestsForDay(
+    daySeed,
+    reputation,
+    availablePartyRanks,
+  )
   const currentDay = buildTavernDay(daySeed, requests, parties, dayNumber)
 
   return {
@@ -215,9 +220,13 @@ export function advanceCampaignDay(
   }
 
   const daySeed = `${nextCampaign.seed}:day:${nextDayNumber}`
+  const availablePartyRanks = remaining
+    .filter((p) => !isRecoveringOnDay(p, nextDayNumber))
+    .map((p) => p.party.rank)
   const requests = generateTavernRequestsForDay(
     daySeed,
     nextCampaign.reputation,
+    availablePartyRanks,
   )
   const currentDay = buildTavernDay(daySeed, requests, remaining, nextDayNumber)
   currentDay.partyEvents = [...preEvents, ...(currentDay.partyEvents ?? [])]
