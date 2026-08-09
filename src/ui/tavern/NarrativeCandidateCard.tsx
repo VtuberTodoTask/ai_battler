@@ -6,6 +6,10 @@ import type {
 } from '../../core/narrative/types.ts'
 import { NarrativeGenerationView } from './NarrativeGenerationView.tsx'
 
+function formatContext(context: NarrativeCandidate['context']): string {
+  return JSON.stringify(context, null, 2)
+}
+
 export interface NarrativeCandidateCardProps {
   candidate: NarrativeCandidate
   generation: NarrativeGenerationRecord | undefined
@@ -36,8 +40,10 @@ export function NarrativeCandidateCard({
   onRestore,
 }: NarrativeCandidateCardProps) {
   const [showPrompt, setShowPrompt] = useState(false)
+  const [showRaw, setShowRaw] = useState(false)
 
   const prompt = buildNarrativePrompt(candidate.context)
+  const rawContext = formatContext(candidate.context)
 
   const canSelect = candidate.state === 'available' && !generating
 
@@ -90,13 +96,22 @@ export function NarrativeCandidateCard({
 
       <details className="narrative-prompt">
         <summary onClick={() => setShowPrompt((v) => !v)}>
-          AIへ送る内容を{showPrompt ? '隠す' : '見る'}
+          AIへ送る内容（compressed v3 prompt）を{showPrompt ? '隠す' : '見る'}
         </summary>
         <div className="narrative-prompt-content">
           <h5>System Prompt</h5>
           <pre>{prompt.system}</pre>
           <h5>User Prompt</h5>
           <pre>{prompt.user}</pre>
+        </div>
+      </details>
+
+      <details className="narrative-raw-context">
+        <summary onClick={() => setShowRaw((v) => !v)}>
+          Raw Narrative Contextを{showRaw ? '隠す' : '見る'}
+        </summary>
+        <div className="narrative-raw-context-content">
+          <pre>{rawContext}</pre>
         </div>
       </details>
 

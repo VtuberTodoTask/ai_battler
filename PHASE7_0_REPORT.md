@@ -22,7 +22,7 @@ src/core/narrative/
   types.ts      — candidate, context, snapshot and generation record types
   candidates.ts — derive expedition/character-event candidates from campaign state
   context.ts    — build party/request snapshots and recent highlights
-  prompt.ts     — build v1 system/user prompts
+  prompt.ts     — build v3 system/user prompts
   generation.ts — single call + archive helper
 
 src/ai/narrative/
@@ -198,10 +198,13 @@ produce a coherent goodbye.
 
 ## Prompt contract
 
-`NARRATIVE_PROMPT_VERSION = 'v2'`.
+`NARRATIVE_PROMPT_VERSION = 'v3'`.
 
-The v2 bump reflects a meaningful contract change: the tavernkeeper is now
-explicitly defined as the player, not an NPC the AI can act for.
+The v3 bump reflects a meaningful contract change: the prompt now sends a
+`NarrativeFactBundle` (`confirmedFacts`, `unknownDetails`, `presentationHints`)
+from the deterministic `src/core/narrative/facts.ts` builder instead of raw
+engine values. The tavernkeeper remains explicitly defined as the player, not an
+NPC the AI can act for.
 
 ### Player-owned tavernkeeper
 
@@ -210,6 +213,8 @@ The system prompt contains a dedicated `【店主＝プレイヤーについて�
 - The tavernkeeper is not an NPC; the tavernkeeper is the player operating the game.
 - The AI must not decide the tavernkeeper's personality, speech, emotions,
   thoughts, decisions, promises, or course of action.
+- The AI must not infer or state the player's feelings
+  (e.g. `プレイヤーは期待した`, `プレイヤーは喜んだ`, `プレイヤーは不安を感じた`).
 - Unless provided as a FACT, the AI must not invent the tavernkeeper's name,
   gender, age, appearance, personality, past, feelings, tone, or lines.
 - If no tavernkeeper name is given as a FACT, refer to them only as `店主`.
@@ -232,12 +237,24 @@ The system prompt contains a dedicated `【店主＝プレイヤーについて�
 - Do not promise return dates or invent fixed destinations.
 - Do not resurrect the dead, kill survivors, invent new injuries/illnesses, or
   create romances.
+- Do not invent the causes of failure, retreat, injury, depletion, low progress,
+  or success when those causes are not listed in CONFIRMED FACTS.
+- Only characters explicitly named in the input data and the tavernkeeper may
+  appear. Do not invent clerks, clients, guards, doctors, travelers, etc., unless
+  explicitly listed as an NPC in a character event. This rule applies to both
+  expedition and character-event narratives.
+- Do not infer equipment, spells, weapons, or actions from a member's `role`
+  (e.g., `mage` casting magic, `guardian` using a shield, `scout` finding traps)
+  unless the FACTS explicitly record them.
 
 ### Personality usage
 
 Personality values (bravery, caution, cooperation, discipline, altruism, greed)
-may influence how a party member speaks or reacts, but they must not be used to
-invent new backstory, family, debt, or employment history.
+are translated by `buildPersonalityHints` into Japanese narrative hints when
+`|value| >= 2`. The AI receives hints such as `大胆で、危険を過度には恐れない` or
+`他者への配慮が強い`, never raw trait names or numbers. Hints may influence
+speech style but must not be used to invent backstory, family, debt, or
+employment history.
 
 ### Expedition output
 
@@ -300,50 +317,46 @@ for every supported event:
 ## Expedition prompt example
 
 ```text
-【遠征レポート】
-依頼タイトル: 魔物出没原因の調査
-依頼ランク: E
-目的: investigation
-環境: forest
-Public Tags: 調査, 森林, 待ち伏せの可能性
-依頼内容: 街道沿いで増えている魔物の出没理由を探る。
+=== CURRENT REQUEST ===
+依頼タイトル: 洞窟の魔物討伐
+依頼ランク: D
+今回の依頼種別: elimination（討伐）
+環境: cave（洞窟）
+Public Tags: 討伐, 洞窟, 戦闘あり
+依頼内容: 洞窟に潜む魔物を掃討する。
 
-Party: 風鳴り (Rank D)
-Leader: オルム ピーク
-Affinity: 10
-Financial Pressure: 32
-Risk Tolerance: balanced
-Specialization Match: weak
-Strong Objective: survey
-Weak Objective: investigation
-Leader Personality: bravery 0, caution -1, cooperation 2, discipline 3, altruism 2, greed -2
+=== PARTY ===
+Party: 雷鳴の足跡 (Rank D)
+Leader: リナ ジェム
+関係性: まだ馴染みが薄い
+リスクへの姿勢: バランス型
+受諾理由: 適切な内容の依頼だった
+今回の依頼との専門適性: 今回の依頼は得意・苦手のどちらでもない
+
 Members:
-  - オルム ピーク (D vanguard)
-      Personality: bravery 0, caution -1, cooperation 2, discipline 3, altruism 2, greed -2
-  - ゴウ オーシャン (D scout)
-      Personality: bravery -3, caution 0, cooperation -1, discipline -2, altruism -3, greed -3
-  - チェルシー ピーク (D healer)
-      Personality: bravery 1, caution 2, cooperation -2, discipline -1, altruism 1, greed 0
-  - シエラ ムーン (D support)
-      Personality: bravery -3, caution -1, cooperation -3, discipline 0, altruism -3, greed -3
+  - ナナリー アイヴィー（D guardian）: 大胆で、危険を過度には恐れない / 慎重さより行動を優先しやすい / 仲間と歩調を合わせやすい / 形式や手順にはあまり拘らない
+  - ユリ オーシャン（D ranger）: 危険には慎重な姿勢を取りやすい
+  - リナ ジェム（D mage）: 慎重さより行動を優先しやすい / 自分の判断を優先しやすい / 他者より自分側の利益を優先しやすい / 金銭的利益への執着は弱い
+  - レオ アイヴィー（D support）: 特に目立った傾向は記録されていない
 
-Acceptance Reason: appropriate
-Rank Gap: -1
-Outcome: success
-Objective Completed: Yes
-Objective Progress: 80%
+=== CONFIRMED FACTS ===
+- Partyは依頼を完遂できず、途中で撤退した
+- 遠征中に戦闘が発生した
+- 戦闘結果は撤退だった
+- 依頼対象の一部が残っている
+- 帰還時の状態: ナナリー アイヴィー: 目立った消耗はない / ユリ オーシャン: 目立った消耗はない / リナ ジェム: 帰還時の消耗が大きい / レオ アイヴィー: 目立った消耗はない
 
-Member Final States:
-  - オルム ピーク (vanguard D) — HP 75/75, MP 12/12, Morale 47
-  - ゴウ オーシャン (scout D) — HP 64/64, MP 9/9, Morale 44
-  - チェルシー ピーク (healer D) — HP 62/62, MP 39/39, Morale 62
-  - シエラ ムーン (support D) — HP 52/52, MP 39/39, Morale 48
+=== DETAILS NOT RECORDED ===
+- Memberが消耗した具体的な原因は記録されていない
+- 撤退した具体的原因は記録されていない
 
-Key Facts:
-  - 魔物出没原因の調査を完了
-  - 全員無事に帰還
+=== NARRATIVE HINTS ===
+- 関係性: まだ馴染みが薄い
+- リスクへの姿勢: バランス型
+- 今回の依頼は得意・苦手のどちらでもない
+- 受諾理由: 適切な内容の依頼だった
 
-WRITING INSTRUCTIONS:
+=== WRITING INSTRUCTIONS ===
 - 400～800字程度の日本語
 - Partyが酒場へ帰還し、店主へ結果を報告する短編
 - 重要な出来事を自然な文章にする
@@ -352,7 +365,10 @@ WRITING INSTRUCTIONS:
 - 店主はプレイヤー本人なので、店主の台詞・感情・判断を作らない
 - 店主の反応を必要とする場面では、反応そのものを書かずに場面を進める
 - HP/MP/Morale等の数値をそのまま読み上げない
+- 最終文章にenum名、内部フィールド名、ゲームシステムの注釈、FACTS一覧の引用、注意書き、解説、括弧書きのメタコメントを出力してはいけません
+- 最終本文は自然な日本語だけで書いてください
 - Outcomeを変更しない
+- 次の冒険、新たな依頼、新しい目的地へ勝手につなげない
 ```
 
 ## Farewell prompt example
@@ -418,23 +434,18 @@ User (farewell fixture):
 Event Type: farewell
 Party: 赤鴉団 (Rank D)
 Leader: フェイ アイヴィー
-Leader Personality: bravery -3, caution -1, cooperation 3, discipline -2, altruism 3, greed -1
-Affinity: 60
-Financial Pressure: 38
-Risk Tolerance: cautious
-Growth Milestones: 0
-Training Days: 0
-Strong Objective: retrieval
-Weak Objective: investigation
+Leaderの傾向: 危険には慎重な姿勢を取りやすい / 仲間と歩調を合わせやすい / 他者への配慮が強い
+関係性: 新人関係
+リスクへの姿勢: 慎重
+成長段階: 0
+滞在訓練日数: 0
+得意分野: retrieval
+苦手分野: investigation
 Members:
-  - フェイ アイヴィー (D scout)
-      Personality: bravery -3, caution -1, cooperation 3, discipline -2, altruism 3, greed -1
-  - オルム クォーツ (D ranger)
-      Personality: bravery -2, caution 3, cooperation -1, discipline 1, altruism -3, greed 2
-  - シエラ アイヴィー (D mage)
-      Personality: bravery -3, caution 3, cooperation 3, discipline -1, altruism 2, greed -3
-  - チェルシー アイヴィー (D support)
-      Personality: bravery 0, caution -1, cooperation 2, discipline 2, altruism -2, greed -1
+  - フェイ アイヴィー（D scout）: 危険には慎重な姿勢を取りやすい / 仲間と歩調を合わせやすい / 他者への配慮が強い
+  - オルム クォーツ（D ranger）: 慎重に物事を考える / 自分の判断を優先しやすい / 金銭的利益への執着は弱い
+  - シエラ アイヴィー（D mage）: 慎重に物事を考える / 仲間と歩調を合わせやすい / 他者への配慮が強い
+  - チェルシー アイヴィー（D support）: 形式や手順にはあまり拘らない / 他者への配慮が強い / 金銭的利益への執着は弱い
 
 Recent Highlights:
 なし
@@ -577,3 +588,211 @@ Recordings and detailed screenshots are in `test-report-phase7-0-rerun.md`.
 - Character event `recentHighlights` are based on the current party's mission
   specialization and may not reflect historical context if the specialization
   changed (specialization is currently static).
+
+## Phase 7.0.3 — Narrative Fact Fidelity / Context Compression
+
+Phase 7.0.3 stops feeding raw engine values into the LLM and instead sends a
+deterministic `NarrativeFactBundle` produced by `src/core/narrative/facts.ts`.
+
+### New module: `src/core/narrative/facts.ts`
+
+- `NarrativeFactBundle { confirmedFacts, unknownDetails, presentationHints }`
+- `buildExpeditionNarrativeFacts(context)` returns the bundle deterministically
+  (no RNG; same context always yields the same bundle).
+- `buildPersonalityHints(personality)` maps traits with `|value| >= 2` to Japanese
+  narrative hints (e.g. `大胆で、危険を過度には恐れない`, `他者への配慮が強い`).
+- Helper label functions:
+  - `objectiveLabel`
+  - `environmentLabel`
+  - `outcomeLabel`
+  - `battleOutcomeLabel`
+  - `riskToleranceLabel`
+  - `affinityBand`
+  - `specializationMatchText`
+  - `acceptanceReasonText`
+
+### Prompt version bump
+
+`NARRATIVE_PROMPT_VERSION = 'v3'`.
+
+The new contract is a clean break: the LLM translates confirmed facts into
+prose, but it does not invent new events, causes, NPCs, equipment, items, or
+destinations.
+
+### Expedition prompt sections
+
+```text
+=== CURRENT REQUEST ===
+=== PARTY ===
+=== CONFIRMED FACTS ===
+=== DETAILS NOT RECORDED ===
+=== NARRATIVE HINTS ===
+=== WRITING INSTRUCTIONS ===
+```
+
+`CURRENT REQUEST` contains only existing request fields (`title`, `rank`,
+`objectiveType` with a Japanese label, `environment` with a label, `publicTags`,
+`briefing`). No new information is generated.
+
+### Removed from the AI-facing prompt
+
+- `Outcome: failedObjective`
+- `Objective Progress: 30%`
+- `Objective Completed`
+- `elapsedTime`
+- `HP 45/65`, `MP`, `Morale`
+- Raw `keyFacts` listing
+- `Strong Objective` / `Weak Objective` in expedition prompts
+- Raw enum names and internal field names
+
+`Strong`/`Weak Objective` is still kept for character-event prompts where it is
+narratively useful.
+
+### Natural-language transformations
+
+- Outcome labels:
+  - `completeSuccess` → `依頼は完全な成功に終わった`
+  - `success` → `依頼は成功した`
+  - `partialSuccess` → `依頼は一部成果を得たが、完全な成功には至らなかった`
+  - `failedObjective` → `依頼の目的を達成できなかった`
+  - `forcedRetreat` → `Partyは依頼を完遂できず、途中で撤退した`
+  - `lostExpedition` → `遠征は壊滅的な結果に終わった`
+- Battle outcomes are reported as `遠征中に戦闘が発生した` + `戦闘結果は...だった`.
+- HP condition bands:
+  - ratio `>= 0.9` → `目立った消耗はない`
+  - `0.5–0.9` → `帰還時に消耗が見られる`
+  - `< 0.5` → `帰還時の消耗が大きい`
+- Affinity banded as 0–19, 20–39, 40–59, 60–79, 80–100.
+- Risk tolerance, specialization match, and acceptance reason are all rendered
+  as Japanese prose.
+
+### Objective-specific fact builders
+
+All six objective types have dedicated builders:
+
+- `investigationFacts`
+- `eliminationFacts`
+- `rescueFacts`
+- `escortFacts`
+- `retrievalFacts`
+- `surveyFacts`
+
+Each builder emits `confirmedFacts` from the `DispatchReport` objective summary and
+adds `unknownDetails` for missing causal facts. For example, a partial survey
+states that only part of the area was surveyed and that the record quality met
+the threshold, but marks the reason coverage was limited as unknown.
+
+### Causality and role-hallucination guards
+
+The v3 system prompt adds:
+
+- Cause Fidelity Rule: when a cause is not in `CONFIRMED FACTS`, the LLM must not
+  invent one; it must describe the outcome while leaving the cause unknown.
+- Role-hallucination guard: a member's `role` is not a license to invent actions
+  (`mage` casting magic, `guardian` using a shield, `scout` finding traps, etc.)
+  unless the FACTS explicitly record them.
+- Equipment creation is forbidden unless the FACTS list the item.
+- NPC creation is forbidden except for confirmed people in `CONFIRMED FACTS` and
+  the tavernkeeper.
+- Player emotion inference is explicitly forbidden (`プレイヤーは期待した`, etc.).
+- Meta output is forbidden: no enum names, internal field names, annotations,
+  fact lists, or parenthetical meta comments in the final prose.
+- Future actions and next destinations may not be invented.
+
+### Creativity boundary
+
+Allowed:
+
+- Facial expressions, glances, tone, posture, pauses, short lines, and light
+  reactions among party members.
+
+Forbidden:
+
+- New events, obstacles, enemies, people, items, causes, information, promises,
+  or future plans.
+
+### UI prompt preview
+
+`NarrativeCandidateCard.tsx` now shows two expandable blocks:
+
+- `AIへ送る内容（compressed v3 prompt）を見る` — the actual v3 system + user prompt.
+- `Raw Narrative Contextを見る` — the full JSON context retained for audit and
+  debug.
+
+### Tests added
+
+- `src/core/narrative/facts.test.ts`
+  - `buildPersonalityHints` for positive/negative traits, raw-name exclusion.
+  - Fact bundles for all six objective types.
+  - Battle outcome reporting without causal inference.
+  - Member condition bands without raw HP/MP/Morale.
+- `src/core/narrative/narrative.test.ts` updated for v3 prompt sections and
+  contents, player-contract regression, role/equipment hallucination guards,
+  meta-output guard, and Japanese-only output.
+
+### Audits
+
+**30-day zero-call audit** (`npx tsx scripts/phase7-0-narrative-audit.ts`):
+
+```text
+30-day zero-call audit
+  Candidates: 69
+  AI calls: 0
+  Generations: 0
+After manual 3-call generation
+  AI calls: 3
+  Generations: 3
+```
+
+**Compression audit** (`npx tsx scripts/phase7-0-3-compression-audit.ts`):
+
+```text
+Prompt compression audit
+  Expedition candidates: 30
+  Avg prompt characters: 3597
+  Avg estimated tokens:  5396
+  Avg raw context chars:   4943
+  Total prompt chars:      107913
+  Total estimated tokens:  161877
+  Total raw context chars: 148283
+```
+
+This audit compares the compressed v3 prompt actually sent to the LLM with
+the raw `NarrativeContext` JSON retained for debugging. It does not compare
+against the older v2 prompt, which is no longer reconstructed. The v3 prompt is
+shorter than the raw JSON context and focuses on facts rather than numbers,
+improving fidelity while keeping token use reasonable.
+
+### LM Studio smoke test
+
+Not available in this environment, so no manual LLM generation was run.
+The prompt contract and deterministic fact builder are the deliverables for
+Phase 7.0.3.
+
+### Verification
+
+- `npm run typecheck` — green
+- `npm run lint` — green
+- `npm test` — green
+- `npm run build` — green
+- `npm run test:expedition-regression` — 22/22 passing
+- `npx tsx scripts/phase7-0-narrative-audit.ts` — 69 candidates, 0 AI calls
+- `npx tsx scripts/phase7-0-3-compression-audit.ts` — completed
+
+### Phase 7.0.3.1 consistency fixes
+
+- Survey unknown-detail derivation is based on the actual failing condition
+  (`coveragePercent < 100`, `averageQuality < minimumAcceptableQuality`,
+  `!reportReturned`) rather than `completed === false` alone. This prevents
+  contradictory facts such as "full coverage" and "range was limited" appearing
+  together.
+- Retrieval integrity (`finalIntegrity` vs `minimumAcceptableIntegrity`) is
+  narrated only when the party has actually interacted with the target
+  (`secured || extracted || returned`). Hidden engine state for an unobserved
+  target no longer leaks into `CONFIRMED FACTS`.
+- Character-event actor restrictions now refer to people explicitly present in
+  the input data (`入力データに人物として明示されている者と店主`) rather than
+  depending on the Expedition-only `CONFIRMED FACTS` section.
+- Survey with zero `surveyedSectorCount` is treated as having no survey record to
+  evaluate or return; quality and report-return facts are emitted only when at
+  least one sector was surveyed.
