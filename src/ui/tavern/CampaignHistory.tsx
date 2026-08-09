@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { OUTCOME_LABELS } from '../expedition/labels.ts'
 import type { TavernDayRecord } from '../../core/tavern/campaign/types.ts'
+import type { CampaignProgressionEvent } from '../../core/tavern/campaign/types.ts'
 
 export interface CampaignHistoryProps {
   history: TavernDayRecord[]
@@ -55,6 +56,16 @@ export function CampaignHistory({ history }: CampaignHistoryProps) {
                     </ul>
                   </div>
                 )}
+                {record.progressionEvents.length > 0 && (
+                  <div className="history-events">
+                    <strong>成長 / 鍛錬:</strong>
+                    <ul>
+                      {record.progressionEvents.map((e, i) => (
+                        <li key={i}>{progressionLabel(e)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </li>
@@ -73,4 +84,31 @@ function eventLabel(type: string): string {
     finishedRecovery: '療養完了',
   }
   return labels[type] ?? type
+}
+
+function progressionLabel(event: CampaignProgressionEvent): string {
+  switch (event.type) {
+    case 'experienceGained':
+      return `《${event.partyName}》 ${sourceLabel(event.source)} +${event.amount} XP (計 ${event.totalGrowthXpAfter})`
+    case 'training':
+      return `《${event.partyName}》 自主鍛錬 +${event.amount} XP`
+    case 'skillImproved':
+      return `${event.memberName}: ${event.skill} ${event.before} → ${event.after}`
+    case 'progressionSkipped':
+      return `《${event.partyName}》 成長スキップ (${event.reason})`
+    default:
+      return `《${(event as CampaignProgressionEvent).partyName}》 ${(event as CampaignProgressionEvent).type}`
+  }
+}
+
+function sourceLabel(source: string): string {
+  const labels: Record<string, string> = {
+    completeSuccess: '完全成功',
+    success: '成功',
+    partialSuccess: '部分成功',
+    failedObjective: '失敗',
+    forcedRetreat: '強制撤退',
+    training: '自主鍛錬',
+  }
+  return labels[source] ?? source
 }

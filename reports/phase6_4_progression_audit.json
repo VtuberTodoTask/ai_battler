@@ -1,0 +1,98 @@
+{
+  "dayCount": 30,
+  "seedCount": 5,
+  "combined": {
+    "totalExpeditionXp": 407,
+    "totalTrainingXp": 383,
+    "totalMilestones": 10,
+    "totalSkillImprovements": 552,
+    "totalSkillIncrease": 1101,
+    "maxSkillIncrease": 2,
+    "totalTrainingDays": 52,
+    "outcomeXp": {
+      "completeSuccess": {
+        "count": 61,
+        "xp": 244
+      },
+      "success": {
+        "count": 36,
+        "xp": 108
+      },
+      "partialSuccess": {
+        "count": 8,
+        "xp": 16
+      },
+      "failedObjective": {
+        "count": 23,
+        "xp": 23
+      },
+      "forcedRetreat": {
+        "count": 16,
+        "xp": 16
+      },
+      "training": {
+        "count": 383,
+        "xp": 383
+      }
+    },
+    "finalParties": 20,
+    "partiesWithZeroGrowth": 0,
+    "partiesWithMilestone": 9
+  },
+  "xpPerOutcome": {
+    "completeSuccess": 4,
+    "success": 3,
+    "partialSuccess": 2,
+    "failedObjective": 1,
+    "forcedRetreat": 1,
+    "training": 1
+  },
+  "averages": {
+    "expeditionXpPerSeed": 81.4,
+    "trainingXpPerSeed": 76.6,
+    "milestonesPerSeed": 27.6,
+    "skillImprovementsPerSeed": 110.4,
+    "trainingDaysPerSeed": 76.6,
+    "finalPartiesWithMilestoneRate": 0.45,
+    "finalPartiesWithZeroGrowthRate": 0,
+    "skillIncreasePerImprovement": 1.9945652173913044,
+    "maxSkillIncrease": 2
+  },
+  "seeds": [
+    {
+      "seed": "phase6-4-audit-001",
+      "totalGrowth": 153,
+      "milestones": 1,
+      "skillImprovements": 104,
+      "trainingDays": 10
+    },
+    {
+      "seed": "phase6-4-audit-002",
+      "totalGrowth": 163,
+      "milestones": 2,
+      "skillImprovements": 112,
+      "trainingDays": 11
+    },
+    {
+      "seed": "phase6-4-audit-003",
+      "totalGrowth": 171,
+      "milestones": 3,
+      "skillImprovements": 124,
+      "trainingDays": 12
+    },
+    {
+      "seed": "phase6-4-audit-004",
+      "totalGrowth": 157,
+      "milestones": 2,
+      "skillImprovements": 116,
+      "trainingDays": 9
+    },
+    {
+      "seed": "phase6-4-audit-005",
+      "totalGrowth": 146,
+      "milestones": 2,
+      "skillImprovements": 96,
+      "trainingDays": 10
+    }
+  ]
+}

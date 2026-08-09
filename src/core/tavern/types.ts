@@ -69,6 +69,12 @@ export interface AdventurerParty {
   archetypeId: string
 }
 
+export interface TavernPartyProgressionSnapshot {
+  growthXp: number
+  growthMilestones: number
+  trainingDays: number
+}
+
 export interface TavernParty {
   id: string
   party: AdventurerParty
@@ -78,6 +84,7 @@ export interface TavernParty {
   arrivalDay?: number
   plannedDepartureDay?: number
   isNew?: boolean
+  progression?: TavernPartyProgressionSnapshot
 }
 
 export interface PartyTemplate {

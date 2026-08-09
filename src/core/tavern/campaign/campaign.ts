@@ -10,6 +10,11 @@ import {
   updateCampaignPartyStats,
 } from './partyState.ts'
 import {
+  EXPEDITION_GROWTH_XP,
+  TRAINING_GROWTH_XP,
+  awardPartyGrowthXp,
+} from './progression.ts'
+import {
   buildTavernDay,
   generateCampaignParty,
   generateInitialCampaignParties,
@@ -18,10 +23,12 @@ import {
 } from './generators.ts'
 import type {
   CampaignParty,
+  CampaignProgressionEvent,
+  CampaignProgressionSource,
   TavernCampaignState,
   TavernDayRecord,
 } from './types.ts'
-import type { CampaignPartyEvent } from '../types.ts'
+import type { CampaignPartyEvent, TavernDayState } from '../types.ts'
 
 export function createTavernCampaign(seed: string): TavernCampaignState {
   const dayNumber = 1
@@ -71,6 +78,7 @@ export function resolveCampaignDay(
   }
 
   const postEvents: CampaignPartyEvent[] = []
+  const progressionEvents: CampaignProgressionEvent[] = []
 
   for (const resolved of results) {
     if (resolved.status !== 'resolved' || !resolved.result) {
@@ -94,7 +102,25 @@ export function resolveCampaignDay(
         partyName: party.party.name,
         dayNumber,
       })
+      progressionEvents.push(
+        ...awardPartyGrowthXp(nextCampaign.seed, party, 0, {
+          source: 'forcedRetreat',
+          dayNumber,
+        }),
+      )
       continue
+    }
+
+    const xpAmount = EXPEDITION_GROWTH_XP[outcome]
+    if (xpAmount > 0) {
+      const progressionSource: CampaignProgressionSource =
+        outcome === 'lostExpedition' ? 'forcedRetreat' : outcome
+      progressionEvents.push(
+        ...awardPartyGrowthXp(nextCampaign.seed, party, xpAmount, {
+          source: progressionSource,
+          dayNumber,
+        }),
+      )
     }
 
     const recoveryDays = calculateRecoveryDays(party)
@@ -108,6 +134,34 @@ export function resolveCampaignDay(
       })
     }
   }
+
+  const dispatchedPartyIds = new Set(
+    results
+      .filter((r) => r.status === 'resolved' && r.partyId)
+      .map((r) => r.partyId),
+  )
+
+  for (const party of nextCampaign.parties) {
+    if (
+      party.departingCasualty ||
+      dispatchedPartyIds.has(party.id) ||
+      isRecoveringOnDay(party, dayNumber)
+    ) {
+      continue
+    }
+    progressionEvents.push(
+      ...awardPartyGrowthXp(nextCampaign.seed, party, TRAINING_GROWTH_XP, {
+        source: 'training',
+        dayNumber,
+      }),
+    )
+  }
+
+  // Sync resolved day party snapshots with grown campaign parties.
+  nextCampaign.currentDay = syncCurrentDayParties(
+    nextCampaign.currentDay,
+    nextCampaign.parties,
+  )
 
   const reputationOutcomes = results
     .filter((r) => r.status === 'resolved' && r.result)
@@ -133,10 +187,31 @@ export function resolveCampaignDay(
       ...(nextCampaign.currentDay.partyEvents ?? []),
       ...postEvents,
     ],
+    progressionEvents,
   }
   nextCampaign.history.push(dayRecord)
 
   return nextCampaign
+}
+
+function syncCurrentDayParties(
+  currentDay: TavernDayState,
+  parties: CampaignParty[],
+): TavernDayState {
+  const updated = currentDay.parties.map((tavernParty) => {
+    const campaignParty = parties.find((p) => p.id === tavernParty.id)
+    if (!campaignParty) return tavernParty
+    return {
+      ...tavernParty,
+      party: deepClone(campaignParty.party),
+      progression: {
+        growthXp: campaignParty.progression.growthXp,
+        growthMilestones: campaignParty.progression.growthMilestones,
+        trainingDays: campaignParty.progression.trainingDays,
+      },
+    }
+  })
+  return { ...currentDay, parties: updated }
 }
 
 export function advanceCampaignDay(

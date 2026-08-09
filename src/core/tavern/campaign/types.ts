@@ -28,6 +28,59 @@ export interface CampaignPartyStats {
   retreats: number
 }
 
+export interface CampaignPartyProgression {
+  growthXp: number
+  totalGrowthXp: number
+  growthMilestones: number
+  trainingDays: number
+}
+
+export type CampaignProgressionSource =
+  | 'completeSuccess'
+  | 'success'
+  | 'partialSuccess'
+  | 'failedObjective'
+  | 'forcedRetreat'
+  | 'training'
+
+export type CampaignProgressionEvent =
+  | {
+      type: 'experienceGained'
+      partyId: string
+      partyName: string
+      dayNumber: number
+      source: CampaignProgressionSource
+      amount: number
+      growthXpAfter: number
+      totalGrowthXpAfter: number
+    }
+  | {
+      type: 'training'
+      partyId: string
+      partyName: string
+      dayNumber: number
+      amount: number
+    }
+  | {
+      type: 'skillImproved'
+      partyId: string
+      partyName: string
+      memberId: string
+      memberName: string
+      skill: string
+      before: number
+      after: number
+      milestone: number
+      dayNumber: number
+    }
+  | {
+      type: 'progressionSkipped'
+      partyId: string
+      partyName: string
+      dayNumber: number
+      reason: string
+    }
+
 export interface CampaignParty {
   id: string
   party: AdventurerParty
@@ -37,6 +90,7 @@ export interface CampaignParty {
   recoveringThroughDay?: number
   condition: CampaignPartyCondition
   stats: CampaignPartyStats
+  progression: CampaignPartyProgression
   departingCasualty?: boolean
 }
 
@@ -62,6 +116,7 @@ export interface TavernDayRecord {
   reputationChange: ReputationChangeSummary
   results: ResolvedDispatch[]
   partyEvents: CampaignPartyEvent[]
+  progressionEvents: CampaignProgressionEvent[]
 }
 
 export interface TavernCampaignState {
