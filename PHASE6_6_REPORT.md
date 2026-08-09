@@ -15,8 +15,16 @@
 - `src/core/tavern/specialization.ts` に `getMissionSpecializationMatch()` と定数を追加
 
 ```ts
-export const MISSION_SPECIALIZATION_CHECK_MODIFIER = { strong: 8, neutral: 0, weak: -8 }
-export const ELIMINATION_SPECIALIZATION_THREAT_MULTIPLIER = { strong: 0.92, neutral: 1.0, weak: 1.08 }
+export const MISSION_SPECIALIZATION_CHECK_MODIFIER = {
+  strong: 8,
+  neutral: 0,
+  weak: -8,
+}
+export const ELIMINATION_SPECIALIZATION_THREAT_MULTIPLIER = {
+  strong: 0.92,
+  neutral: 1.0,
+  weak: 1.08,
+}
 ```
 
 ### 2.2 遠征実行への統合
@@ -45,14 +53,14 @@ export const ELIMINATION_SPECIALIZATION_THREAT_MULTIPLIER = { strong: 0.92, neut
 
 `scripts/phase6-6-specialization-audit.ts` を実行。
 
-| 監査 | 結果 |
-| --- | --- |
-| Distribution（1000 seeds × 8 templates） | PASS: 各 Objective の strong/weak 出現頻度が期待値 ±30% 以内 |
-| Role independence | PASS: archetype 間で偏りなし |
-| Paired success（6 objectives × 100 seeds） | PASS: strong >= neutral >= weak |
-| Acceptance score shift | PASS: strong vs neutral = +8.00, neutral vs weak = +8.00 |
-| Acceptance rate（same-rank / +1 / +2 hard gate） | PASS: スコア差 ~±8、+2 hard gate 0% acceptance |
-| 30-day campaign smoke | PASS: 30 日間、70 件の遠征をエラーなく実行 |
+| 監査                                             | 結果                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------ |
+| Distribution（1000 seeds × 8 templates）         | PASS: 各 Objective の strong/weak 出現頻度が期待値 ±30% 以内 |
+| Role independence                                | PASS: archetype 間で偏りなし                                 |
+| Paired success（6 objectives × 100 seeds）       | PASS: strong >= neutral >= weak                              |
+| Acceptance score shift                           | PASS: strong vs neutral = +8.00, neutral vs weak = +8.00     |
+| Acceptance rate（same-rank / +1 / +2 hard gate） | PASS: スコア差 ~±8、+2 hard gate 0% acceptance               |
+| 30-day campaign smoke                            | PASS: 30 日間、70 件の遠征をエラーなく実行                   |
 
 詳細は `reports/phase6_6_specialization_audit.json` を参照。
 
