@@ -1,5 +1,6 @@
 import type {
   CharacterEventNarrativeContext,
+  CharacterNarrativeContext,
   CharacterNarrativeEventType,
   ExpeditionNarrativeContext,
   NarrativeContext,
@@ -22,8 +23,9 @@ import {
 } from './timeline.ts'
 import { determineNarrativeDirection } from './director.ts'
 import { formatNarrativeProfile } from './characterProfile.ts'
+import { countryLabel, genderLabel, speciesLabel } from '../identity/labels.ts'
 
-export const NARRATIVE_PROMPT_VERSION = 'v7'
+export const NARRATIVE_PROMPT_VERSION = 'v8'
 
 export interface NarrativePrompt {
   system: string
@@ -109,6 +111,25 @@ CHARACTERS に含まれる口調、癖、価値観、欠点、恐れ、気質は
 【キャラクター技法はチェックリストではない】
 dialogue、habit、relationship、human noise、non-verbal interaction などは、場面に自然に合うものだけを使ってください。
 全部を毎回入れる必要はありません。
+
+【背景とアイデンティティの扱い】
+種族・出身国・性別・家庭・経歴は、Character の行動や判断を「なぜそうなったか」で理解するための文脈です。
+これらを Personality や台詞のテンプレートとして扱わないでください。
+文化の価値は、個人が受け入れ、再解釈、無視、拒否、逆手に取ることがあります。
+背景は、行動や選択、会話の端に滲ませるものであって、自己紹介や履歴書のように要約して読み上げないでください。
+以下のような表現を避けてください。
+- 「山人族なので職人気質だ」
+- 「ラグナ出身なので生存を重視する」
+- 「女性だから穏やかだ」
+- 「彼はセレスタ人らしく契約を重視する」
+代わりに、背景を通じて自然な反応や台詞を作ってください。
+例：「報酬は後でいい。帰れるうちに戻るぞ」「その条件、依頼書には書いてなかったよな」
+
+【恋愛的興味の扱い】
+Romantic Attraction が明示されている場合、それは一方向の内面の傾向です。
+高値だからといって、必ず「恋をしている」「愛している」と説明しないでください。
+中程度であれば、「少し意識している」「相手への反応だけ微妙に違う」「妙に気にする」程度にとどめてください。
+存在しない恋愛感情や、関係性のない二者間の恋愛を創作しないでください。
 
 【情報の三層モデル】
 このプロンプトで提供される情報は次の三層に分かれています。
@@ -213,6 +234,22 @@ CONFIRMED OUTCOME FACTSやTIMELINEの文を、そのまま登場人物の台詞�
 
 ゲームシステムの数値をそのまま読み上げるのではなく、自然な日本語の物語として描写してください。`
 
+function identitySummaryLine(m: NarrativeMemberSnapshot): string {
+  if (!m.identity) return '素性: 未記録'
+  const parts = [
+    speciesLabel(m.identity.species),
+    countryLabel(m.identity.countryOfOrigin),
+    genderLabel(m.identity.gender),
+  ]
+  if (m.lifeBackground?.formerOccupation) {
+    parts.push(`元${m.lifeBackground.formerOccupation}`)
+  }
+  if (m.lifeBackground?.reasonForAdventuring) {
+    parts.push(m.lifeBackground.reasonForAdventuring)
+  }
+  return `素性: ${parts.join(' / ')}`
+}
+
 function memberHintLines(members: NarrativeMemberSnapshot[]): string[] {
   const lines: string[] = []
   for (const m of members) {
@@ -223,6 +260,7 @@ function memberHintLines(members: NarrativeMemberSnapshot[]): string[] {
         : '特に目立った傾向は記録されていない'
     const profileText = formatNarrativeProfile(m.narrativeProfile)
     lines.push(`  - ${m.name}（${m.rank} ${m.role}）`)
+    lines.push(`    ${identitySummaryLine(m)}`)
     lines.push(`    傾向: ${hintText}`)
     lines.push(`    プロフィール: ${profileText}`)
   }
@@ -248,8 +286,12 @@ function relationshipLines(
       r.recentEvents && r.recentEvents.length > 0
         ? ` 最近: ${r.recentEvents.map((e) => e.summary).join('；')}`
         : ''
+    const romantic =
+      typeof r.romanticAttraction === 'number' && r.romanticAttraction > 0
+        ? ` 恋愛的興味: ${relationshipBand(r.romanticAttraction)}`
+        : ''
     lines.push(
-      `  - ${r.sourceName} → ${r.targetName}: ${metrics}${tags}${recent}`,
+      `  - ${r.sourceName} → ${r.targetName}: ${metrics}${romantic}${tags}${recent}`,
     )
   }
   return lines
@@ -326,6 +368,38 @@ function directionLines(
     lines.push('  - なし')
   }
 
+  return lines
+}
+
+function characterContextLines(
+  contexts: CharacterNarrativeContext[] | undefined,
+): string[] {
+  if (!contexts || contexts.length === 0)
+    return ['- キャラクターバックグラウンドは未設定']
+  const lines: string[] = []
+  for (const c of contexts) {
+    lines.push(`  - ${c.characterId}:`)
+    if (c.identitySummary) lines.push(`    素性: ${c.identitySummary}`)
+    if (c.relevantBackground && c.relevantBackground.length > 0) {
+      lines.push(`    関連背景: ${c.relevantBackground.join(' / ')}`)
+    }
+    if (c.relevantExperiences && c.relevantExperiences.length > 0) {
+      lines.push(`    経験: ${c.relevantExperiences.join(' / ')}`)
+    }
+    if (
+      c.relevantCulturalInfluences &&
+      c.relevantCulturalInfluences.length > 0
+    ) {
+      lines.push(`    文化的傾向: ${c.relevantCulturalInfluences.join(' / ')}`)
+    }
+    if (c.currentTraits && c.currentTraits.length > 0) {
+      lines.push(`    現在の傾向: ${c.currentTraits.join(' / ')}`)
+    }
+    if (c.relationshipHints && c.relationshipHints.length > 0) {
+      lines.push(`    関係性: ${c.relationshipHints.join(' / ')}`)
+    }
+    if (c.romanticHint) lines.push(`    恋愛的興味: ${c.romanticHint}`)
+  }
   return lines
 }
 
@@ -517,6 +591,10 @@ export function buildExpeditionPrompt(
     '=== CHARACTERS ===',
     'Members:',
     ...memberHintLines(context.party.members),
+    '',
+    '=== CHARACTER BACKGROUND ===',
+    'Scene-relevant background and identity (background is context, not stereotype):',
+    ...characterContextLines(context.characterContexts),
     '',
     '=== PARTY RELATIONSHIPS ===',
     ...relationshipLines(context.party.characterRelationships ?? []),

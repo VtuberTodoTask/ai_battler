@@ -5,6 +5,11 @@ import {
 } from '../../core/tavern/campaign/relationship.ts'
 import type { TavernParty } from '../../core/tavern/types.ts'
 import { OBJECTIVE_LABELS } from '../expedition/labels.ts'
+import {
+  countryLabel,
+  genderLabel,
+  speciesLabel,
+} from '../../core/identity/labels.ts'
 
 export interface PartyCardProps {
   party: TavernParty
@@ -56,6 +61,23 @@ export function PartyCard({
             <small>
               ({m.rank} {m.role}) HP {m.currentHp}/{m.maxHp} MP {m.currentMp}/
               {m.maxMp} M {m.morale}
+              {m.identity && (
+                <>
+                  {' '}
+                  {speciesLabel(m.identity.species)}/
+                  {countryLabel(m.identity.countryOfOrigin)}/
+                  {genderLabel(m.identity.gender)}
+                  {m.identity.regionOfOrigin
+                    ? ` · ${m.identity.regionOfOrigin}`
+                    : ''}
+                  {m.lifeBackground?.formerOccupation
+                    ? ` · 元${m.lifeBackground.formerOccupation}`
+                    : ''}
+                  {m.lifeBackground?.reasonForAdventuring
+                    ? ` · ${m.lifeBackground.reasonForAdventuring}`
+                    : ''}
+                </>
+              )}
             </small>
           </span>
         ))}

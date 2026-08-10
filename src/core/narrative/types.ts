@@ -5,6 +5,12 @@ import type {
   Personality,
 } from '../models/types.ts'
 import type {
+  CharacterIdentity,
+  CharacterLifeBackground,
+  CharacterRomanticProfile,
+  CulturalInfluence,
+} from '../identity/types.ts'
+import type {
   EnvironmentType,
   ExpeditionOutcome,
   ExpeditionState,
@@ -38,6 +44,10 @@ export interface NarrativeMemberSnapshot {
   rank: AdventurerRank
   personality: Personality
   narrativeProfile?: CharacterNarrativeProfile
+  identity?: CharacterIdentity
+  lifeBackground?: CharacterLifeBackground
+  culturalInfluences?: CulturalInfluence[]
+  romanticProfile?: CharacterRomanticProfile
   incapacitated?: boolean
   dead?: boolean
 }
@@ -56,6 +66,7 @@ export interface CharacterRelationship {
   trust: number
   respect: number
   tension: number
+  romanticAttraction?: number
   tags?: string[]
   recentEvents?: RelationshipMemory[]
 }
@@ -69,6 +80,7 @@ export interface CharacterRelationshipSnapshot {
   trust: number
   respect: number
   tension: number
+  romanticAttraction?: number
   tags?: string[]
   recentEvents?: RelationshipMemory[]
 }
@@ -165,6 +177,17 @@ export interface ExpeditionBattleMetric {
   beats: number
 }
 
+export interface CharacterNarrativeContext {
+  characterId: string
+  identitySummary?: string
+  relevantBackground?: string[]
+  relevantCulturalInfluences?: string[]
+  relevantExperiences?: string[]
+  currentTraits?: string[]
+  relationshipHints?: string[]
+  romanticHint?: string
+}
+
 export interface ExpeditionNarrativeContext {
   kind: 'expedition'
   party: NarrativePartySnapshot
@@ -179,6 +202,8 @@ export interface ExpeditionNarrativeContext {
   battleMetrics?: ExpeditionBattleMetric[]
   /** Deterministic narrative direction: main/secondary scenes and montage beats. */
   direction?: NarrativeDirection
+  /** Per-character background projected for the narrative focus. */
+  characterContexts?: CharacterNarrativeContext[]
 }
 
 export interface NarrativeHistoryHighlight {
