@@ -14,6 +14,7 @@ import type {
 import { getPartyRankWeights, getRequestRankWeights } from './rankWeights.ts'
 import { createInitialRelationship } from './relationship.ts'
 import type { CampaignParty } from './types.ts'
+import { initializePartyMemberRelationships } from '../../narrative/characterRelationships.ts'
 
 const PARTY_NAMES = [
   '灰狼の牙',
@@ -115,6 +116,7 @@ export function generateCampaignParty(
       trainingDays: 0,
     },
     relationship: createInitialRelationship(campaignSeed, serial, leader),
+    memberRelationships: initializePartyMemberRelationships(party.members),
   }
 }
 

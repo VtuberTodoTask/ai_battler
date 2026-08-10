@@ -19,6 +19,9 @@ import type {
 } from '../expedition/types.ts'
 import { rankIndex } from '../tavern/campaign/generators.ts'
 import { buildExpeditionNarrativeTimeline } from './timeline.ts'
+import { deriveCharacterNarrativeProfile } from './characterProfile.ts'
+import { buildRelationshipSnapshot } from './characterRelationships.ts'
+import { determineNarrativeDirection } from './director.ts'
 
 function memberIsDead(member: { currentHp: number }): boolean {
   return member.currentHp <= 0
@@ -29,6 +32,16 @@ export function buildNarrativePartySnapshot(
 ): NarrativePartySnapshot {
   const leader = party.party.members.find((m) => m.id === party.party.leaderId)
   const incapacitatedIds = new Set(party.condition.incapacitatedIds)
+  const members = party.party.members.map((m) => ({
+    id: m.id,
+    name: m.name,
+    role: m.role,
+    rank: m.rank,
+    personality: m.personality,
+    narrativeProfile: m.narrativeProfile ?? deriveCharacterNarrativeProfile(m),
+    incapacitated: incapacitatedIds.has(m.id),
+    dead: memberIsDead(m),
+  }))
 
   return {
     id: party.id,
@@ -36,15 +49,7 @@ export function buildNarrativePartySnapshot(
     rank: party.party.rank,
     leaderId: party.party.leaderId,
     leaderName: leader?.name ?? '—',
-    members: party.party.members.map((m) => ({
-      id: m.id,
-      name: m.name,
-      role: m.role,
-      rank: m.rank,
-      personality: m.personality,
-      incapacitated: incapacitatedIds.has(m.id),
-      dead: memberIsDead(m),
-    })),
+    members,
     missionSpecialization: party.party.missionSpecialization,
     affinity: party.relationship.affinity,
     financialPressure: party.relationship.financialPressure,
@@ -52,6 +57,10 @@ export function buildNarrativePartySnapshot(
     growthMilestones: party.progression.growthMilestones,
     trainingDays: party.progression.trainingDays,
     stats: { ...party.stats },
+    characterRelationships: buildRelationshipSnapshot(
+      members,
+      party.memberRelationships,
+    ),
     arrivalDay: party.arrivalDay,
     plannedDepartureDay: party.plannedDepartureDay,
   }
@@ -108,6 +117,11 @@ export function buildExpeditionNarrativeContext(
       beats: (context.timeline ?? []).filter((b) => b.phase === 'battle')
         .length,
     }))
+    context.direction = determineNarrativeDirection(
+      context.timeline,
+      context.party.members,
+      context.party.characterRelationships,
+    )
   }
   return context
 }
