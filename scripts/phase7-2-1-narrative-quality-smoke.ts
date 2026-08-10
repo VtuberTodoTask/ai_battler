@@ -278,17 +278,18 @@ function assertPromptIntegrity(user: string): void {
   )
   assert(user.includes('Focus:'), 'Focus missing')
   assert(user.includes('Main Scenes:'), 'Main Scenes missing')
+  assert(user.includes('Omitted Beat IDs:'), 'Omitted Beat IDs missing')
   assert(
     user.includes('Narrative Interaction Hints:'),
     'Narrative Interaction Hints missing',
   )
   assert(user.includes('NARRATIVE FOCUS'), 'NARRATIVE FOCUS rule missing')
   assert(
-    user.includes('MONTAGEは1～3文程度'),
+    user.includes('MONTAGE は 1～3 文程度'),
     'MONTAGE compression rule missing',
   )
   assert(
-    user.includes('TIMELINEのすべての出来事を順番に説明しない'),
+    user.includes('TIMELINE のすべての出来事を順番に説明しない'),
     'TIMELINE not checklist rule missing',
   )
   assert(
@@ -436,9 +437,10 @@ function runCase(
     direction.mainScenes.length >= 1,
     'Case A: expected at least one main scene',
   )
+  const caseAScenes = [...direction.mainScenes, ...direction.secondaryScenes]
   assert(
-    direction.mainScenes.some((s) => s.beatIds.includes('a4')),
-    'Case A: injury beat should be a main scene',
+    caseAScenes.some((s) => s.beatIds.includes('a4')),
+    'Case A: injury beat should be a main or secondary scene',
   )
   assert(
     direction.interactionHints &&

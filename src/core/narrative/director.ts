@@ -317,10 +317,12 @@ function includeConsecutive(
   maxLength: number,
   assigned: Set<number>,
 ): number {
+  const startPhase = scored[start]!.beat.phase
   let end = start
   while (
     end + 1 < scored.length &&
     !assigned.has(end + 1) &&
+    scored[end + 1]!.beat.phase === startPhase &&
     scored[end + 1]!.score >= threshold &&
     end - start + 1 < maxLength
   ) {
@@ -557,15 +559,45 @@ function relationshipHintSummary(
   rel: CharacterRelationshipSnapshot | undefined,
 ): string | undefined {
   if (!rel) return undefined
+  const highTrust = rel.trust >= 60
+  const lowTrust = rel.trust <= 40
+  const highTension = rel.tension >= 60
+  const lowTension = rel.tension <= 40
+  const highAffinity = rel.affinity >= 60
+  const lowAffinity = rel.affinity <= 40
+  const highRespect = rel.respect >= 60
+
   const parts: string[] = []
-  if (rel.affinity >= 60) parts.push('親密度が高い')
-  else if (rel.affinity <= 40) parts.push('親密度が低い')
-  if (rel.trust >= 60) parts.push('信頼が厚い')
-  else if (rel.trust <= 40) parts.push('信頼が薄い')
-  if (rel.tension >= 60) parts.push('緊張がある')
-  if (rel.respect >= 60) parts.push('尊敬している')
+  if (highAffinity) parts.push('親密度が高い')
+  else if (lowAffinity) parts.push('親密度が低い')
+
+  if (highTrust) parts.push('信頼が厚い')
+  else if (lowTrust) parts.push('信頼が薄い')
+
+  if (highRespect) parts.push('尊敬している')
+
+  if (highTension) parts.push('緊張がある')
+  else if (lowTension && (highTrust || highAffinity)) {
+    parts.push('緊張は低い')
+  }
+
   if (rel.tags && rel.tags.length > 0) parts.push(...rel.tags)
-  return parts.length > 0 ? parts.join('・') : '関係に目立った特徴がある'
+
+  if (parts.length === 0) return '関係に目立った特徴がある'
+
+  if (highTrust && highTension) {
+    return `${parts.join('・')}。言葉には気安さと棘が混在しやすい`
+  }
+  if (highAffinity && lowTrust) {
+    return `${parts.join('・')}。仲は良いが判断を任せるとは限らない`
+  }
+  if (highRespect && lowAffinity) {
+    return `${parts.join('・')}。個人的な距離はあっても指示には従う`
+  }
+  if (lowTrust && lowTension) {
+    return `${parts.join('・')}。互いに距離を置き、必要最低限の関わりを保つ`
+  }
+  return parts.join('・')
 }
 
 function suggestedDynamic(
@@ -616,9 +648,10 @@ export function determineNarrativeDirection(
   const mainScenes: NarrativeSceneSelection[] = []
   const secondaryScenes: NarrativeSceneSelection[] = []
 
-  const maxMainScenes = 2
-  const maxSecondaryScenes = 2
+  const maxMainScenes = 1
+  const maxSecondaryScenes = 1
   const maxSceneLength = 2
+  const maxMontageBeats = 3
 
   for (let i = 0; i < scored.length; i++) {
     if (assigned.has(i)) continue
@@ -655,11 +688,25 @@ export function determineNarrativeDirection(
   }
 
   const beatMap = new Map(timeline.map((b) => [b.id, b]))
-  const montageBeatIds = scored
-    .filter(
-      (s) => !assigned.has(s.index) && s.beat.importance >= MONTAGE_THRESHOLD,
-    )
-    .map((s) => s.beat.id)
+  const unassigned = scored
+    .filter((s) => !assigned.has(s.index))
+    .sort((a, b) => b.score - a.score)
+
+  const montage: BeatScore[] = []
+  const omitted: BeatScore[] = []
+  for (const s of unassigned) {
+    if (
+      montage.length < maxMontageBeats &&
+      s.beat.importance >= MONTAGE_THRESHOLD
+    ) {
+      montage.push(s)
+    } else {
+      omitted.push(s)
+    }
+  }
+
+  const montageBeatIds = montage.map((s) => s.beat.id)
+  const omittedBeatIds = omitted.map((s) => s.beat.id)
 
   const focus = buildFocus(mainScenes, secondaryScenes, beatMap, members)
   const interactionHints = buildInteractionHints(
@@ -675,6 +722,7 @@ export function determineNarrativeDirection(
     mainScenes,
     secondaryScenes,
     montageBeatIds,
+    omittedBeatIds,
     interactionHints,
   }
 }

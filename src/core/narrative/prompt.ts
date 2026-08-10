@@ -23,7 +23,7 @@ import {
 import { determineNarrativeDirection } from './director.ts'
 import { formatNarrativeProfile } from './characterProfile.ts'
 
-export const NARRATIVE_PROMPT_VERSION = 'v6'
+export const NARRATIVE_PROMPT_VERSION = 'v7'
 
 export interface NarrativePrompt {
   system: string
@@ -72,6 +72,43 @@ FACTSとして店主の発言内容が明示されている場合を除き、店
 - 店主は失敗に落胆した。
 
 物語のカメラは主に冒険者Party側へ置いてください。店主の内面を描写する視点には入らないでください。
+
+【Narrative Generator と UI の責務分界】
+Narrative Generator が担当するのは「人物・出来事・余韻」です。
+UI が担当するのは「成功/失敗、報酬、損害、負傷、取得物、依頼達成率、Quest grade、滞在日数、残存目標」です。
+Narrative に UI の structured result を全文読み上げさせる必要はありません。
+
+【FACT PRESERVATION と FACT COVERAGE】
+Confirmed Facts は、Narrative が矛盾してはならない事実です。
+Narrative がすべての Confirmed Fact を本文に含める必要はありません。
+Confirmed Fact が NARRATIVE FOCUS に重要でなければ、暗黙的に省略して構いません。
+省略は許されます。矛盾だけは許されません。
+
+【不在は出来事ではない】
+イベントが存在しなかったことを本文で説明しないでください。
+例えば以下のような表現は避けてください。
+- 「手当ては行われなかった」
+- 「目立った消耗はなかった」
+- 「これ以上の被害はなかった」
+- 「誰も追加で負傷しなかった」
+ただし、不在そのものが目的の成否や重大な事実を意味する場合は除きます。例：「救援が来る予定だったが来なかった」「指定時間までに対象が現れなかった」「必要な物資が存在しなかったため objective failed した」。
+
+【キャラクター特性は傾向である】
+CHARACTERS に含まれる口調、癖、価値観、欠点、恐れ、気質は傾向（tendency）であり、強制ではありません。
+すべてのセリフや行動で特性を証明する必要はありません。
+特に speechStyle は、すべての台詞を極端に変形させる強制ではありません。
+状況に応じて自然な変化や、無関係な振る舞いを入れて構いません。
+一度特性を示したら、同じシーン内で何度も反復して証明しないでください。
+
+【関係性の差異化】
+関係性があれば、その相手に対してだけ現れる反応を優先してください。
+「心配する」「制止する」「様子を見る」など、どの Party Member でもありうる振る舞いだけでは不十分です。
+「この人物は他のメンバーに対しても同じ反応をするか？」と自問してください。
+もし答えが「はい」なら、その相互作用は関係性を強く表現していません。
+
+【キャラクター技法はチェックリストではない】
+dialogue、habit、relationship、human noise、non-verbal interaction などは、場面に自然に合うものだけを使ってください。
+全部を毎回入れる必要はありません。
 
 【情報の三層モデル】
 このプロンプトで提供される情報は次の三層に分かれています。
@@ -155,8 +192,10 @@ TIMELINEは出来事の順序を示します。
 TIMELINEに書かれていない具体的な出来事を、場面を盛り上げるために追加してはいけません。
 前後している出来事同士に、入力にない因果関係を追加してはいけません。
 
-NARRATIVE DIRECTIONは、どの場面を詳しく描き、どの場面を圧縮するかの指示です。
-NARRATIVE FOCUSに従い、MAIN SCENESを中心に詳しく描き、SECONDARY SCENESを簡潔に触れ、MONTAGEは1～3文程度に圧縮して飛ばしてください。
+NARRATIVE DIRECTIONは、どの場面を詳しく描き、どの場面を圧縮・省略するかの指示です。
+NARRATIVE FOCUSに従い、MAIN SCENESを中心に詳しく描き、SECONDARY SCENESを簡潔に触れ、MONTAGEは1～3文程度に圧縮または省略してください。
+OMITTED BEAT IDs に含まれる出来事は、Narrative 本文で言及しなくても構いません。Simulation Fact は保持されます。
+TIMELINEのすべてを網羅する必要はありません。一つの印象的な人物の瞬間に集中した短い文章の方、完全な時系列解説より望ましいです。
 Narrative Interaction Hintsは、人物関係をSceneに盛り込むための参考です。セリフを強制するものではありません。
 MAIN SCENESに選ばれた出来事を中心に、登場人物の反応や会話を自然に描写してください。
 
@@ -265,6 +304,9 @@ function directionLines(
   }
   lines.push(
     `Montage Beat IDs: ${direction.montageBeatIds.length > 0 ? direction.montageBeatIds.join(', ') : 'なし'}`,
+  )
+  lines.push(
+    `Omitted Beat IDs: ${direction.omittedBeatIds && direction.omittedBeatIds.length > 0 ? direction.omittedBeatIds.join(', ') : 'なし'}`,
   )
 
   lines.push('Narrative Interaction Hints:')
@@ -397,27 +439,35 @@ export function characterEventInstruction(
 }
 
 const EXPEDITION_WRITING_INSTRUCTIONS = `WRITING INSTRUCTIONS:
-- 1600～2600字程度の日本語。ただし、TIMELINEが短く人物ドラマが薄ければ、無理に文字数を伸ばさず簡潔にまとめてよい
-- 一続きの短編小説として、以下のリズムを意識する：短いOpening → MAIN SCENEの詳細描写 → それ以外の経過をMONTAGEで圧縮 → 必要ならSECONDARY SCENE → 帰還時の短い余韻
+- 1600～2600字程度の日本語。ただし、NARRATIVE FOCUS が一つに絞れていれば、無理に文字数を伸ばさず短くまとめてよい
+- 短い Narrative が正常系です。重大事件が 1 つなら MAIN 1 つ、SECONDARY 0、MONTAGE 1 文程度、ENDING 短いシーンで終えてよい
+- 一続きの短編小説として：短い Opening → MAIN SCENE の詳細描写 → それ以外は MONTAGE または省略 → 必要なら SECONDARY SCENE → 帰還時の短い余韻
 - 見出しや小説専用の区切りを付けない
-- NARRATIVE FOCUSとMAIN SCENESを中心に描き、SECONDARY SCENESは簡潔に触れ、MONTAGEは1～3文程度に圧縮して飛ばす
-- TIMELINEのすべての出来事を順番に説明しない。TIMELINEは参考情報であり、checklistではない
+- NARRATIVE FOCUS と MAIN SCENES を中心に描き、SECONDARY SCENES は簡潔に、MONTAGE は 1～3 文程度に圧縮または省略する
+- TIMELINE のすべての出来事を順番に説明しない。TIMELINE は参考であり、checklist ではない。OMITTED BEAT IDs は本文で言及しなくてよい
+- 低重要度のイベントは圧縮だけでなく、完全に省略してもよい
+- 不在の出来事（「手当てされなかった」「消耗がなかった」など）を説明しない
 - 重要な出来事は、登場人物の行動、会話、沈黙、仕草、場の空気として「見せる」
+- 結果や objective success / failure、partial success、報酬、損害、負傷一覧、残存目標などを、UI のように列挙・読み上げしない
+- Outcome が既にシーン、台詞、最後の印象で伝わっているなら、再度説明しない
 - 性格や人間関係を直接説明しない。気質・価値観・欠点・恐れは、台詞、反応、選択、仕草、沈黙を通じて読者に伝える
 - 人間関係は、会話の距離感、助け合い、避け合い、からかい、言い争い、気遣いなどとして表現する。信頼度や緊張値のような数値・ラベルは本文に出さない
+- Character の状態（疲労、消耗、無傷など）を roster summary のように列挙しない。NARRATIVE FOCUS に関係する人物のみ、必要な範囲で描写する
 - 目的達成、勝利、帰還、作戦、HP/MP/Moraleなどのゲーム状態をそのままセリフ化しない
-- キャラクターはミッションと無関係な雑談をしてよい。空腹、疲労、からかい、愚痴、気まずい沈黙、冗談、装備確認、相手の様子を気にする、食事を求めるなど、人間らしい小さな動作や会話を入れてよい
-- 水筒を渡す、歩調を落とす、傷を気にする、座り込むなどの非言語的やり取りを使ってもよい。ただし、治療・回復・新たなアイテム授与など、機械的な効果を伴う行動はCONFIRMED FACTSが無い限り創作しない
-- 同じ結果を繰り返し説明しない。Outcomeが既に分かっている場合、登場人物の余韻で終えてよい
-- Party Memberの短い会話は原則Party Member側の台詞にする
+- キャラクターはミッションと無関係な雑談をしてよい。ただし、空腹、疲労、からかい、愚痴、気まずい沈黙、冗談、装備確認、相手の様子を気にする、食事を求めるなどは毎回ではなく、自然な場面だけで使う
+- Routine preparation（防具確認、道具確認、周囲を見るなど）は、Character relevance がなければ省略する
+- Opening は短く。誰が、どこへ、何をしに行ったまで。出発判定や適性評価は必要な場合のみ
+- 水筒を渡す、歩調を落とす、傷を気にする、座り込むなどの非言語的やり取りを使ってもよい。ただし、治療・回復・新たなアイテム授与など、機械的な効果を伴う行動は CONFIRMED FACTS が無い限り創作しない
+- 同じ結果を繰り返し説明しない。Outcome が既に分かっている場合、登場人物の余韻で終えてよい
+- Party Member の短い会話は原則 Party Member 側の台詞にする
 - 店主はプレイヤー本人なので、店主の台詞・感情・判断を作らない
 - 店主の反応を必要とする場面では、反応そのものを書かずに場面を進める
-- TIMELINEに書かれていない具体的な出来事を追加しない
-- TIMELINEの前後にある出来事同士に、入力にない因果関係を追加しない
-- CHARACTERSのNarrative ProfileとPARTY RELATIONSHIPSは人物描写の参考です。それらを根拠に新しい事実を作らない
-- 最終文章にenum名、内部フィールド名、ゲームシステムの注釈、FACTS一覧の引用、注意書き、解説、括弧書きのメタコメントを出力しない
+- TIMELINE に書かれていない具体的な出来事を追加しない
+- TIMELINE の前後にある出来事同士に、入力にない因果関係を追加しない
+- CHARACTERS の Narrative Profile と PARTY RELATIONSHIPS は人物描写の参考です。それらを根拠に新しい事実を作らない
+- 最終文章に enum 名、内部フィールド名、ゲームシステムの注釈、FACTS 一覧の引用、注意書き、解説、括弧書きのメタコメントを出力しない
 - 最終本文は自然な日本語だけで書く
-- Outcomeを変更しない
+- Outcome を変更しない
 - 次の冒険、新たな依頼、新しい目的地へ勝手につなげない
 - 文字数を満たすために新しい出来事を創作しない`
 
@@ -461,15 +511,15 @@ export function buildExpeditionPrompt(
     `受諾理由: ${acceptanceReasonText(reason)}`,
     `今回の依頼との専門適性: ${specializationMatchText(match)}`,
     '',
+    '=== NARRATIVE DIRECTION ===',
+    ...directionLines(direction, context.party.members),
+    '',
     '=== CHARACTERS ===',
     'Members:',
     ...memberHintLines(context.party.members),
     '',
     '=== PARTY RELATIONSHIPS ===',
     ...relationshipLines(context.party.characterRelationships ?? []),
-    '',
-    '=== NARRATIVE DIRECTION ===',
-    ...directionLines(direction, context.party.members),
     '',
     '=== EXPEDITION TIMELINE ===',
     timelineText,

@@ -351,4 +351,124 @@ describe('NarrativeDirection focus and hints', () => {
     ).toBeLessThanOrEqual(1)
     expect(mainSecondaryIds.filter((id) => id === 't4').length).toBe(0)
   })
+
+  it('omits low-importance routine beats', () => {
+    const members = [makeMember('a'), makeMember('b')]
+    const timeline: NarrativeTimelineBeat[] = [
+      makeBeat({
+        id: 't1',
+        phase: 'departure',
+        text: '出発した',
+        importance: 45,
+      }),
+      makeBeat({
+        id: 't2',
+        phase: 'approach',
+        text: '森を進んだ',
+        importance: 45,
+      }),
+      makeBeat({
+        id: 't3',
+        phase: 'exploration',
+        text: '少し足止めがあった',
+        importance: 45,
+      }),
+      makeBeat({
+        id: 't4',
+        phase: 'exploration',
+        text: '周囲を見回した',
+        importance: 45,
+      }),
+      makeBeat({
+        id: 't5',
+        phase: 'objective',
+        text: '目的の手がかりを得た',
+        importance: 85,
+      }),
+      makeBeat({ id: 't6', phase: 'return', text: '戻った', importance: 45 }),
+    ]
+    const dir = determineNarrativeDirection(timeline, members)
+    expect(dir.mainScenes.length).toBeLessThanOrEqual(1)
+    expect(dir.secondaryScenes.length).toBeLessThanOrEqual(1)
+    expect(dir.montageBeatIds.length).toBeLessThanOrEqual(3)
+    expect(dir.omittedBeatIds).toBeDefined()
+    expect((dir.omittedBeatIds ?? []).length).toBeGreaterThan(0)
+  })
+
+  it('produces different interaction hints for trust+high tension vs trust+low tension', () => {
+    const members = [makeMember('a'), makeMember('b'), makeMember('c')]
+    const relationships = [
+      {
+        sourceCharacterId: 'a',
+        sourceName: 'A',
+        targetCharacterId: 'b',
+        targetName: 'B',
+        affinity: 50,
+        trust: 90,
+        respect: 50,
+        tension: 80,
+        recentEvents: [],
+      },
+      {
+        sourceCharacterId: 'b',
+        sourceName: 'B',
+        targetCharacterId: 'a',
+        targetName: 'A',
+        affinity: 50,
+        trust: 90,
+        respect: 50,
+        tension: 80,
+        recentEvents: [],
+      },
+      {
+        sourceCharacterId: 'a',
+        sourceName: 'A',
+        targetCharacterId: 'c',
+        targetName: 'C',
+        affinity: 50,
+        trust: 90,
+        respect: 50,
+        tension: 10,
+        recentEvents: [],
+      },
+      {
+        sourceCharacterId: 'c',
+        sourceName: 'C',
+        targetCharacterId: 'a',
+        targetName: 'A',
+        affinity: 50,
+        trust: 90,
+        respect: 50,
+        tension: 10,
+        recentEvents: [],
+      },
+    ]
+    const timeline: NarrativeTimelineBeat[] = [
+      makeBeat({
+        id: 't1',
+        phase: 'battle',
+        text: 'BとCが負傷した',
+        importance: 90,
+        actorIds: ['a'],
+        targetIds: ['b', 'c'],
+      }),
+      makeBeat({
+        id: 't2',
+        phase: 'return',
+        text: 'Partyは帰路についた',
+        importance: 45,
+      }),
+    ]
+    const dir = determineNarrativeDirection(timeline, members, relationships)
+    const abHint = dir.interactionHints?.find(
+      (h) => h.characterIds.includes('a') && h.characterIds.includes('b'),
+    )
+    const acHint = dir.interactionHints?.find(
+      (h) => h.characterIds.includes('a') && h.characterIds.includes('c'),
+    )
+    expect(abHint).toBeDefined()
+    expect(acHint).toBeDefined()
+    expect(abHint?.relationshipSummary).not.toBe(acHint?.relationshipSummary)
+    expect(abHint?.suggestedDynamic).not.toBe(acHint?.suggestedDynamic)
+  })
 })
