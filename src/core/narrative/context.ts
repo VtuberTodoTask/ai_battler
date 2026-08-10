@@ -23,6 +23,10 @@ import { deriveCharacterNarrativeProfile } from './characterProfile.ts'
 import { buildRelationshipSnapshot } from './characterRelationships.ts'
 import { determineNarrativeDirection } from './director.ts'
 import { projectCharacterContextsForNarrative } from '../identity/characterContext.ts'
+import {
+  projectMemoriesForNarrative,
+  type ProjectedMemoryContext,
+} from './memory.ts'
 
 function memberIsDead(member: { currentHp: number }): boolean {
   return member.currentHp <= 0
@@ -91,6 +95,7 @@ export function buildExpeditionNarrativeContext(
   report: DispatchReport,
   acceptedOffer: BrokerageOfferAttempt | undefined,
   result?: ExpeditionResult,
+  dayNumber?: number,
 ): ExpeditionNarrativeContext {
   const specializationMatch = getMissionSpecializationMatch(
     party.party.missionSpecialization,
@@ -144,8 +149,30 @@ export function buildExpeditionNarrativeContext(
       sceneCharacterIds,
       context.party.characterRelationships ?? [],
     )
+    if (dayNumber !== undefined) {
+      const memoryContext = projectMemoriesForNarrative(
+        party,
+        context.direction?.focus?.summary ?? '',
+        context.request,
+        sceneCharacterIds,
+        dayNumber,
+      )
+      context.characterMemories = memoryContext.characterMemories
+      context.relationshipMemories = memoryContext.relationshipMemories
+      attachMemoriesToCharacterContexts(context, memoryContext)
+    }
   }
   return context
+}
+
+function attachMemoriesToCharacterContexts(
+  context: ExpeditionNarrativeContext,
+  memoryContext: ProjectedMemoryContext,
+): void {
+  if (!context.characterContexts) return
+  for (const cc of context.characterContexts) {
+    cc.memories = memoryContext.characterMemories[cc.characterId]
+  }
 }
 
 const OUTCOME_PRIORITY: Record<ExpeditionOutcome, number> = {

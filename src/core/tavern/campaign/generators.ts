@@ -311,6 +311,12 @@ export function buildTavernDay(
         riskTolerance: cp.relationship.riskTolerance,
         stayExtensionDaysUsed: cp.relationship.stayExtensionDaysUsed,
       },
+      characterMemories: cp.characterMemories
+        ? deepClone(cp.characterMemories)
+        : undefined,
+      memberRelationships: cp.memberRelationships
+        ? deepClone(cp.memberRelationships)
+        : undefined,
     }
   })
 

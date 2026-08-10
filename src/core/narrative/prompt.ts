@@ -25,7 +25,7 @@ import { determineNarrativeDirection } from './director.ts'
 import { formatNarrativeProfile } from './characterProfile.ts'
 import { countryLabel, genderLabel, speciesLabel } from '../identity/labels.ts'
 
-export const NARRATIVE_PROMPT_VERSION = 'v8'
+export const NARRATIVE_PROMPT_VERSION = 'v9'
 
 export interface NarrativePrompt {
   system: string
@@ -284,16 +284,100 @@ function relationshipLines(
       r.tags && r.tags.length > 0 ? ` タグ: ${r.tags.join('・')}` : ''
     const recent =
       r.recentEvents && r.recentEvents.length > 0
-        ? ` 最近: ${r.recentEvents.map((e) => e.summary).join('；')}`
+        ? ` 最近: ${r.recentEvents
+            .slice(0, 3)
+            .map((e) => e.summary)
+            .join('；')}`
         : ''
     const romantic =
       typeof r.romanticAttraction === 'number' && r.romanticAttraction > 0
         ? ` 恋愛的興味: ${relationshipBand(r.romanticAttraction)}`
         : ''
+    const shared =
+      typeof r.sharedExpeditions === 'number' && r.sharedExpeditions > 0
+        ? ` 共に遠征した回数: ${r.sharedExpeditions}`
+        : ''
     lines.push(
-      `  - ${r.sourceName} → ${r.targetName}: ${metrics}${romantic}${tags}${recent}`,
+      `  - ${r.sourceName} → ${r.targetName}: ${metrics}${romantic}${shared}${tags}${recent}`,
     )
   }
+  return lines
+}
+
+function memoryLabel(type: string): string {
+  switch (type) {
+    case 'major_success':
+    case 'objective_success':
+    case 'shared_success':
+      return '好印象'
+    case 'rescued':
+    case 'healed':
+    case 'protected':
+    case 'supported':
+    case 'trust_event':
+      return '好印象'
+    case 'major_failure':
+    case 'objective_failure':
+    case 'shared_failure':
+    case 'casualty':
+    case 'critical_injury':
+    case 'injury':
+    case 'abandoned':
+    case 'conflict':
+    case 'disagreement':
+      return '悪印象'
+    case 'retreat':
+    case 'mixed':
+      return '複雑'
+    default:
+      return '中立'
+  }
+}
+
+function formatMemoryItem(item: {
+  summary: string
+  type: string
+  importance: number
+  valence: string
+}): string {
+  return `${item.summary}（重要度${item.importance}、感情色${memoryLabel(item.type)}）`
+}
+
+function memoryLines(context: ExpeditionNarrativeContext): string[] {
+  const lines: string[] = []
+  const { characterMemories, relationshipMemories, party } = context
+  let hasMemory = false
+
+  const characterEntries = Object.entries(characterMemories ?? {})
+  if (characterEntries.length > 0) {
+    lines.push('Character Memories:')
+    for (const [characterId, items] of characterEntries) {
+      if (items.length === 0) continue
+      const name =
+        party.members.find((m) => m.id === characterId)?.name ?? characterId
+      hasMemory = true
+      for (const item of items) {
+        lines.push(`  - ${name}: ${formatMemoryItem(item)}`)
+      }
+    }
+  }
+
+  const pairEntries = Object.entries(relationshipMemories ?? {})
+  if (pairEntries.length > 0) {
+    lines.push('Relationship Memories:')
+    for (const [pairKey, items] of pairEntries) {
+      if (items.length === 0) continue
+      const [a, b] = pairKey.split(':')
+      const aName = party.members.find((m) => m.id === a)?.name ?? a
+      const bName = party.members.find((m) => m.id === b)?.name ?? b
+      hasMemory = true
+      for (const item of items) {
+        lines.push(`  - ${aName} ↔ ${bName}: ${formatMemoryItem(item)}`)
+      }
+    }
+  }
+
+  if (!hasMemory) lines.push('- なし')
   return lines
 }
 
@@ -399,6 +483,9 @@ function characterContextLines(
       lines.push(`    関係性: ${c.relationshipHints.join(' / ')}`)
     }
     if (c.romanticHint) lines.push(`    恋愛的興味: ${c.romanticHint}`)
+    if (c.memories && c.memories.length > 0) {
+      lines.push(`    関連記憶: ${c.memories.map((m) => m.summary).join('；')}`)
+    }
   }
   return lines
 }
@@ -526,6 +613,7 @@ const EXPEDITION_WRITING_INSTRUCTIONS = `WRITING INSTRUCTIONS:
 - Outcome が既にシーン、台詞、最後の印象で伝わっているなら、再度説明しない
 - 性格や人間関係を直接説明しない。気質・価値観・欠点・恐れは、台詞、反応、選択、仕草、沈黙を通じて読者に伝える
 - 人間関係は、会話の距離感、助け合い、避け合い、からかい、言い争い、気遣いなどとして表現する。信頼度や緊張値のような数値・ラベルは本文に出さない
+- RELEVANT MEMORIES は確認済みの過去の出来事です。キャラクターの現在の態度や仕草に影響を与えてよいが、思い出を改変・拡張・新しい背景にしない。記憶を無理にセリフで言及させない
 - Character の状態（疲労、消耗、無傷など）を roster summary のように列挙しない。NARRATIVE FOCUS に関係する人物のみ、必要な範囲で描写する
 - 目的達成、勝利、帰還、作戦、HP/MP/Moraleなどのゲーム状態をそのままセリフ化しない
 - キャラクターはミッションと無関係な雑談をしてよい。ただし、空腹、疲労、からかい、愚痴、気まずい沈黙、冗談、装備確認、相手の様子を気にする、食事を求めるなどは毎回ではなく、自然な場面だけで使う
@@ -598,6 +686,10 @@ export function buildExpeditionPrompt(
     '',
     '=== PARTY RELATIONSHIPS ===',
     ...relationshipLines(context.party.characterRelationships ?? []),
+    '',
+    '=== RELEVANT MEMORIES ===',
+    'Relevant memories describe confirmed past events. You may let them influence present behavior. Do not invent additional details about those past events. Do not rewrite or expand the memory into a new backstory. Do not force characters to discuss a memory explicitly. Avoid repeated "we did this before" dialogue; let memories influence non-verbal behavior, hesitation, trust, irritation, expectation, or willingness to rely.',
+    ...memoryLines(context),
     '',
     '=== EXPEDITION TIMELINE ===',
     timelineText,

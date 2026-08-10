@@ -22,6 +22,7 @@ import {
   tryExtendStay,
 } from './relationship.ts'
 import { applyCharacterRelationshipChanges } from '../../narrative/characterRelationships.ts'
+import { applyExpeditionMemory } from '../../narrative/memory.ts'
 import {
   EXPEDITION_GROWTH_XP,
   TRAINING_GROWTH_XP,
@@ -115,8 +116,10 @@ export function resolveCampaignDay(
     applyCharacterRelationshipChanges(
       party,
       resolved.result,
+      dayNumber,
       resolved.requestId,
     )
+    applyExpeditionMemory(party, resolved.result, dayNumber, resolved.requestId)
 
     relationshipEvents.push(applyAffinityFromOutcome(party, outcome, dayNumber))
     relationshipEvents.push(

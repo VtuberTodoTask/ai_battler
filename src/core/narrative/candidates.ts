@@ -205,6 +205,7 @@ export function deriveResolveCandidates(
       resolved.report,
       acceptedOffer,
       resolved.result,
+      dayNumber,
     )
     // Persist only the compact timeline and metrics; the full simulation state
     // is intentionally dropped from the campaign snapshot to avoid expensive

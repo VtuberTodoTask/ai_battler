@@ -11,6 +11,7 @@ import type {
   TavernPartyStats,
 } from '../types.ts'
 import type {
+  CharacterMemory,
   CharacterRelationship,
   NarrativeCandidate,
   NarrativeGenerationRecord,
@@ -133,6 +134,10 @@ export interface CampaignParty {
   relationship: CampaignPartyRelationship
   /** Per-character directional relationships among party members. Optional for backward compatibility. */
   memberRelationships?: Record<string, CharacterRelationship>
+  /** Per-character persistent memories from expeditions. Optional for backward compatibility. */
+  characterMemories?: Record<string, CharacterMemory[]>
+  /** Number of expeditions shared by each unordered pair of members. Optional for backward compatibility. */
+  sharedExpeditionCounts?: Record<string, number>
   departingCasualty?: boolean
 }
 
