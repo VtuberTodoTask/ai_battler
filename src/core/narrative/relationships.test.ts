@@ -228,7 +228,7 @@ describe('applyRelationshipEvents', () => {
       rels,
       [{ id: 'a' }, { id: 'b' }, { id: 'dead' }],
       [{ type: 'casualty', targetId: 'dead', reason: 'test' }],
-      state,
+      { state },
     )
     const rel = rels['a:dead']
     expect(rel.affinity).toBeLessThan(50)
@@ -247,7 +247,7 @@ describe('applyCharacterRelationshipChanges', () => {
       party: [],
     } as unknown as ExpeditionResult
     expect(party.memberRelationships).toBeUndefined()
-    applyCharacterRelationshipChanges(party, result)
+    applyCharacterRelationshipChanges(party, result, 1)
     expect(party.memberRelationships).toBeDefined()
     const rel = party.memberRelationships!['a:b']
     expect(rel.affinity).toBeGreaterThan(50)

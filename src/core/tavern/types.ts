@@ -17,6 +17,10 @@ import type {
   MissionSpecializationMatch,
   PartyMissionSpecialization,
 } from './specialization.ts'
+import type {
+  CharacterMemory,
+  CharacterRelationship,
+} from '../narrative/types.ts'
 
 export type PartyRiskTolerance = 'cautious' | 'balanced' | 'bold'
 
@@ -110,6 +114,10 @@ export interface TavernParty {
   progression?: TavernPartyProgressionSnapshot
   relationship?: TavernPartyRelationshipSnapshot
   stats?: TavernPartyStats
+  /** Per-character persistent memories from expeditions. Optional for backward compatibility. */
+  characterMemories?: Record<string, CharacterMemory[]>
+  /** Per-character directional relationships among party members. Optional for backward compatibility. */
+  memberRelationships?: Record<string, CharacterRelationship>
 }
 
 export interface PartyTemplate {

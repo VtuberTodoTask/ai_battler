@@ -4,6 +4,10 @@ import {
   getPositiveBrokerageText,
 } from '../../core/tavern/campaign/relationship.ts'
 import type { TavernParty } from '../../core/tavern/types.ts'
+import type {
+  CharacterMemory,
+  RelationshipMemory,
+} from '../../core/narrative/types.ts'
 import { OBJECTIVE_LABELS } from '../expedition/labels.ts'
 import {
   countryLabel,
@@ -16,6 +20,29 @@ export interface PartyCardProps {
   selected: boolean
   disabled: boolean
   onClick: () => void
+}
+
+function recentMemoriesForMember(
+  memberId: string,
+  party: TavernParty,
+): (CharacterMemory | RelationshipMemory)[] {
+  const characterMemories = party.characterMemories?.[memberId] ?? []
+  const relationshipMemories: RelationshipMemory[] = []
+  for (const rel of Object.values(party.memberRelationships ?? {})) {
+    if (!rel) continue
+    if (
+      rel.sourceCharacterId !== memberId &&
+      rel.targetCharacterId !== memberId
+    ) {
+      continue
+    }
+    if (rel.recentEvents) {
+      relationshipMemories.push(...rel.recentEvents)
+    }
+  }
+  return [...characterMemories, ...relationshipMemories]
+    .sort((a, b) => (b.importance ?? 0) - (a.importance ?? 0))
+    .slice(0, 2)
 }
 
 export function PartyCard({
@@ -82,6 +109,22 @@ export function PartyCard({
           </span>
         ))}
       </div>
+      {(party.characterMemories || party.memberRelationships) && (
+        <div className="party-recent-events">
+          {ap.members
+            .map((m) => {
+              const memories = recentMemoriesForMember(m.id, party)
+              if (memories.length === 0) return null
+              return (
+                <div key={m.id} className="member-recent-events">
+                  <strong>{m.name}</strong> 最近の出来事：
+                  {memories.map((mem) => mem.summary).join('；')}
+                </div>
+              )
+            })
+            .filter(Boolean)}
+        </div>
+      )}
       {ap.missionSpecialization && (
         <div className="party-specialization">
           得意：{OBJECTIVE_LABELS[ap.missionSpecialization.strongObjective]} ·

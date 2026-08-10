@@ -50,13 +50,68 @@ export interface NarrativeMemberSnapshot {
   romanticProfile?: CharacterRomanticProfile
   incapacitated?: boolean
   dead?: boolean
+  memories?: string[]
 }
 
+export type MemoryValence = 'positive' | 'negative' | 'mixed' | 'neutral'
+
+export type RelationshipMemoryType =
+  | 'rescued'
+  | 'healed'
+  | 'protected'
+  | 'abandoned'
+  | 'supported'
+  | 'conflict'
+  | 'disagreement'
+  | 'shared_success'
+  | 'shared_failure'
+  | 'retreat'
+  | 'casualty'
+  | 'romantic_moment'
+  | 'trust_event'
+  | 'other'
+
 export interface RelationshipMemory {
+  id: string
+  sourceCharacterId: string
+  targetCharacterId: string
   expeditionId?: string
-  type?: string
+  day?: number
+  type: RelationshipMemoryType
   summary: string
-  importance?: number
+  importance: number
+  valence: MemoryValence
+  relatedFactIds?: string[]
+  relatedBeatIds?: string[]
+  createdAtDay?: number
+  lastReferencedDay?: number
+}
+
+export type CharacterMemoryType =
+  | 'major_success'
+  | 'major_failure'
+  | 'injury'
+  | 'critical_injury'
+  | 'retreat'
+  | 'rescue'
+  | 'casualty'
+  | 'objective_failure'
+  | 'objective_success'
+  | 'other'
+
+export interface CharacterMemory {
+  id: string
+  characterId: string
+  expeditionId?: string
+  day?: number
+  type: CharacterMemoryType
+  summary: string
+  importance: number
+  valence: MemoryValence
+  relatedCharacterIds?: string[]
+  relatedBeatIds?: string[]
+  createdAtDay?: number
+  lastReferencedDay?: number
 }
 
 export interface CharacterRelationship {
@@ -67,6 +122,7 @@ export interface CharacterRelationship {
   respect: number
   tension: number
   romanticAttraction?: number
+  sharedExpeditions?: number
   tags?: string[]
   recentEvents?: RelationshipMemory[]
 }
@@ -81,6 +137,7 @@ export interface CharacterRelationshipSnapshot {
   respect: number
   tension: number
   romanticAttraction?: number
+  sharedExpeditions?: number
   tags?: string[]
   recentEvents?: RelationshipMemory[]
 }
@@ -177,6 +234,13 @@ export interface ExpeditionBattleMetric {
   beats: number
 }
 
+export interface NarrativeMemoryContextItem {
+  summary: string
+  type: string
+  importance: number
+  valence: MemoryValence
+}
+
 export interface CharacterNarrativeContext {
   characterId: string
   identitySummary?: string
@@ -186,6 +250,7 @@ export interface CharacterNarrativeContext {
   currentTraits?: string[]
   relationshipHints?: string[]
   romanticHint?: string
+  memories?: NarrativeMemoryContextItem[]
 }
 
 export interface ExpeditionNarrativeContext {
@@ -204,6 +269,10 @@ export interface ExpeditionNarrativeContext {
   direction?: NarrativeDirection
   /** Per-character background projected for the narrative focus. */
   characterContexts?: CharacterNarrativeContext[]
+  /** Per-character memories selected as relevant to the narrative focus. */
+  characterMemories?: Record<string, NarrativeMemoryContextItem[]>
+  /** Per-pair relationship memories selected as relevant to the narrative focus. */
+  relationshipMemories?: Record<string, NarrativeMemoryContextItem[]>
 }
 
 export interface NarrativeHistoryHighlight {
