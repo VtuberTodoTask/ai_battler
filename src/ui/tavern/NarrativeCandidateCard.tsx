@@ -96,7 +96,7 @@ export function NarrativeCandidateCard({
 
       <details className="narrative-prompt">
         <summary onClick={() => setShowPrompt((v) => !v)}>
-          AIへ送る内容（compressed v3 prompt）を{showPrompt ? '隠す' : '見る'}
+          AIへ送る内容（compressed v4 prompt）を{showPrompt ? '隠す' : '見る'}
         </summary>
         <div className="narrative-prompt-content">
           <h5>System Prompt</h5>
@@ -123,7 +123,7 @@ export function NarrativeCandidateCard({
             disabled={generating}
             data-testid="narrative-generate"
           >
-            生成
+            {candidate.category === 'expedition' ? '遠征物語を生成' : '生成'}
           </button>
         )}
         {candidate.state !== 'dismissed' && (

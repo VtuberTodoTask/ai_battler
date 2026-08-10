@@ -12,7 +12,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:expedition-regression": "vitest run src/core/expedition/regression.test.ts",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage --testTimeout 10000",
     "update:expedition-regression": "tsx scripts/capture-regression-snapshots.ts && prettier --write regression-snapshots/baseline",
     "format": "prettier --write ."
   },

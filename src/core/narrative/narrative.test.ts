@@ -363,7 +363,7 @@ describe('Narrative generation', () => {
     expect(candidate.state).toBe('generated')
     expect(candidate.activeGenerationId).toBe(record.id)
     expect(record.generatedText).toContain('Fake生成')
-    expect(record.promptVersion).toBe('v3')
+    expect(record.promptVersion).toBe('v4')
   })
 
   it('bulk generates candidates sequentially', async () => {
@@ -443,16 +443,17 @@ describe('Narrative prompt integrity', () => {
     expect(user).toContain(resolved.partyName ?? '')
     expect(user).toContain('=== CURRENT REQUEST ===')
     expect(user).toContain('=== PARTY ===')
-    expect(user).toContain('=== CONFIRMED FACTS ===')
+    expect(user).toContain('=== CONFIRMED OUTCOME FACTS ===')
     expect(user).toContain('=== DETAILS NOT RECORDED ===')
     expect(user).toContain('=== NARRATIVE HINTS ===')
     expect(user).toContain('=== WRITING INSTRUCTIONS ===')
     expect(user).toContain('Leader:')
     expect(user).toContain('Members:')
     expect(user).toContain('専門適性')
-    expect(user).toContain('400～800字')
+    expect(user).toContain('1600～2600字')
     expect(user).toContain('WRITING INSTRUCTIONS')
     expect(user).toContain('依頼は成功した')
+    expect(user).toContain('=== EXPEDITION TIMELINE ===')
     expect(user).toContain('調査によっていくつかの情報を得た')
 
     expect(system).toContain('Personality値')
@@ -571,9 +572,10 @@ describe('Narrative prompt integrity', () => {
     )[0]
     const { user } = buildNarrativePrompt(candidate.context)
 
-    expect(user).toContain('400～800字')
+    expect(user).toContain('1600～2600字')
     expect(user).toContain('店主はプレイヤー本人')
     expect(user).toContain('店主の台詞')
+    expect(user).toContain('TIMELINEに書かれていない')
     expect(user).toContain('店主の反応')
     expect(user).toContain('Party Member側の台詞')
   })

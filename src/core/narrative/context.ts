@@ -12,8 +12,13 @@ import type {
   NarrativePartySnapshot,
   NarrativeRequestInfo,
 } from './types.ts'
-import type { ExpeditionOutcome, ObjectiveType } from '../expedition/types.ts'
+import type {
+  ExpeditionOutcome,
+  ExpeditionResult,
+  ObjectiveType,
+} from '../expedition/types.ts'
 import { rankIndex } from '../tavern/campaign/generators.ts'
+import { buildExpeditionNarrativeTimeline } from './timeline.ts'
 
 function memberIsDead(member: { currentHp: number }): boolean {
   return member.currentHp <= 0
@@ -71,12 +76,14 @@ export function buildExpeditionNarrativeContext(
   request: TavernRequestOffer,
   report: DispatchReport,
   acceptedOffer: BrokerageOfferAttempt | undefined,
+  result?: ExpeditionResult,
 ): ExpeditionNarrativeContext {
   const specializationMatch = getMissionSpecializationMatch(
     party.party.missionSpecialization,
     request.objectiveType,
   )
-  return {
+  const state = result?.state
+  const context: ExpeditionNarrativeContext = {
     kind: 'expedition',
     party: buildNarrativePartySnapshot(party),
     request: buildNarrativeRequestInfo(request),
@@ -92,7 +99,17 @@ export function buildExpeditionNarrativeContext(
           specializationMatch,
         },
     report,
+    state,
   }
+  if (state) {
+    context.timeline = buildExpeditionNarrativeTimeline(context)
+    context.battleMetrics = state.battles.map((battle) => ({
+      sourceEvents: battle.result.logs.length,
+      beats: (context.timeline ?? []).filter((b) => b.phase === 'battle')
+        .length,
+    }))
+  }
+  return context
 }
 
 const OUTCOME_PRIORITY: Record<ExpeditionOutcome, number> = {

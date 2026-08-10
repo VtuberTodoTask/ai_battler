@@ -6,6 +6,7 @@ import type {
 import type {
   EnvironmentType,
   ExpeditionOutcome,
+  ExpeditionState,
   ObjectiveType,
 } from '../expedition/types.ts'
 import type {
@@ -67,10 +68,37 @@ export interface NarrativeRequestInfo {
   publicTags: string[]
 }
 
+export type NarrativeTimelinePhase =
+  | 'departure'
+  | 'approach'
+  | 'exploration'
+  | 'objective'
+  | 'battle'
+  | 'return'
+  | 'aftermath'
+
+export type NarrativeTimelineBeatKind =
+  'event' | 'transition' | 'battle' | 'outcome' | 'return'
+
+export interface NarrativeTimelineBeat {
+  id: string
+  phase: NarrativeTimelinePhase
+  kind: NarrativeTimelineBeatKind
+  text: string
+  actorIds?: string[]
+  targetIds?: string[]
+  importance: number
+}
+
 export interface NarrativeAcceptanceInfo {
   reason: AcceptanceReasonCode
   rankGap: number
   specializationMatch: 'strong' | 'neutral' | 'weak'
+}
+
+export interface ExpeditionBattleMetric {
+  sourceEvents: number
+  beats: number
 }
 
 export interface ExpeditionNarrativeContext {
@@ -79,6 +107,12 @@ export interface ExpeditionNarrativeContext {
   request: NarrativeRequestInfo
   acceptance?: NarrativeAcceptanceInfo
   report: DispatchReport
+  /** Full expedition state including logs and battles. Optional for backward compatibility. */
+  state?: ExpeditionState
+  /** Precomputed deterministic narrative timeline. Preferred over state for prompts. */
+  timeline?: NarrativeTimelineBeat[]
+  /** Per-battle source event and compressed beat counts for audit/metrics. */
+  battleMetrics?: ExpeditionBattleMetric[]
 }
 
 export interface NarrativeHistoryHighlight {

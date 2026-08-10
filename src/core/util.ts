@@ -3,7 +3,7 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 export function deepClone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj)) as T
+  return structuredClone(obj) as T
 }
 
 export function round(value: number): number {

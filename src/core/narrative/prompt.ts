@@ -16,8 +16,12 @@ import {
   riskToleranceLabel,
   specializationMatchText,
 } from './facts.ts'
+import {
+  buildExpeditionNarrativeTimeline,
+  formatNarrativeTimeline,
+} from './timeline.ts'
 
-export const NARRATIVE_PROMPT_VERSION = 'v3'
+export const NARRATIVE_PROMPT_VERSION = 'v4'
 
 export interface NarrativePrompt {
   system: string
@@ -107,6 +111,20 @@ PERSONALITY HINTSは口調・反応の参考だけです。過去や実際の行
 
 将来の行動を創作しないでください。
 「次はもっと上手くやろう」「次の依頼に備えよう」「再挑戦する」「新しい探索へ向かう」などは禁止です。
+
+【TIMELINEの扱い】
+TIMELINEは出来事の順序を示します。
+TIMELINEに書かれていない具体的な出来事を、場面を盛り上げるために追加してはいけません。
+前後している出来事同士に、入力にない因果関係を追加してはいけません。
+
+店主を文の主語として、台詞・行動・表情・感情・判断を記述しないでください。
+「店主は頷いた」「店主は杯を掲げた」「店主は尋ねた」「店主は笑った」等は禁止です。
+
+PERSONALITY HINTSは会話・態度・表情の参考だけです。実際に起きた出来事、報酬、行動、装備、戦術を意味しません。
+利益や報酬への関心が強いからといって、報酬の有無や多寡を捏造してはいけません。
+
+CONFIRMED OUTCOME FACTSやTIMELINEの文を、そのまま登場人物の台詞として読み上げないでください。
+自然な言い換えは可ですが、内容や数値をそのまま読み上げないでください。
 
 最終文章に、enum名、内部フィールド名、ゲームシステムの注釈、FACTS一覧の引用、注意書き、解説、括弧書きのメタコメントを出力してはいけません。物語本文だけを出力してください。
 最終本文は自然な日本語だけで書いてください。意図しない英単語やsystem field名を混在させないでください。
@@ -236,24 +254,31 @@ export function characterEventInstruction(
 }
 
 const EXPEDITION_WRITING_INSTRUCTIONS = `WRITING INSTRUCTIONS:
-- 400～800字程度の日本語
-- Partyが酒場へ帰還し、店主へ結果を報告する短編
+- 1600～2600字程度の日本語。ただしTIMELINEの入力が少ない場合は無理に1600字以上へ引き延ばさず、1200字程度まで短くなっても構いません
+- 一続きの短編小説として、出発・接近・探索・目標・戦闘・帰還・報告を自然な段落で繋げてください
+- 見出し（第一章、第二章等）や小説専用の区切りを付けないでください
 - 重要な出来事を自然な文章にする
 - Party Memberの短い会話を含めてよい
 - 会話を入れる場合は原則Party Member側の台詞にする
 - 店主はプレイヤー本人なので、店主の台詞・感情・判断を作らない
 - 店主の反応を必要とする場面では、反応そのものを書かずに場面を進める
 - HP/MP/Morale等の数値をそのまま読み上げない
+- TIMELINEに書かれていない具体的な出来事を追加してはいけません
+- TIMELINEの前後にある出来事同士に、入力にない因果関係を追加してはいけません
+- CONFIRMED OUTCOME FACTSにない原因を推測・創作してはいけません
 - 最終文章にenum名、内部フィールド名、ゲームシステムの注釈、FACTS一覧の引用、注意書き、解説、括弧書きのメタコメントを出力してはいけません
 - 最終本文は自然な日本語だけで書いてください
 - Outcomeを変更しない
-- 次の冒険、新たな依頼、新しい目的地へ勝手につなげない`
+- 次の冒険、新たな依頼、新しい目的地へ勝手につなげない
+- 文字数を満たすために新しい出来事を創作してはいけません`
 
 export function buildExpeditionPrompt(
   context: ExpeditionNarrativeContext,
 ): string {
   const request = context.request
   const facts = buildExpeditionNarrativeFacts(context)
+  const timeline = context.timeline ?? buildExpeditionNarrativeTimeline(context)
+  const timelineText = formatNarrativeTimeline(timeline)
   const match = context.acceptance?.specializationMatch ?? 'neutral'
   const reason = context.acceptance?.reason ?? 'appropriate'
 
@@ -277,7 +302,10 @@ export function buildExpeditionPrompt(
     'Members:',
     ...memberHintLines(context.party.members),
     '',
-    '=== CONFIRMED FACTS ===',
+    '=== EXPEDITION TIMELINE ===',
+    timelineText,
+    '',
+    '=== CONFIRMED OUTCOME FACTS ===',
     ...facts.confirmedFacts.map((f) => `- ${f}`),
     '',
     '=== DETAILS NOT RECORDED ===',
