@@ -318,6 +318,9 @@ export function buildTavernDay(
         ? deepClone(cp.memberRelationships)
         : undefined,
       arcSignals: cp.arcSignals ? deepClone(cp.arcSignals) : undefined,
+      relationshipMilestones: cp.relationshipMilestones
+        ? deepClone(cp.relationshipMilestones)
+        : undefined,
     }
   })
 

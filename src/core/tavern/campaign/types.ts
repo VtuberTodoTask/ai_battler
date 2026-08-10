@@ -16,6 +16,7 @@ import type {
   CharacterRelationship,
   NarrativeCandidate,
   NarrativeGenerationRecord,
+  RelationshipMilestone,
 } from '../../narrative/types.ts'
 
 export type TavernReputationTier =
@@ -141,6 +142,8 @@ export interface CampaignParty {
   sharedExpeditionCounts?: Record<string, number>
   /** Persistent relationship / personal arc signals derived from memories. Optional for backward compatibility. */
   arcSignals?: CharacterArcSignal[]
+  /** Persistent relationship milestones achieved by this party. Optional for backward compatibility. */
+  relationshipMilestones?: RelationshipMilestone[]
   departingCasualty?: boolean
 }
 
