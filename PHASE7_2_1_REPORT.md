@@ -10,7 +10,7 @@ narrator is tuned.
 ## Observed narrative problems
 
 - **Event-digest tone**: previous prompts listed `Main Scenes`, `Secondary
-  Scenes`, and `Montage Beat IDs` but gave the model no single focal idea, so
+Scenes`, and `Montage Beat IDs` but gave the model no single focal idea, so
   output often read as "and then ... and then ..." summaries.
 - **Mechanical outcome priority**: generic `outcome` beats ("依頼の目的を達成した")
   could dominate scenes because no penalty distinguished them from character
@@ -37,7 +37,7 @@ export interface NarrativeFocus {
 `buildFocus` derives the focus from the main/secondary scenes, the central
 character (name closest to the dominant theme keyword), and a theme
 (`injury`, `surround`, `route`, `combat`, `objective`, `event`). The summary is
-a short Japanese sentence that tells the model what the story is *about*, e.g.
+a short Japanese sentence that tells the model what the story is _about_, e.g.
 
 ```text
 「ゼファーとリナ、アルンを気にかける仲間たちと、ゼファーが傷を負いながらも前に進む場面」
@@ -80,7 +80,7 @@ export interface NarrativeInteractionHint {
 }
 ```
 
-The hint is a *suggestion*, not a script. It gives the model a concrete
+The hint is a _suggestion_, not a script. It gives the model a concrete
 relationship dynamic to stage in a specific scene, e.g.
 
 ```text
@@ -218,18 +218,18 @@ Narrative Interaction Hints:
 
 ## Smoke / Audit Results
 
-| Check | Result |
-|---|---|
-| `npm run typecheck` | PASS |
-| `npm run lint` | PASS |
-| `npm test` | 58 files / 839 tests PASS |
-| `npm run build` | PASS |
-| `npm run test:expedition-regression` | 22/22 PASS |
-| `npx tsx scripts/phase7-0-narrative-audit.ts` | 69 candidates / 0 AI calls PASS |
-| `npx tsx scripts/phase7-0-3-compression-audit.ts` | PASS |
-| `npx tsx scripts/phase7-1-timeline-audit.ts` | 0 leakage violations PASS |
-| `npx tsx scripts/phase7-2-narrative-smoke.ts` | PASS |
-| `npx tsx scripts/phase7-2-1-narrative-quality-smoke.ts` | PASS |
+| Check                                                   | Result                          |
+| ------------------------------------------------------- | ------------------------------- |
+| `npm run typecheck`                                     | PASS                            |
+| `npm run lint`                                          | PASS                            |
+| `npm test`                                              | 58 files / 839 tests PASS       |
+| `npm run build`                                         | PASS                            |
+| `npm run test:expedition-regression`                    | 22/22 PASS                      |
+| `npx tsx scripts/phase7-0-narrative-audit.ts`           | 69 candidates / 0 AI calls PASS |
+| `npx tsx scripts/phase7-0-3-compression-audit.ts`       | PASS                            |
+| `npx tsx scripts/phase7-1-timeline-audit.ts`            | 0 leakage violations PASS       |
+| `npx tsx scripts/phase7-2-narrative-smoke.ts`           | PASS                            |
+| `npx tsx scripts/phase7-2-1-narrative-quality-smoke.ts` | PASS                            |
 
 ## Known Limitations
 
