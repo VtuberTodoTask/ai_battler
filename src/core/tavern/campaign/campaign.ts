@@ -21,6 +21,7 @@ import {
   applyRecoveryFinancialPressure,
   tryExtendStay,
 } from './relationship.ts'
+import { applyCharacterRelationshipChanges } from '../../narrative/characterRelationships.ts'
 import {
   EXPEDITION_GROWTH_XP,
   TRAINING_GROWTH_XP,
@@ -110,6 +111,12 @@ export function resolveCampaignDay(
 
     const outcome = resolved.result.outcome
     updateCampaignPartyStats(party, outcome)
+
+    applyCharacterRelationshipChanges(
+      party,
+      resolved.result,
+      resolved.requestId,
+    )
 
     relationshipEvents.push(applyAffinityFromOutcome(party, outcome, dayNumber))
     relationshipEvents.push(

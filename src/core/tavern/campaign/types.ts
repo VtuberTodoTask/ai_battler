@@ -11,6 +11,7 @@ import type {
   TavernPartyStats,
 } from '../types.ts'
 import type {
+  CharacterRelationship,
   NarrativeCandidate,
   NarrativeGenerationRecord,
 } from '../../narrative/types.ts'
@@ -130,6 +131,8 @@ export interface CampaignParty {
   stats: CampaignPartyStats
   progression: CampaignPartyProgression
   relationship: CampaignPartyRelationship
+  /** Per-character directional relationships among party members. Optional for backward compatibility. */
+  memberRelationships?: Record<string, CharacterRelationship>
   departingCasualty?: boolean
 }
 

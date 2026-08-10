@@ -101,6 +101,16 @@ export interface Personality {
   greed: number
 }
 
+export interface CharacterNarrativeProfile {
+  temperament?: string
+  socialStyle?: string
+  values?: string[]
+  flaws?: string[]
+  fears?: string[]
+  habits?: string[]
+  speechStyle?: string
+}
+
 export interface Weapon {
   id: string
   name: string
@@ -237,6 +247,7 @@ export interface Adventurer {
   morale: number
   traits: TraitInstance[]
   personality: Personality
+  narrativeProfile?: CharacterNarrativeProfile
   equipment: EquipmentSet
   statusEffects: StatusEffect[]
 }

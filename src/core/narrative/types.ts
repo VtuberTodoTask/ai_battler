@@ -1,6 +1,7 @@
 import type {
   AdventurerRank,
   AdventurerRole,
+  CharacterNarrativeProfile,
   Personality,
 } from '../models/types.ts'
 import type {
@@ -36,8 +37,40 @@ export interface NarrativeMemberSnapshot {
   role: AdventurerRole
   rank: AdventurerRank
   personality: Personality
+  narrativeProfile?: CharacterNarrativeProfile
   incapacitated?: boolean
   dead?: boolean
+}
+
+export interface RelationshipMemory {
+  expeditionId?: string
+  type?: string
+  summary: string
+  importance?: number
+}
+
+export interface CharacterRelationship {
+  sourceCharacterId: string
+  targetCharacterId: string
+  affinity: number
+  trust: number
+  respect: number
+  tension: number
+  tags?: string[]
+  recentEvents?: RelationshipMemory[]
+}
+
+export interface CharacterRelationshipSnapshot {
+  sourceCharacterId: string
+  sourceName: string
+  targetCharacterId: string
+  targetName: string
+  affinity: number
+  trust: number
+  respect: number
+  tension: number
+  tags?: string[]
+  recentEvents?: RelationshipMemory[]
 }
 
 export interface NarrativePartySnapshot {
@@ -54,6 +87,7 @@ export interface NarrativePartySnapshot {
   growthMilestones: number
   trainingDays: number
   stats: TavernPartyStats
+  characterRelationships?: CharacterRelationshipSnapshot[]
   arrivalDay: number
   plannedDepartureDay: number
 }
@@ -90,6 +124,18 @@ export interface NarrativeTimelineBeat {
   importance: number
 }
 
+export interface NarrativeSceneSelection {
+  beatIds: string[]
+  focus: string
+  reason: string
+}
+
+export interface NarrativeDirection {
+  mainScenes: NarrativeSceneSelection[]
+  secondaryScenes: NarrativeSceneSelection[]
+  montageBeatIds: string[]
+}
+
 export interface NarrativeAcceptanceInfo {
   reason: AcceptanceReasonCode
   rankGap: number
@@ -113,6 +159,8 @@ export interface ExpeditionNarrativeContext {
   timeline?: NarrativeTimelineBeat[]
   /** Per-battle source event and compressed beat counts for audit/metrics. */
   battleMetrics?: ExpeditionBattleMetric[]
+  /** Deterministic narrative direction: main/secondary scenes and montage beats. */
+  direction?: NarrativeDirection
 }
 
 export interface NarrativeHistoryHighlight {

@@ -363,7 +363,7 @@ describe('Narrative generation', () => {
     expect(candidate.state).toBe('generated')
     expect(candidate.activeGenerationId).toBe(record.id)
     expect(record.generatedText).toContain('Fake生成')
-    expect(record.promptVersion).toBe('v4')
+    expect(record.promptVersion).toBe('v5')
   })
 
   it('bulk generates candidates sequentially', async () => {
@@ -441,8 +441,12 @@ describe('Narrative prompt integrity', () => {
     expect(user).toContain(resolved.request.objectiveType)
     expect(user).toContain(String(resolved.request.environment))
     expect(user).toContain(resolved.partyName ?? '')
+    expect(user).toContain('=== EXPEDITION SUMMARY ===')
     expect(user).toContain('=== CURRENT REQUEST ===')
     expect(user).toContain('=== PARTY ===')
+    expect(user).toContain('=== CHARACTERS ===')
+    expect(user).toContain('=== PARTY RELATIONSHIPS ===')
+    expect(user).toContain('=== NARRATIVE DIRECTION ===')
     expect(user).toContain('=== CONFIRMED OUTCOME FACTS ===')
     expect(user).toContain('=== DETAILS NOT RECORDED ===')
     expect(user).toContain('=== NARRATIVE HINTS ===')
@@ -641,7 +645,7 @@ describe('Narrative prompt integrity', () => {
     )!
     const { user } = buildNarrativePrompt(arrival.context)
 
-    expect(user).toContain('Memberの傾向:')
+    expect(user).toContain('Members:')
     expect(user).not.toContain('bravery')
     expect(user).not.toContain('caution')
     expect(user).not.toContain('bravery 3')
