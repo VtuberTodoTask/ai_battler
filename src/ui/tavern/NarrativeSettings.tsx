@@ -60,7 +60,7 @@ export function NarrativeSettings({
             type="text"
             value={config.endpoint}
             onChange={(e) => onChange({ ...config, endpoint: e.target.value })}
-            placeholder="https://api.example.com/v1/chat/completions"
+            placeholder="https://api.openai.com/v1/chat/completions or .../v1/responses"
           />
         </label>
         <label>
