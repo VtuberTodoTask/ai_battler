@@ -51,6 +51,9 @@ src/ui/canvas/
     gameSceneManager.test.ts
     gameUiViewModel.test.ts
     gameButton.test.ts
+    gameModal.test.ts
+    gameScrollView.test.ts
+    canvasGame.test.ts
     canvasLifecycle.test.tsx
     phase8-0-canvas-ui-foundation-smoke.test.ts
 ```
@@ -147,14 +150,15 @@ React (TavernSimulator)
 
 ### 5.1 typecheck / lint / test / coverage / build
 
-| 項目                                 | 結果                                                        |
-| ------------------------------------ | ----------------------------------------------------------- |
-| `npm run typecheck`                  | PASS                                                        |
-| `npm run lint`                       | PASS                                                        |
-| `npm run test`                       | 964 tests PASS                                              |
-| `npm run test:coverage`              | PASS (Stmt 89.73%, Branch 81.14%, Funcs 91.7%, Lines 91.4%) |
-| `npm run build`                      | PASS                                                        |
-| `npm run test:expedition-regression` | 22/22 PASS                                                  |
+| 項目                                          | 結果                                                        |
+| --------------------------------------------- | ----------------------------------------------------------- |
+| `npm run typecheck`                           | PASS                                                        |
+| `npm run lint`                                | PASS                                                        |
+| `npm run test`                                | 978 tests PASS                                              |
+| `npm run test:coverage`                       | PASS (Stmt 89.73%, Branch 81.14%, Funcs 91.7%, Lines 91.4%) |
+| `npm run build`                               | PASS                                                        |
+| `npm run test:expedition-regression`          | 22/22 PASS                                                  |
+| `npm run phase8-0-canvas-ui-foundation-smoke` | 12/12 PASS                                                  |
 
 ### 5.2 Phase 8.0 Smoke
 
@@ -194,8 +198,8 @@ L: canvas foundation smoke uses zero AI calls
 
 ```
 dist/assets/index-Da4HtH4R.css                     16.92 kB │ gzip:   3.82 kB
-dist/assets/GameCanvasHost-FSWSRaks.js            231.91 kB │ gzip:  67.06 kB
-dist/assets/index-CcgdoVQs.js                     698.11 kB │ gzip: 207.47 kB
+dist/assets/GameCanvasHost-GxWQp5PZ.js             62.13 kB │ gzip:  19.91 kB
+dist/assets/index-DStw1-C3.js                     697.97 kB │ gzip: 207.39 kB
 ```
 
 - `GameCanvasHost` は dynamic import により別 chunk 化。`pixi.js` 関連コードは `GameCanvasHost` chunk に含まれる。
@@ -213,3 +217,74 @@ dist/assets/index-CcgdoVQs.js                     698.11 kB │ gzip: 207.47 kB
 - `NARRATIVE_PROMPT_VERSION`（v11）および `DOWNTIME_PROMPT_VERSION`（v2）は変更していない。
 - Core シミュレーション、expedition、narrative、downtime、relationship、memory、arc、milestone、seed determinism、save/load に一切変更なし。
 - `package-lock.json` は `pixi.js` 追加に伴う更新のみ。
+
+## 9. Phase 8.0.1 Canvas Runtime 安定化
+
+PR #37 レビューで指摘された Canvas runtime の安定性問題に対し、以下を修正した。
+
+### 9.1 Canvas append / ticker 接続 / ライフサイクル
+
+- `CanvasGame`
+  - `app.init()` 完了後に `host.contains(app.canvas)` で重複 append を防止し、なければ `host.appendChild(app.canvas)` で明示的に追加。
+  - Pixi `app.ticker.add(this.handleTick)` で `GameSceneManager.update(deltaMS)` を駆動。`destroy()` では `ticker.remove(this.handleTick)` を呼び出し。
+  - `this._destroyRequested` フラグを導入。`init()` 中に React unmount 等で `destroy()` が呼ばれた場合、初期化完了後にアプリを破棄し、ホストに canvas を残さない。
+  - `this._initializing` フラグを導入し、`init()` の二重呼び出しを防止。
+  - `ResizeObserver` / `renderer.on('resize')` / `ticker` / `sceneManager.unmountCurrent()` の cleanup 順序を整理。
+- `GameCanvasHost`
+  - `mounted` フラグを導入。unmount 後は `setError` および `setCampaign` を呼ばない。
+
+### 9.2 UI プリミティブの初期描画とクリーンアップ
+
+- `GameButton`
+  - コンストラクタで `_isEnabled` / `_state` / `cursor` を設定し、`draw()` と `centerLabel()` をイベント登録前に実行。
+- `FoundationDemoScene`
+  - シーンが `backgroundRoot` / `uiRoot` / `partyListRoot` を所有し、`unmount()` で layer から `removeChild` して `destroy({ children: true })`。
+  - グローバル layer コンテナ自体は破棄せず、シーンが作った DisplayObject のみ破棄。
+- `destroyChildren(container)` ヘルパーを追加。`removeChildren()` 後に各 child を `destroy({ children: true })`。
+- `FoundationDemoScene.rebuildPartyList` で古い party ボタンを `destroyChildren` してから再構築。
+- `GameModal`
+  - `open()` 時に既存 body content を `destroyChildren` してから新しい content を追加。
+- `GameAssetManager`
+  - `loadFoundation()` を no-op 化。Phase 8.0.1 では空の `src` manifest および `Assets.loadBundle()` を実行しない。
+- `GameScrollView`
+  - `viewport.eventMode = 'static'` および `viewport.hitArea = new Rectangle(0, 0, width, height)` を設定。
+  - `setViewportSize()` でも `hitArea` を更新。
+- `gameUiViewModel`
+  - `unreadEventCount` を `narrativeStatus !== 'viewed'` のイベント件数に変更（`unseen` / `generated` 両方を含む）。
+
+### 9.3 追加・更新された単体テスト
+
+- `src/ui/canvas/__tests__/canvasGame.test.ts`（新規）：canvas append、二重 init 防止、`destroy()` クリーンアップ、unmount 中の init キャンセル、`ticker` から `GameSceneManager.update` への接続、`setCampaign` 後の scene 状態反映。
+- `src/ui/canvas/__tests__/gameButton.test.ts`：enabled / disabled 初期 visual 状態を追加。
+- `src/ui/canvas/__tests__/gameScrollView.test.ts`（新規）：viewport `eventMode` / `hitArea` を検証。
+- `src/ui/canvas/__tests__/gameModal.test.ts`（新規）：`open()` 時の body content 破棄と string content 展開を検証。
+- `src/ui/canvas/__tests__/gameUiViewModel.test.ts`：`unreadEventCount` 計算を追加。
+
+## 10. ブラウザ E2E 検証結果
+
+`npm run dev` で `http://localhost:5173/` を起動し、Chrome + Playwright で録画付き E2E を実施した。Canvas runtime および UI プリミティブは期待通り動作した。
+
+| シナリオ                                                                                                                                     | 結果     |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| Legacy DOM UI ロード（console error なし）                                                                                                   | PASS     |
+| `Canvas UI` ボタンで Canvas 表示切替。`.game-canvas-host` 内に `<canvas>` が **1 枚**、bounding box サイズ 0 ではない                        | PASS     |
+| BootScene の `Loading...` 表示後、約 1.2 s で FoundationDemoScene へ自動遷移                                                                 | PASS     |
+| FoundationDemoScene に `DAY 1` / `酒場評判` / `PARTIES` リスト / `TAVERN` / 下部 `Panel` `Tooltip` `Modal` `Scroll` `Legacy UI` ボタンが表示 | PASS     |
+| `Panel` クリックで `Panel Test` モーダル、`Modal` クリックで `Modal Test` モーダルが開閉                                                     | PASS     |
+| `Tooltip` ホバーで日本語ツールチップ表示                                                                                                     | PASS     |
+| `Scroll` クリックで 40 アイテムのスクロールモーダル、ホイールで内容がスクロール                                                              | PASS     |
+| ウィンドウリサイズ（1024×600 / 1600×900 / 2560×1080）で 16:9 中央配置が維持され、極端なアスペクト比では黒帯                                  | PASS     |
+| `Legacy UI` ボタンで DOM UI に復帶。`<canvas>` は 0 枚                                                                                       | PASS     |
+| 再度 `Canvas UI` 切替えでも `<canvas>` は **1 枚**、重複なし                                                                                 | PASS     |
+| Legacy UI で Day1 を解決後に Canvas UI へ切り替え、`NEXT DAY` で `DAY 2` に進行。Legacy UI 復帰でも `Day 2` 保持                             | PASS     |
+| Provider 未接続・Narrative 未操作で AI 呼び出し 0 件                                                                                         | PASS     |
+| `console.error` / `pageerror` / `unhandled rejection`                                                                                        | 検出なし |
+
+### 留意事項
+
+- Chrome / NVIDIA ドライバーから `[.WebGL-...] GL Driver Message ... GPU stall due to ReadPixels` というパフォーマンス警告が Canvas 初期化時に 4 件出力された。これはアプリコードではなく WebGL / ドライバー層のメッセージであり、機能には影響しない。
+- jsdom ベースの `npm run test` では `pixi.js` を直接 import するテストで `HTMLCanvasElement.prototype.getContext` 未実装の `Error:` ログが多数出るが、すべて catch されてテストは PASS する。`canvas` npm パッケージ導入または `pixi.js` の完全 mock 化で消すことができる。
+
+## 11. 既知の制約
+
+- **Accessibility foundation は Phase 8.0.1 では未実装**。Canvas 内のボタン・スクロール・モーダルは Pixi DisplayObject イベントで駆動され、ARIA 属性 / キーボードフォーカス / スクリーンリーダー対応は今後の Phase で構築する。本 Phase では pointer イベント中心の動作確認に留まっている。

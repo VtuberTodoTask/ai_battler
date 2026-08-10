@@ -1,4 +1,4 @@
-import { Assets, Texture } from 'pixi.js'
+import { Texture } from 'pixi.js'
 
 export class GameAssetManager {
   private readonly _cache = new Map<string, Texture>()
@@ -8,22 +8,12 @@ export class GameAssetManager {
     return this._loaded
   }
 
-  async load(): Promise<void> {
+  /**
+   * Loads placeholder assets for the foundation phase.
+   * Phase 8.0 does not load real image files; placeholder textures are used instead.
+   */
+  async loadFoundation(): Promise<void> {
     if (this._loaded) return
-
-    await Assets.init({ manifest: this.buildManifest() })
-
-    try {
-      const textures = await Assets.loadBundle('foundation')
-      for (const [alias, texture] of Object.entries(textures)) {
-        if (texture instanceof Texture) {
-          this._cache.set(alias, texture)
-        }
-      }
-    } catch {
-      // Foundation phase uses placeholder textures; missing bundle is safe.
-    }
-
     this._loaded = true
   }
 
@@ -33,21 +23,5 @@ export class GameAssetManager {
 
   registerPlaceholder(alias: string, texture: Texture): void {
     this._cache.set(alias, texture)
-  }
-
-  private buildManifest() {
-    return {
-      bundles: [
-        {
-          name: 'foundation',
-          assets: [
-            { alias: 'ui.panel', src: '' },
-            { alias: 'ui.button', src: '' },
-            { alias: 'tavern.background', src: '' },
-            { alias: 'icon.quest', src: '' },
-          ],
-        },
-      ],
-    }
   }
 }

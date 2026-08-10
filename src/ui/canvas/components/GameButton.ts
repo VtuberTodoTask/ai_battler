@@ -29,14 +29,11 @@ export class GameButton extends Container {
     this._width = options.width
     this._height = options.height
     this._theme = options.theme
-    this._isEnabled = true
 
     this._graphics = new Graphics()
     this.addChild(this._graphics)
 
     this._label = new GameLabel(options.label, this._theme, 'button')
-    this._label.x = this._width / 2 - this._label.textWidth / 2
-    this._label.y = this._height / 2 - this._label.textHeight / 2
     this.addChild(this._label)
 
     this.eventMode = 'static'
@@ -48,7 +45,11 @@ export class GameButton extends Container {
     this.on('pointerup', this.onPointerUp)
     this.on('pointertap', this.onPointerTap)
 
-    this.setEnabled(!options.disabled)
+    this._isEnabled = !options.disabled
+    this._state = this._isEnabled ? 'normal' : 'disabled'
+    this.cursor = this._isEnabled ? 'pointer' : 'default'
+    this.draw()
+    this.centerLabel()
   }
 
   get state(): ButtonState {
@@ -61,8 +62,7 @@ export class GameButton extends Container {
 
   setLabel(label: string): void {
     this._label.text = label
-    this._label.x = this._width / 2 - this._label.textWidth / 2
-    this._label.y = this._height / 2 - this._label.textHeight / 2
+    this.centerLabel()
   }
 
   setEnabled(enabled: boolean): void {
@@ -153,5 +153,10 @@ export class GameButton extends Container {
       .stroke({ width: 2, color: stroke })
 
     this._label.alpha = this._isEnabled ? 1 : 0.6
+  }
+
+  private centerLabel(): void {
+    this._label.x = this._width / 2 - this._label.textWidth / 2
+    this._label.y = this._height / 2 - this._label.textHeight / 2
   }
 }

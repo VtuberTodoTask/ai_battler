@@ -16,11 +16,19 @@ const LEFT_W = 360
 const BOTTOM_BAR_H = 80
 const MARGIN = 16
 
+function destroyChildren(container: Container): void {
+  const children = container.removeChildren()
+  for (const child of children) {
+    child.destroy({ children: true })
+  }
+}
+
 export class FoundationDemoScene implements GameScene {
   readonly id = 'foundation'
 
   private _context: GameSceneContext | null = null
-  private _root: Container | null = null
+  private _bgRoot: Container | null = null
+  private _uiRoot: Container | null = null
   private _partyListRoot: Container | null = null
   private _dayLabel: GameLabel | null = null
   private _reputationLabel: GameLabel | null = null
@@ -37,8 +45,12 @@ export class FoundationDemoScene implements GameScene {
 
   mount(context: GameSceneContext): void {
     this._context = context
-    this._root = new Container()
-    context.layers.ui.addChild(this._root)
+
+    this._bgRoot = new Container()
+    context.layers.background.addChild(this._bgRoot)
+
+    this._uiRoot = new Container()
+    context.layers.ui.addChild(this._uiRoot)
 
     this.buildBackground(context)
     this.buildTopBar(context)
@@ -68,11 +80,18 @@ export class FoundationDemoScene implements GameScene {
   }
 
   unmount(): void {
-    if (this._root) {
-      this._root.parent?.removeChild(this._root)
-      this._root.destroy({ children: true })
-      this._root = null
+    if (this._bgRoot) {
+      this._bgRoot.parent?.removeChild(this._bgRoot)
+      this._bgRoot.destroy({ children: true })
+      this._bgRoot = null
     }
+
+    if (this._uiRoot) {
+      this._uiRoot.parent?.removeChild(this._uiRoot)
+      this._uiRoot.destroy({ children: true })
+      this._uiRoot = null
+    }
+
     this._partyListRoot = null
     this._dayLabel = null
     this._reputationLabel = null
@@ -90,7 +109,7 @@ export class FoundationDemoScene implements GameScene {
       context.viewport.virtualWidth,
       context.viewport.virtualHeight,
     ).fill({ color: context.theme.colors.background })
-    context.layers.background.addChild(bg)
+    this._bgRoot!.addChild(bg)
   }
 
   private buildTopBar(context: GameSceneContext): void {
@@ -104,7 +123,7 @@ export class FoundationDemoScene implements GameScene {
       borderColor: theme.colors.panelBorder,
       radius: 0,
     })
-    this._root!.addChild(topBar)
+    this._uiRoot!.addChild(topBar)
 
     this._dayLabel = new GameLabel('', theme, 'heading')
     this._dayLabel.x = MARGIN
@@ -145,7 +164,7 @@ export class FoundationDemoScene implements GameScene {
     })
     leftPanel.x = MARGIN
     leftPanel.y = TOP_BAR_H + MARGIN
-    this._root!.addChild(leftPanel)
+    this._uiRoot!.addChild(leftPanel)
 
     this._partyListRoot = new Container()
     this._partyListRoot.x = MARGIN
@@ -172,7 +191,7 @@ export class FoundationDemoScene implements GameScene {
     })
     mainPanel.x = x
     mainPanel.y = y
-    this._root!.addChild(mainPanel)
+    this._uiRoot!.addChild(mainPanel)
 
     const title = new GameLabel(
       'Phase 8.0 Canvas Foundation',
@@ -221,7 +240,7 @@ export class FoundationDemoScene implements GameScene {
     })
     bottomBar.x = MARGIN
     bottomBar.y = y
-    this._root!.addChild(bottomBar)
+    this._uiRoot!.addChild(bottomBar)
 
     const buttons = [
       {
@@ -300,7 +319,7 @@ export class FoundationDemoScene implements GameScene {
   private rebuildPartyList(parties: PartyListItemViewModel[]): void {
     if (!this._partyListRoot || !this._context) return
 
-    this._partyListRoot.removeChildren()
+    destroyChildren(this._partyListRoot)
     this._partyButtons = []
 
     const width = LEFT_W - MARGIN * 3

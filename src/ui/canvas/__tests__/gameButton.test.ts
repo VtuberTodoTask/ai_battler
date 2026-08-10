@@ -2,11 +2,49 @@
 import { describe, expect, it, vi } from 'vitest'
 import { FederatedPointerEvent } from 'pixi.js'
 import { GameButton } from '../components/GameButton.ts'
+import { GameLabel } from '../components/GameLabel.ts'
 import { DEFAULT_GAME_THEME } from '../theme/gameTheme.ts'
 
 const pointerEvent = {} as FederatedPointerEvent
 
 describe('GameButton', () => {
+  it('renders the normal visual state immediately when enabled', () => {
+    const button = new GameButton({
+      width: 100,
+      height: 40,
+      theme: DEFAULT_GAME_THEME,
+      label: 'Enabled',
+    })
+
+    expect(button.isEnabled).toBe(true)
+    expect(button.state).toBe('normal')
+    expect(button.cursor).toBe('pointer')
+
+    const label = button.children.find(
+      (c) => c instanceof GameLabel,
+    ) as GameLabel
+    expect(label.alpha).toBe(1)
+  })
+
+  it('renders the disabled visual state immediately when disabled', () => {
+    const button = new GameButton({
+      width: 100,
+      height: 40,
+      theme: DEFAULT_GAME_THEME,
+      label: 'Disabled',
+      disabled: true,
+    })
+
+    expect(button.isEnabled).toBe(false)
+    expect(button.state).toBe('disabled')
+    expect(button.cursor).toBe('default')
+
+    const label = button.children.find(
+      (c) => c instanceof GameLabel,
+    ) as GameLabel
+    expect(label.alpha).toBe(0.6)
+  })
+
   it('fires onActivate exactly once when tapped', () => {
     const action = vi.fn()
     const button = new GameButton({

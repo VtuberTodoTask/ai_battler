@@ -1,4 +1,4 @@
-import { Container, FederatedWheelEvent, Graphics } from 'pixi.js'
+import { Container, FederatedWheelEvent, Graphics, Rectangle } from 'pixi.js'
 import type { GameUiTheme } from '../theme/gameTheme.ts'
 
 export class GameScrollView extends Container {
@@ -19,6 +19,7 @@ export class GameScrollView extends Container {
 
     this._viewport = new Container()
     this._viewport.eventMode = 'static'
+    this._viewport.hitArea = new Rectangle(0, 0, width, height)
     this.addChild(this._viewport)
 
     this._content = new Container()
@@ -42,6 +43,8 @@ export class GameScrollView extends Container {
 
     this._mask.clear()
     this._mask.rect(0, 0, width, height).fill({ color: 0xffffff, alpha: 1 })
+
+    this._viewport.hitArea = new Rectangle(0, 0, width, height)
 
     this.clampContent()
   }

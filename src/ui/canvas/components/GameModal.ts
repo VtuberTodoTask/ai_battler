@@ -4,6 +4,16 @@ import { GameButton } from './GameButton.ts'
 import { GameLabel } from './GameLabel.ts'
 import { GamePanel } from './GamePanel.ts'
 
+const VIRTUAL_WIDTH = 1600
+const VIRTUAL_HEIGHT = 900
+
+function destroyChildren(container: Container): void {
+  const children = container.removeChildren()
+  for (const child of children) {
+    child.destroy({ children: true })
+  }
+}
+
 export class GameModal extends Container {
   private readonly _dim: Graphics
   private readonly _panel: GamePanel
@@ -64,7 +74,7 @@ export class GameModal extends Container {
 
   open(title: string, content: Container | string): void {
     this._titleLabel.text = title
-    this._bodyContainer.removeChildren()
+    destroyChildren(this._bodyContainer)
 
     if (typeof content === 'string') {
       const label = new GameLabel(content, this._theme, 'body', {
@@ -90,6 +100,3 @@ export class GameModal extends Container {
       .fill({ color: this._theme.colors.dim, alpha: 0.7 })
   }
 }
-
-const VIRTUAL_WIDTH = 1600
-const VIRTUAL_HEIGHT = 900

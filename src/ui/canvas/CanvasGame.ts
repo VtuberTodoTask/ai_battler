@@ -1,4 +1,4 @@
-import { Application, Container } from 'pixi.js'
+import { Application, Container, Ticker } from 'pixi.js'
 import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
 import { GameAssetManager } from './assets/GameAssetManager.ts'
 import { DEFAULT_GAME_THEME, type GameUiTheme } from './theme/gameTheme.ts'
@@ -28,6 +28,8 @@ export class CanvasGame {
   private _host: HTMLElement | null = null
   private _uiState: GameUiState = { ...DEFAULT_GAME_UI_STATE }
   private _currentCampaign: TavernCampaignState | null = null
+  private _destroyRequested = false
+  private _initializing = false
 
   actions: GameUiActions | null = null
 
@@ -39,20 +41,43 @@ export class CanvasGame {
     return this._viewport
   }
 
-  async init(host: HTMLElement): Promise<void> {
-    if (this._app) return
+  get app(): Application | null {
+    return this._app
+  }
 
+  async init(host: HTMLElement): Promise<void> {
+    if (this._app || this._initializing) return
+
+    this._initializing = true
+    this._destroyRequested = false
     this._host = host
 
     const app = new Application()
-    await app.init({
-      resizeTo: host,
-      background: this._theme.colors.background,
-      antialias: true,
-      resolution: Math.min(window.devicePixelRatio || 1, 2),
-      autoDensity: true,
-      preference: ['webgl', 'webgpu', 'canvas'],
-    })
+
+    try {
+      await app.init({
+        resizeTo: host,
+        background: this._theme.colors.background,
+        antialias: true,
+        resolution: Math.min(window.devicePixelRatio || 1, 2),
+        autoDensity: true,
+        preference: ['webgl', 'webgpu', 'canvas'],
+      })
+    } catch (err) {
+      this._initializing = false
+      this._host = null
+      throw err
+    }
+
+    if (this._destroyRequested) {
+      app.destroy({ removeView: true }, { children: true })
+      this._initializing = false
+      return
+    }
+
+    if (!host.contains(app.canvas)) {
+      host.appendChild(app.canvas)
+    }
 
     if (app.renderer.events.features) {
       app.renderer.events.features.wheel = true
@@ -63,8 +88,6 @@ export class CanvasGame {
     app.stage.addChild(this._viewportRoot)
 
     this._layers = this.createLayers(this._viewportRoot)
-
-    await this._assetManager.load()
 
     this._overlayManager = new OverlayManager(
       this._layers.overlay,
@@ -83,20 +106,31 @@ export class CanvasGame {
     this._sceneManager.register(new BootScene())
     this._sceneManager.register(new FoundationDemoScene())
 
+    app.ticker.add(this.handleTick)
+
     this._sceneManager.show('boot')
 
-    this._app.renderer.on('resize', this.handleRendererResize)
+    app.renderer.on('resize', this.handleRendererResize)
     this._resizeObserver = new ResizeObserver(() => this.updateViewport())
     this._resizeObserver.observe(host)
 
     this.updateViewport()
+
+    this._initializing = false
   }
 
   destroy(): void {
+    this._destroyRequested = true
+
+    if (this._initializing && !this._app) {
+      return
+    }
+
     this._resizeObserver?.disconnect()
     this._resizeObserver = null
 
     this._app?.renderer.off('resize', this.handleRendererResize)
+    this._app?.ticker.remove(this.handleTick)
 
     this._sceneManager?.unmountCurrent()
 
@@ -126,6 +160,10 @@ export class CanvasGame {
 
   private handleRendererResize = (): void => {
     this.updateViewport()
+  }
+
+  private handleTick = (ticker: Ticker): void => {
+    this._sceneManager?.update(ticker.deltaMS)
   }
 
   private updateViewport(): void {

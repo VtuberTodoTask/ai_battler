@@ -30,6 +30,7 @@ export default function GameCanvasHost({
     const host = hostRef.current
     if (!host) return undefined
 
+    let mounted = true
     const cg = new CanvasGame()
     const uiState: GameUiState = {
       selectedPartyId: null,
@@ -67,18 +68,20 @@ export default function GameCanvasHost({
 
     cg.actions = actions
     canvasGameRef.current = cg
-    setError(null)
 
     cg.init(host).then(
       () => {
+        if (!mounted) return
         cg.setCampaign(campaign)
       },
       (err) => {
+        if (!mounted) return
         setError(err instanceof Error ? err.message : String(err))
       },
     )
 
     return () => {
+      mounted = false
       cg.destroy()
       canvasGameRef.current = null
     }

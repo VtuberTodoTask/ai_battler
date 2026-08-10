@@ -58,4 +58,35 @@ describe('gameUiViewModel', () => {
     const item = buildPartyListItemViewModel(rawParty)
     expect(item.statusLabel).toBe('依頼受諾済み')
   })
+
+  it('counts unread downtime events as narrativeStatus !== viewed', () => {
+    const campaign = createTavernCampaign('test-viewmodel-unread')
+    const rawParty = campaign.currentDay.parties[0]
+    rawParty.downtimeEvents = [
+      { narrativeStatus: 'unseen' } as unknown as NonNullable<
+        typeof rawParty.downtimeEvents
+      >[number],
+      { narrativeStatus: 'generated' } as unknown as NonNullable<
+        typeof rawParty.downtimeEvents
+      >[number],
+      { narrativeStatus: 'viewed' } as unknown as NonNullable<
+        typeof rawParty.downtimeEvents
+      >[number],
+      { narrativeStatus: 'generated' } as unknown as NonNullable<
+        typeof rawParty.downtimeEvents
+      >[number],
+    ]
+
+    const item = buildPartyListItemViewModel(rawParty)
+    expect(item.unreadEventCount).toBe(3)
+  })
+
+  it('reports zero unread events when downtimeEvents is missing', () => {
+    const campaign = createTavernCampaign('test-viewmodel-zero-unread')
+    const rawParty = campaign.currentDay.parties[0]
+    rawParty.downtimeEvents = undefined
+
+    const item = buildPartyListItemViewModel(rawParty)
+    expect(item.unreadEventCount).toBe(0)
+  })
 })

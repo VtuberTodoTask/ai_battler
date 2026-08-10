@@ -37,7 +37,10 @@ export function buildPartyListItemViewModel(
     name: party.party.name,
     memberNames,
     statusLabel,
-    unreadEventCount: party.downtimeEvents?.length ?? 0,
+    unreadEventCount:
+      party.downtimeEvents?.filter(
+        (event) => event.narrativeStatus !== 'viewed',
+      ).length ?? 0,
   }
 }
 
