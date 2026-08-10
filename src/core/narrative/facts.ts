@@ -169,12 +169,12 @@ export function buildPersonalityHints(personality: Personality): string[] {
   return hints
 }
 
-function hpCondition(partyMember: DispatchPartyResult): string {
+function hpCondition(partyMember: DispatchPartyResult): string | undefined {
   if (partyMember.dead) return '死亡した'
   if (partyMember.incapacitated) return '行動不能になった'
   const ratio =
     partyMember.maxHp > 0 ? partyMember.finalHp / partyMember.maxHp : 1
-  if (ratio >= 0.9) return '目立った消耗はない'
+  if (ratio >= 0.9) return undefined
   if (ratio >= 0.5) return '帰還時に消耗が見られる'
   return '帰還時の消耗が大きい'
 }
@@ -190,7 +190,8 @@ function memberConditionFacts(report: DispatchReport): string[] {
     } else if (m.incapacitated) {
       incapacitated.push(m.name)
     } else {
-      conditions.push(`${m.name}: ${hpCondition(m)}`)
+      const condition = hpCondition(m)
+      if (condition) conditions.push(`${m.name}: ${condition}`)
     }
   }
   if (dead.length > 0) facts.push(`死亡したMember: ${dead.join('、 ')}`)

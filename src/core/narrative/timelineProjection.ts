@@ -371,7 +371,7 @@ export function projectExpeditionLogToNarrativeBeats(
     }
 
     case 'noHealer': {
-      push('手当てが行われなかった')
+      // Absence of a healer is not a narrative event.
       break
     }
 

@@ -150,6 +150,7 @@ export interface NarrativeDirection {
   mainScenes: NarrativeSceneSelection[]
   secondaryScenes: NarrativeSceneSelection[]
   montageBeatIds: string[]
+  omittedBeatIds?: string[]
   interactionHints?: NarrativeInteractionHint[]
 }
 
