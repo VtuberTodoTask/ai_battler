@@ -22,6 +22,7 @@ import { buildExpeditionNarrativeTimeline } from './timeline.ts'
 import { deriveCharacterNarrativeProfile } from './characterProfile.ts'
 import { buildRelationshipSnapshot } from './characterRelationships.ts'
 import { determineNarrativeDirection } from './director.ts'
+import { projectCharacterContextsForNarrative } from '../identity/characterContext.ts'
 
 function memberIsDead(member: { currentHp: number }): boolean {
   return member.currentHp <= 0
@@ -39,6 +40,10 @@ export function buildNarrativePartySnapshot(
     rank: m.rank,
     personality: m.personality,
     narrativeProfile: m.narrativeProfile ?? deriveCharacterNarrativeProfile(m),
+    identity: m.identity,
+    lifeBackground: m.lifeBackground,
+    culturalInfluences: m.culturalInfluences,
+    romanticProfile: m.romanticProfile,
     incapacitated: incapacitatedIds.has(m.id),
     dead: memberIsDead(m),
   }))
@@ -121,6 +126,23 @@ export function buildExpeditionNarrativeContext(
       context.timeline,
       context.party.members,
       context.party.characterRelationships,
+    )
+    const sceneCharacterIds = [
+      ...new Set(
+        (context.direction?.mainScenes ?? [])
+          .concat(context.direction?.secondaryScenes ?? [])
+          .flatMap((s) => s.characterIds ?? []),
+      ),
+    ]
+    if (sceneCharacterIds.length === 0 && context.party.members.length > 0) {
+      sceneCharacterIds.push(context.party.leaderId)
+    }
+    context.characterContexts = projectCharacterContextsForNarrative(
+      context.party.members,
+      context.direction?.focus?.summary ?? '',
+      context.request,
+      sceneCharacterIds,
+      context.party.characterRelationships ?? [],
     )
   }
   return context

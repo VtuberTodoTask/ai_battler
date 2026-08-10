@@ -11,6 +11,8 @@ import type {
   NarrativeMemberSnapshot,
   RelationshipMemory,
 } from './types.ts'
+import type { CharacterRomanticProfile, GenderId } from '../identity/types.ts'
+import { SeededRng } from '../rng/seededRng.ts'
 
 export type RelationshipEventType =
   | 'rescued'
@@ -88,14 +90,52 @@ function memberNameById(
   return members.find((m) => m.id === id)?.name
 }
 
+interface RomanceAwareMember {
+  id: string
+  seed?: string
+  gender?: GenderId
+  identity?: { gender?: GenderId }
+  romanticProfile?: CharacterRomanticProfile
+}
+
+function memberGender(m: RomanceAwareMember): GenderId | undefined {
+  return m.gender ?? m.identity?.gender
+}
+
+function computeInitialRomanticAttraction(
+  source: RomanceAwareMember,
+  target: RomanceAwareMember,
+  rng: SeededRng,
+): number | undefined {
+  const attraction = source.romanticProfile?.attraction
+  if (!attraction) return undefined
+  const genders = attraction.genders
+  if (genders === undefined || genders.length === 0) return undefined
+  const targetGender = memberGender(target)
+  if (targetGender !== undefined && !genders.includes(targetGender)) {
+    return undefined
+  }
+  const base = attraction.openness ?? 50
+  const variation = rng.integer(-15, 15)
+  const value = Math.max(0, Math.min(100, base + variation))
+  return value > 0 ? value : undefined
+}
+
 export function initializePartyMemberRelationships(
-  members: { id: string }[],
+  members: RomanceAwareMember[],
 ): Record<string, CharacterRelationship> {
   const relationships: Record<string, CharacterRelationship> = {}
   for (const source of members) {
     for (const target of members) {
       if (source.id === target.id) continue
-      ensureRelationship(relationships, source.id, target.id)
+      const rel = ensureRelationship(relationships, source.id, target.id)
+      const seed = source.seed ?? source.id
+      const rng = new SeededRng(`${seed}:romance:${target.id}`)
+      rel.romanticAttraction = computeInitialRomanticAttraction(
+        source,
+        target,
+        rng,
+      )
     }
   }
   return relationships
@@ -122,6 +162,7 @@ export function buildRelationshipSnapshot(
       trust: rel.trust,
       respect: rel.respect,
       tension: rel.tension,
+      romanticAttraction: rel.romanticAttraction,
       tags: rel.tags ? [...rel.tags] : [],
       recentEvents: rel.recentEvents
         ? rel.recentEvents.map((m) => ({ ...m }))

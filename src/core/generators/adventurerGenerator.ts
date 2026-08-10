@@ -25,6 +25,10 @@ import {
   MIN_STAT,
 } from '../balance/constants.ts'
 import { clamp, deepClone, round } from '../util.ts'
+import {
+  buildCharacterNarrativeProfile,
+  generateAdventurerIdentity,
+} from '../identity/generator.ts'
 
 const STAT_NAMES: StatName[] = ['str', 'con', 'dex', 'int', 'per', 'wil', 'soc']
 
@@ -308,8 +312,9 @@ export function generateAdventurer(
     : rng.integer(0, 10) + maxMpBonus
 
   const morale = clamp(20 + round(finalStats.wil * 0.5) + moraleBonus, 0, 100)
+  const identityData = generateAdventurerIdentity(`${parsed.seed}:identity`)
 
-  return {
+  const adventurer: Adventurer = {
     id: `${rank}-${role}-${parsed.seed}`,
     seed: parsed.seed,
     name: generateName(rng),
@@ -331,7 +336,16 @@ export function generateAdventurer(
       armor: deepClone(ARMORS[roleDef.armorId]),
     },
     statusEffects: [],
+    identity: identityData.identity,
+    lifeBackground: identityData.lifeBackground,
+    culturalInfluences: identityData.culturalInfluences,
+    romanticProfile: identityData.romanticProfile,
+    contradiction: identityData.contradiction,
   }
+
+  adventurer.narrativeProfile = buildCharacterNarrativeProfile(adventurer)
+
+  return adventurer
 }
 
 export function generateAdventurers(

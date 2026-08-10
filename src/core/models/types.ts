@@ -1,4 +1,11 @@
 import { z } from 'zod'
+import type {
+  CharacterIdentity,
+  CharacterLifeBackground,
+  CharacterRomanticProfile,
+  CulturalInfluence,
+  PersonalityContradiction,
+} from '../identity/types.ts'
 
 export const RANKS = ['E', 'D', 'C', 'B', 'A', 'S'] as const
 export const ENEMY_RANKS = [...RANKS, 'DISASTER'] as const
@@ -109,6 +116,9 @@ export interface CharacterNarrativeProfile {
   fears?: string[]
   habits?: string[]
   speechStyle?: string
+  beliefs?: string[]
+  attitudes?: string[]
+  contradictions?: PersonalityContradiction[]
 }
 
 export interface Weapon {
@@ -250,6 +260,12 @@ export interface Adventurer {
   narrativeProfile?: CharacterNarrativeProfile
   equipment: EquipmentSet
   statusEffects: StatusEffect[]
+
+  identity?: CharacterIdentity
+  lifeBackground?: CharacterLifeBackground
+  culturalInfluences?: CulturalInfluence[]
+  romanticProfile?: CharacterRomanticProfile
+  contradiction?: PersonalityContradiction
 }
 
 export interface Enemy {
