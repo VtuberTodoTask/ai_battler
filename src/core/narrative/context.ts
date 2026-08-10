@@ -28,6 +28,7 @@ import {
   type ProjectedMemoryContext,
 } from './memory.ts'
 import { projectArcSignalsForNarrative } from './arcSignals.ts'
+import { projectRelationshipMilestonesForNarrative } from './milestones.ts'
 
 function memberIsDead(member: { currentHp: number }): boolean {
   return member.currentHp <= 0
@@ -169,6 +170,14 @@ export function buildExpeditionNarrativeContext(
         sceneCharacterIds,
         dayNumber,
       )
+      context.relationshipMilestones =
+        projectRelationshipMilestonesForNarrative(
+          party,
+          context.direction?.focus?.summary ?? '',
+          context.request,
+          sceneCharacterIds,
+          dayNumber,
+        )
     }
   }
   return context

@@ -21,6 +21,7 @@ import type {
   CharacterArcSignal,
   CharacterMemory,
   CharacterRelationship,
+  RelationshipMilestone,
 } from '../narrative/types.ts'
 
 export type PartyRiskTolerance = 'cautious' | 'balanced' | 'bold'
@@ -121,6 +122,8 @@ export interface TavernParty {
   memberRelationships?: Record<string, CharacterRelationship>
   /** Persistent relationship / personal arc signals derived from memories. Optional for backward compatibility. */
   arcSignals?: CharacterArcSignal[]
+  /** Persistent relationship milestones achieved by this party. Optional for backward compatibility. */
+  relationshipMilestones?: RelationshipMilestone[]
 }
 
 export interface PartyTemplate {

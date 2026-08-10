@@ -151,6 +151,8 @@ export function projectCharacterContextForNarrative(
 
   return {
     characterId: member.id,
+    name: member.name,
+    gender: member.identity?.gender,
     identitySummary: identitySummary(member),
     relevantBackground:
       relevantBackground.length > 0 ? relevantBackground : undefined,

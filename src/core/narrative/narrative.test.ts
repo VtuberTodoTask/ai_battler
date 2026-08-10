@@ -363,7 +363,7 @@ describe('Narrative generation', () => {
     expect(candidate.state).toBe('generated')
     expect(candidate.activeGenerationId).toBe(record.id)
     expect(record.generatedText).toContain('Fake生成')
-    expect(record.promptVersion).toBe('v10')
+    expect(record.promptVersion).toBe('v11')
   })
 
   it('bulk generates candidates sequentially', async () => {

@@ -25,8 +25,9 @@ import { determineNarrativeDirection } from './director.ts'
 import { formatNarrativeProfile } from './characterProfile.ts'
 import { countryLabel, genderLabel, speciesLabel } from '../identity/labels.ts'
 import { arcSignalSummary } from './arcSignals.ts'
+import { milestoneSummary } from './milestones.ts'
 
-export const NARRATIVE_PROMPT_VERSION = 'v10'
+export const NARRATIVE_PROMPT_VERSION = 'v11'
 
 export interface NarrativePrompt {
   system: string
@@ -398,6 +399,22 @@ function arcSignalLines(context: ExpeditionNarrativeContext): string[] {
   return lines
 }
 
+function milestoneLines(context: ExpeditionNarrativeContext): string[] {
+  const lines: string[] = []
+  const milestones = context.relationshipMilestones ?? []
+  if (milestones.length === 0) return ['- なし']
+  const memberMap = new Map(
+    context.party.members.map((m) => [m.id, m.name ?? m.id]),
+  )
+  for (const milestone of milestones) {
+    const summary = milestoneSummary(milestone, memberMap)
+    lines.push(
+      `- ${summary}（状態：${milestone.status}、強さ${milestone.strength}、確信${milestone.confidence}）`,
+    )
+  }
+  return lines
+}
+
 function directionLines(
   direction: import('./types.ts').NarrativeDirection | undefined,
   members?: NarrativeMemberSnapshot[],
@@ -479,8 +496,9 @@ function characterContextLines(
     return ['- キャラクターバックグラウンドは未設定']
   const lines: string[] = []
   for (const c of contexts) {
-    lines.push(`  - ${c.characterId}:`)
+    lines.push(`  - ${c.name ?? c.characterId}:`)
     if (c.identitySummary) lines.push(`    素性: ${c.identitySummary}`)
+    if (c.gender) lines.push(`    性別: ${c.gender}`)
     if (c.relevantBackground && c.relevantBackground.length > 0) {
       lines.push(`    関連背景: ${c.relevantBackground.join(' / ')}`)
     }
@@ -649,7 +667,13 @@ const EXPEDITION_WRITING_INSTRUCTIONS = `WRITING INSTRUCTIONS:
 - 最終本文は自然な日本語だけで書く
 - Outcome を変更しない
 - 次の冒険、新たな依頼、新しい目的地へ勝手につなげない
-- 文字数を満たすために新しい出来事を創作しない`
+- 文字数を満たすために新しい出来事を創作しない
+- CHARACTER IDENTITY IS IMMUTABLE: name, gender, species, country of origin are authoritative. Never change, guess, or contradict them.
+- JAPANESE PRONOUNS: Japanese does not require gendered third-person pronouns. Prefer the character's name or natural subject omission over 彼 / 彼女. Never use a gendered pronoun that conflicts with the character's identity. If gender is nonbinary, other, or unsafe to map to a binary Japanese pronoun, use the name or omit the pronoun.
+- DO NOT SUMMARIZE RELATIONSHIP DEVELOPMENT: If the scene already demonstrates familiarity, trust, reliance, tension, or coordination through behavior, do not summarize that relationship state afterward. Avoid abstract narration such as "They had grown to understand each other.", "Their trust had deepened.", "They no longer needed many words.", "The distance between them had narrowed.", "Their teamwork had become natural.", "They had grown accustomed to one another.", and Japanese equivalents like "信頼が深まっていた", "距離が縮まっていた", "互いを理解していた", "息が合っていた", "馴染んでいた", "関係が深まっていた", "絆が強くなっていた", "言葉を必要としなかった".
+- MILESTONES ARE NOT EXPOSITION: A milestone changes behavioral expectations. It is not a sentence that must appear in the narrative. Do not write "二人は互いを頼る関係になっていた" or similar. Show the changed behavior once, then move on.
+- Gender is not personality: do not derive temperament, values, flaws, fears, or social style from gender.
+- Romantic interest is not a relationship status: a character may be interested without confessing, dating, or partnering.`
 
 export function buildExpeditionPrompt(
   context: ExpeditionNarrativeContext,
@@ -699,7 +723,7 @@ export function buildExpeditionPrompt(
     ...memberHintLines(context.party.members),
     '',
     '=== CHARACTER BACKGROUND ===',
-    'Scene-relevant background and identity (background is context, not stereotype):',
+    'Character identity (name, gender, species, country of origin) is immutable and authoritative. Scene-relevant background and identity (background is context, not stereotype):',
     ...characterContextLines(context.characterContexts),
     '',
     '=== PARTY RELATIONSHIPS ===',
@@ -712,6 +736,10 @@ export function buildExpeditionPrompt(
     '=== RELATIONSHIP ARCS ===',
     'Arc signals describe long-term relationship trends, not facts to announce. Do not state an arc label or relationship development directly. Let an arc influence who a character listens to, who they look toward first, how quickly they accept advice, how much explanation is needed, whether disagreement is blunt or restrained, and how familiar routine coordination feels. Do not force the arc into every scene.',
     ...arcSignalLines(context),
+    '',
+    '=== RELATIONSHIP MILESTONES ===',
+    'Milestones are achieved relationship states backed by persistent history, not labels such as 親友, 恋人, or 宿敵. They are not exposition. A milestone changes behavioral expectations: how much a character explains, who they look toward first, how quickly they disagree, how familiar routine coordination feels. Do not state a milestone label or relationship development directly. Do not write a scene about the milestone being achieved.',
+    ...milestoneLines(context),
     '',
     '=== EXPEDITION TIMELINE ===',
     timelineText,

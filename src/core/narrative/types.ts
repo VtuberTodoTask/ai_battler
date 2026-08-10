@@ -298,8 +298,64 @@ export interface NarrativeArcSignal {
   targetCharacterId?: string
 }
 
+export type RelationshipMilestoneStatus = 'active' | 'legacy'
+
+export type RelationshipMilestoneType =
+  | 'established_mutual_reliance'
+  | 'established_directional_reliance'
+  | 'established_working_rhythm'
+  | 'established_reciprocal_support'
+  | 'established_trusted_friction'
+  | 'established_decision_friction'
+  | 'established_strained_trust'
+  | 'established_shared_resilience'
+  | 'persistent_romantic_interest'
+
+export interface RelationshipMilestone {
+  id: string
+  type: RelationshipMilestoneType
+  characterIds: string[]
+  sourceCharacterId?: string
+  targetCharacterId?: string
+  achievedDay: number
+  status: RelationshipMilestoneStatus
+  strength: number
+  confidence: number
+  supportingArcSignalIds: string[]
+  supportingMemoryIds: string[]
+  deactivatedDay?: number
+}
+
+export interface RelationshipMilestoneCandidate {
+  type: RelationshipMilestoneType
+  characterIds: string[]
+  sourceCharacterId?: string
+  targetCharacterId?: string
+  score: number
+  confidence: number
+  supportingArcSignalIds: string[]
+  supportingMemoryIds: string[]
+  eligible: boolean
+}
+
+export interface NarrativeRelationshipMilestone {
+  type: RelationshipMilestoneType
+  summary: string
+  strength: number
+  confidence: number
+  status: RelationshipMilestoneStatus
+  characterIds: string[]
+  sourceCharacterId?: string
+  targetCharacterId?: string
+}
+
+export type NarrativeQualityWarning =
+  'identity_pronoun_mismatch' | 'abstract_relationship_summary'
+
 export interface CharacterNarrativeContext {
   characterId: string
+  name?: string
+  gender?: string
   identitySummary?: string
   relevantBackground?: string[]
   relevantCulturalInfluences?: string[]
@@ -333,6 +389,8 @@ export interface ExpeditionNarrativeContext {
   relationshipMemories?: Record<string, NarrativeMemoryContextItem[]>
   /** Relationship arc signals selected as relevant to the narrative focus. */
   relationshipArcs?: NarrativeArcSignal[]
+  /** Relationship milestones selected as relevant to the narrative focus. */
+  relationshipMilestones?: NarrativeRelationshipMilestone[]
 }
 
 export interface NarrativeHistoryHighlight {

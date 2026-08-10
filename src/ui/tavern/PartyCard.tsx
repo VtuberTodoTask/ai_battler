@@ -15,12 +15,24 @@ import {
   speciesLabel,
 } from '../../core/identity/labels.ts'
 import { arcSignalSummary } from '../../core/narrative/arcSignals.ts'
+import { milestoneSummary } from '../../core/narrative/milestones.ts'
 
 export interface PartyCardProps {
   party: TavernParty
   selected: boolean
   disabled: boolean
   onClick: () => void
+}
+
+function activeMilestonesForParty(party: TavernParty): string[] {
+  const memberMap = new Map(
+    party.party.members.map((m) => [m.id, m.name ?? m.id]),
+  )
+  return (party.relationshipMilestones ?? [])
+    .filter((m) => m.status === 'active')
+    .sort((a, b) => b.achievedDay - a.achievedDay)
+    .slice(0, 3)
+    .map((m) => milestoneSummary(m, memberMap))
 }
 
 function recentArcsForParty(party: TavernParty): string[] {
@@ -145,6 +157,16 @@ export function PartyCard({
           ))}
         </div>
       )}
+      {party.relationshipMilestones &&
+        party.relationshipMilestones.filter((m) => m.status === 'active')
+          .length > 0 && (
+          <div className="party-milestones">
+            <strong>関係の節目</strong>
+            {activeMilestonesForParty(party).map((text, i) => (
+              <div key={i}>{text}</div>
+            ))}
+          </div>
+        )}
       {ap.missionSpecialization && (
         <div className="party-specialization">
           得意：{OBJECTIVE_LABELS[ap.missionSpecialization.strongObjective]} ·
