@@ -363,7 +363,7 @@ describe('Narrative generation', () => {
     expect(candidate.state).toBe('generated')
     expect(candidate.activeGenerationId).toBe(record.id)
     expect(record.generatedText).toContain('Fake生成')
-    expect(record.promptVersion).toBe('v5')
+    expect(record.promptVersion).toBe('v6')
   })
 
   it('bulk generates candidates sequentially', async () => {
@@ -459,6 +459,13 @@ describe('Narrative prompt integrity', () => {
     expect(user).toContain('依頼は成功した')
     expect(user).toContain('=== EXPEDITION TIMELINE ===')
     expect(user).toContain('調査によっていくつかの情報を得た')
+    expect(user).toContain('Focus:')
+    expect(user).toContain('Narrative Interaction Hints:')
+    expect(user).toContain('NARRATIVE FOCUS')
+    expect(user).toContain('MONTAGEは1～3文程度')
+    expect(user).toContain('TIMELINEのすべての出来事を順番に説明しない')
+    expect(user).toContain('同じ結果を繰り返し説明しない')
+    expect(user).toContain('水筒を渡す')
 
     expect(system).toContain('Personality値')
     expect(system).toContain('再訪')

@@ -128,12 +128,29 @@ export interface NarrativeSceneSelection {
   beatIds: string[]
   focus: string
   reason: string
+  characterIds?: string[]
+}
+
+export interface NarrativeFocus {
+  summary: string
+  characterIds?: string[]
+  relatedBeatIds?: string[]
+  reason?: string
+}
+
+export interface NarrativeInteractionHint {
+  characterIds: string[]
+  beatIds: string[]
+  relationshipSummary?: string
+  suggestedDynamic?: string
 }
 
 export interface NarrativeDirection {
+  focus?: NarrativeFocus
   mainScenes: NarrativeSceneSelection[]
   secondaryScenes: NarrativeSceneSelection[]
   montageBeatIds: string[]
+  interactionHints?: NarrativeInteractionHint[]
 }
 
 export interface NarrativeAcceptanceInfo {
