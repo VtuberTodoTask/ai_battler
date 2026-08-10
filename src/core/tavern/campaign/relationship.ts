@@ -8,6 +8,10 @@ import type {
   CampaignPartyRelationship,
   CampaignRelationshipEvent,
 } from './types.ts'
+import {
+  buildMinorScenePresentationPlan,
+  selectStayExtensionReason,
+} from '../../narrative/minorScenes.ts'
 
 export const AFFINITY_DELTA: Record<ExpeditionOutcome, number> = {
   completeSuccess: 12,
@@ -165,6 +169,7 @@ export function tryExtendStay(
   party: CampaignParty,
   nextDayNumber: number,
   dayNumber: number,
+  seed?: string,
 ): CampaignRelationshipEvent | null {
   if (party.departingCasualty) return null
   if (party.plannedDepartureDay >= nextDayNumber) return null
@@ -177,6 +182,25 @@ export function tryExtendStay(
   party.plannedDepartureDay += remaining
   party.relationship.stayExtensionDaysUsed += remaining
 
+  const rng = new SeededRng(
+    seed ?? `${party.id}:stay:${nextDayNumber}:${dayNumber}`,
+  )
+  const { primary, secondary } = selectStayExtensionReason(rng, party)
+
+  const plan = buildMinorScenePresentationPlan(rng, party, {
+    eventType: 'stayExtended',
+    extensionReason: primary,
+    isStayExtension: true,
+    dayNumber,
+  })
+
+  const relevantCharacterIds = [
+    ...new Set([
+      ...(plan.speakingCharacterIds ?? []),
+      ...(plan.backgroundCharacterIds ?? []),
+    ]),
+  ]
+
   return {
     type: 'stayExtended',
     partyId: party.id,
@@ -186,6 +210,10 @@ export function tryExtendStay(
     newDepartureDay: party.plannedDepartureDay,
     extensionDays: remaining,
     affinity: party.relationship.affinity,
+    primaryReason: primary,
+    secondaryReason: secondary,
+    relevantCharacterIds,
+    presentationPlan: plan,
   }
 }
 

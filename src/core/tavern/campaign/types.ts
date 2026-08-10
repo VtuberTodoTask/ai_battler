@@ -15,9 +15,12 @@ import type {
   CharacterMemory,
   CharacterRelationship,
   DowntimeEvent,
+  MinorNarrativeFingerprint,
+  MinorScenePresentationPlan,
   NarrativeCandidate,
   NarrativeGenerationRecord,
   RelationshipMilestone,
+  StayExtensionReason,
 } from '../../narrative/types.ts'
 
 export type TavernReputationTier =
@@ -122,6 +125,10 @@ export type CampaignRelationshipEvent =
       newDepartureDay: number
       extensionDays: number
       affinity: number
+      primaryReason: StayExtensionReason
+      secondaryReason?: StayExtensionReason
+      relevantCharacterIds?: string[]
+      presentationPlan: MinorScenePresentationPlan
     }
 
 export interface CampaignParty {
@@ -147,6 +154,8 @@ export interface CampaignParty {
   relationshipMilestones?: RelationshipMilestone[]
   /** Downtime events accumulated while the party was not on expedition. Optional for backward compatibility. */
   downtimeEvents?: DowntimeEvent[]
+  /** Recent minor narrative fingerprints for this party, used to avoid repeated framing. Optional for backward compatibility. */
+  minorNarrativeFingerprints?: MinorNarrativeFingerprint[]
   departingCasualty?: boolean
 }
 

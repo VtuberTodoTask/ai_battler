@@ -318,7 +318,12 @@ export function advanceCampaignDay(
       continue
     }
     if (party.plannedDepartureDay < nextDayNumber) {
-      const stayEvent = tryExtendStay(party, nextDayNumber, nextDayNumber)
+      const stayEvent = tryExtendStay(
+        party,
+        nextDayNumber,
+        nextDayNumber,
+        nextCampaign.seed,
+      )
       if (stayEvent) {
         extensionEvents.push(stayEvent)
         remaining.push(party)

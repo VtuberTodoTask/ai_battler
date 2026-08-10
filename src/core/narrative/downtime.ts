@@ -12,8 +12,9 @@ import type {
 } from './types.ts'
 import { updateArcSignals } from './arcSignals.ts'
 import { updateRelationshipMilestones } from './milestones.ts'
+import { buildMinorScenePresentationPlan } from './minorScenes.ts'
 
-export const DOWNTIME_PROMPT_VERSION = 'v1'
+export const DOWNTIME_PROMPT_VERSION = 'v2'
 
 const MIN_RELATIONSHIP = 0
 const MAX_RELATIONSHIP = 100
@@ -839,13 +840,22 @@ export function createDowntimeEvent(
   dayNumber: number,
   state: 'idle' | 'recovering',
   config: DowntimeConfig = DEFAULT_DOWNTIME_CONFIG,
+  rng?: SeededRng,
 ): DowntimeEvent {
   const def = EVENT_DEF_BY_TYPE.get(type)!
-  const id = `downtime:${party.id}:${dayNumber}:${type}:${Math.random().toString(36).slice(2, 8)}`
+  const localRng =
+    rng ?? new SeededRng(`${party.id ?? 'party'}:downtime:${dayNumber}:${type}`)
+  const id = `downtime:${party.id}:${dayNumber}:${type}:${localRng.integer(1000, 9999)}`
   const sourceId = participants[0]
   const targetId = participants[1]
   const relationshipDeltas =
     sourceId && targetId ? buildDeltas(def, sourceId, targetId, config) : []
+
+  const plan = buildMinorScenePresentationPlan(localRng, party, {
+    eventType: type,
+    isStayExtension: false,
+    dayNumber,
+  })
 
   const fallback = downtimeFallbackSummary(
     type,
@@ -868,6 +878,7 @@ export function createDowntimeEvent(
     createdAtDay: dayNumber,
     narrativeStatus: 'unseen',
     fallbackSummary: fallback,
+    presentationPlan: plan,
   }
 }
 
@@ -912,6 +923,7 @@ export function resolveDowntimeForParty(
         dayNumber,
         state,
         config,
+        rng,
       )
       events.push(event)
       party.downtimeEvents.push(event)
@@ -940,6 +952,7 @@ export function resolveDowntimeForParty(
         dayNumber,
         state,
         config,
+        rng,
       )
       events.push(event)
       party.downtimeEvents.push(event)
@@ -1345,6 +1358,21 @@ export function resolveDowntimeForCampaign(
   }
 }
 
+function formatDowntimePresentationPlan(
+  plan: NonNullable<DowntimeEvent['presentationPlan']>,
+  memberMap: Map<string, { name?: string; id: string }>,
+): string[] {
+  const nameOf = (id?: string) => memberMap.get(id ?? '')?.name ?? id ?? '—'
+  return [
+    `Framing: ${plan.framing}`,
+    `Opening: ${plan.openingCategory ?? '—'}`,
+    `Focal Character: ${nameOf(plan.focalCharacterId)}`,
+    `Speaking Characters: ${plan.speakingCharacterIds.map(nameOf).join('、') || '—'}`,
+    `Background Characters: ${plan.backgroundCharacterIds?.map(nameOf).join('、') || '—'}`,
+    `Ending Style: ${plan.endingStyle}`,
+  ]
+}
+
 export function buildDowntimePrompt(
   event: DowntimeEvent,
   party: CampaignParty,
@@ -1363,6 +1391,13 @@ export function buildDowntimePrompt(
     `Participants: ${names}`,
     `Valence: ${event.valence}`,
     '',
+    ...(event.presentationPlan
+      ? [
+          '=== SCENE PRESENTATION ===',
+          ...formatDowntimePresentationPlan(event.presentationPlan, memberMap),
+          '',
+        ]
+      : []),
     '=== CHARACTERS ===',
     ...party.party.members.map((m) => {
       const identity: string[] = []
@@ -1377,13 +1412,22 @@ export function buildDowntimePrompt(
     ...relationshipContextLines(party, event),
     '',
     '=== NARRATIVE RULES ===',
-    'Write ONE short scene (300-700 Japanese characters) based on the structured downtime event.',
+    'Write ONE short scene (200-500 Japanese characters) based on the structured downtime event.',
     'The event facts are fixed: do not invent new injuries, romance confessions, relationship status changes, quests, equipment, factions, finances, or tavern facilities.',
     'Character identity (name, gender, species, country of origin) is immutable and authoritative.',
     'Japanese pronouns: prefer character names or natural subject omission over 彼/彼女. Never use a gendered pronoun that conflicts with identity.',
     'Do not summarize relationship development with abstract phrases such as "trust deepened" or "distance narrowed". Show behavior, not exposition.',
     'Focus on mundane details: food, drink, chairs, equipment, laundry, cards, books, weather outside, small complaints, silence.',
     'One scene per event. No player choices. No internal monologue from the player.',
+    '',
+    '=== MINOR EVENT NARRATIVE RULES ===',
+    'Short single scene only. No long introductions, background exposition, or references to future scenes.',
+    'Use the SCENE PRESENTATION: Framing decides which moment is shown, Opening decides how the scene starts, Focal Character is the camera center, Speaking Characters are the only ones required to speak.',
+    'Do not write every party member into the scene. Background characters may be present silently.',
+    'Avoid repeated phrases such as "静かな気配", "静かな余韻", "顔を寄せる", "酒場の一角".',
+    'Do not restate the decision or duration inside the scene unless SCENE PRESENTATION explicitly requires it.',
+    'End according to Ending Style: concrete_action (a small next action), unfinished_conversation (cut off mid-dialogue), mundane_transition (return to ordinary activity), brief_observation (a short external description), no_stylized_ending (no special closing line).',
+    'Even when the downtime event type is the same, this particular scene should feel like a different moment.',
   ].join('\n')
 
   const userPrompt = [

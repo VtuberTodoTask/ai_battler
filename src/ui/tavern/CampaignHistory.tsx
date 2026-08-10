@@ -114,8 +114,10 @@ function relationshipLabel(event: CampaignRelationshipEvent): string {
       return `《${event.partyName}》 お気に入り ${event.before} → ${event.after} (${outcomeLabel(event.outcome)})`
     case 'financialPressureChanged':
       return `《${event.partyName}》 懐事情 ${event.before} → ${event.after} (${sourceLabel(event.source)})`
-    case 'stayExtended':
-      return `《${event.partyName}》 滞在延長 Day ${event.previousDepartureDay} → ${event.newDepartureDay}（+${event.extensionDays}日）`
+    case 'stayExtended': {
+      const reasonLabel = stayExtensionReasonLabel(event.primaryReason)
+      return `《${event.partyName}》 滞在 +${event.extensionDays}日 / 理由：${reasonLabel}（Day ${event.previousDepartureDay} → ${event.newDepartureDay}）`
+    }
     default:
       return `《${(event as CampaignRelationshipEvent).partyName}》 ${(event as CampaignRelationshipEvent).type}`
   }
@@ -128,6 +130,20 @@ function sourceLabel(source: string): string {
     recovery: '療養',
   }
   return labels[source] ?? source
+}
+
+function stayExtensionReasonLabel(reason: string | undefined): string {
+  const labels: Record<string, string> = {
+    training: '訓練',
+    recovery: '回復',
+    equipment_preparation: '装備準備',
+    party_coordination: 'パーティ連携',
+    resource_preparation: '物資準備',
+    waiting_for_work: '仕事待ち',
+    personal_preference: '個人的希望',
+    mixed: '複合',
+  }
+  return labels[reason ?? ''] ?? reason ?? '—'
 }
 
 function outcomeLabel(outcome: string): string {

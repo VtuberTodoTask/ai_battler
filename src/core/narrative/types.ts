@@ -502,4 +502,64 @@ export interface DowntimeEvent {
   narrativeStatus: 'unseen' | 'generated' | 'viewed'
   generatedText?: string
   fallbackSummary?: string
+  /** Structured presentation plan for minor event narrative diversity. Optional for backward compatibility. */
+  presentationPlan?: MinorScenePresentationPlan
+}
+
+export type StayExtensionReason =
+  | 'training'
+  | 'recovery'
+  | 'equipment_preparation'
+  | 'party_coordination'
+  | 'resource_preparation'
+  | 'waiting_for_work'
+  | 'personal_preference'
+  | 'mixed'
+
+export type MinorSceneOpeningCategory =
+  | 'dialogue_first'
+  | 'action_first'
+  | 'observation_first'
+  | 'time_change'
+  | 'object_focus'
+
+export type MinorSceneEndingStyle =
+  | 'concrete_action'
+  | 'unfinished_conversation'
+  | 'mundane_transition'
+  | 'brief_observation'
+  | 'no_stylized_ending'
+
+export interface MinorScenePresentationPlan {
+  id: string
+  /** How the scene is framed; for stay extensions this is a StayExtensionFraming value. */
+  framing: string
+  /** How the scene opens (optional; selected per minor scene). */
+  openingCategory?: MinorSceneOpeningCategory
+  /** The character the camera follows, if any. */
+  focalCharacterId?: string
+  /** Characters that speak in the scene. */
+  speakingCharacterIds: string[]
+  /** Characters present but silent / in the background. */
+  backgroundCharacterIds?: string[]
+  /** For stay extensions: whether the extension decision is stated in dialogue. */
+  communicateDecisionDirectly?: boolean
+  /** For stay extensions: whether the number of days is spoken. */
+  mentionExtensionDays?: boolean
+  /** For stay extensions: whether the reason is spoken explicitly. */
+  emphasizeReason?: boolean
+  /** For stay extensions: whether relationship context is highlighted. */
+  emphasizeRelationship?: boolean
+  /** How the scene ends. */
+  endingStyle: MinorSceneEndingStyle
+}
+
+export interface MinorNarrativeFingerprint {
+  day: number
+  eventType?: string
+  framing?: string
+  openingCategory?: MinorSceneOpeningCategory
+  focalCharacterId?: string
+  speakerCount: number
+  endingStyle?: MinorSceneEndingStyle
 }

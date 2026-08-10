@@ -399,6 +399,10 @@ export function deriveAdvanceCandidates(
         newDepartureDay: stayEvent.newDepartureDay,
         extensionDays: stayEvent.extensionDays,
         affinity: stayEvent.affinity,
+        primaryReason: stayEvent.primaryReason,
+        secondaryReason: stayEvent.secondaryReason,
+        presentationPlan: stayEvent.presentationPlan,
+        relevantCharacterIds: stayEvent.relevantCharacterIds,
       },
       priority: EVENT_PRIORITY.stayExtended,
     })
