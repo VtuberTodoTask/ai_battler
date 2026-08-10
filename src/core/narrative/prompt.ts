@@ -20,9 +20,10 @@ import {
   buildExpeditionNarrativeTimeline,
   formatNarrativeTimeline,
 } from './timeline.ts'
+import { determineNarrativeDirection } from './director.ts'
 import { formatNarrativeProfile } from './characterProfile.ts'
 
-export const NARRATIVE_PROMPT_VERSION = 'v5'
+export const NARRATIVE_PROMPT_VERSION = 'v6'
 
 export interface NarrativePrompt {
   system: string
@@ -95,6 +96,8 @@ Tier 3: Narrative Embellishment（物語演出）
 - 登場人物の簡潔な内心の動き（ただし「店主」の感情・思考・判断は除く）
 - 空気、温度、照明、天候など場の演出
 - Party Member間の短い会話（原則Party Member側の台詞）
+- ミッションと無関係な雑談、空腹、疲労、からかい、愚痴、気まずい沈黙、冗談、装備確認、相手の様子を気にする、小言、世間話
+- 水筒を渡す、歩調を落とす、装備を見る、傷を気にする、座り込む、食事を求めるなど、機械的な効果を伴わない非言語的やり取り
 
 【Forbidden Invention（創作禁止）】
 - 死亡者を生き返らせたり、生存者を死亡させたりすること
@@ -104,6 +107,7 @@ Tier 3: Narrative Embellishment（物語演出）
 - 内部enum名、フィールド名、メタコメント、解説、括弧書きの注釈
 - TIMELINEにない出来事や、入力にない因果関係
 - 店主の感情、思考、台詞、意思決定、行動方針
+- 機械的な効果を伴う行動（傷を治療する、HPを回復する、敵から庇ってダメージを受ける、魔法を使用する、新しいアイテムを渡すなど）は、CONFIRMED FACTSに無い限り創作禁止
 
 【その他の事実制約】
 提供されたFACTSはゲームエンジンが確定した事実です。FACTSと矛盾する内容を書いてはいけません。
@@ -151,7 +155,9 @@ TIMELINEは出来事の順序を示します。
 TIMELINEに書かれていない具体的な出来事を、場面を盛り上げるために追加してはいけません。
 前後している出来事同士に、入力にない因果関係を追加してはいけません。
 
-NARRATIVE DIRECTIONのMAIN SCENESを詳しく描き、SECONDARY SCENESを簡潔に触れ、MONTAGEは短い一文で飛ばしてください。
+NARRATIVE DIRECTIONは、どの場面を詳しく描き、どの場面を圧縮するかの指示です。
+NARRATIVE FOCUSに従い、MAIN SCENESを中心に詳しく描き、SECONDARY SCENESを簡潔に触れ、MONTAGEは1～3文程度に圧縮して飛ばしてください。
+Narrative Interaction Hintsは、人物関係をSceneに盛り込むための参考です。セリフを強制するものではありません。
 MAIN SCENESに選ばれた出来事を中心に、登場人物の反応や会話を自然に描写してください。
 
 店主を文の主語として、台詞・行動・表情・感情・判断を記述しないでください。
@@ -212,9 +218,37 @@ function relationshipLines(
 
 function directionLines(
   direction: import('./types.ts').NarrativeDirection | undefined,
+  members?: NarrativeMemberSnapshot[],
 ): string[] {
   if (!direction) return ['- 演出指示は記録されていない']
   const lines: string[] = []
+
+  lines.push('Focus:')
+  if (direction.focus) {
+    lines.push(`  Summary: ${direction.focus.summary}`)
+    if (
+      direction.focus.characterIds &&
+      direction.focus.characterIds.length > 0
+    ) {
+      const names = direction.focus.characterIds.map(
+        (id) => members?.find((m) => m.id === id)?.name ?? id,
+      )
+      lines.push(`  Characters: ${names.join(', ')}`)
+    }
+    if (
+      direction.focus.relatedBeatIds &&
+      direction.focus.relatedBeatIds.length > 0
+    ) {
+      lines.push(
+        `  Related Beats: ${direction.focus.relatedBeatIds.join(', ')}`,
+      )
+    }
+    if (direction.focus.reason)
+      lines.push(`  Reason: ${direction.focus.reason}`)
+  } else {
+    lines.push('  - 記録されていない')
+  }
+
   lines.push('Main Scenes:')
   if (direction.mainScenes.length === 0) lines.push('  - なし')
   for (const scene of direction.mainScenes) {
@@ -232,6 +266,24 @@ function directionLines(
   lines.push(
     `Montage Beat IDs: ${direction.montageBeatIds.length > 0 ? direction.montageBeatIds.join(', ') : 'なし'}`,
   )
+
+  lines.push('Narrative Interaction Hints:')
+  if (direction.interactionHints && direction.interactionHints.length > 0) {
+    for (const hint of direction.interactionHints) {
+      const names = hint.characterIds.map(
+        (id) => members?.find((m) => m.id === id)?.name ?? id,
+      )
+      lines.push(`  - Characters: ${names.join(', ')}`)
+      lines.push(`    Beats: ${hint.beatIds.join(', ')}`)
+      if (hint.relationshipSummary)
+        lines.push(`    Relationship: ${hint.relationshipSummary}`)
+      if (hint.suggestedDynamic)
+        lines.push(`    Dynamic: ${hint.suggestedDynamic}`)
+    }
+  } else {
+    lines.push('  - なし')
+  }
+
   return lines
 }
 
@@ -345,25 +397,29 @@ export function characterEventInstruction(
 }
 
 const EXPEDITION_WRITING_INSTRUCTIONS = `WRITING INSTRUCTIONS:
-- 1600～2600字程度の日本語。ただしTIMELINEの入力が少ない場合は無理に1600字以上へ引き延ばさず、1200字程度まで短くなっても構いません
-- 一続きの短編小説として、出発・接近・探索・目標・戦闘・帰還・報告を自然な段落で繋げてください
-- 見出し（第一章、第二章等）や小説専用の区切りを付けないでください
-- NARRATIVE DIRECTIONのMAIN SCENESを最重要な場面として詳しく描き、SECONDARY SCENESを簡潔に触れ、MONTAGEは短い一文で飛ばしてください
-- 重要な出来事を自然な文章にする
-- Party Memberの短い会話を含めてよい
-- 会話を入れる場合は原則Party Member側の台詞にする
+- 1600～2600字程度の日本語。ただし、TIMELINEが短く人物ドラマが薄ければ、無理に文字数を伸ばさず簡潔にまとめてよい
+- 一続きの短編小説として、以下のリズムを意識する：短いOpening → MAIN SCENEの詳細描写 → それ以外の経過をMONTAGEで圧縮 → 必要ならSECONDARY SCENE → 帰還時の短い余韻
+- 見出しや小説専用の区切りを付けない
+- NARRATIVE FOCUSとMAIN SCENESを中心に描き、SECONDARY SCENESは簡潔に触れ、MONTAGEは1～3文程度に圧縮して飛ばす
+- TIMELINEのすべての出来事を順番に説明しない。TIMELINEは参考情報であり、checklistではない
+- 重要な出来事は、登場人物の行動、会話、沈黙、仕草、場の空気として「見せる」
+- 性格や人間関係を直接説明しない。気質・価値観・欠点・恐れは、台詞、反応、選択、仕草、沈黙を通じて読者に伝える
+- 人間関係は、会話の距離感、助け合い、避け合い、からかい、言い争い、気遣いなどとして表現する。信頼度や緊張値のような数値・ラベルは本文に出さない
+- 目的達成、勝利、帰還、作戦、HP/MP/Moraleなどのゲーム状態をそのままセリフ化しない
+- キャラクターはミッションと無関係な雑談をしてよい。空腹、疲労、からかい、愚痴、気まずい沈黙、冗談、装備確認、相手の様子を気にする、食事を求めるなど、人間らしい小さな動作や会話を入れてよい
+- 水筒を渡す、歩調を落とす、傷を気にする、座り込むなどの非言語的やり取りを使ってもよい。ただし、治療・回復・新たなアイテム授与など、機械的な効果を伴う行動はCONFIRMED FACTSが無い限り創作しない
+- 同じ結果を繰り返し説明しない。Outcomeが既に分かっている場合、登場人物の余韻で終えてよい
+- Party Memberの短い会話は原則Party Member側の台詞にする
 - 店主はプレイヤー本人なので、店主の台詞・感情・判断を作らない
 - 店主の反応を必要とする場面では、反応そのものを書かずに場面を進める
-- HP/MP/Morale等の数値をそのまま読み上げない
-- TIMELINEに書かれていない具体的な出来事を追加してはいけません
-- TIMELINEの前後にある出来事同士に、入力にない因果関係を追加してはいけません
-- CONFIRMED OUTCOME FACTSにない原因を推測・創作してはいけません
-- CHARACTERSのNarrative ProfileとPARTY RELATIONSHIPSは人物描写の参考です。それらを根拠に新しい事実を作らないでください
-- 最終文章にenum名、内部フィールド名、ゲームシステムの注釈、FACTS一覧の引用、注意書き、解説、括弧書きのメタコメントを出力してはいけません
-- 最終本文は自然な日本語だけで書いてください
+- TIMELINEに書かれていない具体的な出来事を追加しない
+- TIMELINEの前後にある出来事同士に、入力にない因果関係を追加しない
+- CHARACTERSのNarrative ProfileとPARTY RELATIONSHIPSは人物描写の参考です。それらを根拠に新しい事実を作らない
+- 最終文章にenum名、内部フィールド名、ゲームシステムの注釈、FACTS一覧の引用、注意書き、解説、括弧書きのメタコメントを出力しない
+- 最終本文は自然な日本語だけで書く
 - Outcomeを変更しない
 - 次の冒険、新たな依頼、新しい目的地へ勝手につなげない
-- 文字数を満たすために新しい出来事を創作してはいけません`
+- 文字数を満たすために新しい出来事を創作しない`
 
 export function buildExpeditionPrompt(
   context: ExpeditionNarrativeContext,
@@ -372,6 +428,13 @@ export function buildExpeditionPrompt(
   const facts = buildExpeditionNarrativeFacts(context)
   const timeline = context.timeline ?? buildExpeditionNarrativeTimeline(context)
   const timelineText = formatNarrativeTimeline(timeline)
+  const direction =
+    context.direction ??
+    determineNarrativeDirection(
+      timeline,
+      context.party.members,
+      context.party.characterRelationships,
+    )
   const match = context.acceptance?.specializationMatch ?? 'neutral'
   const reason = context.acceptance?.reason ?? 'appropriate'
 
@@ -406,7 +469,7 @@ export function buildExpeditionPrompt(
     ...relationshipLines(context.party.characterRelationships ?? []),
     '',
     '=== NARRATIVE DIRECTION ===',
-    ...directionLines(context.direction),
+    ...directionLines(direction, context.party.members),
     '',
     '=== EXPEDITION TIMELINE ===',
     timelineText,

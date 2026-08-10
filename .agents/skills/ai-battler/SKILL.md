@@ -389,3 +389,40 @@ A fourth tab, `酒場キャンペーン`, renders a multi-day campaign:
 - `ExpeditionPredictionPanel` updates correctly across party switches and reuses
   cached values when returning to a previously selected pair.
 - `TavernResultDetail` shows the actual outcome separately from the prediction.
+
+## Phase 7.2.1 Narrative quality tuning (`devin/phase7-2-1-narrative-quality`)
+
+- UI changes live in the existing `AI文章候補` / `NarrativeQueue` / `NarrativeCandidateCard`
+  flow; no new top-level tab is introduced.
+- `NarrativeDirector` now produces `NarrativeDirection` with a single `focus`,
+  `mainScenes[]`, `secondaryScenes[]`, `montageBeatIds[]`, and
+  `interactionHints[]`.
+- `buildExpeditionPrompt` falls back to `determineNarrativeDirection` when the
+  context does not already carry one, and the rendered prompt is now version `v6`.
+- In the UI, expand a candidate's `AIへ送る内容` details to verify the v6
+  prompt contains `=== NARRATIVE DIRECTION ===`, `Focus:`, `Main Scenes:`,
+  `Secondary Scenes:`, `Montage Beat IDs:`, and `Narrative Interaction Hints:`.
+- Expand `Raw Narrative Context` to verify the JSON contains `"direction"` with
+  `mainScenes`, `secondaryScenes`, `montageBeatIds`, `focus`, and
+  `interactionHints`.
+- The `遠征物語を生成` button is used for expedition candidates; other
+  character-event candidates still use `生成`.
+- A quick deterministic E2E scenario uses seed `tavern-005`:
+  1. Open the `酒場キャンペーン` tab and start campaign with `tavern-005`.
+  2. Confirm `AI文章候補` is empty, `AI呼び出し: 0回`, `状態: AI未接続`.
+  3. Select the first `.request-card` and the first non-disabled `.party-card`,
+     click `この依頼を紹介する`, then `本日の仲介を確定`.
+  4. Check that a `遠征レポート：...` candidate appears with state `未生成`
+     and `AI呼び出し` is still `0`.
+  5. Set an invalid HTTP endpoint (`http://localhost:5173/invalid`) and try
+     to generate; expect `AI文章の生成に失敗しました。HTTP 404:` and no
+     call-count increase.
+  6. Switch to `開発用 Fake Provider を使う` and generate the expedition
+     candidate; expect `【Fake生成 #1】`, `model: fake-model`, and
+     `AI呼び出し: 1回`.
+  7. Expand the prompt and raw-context details to confirm the new v6
+     `NarrativeDirection` fields.
+  8. Click `翌日へ` and confirm the campaign advances without console errors.
+- Console checks should allow the expected `Failed to load resource: 404` from
+  the provider-error test, but otherwise require zero `error` / `pageerror` /
+  unhandled rejection output.
