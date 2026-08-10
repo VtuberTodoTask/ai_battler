@@ -55,8 +55,9 @@ export class GameScrollView extends Container {
   }
 
   private onWheel = (event: FederatedWheelEvent): void => {
-    this._contentY -= event.deltaY * 0.5
+    this._contentY += (event.deltaY ?? 0) * 0.5
     this.clampContent()
+    event.preventDefault?.()
   }
 
   private clampContent(): void {
