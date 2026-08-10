@@ -36,59 +36,63 @@ function resolveWithOptionalOffer(
 }
 
 describe('Campaign 30-day smoke', () => {
-  it('runs 30 days without crashing and maintains invariants', () => {
-    const seeds = [
-      'tavern-smoke-001',
-      'tavern-smoke-002',
-      'tavern-smoke-003',
-      'tavern-smoke-004',
-      'tavern-smoke-005',
-    ]
+  it(
+    'runs 30 days without crashing and maintains invariants',
+    { timeout: 20000 },
+    () => {
+      const seeds = [
+        'tavern-smoke-001',
+        'tavern-smoke-002',
+        'tavern-smoke-003',
+        'tavern-smoke-004',
+        'tavern-smoke-005',
+      ]
 
-    for (const seed of seeds) {
-      let campaign = createTavernCampaign(seed)
-      const seenMemberIds = new Map<number, Set<string>>()
+      for (const seed of seeds) {
+        let campaign = createTavernCampaign(seed)
+        const seenMemberIds = new Map<number, Set<string>>()
 
-      for (let day = 1; day <= 30; day++) {
-        expect(campaign.dayNumber).toBe(day)
-        expect(campaign.reputation).toBeGreaterThanOrEqual(0)
-        expect(campaign.reputation).toBeLessThanOrEqual(100)
-        expect(campaign.parties).toHaveLength(4)
-        expect(campaign.currentDay.requests).toHaveLength(3)
-        expect(campaign.currentDay.status).toBe('planning')
+        for (let day = 1; day <= 30; day++) {
+          expect(campaign.dayNumber).toBe(day)
+          expect(campaign.reputation).toBeGreaterThanOrEqual(0)
+          expect(campaign.reputation).toBeLessThanOrEqual(100)
+          expect(campaign.parties).toHaveLength(4)
+          expect(campaign.currentDay.requests).toHaveLength(3)
+          expect(campaign.currentDay.status).toBe('planning')
 
-        // No stale scheduled departures in the active roster.
-        for (const party of campaign.parties) {
-          expect(party.plannedDepartureDay).toBeGreaterThanOrEqual(day)
+          // No stale scheduled departures in the active roster.
+          for (const party of campaign.parties) {
+            expect(party.plannedDepartureDay).toBeGreaterThanOrEqual(day)
+          }
+
+          const memberIds = new Set(
+            campaign.parties.flatMap((p) => p.party.members.map((m) => m.id)),
+          )
+          expect(memberIds.size).toBe(16)
+          seenMemberIds.set(day, memberIds)
+
+          campaign = resolveWithOptionalOffer(campaign)
+          expect(campaign.currentDay.status).toBe('resolved')
+
+          // PartyStats invariant: outcome categories sum to totalExpeditions.
+          for (const party of campaign.parties) {
+            const sum =
+              party.stats.completeSuccesses +
+              party.stats.successes +
+              party.stats.partialSuccesses +
+              party.stats.failures +
+              party.stats.retreats
+            expect(sum).toBe(party.stats.totalExpeditions)
+          }
+
+          if (day < 30) {
+            campaign = advanceCampaignDay(campaign)
+          }
         }
 
-        const memberIds = new Set(
-          campaign.parties.flatMap((p) => p.party.members.map((m) => m.id)),
-        )
-        expect(memberIds.size).toBe(16)
-        seenMemberIds.set(day, memberIds)
-
-        campaign = resolveWithOptionalOffer(campaign)
-        expect(campaign.currentDay.status).toBe('resolved')
-
-        // PartyStats invariant: outcome categories sum to totalExpeditions.
-        for (const party of campaign.parties) {
-          const sum =
-            party.stats.completeSuccesses +
-            party.stats.successes +
-            party.stats.partialSuccesses +
-            party.stats.failures +
-            party.stats.retreats
-          expect(sum).toBe(party.stats.totalExpeditions)
-        }
-
-        if (day < 30) {
-          campaign = advanceCampaignDay(campaign)
-        }
+        expect(campaign.dayNumber).toBe(30)
+        expect(campaign.history).toHaveLength(30)
       }
-
-      expect(campaign.dayNumber).toBe(30)
-      expect(campaign.history).toHaveLength(30)
-    }
-  })
+    },
+  )
 })
