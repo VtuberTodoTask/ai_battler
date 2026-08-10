@@ -445,3 +445,61 @@ export interface NarrativeGenerationRecord {
     totalTokens?: number
   }
 }
+
+export type DowntimeEventCategory = 'relationship' | 'flavor'
+
+export type DowntimeEventType =
+  | 'shared_meal'
+  | 'casual_conversation'
+  | 'quiet_company'
+  | 'equipment_help'
+  | 'planning_together'
+  | 'shared_chore'
+  | 'minor_argument'
+  | 'annoying_habit'
+  | 'misunderstanding'
+  | 'resource_disagreement'
+  | 'competitive_activity'
+  | 'mixed_working_session'
+  | 'recovery_assistance'
+  | 'personal_space'
+  | 'no_notable_event'
+  | 'solo_equipment_maintenance'
+  | 'reading'
+  | 'sleeping'
+  | 'quiet_drinking'
+  | 'writing_notes'
+  | 'watching_other_adventurers'
+  | 'resting_in_room'
+  | 'checking_bandages'
+  | 'slow_meal'
+  | 'watching_party_prepare'
+  | 'unexpected_common_ground'
+
+export interface DowntimeRelationshipDelta {
+  sourceCharacterId: string
+  targetCharacterId: string
+  affinity?: number
+  trust?: number
+  respect?: number
+  tension?: number
+  romanticAttraction?: number
+}
+
+export interface DowntimeEvent {
+  id: string
+  day: number
+  type: DowntimeEventType
+  participantIds: string[]
+  sourceCharacterId?: string
+  targetCharacterId?: string
+  valence: MemoryValence
+  importance: number
+  relationshipDeltas: DowntimeRelationshipDelta[]
+  memoryEligible: boolean
+  narrativeKey: string
+  createdAtDay: number
+  narrativeStatus: 'unseen' | 'generated' | 'viewed'
+  generatedText?: string
+  fallbackSummary?: string
+}

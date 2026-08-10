@@ -14,6 +14,7 @@ import type {
   CharacterArcSignal,
   CharacterMemory,
   CharacterRelationship,
+  DowntimeEvent,
   NarrativeCandidate,
   NarrativeGenerationRecord,
   RelationshipMilestone,
@@ -144,6 +145,8 @@ export interface CampaignParty {
   arcSignals?: CharacterArcSignal[]
   /** Persistent relationship milestones achieved by this party. Optional for backward compatibility. */
   relationshipMilestones?: RelationshipMilestone[]
+  /** Downtime events accumulated while the party was not on expedition. Optional for backward compatibility. */
+  downtimeEvents?: DowntimeEvent[]
   departingCasualty?: boolean
 }
 

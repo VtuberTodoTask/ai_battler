@@ -321,6 +321,9 @@ export function buildTavernDay(
       relationshipMilestones: cp.relationshipMilestones
         ? deepClone(cp.relationshipMilestones)
         : undefined,
+      downtimeEvents: cp.downtimeEvents
+        ? deepClone(cp.downtimeEvents).filter((e) => e.day === dayNumber)
+        : undefined,
     }
   })
 

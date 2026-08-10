@@ -16,6 +16,7 @@ import {
 } from '../../core/identity/labels.ts'
 import { arcSignalSummary } from '../../core/narrative/arcSignals.ts'
 import { milestoneSummary } from '../../core/narrative/milestones.ts'
+import { downtimeEventSummary } from '../../core/narrative/downtime.ts'
 
 export interface PartyCardProps {
   party: TavernParty
@@ -44,6 +45,12 @@ function recentArcsForParty(party: TavernParty): string[] {
     .sort((a, b) => b.strength - a.strength)
     .slice(0, 4)
   return signals.map((s) => arcSignalSummary(s, memberMap))
+}
+
+function downtimeSummaryForParty(party: TavernParty): string[] {
+  return (party.downtimeEvents ?? [])
+    .filter((e) => e.narrativeStatus !== 'viewed')
+    .map((e) => downtimeEventSummary(e, party.party.members))
 }
 
 function recentMemoriesForMember(
@@ -167,6 +174,14 @@ export function PartyCard({
             ))}
           </div>
         )}
+      {party.downtimeEvents && party.downtimeEvents.length > 0 && (
+        <div className="party-downtime">
+          <strong>今日の様子</strong>
+          {downtimeSummaryForParty(party).map((text, i) => (
+            <div key={i}>{text}</div>
+          ))}
+        </div>
+      )}
       {ap.missionSpecialization && (
         <div className="party-specialization">
           得意：{OBJECTIVE_LABELS[ap.missionSpecialization.strongObjective]} ·

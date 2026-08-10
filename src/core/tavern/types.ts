@@ -21,6 +21,7 @@ import type {
   CharacterArcSignal,
   CharacterMemory,
   CharacterRelationship,
+  DowntimeEvent,
   RelationshipMilestone,
 } from '../narrative/types.ts'
 
@@ -124,6 +125,8 @@ export interface TavernParty {
   arcSignals?: CharacterArcSignal[]
   /** Persistent relationship milestones achieved by this party. Optional for backward compatibility. */
   relationshipMilestones?: RelationshipMilestone[]
+  /** Downtime events for the current day. Optional for backward compatibility. */
+  downtimeEvents?: DowntimeEvent[]
 }
 
 export interface PartyTemplate {

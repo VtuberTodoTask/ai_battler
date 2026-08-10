@@ -25,6 +25,7 @@ import { applyCharacterRelationshipChanges } from '../../narrative/characterRela
 import { applyExpeditionMemory } from '../../narrative/memory.ts'
 import { updateArcSignals } from '../../narrative/arcSignals.ts'
 import { updateRelationshipMilestones } from '../../narrative/milestones.ts'
+import { resolveDowntimeForCampaign } from '../../narrative/downtime.ts'
 import {
   EXPEDITION_GROWTH_XP,
   TRAINING_GROWTH_XP,
@@ -173,8 +174,11 @@ export function resolveCampaignDay(
   const dispatchedPartyIds = new Set(
     results
       .filter((r) => r.status === 'resolved' && r.partyId)
-      .map((r) => r.partyId),
+      .map((r) => r.partyId!),
   )
+
+  // Resolve downtime events for parties not on expedition.
+  resolveDowntimeForCampaign(nextCampaign, dispatchedPartyIds)
 
   for (const party of nextCampaign.parties) {
     if (party.departingCasualty || dispatchedPartyIds.has(party.id)) {
@@ -197,6 +201,7 @@ export function resolveCampaignDay(
   nextCampaign.currentDay = syncCurrentDayParties(
     nextCampaign.currentDay,
     nextCampaign.parties,
+    dayNumber,
   )
 
   const reputationOutcomes = results
@@ -243,6 +248,7 @@ export function resolveCampaignDay(
 function syncCurrentDayParties(
   currentDay: TavernDayState,
   parties: CampaignParty[],
+  dayNumber: number,
 ): TavernDayState {
   const updated = currentDay.parties.map((tavernParty) => {
     const campaignParty = parties.find((p) => p.id === tavernParty.id)
@@ -262,6 +268,23 @@ function syncCurrentDayParties(
         stayExtensionDaysUsed: campaignParty.relationship.stayExtensionDaysUsed,
       },
       stats: { ...campaignParty.stats },
+      characterMemories: campaignParty.characterMemories
+        ? deepClone(campaignParty.characterMemories)
+        : undefined,
+      memberRelationships: campaignParty.memberRelationships
+        ? deepClone(campaignParty.memberRelationships)
+        : undefined,
+      arcSignals: campaignParty.arcSignals
+        ? deepClone(campaignParty.arcSignals)
+        : undefined,
+      relationshipMilestones: campaignParty.relationshipMilestones
+        ? deepClone(campaignParty.relationshipMilestones)
+        : undefined,
+      downtimeEvents: campaignParty.downtimeEvents
+        ? deepClone(campaignParty.downtimeEvents).filter(
+            (e) => e.day === dayNumber,
+          )
+        : undefined,
     }
   })
   return { ...currentDay, parties: updated }
