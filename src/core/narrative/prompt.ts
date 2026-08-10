@@ -597,10 +597,22 @@ export function characterEventInstruction(
 - 店主が「無理するなよ」等と言わせない
 - 病名・治療法・医師等を捏造しない`,
     stayExtended: `stayExtended:
-- 本来の予定より滞在を延長するとParty側から店主へ伝える場面
-- 「予定を変えた。もう少しここにいることにした」等は可
+- 本来の予定より滞在を延長するとParty側から店主へ伝える短い場面（200～500字）
+- SCENE PRESENTATIONで指定されたFraming・Opening・Focal Characterを優先する
+- Speakerは1人～4人まで。通常は1～2人。group_discussionの場合のみ3～4人を許可する
+- 決定内容（「もう少し滞在する」）を本文中で繰り返し説明しない。SCENE PRESENTATIONのCommunicate Decision Directlyがfalseなら、決定を暗に示す動作・雰囲気で終える
+- 延長日数はUI側で表示される。Mention Extension Daysがfalseなら、日数をセリフや説明で繰り返さない
+- Emphasize Reasonがfalseなら、理由を説明せず、関連する小道具や行動で示す
+- Emphasize Relationshipがfalseなら、関係性を抽象語（「信頼」「距離」）で要約しない
+- Ending Styleに従う：concrete_action→具体的な次の行動、unfinished_conversation→会話を途中で止める、mundane_transition→日常動作へ移行、brief_observation→短い客観描写、no_stylized_ending→特別な結末表現を使わない
 - 店主の返事は書かない
-- 永住・永久滞在にはしない`,
+- 永住・永久滞在にはしない
+
+MINOR EVENT NARRATIVE RULES:
+- 短い1シーンのみ。長い導入・背景説明・他の場面への展望を付けない
+- 全員を登場させる必要はない。Speaker/Backgroundに指定されたキャラクターのみを自然に配置する
+- 定型句（「静かな気配」「静かな余韾」「顔を寄せる」「酒場の一角」等）を繰り返さない
+- 同じイベント種別でも、今回のFraming/Opening/Focalを活かして「別の瞬間」を切り取る`,
     becameRegular: `becameRegular:
 - 酒場に馴染み、常連になったと感じられる場面
 - 「いつもの席」程度の一般的描写は可
@@ -778,6 +790,45 @@ function recentHighlightsText(highlights: NarrativeHistoryHighlight[]): string {
     .join('\n')
 }
 
+function formatPresentationPlan(
+  plan: {
+    framing: string
+    openingCategory?: string
+    focalCharacterId?: string
+    speakingCharacterIds: string[]
+    backgroundCharacterIds?: string[]
+    communicateDecisionDirectly?: boolean
+    mentionExtensionDays?: boolean
+    emphasizeReason?: boolean
+    emphasizeRelationship?: boolean
+    endingStyle: string
+  },
+  members: { id: string; name?: string }[],
+): string {
+  const nameOf = (id?: string) =>
+    members.find((m) => m.id === id)?.name ?? id ?? '—'
+  return [
+    `Framing: ${plan.framing}`,
+    `Opening: ${plan.openingCategory ?? '—'}`,
+    `Focal Character: ${nameOf(plan.focalCharacterId)}`,
+    `Speaking Characters: ${plan.speakingCharacterIds.map(nameOf).join('、') || '—'}`,
+    `Background Characters: ${plan.backgroundCharacterIds?.map(nameOf).join('、') || '—'}`,
+    `Ending Style: ${plan.endingStyle}`,
+    ...(plan.communicateDecisionDirectly !== undefined
+      ? [`Communicate Decision Directly: ${plan.communicateDecisionDirectly}`]
+      : []),
+    ...(plan.mentionExtensionDays !== undefined
+      ? [`Mention Extension Days: ${plan.mentionExtensionDays}`]
+      : []),
+    ...(plan.emphasizeReason !== undefined
+      ? [`Emphasize Reason: ${plan.emphasizeReason}`]
+      : []),
+    ...(plan.emphasizeRelationship !== undefined
+      ? [`Emphasize Relationship: ${plan.emphasizeRelationship}`]
+      : []),
+  ].join('\n')
+}
+
 export function buildCharacterEventPrompt(
   context: CharacterEventNarrativeContext,
 ): string {
@@ -787,6 +838,12 @@ export function buildCharacterEventPrompt(
   const leaderHint = leader
     ? `Leaderの傾向: ${buildPersonalityHints(leader.personality).join(' / ') || '特に目立った傾向は記録されていない'}`
     : ''
+
+  const presentationPlan: unknown = context.eventFacts.presentationPlan
+  const hasPresentationPlan =
+    typeof presentationPlan === 'object' &&
+    presentationPlan !== null &&
+    'framing' in presentationPlan
 
   const lines: string[] = [
     '【キャラクターイベント】',
@@ -802,9 +859,24 @@ export function buildCharacterEventPrompt(
     'Recent Highlights:',
     recentHighlightsText(context.recentHighlights),
     '',
-    'Event Facts:',
   ]
+
+  if (hasPresentationPlan) {
+    lines.push(
+      '=== SCENE PRESENTATION ===',
+      formatPresentationPlan(
+        presentationPlan as Parameters<typeof formatPresentationPlan>[0],
+        context.party.members,
+      ),
+      '',
+    )
+  }
+
+  lines.push('Event Facts:')
   for (const [key, value] of Object.entries(context.eventFacts)) {
+    if (key === 'presentationPlan') continue
+    if (value === undefined || value === null) continue
+    if (typeof value === 'object' && Object.keys(value).length === 0) continue
     lines.push(`  - ${key}: ${JSON.stringify(value)}`)
   }
 

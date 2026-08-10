@@ -16,6 +16,7 @@
     "update:expedition-regression": "tsx scripts/capture-regression-snapshots.ts && prettier --write regression-snapshots/baseline",
     "phase7-4-memory-smoke": "tsx scripts/phase7-4-memory-smoke.ts",
     "phase7-7-downtime-relationship-smoke": "tsx scripts/phase7-7-downtime-relationship-smoke.ts",
+    "phase7-7-1-minor-narrative-diversity-smoke": "tsx scripts/phase7-7-1-minor-narrative-diversity-smoke.ts",
     "format": "prettier --write ."
   },
   "dependencies": {
