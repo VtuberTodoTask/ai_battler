@@ -22,6 +22,47 @@ let maxPromptChars = 0
 let totalBattleSourceEvents = 0
 let totalBattleBeats = 0
 let battleRecordCount = 0
+let leakageViolations = 0
+
+const LEAKAGE_SUBSTRINGS = [
+  'criticalSuccess',
+  'partialSuccess',
+  'failure',
+  'success',
+  'HP',
+  'MP',
+  'Morale',
+  'averageQuality',
+  'coveragePercent',
+  'reportReturned',
+  'elapsedTime',
+  'medicine',
+  'tools',
+  'food',
+  'progress:',
+  'quality:',
+  'roll:',
+  'difficulty:',
+  'seed:',
+]
+
+const LEAKAGE_PATTERNS = [
+  /\d+の(ダメージ|被害|損傷|回復|消費|負傷|傷)/,
+  /\d+%/,
+  /\d+(HP|MP| morale)/i,
+  /roll[ =:]*\d+/i,
+  /difficulty[ =:]*\d+/i,
+]
+
+function hasLeakage(text: string): boolean {
+  for (const word of LEAKAGE_SUBSTRINGS) {
+    if (text.includes(word)) return true
+  }
+  for (const pattern of LEAKAGE_PATTERNS) {
+    if (pattern.test(text)) return true
+  }
+  return false
+}
 
 function findAcceptingPair(campaign: TavernCampaignState) {
   for (const request of campaign.currentDay.requests) {
@@ -68,6 +109,17 @@ for (const seed of seeds) {
       totalPromptChars += promptText.length
       maxPromptChars = Math.max(maxPromptChars, promptText.length)
 
+      const timelineText = timeline.map((b) => b.text).join('\n')
+      const userBody = prompt.user.split('=== WRITING INSTRUCTIONS ===')[0]
+      if (hasLeakage(timelineText) || hasLeakage(userBody)) {
+        leakageViolations++
+        console.error(`Leakage violation in candidate ${totalCandidates}:`)
+        console.error(timelineText.slice(0, 500))
+        console.error('---')
+        console.error(userBody.slice(0, 500))
+        process.exit(1)
+      }
+
       if (context.battleMetrics) {
         for (const metric of context.battleMetrics) {
           battleRecordCount++
@@ -105,3 +157,7 @@ console.log(`  Max prompt chars:                ${maxPromptChars}`)
 console.log(`  Average battle source events:    ${avgBattleSourceEvents}`)
 console.log(`  Average battle narrative beats:  ${avgBattleBeats}`)
 console.log(`  Compression ratio:               ${compressionRatio}`)
+console.log(`  Leakage violations:              ${leakageViolations}`)
+if (leakageViolations > 0) {
+  process.exit(1)
+}

@@ -1,7 +1,5 @@
 import type {
   ExpeditionBattleRecord,
-  ExpeditionLogEntry,
-  ExpeditionPhase,
   ExpeditionState,
 } from '../expedition/types.ts'
 import type {
@@ -11,24 +9,18 @@ import type {
   NarrativeTimelineBeatKind,
   NarrativeTimelinePhase,
 } from './types.ts'
+import { ABILITY_MAP } from '../../data/enemyData.ts'
 import { battleOutcomeLabel, environmentLabel } from './facts.ts'
+import {
+  projectExpeditionLogToNarrativeBeats,
+  type NarrativeTimelineBeatDraft,
+} from './timelineProjection.ts'
 
 export type {
   NarrativeTimelineBeat,
   NarrativeTimelineBeatKind,
   NarrativeTimelinePhase,
 } from './types.ts'
-
-const PHASE_MAP: Record<ExpeditionPhase, NarrativeTimelinePhase> = {
-  preparation: 'departure',
-  approach: 'approach',
-  contact: 'approach',
-  exploration: 'exploration',
-  objective: 'objective',
-  battle: 'battle',
-  return: 'return',
-  aftermath: 'aftermath',
-}
 
 const PHASE_LABELS: Record<NarrativeTimelinePhase, string> = {
   departure: '出発',
@@ -140,12 +132,17 @@ function buildBattleTimeline(
       const actorName = log.actorId
         ? (memberName(log.actorId, members) ?? '一人の冒険者')
         : 'Party'
+      const ability = ABILITY_MAP[abilityId]
+      if (!ability) {
+        // Unknown or non-Japanese ability IDs are omitted from the Japanese timeline.
+        continue
+      }
       beats.push(
         makeBeat(
           i++,
           'battle',
           'battle',
-          `${actorName}が${abilityId}を使用した`,
+          `${actorName}が${ability.name}を使用した`,
           65,
           log.actorId ? [log.actorId] : undefined,
         ),
@@ -261,29 +258,30 @@ export function buildExpeditionNarrativeTimeline(
   const seenTexts = new Set<string>()
   let index = 0
 
-  function addBeat(
-    phase: NarrativeTimelinePhase,
-    kind: NarrativeTimelineBeatKind,
-    text: string,
-    importance: number,
-    actorIds?: string[],
-    targetIds?: string[],
-  ): void {
-    if (seenTexts.has(text)) return
-    seenTexts.add(text)
+  function addBeat(draft: NarrativeTimelineBeatDraft): void {
+    if (seenTexts.has(draft.text)) return
+    seenTexts.add(draft.text)
     beats.push(
-      makeBeat(index++, phase, kind, text, importance, actorIds, targetIds),
+      makeBeat(
+        index++,
+        draft.phase,
+        draft.kind,
+        draft.text,
+        draft.importance,
+        draft.actorIds,
+        draft.targetIds,
+      ),
     )
   }
 
   // Departure beat
-  addBeat(
-    'departure',
-    'transition',
-    `${context.party.name}は依頼を引き受け、${environmentLabel(context.request.environment)}へ向かった`,
-    90,
-    members.map((m) => m.id),
-  )
+  addBeat({
+    phase: 'departure',
+    kind: 'transition',
+    text: `${context.party.name}は依頼を引き受け、${environmentLabel(context.request.environment)}へ向かった`,
+    importance: 90,
+    actorIds: members.map((m) => m.id),
+  })
 
   const state: ExpeditionState | undefined = context.state
   if (state) {
@@ -300,17 +298,8 @@ export function buildExpeditionNarrativeTimeline(
         continue
       }
 
-      const phase = PHASE_MAP[log.phase] ?? 'exploration'
-      for (const fact of log.facts) {
-        if (!fact.trim()) continue
-        addBeat(
-          phase,
-          'event',
-          fact,
-          importanceForLog(log),
-          log.actorIds,
-          log.targetIds,
-        )
+      for (const draft of projectExpeditionLogToNarrativeBeats(log, context)) {
+        addBeat(draft)
       }
     }
 
@@ -318,67 +307,62 @@ export function buildExpeditionNarrativeTimeline(
     const hasReturn = beats.some((b) => b.phase === 'return')
     const hasAftermath = beats.some((b) => b.phase === 'aftermath')
     if (!hasReturn && context.report.outcome !== 'lostExpedition') {
-      addBeat(
-        'return',
-        'return',
-        'Partyは酒場へ帰還した',
-        80,
-        survivingMemberIds(context),
-      )
+      addBeat({
+        phase: 'return',
+        kind: 'return',
+        text: 'Partyは酒場へ帰還した',
+        importance: 80,
+        actorIds: survivingMemberIds(context),
+      })
     }
     if (!hasAftermath && context.report.outcome !== 'lostExpedition') {
-      addBeat(
-        'aftermath',
-        'outcome',
-        'Partyは酒場で店主へ結果を報告した',
-        85,
-        survivingMemberIds(context),
-      )
+      addBeat({
+        phase: 'aftermath',
+        kind: 'outcome',
+        text: 'Partyは酒場で店主へ結果を報告した',
+        importance: 85,
+        actorIds: survivingMemberIds(context),
+      })
     }
   } else {
     // Fallback timeline when full state is not available.
-    addBeat(
-      'exploration',
-      'event',
-      `${objectiveLabel(context.report.objectiveType)}を進めた`,
-      50,
-    )
+    addBeat({
+      phase: 'exploration',
+      kind: 'event',
+      text: `${objectiveLabel(context.report.objectiveType)}を進めた`,
+      importance: 50,
+    })
     if (context.report.battleOutcome) {
-      addBeat('battle', 'battle', '遠征中に戦闘が発生した', 100)
-      addBeat(
-        'battle',
-        'outcome',
-        `戦闘結果は${battleOutcomeLabel(context.report.battleOutcome)}だった`,
-        95,
-      )
+      addBeat({
+        phase: 'battle',
+        kind: 'battle',
+        text: '遠征中に戦闘が発生した',
+        importance: 100,
+      })
+      addBeat({
+        phase: 'battle',
+        kind: 'outcome',
+        text: `戦闘結果は${battleOutcomeLabel(context.report.battleOutcome)}だった`,
+        importance: 95,
+      })
     }
     if (context.report.outcome !== 'lostExpedition') {
-      addBeat('return', 'return', 'Partyは酒場へ帰還した', 80)
-      addBeat('aftermath', 'outcome', 'Partyは酒場で店主へ結果を報告した', 85)
+      addBeat({
+        phase: 'return',
+        kind: 'return',
+        text: 'Partyは酒場へ帰還した',
+        importance: 80,
+      })
+      addBeat({
+        phase: 'aftermath',
+        kind: 'outcome',
+        text: 'Partyは酒場で店主へ結果を報告した',
+        importance: 85,
+      })
     }
   }
 
   return beats
-}
-
-function importanceForLog(log: ExpeditionLogEntry): number {
-  switch (log.type) {
-    case 'escortTargetDeath':
-    case 'targetDeath':
-    case 'casualty':
-      return 95
-    case 'retreat':
-      return 90
-    case 'objectiveComplete':
-      return 85
-    case 'escortDeparture':
-    case 'rescueLocate':
-    case 'retrievalLocate':
-    case 'surveySectorComplete':
-      return 75
-    default:
-      return 50
-  }
 }
 
 function survivingMemberIds(context: ExpeditionNarrativeContext): string[] {

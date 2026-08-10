@@ -3,9 +3,11 @@ import { buildDispatchReport } from '../src/core/tavern/report.ts'
 import { buildNarrativePrompt } from '../src/core/narrative/prompt.ts'
 import {
   makeEliminationRequest,
+  makeEscortRequest,
   makeParty,
   makeRequest,
   makeRescueRequest,
+  makeRetrievalRequest,
   makeSurveyRequest,
   battleConfig,
 } from '../src/core/expedition/test-utils.ts'
@@ -93,14 +95,54 @@ function printSection(user: string, startMarker: string) {
   return section.trim()
 }
 
+const LEAKAGE_SUBSTRINGS = [
+  'criticalSuccess',
+  'partialSuccess',
+  'failure',
+  'success',
+  'HP',
+  'MP',
+  'Morale',
+  'averageQuality',
+  'coveragePercent',
+  'reportReturned',
+  'elapsedTime',
+  'medicine',
+  'tools',
+  'food',
+]
+
+function assertNoLeaks(text: string, label: string) {
+  for (const word of LEAKAGE_SUBSTRINGS) {
+    if (text.includes(word)) {
+      console.error(`Leakage violation in ${label}: ${word}`)
+      process.exit(1)
+    }
+  }
+  if (/\d+の(ダメージ|被害|損傷|回復|消費|負傷|傷)/.test(text)) {
+    console.error(`Leakage violation in ${label}: raw numeric value`)
+    process.exit(1)
+  }
+  if (/\d+%/.test(text)) {
+    console.error(`Leakage violation in ${label}: percentage`)
+    process.exit(1)
+  }
+}
+
 function printScenario(name: string, result: ExpeditionResult) {
   const context = buildContext(result)
   const { user } = buildNarrativePrompt(context)
   console.log(`\n## ${name} — outcome: ${result.outcome}`)
   const timeline = printSection(user, '=== EXPEDITION TIMELINE ===')
   const facts = printSection(user, '=== CONFIRMED OUTCOME FACTS ===')
-  if (timeline) console.log(`\n${timeline}`)
-  if (facts) console.log(`\n${facts}`)
+  if (timeline) {
+    console.log(`\n${timeline}`)
+    assertNoLeaks(timeline, name)
+  }
+  if (facts) {
+    console.log(`\n${facts}`)
+    assertNoLeaks(facts, name)
+  }
 }
 
 const scenarios = [
@@ -151,6 +193,22 @@ const scenarios = [
     partyBuilder: (seed: string) =>
       makeParty(['vanguard', 'guardian', 'mage', 'healer'], seed, 'C'),
     predicate: (r: ExpeditionResult) => r.state.casualties.length > 0,
+  },
+  {
+    name: 'F. Escort success',
+    requestBuilder: (seed: string) => makeEscortRequest(seed, 'C'),
+    partyBuilder: (seed: string) =>
+      makeParty(['vanguard', 'guardian', 'mage', 'healer'], seed, 'C'),
+    predicate: (r: ExpeditionResult) =>
+      r.outcome === 'success' || r.outcome === 'completeSuccess',
+  },
+  {
+    name: 'G. Retrieval success',
+    requestBuilder: (seed: string) => makeRetrievalRequest(seed, 'C'),
+    partyBuilder: (seed: string) =>
+      makeParty(['vanguard', 'guardian', 'mage', 'healer'], seed, 'C'),
+    predicate: (r: ExpeditionResult) =>
+      r.outcome === 'success' || r.outcome === 'completeSuccess',
   },
 ]
 

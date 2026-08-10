@@ -7,6 +7,7 @@ import {
   formatNarrativeTimeline,
 } from './timeline.ts'
 import { buildNarrativePrompt } from './prompt.ts'
+import { logEntry } from '../expedition/logs.ts'
 import { runExpedition } from '../expedition/expedition.ts'
 
 import {
@@ -236,7 +237,7 @@ describe('buildExpeditionNarrativeTimeline', () => {
     }
   })
 
-  it('includes named abilities only when they appear in recorded battle events', () => {
+  it('uses canonical Japanese ability names from ABILITY_MAP', () => {
     const party = makeParty(
       ['vanguard', 'guardian', 'mage', 'healer'],
       'ability-check',
@@ -253,8 +254,44 @@ describe('buildExpeditionNarrativeTimeline', () => {
 
     const record = result.state.battles[0]
     const baseline = buildExpeditionNarrativeTimeline(context)
-    expect(baseline.map((b) => b.text).join('\n')).not.toContain('Fireball')
+    const baseTexts = baseline.map((b) => b.text).join('\n')
+    expect(baseTexts).not.toContain('summon')
+    expect(baseTexts).not.toContain('Fireball')
 
+    if (record) {
+      const member = result.party[0]
+      record.result.logs.push({
+        round: 1,
+        phase: 'combat',
+        actionType: 'ability',
+        result: 'test',
+        actorId: member.id,
+        targetIds: [],
+        metadata: { abilityId: 'summon' },
+      })
+    }
+
+    const withAbility = buildExpeditionNarrativeTimeline(context)
+    const texts = withAbility.map((b) => b.text).join('\n')
+    expect(texts).toContain('仲間召喚')
+    expect(texts).not.toContain('summon')
+  })
+
+  it('omits unknown ability ids from the Japanese timeline', () => {
+    const party = makeParty(
+      ['vanguard', 'guardian', 'mage', 'healer'],
+      'unknown-ability',
+      'C',
+    )
+    const request = makeEliminationRequest(
+      'unknown-ability',
+      'C',
+      false,
+      'standard',
+    )
+    const result = runExpedition(request, party)
+    const context = buildTestContext(result)
+    const record = result.state.battles[0]
     if (record) {
       const member = result.party[0]
       record.result.logs.push({
@@ -266,12 +303,11 @@ describe('buildExpeditionNarrativeTimeline', () => {
         targetIds: [],
         metadata: { abilityId: 'Fireball' },
       })
-      record.result.abilityUsage.Fireball = 1
     }
-
-    const withAbility = buildExpeditionNarrativeTimeline(context)
-    const texts = withAbility.map((b) => b.text).join('\n')
-    expect(texts).toContain('Fireball')
+    const timeline = buildExpeditionNarrativeTimeline(context)
+    const texts = timeline.map((b) => b.text).join('\n')
+    expect(texts).not.toContain('Fireball')
+    expect(texts).not.toContain('Fireballを使用した')
   })
 
   it('is independent of global RNG and Date.now', () => {
@@ -326,6 +362,105 @@ describe('v4 prompt integration', () => {
     for (const word of forbidden) {
       expect(user).not.toContain(word)
     }
+  })
+})
+
+describe('structured timeline projection', () => {
+  it('does not copy raw log.facts strings into timeline beats', () => {
+    const result = runObjective('investigation')
+    const poisonedFact = 'POISONED_RAW_FACT_7f8a9b'
+    result.state.logs.push(
+      logEntry(
+        'exploration',
+        'poisonedDiagnostic',
+        [],
+        [poisonedFact, 'Another raw leak: 123'],
+        [],
+      ),
+    )
+    const context = buildTestContext(result)
+    const texts = buildExpeditionNarrativeTimeline(context)
+      .map((b) => b.text)
+      .join('\n')
+    expect(texts).not.toContain(poisonedFact)
+    expect(texts).not.toContain('Another raw leak')
+  })
+
+  it('produces no beats for unknown log types', () => {
+    const result = runObjective('investigation')
+    result.state.logs.push(
+      logEntry(
+        'exploration',
+        'unknownCustomType',
+        [],
+        ['custom fact leak'],
+        [],
+      ),
+    )
+    const context = buildTestContext(result)
+    const texts = buildExpeditionNarrativeTimeline(context)
+      .map((b) => b.text)
+      .join('\n')
+    expect(texts).not.toContain('custom fact leak')
+  })
+
+  it('does not leak numeric damage, supply counts, or check enum labels', () => {
+    for (const objectiveType of [
+      'investigation',
+      'elimination',
+      'rescue',
+      'escort',
+      'retrieval',
+      'survey',
+    ]) {
+      const result = runObjective(
+        objectiveType as
+          | 'investigation'
+          | 'elimination'
+          | 'rescue'
+          | 'escort'
+          | 'retrieval'
+          | 'survey',
+      )
+      const context = buildTestContext(result)
+      const texts = buildExpeditionNarrativeTimeline(context)
+        .map((b) => b.text)
+        .join('\n')
+      const forbidden = [
+        'criticalSuccess',
+        'partialSuccess',
+        'failure',
+        'success',
+        'HP',
+        'MP',
+        'Morale',
+        'medicine',
+        'tools',
+        'food',
+        '%',
+        'progress',
+        'quality',
+        'AverageQuality',
+        'ReportReturned',
+        'roll',
+        'difficulty',
+      ]
+      for (const word of forbidden) {
+        expect(texts).not.toContain(word)
+      }
+      expect(texts).not.toMatch(/\d+の(ダメージ|被害|損傷|回復|消費|負傷|傷)/)
+      expect(texts).not.toMatch(/\d+(HP|MP| morale)/i)
+      expect(texts).not.toMatch(/roll[ =:]*\d+/i)
+    }
+  })
+
+  it('keeps world-facing counts for elimination targets', () => {
+    const result = runObjective('elimination')
+    const context = buildTestContext(result)
+    const texts = buildExpeditionNarrativeTimeline(context)
+      .map((b) => b.text)
+      .join('\n')
+    expect(texts).toMatch(/討伐対象として\d+体が指定された/)
   })
 })
 
