@@ -247,6 +247,26 @@ Narrative Interaction Hints:
   character moments will still be limited to at most two main and two
   secondary scenes, with the rest in montage.
 
+## E2E Verification
+
+`酒場キャンペーン` UI フローを `npm run dev` → `http://localhost:5173/` で
+Playwright ヘッドフルブラウザ E2E テストしました（seed `tavern-005`）。
+
+| Step                                                                                        | Result                                                                                                        |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 依頼 → パーティ → 紹介 → 本日の仲介を確定で遠征実行                                         | PASS                                                                                                          |
+| 遠征結果から `遠征レポート：旧坑道東部の測量` が `未生成` 候補として追加                    | PASS                                                                                                          |
+| `開発用 Fake Provider` で `遠征物語を生成` が成功                                           | PASS（`【Fake生成 #1】` / `tokens: 1753`）                                                                    |
+| 生成済み候補 / レポートが UI に表示                                                         | PASS                                                                                                          |
+| `AIへ送る内容` 詳細に v6 prompt セクションが表示                                            | PASS (`Focus:` / `Main Scenes:` / `Secondary Scenes:` / `Montage Beat IDs:` / `Narrative Interaction Hints:`) |
+| `Raw Narrative Context` に新 `NarrativeDirection` フィールドが表示                          | PASS (`direction`, `mainScenes`, `secondaryScenes`, `montageBeatIds`, `focus`, `interactionHints`)            |
+| Provider 未接続時に `AI呼び出し: 0回` のまま候補が保持（zero-call）                         | PASS                                                                                                          |
+| HTTP Provider 無効エンドポイントで `AI文章の生成に失敗しました。HTTP 404:` とフォールバック | PASS                                                                                                          |
+| `翌日へ` で次の日に正常進行                                                                 | PASS                                                                                                          |
+| Console `error` / `pageerror` / unhandled rejection                                         | なし（意図的 404 ネットワークログを除く）                                                                     |
+
+録画: `/home/ubuntu/screencasts/phase7-2-1-narrative-ui-flow-clean/phase7-2-1-narrative-ui-flow-clean-edited.mp4`
+
 ## Out of Scope
 
 As specified, the following are **not** included:
