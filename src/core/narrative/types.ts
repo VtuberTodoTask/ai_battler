@@ -241,6 +241,63 @@ export interface NarrativeMemoryContextItem {
   valence: MemoryValence
 }
 
+export type ArcSignalStatus = 'emerging' | 'established' | 'fading'
+
+export type ArcSignalDirection = 'positive' | 'negative' | 'mixed' | 'neutral'
+
+export type CharacterArcSignalType =
+  | 'growing_reliance'
+  | 'growing_trust'
+  | 'recurring_support'
+  | 'comfortable_familiarity'
+  | 'comfortable_teasing'
+  | 'protective_pattern'
+  | 'recurring_conflict'
+  | 'decision_friction'
+  | 'eroding_trust'
+  | 'growing_tension'
+  | 'avoidance_pattern'
+  | 'shared_failure_bond'
+  | 'shared_success_bond'
+  | 'unresolved_debt'
+  | 'reciprocal_support'
+  | 'romantic_interest_possible'
+  | 'repeated_injury'
+  | 'repeated_success'
+  | 'repeated_failure'
+  | 'other'
+
+export interface CharacterArcSignal {
+  id: string
+  type: CharacterArcSignalType
+  /** The character whose perspective the signal describes, if directional. */
+  sourceCharacterId?: string
+  /** The other character involved, if directional. */
+  targetCharacterId?: string
+  /** All character IDs relevant to this signal (1 for personal, 2 for pair). */
+  characterIds: string[]
+  strength: number
+  confidence: number
+  supportingMemoryIds: string[]
+  supportingEventIds?: string[]
+  firstDetectedDay?: number
+  lastUpdatedDay?: number
+  status: ArcSignalStatus
+  direction: ArcSignalDirection
+}
+
+export interface NarrativeArcSignal {
+  type: CharacterArcSignalType
+  summary: string
+  strength: number
+  confidence: number
+  status: ArcSignalStatus
+  direction: ArcSignalDirection
+  characterIds: string[]
+  sourceCharacterId?: string
+  targetCharacterId?: string
+}
+
 export interface CharacterNarrativeContext {
   characterId: string
   identitySummary?: string
@@ -251,6 +308,7 @@ export interface CharacterNarrativeContext {
   relationshipHints?: string[]
   romanticHint?: string
   memories?: NarrativeMemoryContextItem[]
+  arcSignals?: NarrativeArcSignal[]
 }
 
 export interface ExpeditionNarrativeContext {
@@ -273,6 +331,8 @@ export interface ExpeditionNarrativeContext {
   characterMemories?: Record<string, NarrativeMemoryContextItem[]>
   /** Per-pair relationship memories selected as relevant to the narrative focus. */
   relationshipMemories?: Record<string, NarrativeMemoryContextItem[]>
+  /** Relationship arc signals selected as relevant to the narrative focus. */
+  relationshipArcs?: NarrativeArcSignal[]
 }
 
 export interface NarrativeHistoryHighlight {
