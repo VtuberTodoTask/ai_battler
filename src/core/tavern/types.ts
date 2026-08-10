@@ -18,6 +18,7 @@ import type {
   PartyMissionSpecialization,
 } from './specialization.ts'
 import type {
+  CharacterArcSignal,
   CharacterMemory,
   CharacterRelationship,
 } from '../narrative/types.ts'
@@ -118,6 +119,8 @@ export interface TavernParty {
   characterMemories?: Record<string, CharacterMemory[]>
   /** Per-character directional relationships among party members. Optional for backward compatibility. */
   memberRelationships?: Record<string, CharacterRelationship>
+  /** Persistent relationship / personal arc signals derived from memories. Optional for backward compatibility. */
+  arcSignals?: CharacterArcSignal[]
 }
 
 export interface PartyTemplate {

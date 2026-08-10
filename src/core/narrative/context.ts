@@ -27,6 +27,7 @@ import {
   projectMemoriesForNarrative,
   type ProjectedMemoryContext,
 } from './memory.ts'
+import { projectArcSignalsForNarrative } from './arcSignals.ts'
 
 function memberIsDead(member: { currentHp: number }): boolean {
   return member.currentHp <= 0
@@ -160,6 +161,14 @@ export function buildExpeditionNarrativeContext(
       context.characterMemories = memoryContext.characterMemories
       context.relationshipMemories = memoryContext.relationshipMemories
       attachMemoriesToCharacterContexts(context, memoryContext)
+
+      context.relationshipArcs = projectArcSignalsForNarrative(
+        party,
+        context.direction?.focus?.summary ?? '',
+        context.request,
+        sceneCharacterIds,
+        dayNumber,
+      )
     }
   }
   return context

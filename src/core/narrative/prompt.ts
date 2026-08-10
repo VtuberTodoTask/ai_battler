@@ -24,8 +24,9 @@ import {
 import { determineNarrativeDirection } from './director.ts'
 import { formatNarrativeProfile } from './characterProfile.ts'
 import { countryLabel, genderLabel, speciesLabel } from '../identity/labels.ts'
+import { arcSignalSummary } from './arcSignals.ts'
 
-export const NARRATIVE_PROMPT_VERSION = 'v9'
+export const NARRATIVE_PROMPT_VERSION = 'v10'
 
 export interface NarrativePrompt {
   system: string
@@ -381,6 +382,22 @@ function memoryLines(context: ExpeditionNarrativeContext): string[] {
   return lines
 }
 
+function arcSignalLines(context: ExpeditionNarrativeContext): string[] {
+  const lines: string[] = []
+  const signals = context.relationshipArcs ?? []
+  if (signals.length === 0) return ['- なし']
+  const memberMap = new Map(
+    context.party.members.map((m) => [m.id, m.name ?? m.id]),
+  )
+  for (const signal of signals) {
+    const summary = arcSignalSummary(signal, memberMap)
+    lines.push(
+      `- ${summary}（傾向：${signal.status}、強さ${Math.round(signal.strength)}、確信${Math.round(signal.confidence)}）`,
+    )
+  }
+  return lines
+}
+
 function directionLines(
   direction: import('./types.ts').NarrativeDirection | undefined,
   members?: NarrativeMemberSnapshot[],
@@ -614,6 +631,7 @@ const EXPEDITION_WRITING_INSTRUCTIONS = `WRITING INSTRUCTIONS:
 - 性格や人間関係を直接説明しない。気質・価値観・欠点・恐れは、台詞、反応、選択、仕草、沈黙を通じて読者に伝える
 - 人間関係は、会話の距離感、助け合い、避け合い、からかい、言い争い、気遣いなどとして表現する。信頼度や緊張値のような数値・ラベルは本文に出さない
 - RELEVANT MEMORIES は確認済みの過去の出来事です。キャラクターの現在の態度や仕草に影響を与えてよいが、思い出を改変・拡張・新しい背景にしない。記憶を無理にセリフで言及させない
+- RELATIONSHIP ARCS は長期的な関係傾向です。Arc ラベルや「関係が深まった」「信頼し合うようになった」といった説明を直接述べない。Arc はキャラクターが誰の声を聞くか、誰を振り返るか、助言をどれほど素直に受けるか、言い争いをどう制御するか、日常の連携がどれだけ自然に感じるかなどに反映する。無理に毎回のシーンに出さない
 - Character の状態（疲労、消耗、無傷など）を roster summary のように列挙しない。NARRATIVE FOCUS に関係する人物のみ、必要な範囲で描写する
 - 目的達成、勝利、帰還、作戦、HP/MP/Moraleなどのゲーム状態をそのままセリフ化しない
 - キャラクターはミッションと無関係な雑談をしてよい。ただし、空腹、疲労、からかい、愚痴、気まずい沈黙、冗談、装備確認、相手の様子を気にする、食事を求めるなどは毎回ではなく、自然な場面だけで使う
@@ -690,6 +708,10 @@ export function buildExpeditionPrompt(
     '=== RELEVANT MEMORIES ===',
     'Relevant memories describe confirmed past events. You may let them influence present behavior. Do not invent additional details about those past events. Do not rewrite or expand the memory into a new backstory. Do not force characters to discuss a memory explicitly. Avoid repeated "we did this before" dialogue; let memories influence non-verbal behavior, hesitation, trust, irritation, expectation, or willingness to rely.',
     ...memoryLines(context),
+    '',
+    '=== RELATIONSHIP ARCS ===',
+    'Arc signals describe long-term relationship trends, not facts to announce. Do not state an arc label or relationship development directly. Let an arc influence who a character listens to, who they look toward first, how quickly they accept advice, how much explanation is needed, whether disagreement is blunt or restrained, and how familiar routine coordination feels. Do not force the arc into every scene.',
+    ...arcSignalLines(context),
     '',
     '=== EXPEDITION TIMELINE ===',
     timelineText,

@@ -11,6 +11,7 @@ import type {
   TavernPartyStats,
 } from '../types.ts'
 import type {
+  CharacterArcSignal,
   CharacterMemory,
   CharacterRelationship,
   NarrativeCandidate,
@@ -138,6 +139,8 @@ export interface CampaignParty {
   characterMemories?: Record<string, CharacterMemory[]>
   /** Number of expeditions shared by each unordered pair of members. Optional for backward compatibility. */
   sharedExpeditionCounts?: Record<string, number>
+  /** Persistent relationship / personal arc signals derived from memories. Optional for backward compatibility. */
+  arcSignals?: CharacterArcSignal[]
   departingCasualty?: boolean
 }
 

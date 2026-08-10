@@ -23,6 +23,7 @@ import {
 } from './relationship.ts'
 import { applyCharacterRelationshipChanges } from '../../narrative/characterRelationships.ts'
 import { applyExpeditionMemory } from '../../narrative/memory.ts'
+import { updateArcSignals } from '../../narrative/arcSignals.ts'
 import {
   EXPEDITION_GROWTH_XP,
   TRAINING_GROWTH_XP,
@@ -120,6 +121,7 @@ export function resolveCampaignDay(
       resolved.requestId,
     )
     applyExpeditionMemory(party, resolved.result, dayNumber, resolved.requestId)
+    updateArcSignals(party, dayNumber)
 
     relationshipEvents.push(applyAffinityFromOutcome(party, outcome, dayNumber))
     relationshipEvents.push(

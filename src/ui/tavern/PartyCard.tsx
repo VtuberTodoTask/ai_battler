@@ -14,12 +14,24 @@ import {
   genderLabel,
   speciesLabel,
 } from '../../core/identity/labels.ts'
+import { arcSignalSummary } from '../../core/narrative/arcSignals.ts'
 
 export interface PartyCardProps {
   party: TavernParty
   selected: boolean
   disabled: boolean
   onClick: () => void
+}
+
+function recentArcsForParty(party: TavernParty): string[] {
+  const memberMap = new Map(
+    party.party.members.map((m) => [m.id, m.name ?? m.id]),
+  )
+  const signals = (party.arcSignals ?? [])
+    .filter((s) => s.status !== 'fading' || s.strength > 30)
+    .sort((a, b) => b.strength - a.strength)
+    .slice(0, 4)
+  return signals.map((s) => arcSignalSummary(s, memberMap))
 }
 
 function recentMemoriesForMember(
@@ -123,6 +135,14 @@ export function PartyCard({
               )
             })
             .filter(Boolean)}
+        </div>
+      )}
+      {party.arcSignals && party.arcSignals.length > 0 && (
+        <div className="party-arc-signals">
+          <strong>最近の関係傾向</strong>
+          {recentArcsForParty(party).map((text, i) => (
+            <div key={i}>{text}</div>
+          ))}
         </div>
       )}
       {ap.missionSpecialization && (
