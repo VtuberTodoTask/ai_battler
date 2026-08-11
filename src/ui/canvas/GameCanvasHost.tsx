@@ -23,6 +23,7 @@ export interface GameCanvasHostProps {
   onOpenExpeditionNarrative?: (
     candidateId: string,
   ) => Promise<UiActionResult<string>>
+  onOpenSettings?: () => void
   onSwitchToLegacy: () => void
 }
 
@@ -33,6 +34,7 @@ export default function GameCanvasHost({
   onOfferRequest,
   onOpenActivity,
   onOpenExpeditionNarrative,
+  onOpenSettings,
   onSwitchToLegacy,
 }: GameCanvasHostProps) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -44,6 +46,7 @@ export default function GameCanvasHost({
   const onOfferRef = useRef(onOfferRequest)
   const onOpenActivityRef = useRef(onOpenActivity)
   const onOpenExpeditionNarrativeRef = useRef(onOpenExpeditionNarrative)
+  const onOpenSettingsRef = useRef(onOpenSettings)
   const onSwitchRef = useRef(onSwitchToLegacy)
 
   useEffect(() => {
@@ -52,6 +55,7 @@ export default function GameCanvasHost({
     onOfferRef.current = onOfferRequest
     onOpenActivityRef.current = onOpenActivity
     onOpenExpeditionNarrativeRef.current = onOpenExpeditionNarrative
+    onOpenSettingsRef.current = onOpenSettings
     onSwitchRef.current = onSwitchToLegacy
   }, [
     onAdvanceDay,
@@ -59,6 +63,7 @@ export default function GameCanvasHost({
     onOfferRequest,
     onOpenActivity,
     onOpenExpeditionNarrative,
+    onOpenSettings,
     onSwitchToLegacy,
   ])
 
@@ -156,6 +161,9 @@ export default function GameCanvasHost({
               e instanceof Error ? e.message : '物語の生成に失敗しました',
           }
         }
+      },
+      openSettings: () => {
+        onOpenSettingsRef.current?.()
       },
       closeModal: () => {
         uiState.modalOpen = false

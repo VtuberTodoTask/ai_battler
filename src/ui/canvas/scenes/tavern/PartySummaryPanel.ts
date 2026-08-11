@@ -6,6 +6,17 @@ import { GameScrollView } from '../../components/GameScrollView.ts'
 import type { GameUiTheme } from '../../theme/gameTheme.ts'
 import type { TavernPartySummaryViewModel } from '../../viewModel/tavernScreenViewModel.ts'
 
+function buttonLabelForReason(reason: string | undefined): string {
+  if (!reason) return '依頼を割り当てる'
+  if (reason.includes('紹介済み')) return '紹介済み'
+  if (reason.includes('確定済み')) return '本日確定済'
+  if (reason.includes('未選択')) return '依頼未選択'
+  if (reason.includes('療養中')) return '療養中'
+  if (reason.includes('成立')) return '成立済'
+  if (reason.includes('受諾')) return '受諾済'
+  return reason
+}
+
 export interface PartySummaryPanelOptions {
   theme: GameUiTheme
   width: number
@@ -123,7 +134,7 @@ export class PartySummaryPanel extends Container {
     this._assignButton.setLabel(
       summary.canAssignQuest
         ? '依頼を割り当てる'
-        : (summary.assignDisabledReason ?? '依頼を割り当てる'),
+        : buttonLabelForReason(summary.assignDisabledReason),
     )
     this._assignButton.setEnabled(summary.canAssignQuest)
 

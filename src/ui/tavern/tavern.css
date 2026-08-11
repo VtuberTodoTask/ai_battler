@@ -815,3 +815,66 @@
   background: #1a120b;
   color: #f0e6d2;
 }
+
+.canvas-settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  padding: 1rem;
+}
+
+.canvas-settings-modal {
+  background: #1a120b;
+  border: 1px solid #8b5e3c;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #f0e6d2;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.canvas-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #8b5e3c;
+}
+
+.canvas-settings-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.canvas-settings-close {
+  background: none;
+  border: none;
+  color: #f0e6d2;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.canvas-settings-modal .narrative-settings {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  margin-top: 0;
+}
+
+.canvas-settings-modal .narrative-settings h4 {
+  display: none;
+}
+
+.canvas-settings-modal .narrative-inputs input,
+.canvas-settings-modal .narrative-actions button {
+  background: #2a1e14;
+  color: #f0e6d2;
+  border-color: #8b5e3c;
+}

@@ -43,6 +43,8 @@ export interface TavernFeedbackItem {
   importance: FeedbackImportance
   reportId?: string
   narrativeTargetId?: string
+  day?: number
+  sequence?: number
 }
 
 const PARTY_EVENT_LABELS: Record<CampaignPartyEvent['type'], string> = {
@@ -321,11 +323,24 @@ function pushUniqueFeedback(
   items: TavernFeedbackItem[],
   seen: Set<string>,
   feedback: TavernFeedbackItem | null,
+  day: number,
+  sequence: number,
 ): void {
   if (!feedback || seen.has(feedback.id)) return
   seen.add(feedback.id)
-  items.push(feedback)
+  items.push({ ...feedback, day, sequence })
 }
+
+const PRE_PARTY_EVENT_TYPES = new Set<CampaignPartyEvent['type']>([
+  'arrived',
+  'finishedRecovery',
+  'departedScheduled',
+])
+
+const POST_PARTY_EVENT_TYPES = new Set<CampaignPartyEvent['type']>([
+  'startedRecovery',
+  'departedCasualty',
+])
 
 export function buildTavernFeedbackItems(
   campaign: TavernCampaignState,
@@ -335,19 +350,25 @@ export function buildTavernFeedbackItems(
   const seen = new Set<string>()
   const viewedIds = new Set(viewedActivityIds)
   const day = campaign.currentDay
+  const dayNumber = campaign.dayNumber
   const reports = buildExpeditionReportViewModels(campaign)
+  let sequence = 0
+  const nextSeq = () => sequence++
 
-  for (const party of day.parties) {
-    for (const event of party.downtimeEvents ?? []) {
-      pushUniqueFeedback(items, seen, buildDowntimeFeedback(party, event))
-    }
-  }
+  const prePartyEvents = (day.partyEvents ?? []).filter((e) =>
+    PRE_PARTY_EVENT_TYPES.has(e.type),
+  )
+  const postPartyEvents = (day.partyEvents ?? []).filter((e) =>
+    POST_PARTY_EVENT_TYPES.has(e.type),
+  )
 
-  for (const event of day.partyEvents ?? []) {
+  for (const event of prePartyEvents) {
     pushUniqueFeedback(
       items,
       seen,
       buildPartyEventFeedback(event, day.parties, viewedIds),
+      dayNumber,
+      nextSeq(),
     )
   }
 
@@ -356,6 +377,8 @@ export function buildTavernFeedbackItems(
       items,
       seen,
       buildOfferFeedback(offer, day.parties, viewedIds),
+      dayNumber,
+      nextSeq(),
     )
   }
 
@@ -364,19 +387,38 @@ export function buildTavernFeedbackItems(
       pushUniqueFeedback(
         items,
         seen,
-        buildExpeditionReturnFeedback(
-          campaign.dayNumber,
-          result,
-          reports,
-          viewedIds,
-        ),
+        buildExpeditionReturnFeedback(dayNumber, result, reports, viewedIds),
+        dayNumber,
+        nextSeq(),
+      )
+    }
+  }
+
+  for (const event of postPartyEvents) {
+    pushUniqueFeedback(
+      items,
+      seen,
+      buildPartyEventFeedback(event, day.parties, viewedIds),
+      dayNumber,
+      nextSeq(),
+    )
+  }
+
+  for (const party of day.parties) {
+    for (const event of party.downtimeEvents ?? []) {
+      pushUniqueFeedback(
+        items,
+        seen,
+        buildDowntimeFeedback(party, event),
+        event.day,
+        nextSeq(),
       )
     }
   }
 
   for (const record of campaign.history) {
     for (const event of record.relationshipEvents) {
-      if (event.dayNumber !== campaign.dayNumber) continue
+      if (event.dayNumber !== dayNumber) continue
       if (event.type === 'stayExtended') {
         const party = day.parties.find((p) => p.id === event.partyId)
         pushUniqueFeedback(
@@ -391,6 +433,8 @@ export function buildTavernFeedbackItems(
             campaign,
             viewedIds,
           ),
+          dayNumber,
+          nextSeq(),
         )
       }
     }
@@ -404,6 +448,12 @@ export function sortFeedbackItems(
 ): TavernFeedbackItem[] {
   const indexed = items.map((item, index) => ({ item, index }))
   indexed.sort((a, b) => {
+    const dayA = a.item.day ?? 0
+    const dayB = b.item.day ?? 0
+    if (dayB !== dayA) return dayB - dayA
+    const seqA = a.item.sequence ?? 0
+    const seqB = b.item.sequence ?? 0
+    if (seqB !== seqA) return seqB - seqA
     const diff =
       importanceValue(b.item.importance) - importanceValue(a.item.importance)
     if (diff !== 0) return diff
