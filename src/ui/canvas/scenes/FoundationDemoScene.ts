@@ -151,7 +151,7 @@ export class FoundationDemoScene implements GameScene {
   private buildLeftPanel(context: GameSceneContext): void {
     const { theme, viewport } = context
     const height =
-      viewport.virtualHeight - TOP_BAR_H - BOTTOM_BAR_H - MARGIN * 2
+      viewport.virtualHeight - TOP_BAR_H - BOTTOM_BAR_H - MARGIN * 3
 
     const leftPanel = new GamePanel({
       width: LEFT_W - MARGIN,
@@ -178,7 +178,7 @@ export class FoundationDemoScene implements GameScene {
     const y = TOP_BAR_H + MARGIN
     const width = viewport.virtualWidth - x - MARGIN
     const height =
-      viewport.virtualHeight - TOP_BAR_H - BOTTOM_BAR_H - MARGIN * 2
+      viewport.virtualHeight - TOP_BAR_H - BOTTOM_BAR_H - MARGIN * 3
 
     const mainPanel = new GamePanel({
       width,
@@ -236,7 +236,7 @@ export class FoundationDemoScene implements GameScene {
       theme,
       color: theme.colors.panel,
       borderColor: theme.colors.panelBorder,
-      radius: theme.radius.large,
+      radius: 0,
     })
     bottomBar.x = MARGIN
     bottomBar.y = y
@@ -326,12 +326,11 @@ export class FoundationDemoScene implements GameScene {
     let y = 0
 
     for (const party of parties) {
-      const members = party.memberNames.slice(0, 3).join(', ')
       const button = new GameButton({
         width,
         height: 60,
         theme: this._context.theme,
-        label: `${party.name}\n${members}`,
+        label: party.name,
       })
       button.y = y
       button.onActivate = () => this._context!.actions.selectParty(party.id)

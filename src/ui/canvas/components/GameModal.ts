@@ -81,6 +81,13 @@ export class GameModal extends Container {
         maxWidth: this._width - this._theme.spacing.s48,
         align: 'left',
       })
+      const titleBottom =
+        this._titleLabel.y +
+        (this._titleLabel.textHeight || this._theme.spacing.s32)
+      label.y = Math.max(
+        0,
+        titleBottom + this._theme.spacing.s16 - this._bodyContainer.y,
+      )
       this._bodyContainer.addChild(label)
     } else {
       this._bodyContainer.addChild(content)
