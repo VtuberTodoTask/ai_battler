@@ -147,11 +147,7 @@ Text area for this phase: roughly `x: 170, y: 120, width: 1260, height: 620` on 
 
 ```ts
 type SoundNovelPlaybackState =
-  | 'typing'
-  | 'waiting'
-  | 'page_wait'
-  | 'finished'
-  | 'closed'
+  'typing' | 'waiting' | 'page_wait' | 'finished' | 'closed'
 ```
 
 - `typing`: revealing the current segment
@@ -161,6 +157,7 @@ type SoundNovelPlaybackState =
 - `closed`: scene closing / return
 
 Click behavior:
+
 - typing → complete current segment
 - waiting → start next segment typewriter
 - page_wait → clear page and start next page
