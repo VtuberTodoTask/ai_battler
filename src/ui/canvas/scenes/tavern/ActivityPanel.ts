@@ -60,7 +60,7 @@ export class ActivityPanel extends Container {
     this._rows = []
 
     const rowWidth = this._width - this._theme.spacing.s24 - 4
-    const rowHeight = 48
+    const rowHeight = 36
     const gap = 6
     let y = 0
 
@@ -84,7 +84,6 @@ export class ActivityPanel extends Container {
         height: rowHeight,
         theme: this._theme,
         title: activity.title,
-        subtitle: activity.summary,
         selected: false,
         disabled: !activity.canOpen,
         unread: activity.unread,

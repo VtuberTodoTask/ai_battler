@@ -53,6 +53,7 @@ export class TavernListRow extends Container {
     )
     this._subtitleLabel.x = this._theme.spacing.s12
     this._subtitleLabel.y = this._theme.spacing.s8 + 30
+    this._subtitleLabel.visible = (options.subtitle ?? '').length > 0
     this.addChild(this._subtitleLabel)
 
     this._unreadDot = new Graphics()
