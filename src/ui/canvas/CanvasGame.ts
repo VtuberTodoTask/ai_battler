@@ -6,6 +6,7 @@ import { GameViewport, VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from './GameViewport.ts'
 import { OverlayManager } from './overlays/OverlayManager.ts'
 import { BootScene } from './scenes/BootScene.ts'
 import { FoundationDemoScene } from './scenes/FoundationDemoScene.ts'
+import { TavernScene } from './scenes/tavern/TavernScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -103,8 +104,9 @@ export class CanvasGame {
         }
       },
     })
-    this._sceneManager.register(new BootScene())
+    this._sceneManager.register(new BootScene('tavern'))
     this._sceneManager.register(new FoundationDemoScene())
+    this._sceneManager.register(new TavernScene())
 
     app.ticker.add(this.handleTick)
 
@@ -229,9 +231,12 @@ export class CanvasGame {
   private createNoopActions(): GameUiActions {
     return {
       advanceDay: () => {},
+      resolveDay: () => {},
+      offerRequest: () => {},
       selectParty: () => {},
       selectQuest: () => {},
       openCharacter: () => {},
+      openActivity: () => Promise.resolve(''),
       closeModal: () => {},
       switchToLegacy: () => {},
     }

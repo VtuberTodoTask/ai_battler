@@ -5,6 +5,8 @@ import {
   resolveCampaignDay,
 } from '../../core/tavern/campaign/campaign.ts'
 import { offerRequestToParty } from '../../core/tavern/brokerage.ts'
+import { deepClone } from '../../core/util.ts'
+import { generateDowntimeNarrative } from '../../core/narrative/downtime.ts'
 import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
 import { TavernControls } from './TavernControls.tsx'
 import { CampaignHeader } from './CampaignHeader.tsx'
@@ -77,20 +79,45 @@ export function TavernSimulator() {
     setError(null)
   }, [])
 
-  const handleOffer = useCallback(() => {
-    if (!selectedRequestId || !selectedPartyId) return
-    try {
-      const nextDay = offerRequestToParty(
-        campaign.currentDay,
-        selectedRequestId,
-        selectedPartyId,
+  const handleOfferRequest = useCallback(
+    (requestId: string, partyId: string) => {
+      try {
+        const nextDay = offerRequestToParty(
+          campaign.currentDay,
+          requestId,
+          partyId,
+        )
+        setCampaign((prev) => ({ ...prev, currentDay: nextDay }))
+        setError(null)
+      } catch (e) {
+        setError(e instanceof Error ? e.message : '紹介に失敗しました')
+      }
+    },
+    [campaign],
+  )
+
+  const handleOpenActivity = useCallback(
+    async (partyId: string, eventId: string) => {
+      const party = campaign.currentDay.parties.find((p) => p.id === partyId)
+      const event = party?.downtimeEvents?.find((e) => e.id === eventId)
+      if (!party || !event) return ''
+
+      const next = deepClone(campaign)
+      const nextParty = next.currentDay.parties.find((p) => p.id === partyId)
+      const nextEvent = nextParty?.downtimeEvents?.find((e) => e.id === eventId)
+      if (!nextParty || !nextEvent) return ''
+
+      const text = await generateDowntimeNarrative(
+        nextEvent,
+        nextParty as unknown as Parameters<typeof generateDowntimeNarrative>[1],
+        narrativeProvider,
       )
-      setCampaign((prev) => ({ ...prev, currentDay: nextDay }))
-      setError(null)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '紹介に失敗しました')
-    }
-  }, [campaign, selectedRequestId, selectedPartyId])
+      nextEvent.narrativeStatus = 'viewed'
+      setCampaign(next)
+      return text
+    },
+    [campaign, narrativeProvider],
+  )
 
   const handleResolve = useCallback(() => {
     try {
@@ -166,6 +193,9 @@ export function TavernSimulator() {
           <GameCanvasHost
             campaign={campaign}
             onAdvanceDay={handleAdvance}
+            onResolveDay={handleResolve}
+            onOfferRequest={handleOfferRequest}
+            onOpenActivity={handleOpenActivity}
             onSwitchToLegacy={() => setUiMode('legacy')}
           />
         </Suspense>
@@ -220,7 +250,11 @@ export function TavernSimulator() {
         canResolve={canResolve}
         canAdvance={canAdvance}
         error={error}
-        onOffer={handleOffer}
+        onOffer={() => {
+          if (selectedRequestId && selectedPartyId) {
+            handleOfferRequest(selectedRequestId, selectedPartyId)
+          }
+        }}
         onResolve={handleResolve}
         onAdvance={handleAdvance}
       />

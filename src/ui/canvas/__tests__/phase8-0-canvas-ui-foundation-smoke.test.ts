@@ -55,9 +55,12 @@ function createTestContext(): GameSceneContext {
     assetManager: new GameAssetManager(),
     actions: {
       advanceDay: vi.fn(),
+      resolveDay: vi.fn(),
+      offerRequest: vi.fn(),
       selectParty: vi.fn(),
       selectQuest: vi.fn(),
       openCharacter: vi.fn(),
+      openActivity: vi.fn().mockResolvedValue(''),
       closeModal: vi.fn(),
       switchToLegacy: vi.fn(),
     },

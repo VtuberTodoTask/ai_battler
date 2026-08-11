@@ -18,9 +18,12 @@ export interface GameLayers {
 
 export interface GameUiActions {
   advanceDay: () => void
+  resolveDay: () => void
+  offerRequest: (partyId: string, requestId: string) => void
   selectParty: (partyId: string) => void
   selectQuest: (questId: string) => void
   openCharacter: (characterId: string) => void
+  openActivity: (partyId: string, eventId: string) => Promise<string>
   closeModal: () => void
   switchToLegacy: () => void
 }

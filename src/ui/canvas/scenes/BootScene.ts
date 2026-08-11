@@ -7,10 +7,15 @@ const BOOT_DURATION_MS = 1200
 export class BootScene implements GameScene {
   readonly id = 'boot'
 
+  private _nextScene: string
   private _context: GameSceneContext | null = null
   private _elapsed = 0
   private _container: Container | null = null
   private _label: Text | null = null
+
+  constructor(nextScene = 'foundation') {
+    this._nextScene = nextScene
+  }
 
   mount(context: GameSceneContext): void {
     this._context = context
@@ -58,7 +63,7 @@ export class BootScene implements GameScene {
     }
 
     if (this._elapsed >= BOOT_DURATION_MS && this._context) {
-      this._context.canvasGame.sceneManager?.show('foundation')
+      this._context.canvasGame.sceneManager?.show(this._nextScene)
     }
   }
 

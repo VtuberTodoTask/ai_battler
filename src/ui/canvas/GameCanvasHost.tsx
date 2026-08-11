@@ -6,12 +6,18 @@ import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
 export interface GameCanvasHostProps {
   campaign: TavernCampaignState
   onAdvanceDay: () => void
+  onResolveDay: () => void
+  onOfferRequest: (partyId: string, requestId: string) => void
+  onOpenActivity: (partyId: string, eventId: string) => Promise<string>
   onSwitchToLegacy: () => void
 }
 
 export default function GameCanvasHost({
   campaign,
   onAdvanceDay,
+  onResolveDay,
+  onOfferRequest,
+  onOpenActivity,
   onSwitchToLegacy,
 }: GameCanvasHostProps) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -19,12 +25,24 @@ export default function GameCanvasHost({
   const [error, setError] = useState<string | null>(null)
 
   const onAdvanceRef = useRef(onAdvanceDay)
+  const onResolveRef = useRef(onResolveDay)
+  const onOfferRef = useRef(onOfferRequest)
+  const onOpenActivityRef = useRef(onOpenActivity)
   const onSwitchRef = useRef(onSwitchToLegacy)
 
   useEffect(() => {
     onAdvanceRef.current = onAdvanceDay
+    onResolveRef.current = onResolveDay
+    onOfferRef.current = onOfferRequest
+    onOpenActivityRef.current = onOpenActivity
     onSwitchRef.current = onSwitchToLegacy
-  }, [onAdvanceDay, onSwitchToLegacy])
+  }, [
+    onAdvanceDay,
+    onResolveDay,
+    onOfferRequest,
+    onOpenActivity,
+    onSwitchToLegacy,
+  ])
 
   useEffect(() => {
     const host = hostRef.current
@@ -43,6 +61,12 @@ export default function GameCanvasHost({
       advanceDay: () => {
         onAdvanceRef.current()
       },
+      resolveDay: () => {
+        onResolveRef.current()
+      },
+      offerRequest: (partyId, requestId) => {
+        onOfferRef.current(partyId, requestId)
+      },
       selectParty: (partyId) => {
         uiState.selectedPartyId = partyId
         cg.setUiState({ selectedPartyId: partyId })
@@ -55,6 +79,9 @@ export default function GameCanvasHost({
         uiState.openCharacterId = characterId
         uiState.modalOpen = true
         cg.setUiState({ openCharacterId: characterId, modalOpen: true })
+      },
+      openActivity: (partyId, eventId) => {
+        return onOpenActivityRef.current(partyId, eventId)
       },
       closeModal: () => {
         uiState.modalOpen = false

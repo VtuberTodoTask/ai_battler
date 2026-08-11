@@ -28,6 +28,9 @@ describe('GameCanvasHost lifecycle', () => {
       <GameCanvasHost
         campaign={campaign}
         onAdvanceDay={() => {}}
+        onResolveDay={() => {}}
+        onOfferRequest={() => {}}
+        onOpenActivity={() => Promise.resolve('')}
         onSwitchToLegacy={() => {}}
       />,
     )
@@ -49,6 +52,9 @@ describe('GameCanvasHost lifecycle', () => {
       <GameCanvasHost
         campaign={campaign}
         onAdvanceDay={() => {}}
+        onResolveDay={() => {}}
+        onOfferRequest={() => {}}
+        onOpenActivity={() => Promise.resolve('')}
         onSwitchToLegacy={() => {}}
       />,
     )
@@ -59,6 +65,9 @@ describe('GameCanvasHost lifecycle', () => {
       <GameCanvasHost
         campaign={nextCampaign}
         onAdvanceDay={() => {}}
+        onResolveDay={() => {}}
+        onOfferRequest={() => {}}
+        onOpenActivity={() => Promise.resolve('')}
         onSwitchToLegacy={() => {}}
       />,
     )
