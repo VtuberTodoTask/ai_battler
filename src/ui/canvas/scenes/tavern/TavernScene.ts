@@ -1,4 +1,4 @@
-import { Container, Graphics } from 'pixi.js'
+import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js'
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '../../GameViewport.ts'
 import type { TavernCampaignState } from '../../../../core/tavern/campaign/types.ts'
 import { GameLabel } from '../../components/GameLabel.ts'
@@ -24,6 +24,7 @@ const MAIN_HEIGHT =
   VIRTUAL_HEIGHT - TOP_BAR_HEIGHT - BOTTOM_PANEL_HEIGHT - MARGIN * 3
 const BOTTOM_Y = MAIN_Y + MAIN_HEIGHT + MARGIN
 const CENTER_WIDTH = VIRTUAL_WIDTH - LEFT_WIDTH - RIGHT_WIDTH - MARGIN * 4
+const TAVERN_BG_URL = '/tavern-bg.jpg'
 
 export class TavernScene implements GameScene {
   readonly id = 'tavern'
@@ -169,28 +170,33 @@ export class TavernScene implements GameScene {
     })
     bg.addChild(base)
 
-    const floor = new Graphics()
-    floor.rect(0, VIRTUAL_HEIGHT - 96, VIRTUAL_WIDTH, 96).fill({
-      color: theme.colors.wood,
-      alpha: 0.25,
-    })
-    bg.addChild(floor)
+    if (
+      typeof import.meta.env !== 'undefined' &&
+      import.meta.env.MODE === 'test'
+    ) {
+      return
+    }
 
-    const top = new Graphics()
-    top.rect(0, 0, VIRTUAL_WIDTH, TOP_BAR_HEIGHT).fill({
-      color: theme.colors.panelTitle,
-      alpha: 0.6,
-    })
-    bg.addChild(top)
+    if (typeof Assets.load !== 'function') return
 
-    const bottom = new Graphics()
-    bottom
-      .rect(MARGIN, BOTTOM_Y, VIRTUAL_WIDTH - MARGIN * 2, BOTTOM_PANEL_HEIGHT)
-      .fill({
-        color: theme.colors.panel,
-        alpha: 0.4,
+    void Assets.load(TAVERN_BG_URL)
+      .then((texture) => {
+        const sprite = new Sprite(texture as Texture)
+        const scale = Math.max(
+          VIRTUAL_WIDTH / sprite.width,
+          VIRTUAL_HEIGHT / sprite.height,
+        )
+        sprite.scale.set(scale)
+        sprite.x = (VIRTUAL_WIDTH - sprite.width * scale) / 2
+        sprite.y = (VIRTUAL_HEIGHT - sprite.height * scale) / 2
+        base.clear()
+        bg.removeChild(base)
+        base.destroy()
+        bg.addChild(sprite)
       })
-    bg.addChild(bottom)
+      .catch(() => {
+        // Keep base color if loading fails.
+      })
   }
 
   private createPanels(context: GameSceneContext): void {

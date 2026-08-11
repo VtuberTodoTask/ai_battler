@@ -36,6 +36,7 @@ export class QuestListPanel extends Container {
       color: this._theme.colors.panel,
       borderColor: this._theme.colors.panelBorder,
       radius: this._theme.radius.large,
+      alpha: 0.82,
     })
     this.addChild(panel)
 

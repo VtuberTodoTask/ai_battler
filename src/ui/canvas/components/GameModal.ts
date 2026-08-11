@@ -3,6 +3,7 @@ import type { GameUiTheme } from '../theme/gameTheme.ts'
 import { GameButton } from './GameButton.ts'
 import { GameLabel } from './GameLabel.ts'
 import { GamePanel } from './GamePanel.ts'
+import { GameScrollingLabel } from './GameScrollingLabel.ts'
 
 const VIRTUAL_WIDTH = 1600
 const VIRTUAL_HEIGHT = 900
@@ -17,7 +18,7 @@ function destroyChildren(container: Container): void {
 export class GameModal extends Container {
   private readonly _dim: Graphics
   private readonly _panel: GamePanel
-  private readonly _titleLabel: GameLabel
+  private readonly _titleLabel: GameScrollingLabel
   private readonly _bodyContainer: Container
   private readonly _closeButton: GameButton
   private readonly _theme: GameUiTheme
@@ -47,10 +48,15 @@ export class GameModal extends Container {
     this._panel.y = (VIRTUAL_HEIGHT - this._height) / 2
     this.addChild(this._panel)
 
-    this._titleLabel = new GameLabel('', theme, 'heading', { align: 'center' })
-    this._titleLabel.x = this._panel.x + this._width / 2
+    this._titleLabel = new GameScrollingLabel({
+      text: '',
+      theme,
+      kind: 'heading',
+      maxWidth: this._width - this._theme.spacing.s48,
+      align: 'center',
+    })
+    this._titleLabel.x = this._panel.x + this._theme.spacing.s24
     this._titleLabel.y = this._panel.y + this._theme.spacing.s24
-    this._titleLabel.anchor.set(0.5, 0)
     this.addChild(this._titleLabel)
 
     this._bodyContainer = new Container()

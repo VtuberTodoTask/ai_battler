@@ -40,6 +40,7 @@ export class TavernHeader extends Container {
       color: this._theme.colors.panelTitle,
       borderColor: this._theme.colors.panelBorder,
       radius: 0,
+      alpha: 0.82,
     })
     this.addChild(panel)
 
