@@ -85,7 +85,7 @@ export class PartyListPanel extends Container {
         title: party.name,
         subtitle,
         selected: party.selected,
-        disabled: party.status === 'recovering',
+        disabled: false,
         unread: party.unreadEventCount > 0,
       })
       row.y = y

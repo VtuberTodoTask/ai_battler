@@ -80,7 +80,10 @@ export function TavernSimulator() {
   }, [])
 
   const handleOfferRequest = useCallback(
-    (requestId: string, partyId: string) => {
+    (
+      partyId: string,
+      requestId: string,
+    ): { ok: true } | { ok: false; message: string } => {
       try {
         const nextDay = offerRequestToParty(
           campaign.currentDay,
@@ -89,37 +92,89 @@ export function TavernSimulator() {
         )
         setCampaign((prev) => ({ ...prev, currentDay: nextDay }))
         setError(null)
+        return { ok: true }
       } catch (e) {
-        setError(e instanceof Error ? e.message : '紹介に失敗しました')
+        const message = e instanceof Error ? e.message : '紹介に失敗しました'
+        setError(message)
+        return { ok: false, message }
       }
     },
     [campaign],
   )
 
   const handleOpenActivity = useCallback(
-    async (partyId: string, eventId: string) => {
+    async (
+      partyId: string,
+      eventId: string,
+    ): Promise<{ ok: true; data: string } | { ok: false; message: string }> => {
       const party = campaign.currentDay.parties.find((p) => p.id === partyId)
       const event = party?.downtimeEvents?.find((e) => e.id === eventId)
-      if (!party || !event) return ''
+      if (!party || !event) {
+        return { ok: false, message: 'イベントが見つかりません' }
+      }
 
-      const next = deepClone(campaign)
-      const nextParty = next.currentDay.parties.find((p) => p.id === partyId)
-      const nextEvent = nextParty?.downtimeEvents?.find((e) => e.id === eventId)
-      if (!nextParty || !nextEvent) return ''
+      // If already generated, just mark viewed and return the existing text (0 AI calls).
+      if (event.narrativeStatus === 'generated' && event.generatedText) {
+        setCampaign((current) => {
+          const next = deepClone(current)
+          const currentParty = next.currentDay.parties.find(
+            (p) => p.id === partyId,
+          )
+          const currentEvent = currentParty?.downtimeEvents?.find(
+            (e) => e.id === eventId,
+          )
+          if (currentEvent) {
+            currentEvent.narrativeStatus = 'viewed'
+          }
+          return next
+        })
+        return { ok: true, data: event.generatedText }
+      }
+
+      // Generate once, then merge only the target event narrative into the latest campaign state.
+      const cloneForGeneration = deepClone(campaign)
+      const cloneParty = cloneForGeneration.currentDay.parties.find(
+        (p) => p.id === partyId,
+      )
+      const cloneEvent = cloneParty?.downtimeEvents?.find(
+        (e) => e.id === eventId,
+      )
+      if (!cloneParty || !cloneEvent) {
+        return { ok: false, message: 'イベントが見つかりません' }
+      }
 
       const text = await generateDowntimeNarrative(
-        nextEvent,
-        nextParty as unknown as Parameters<typeof generateDowntimeNarrative>[1],
+        cloneEvent,
+        cloneParty as unknown as Parameters<
+          typeof generateDowntimeNarrative
+        >[1],
         narrativeProvider,
       )
-      nextEvent.narrativeStatus = 'viewed'
-      setCampaign(next)
-      return text
+
+      setCampaign((current) => {
+        const next = deepClone(current)
+        const currentParty = next.currentDay.parties.find(
+          (p) => p.id === partyId,
+        )
+        const currentEvent = currentParty?.downtimeEvents?.find(
+          (e) => e.id === eventId,
+        )
+        if (!currentEvent) {
+          // Event disappeared while generating (e.g. day advanced): discard stale result safely.
+          return current
+        }
+        currentEvent.narrativeStatus = 'viewed'
+        currentEvent.generatedText = text
+        return next
+      })
+
+      return { ok: true, data: text }
     },
     [campaign, narrativeProvider],
   )
 
-  const handleResolve = useCallback(() => {
+  const handleResolve = useCallback(():
+    { ok: true } | { ok: false; message: string } => {
     try {
       const next = resolveCampaignDay(campaign)
       setCampaign(next)
@@ -132,12 +187,16 @@ export function TavernSimulator() {
           null,
       )
       setError(null)
+      return { ok: true }
     } catch (e) {
-      setError(e instanceof Error ? e.message : '仲介確定に失敗しました')
+      const message = e instanceof Error ? e.message : '仲介確定に失敗しました'
+      setError(message)
+      return { ok: false, message }
     }
   }, [campaign])
 
-  const handleAdvance = useCallback(() => {
+  const handleAdvance = useCallback(():
+    { ok: true } | { ok: false; message: string } => {
     try {
       const next = advanceCampaignDay(campaign)
       setCampaign(next)
@@ -145,8 +204,12 @@ export function TavernSimulator() {
       setSelectedPartyId(null)
       setSelectedResultId(null)
       setError(null)
+      return { ok: true }
     } catch (e) {
-      setError(e instanceof Error ? e.message : '翌日への進行に失敗しました')
+      const message =
+        e instanceof Error ? e.message : '翌日への進行に失敗しました'
+      setError(message)
+      return { ok: false, message }
     }
   }, [campaign, selectedRequestId])
 
@@ -252,7 +315,7 @@ export function TavernSimulator() {
         error={error}
         onOffer={() => {
           if (selectedRequestId && selectedPartyId) {
-            handleOfferRequest(selectedRequestId, selectedPartyId)
+            handleOfferRequest(selectedPartyId, selectedRequestId)
           }
         }}
         onResolve={handleResolve}

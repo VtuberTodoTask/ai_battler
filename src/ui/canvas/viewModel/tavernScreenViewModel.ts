@@ -12,8 +12,9 @@ import type {
   TavernParty,
   TavernRequestOffer,
 } from '../../../core/tavern/types.ts'
+import type { CampaignRelationshipEvent } from '../../../core/tavern/campaign/types.ts'
 import { OBJECTIVE_LABELS, OUTCOME_LABELS } from '../../expedition/labels.ts'
-import type { GameUiState } from '../types.ts'
+import type { GameUiState, UiActionMessage } from '../types.ts'
 
 export interface TavernHeaderViewModel {
   day: number
@@ -23,6 +24,7 @@ export interface TavernHeaderViewModel {
   canAdvanceDay: boolean
   canResolveDay: boolean
   advanceDayDisabledReason?: string
+  statusMessage?: UiActionMessage
 }
 
 export interface TavernPartyMemberViewModel {
@@ -228,13 +230,14 @@ function stayInfoForParty(
 function buildPartyListItem(
   party: TavernParty,
   selected: boolean,
+  dayNumber: number,
 ): TavernPartyListItemViewModel {
   const unreadCount =
     party.downtimeEvents?.filter((e) => e.narrativeStatus !== 'viewed')
       .length ?? 0
   const extensionDaysRemaining =
-    party.plannedDepartureDay !== undefined && party.arrivalDay !== undefined
-      ? party.plannedDepartureDay - party.arrivalDay + 1
+    party.plannedDepartureDay !== undefined
+      ? Math.max(0, party.plannedDepartureDay - dayNumber + 1)
       : undefined
   return {
     id: party.id,
@@ -369,6 +372,25 @@ function buildPartyEventActivity(
   }
 }
 
+function buildStayExtensionActivity(
+  party: TavernParty,
+  event: Extract<CampaignRelationshipEvent, { type: 'stayExtended' }>,
+): TavernActivityItemViewModel {
+  const reason = stayExtensionReasonLabel(event.primaryReason)
+  const summary = `滞在を${event.extensionDays}日延長しました${event.secondaryReason ? `（${reason}／${stayExtensionReasonLabel(event.secondaryReason)}）` : `（${reason}）`}`
+  return {
+    id: `stay-extension:${event.partyId}:${event.dayNumber}`,
+    partyId: event.partyId,
+    partyName: event.partyName,
+    title: `滞在延長：${event.partyName}`,
+    summary,
+    unread: false,
+    narrativeStatus: 'viewed',
+    kind: 'stay_extension',
+    canOpen: true,
+  }
+}
+
 function buildExpeditionReturnActivity(
   party: TavernParty,
   request: TavernRequestOffer,
@@ -401,6 +423,31 @@ function buildActivities(
 
   for (const event of day.partyEvents ?? []) {
     activities.push(buildPartyEventActivity(event))
+  }
+
+  const stayEvents: Extract<
+    CampaignRelationshipEvent,
+    { type: 'stayExtended' }
+  >[] = []
+  for (const record of campaign.history) {
+    for (const event of record.relationshipEvents) {
+      if (
+        event.dayNumber === campaign.dayNumber &&
+        event.type === 'stayExtended'
+      ) {
+        stayEvents.push(event)
+      }
+    }
+  }
+  const seenStayIds = new Set<string>()
+  for (const event of stayEvents) {
+    const id = `stay-extension:${event.partyId}:${event.dayNumber}`
+    if (seenStayIds.has(id)) continue
+    seenStayIds.add(id)
+    const party = day.parties.find((p) => p.id === event.partyId)
+    if (party) {
+      activities.push(buildStayExtensionActivity(party, event))
+    }
   }
 
   if (day.status === 'resolved') {
@@ -437,10 +484,11 @@ export function buildTavernScreenViewModel(
       day.status !== 'resolved'
         ? '本日を確定してから翌日へ進めます'
         : undefined,
+    statusMessage: uiState.actionMessage,
   }
 
   const parties = day.parties.map((p) =>
-    buildPartyListItem(p, p.id === uiState.selectedPartyId),
+    buildPartyListItem(p, p.id === uiState.selectedPartyId, campaign.dayNumber),
   )
 
   const quests = day.requests.map((r) =>

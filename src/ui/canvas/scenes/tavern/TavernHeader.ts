@@ -19,6 +19,7 @@ export class TavernHeader extends Container {
   private readonly _height: number
   private readonly _dayLabel: GameLabel
   private readonly _reputationLabel: GameLabel
+  private readonly _statusLabel: GameLabel
   private readonly _actionButton: GameButton
   private readonly _onResolve?: () => void
   private readonly _onAdvance?: () => void
@@ -52,6 +53,13 @@ export class TavernHeader extends Container {
     this._reputationLabel.y = 20
     this.addChild(this._reputationLabel)
 
+    this._statusLabel = new GameLabel('', this._theme, 'caption', {
+      maxWidth: this._width - 420,
+    })
+    this._statusLabel.x = this._theme.spacing.s16
+    this._statusLabel.y = 42
+    this.addChild(this._statusLabel)
+
     this._actionButton = new GameButton({
       width: 180,
       height: 44,
@@ -77,6 +85,14 @@ export class TavernHeader extends Container {
   update(viewModel: TavernHeaderViewModel): void {
     this._dayLabel.text = `DAY ${viewModel.day}`
     this._reputationLabel.text = viewModel.reputationLabel
+
+    if (viewModel.statusMessage) {
+      this._statusLabel.text = viewModel.statusMessage.text
+      this._statusLabel.visible = true
+    } else {
+      this._statusLabel.text = ''
+      this._statusLabel.visible = false
+    }
 
     if (viewModel.canResolveDay) {
       this._actionButtonLabel = '本日を確定'

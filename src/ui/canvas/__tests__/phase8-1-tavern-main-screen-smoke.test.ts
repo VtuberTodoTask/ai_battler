@@ -120,13 +120,16 @@ function createSceneContext(
   }
 
   const actions = {
-    advanceDay: vi.fn(),
-    resolveDay: vi.fn(),
-    offerRequest: vi.fn(),
+    advanceDay: vi.fn(() => ({ ok: true })),
+    resolveDay: vi.fn(() => ({ ok: true })),
+    offerRequest: vi.fn(() => ({ ok: true })),
     selectParty: vi.fn(),
     selectQuest: vi.fn(),
     openCharacter: vi.fn(),
-    openActivity: vi.fn().mockResolvedValue('生成された酒場イベントの本文'),
+    openActivity: vi.fn().mockResolvedValue({
+      ok: true,
+      data: '生成された酒場イベントの本文',
+    }),
     closeModal: vi.fn(),
     switchToLegacy: vi.fn(),
   }
@@ -427,15 +430,22 @@ describe('Phase 8.1 Tavern Main Screen Smoke', () => {
     scene.mount(context)
     scene.setCampaign(campaign, { ...DEFAULT_GAME_UI_STATE })
 
-    const activityRows = (
-      scene as unknown as {
-        _activityPanel: { _rows: { emit: (event: string) => void }[] }
-      }
-    )._activityPanel._rows
-    activityRows[0]!.emit('pointertap')
+    const getRows = () =>
+      (
+        scene as unknown as {
+          _activityPanel: { _rows: { emit: (event: string) => void }[] }
+        }
+      )._activityPanel._rows
+
+    getRows()[0]!.emit('pointertap')
     await Promise.resolve()
 
-    activityRows[0]!.emit('pointertap')
+    // Simulate the host-side update marking the event viewed.
+    event.narrativeStatus = 'viewed'
+    event.generatedText = '生成された酒場イベントの本文'
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    getRows()[0]!.emit('pointertap')
     await Promise.resolve()
 
     expect(context.actions.openActivity).toHaveBeenCalledTimes(1)

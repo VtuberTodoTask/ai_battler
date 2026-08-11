@@ -19,6 +19,7 @@
     "phase7-7-1-minor-narrative-diversity-smoke": "tsx scripts/phase7-7-1-minor-narrative-diversity-smoke.ts",
     "phase8-0-canvas-ui-foundation-smoke": "vitest run src/ui/canvas/__tests__/phase8-0-canvas-ui-foundation-smoke.test.ts",
     "phase8-1-tavern-main-screen-smoke": "vitest run src/ui/canvas/__tests__/phase8-1-tavern-main-screen-smoke.test.ts",
+    "phase8-1-1-tavern-integration-smoke": "vitest run src/ui/canvas/__tests__/phase8-1-1-tavern-integration-smoke.test.ts",
     "format": "prettier --write ."
   },
   "dependencies": {

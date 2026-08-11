@@ -45,7 +45,7 @@ export class TavernScene implements GameScene {
   private _questList: QuestListPanel | null = null
   private _activityPanel: ActivityPanel | null = null
   private _autoSelectPending = true
-  private _openedActivityEventIds = new Set<string>()
+  private _activityGenerationInFlight = new Set<string>()
 
   mount(context: GameSceneContext): void {
     this._context = context
@@ -82,7 +82,7 @@ export class TavernScene implements GameScene {
     this._activityPanel = null
     this._context = null
     this._campaign = null
-    this._openedActivityEventIds.clear()
+    this._activityGenerationInFlight.clear()
     this._autoSelectPending = true
   }
 
@@ -110,16 +110,20 @@ export class TavernScene implements GameScene {
     const partyIds = new Set(campaign.currentDay.parties.map((p) => p.id))
     const requestIds = new Set(campaign.currentDay.requests.map((r) => r.id))
 
-    if (this._uiState.selectedPartyId) {
-      if (!partyIds.has(this._uiState.selectedPartyId)) {
-        this._uiState.selectedPartyId = null
-      }
+    let reconciled = false
+    if (
+      this._uiState.selectedPartyId &&
+      !partyIds.has(this._uiState.selectedPartyId)
+    ) {
+      this._uiState.selectedPartyId = null
+      reconciled = true
     }
     if (
       this._uiState.selectedQuestId &&
       !requestIds.has(this._uiState.selectedQuestId)
     ) {
       this._uiState.selectedQuestId = null
+      reconciled = true
     }
 
     if (
@@ -131,19 +135,21 @@ export class TavernScene implements GameScene {
         campaign.currentDay.parties.find(
           (p) => p.availability !== 'recovering',
         ) ?? campaign.currentDay.parties[0]
-      if (firstSelectable) {
+      if (firstSelectable && this._context) {
         this._uiState.selectedPartyId = firstSelectable.id
         this._autoSelectPending = false
-        if (this._context) {
-          this._context.canvasGame.setUiState({
-            selectedPartyId: firstSelectable.id,
-          })
-          return
-        }
+        this._context.canvasGame.setUiState({ ...this._uiState })
+        return
       }
     }
 
     this._autoSelectPending = false
+
+    if (reconciled && this._context) {
+      this._context.canvasGame.setUiState({ ...this._uiState })
+      return
+    }
+
     this.updateViewModel()
     this.render()
   }
@@ -194,8 +200,8 @@ export class TavernScene implements GameScene {
       theme,
       width: VIRTUAL_WIDTH,
       height: TOP_BAR_HEIGHT,
-      onResolve: () => context.actions.resolveDay(),
-      onAdvance: () => context.actions.advanceDay(),
+      onResolve: () => this.handleResolve(),
+      onAdvance: () => this.handleAdvance(),
     })
     this._header.x = 0
     this._header.y = 0
@@ -251,63 +257,146 @@ export class TavernScene implements GameScene {
     this._activityPanel?.update(this._viewModel.activities)
   }
 
+  private handleResolve(): void {
+    this.clearActionMessage()
+    const result = this._context!.actions.resolveDay()
+    if (!result.ok) {
+      this.setActionMessage(
+        'error',
+        result.message ?? '本日の仲介確定に失敗しました',
+      )
+    }
+  }
+
+  private handleAdvance(): void {
+    this.clearActionMessage()
+    const result = this._context!.actions.advanceDay()
+    if (!result.ok) {
+      this.setActionMessage(
+        'error',
+        result.message ?? '翌日への進行に失敗しました',
+      )
+    }
+  }
+
   private handleAssign(): void {
+    this.clearActionMessage()
     const partyId = this._uiState.selectedPartyId
     const questId = this._uiState.selectedQuestId
     if (!partyId || !questId) return
-    this._context?.actions.offerRequest(partyId, questId)
+    const result = this._context!.actions.offerRequest(partyId, questId)
+    if (!result.ok) {
+      this.setActionMessage(
+        'error',
+        result.message ?? '依頼を紹介できませんでした',
+      )
+    }
+  }
+
+  private setActionMessage(
+    kind: 'error' | 'success' | 'info',
+    text: string,
+  ): void {
+    this._uiState.actionMessage = { kind, text }
+    this._context?.canvasGame.setUiState({ actionMessage: { kind, text } })
+  }
+
+  private clearActionMessage(): void {
+    if (!this._uiState.actionMessage) return
+    this._uiState.actionMessage = undefined
+    this._context?.canvasGame.setUiState({ actionMessage: undefined })
+  }
+
+  private openActivityModal(title: string, text: string): void {
+    const theme = this._context!.theme
+    const content = new Container()
+    const label = new GameLabel(text, theme, 'body', { maxWidth: 520 })
+    label.y = MARGIN
+    content.addChild(label)
+    this._context!.overlayManager.openModal(title, content)
   }
 
   private handleOpenActivity(activity: TavernActivityItemViewModel): void {
     if (!activity.canOpen) return
-    const theme = this._context!.theme
+    this.clearActionMessage()
 
-    const shouldGenerate =
-      activity.kind === 'downtime' &&
-      activity.narrativeStatus === 'unseen' &&
-      !this._openedActivityEventIds.has(activity.id)
+    if (activity.narrativeStatus === 'viewed') {
+      this.openActivityModal(activity.title, activity.summary)
+      return
+    }
 
-    if (shouldGenerate) {
-      // Lazy narrative generation: exactly one AI call per unseen event.
-      this._openedActivityEventIds.add(activity.id)
-      const loading = new GameLabel('生成中…', theme, 'body', {
-        maxWidth: 520,
-      })
-      const loadingContainer = new Container()
-      loading.y = MARGIN
-      loadingContainer.addChild(loading)
-      this._context!.overlayManager.openModal(activity.title, loadingContainer)
+    if (this._activityGenerationInFlight.has(activity.id)) return
+    this._activityGenerationInFlight.add(activity.id)
 
+    if (activity.narrativeStatus === 'generated') {
+      // Already generated: no AI call, just confirm viewed state and display text.
       this._context!.actions.openActivity(activity.partyId!, activity.id)
-        .then((text) => {
-          const content = new Container()
-          const label = new GameLabel(text, theme, 'body', { maxWidth: 520 })
-          label.y = MARGIN
-          content.addChild(label)
-          this._context!.overlayManager.openModal(activity.title, content)
+        .then((result) => {
+          this._activityGenerationInFlight.delete(activity.id)
+          if (!result.ok || result.data === undefined) {
+            this.setActionMessage(
+              'error',
+              result.message ?? '表示に失敗しました',
+            )
+            return
+          }
+          this.openActivityModal(activity.title, result.data)
         })
-        .catch(() => {
-          const content = new Container()
-          const label = new GameLabel(
-            '表示準備に失敗しました。',
-            theme,
-            'body',
-            { maxWidth: 520 },
+        .catch((e) => {
+          this._activityGenerationInFlight.delete(activity.id)
+          this.setActionMessage(
+            'error',
+            e instanceof Error ? e.message : '表示に失敗しました',
           )
-          label.y = MARGIN
-          content.addChild(label)
-          this._context!.overlayManager.openModal(activity.title, content)
         })
       return
     }
 
-    // Reopen or non-downtime: show the already-available summary.
+    // Unseen: lazy narrative generation (exactly one AI call per unseen event).
+    const theme = this._context!.theme
+    const loading = new GameLabel('生成中…', theme, 'body', { maxWidth: 520 })
+    const loadingContainer = new Container()
+    loading.y = MARGIN
+    loadingContainer.addChild(loading)
+    this._context!.overlayManager.openModal(activity.title, loadingContainer)
+
+    this._context!.actions.openActivity(activity.partyId!, activity.id)
+      .then((result) => {
+        this._activityGenerationInFlight.delete(activity.id)
+        if (!result.ok || result.data === undefined) {
+          this._context!.overlayManager.openModal(
+            activity.title,
+            this.errorModalContent(
+              result.message ?? '表示準備に失敗しました。',
+            ),
+          )
+          this.setActionMessage(
+            'error',
+            result.message ?? '表示準備に失敗しました',
+          )
+          return
+        }
+        this.openActivityModal(activity.title, result.data)
+      })
+      .catch((e) => {
+        this._activityGenerationInFlight.delete(activity.id)
+        this._context!.overlayManager.openModal(
+          activity.title,
+          this.errorModalContent('表示準備に失敗しました。'),
+        )
+        this.setActionMessage(
+          'error',
+          e instanceof Error ? e.message : '表示準備に失敗しました',
+        )
+      })
+  }
+
+  private errorModalContent(text: string): Container {
+    const theme = this._context!.theme
     const content = new Container()
-    const label = new GameLabel(activity.summary, theme, 'body', {
-      maxWidth: 520,
-    })
+    const label = new GameLabel(text, theme, 'body', { maxWidth: 520 })
     label.y = MARGIN
     content.addChild(label)
-    this._context!.overlayManager.openModal(activity.title, content)
+    return content
   }
 }

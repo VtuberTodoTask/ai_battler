@@ -84,7 +84,7 @@ export class QuestListPanel extends Container {
         title: quest.title,
         subtitle,
         selected: quest.selected,
-        disabled: !quest.assignable && quest.selected,
+        disabled: false,
       })
       row.y = y
       row.onActivate = () => this._onSelectQuest(quest.id)

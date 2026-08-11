@@ -230,13 +230,13 @@ export class CanvasGame {
 
   private createNoopActions(): GameUiActions {
     return {
-      advanceDay: () => {},
-      resolveDay: () => {},
-      offerRequest: () => {},
+      advanceDay: () => ({ ok: true }),
+      resolveDay: () => ({ ok: true }),
+      offerRequest: () => ({ ok: true }),
       selectParty: () => {},
       selectQuest: () => {},
       openCharacter: () => {},
-      openActivity: () => Promise.resolve(''),
+      openActivity: () => Promise.resolve({ ok: true, data: '' }),
       closeModal: () => {},
       switchToLegacy: () => {},
     }
