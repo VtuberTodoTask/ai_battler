@@ -89,7 +89,7 @@ export interface GameSceneContext {
 
 export interface GameScene {
   readonly id: string
-  mount(context: GameSceneContext): void
+  mount(context: GameSceneContext, input?: unknown): void
   unmount(): void
   update?(dt: number): void
   setCampaign?(campaign: TavernCampaignState, uiState: GameUiState): void

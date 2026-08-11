@@ -1,4 +1,11 @@
-import { Assets, Container, Graphics, Rectangle, Sprite, Texture } from 'pixi.js'
+import {
+  Assets,
+  Container,
+  Graphics,
+  Rectangle,
+  Sprite,
+  Texture,
+} from 'pixi.js'
 import { GameButton } from '../../components/GameButton.ts'
 import { GameLabel } from '../../components/GameLabel.ts'
 import { GamePanel } from '../../components/GamePanel.ts'

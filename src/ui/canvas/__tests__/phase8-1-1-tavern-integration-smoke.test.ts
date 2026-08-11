@@ -136,6 +136,10 @@ function createSceneContext(
       uiStateRef.current = { ...uiStateRef.current, ...partial }
       scene.setUiState(uiStateRef.current)
     }),
+    sceneManager: {
+      push: vi.fn(),
+      pop: vi.fn(),
+    },
   } as unknown as GameSceneContext['canvasGame']
 
   return {
