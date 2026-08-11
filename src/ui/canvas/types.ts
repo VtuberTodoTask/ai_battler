@@ -16,13 +16,30 @@ export interface GameLayers {
   debug: Container
 }
 
+export interface UiActionResult<T = void> {
+  ok: boolean
+  message?: string
+  data?: T
+}
+
 export interface GameUiActions {
-  advanceDay: () => void
+  advanceDay: () => UiActionResult
+  resolveDay: () => UiActionResult
+  offerRequest: (partyId: string, requestId: string) => UiActionResult
   selectParty: (partyId: string) => void
   selectQuest: (questId: string) => void
   openCharacter: (characterId: string) => void
+  openActivity: (
+    partyId: string,
+    eventId: string,
+  ) => Promise<UiActionResult<string>>
   closeModal: () => void
   switchToLegacy: () => void
+}
+
+export interface UiActionMessage {
+  kind: 'error' | 'success' | 'info'
+  text: string
 }
 
 export interface GameUiState {
@@ -30,6 +47,8 @@ export interface GameUiState {
   selectedQuestId: string | null
   openCharacterId: string | null
   modalOpen: boolean
+  actionMessage?: UiActionMessage
+  viewedActivityIds?: string[]
 }
 
 export const DEFAULT_GAME_UI_STATE: GameUiState = {

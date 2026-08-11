@@ -1,17 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
 import { CanvasGame } from './CanvasGame.ts'
-import type { GameUiActions, GameUiState } from './types.ts'
+import type { GameUiActions, GameUiState, UiActionResult } from './types.ts'
 import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
 
 export interface GameCanvasHostProps {
   campaign: TavernCampaignState
-  onAdvanceDay: () => void
+  onAdvanceDay: () => UiActionResult
+  onResolveDay: () => UiActionResult
+  onOfferRequest: (partyId: string, requestId: string) => UiActionResult
+  onOpenActivity: (
+    partyId: string,
+    eventId: string,
+  ) => Promise<UiActionResult<string>>
   onSwitchToLegacy: () => void
 }
 
 export default function GameCanvasHost({
   campaign,
   onAdvanceDay,
+  onResolveDay,
+  onOfferRequest,
+  onOpenActivity,
   onSwitchToLegacy,
 }: GameCanvasHostProps) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -19,12 +28,24 @@ export default function GameCanvasHost({
   const [error, setError] = useState<string | null>(null)
 
   const onAdvanceRef = useRef(onAdvanceDay)
+  const onResolveRef = useRef(onResolveDay)
+  const onOfferRef = useRef(onOfferRequest)
+  const onOpenActivityRef = useRef(onOpenActivity)
   const onSwitchRef = useRef(onSwitchToLegacy)
 
   useEffect(() => {
     onAdvanceRef.current = onAdvanceDay
+    onResolveRef.current = onResolveDay
+    onOfferRef.current = onOfferRequest
+    onOpenActivityRef.current = onOpenActivity
     onSwitchRef.current = onSwitchToLegacy
-  }, [onAdvanceDay, onSwitchToLegacy])
+  }, [
+    onAdvanceDay,
+    onResolveDay,
+    onOfferRequest,
+    onOpenActivity,
+    onSwitchToLegacy,
+  ])
 
   useEffect(() => {
     const host = hostRef.current
@@ -41,20 +62,66 @@ export default function GameCanvasHost({
 
     const actions: GameUiActions = {
       advanceDay: () => {
-        onAdvanceRef.current()
+        try {
+          onAdvanceRef.current()
+          return { ok: true }
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '翌日への進行に失敗しました',
+          }
+        }
+      },
+      resolveDay: () => {
+        try {
+          onResolveRef.current()
+          return { ok: true }
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '本日の仲介確定に失敗しました',
+          }
+        }
+      },
+      offerRequest: (partyId, requestId) => {
+        try {
+          onOfferRef.current(partyId, requestId)
+          return { ok: true }
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '依頼の紹介に失敗しました',
+          }
+        }
       },
       selectParty: (partyId) => {
         uiState.selectedPartyId = partyId
-        cg.setUiState({ selectedPartyId: partyId })
+        uiState.actionMessage = undefined
+        cg.setUiState({ selectedPartyId: partyId, actionMessage: undefined })
       },
       selectQuest: (questId) => {
         uiState.selectedQuestId = questId
-        cg.setUiState({ selectedQuestId: questId })
+        uiState.actionMessage = undefined
+        cg.setUiState({ selectedQuestId: questId, actionMessage: undefined })
       },
       openCharacter: (characterId) => {
         uiState.openCharacterId = characterId
         uiState.modalOpen = true
         cg.setUiState({ openCharacterId: characterId, modalOpen: true })
+      },
+      openActivity: async (partyId, eventId) => {
+        try {
+          return await onOpenActivityRef.current(partyId, eventId)
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : 'イベントの表示に失敗しました',
+          }
+        }
       },
       closeModal: () => {
         uiState.modalOpen = false

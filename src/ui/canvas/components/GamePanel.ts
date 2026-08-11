@@ -10,6 +10,7 @@ export interface GamePanelOptions {
   color?: number
   borderColor?: number
   radius?: number
+  alpha?: number
 }
 
 export class GamePanel extends Container {
@@ -21,6 +22,7 @@ export class GamePanel extends Container {
   private _color: number
   private _borderColor: number
   private _radius: number
+  private _alpha: number
 
   constructor(options: GamePanelOptions) {
     super()
@@ -31,6 +33,7 @@ export class GamePanel extends Container {
     this._color = options.color ?? this._theme.colors.panel
     this._borderColor = options.borderColor ?? this._theme.colors.panelBorder
     this._radius = options.radius ?? this._theme.radius.medium
+    this._alpha = options.alpha ?? 1
 
     this._graphics = new Graphics()
     this.addChild(this._graphics)
@@ -85,7 +88,7 @@ export class GamePanel extends Container {
 
     this._graphics
       .roundRect(0, 0, this._width, this._height, this._radius)
-      .fill({ color: this._color })
+      .fill({ color: this._color, alpha: this._alpha })
       .stroke({ width: 2, color: this._borderColor })
   }
 }

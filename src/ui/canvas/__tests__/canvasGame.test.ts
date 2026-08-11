@@ -253,7 +253,7 @@ describe('CanvasGame lifecycle', () => {
 
     app.ticker.callbacks[0]!({ deltaMS: 1300 })
 
-    expect(cg.sceneManager?.current?.id).toBe('foundation')
+    expect(cg.sceneManager?.current?.id).toBe('tavern')
     cg.destroy()
   })
 

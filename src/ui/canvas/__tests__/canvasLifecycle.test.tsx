@@ -27,7 +27,10 @@ describe('GameCanvasHost lifecycle', () => {
     const { container } = render(
       <GameCanvasHost
         campaign={campaign}
-        onAdvanceDay={() => {}}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
     )
@@ -48,7 +51,10 @@ describe('GameCanvasHost lifecycle', () => {
     const { rerender } = render(
       <GameCanvasHost
         campaign={campaign}
-        onAdvanceDay={() => {}}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
     )
@@ -58,7 +64,10 @@ describe('GameCanvasHost lifecycle', () => {
     rerender(
       <GameCanvasHost
         campaign={nextCampaign}
-        onAdvanceDay={() => {}}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
     )
