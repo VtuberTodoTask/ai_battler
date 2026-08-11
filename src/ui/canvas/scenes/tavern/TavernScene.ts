@@ -332,12 +332,10 @@ export class TavernScene implements GameScene {
           }`,
         )
       } else {
-        this.setActionMessage(
-          'info',
-          `${partyName}は依頼を断りました${
-            result.data.reasonText ? `\n${result.data.reasonText}` : ''
-          }`,
-        )
+        const body = result.data.reasonText
+          ? result.data.reasonText
+          : '依頼を断りました。'
+        this.openActivityModal(`${partyName}は依頼を断りました`, body)
       }
     }
   }
