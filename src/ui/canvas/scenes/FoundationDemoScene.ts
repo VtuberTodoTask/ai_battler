@@ -299,6 +299,7 @@ export class FoundationDemoScene implements GameScene {
     }
 
     const modalContent = new Container()
+    scroll.y = MARGIN
     modalContent.addChild(scroll)
     context.overlayManager.openModal('Scroll Test', modalContent)
   }
