@@ -10,7 +10,9 @@ import type { DowntimeEvent } from '../../../core/narrative/types.ts'
 import { acceptanceReasonText } from '../../../core/tavern/acceptance.ts'
 import { downtimeEventSummary } from '../../../core/narrative/downtime.ts'
 import {
+  buildExpeditionReportId,
   buildExpeditionReportViewModels,
+  narrativeStatusForCandidate,
   type ExpeditionReportViewModel,
 } from './expeditionReportViewModel.ts'
 import { OUTCOME_LABELS } from '../../expedition/labels.ts'
@@ -114,6 +116,12 @@ function getPartyRank(
   return dayParties.find((p) => p.id === partyId)?.party.rank
 }
 
+function downtimeImportanceFromEvent(importance: number): FeedbackImportance {
+  if (importance >= 3) return 'high'
+  if (importance >= 2) return 'medium'
+  return 'low'
+}
+
 function buildDowntimeFeedback(
   party: TavernParty,
   event: DowntimeEvent,
@@ -132,29 +140,34 @@ function buildDowntimeFeedback(
     narrativeStatus: event.narrativeStatus,
     kind: 'downtime',
     canOpen: true,
-    importance: 'low',
+    importance: downtimeImportanceFromEvent(event.importance),
   }
 }
 
 function buildPartyEventFeedback(
   event: CampaignPartyEvent,
   dayParties: TavernParty[],
+  viewedIds: Set<string>,
 ): TavernFeedbackItem {
   const partyName = getPartyName(dayParties, event.partyId, event.partyName)
   const rank = getPartyRank(dayParties, event.partyId)
   const party = dayParties.find((p) => p.id === event.partyId)
   const memberCount = party?.party.members.length ?? 4
+  const id = `${event.type}:${event.partyId}:${event.dayNumber}`
+  const base = {
+    id,
+    partyId: event.partyId,
+    partyName,
+    unread: !viewedIds.has(id),
+    narrativeStatus: 'viewed' as const,
+  }
 
   switch (event.type) {
     case 'arrived':
       return {
-        id: `${event.type}:${event.partyId}:${event.dayNumber}`,
-        partyId: event.partyId,
-        partyName,
+        ...base,
         title: `新しいパーティが酒場を訪れました`,
         summary: `${partyName} / ${memberCount}人${rank ? ` / Rank ${rank}` : ''}`,
-        unread: false,
-        narrativeStatus: 'viewed',
         kind: 'party_arrival',
         canOpen: true,
         importance: 'high',
@@ -162,40 +175,28 @@ function buildPartyEventFeedback(
     case 'departedScheduled':
     case 'departedCasualty':
       return {
-        id: `${event.type}:${event.partyId}:${event.dayNumber}`,
-        partyId: event.partyId,
-        partyName,
+        ...base,
         title: `${partyName}が${PARTY_EVENT_LABELS[event.type]}`,
         summary: '',
-        unread: false,
-        narrativeStatus: 'viewed',
         kind: 'party_departure',
         canOpen: false,
         importance: 'high',
       }
     case 'finishedRecovery':
       return {
-        id: `${event.type}:${event.partyId}:${event.dayNumber}`,
-        partyId: event.partyId,
-        partyName,
+        ...base,
         title: `${partyName}の療養が完了しました`,
         summary: '待機中に戻りました',
-        unread: false,
-        narrativeStatus: 'viewed',
         kind: 'recovery_complete',
-        canOpen: false,
+        canOpen: true,
         importance: 'medium',
       }
     case 'startedRecovery':
     default:
       return {
-        id: `${event.type}:${event.partyId}:${event.dayNumber}`,
-        partyId: event.partyId,
-        partyName,
+        ...base,
         title: `${partyName}が${PARTY_EVENT_LABELS[event.type] ?? event.type}`,
         summary: '',
-        unread: false,
-        narrativeStatus: 'viewed',
         kind: 'other',
         canOpen: false,
         importance: 'low',
@@ -205,7 +206,9 @@ function buildPartyEventFeedback(
 
 function buildStayExtensionFeedback(
   event: Extract<CampaignRelationshipEvent, { type: 'stayExtended' }>,
-  party?: TavernParty,
+  party: TavernParty | undefined,
+  campaign: TavernCampaignState,
+  viewedIds: Set<string>,
 ): TavernFeedbackItem {
   const partyName = party?.party.name ?? event.partyName
   const primary = stayExtensionReasonLabel(event.primaryReason)
@@ -213,24 +216,38 @@ function buildStayExtensionFeedback(
     ? stayExtensionReasonLabel(event.secondaryReason)
     : undefined
   const reason = secondary ? `${primary} / ${secondary}` : primary
-  const summary = `滞在を${event.extensionDays}日延長しました（${reason}）`
+  const id = `stay-extension:${event.partyId}:${event.dayNumber}`
+
+  const candidate = campaign.narrativeCandidates.find(
+    (c) =>
+      c.eventType === 'stayExtended' &&
+      c.partyId === event.partyId &&
+      c.dayNumber === event.dayNumber,
+  )
+  const narrative = narrativeStatusForCandidate(
+    candidate,
+    campaign.narrativeGenerations,
+  )
+
   return {
-    id: `stay-extension:${event.partyId}:${event.dayNumber}`,
+    id,
     partyId: event.partyId,
     partyName,
     title: `滞在延長：${partyName}`,
-    summary,
-    unread: false,
-    narrativeStatus: 'viewed',
+    summary: `滞在を${event.extensionDays}日延長しました（${reason}）`,
+    unread: !viewedIds.has(id),
+    narrativeStatus: narrative.status,
     kind: 'stay_extension',
     canOpen: true,
     importance: 'medium',
+    narrativeTargetId: candidate?.id,
   }
 }
 
 function buildOfferFeedback(
   offer: BrokerageOfferAttempt,
   dayParties: TavernParty[],
+  viewedIds: Set<string>,
 ): TavernFeedbackItem | null {
   const party = dayParties.find((p) => p.id === offer.partyId)
   const partyName = party?.party.name ?? offer.partyId
@@ -238,13 +255,14 @@ function buildOfferFeedback(
   const reasonText = acceptanceReasonText(offer.reason)
 
   if (offer.decision === 'accepted') {
+    const id = `offer-accepted:${offer.id}`
     return {
-      id: `offer-accepted:${offer.id}`,
+      id,
       partyId: offer.partyId,
       partyName,
       title: `${partyName}が依頼を引き受けました`,
       summary: `理由：${reasonLabel} — ${reasonText}`,
-      unread: false,
+      unread: !viewedIds.has(id),
       narrativeStatus: 'viewed',
       kind: 'quest_accepted',
       canOpen: true,
@@ -252,13 +270,14 @@ function buildOfferFeedback(
     }
   }
 
+  const id = `offer-rejected:${offer.id}`
   return {
-    id: `offer-rejected:${offer.id}`,
+    id,
     partyId: offer.partyId,
     partyName,
     title: `${partyName}は依頼を断りました`,
     summary: `理由：${reasonLabel} — ${reasonText}`,
-    unread: false,
+    unread: !viewedIds.has(id),
     narrativeStatus: 'viewed',
     kind: 'quest_rejected',
     canOpen: true,
@@ -270,25 +289,26 @@ function buildExpeditionReturnFeedback(
   day: number,
   result: ResolvedDispatch,
   reports: ExpeditionReportViewModel[],
+  viewedIds: Set<string>,
 ): TavernFeedbackItem | null {
   if (result.status !== 'resolved' || !result.result || !result.report) {
     return null
   }
-  const report = reports.find(
-    (r) =>
-      r.day === day &&
-      r.questTitle === result.request.title &&
-      r.partyName === (result.partyName ?? '不明'),
+  const reportId = buildExpeditionReportId(
+    day,
+    result.partyId,
+    result.requestId,
   )
-  const reportId = report?.id
+  const report = reports.find((r) => r.id === reportId)
+  const id = `expedition-return:${result.partyId ?? ''}:${result.requestId}`
   return {
-    id: `expedition-return:${result.partyId ?? ''}:${result.requestId}`,
+    id,
     partyId: result.partyId ?? undefined,
     partyName: result.partyName ?? undefined,
     title: `遠征から帰還：${result.request.title}`,
     summary: `結果：${OUTCOME_LABELS[result.result.outcome] ?? result.result.outcome}`,
-    unread: false,
-    narrativeStatus: 'viewed',
+    unread: !viewedIds.has(id),
+    narrativeStatus: report?.narrativeStatus ?? 'viewed',
     kind: 'expedition_return',
     canOpen: true,
     importance: 'high',
@@ -309,9 +329,11 @@ function pushUniqueFeedback(
 
 export function buildTavernFeedbackItems(
   campaign: TavernCampaignState,
+  viewedActivityIds: readonly string[] = [],
 ): TavernFeedbackItem[] {
   const items: TavernFeedbackItem[] = []
   const seen = new Set<string>()
+  const viewedIds = new Set(viewedActivityIds)
   const day = campaign.currentDay
   const reports = buildExpeditionReportViewModels(campaign)
 
@@ -322,11 +344,19 @@ export function buildTavernFeedbackItems(
   }
 
   for (const event of day.partyEvents ?? []) {
-    pushUniqueFeedback(items, seen, buildPartyEventFeedback(event, day.parties))
+    pushUniqueFeedback(
+      items,
+      seen,
+      buildPartyEventFeedback(event, day.parties, viewedIds),
+    )
   }
 
   for (const offer of day.offers) {
-    pushUniqueFeedback(items, seen, buildOfferFeedback(offer, day.parties))
+    pushUniqueFeedback(
+      items,
+      seen,
+      buildOfferFeedback(offer, day.parties, viewedIds),
+    )
   }
 
   if (day.status === 'resolved') {
@@ -334,7 +364,12 @@ export function buildTavernFeedbackItems(
       pushUniqueFeedback(
         items,
         seen,
-        buildExpeditionReturnFeedback(campaign.dayNumber, result, reports),
+        buildExpeditionReturnFeedback(
+          campaign.dayNumber,
+          result,
+          reports,
+          viewedIds,
+        ),
       )
     }
   }
@@ -347,7 +382,15 @@ export function buildTavernFeedbackItems(
         pushUniqueFeedback(
           items,
           seen,
-          buildStayExtensionFeedback(event, party),
+          buildStayExtensionFeedback(
+            event as Extract<
+              CampaignRelationshipEvent,
+              { type: 'stayExtended' }
+            >,
+            party,
+            campaign,
+            viewedIds,
+          ),
         )
       }
     }

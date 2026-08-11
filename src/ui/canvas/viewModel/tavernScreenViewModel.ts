@@ -17,6 +17,7 @@ import {
 } from './expeditionReportViewModel.ts'
 import {
   buildTavernFeedbackItems,
+  sortFeedbackItems,
   type TavernFeedbackItem,
 } from './tavernFeedbackViewModel.ts'
 
@@ -335,8 +336,9 @@ function buildQuestListItem(
 
 function buildActivities(
   campaign: TavernCampaignState,
+  viewedActivityIds: readonly string[] = [],
 ): TavernActivityItemViewModel[] {
-  return buildTavernFeedbackItems(campaign)
+  return buildTavernFeedbackItems(campaign, viewedActivityIds)
 }
 
 export function buildTavernScreenViewModel(
@@ -396,7 +398,9 @@ export function buildTavernScreenViewModel(
           uiState.selectedQuestId,
         )
       : undefined,
-    activities: buildActivities(campaign),
+    activities: sortFeedbackItems(
+      buildActivities(campaign, uiState.viewedActivityIds ?? []),
+    ),
     reports,
   }
 }

@@ -58,8 +58,6 @@ export class TavernScene implements GameScene {
   private _activityGenerationInFlight = new Set<string>()
   private _narrativeGenerationInFlight = new Set<string>()
   private _shownHighFeedbackIds = new Set<string>()
-  private _previousDayNumber = 0
-  private _previousStatus?: 'planning' | 'resolved'
 
   mount(context: GameSceneContext): void {
     this._context = context
@@ -99,8 +97,6 @@ export class TavernScene implements GameScene {
     this._activityGenerationInFlight.clear()
     this._narrativeGenerationInFlight.clear()
     this._shownHighFeedbackIds.clear()
-    this._previousDayNumber = 0
-    this._previousStatus = undefined
     this._autoSelectPending = true
   }
 
@@ -360,6 +356,24 @@ export class TavernScene implements GameScene {
     this._context?.canvasGame.setUiState({ actionMessage: undefined })
   }
 
+  private markReportViewed(reportId: string): void {
+    const current = new Set(this._uiState.viewedReportIds ?? [])
+    if (current.has(reportId)) return
+    current.add(reportId)
+    this._context?.canvasGame.setUiState({
+      viewedReportIds: [...current],
+    })
+  }
+
+  private markActivityViewed(activityId: string): void {
+    const current = new Set(this._uiState.viewedActivityIds ?? [])
+    if (current.has(activityId)) return
+    current.add(activityId)
+    this._context?.canvasGame.setUiState({
+      viewedActivityIds: [...current],
+    })
+  }
+
   private openActivityModal(title: string, text: string): void {
     const theme = this._context!.theme
     const content = new Container()
@@ -380,12 +394,20 @@ export class TavernScene implements GameScene {
         activity.reportId,
       )
       if (report) {
+        this.markActivityViewed(activity.id)
         this.openReportModal(report)
         return
       }
     }
 
+    if (activity.kind === 'stay_extension') {
+      this.markActivityViewed(activity.id)
+      this.openStayExtensionDetail(activity)
+      return
+    }
+
     if (activity.kind !== 'downtime') {
+      this.markActivityViewed(activity.id)
       this.openActivityModal(activity.title, activity.summary)
       return
     }
@@ -456,6 +478,101 @@ export class TavernScene implements GameScene {
         this.setActionMessage(
           'error',
           e instanceof Error ? e.message : '表示準備に失敗しました',
+        )
+      })
+  }
+
+  private openStayExtensionDetail(activity: TavernActivityItemViewModel): void {
+    const theme = this._context!.theme
+    const content = new Container()
+    const scroll = new GameScrollView(theme, 520, 200)
+
+    let y = 0
+    if (activity.summary) {
+      const summary = new GameLabel(activity.summary, theme, 'body', {
+        maxWidth: 520,
+      })
+      summary.y = y
+      scroll.content.addChild(summary)
+      y += summary.textHeight + 16
+    }
+
+    const canReadNarrative =
+      !!activity.narrativeTargetId &&
+      !!this._context!.actions.openExpeditionNarrative
+    const narrativeButton = new GameButton({
+      width: 180,
+      height: 40,
+      theme,
+      label: '物語として読む',
+      disabled: !canReadNarrative,
+    })
+    narrativeButton.y = y
+    narrativeButton.onActivate = () => this.openStayExtensionNarrative(activity)
+    scroll.content.addChild(narrativeButton)
+
+    content.addChild(scroll)
+    this._context!.overlayManager.openModal(activity.title, content)
+  }
+
+  private openStayExtensionNarrative(
+    activity: TavernActivityItemViewModel,
+  ): void {
+    const targetId = activity.narrativeTargetId
+    if (!targetId) return
+    if (this._narrativeGenerationInFlight.has(targetId)) return
+
+    if (this._campaign) {
+      const candidate = this._campaign.narrativeCandidates.find(
+        (c) => c.id === targetId,
+      )
+      if (candidate?.state === 'generated' && candidate.activeGenerationId) {
+        const record = this._campaign.narrativeGenerations.find(
+          (g) => g.id === candidate.activeGenerationId,
+        )
+        if (record) {
+          this.openActivityModal('滞在延長の物語', record.generatedText)
+          return
+        }
+      }
+    }
+
+    this._narrativeGenerationInFlight.add(targetId)
+    const theme = this._context!.theme
+    const loading = new GameLabel('生成中…', theme, 'body', { maxWidth: 520 })
+    const loadingContainer = new Container()
+    const scroll = new GameScrollView(theme, 520, 220)
+    scroll.content.addChild(loading)
+    loadingContainer.addChild(scroll)
+    this._context!.overlayManager.openModal('滞在延長の物語', loadingContainer)
+
+    this._context!.actions.openExpeditionNarrative!(targetId)
+      .then((result) => {
+        this._narrativeGenerationInFlight.delete(targetId)
+        if (!result.ok || result.data === undefined) {
+          this._context!.overlayManager.openModal(
+            '滞在延長の物語',
+            this.errorModalContent(
+              result.message ?? '物語の生成に失敗しました。',
+            ),
+          )
+          this.setActionMessage(
+            'error',
+            result.message ?? '物語の生成に失敗しました',
+          )
+          return
+        }
+        this.openActivityModal('滞在延長の物語', result.data)
+      })
+      .catch((e) => {
+        this._narrativeGenerationInFlight.delete(targetId)
+        this._context!.overlayManager.openModal(
+          '滞在延長の物語',
+          this.errorModalContent('物語の生成に失敗しました。'),
+        )
+        this.setActionMessage(
+          'error',
+          e instanceof Error ? e.message : '物語の生成に失敗しました',
         )
       })
   }
@@ -534,13 +651,19 @@ export class TavernScene implements GameScene {
     lines.push(`Party：${report.partyName}`)
     lines.push(`目的：${report.objectiveSummary}`)
     lines.push(`生還：${report.survivalText}`)
-    lines.push(
-      `負傷：${
-        report.injuries.length > 0
-          ? report.injuries.map((i) => `${i.name}：${i.severity}`).join(' / ')
-          : 'なし'
-      }`,
-    )
+
+    let injuryText: string
+    if (report.injuryRecordMissing) {
+      injuryText = '負傷記録なし'
+    } else if (report.injuries.length > 0) {
+      injuryText = report.injuries
+        .map((i) => `${i.name}：${i.severity}`)
+        .join(' / ')
+    } else {
+      injuryText = '負傷なし'
+    }
+    lines.push(`負傷：${injuryText}`)
+
     lines.push(
       `殉職：${
         report.casualties.length > 0
@@ -621,15 +744,6 @@ export class TavernScene implements GameScene {
       })
   }
 
-  private markReportViewed(reportId: string): void {
-    const current = new Set(this._uiState.viewedReportIds ?? [])
-    if (current.has(reportId)) return
-    current.add(reportId)
-    this._context?.canvasGame.setUiState({
-      viewedReportIds: [...current],
-    })
-  }
-
   private showHighImportanceSummary(): void {
     if (!this._viewModel) return
     const highItems = this._viewModel.activities.filter(
@@ -647,12 +761,13 @@ export class TavernScene implements GameScene {
 
     let y = 0
     for (const item of highItems) {
-      const label = new GameLabel(`・${item.title}`, theme, 'body', {
+      const title = new GameLabel(`・${item.title}`, theme, 'body', {
         maxWidth: 520,
       })
-      label.y = y
-      scroll.content.addChild(label)
-      y += label.textHeight + 8
+      title.y = y
+      scroll.content.addChild(title)
+      y += title.textHeight + 8
+
       if (item.summary) {
         const summary = new GameLabel(`  ${item.summary}`, theme, 'caption', {
           maxWidth: 520,
@@ -661,10 +776,59 @@ export class TavernScene implements GameScene {
         scroll.content.addChild(summary)
         y += summary.textHeight + 8
       }
+
+      const action = this.createHighNotificationAction(item)
+      if (action) {
+        action.y = y
+        scroll.content.addChild(action)
+        y += action.height + 12
+      }
     }
 
     content.addChild(scroll)
     this._context!.overlayManager.openModal('本日の重要な出来事', content)
+  }
+
+  private createHighNotificationAction(
+    item: TavernActivityItemViewModel,
+  ): Container | null {
+    const theme = this._context!.theme
+
+    if (item.kind === 'expedition_return' && item.reportId) {
+      const report = findExpeditionReportById(
+        this._viewModel?.reports ?? [],
+        item.reportId,
+      )
+      if (!report) return null
+      const btn = new GameButton({
+        width: 140,
+        height: 32,
+        theme,
+        label: '報告を見る',
+      })
+      btn.onActivate = () => {
+        this._context!.overlayManager.closeModal()
+        this.markActivityViewed(item.id)
+        this.openReportModal(report)
+      }
+      return btn
+    }
+
+    if (item.kind === 'party_arrival' && item.partyId) {
+      const btn = new GameButton({
+        width: 140,
+        height: 32,
+        theme,
+        label: '選択する',
+      })
+      btn.onActivate = () => {
+        this._context!.overlayManager.closeModal()
+        this._context!.actions.selectParty(item.partyId!)
+      }
+      return btn
+    }
+
+    return null
   }
 
   private errorModalContent(text: string): Container {

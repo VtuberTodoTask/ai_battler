@@ -70,6 +70,8 @@ export const DEFAULT_GAME_UI_STATE: GameUiState = {
   selectedQuestId: null,
   openCharacterId: null,
   modalOpen: false,
+  viewedReportIds: [],
+  viewedActivityIds: [],
 }
 
 export interface GameSceneContext {

@@ -1,7 +1,9 @@
-import type { ExpeditionOutcome } from '../../../core/expedition/types.ts'
+import type {
+  ExpeditionInjury,
+  ExpeditionOutcome,
+} from '../../../core/expedition/types.ts'
 import type {
   DispatchObjectiveSummary,
-  DispatchReport,
   ResolvedDispatch,
 } from '../../../core/tavern/types.ts'
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
@@ -22,6 +24,7 @@ export interface ExpeditionCasualtyViewModel {
 export interface ExpeditionInjuryViewModel {
   name: string
   severity: string
+  cause?: string
 }
 
 export interface ExpeditionRewardViewModel {
@@ -43,6 +46,7 @@ export interface ExpeditionReportViewModel {
   survivalText: string
   casualties: ExpeditionCasualtyViewModel[]
   injuries: ExpeditionInjuryViewModel[]
+  injuryRecordMissing: boolean
   rewards: ExpeditionRewardViewModel[]
   majorEvents: string[]
   narrativeStatus: 'unseen' | 'generated' | 'viewed'
@@ -70,6 +74,14 @@ function reportOutcomeFromExpedition(
   }
 }
 
+export function buildExpeditionReportId(
+  day: number,
+  partyId: string | undefined,
+  requestId: string,
+): string {
+  return `expedition-report:${day}:${partyId ?? 'unknown'}:${requestId}`
+}
+
 function objectiveSummary(objective: DispatchObjectiveSummary): string {
   switch (objective.type) {
     case 'investigation':
@@ -89,46 +101,90 @@ function objectiveSummary(objective: DispatchObjectiveSummary): string {
   }
 }
 
-function buildMemberStatus(report: DispatchReport): {
+function severityLabel(type: ExpeditionInjury['type']): string {
+  return type === 'serious' ? '重傷' : '軽傷'
+}
+
+function severityWeight(type: ExpeditionInjury['type']): number {
+  return type === 'serious' ? 2 : 1
+}
+
+function buildMemberStatus(result: ResolvedDispatch): {
   casualties: ExpeditionCasualtyViewModel[]
   injuries: ExpeditionInjuryViewModel[]
+  injuryRecordMissing: boolean
 } {
-  const casualties: ExpeditionCasualtyViewModel[] = []
-  const injuries: ExpeditionInjuryViewModel[] = []
+  const report = result.report
+  if (!report) {
+    return { casualties: [], injuries: [], injuryRecordMissing: true }
+  }
+
+  const nameById = new Map<string, string>()
   for (const member of report.party) {
-    if (member.dead) {
-      casualties.push({ name: member.name, condition: '死亡' })
-      continue
-    }
-    if (member.incapacitated) {
-      injuries.push({ name: member.name, severity: '重傷' })
-      continue
-    }
-    if (member.finalHp < member.maxHp) {
-      const ratio = member.finalHp / member.maxHp
-      if (ratio < 0.3) {
-        injuries.push({ name: member.name, severity: '重傷' })
-      } else if (ratio < 0.7) {
-        injuries.push({ name: member.name, severity: '負傷' })
+    nameById.set(member.adventurerId, member.name)
+  }
+  for (const id of report.casualties) {
+    if (!nameById.has(id)) nameById.set(id, id)
+  }
+  for (const id of report.incapacitated) {
+    if (!nameById.has(id)) nameById.set(id, id)
+  }
+
+  const casualties: ExpeditionCasualtyViewModel[] = report.casualties.map(
+    (id) => ({
+      name: nameById.get(id) ?? id,
+      condition: '死亡',
+    }),
+  )
+
+  const deadIds = new Set(report.casualties)
+  const expeditionState = result.result?.state
+  const injuryRecordMissing = !expeditionState?.injuries
+
+  const injuryById = new Map<
+    string,
+    { type: ExpeditionInjury['type']; cause?: string }
+  >()
+
+  if (!injuryRecordMissing) {
+    for (const injury of expeditionState!.injuries) {
+      if (deadIds.has(injury.adventurerId)) continue
+      const current = injuryById.get(injury.adventurerId)
+      if (
+        !current ||
+        severityWeight(injury.type) > severityWeight(current.type)
+      ) {
+        injuryById.set(injury.adventurerId, {
+          type: injury.type,
+          cause: injury.cause,
+        })
       }
     }
   }
-  // Include any casualty ids that were not in the party snapshot (old saves).
-  const memberById = new Map(report.party.map((m) => [m.adventurerId, m]))
-  for (const id of report.casualties) {
-    if (!memberById.has(id)) {
-      casualties.push({ name: id, condition: '死亡' })
-    }
-  }
+
+  // Incapacitation is a structured status; if it is recorded and no worse
+  // injury exists, surface it as a serious condition.
   for (const id of report.incapacitated) {
-    if (!memberById.has(id)) {
-      injuries.push({ name: id, severity: '重傷' })
+    if (deadIds.has(id)) continue
+    const current = injuryById.get(id)
+    if (!current || current.type !== 'serious') {
+      injuryById.set(id, { type: 'serious', cause: current?.cause })
     }
   }
-  return { casualties, injuries }
+
+  const injuries: ExpeditionInjuryViewModel[] = []
+  for (const [id, info] of injuryById) {
+    injuries.push({
+      name: nameById.get(id) ?? id,
+      severity: severityLabel(info.type),
+      cause: info.cause,
+    })
+  }
+
+  return { casualties, injuries, injuryRecordMissing }
 }
 
-function findNarrativeCandidate(
+export function findNarrativeCandidate(
   day: number,
   partyId: string,
   requestId: string,
@@ -143,7 +199,7 @@ function findNarrativeCandidate(
   )
 }
 
-function narrativeStatusForCandidate(
+export function narrativeStatusForCandidate(
   candidate: NarrativeCandidate | undefined,
   generations: NarrativeGenerationRecord[],
 ): {
@@ -178,11 +234,12 @@ function buildReportFromResult(
   candidates: NarrativeCandidate[],
   generations: NarrativeGenerationRecord[],
 ): ExpeditionReportViewModel | null {
-  if (result.status !== 'resolved' || !result.result || !result.report) {
+  if (result.status !== 'resolved' || !result.report) {
     return null
   }
   const report = result.report
-  const { casualties, injuries } = buildMemberStatus(report)
+  const { casualties, injuries, injuryRecordMissing } =
+    buildMemberStatus(result)
   const surviving = report.party.filter((m) => !m.dead).length
   const total = report.party.length
   const candidate = findNarrativeCandidate(
@@ -194,7 +251,7 @@ function buildReportFromResult(
   const narrative = narrativeStatusForCandidate(candidate, generations)
 
   return {
-    id: `${day}:${result.requestId}:${result.partyId ?? ''}`,
+    id: buildExpeditionReportId(day, result.partyId, result.requestId),
     day,
     questTitle: result.request.title,
     partyName: result.partyName ?? '不明',
@@ -204,6 +261,7 @@ function buildReportFromResult(
     survivalText: `${surviving} / ${total} 生還`,
     casualties,
     injuries,
+    injuryRecordMissing,
     rewards: [{ label: '記録なし' }],
     majorEvents: report.keyFacts.slice(0, 5),
     narrativeStatus: narrative.status,
@@ -216,7 +274,7 @@ function buildReportFromResult(
 export function buildExpeditionReportViewModels(
   campaign: TavernCampaignState,
 ): ExpeditionReportViewModel[] {
-  const reports: ExpeditionReportViewModel[] = []
+  const reportsById = new Map<string, ExpeditionReportViewModel>()
   const candidates = campaign.narrativeCandidates
   const generations = campaign.narrativeGenerations
 
@@ -228,7 +286,7 @@ export function buildExpeditionReportViewModels(
         candidates,
         generations,
       )
-      if (report) reports.push(report)
+      if (report) reportsById.set(report.id, report)
     }
   }
 
@@ -240,9 +298,11 @@ export function buildExpeditionReportViewModels(
         candidates,
         generations,
       )
-      if (report) reports.push(report)
+      if (report) reportsById.set(report.id, report)
     }
   }
+
+  const reports = [...reportsById.values()]
 
   // Newest first, stable by day then request id.
   reports.sort((a, b) => {
