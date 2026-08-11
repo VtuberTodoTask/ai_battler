@@ -26,6 +26,7 @@ export class PartySummaryPanel extends Container {
   private readonly _stayLabel: GameLabel
   private readonly _assignButton: GameButton
   private readonly _memberScroll: GameScrollView
+  private readonly _memberScrollHeight: number
 
   constructor(options: PartySummaryPanelOptions) {
     super()
@@ -59,27 +60,31 @@ export class PartySummaryPanel extends Container {
     this._statusLabel.y = 88
     this.addChild(this._statusLabel)
 
+    this._memberScrollHeight = Math.min(220, this._height - 240)
+
     this._memberScroll = new GameScrollView(
       this._theme,
       this._width - this._theme.spacing.s24,
-      180,
+      this._memberScrollHeight,
     )
     this._memberScroll.x = this._theme.spacing.s12
     this._memberScroll.y = 130
     this.addChild(this._memberScroll)
 
+    const questY = 130 + this._memberScrollHeight + 16
+
     this._questLabel = new GameLabel('', this._theme, 'body', {
       maxWidth: this._width - this._theme.spacing.s32,
     })
     this._questLabel.x = this._theme.spacing.s16
-    this._questLabel.y = 320
+    this._questLabel.y = questY
     this.addChild(this._questLabel)
 
     this._stayLabel = new GameLabel('', this._theme, 'caption', {
       maxWidth: this._width - this._theme.spacing.s32,
     })
     this._stayLabel.x = this._theme.spacing.s16
-    this._stayLabel.y = 356
+    this._stayLabel.y = questY + 36
     this.addChild(this._stayLabel)
 
     this._assignButton = new GameButton({
@@ -152,7 +157,7 @@ export class PartySummaryPanel extends Container {
     }
     this._memberScroll.setViewportSize(
       this._width - this._theme.spacing.s24,
-      180,
+      this._memberScrollHeight,
     )
   }
 

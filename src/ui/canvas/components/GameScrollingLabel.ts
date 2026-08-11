@@ -41,9 +41,7 @@ export class GameScrollingLabel extends Container {
     this.addChild(this._label)
 
     this._mask = new Graphics()
-    this._mask
-      .rect(0, 0, this._maxWidth, this._label.textHeight || 1)
-      .fill({ color: 0xffffff })
+    this.addChild(this._mask)
     this.mask = this._mask
 
     this._refreshLayout()
@@ -69,12 +67,13 @@ export class GameScrollingLabel extends Container {
   }
 
   private _refreshLayout(): void {
-    this._mask.clear()
-    this._mask
-      .rect(0, 0, this._maxWidth, this._label.textHeight || 1)
-      .fill({ color: 0xffffff })
+    const measured = this._label.measure()
+    const textHeight = measured.height || this._label.textHeight || 1
+    const textWidth = measured.width || this._label.textWidth
 
-    const textWidth = this._label.textWidth
+    this._mask.clear()
+    this._mask.rect(0, 0, this._maxWidth, textHeight).fill({ color: 0xffffff })
+
     if (textWidth <= this._maxWidth) {
       this._stopTicker()
       if (this._align === 'center') {

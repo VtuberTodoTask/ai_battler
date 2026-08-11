@@ -50,4 +50,18 @@ export class GameLabel extends Container {
       return 0
     }
   }
+
+  measure(): { width: number; height: number } {
+    try {
+      const text = this._text as {
+        updateText?: (respectDirty?: boolean) => void
+      }
+      if (typeof text.updateText === 'function') {
+        text.updateText(false)
+      }
+      return { width: this._text.width, height: this._text.height }
+    } catch {
+      return { width: 0, height: 0 }
+    }
+  }
 }

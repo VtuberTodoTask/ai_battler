@@ -52,7 +52,7 @@ export class TavernListRow extends Container {
       { maxWidth: this._width - this._theme.spacing.s24 },
     )
     this._subtitleLabel.x = this._theme.spacing.s12
-    this._subtitleLabel.y = this._theme.spacing.s24
+    this._subtitleLabel.y = this._theme.spacing.s8 + 30
     this.addChild(this._subtitleLabel)
 
     this._unreadDot = new Graphics()
