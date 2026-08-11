@@ -426,3 +426,64 @@ A fourth tab, `酒場キャンペーン`, renders a multi-day campaign:
 - Console checks should allow the expected `Failed to load resource: 404` from
   the provider-error test, but otherwise require zero `error` / `pageerror` /
   unhandled rejection output.
+
+## Phase 8.0 Canvas UI Foundation (`devin/phase8-0-canvas-ui-foundation`)
+
+- A new `Canvas UI` toggle appears in the top-right of the `酒場キャンペーン` Legacy UI.
+- Clicking it lazy-loads `GameCanvasHost` and starts a PixiJS v8 `Application`
+  (BootScene → FoundationDemoScene after ~1.2 s).
+- Virtual resolution is 1600×900; `GameViewport` scales with
+  `min(availableWidth/1600, availableHeight/900)` and letterbox/pillarbox
+  offsets to keep the UI centered.
+- FoundationDemoScene layout:
+  - Top bar: `DAY N`, `酒場評判`, `NEXT DAY` (disabled until day resolved).
+  - Left panel: `PARTIES` list (one `GameButton` per party).
+  - Main panel: `TAVERN` title, `Phase 8.0 Canvas Foundation` subtitle.
+  - Bottom bar: `Panel`, `Tooltip`, `Modal`, `Scroll`, `Legacy UI` buttons.
+- Clicking `Panel`/`Modal` opens a `GameModal`; `Scroll` opens a modal with a
+  `GameScrollView`; hovering `Tooltip` and party buttons shows a `GameTooltip`.
+- The bottom `Legacy UI` button unmounts the Canvas and returns to the DOM UI.
+- Repeated toggles should leave at most **one** `<canvas>` inside
+  `.game-canvas-host`; more than one indicates duplicate Pixi
+  Applications/tickers.
+
+### Playwright E2E notes for Canvas UI
+
+- PixiJS buttons are not DOM elements; click them by converting the virtual
+  1600×900 coordinates to the canvas bounding-box:
+
+  ```js
+  const box = await page
+    .locator('.game-canvas-host canvas')
+    .first()
+    .boundingBox()
+  const scale = Math.min(box.width / 1600, box.height / 900)
+  const offsetX = (box.width - 1600 * scale) / 2
+  const offsetY = (box.height - 900 * scale) / 2
+  const screenX = box.x + offsetX + virtualX * scale
+  const screenY = box.y + offsetY + virtualY * scale
+  await page.mouse.click(screenX, screenY)
+  ```
+
+- Useful virtual button centers:
+  - `Panel`: (102, 844)
+  - `Tooltip`: (252, 844)
+  - `Modal`: (418, 844)
+  - `Scroll`: (584, 844)
+  - `Legacy UI`: (750, 844)
+  - Modal close `閉じる`: (1016, 586)
+  - First party button: (188, 158)
+  - `NEXT DAY`: (1484, 32)
+
+- `page.mouse.move(screenX, screenY)` can be used to hover tooltips. Move the
+  cursor from an empty area onto the target so `pointerover` fires.
+- Maximize via `wmctrl -r <title>` is unreliable in the harness; set the
+  Playwright viewport to a large fixed size instead.
+- `npm run test` may print `HTMLCanvasElement.prototype.getContext` errors from
+  jsdom tests that import `pixi.js` directly; the tests still pass, but adding
+  the `canvas` npm package or mocking `pixi.js` in those tests removes the noise.
+- In Chrome on the NVIDIA driver, the first Canvas render may log one-time
+  `[.WebGL-...] GPU stall due to ReadPixels` performance warnings. These are
+  driver-level, not app `console.warn` calls, but they still appear in the
+  Console tab. Count them as a note rather than a functional failure unless the
+  project strictly requires zero console output.

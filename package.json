@@ -17,9 +17,11 @@
     "phase7-4-memory-smoke": "tsx scripts/phase7-4-memory-smoke.ts",
     "phase7-7-downtime-relationship-smoke": "tsx scripts/phase7-7-downtime-relationship-smoke.ts",
     "phase7-7-1-minor-narrative-diversity-smoke": "tsx scripts/phase7-7-1-minor-narrative-diversity-smoke.ts",
+    "phase8-0-canvas-ui-foundation-smoke": "vitest run src/ui/canvas/__tests__/phase8-0-canvas-ui-foundation-smoke.test.ts",
     "format": "prettier --write ."
   },
   "dependencies": {
+    "pixi.js": "^8.19.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

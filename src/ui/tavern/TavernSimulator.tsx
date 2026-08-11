@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import {
   advanceCampaignDay,
   createTavernCampaign,
@@ -22,6 +22,8 @@ import type { NarrativeProvider } from '../../ai/narrative/types.ts'
 import type { NarrativeProviderConfig } from './NarrativeSettings.tsx'
 import './tavern.css'
 
+const GameCanvasHost = lazy(() => import('../canvas/GameCanvasHost.tsx'))
+
 const DEFAULT_CAMPAIGN_SEED = 'tavern-campaign-001'
 const initialCampaign = createTavernCampaign(DEFAULT_CAMPAIGN_SEED)
 
@@ -43,6 +45,7 @@ export function TavernSimulator() {
       model: '',
       apiKey: '',
     })
+  const [uiMode, setUiMode] = useState<'legacy' | 'canvas'>('legacy')
 
   const day = campaign.currentDay
 
@@ -154,8 +157,28 @@ export function TavernSimulator() {
     return day.parties.find((party) => party.id === selectedPartyId) ?? null
   }, [day, selectedPartyId])
 
+  if (uiMode === 'canvas') {
+    return (
+      <div className="tavern-simulator tavern-canvas-shell">
+        <Suspense
+          fallback={<div className="canvas-loading">Canvas loading...</div>}
+        >
+          <GameCanvasHost
+            campaign={campaign}
+            onAdvanceDay={handleAdvance}
+            onSwitchToLegacy={() => setUiMode('legacy')}
+          />
+        </Suspense>
+      </div>
+    )
+  }
+
   return (
     <div className="tavern-simulator">
+      <div className="ui-mode-switch">
+        <button onClick={() => setUiMode('canvas')}>Canvas UI</button>
+      </div>
+
       <TavernControls
         seed={seedInput}
         onSeedChange={setSeedInput}
