@@ -22,16 +22,29 @@ export interface UiActionResult<T = void> {
   data?: T
 }
 
+export interface OfferRequestActionData {
+  decision: 'accepted' | 'declined'
+  reason?: string
+  reasonText?: string
+}
+
 export interface GameUiActions {
   advanceDay: () => UiActionResult
   resolveDay: () => UiActionResult
-  offerRequest: (partyId: string, requestId: string) => UiActionResult
+  offerRequest: (
+    partyId: string,
+    requestId: string,
+  ) => UiActionResult<OfferRequestActionData>
   selectParty: (partyId: string) => void
   selectQuest: (questId: string) => void
   openCharacter: (characterId: string) => void
   openActivity: (
     partyId: string,
     eventId: string,
+  ) => Promise<UiActionResult<string>>
+  /** Optional: open a generated expedition narrative by candidate id. */
+  openExpeditionNarrative?: (
+    candidateId: string,
   ) => Promise<UiActionResult<string>>
   closeModal: () => void
   switchToLegacy: () => void
@@ -49,6 +62,7 @@ export interface GameUiState {
   modalOpen: boolean
   actionMessage?: UiActionMessage
   viewedActivityIds?: string[]
+  viewedReportIds?: string[]
 }
 
 export const DEFAULT_GAME_UI_STATE: GameUiState = {
@@ -56,6 +70,8 @@ export const DEFAULT_GAME_UI_STATE: GameUiState = {
   selectedQuestId: null,
   openCharacterId: null,
   modalOpen: false,
+  viewedReportIds: [],
+  viewedActivityIds: [],
 }
 
 export interface GameSceneContext {

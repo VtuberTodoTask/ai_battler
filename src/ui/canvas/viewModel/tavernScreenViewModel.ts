@@ -4,17 +4,22 @@ import {
   getReputationTierLabel,
 } from '../../../core/tavern/campaign/reputation.ts'
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
-import { downtimeEventSummary } from '../../../core/narrative/downtime.ts'
-import type { DowntimeEvent } from '../../../core/narrative/types.ts'
 import type {
-  CampaignPartyEvent,
   TavernDayState,
   TavernParty,
   TavernRequestOffer,
 } from '../../../core/tavern/types.ts'
-import type { CampaignRelationshipEvent } from '../../../core/tavern/campaign/types.ts'
-import { OBJECTIVE_LABELS, OUTCOME_LABELS } from '../../expedition/labels.ts'
+import { OBJECTIVE_LABELS } from '../../expedition/labels.ts'
 import type { GameUiState, UiActionMessage } from '../types.ts'
+import {
+  buildExpeditionReportViewModels,
+  type ExpeditionReportViewModel,
+} from './expeditionReportViewModel.ts'
+import {
+  buildTavernFeedbackItems,
+  sortFeedbackItems,
+  type TavernFeedbackItem,
+} from './tavernFeedbackViewModel.ts'
 
 export interface TavernHeaderViewModel {
   day: number
@@ -25,6 +30,7 @@ export interface TavernHeaderViewModel {
   canResolveDay: boolean
   advanceDayDisabledReason?: string
   statusMessage?: UiActionMessage
+  unreadReportCount: number
 }
 
 export interface TavernPartyMemberViewModel {
@@ -83,20 +89,7 @@ export interface TavernQuestListItemViewModel {
   disabledReason?: string
 }
 
-export type TavernActivityItemKind =
-  'downtime' | 'stay_extension' | 'expedition_return' | 'other'
-
-export interface TavernActivityItemViewModel {
-  id: string
-  partyId?: string
-  partyName?: string
-  title: string
-  summary: string
-  unread: boolean
-  narrativeStatus: 'unseen' | 'generated' | 'viewed'
-  kind: TavernActivityItemKind
-  canOpen: boolean
-}
+export type TavernActivityItemViewModel = TavernFeedbackItem
 
 export interface TavernScreenViewModel {
   header: TavernHeaderViewModel
@@ -104,6 +97,7 @@ export interface TavernScreenViewModel {
   quests: TavernQuestListItemViewModel[]
   selectedParty?: TavernPartySummaryViewModel
   activities: TavernActivityItemViewModel[]
+  reports: ExpeditionReportViewModel[]
 }
 
 const STAY_EXTENSION_REASON_LABELS: Record<string, string> = {
@@ -115,14 +109,6 @@ const STAY_EXTENSION_REASON_LABELS: Record<string, string> = {
   waiting_for_work: '仕事待ち',
   personal_preference: '個人的希望',
   mixed: '複合',
-}
-
-const PARTY_EVENT_LABELS: Record<string, string> = {
-  arrived: '到着',
-  departedScheduled: '出発',
-  departedCasualty: '被害者を伴い出発',
-  startedRecovery: '療養を開始',
-  finishedRecovery: '療養が完了',
 }
 
 function stayExtensionReasonLabel(reason: string | undefined): string {
@@ -299,9 +285,21 @@ function buildPartySummary(
 function questStatusLabel(
   request: TavernRequestOffer,
   day: TavernDayState,
+  selectedPartyId: string | null,
 ): string {
   const matched = day.matches.find((m) => m.requestId === request.id)
   if (matched) return '成立'
+
+  if (selectedPartyId) {
+    const offer = day.offers.find(
+      (o) => o.requestId === request.id && o.partyId === selectedPartyId,
+    )
+    if (offer) {
+      if (offer.decision === 'declined') return '拒否済'
+      if (offer.decision === 'accepted') return '受諾済'
+    }
+  }
+
   const offerCount = day.offers.filter((o) => o.requestId === request.id).length
   if (offerCount > 0) return `紹介履歴: ${offerCount}`
   return '未紹介'
@@ -329,141 +327,18 @@ function buildQuestListItem(
     title: request.title,
     rankLabel: `Rank ${request.rank}`,
     objectiveLabel: OBJECTIVE_LABELS[request.objectiveType],
-    statusLabel: questStatusLabel(request, day),
+    statusLabel: questStatusLabel(request, day, selectedPartyId),
     selected,
     assignable,
     disabledReason,
   }
 }
 
-function buildDowntimeActivity(
-  party: TavernParty,
-  event: DowntimeEvent,
-): TavernActivityItemViewModel {
-  return {
-    id: event.id,
-    partyId: party.id,
-    partyName: party.party.name,
-    title: downtimeEventSummary(event, party.party.members),
-    summary:
-      event.generatedText ??
-      event.fallbackSummary ??
-      downtimeEventSummary(event, party.party.members),
-    unread: event.narrativeStatus !== 'viewed',
-    narrativeStatus: event.narrativeStatus,
-    kind: 'downtime',
-    canOpen: true,
-  }
-}
-
-function buildPartyEventActivity(
-  event: CampaignPartyEvent,
-): TavernActivityItemViewModel {
-  return {
-    id: `${event.type}:${event.partyId}:${event.dayNumber}`,
-    partyId: event.partyId,
-    partyName: event.partyName,
-    title: `${event.partyName}が${PARTY_EVENT_LABELS[event.type] ?? event.type}`,
-    summary: '',
-    unread: false,
-    narrativeStatus: 'viewed',
-    kind: 'other',
-    canOpen: false,
-  }
-}
-
-function buildStayExtensionActivity(
-  party: TavernParty,
-  event: Extract<CampaignRelationshipEvent, { type: 'stayExtended' }>,
-): TavernActivityItemViewModel {
-  const reason = stayExtensionReasonLabel(event.primaryReason)
-  const summary = `滞在を${event.extensionDays}日延長しました${event.secondaryReason ? `（${reason}／${stayExtensionReasonLabel(event.secondaryReason)}）` : `（${reason}）`}`
-  return {
-    id: `stay-extension:${event.partyId}:${event.dayNumber}`,
-    partyId: event.partyId,
-    partyName: event.partyName,
-    title: `滞在延長：${event.partyName}`,
-    summary,
-    unread: false,
-    narrativeStatus: 'viewed',
-    kind: 'stay_extension',
-    canOpen: true,
-  }
-}
-
-function buildExpeditionReturnActivity(
-  party: TavernParty,
-  request: TavernRequestOffer,
-  outcome: string,
-): TavernActivityItemViewModel {
-  return {
-    id: `expedition-return:${party.id}:${request.id}`,
-    partyId: party.id,
-    partyName: party.party.name,
-    title: `遠征から帰還：${request.title}`,
-    summary: `結果：${OUTCOME_LABELS[outcome as keyof typeof OUTCOME_LABELS] ?? outcome}`,
-    unread: false,
-    narrativeStatus: 'viewed',
-    kind: 'expedition_return',
-    canOpen: true,
-  }
-}
-
 function buildActivities(
   campaign: TavernCampaignState,
+  viewedActivityIds: readonly string[] = [],
 ): TavernActivityItemViewModel[] {
-  const activities: TavernActivityItemViewModel[] = []
-  const day = campaign.currentDay
-
-  for (const party of day.parties) {
-    for (const event of party.downtimeEvents ?? []) {
-      activities.push(buildDowntimeActivity(party, event))
-    }
-  }
-
-  for (const event of day.partyEvents ?? []) {
-    activities.push(buildPartyEventActivity(event))
-  }
-
-  const stayEvents: Extract<
-    CampaignRelationshipEvent,
-    { type: 'stayExtended' }
-  >[] = []
-  for (const record of campaign.history) {
-    for (const event of record.relationshipEvents) {
-      if (
-        event.dayNumber === campaign.dayNumber &&
-        event.type === 'stayExtended'
-      ) {
-        stayEvents.push(event)
-      }
-    }
-  }
-  const seenStayIds = new Set<string>()
-  for (const event of stayEvents) {
-    const id = `stay-extension:${event.partyId}:${event.dayNumber}`
-    if (seenStayIds.has(id)) continue
-    seenStayIds.add(id)
-    const party = day.parties.find((p) => p.id === event.partyId)
-    if (party) {
-      activities.push(buildStayExtensionActivity(party, event))
-    }
-  }
-
-  if (day.status === 'resolved') {
-    for (const result of day.results) {
-      if (result.status !== 'resolved' || !result.result || !result.partyId)
-        continue
-      const party = day.parties.find((p) => p.id === result.partyId)
-      const request = day.requests.find((r) => r.id === result.requestId)
-      if (!party || !request) continue
-      activities.push(
-        buildExpeditionReturnActivity(party, request, result.result.outcome),
-      )
-    }
-  }
-
-  return activities
+  return buildTavernFeedbackItems(campaign, viewedActivityIds)
 }
 
 export function buildTavernScreenViewModel(
@@ -471,6 +346,11 @@ export function buildTavernScreenViewModel(
   uiState: GameUiState,
 ): TavernScreenViewModel {
   const day = campaign.currentDay
+  const reports = buildExpeditionReportViewModels(campaign)
+  const viewedReportIds = new Set(uiState.viewedReportIds ?? [])
+  const unreadReportCount = reports.filter(
+    (r) => !viewedReportIds.has(r.id),
+  ).length
 
   const header: TavernHeaderViewModel = {
     day: campaign.dayNumber,
@@ -485,6 +365,7 @@ export function buildTavernScreenViewModel(
         ? '本日を確定してから翌日へ進めます'
         : undefined,
     statusMessage: uiState.actionMessage,
+    unreadReportCount,
   }
 
   const parties = day.parties.map((p) =>
@@ -517,7 +398,10 @@ export function buildTavernScreenViewModel(
           uiState.selectedQuestId,
         )
       : undefined,
-    activities: buildActivities(campaign),
+    activities: sortFeedbackItems(
+      buildActivities(campaign, uiState.viewedActivityIds ?? []),
+    ),
+    reports,
   }
 }
 
