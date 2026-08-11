@@ -11,6 +11,7 @@ export interface TavernHeaderOptions {
   height: number
   onResolve?: () => void
   onAdvance?: () => void
+  onOpenReports?: () => void
 }
 
 export class TavernHeader extends Container {
@@ -21,8 +22,10 @@ export class TavernHeader extends Container {
   private readonly _reputationLabel: GameLabel
   private readonly _statusLabel: GameLabel
   private readonly _actionButton: GameButton
+  private readonly _reportButton: GameButton
   private readonly _onResolve?: () => void
   private readonly _onAdvance?: () => void
+  private readonly _onOpenReports?: () => void
 
   constructor(options: TavernHeaderOptions) {
     super()
@@ -32,6 +35,7 @@ export class TavernHeader extends Container {
     this._height = options.height
     this._onResolve = options.onResolve
     this._onAdvance = options.onAdvance
+    this._onOpenReports = options.onOpenReports
 
     const panel = new GamePanel({
       width: this._width,
@@ -60,6 +64,23 @@ export class TavernHeader extends Container {
     this._statusLabel.x = this._theme.spacing.s16
     this._statusLabel.y = 42
     this.addChild(this._statusLabel)
+
+    this._reportButton = new GameButton({
+      width: 120,
+      height: 44,
+      theme: this._theme,
+      label: '報告',
+      disabled: false,
+    })
+    this._reportButton.x =
+      this._width - 196 - this._theme.spacing.s16 - 120 - this._theme.spacing.s8
+    this._reportButton.y = 10
+    this._reportButton.onActivate = () => {
+      if (this._reportButton.state !== 'disabled') {
+        this._onOpenReports?.()
+      }
+    }
+    this.addChild(this._reportButton)
 
     this._actionButton = new GameButton({
       width: 180,
@@ -108,5 +129,11 @@ export class TavernHeader extends Container {
       this._actionButton.setLabel(this._actionButtonLabel)
       this._actionButton.setEnabled(false)
     }
+
+    const reportLabel =
+      viewModel.unreadReportCount > 0
+        ? `報告 \u25cf${viewModel.unreadReportCount}`
+        : '報告'
+    this._reportButton.setLabel(reportLabel)
   }
 }

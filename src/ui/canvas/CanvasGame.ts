@@ -232,11 +232,13 @@ export class CanvasGame {
     return {
       advanceDay: () => ({ ok: true }),
       resolveDay: () => ({ ok: true }),
-      offerRequest: () => ({ ok: true }),
+      offerRequest: () => ({ ok: true, data: { decision: 'accepted' } }),
       selectParty: () => {},
       selectQuest: () => {},
       openCharacter: () => {},
       openActivity: () => Promise.resolve({ ok: true, data: '' }),
+      openExpeditionNarrative: () =>
+        Promise.resolve({ ok: false, message: 'AI provider not connected' }),
       closeModal: () => {},
       switchToLegacy: () => {},
     }

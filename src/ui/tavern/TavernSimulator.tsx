@@ -6,8 +6,12 @@ import {
 } from '../../core/tavern/campaign/campaign.ts'
 import { offerRequestToParty } from '../../core/tavern/brokerage.ts'
 import { deepClone } from '../../core/util.ts'
+import { generateNarrative } from '../../core/narrative/generation.ts'
 import { generateDowntimeNarrative } from '../../core/narrative/downtime.ts'
+import type { NarrativeCandidate } from '../../core/narrative/types.ts'
 import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
+import { acceptanceReasonText } from '../../core/tavern/acceptance.ts'
+import type { OfferRequestActionData, UiActionResult } from '../canvas/types.ts'
 import { TavernControls } from './TavernControls.tsx'
 import { CampaignHeader } from './CampaignHeader.tsx'
 import { RequestBoard } from './RequestBoard.tsx'
@@ -83,16 +87,29 @@ export function TavernSimulator() {
     (
       partyId: string,
       requestId: string,
-    ): { ok: true } | { ok: false; message: string } => {
+    ): UiActionResult<OfferRequestActionData> => {
       try {
         const nextDay = offerRequestToParty(
           campaign.currentDay,
           requestId,
           partyId,
         )
+        const offer = nextDay.offers.find(
+          (o) => o.requestId === requestId && o.partyId === partyId,
+        )
         setCampaign((prev) => ({ ...prev, currentDay: nextDay }))
         setError(null)
-        return { ok: true }
+        if (!offer) {
+          return { ok: true, data: { decision: 'accepted' } }
+        }
+        return {
+          ok: true,
+          data: {
+            decision: offer.decision,
+            reason: offer.reason,
+            reasonText: acceptanceReasonText(offer.reason),
+          },
+        }
       } catch (e) {
         const message = e instanceof Error ? e.message : '紹介に失敗しました'
         setError(message)
@@ -213,6 +230,49 @@ export function TavernSimulator() {
     }
   }, [campaign, selectedRequestId])
 
+  const handleOpenExpeditionNarrative = useCallback(
+    async (candidateId: string): Promise<UiActionResult<string>> => {
+      const candidate = campaign.narrativeCandidates.find(
+        (c) => c.id === candidateId,
+      )
+      if (!candidate) {
+        return { ok: false, message: '物語の候補が見つかりません' }
+      }
+
+      if (candidate.state === 'generated' && candidate.activeGenerationId) {
+        const record = campaign.narrativeGenerations.find(
+          (g) => g.id === candidate.activeGenerationId,
+        )
+        if (record) {
+          return { ok: true, data: record.generatedText }
+        }
+      }
+
+      if (!narrativeProvider) {
+        return { ok: false, message: 'AI provider not connected' }
+      }
+
+      const { candidate: updated, record } = await generateNarrative(
+        candidate as NarrativeCandidate,
+        narrativeProvider,
+      )
+
+      setCampaign((current) => {
+        const next = deepClone(current)
+        next.narrativeCandidates = next.narrativeCandidates.map((c) =>
+          c.id === updated.id ? updated : c,
+        )
+        if (!next.narrativeGenerations.some((g) => g.id === record.id)) {
+          next.narrativeGenerations = [...next.narrativeGenerations, record]
+        }
+        return next
+      })
+
+      return { ok: true, data: record.generatedText }
+    },
+    [campaign, narrativeProvider],
+  )
+
   const handleUpdateCampaign = useCallback(
     (updater: (c: TavernCampaignState) => TavernCampaignState) => {
       setCampaign((prev) => updater(prev))
@@ -259,6 +319,7 @@ export function TavernSimulator() {
             onResolveDay={handleResolve}
             onOfferRequest={handleOfferRequest}
             onOpenActivity={handleOpenActivity}
+            onOpenExpeditionNarrative={handleOpenExpeditionNarrative}
             onSwitchToLegacy={() => setUiMode('legacy')}
           />
         </Suspense>

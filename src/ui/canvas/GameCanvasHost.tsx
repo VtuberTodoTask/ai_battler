@@ -1,16 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
 import { CanvasGame } from './CanvasGame.ts'
-import type { GameUiActions, GameUiState, UiActionResult } from './types.ts'
+import type {
+  GameUiActions,
+  GameUiState,
+  OfferRequestActionData,
+  UiActionResult,
+} from './types.ts'
 import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
 
 export interface GameCanvasHostProps {
   campaign: TavernCampaignState
   onAdvanceDay: () => UiActionResult
   onResolveDay: () => UiActionResult
-  onOfferRequest: (partyId: string, requestId: string) => UiActionResult
+  onOfferRequest: (
+    partyId: string,
+    requestId: string,
+  ) => UiActionResult<OfferRequestActionData>
   onOpenActivity: (
     partyId: string,
     eventId: string,
+  ) => Promise<UiActionResult<string>>
+  onOpenExpeditionNarrative?: (
+    candidateId: string,
   ) => Promise<UiActionResult<string>>
   onSwitchToLegacy: () => void
 }
@@ -21,6 +32,7 @@ export default function GameCanvasHost({
   onResolveDay,
   onOfferRequest,
   onOpenActivity,
+  onOpenExpeditionNarrative,
   onSwitchToLegacy,
 }: GameCanvasHostProps) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -31,6 +43,7 @@ export default function GameCanvasHost({
   const onResolveRef = useRef(onResolveDay)
   const onOfferRef = useRef(onOfferRequest)
   const onOpenActivityRef = useRef(onOpenActivity)
+  const onOpenExpeditionNarrativeRef = useRef(onOpenExpeditionNarrative)
   const onSwitchRef = useRef(onSwitchToLegacy)
 
   useEffect(() => {
@@ -38,12 +51,14 @@ export default function GameCanvasHost({
     onResolveRef.current = onResolveDay
     onOfferRef.current = onOfferRequest
     onOpenActivityRef.current = onOpenActivity
+    onOpenExpeditionNarrativeRef.current = onOpenExpeditionNarrative
     onSwitchRef.current = onSwitchToLegacy
   }, [
     onAdvanceDay,
     onResolveDay,
     onOfferRequest,
     onOpenActivity,
+    onOpenExpeditionNarrative,
     onSwitchToLegacy,
   ])
 
@@ -58,6 +73,8 @@ export default function GameCanvasHost({
       selectedQuestId: null,
       openCharacterId: null,
       modalOpen: false,
+      viewedReportIds: [],
+      viewedActivityIds: [],
     }
 
     const actions: GameUiActions = {
@@ -87,8 +104,7 @@ export default function GameCanvasHost({
       },
       offerRequest: (partyId, requestId) => {
         try {
-          onOfferRef.current(partyId, requestId)
-          return { ok: true }
+          return onOfferRef.current(partyId, requestId)
         } catch (e) {
           return {
             ok: false,
@@ -120,6 +136,24 @@ export default function GameCanvasHost({
             ok: false,
             message:
               e instanceof Error ? e.message : 'イベントの表示に失敗しました',
+          }
+        }
+      },
+      openExpeditionNarrative: async (candidateId) => {
+        try {
+          const handler = onOpenExpeditionNarrativeRef.current
+          if (!handler) {
+            return {
+              ok: false,
+              message: 'AI provider not connected',
+            }
+          }
+          return await handler(candidateId)
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '物語の生成に失敗しました',
           }
         }
       },
