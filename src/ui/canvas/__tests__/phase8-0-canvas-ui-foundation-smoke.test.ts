@@ -61,6 +61,7 @@ function createTestContext(): GameSceneContext {
       selectQuest: vi.fn(),
       openCharacter: vi.fn(),
       openActivity: vi.fn().mockResolvedValue(''),
+      openSettings: vi.fn(),
       closeModal: vi.fn(),
       switchToLegacy: vi.fn(),
     },

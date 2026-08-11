@@ -52,6 +52,7 @@ export function TavernSimulator() {
       apiKey: '',
     })
   const [uiMode, setUiMode] = useState<'legacy' | 'canvas'>('legacy')
+  const [canvasSettingsOpen, setCanvasSettingsOpen] = useState(false)
 
   const day = campaign.currentDay
 
@@ -280,6 +281,14 @@ export function TavernSimulator() {
     [],
   )
 
+  const handleOpenCanvasSettings = useCallback(() => {
+    setCanvasSettingsOpen(true)
+  }, [])
+
+  const handleCloseCanvasSettings = useCallback(() => {
+    setCanvasSettingsOpen(false)
+  }, [])
+
   const canResolve = useMemo(() => {
     return day.status === 'planning'
   }, [day])
@@ -320,9 +329,33 @@ export function TavernSimulator() {
             onOfferRequest={handleOfferRequest}
             onOpenActivity={handleOpenActivity}
             onOpenExpeditionNarrative={handleOpenExpeditionNarrative}
+            onOpenSettings={handleOpenCanvasSettings}
             onSwitchToLegacy={() => setUiMode('legacy')}
           />
         </Suspense>
+        {canvasSettingsOpen && (
+          <div className="canvas-settings-modal-overlay">
+            <div className="canvas-settings-modal">
+              <div className="canvas-settings-header">
+                <h3>AI 接続設定</h3>
+                <button
+                  type="button"
+                  className="canvas-settings-close"
+                  onClick={handleCloseCanvasSettings}
+                  aria-label="設定を閉じる"
+                >
+                  ×
+                </button>
+              </div>
+              <NarrativeSettings
+                provider={narrativeProvider}
+                config={narrativeConfig}
+                onChange={setNarrativeConfig}
+                onProviderChange={setNarrativeProvider}
+              />
+            </div>
+          </div>
+        )}
       </div>
     )
   }

@@ -230,6 +230,7 @@ export class TavernScene implements GameScene {
       onResolve: () => this.handleResolve(),
       onAdvance: () => this.handleAdvance(),
       onOpenReports: () => this.openReportArchiveModal(),
+      onOpenSettings: () => this._context!.actions.openSettings(),
     })
     this._header.x = 0
     this._header.y = 0

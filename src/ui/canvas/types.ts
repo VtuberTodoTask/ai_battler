@@ -46,6 +46,7 @@ export interface GameUiActions {
   openExpeditionNarrative?: (
     candidateId: string,
   ) => Promise<UiActionResult<string>>
+  openSettings: () => void
   closeModal: () => void
   switchToLegacy: () => void
 }

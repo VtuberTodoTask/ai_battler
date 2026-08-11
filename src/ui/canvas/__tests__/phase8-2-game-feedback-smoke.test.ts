@@ -134,6 +134,7 @@ function createSceneContext(
       ok: true,
       data: '遠征の物語本文',
     }),
+    openSettings: vi.fn(),
     closeModal: vi.fn(),
     switchToLegacy: vi.fn(),
   }

@@ -239,6 +239,7 @@ export class CanvasGame {
       openActivity: () => Promise.resolve({ ok: true, data: '' }),
       openExpeditionNarrative: () =>
         Promise.resolve({ ok: false, message: 'AI provider not connected' }),
+      openSettings: () => {},
       closeModal: () => {},
       switchToLegacy: () => {},
     }

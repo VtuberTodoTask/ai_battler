@@ -126,6 +126,7 @@ function createSceneContext(
       ok: true,
       data: '生成された酒場イベントの本文',
     }),
+    openSettings: vi.fn(),
     closeModal: vi.fn(),
     switchToLegacy: vi.fn(),
   }
