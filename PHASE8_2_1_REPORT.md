@@ -76,22 +76,24 @@ any narrative prompt contract or adding new economy features.
 
 `npm run dev` + Playwright ヘッドフル Chrome で `e2e-2` および `phase8-2-report` seed を使い、Canvas Tavern UI 上で Phase 8.2.1 の 7 項目を検証しました。
 
-| 項目 | 結果 |
-|---|---|
-| 遠征報告の重複排除 | PASS（advance 後も `最近の報告` に同じ遠征が 1 行のみ） |
-| 構造化負傷表示 | PASS（HP 比ではなく `state.injuries` から `軽傷`/`重傷` 表示） |
-| Activity 未読ドット | PASS（開封後にドット消滅） |
-| 滞在延長 narrative キャッシュ | PASS（1 回目生成、再開 0 AI コール） |
-| 重要通知アクション | PASS（`expedition_return`→`報告を見る`、`party_arrival`→`選択する`） |
-| 構造化読み出しの AI 0 コール | PASS（quest 拒否・報告・滞在延長詳細で AI 生成なし） |
-| 報酬「記録なし」 | PASS（`報酬：記録なし` と表示） |
+| 項目                          | 結果                                                                 |
+| ----------------------------- | -------------------------------------------------------------------- |
+| 遠征報告の重複排除            | PASS（advance 後も `最近の報告` に同じ遠征が 1 行のみ）              |
+| 構造化負傷表示                | PASS（HP 比ではなく `state.injuries` から `軽傷`/`重傷` 表示）       |
+| Activity 未読ドット           | PASS（開封後にドット消滅）                                           |
+| 滞在延長 narrative キャッシュ | PASS（1 回目生成、再開 0 AI コール）                                 |
+| 重要通知アクション            | PASS（`expedition_return`→`報告を見る`、`party_arrival`→`選択する`） |
+| 構造化読み出しの AI 0 コール  | PASS（quest 拒否・報告・滞在延長詳細で AI 生成なし）                 |
+| 報酬「記録なし」              | PASS（`報酬：記録なし` と表示）                                      |
 
 エスカレーション：
+
 - 機能的な失敗、console `error`/`pageerror`、未処理 rejection は検出されませんでした。
 - `jsdom` 環境で `pixi.js` の `HTMLCanvasElement.prototype.getContext` 未実装エラーログが多数出ます（Canvas 単体テストで `canvas` パッケージ導入または mock 化を検討）。
 - `npm run build` は exit 0 ですが、Vite の Node.js 20 バージョン警告と chunk size 警告が出ます。
 
 成果物：
+
 - 録画：`/home/ubuntu/screencasts/phase8-2-1-v2/phase8-2-1-v2-edited.mp4`
 - 重要通知 `報告を見る` 録画：`/home/ubuntu/screencasts/phase8-2-1-expedition-return/phase8-2-1-expedition-return-edited.mp4`
 - スクリーンショット：`/home/ubuntu/screenshots/p82_*.png`
