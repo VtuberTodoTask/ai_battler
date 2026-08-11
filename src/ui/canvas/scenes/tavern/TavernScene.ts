@@ -182,13 +182,11 @@ export class TavernScene implements GameScene {
     void Assets.load(TAVERN_BG_URL)
       .then((texture) => {
         const sprite = new Sprite(texture as Texture)
-        const scale = Math.max(
-          VIRTUAL_WIDTH / sprite.width,
-          VIRTUAL_HEIGHT / sprite.height,
-        )
+        const scale = VIRTUAL_HEIGHT / sprite.height
+        sprite.anchor.set(0.5)
         sprite.scale.set(scale)
-        sprite.x = (VIRTUAL_WIDTH - sprite.width * scale) / 2
-        sprite.y = (VIRTUAL_HEIGHT - sprite.height * scale) / 2
+        sprite.x = VIRTUAL_WIDTH / 2
+        sprite.y = VIRTUAL_HEIGHT / 2
         base.clear()
         bg.removeChild(base)
         base.destroy()
