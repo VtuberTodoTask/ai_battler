@@ -8,6 +8,8 @@ import { GameButton } from '../../components/GameButton.ts'
 import { GameLabel } from '../../components/GameLabel.ts'
 import { GameScrollView } from '../../components/GameScrollView.ts'
 import { TavernListRow } from '../../components/TavernListRow.ts'
+import { OUTCOME_LABELS } from '../../../expedition/labels.ts'
+import { getPredictionLabel } from '../../../tavern/predictionLabels.ts'
 import type { GameScene, GameSceneContext, GameUiState } from '../../types.ts'
 import {
   buildTavernScreenViewModel,
@@ -23,8 +25,8 @@ import type {
   SoundNovelVisualContext,
 } from '../soundNovel/types.ts'
 import { ActivityPanel } from './ActivityPanel.ts'
+import { DecisionPanel } from './DecisionPanel.ts'
 import { PartyListPanel } from './PartyListPanel.ts'
-import { PartySummaryPanel } from './PartySummaryPanel.ts'
 import { QuestListPanel } from './QuestListPanel.ts'
 import { TavernHeader } from './TavernHeader.ts'
 
@@ -58,7 +60,7 @@ export class TavernScene implements GameScene {
   private _viewModel: TavernScreenViewModel | null = null
   private _header: TavernHeader | null = null
   private _partyList: PartyListPanel | null = null
-  private _partySummary: PartySummaryPanel | null = null
+  private _decisionPanel: DecisionPanel | null = null
   private _questList: QuestListPanel | null = null
   private _activityPanel: ActivityPanel | null = null
   private _autoSelectPending = true
@@ -96,7 +98,7 @@ export class TavernScene implements GameScene {
     }
     this._header = null
     this._partyList = null
-    this._partySummary = null
+    this._decisionPanel = null
     this._questList = null
     this._activityPanel = null
     this._context = null
@@ -253,15 +255,24 @@ export class TavernScene implements GameScene {
     this._partyList.y = MAIN_Y
     this._uiRoot!.addChild(this._partyList)
 
-    this._partySummary = new PartySummaryPanel({
+    this._decisionPanel = new DecisionPanel({
       theme,
       width: CENTER_WIDTH - MARGIN,
       height: MAIN_HEIGHT,
       onAssign: () => this.handleAssign(),
+      getSelectedParty: () =>
+        this._campaign?.currentDay.parties.find(
+          (p) => p.id === this._uiState.selectedPartyId,
+        ),
+      getSelectedQuest: () =>
+        this._campaign?.currentDay.requests.find(
+          (r) => r.id === this._uiState.selectedQuestId,
+        ),
+      onOpenBreakdown: () => this.openPredictionBreakdown(),
     })
-    this._partySummary.x = LEFT_WIDTH + MARGIN
-    this._partySummary.y = MAIN_Y
-    this._uiRoot!.addChild(this._partySummary)
+    this._decisionPanel.x = LEFT_WIDTH + MARGIN
+    this._decisionPanel.y = MAIN_Y
+    this._uiRoot!.addChild(this._decisionPanel)
 
     this._questList = new QuestListPanel({
       theme,
@@ -288,7 +299,7 @@ export class TavernScene implements GameScene {
     if (!this._viewModel) return
     this._header?.update(this._viewModel.header)
     this._partyList?.update(this._viewModel.parties)
-    this._partySummary?.update(this._viewModel.selectedParty)
+    this._decisionPanel?.update(this._viewModel.decision)
     this._questList?.update(this._viewModel.quests)
     this._activityPanel?.update(this._viewModel.activities)
   }
@@ -614,6 +625,58 @@ export class TavernScene implements GameScene {
 
     content.addChild(scroll)
     this._context!.overlayManager.openModal('最近の報告', content)
+  }
+
+  private openPredictionBreakdown(): void {
+    const prediction = this._decisionPanel?.currentPrediction
+    const decision = this._viewModel?.decision
+    if (!prediction || !decision) return
+
+    const theme = this._context!.theme
+    const content = new Container()
+    const scroll = new GameScrollView(theme, 520, 260)
+
+    const partyName = decision.selectedParty?.name ?? 'パーティ'
+    const questTitle = decision.selectedQuest?.title ?? '依頼'
+
+    const outcomes = [
+      'completeSuccess',
+      'success',
+      'partialSuccess',
+      'failedObjective',
+      'forcedRetreat',
+      'lostExpedition',
+    ] as const
+
+    let y = 0
+    const add = (
+      text: string,
+      kind: 'heading' | 'body' | 'caption' = 'body',
+    ) => {
+      const label = new GameLabel(text, theme, kind, { maxWidth: 520 })
+      label.y = y
+      scroll.content.addChild(label)
+      y += label.textHeight + 8
+    }
+
+    add('遠征予測', 'heading')
+    add(`${partyName} × ${questTitle}`)
+    add(`仮想遠征数           ${prediction.sampleCount}`)
+    for (const outcome of outcomes) {
+      const count = prediction.counts[outcome]
+      const rate = Math.round(prediction.rates[outcome] * 100)
+      add(`${OUTCOME_LABELS[outcome]}                  ${count} (${rate}%)`)
+    }
+    add(
+      `推定依頼達成率       ${Math.round(
+        prediction.estimatedSuccessRate * 100,
+      )}%`,
+      'heading',
+    )
+    add(getPredictionLabel(prediction.estimatedSuccessRate))
+
+    content.addChild(scroll)
+    this._context!.overlayManager.openModal('遠征予測の内訳', content)
   }
 
   private openReportModal(report: ExpeditionReportViewModel): void {

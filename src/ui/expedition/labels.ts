@@ -1,6 +1,7 @@
 import type { BattleOutcome } from '../../core/models/types.ts'
 import type {
   CheckResult,
+  EnvironmentType,
   ExpeditionOutcome,
   ExpeditionPhase,
   ObjectiveType,
@@ -51,4 +52,16 @@ export const CHECK_RESULT_LABELS: Readonly<Record<CheckResult, string>> = {
   partialSuccess: '部分成功',
   failure: '失敗',
   criticalFailure: '致命的失敗',
+}
+
+export const ENVIRONMENT_LABELS: Readonly<Record<EnvironmentType, string>> = {
+  forest: '森林',
+  mountain: '山岳',
+  cave: '洞窟',
+  ruins: '遺跡',
+  plains: '平原',
+  swamp: '湿地',
+  desert: '砂漠',
+  urban: '都市',
+  magical: '魔境',
 }

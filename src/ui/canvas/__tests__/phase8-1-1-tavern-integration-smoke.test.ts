@@ -177,9 +177,9 @@ describe('Phase 8.1.1 Tavern Integration Smoke', () => {
 
     const assignButton = (
       scene as unknown as {
-        _partySummary: { _assignButton: { emit: (event: string) => void } }
+        _decisionPanel: { _assignButton: { emit: (event: string) => void } }
       }
-    )._partySummary._assignButton
+    )._decisionPanel._assignButton
     assignButton.emit('pointertap')
 
     expect(context.actions.offerRequest).toHaveBeenCalledWith(
@@ -210,9 +210,9 @@ describe('Phase 8.1.1 Tavern Integration Smoke', () => {
 
     const assignButton = (
       scene as unknown as {
-        _partySummary: { _assignButton: { emit: (event: string) => void } }
+        _decisionPanel: { _assignButton: { emit: (event: string) => void } }
       }
-    )._partySummary._assignButton
+    )._decisionPanel._assignButton
     assignButton.emit('pointertap')
 
     const viewModel = (
