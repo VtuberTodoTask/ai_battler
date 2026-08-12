@@ -107,6 +107,7 @@ export class SoundNovelScene implements GameScene {
 
     this._measureLabel = new GameLabel('', context.theme, 'narration', {
       maxWidth: TEXT_W,
+      breakWords: true,
     })
     this._measureLabel.visible = false
     this._textLayer.addChild(this._measureLabel)
@@ -309,6 +310,7 @@ export class SoundNovelScene implements GameScene {
         const kind = segment.kind === 'dialogue' ? 'body' : 'narration'
         const label = new GameLabel(text, this._context!.theme, kind, {
           maxWidth: TEXT_W,
+          breakWords: true,
         })
         label.x = segment.kind === 'dialogue' ? 24 : 0
         this._labelMap.set(segment.id, label)
@@ -410,6 +412,7 @@ export class SoundNovelScene implements GameScene {
       const text = `${prefix}${entry.text}`
       const line = new GameLabel(text, this._context.theme, 'body', {
         maxWidth: panelW - 80,
+        breakWords: true,
       })
       line.x = 0
       line.y = y

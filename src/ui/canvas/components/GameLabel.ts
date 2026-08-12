@@ -1,4 +1,9 @@
-import { Container, ObservablePoint, Text } from 'pixi.js'
+import {
+  Container,
+  ObservablePoint,
+  Text,
+  type TextStyleOptions,
+} from 'pixi.js'
 import type { GameUiTheme } from '../theme/gameTheme.ts'
 import { makeTextStyle, type TypographyKind } from '../theme/typography.ts'
 
@@ -13,15 +18,26 @@ export class GameLabel extends Container {
     initialText: string,
     theme: GameUiTheme,
     kind: TypographyKind = 'body',
-    options?: { maxWidth?: number; align?: 'left' | 'center' | 'right' },
+    options?: {
+      maxWidth?: number
+      align?: 'left' | 'center' | 'right'
+      breakWords?: boolean
+      leading?: number
+    },
   ) {
     super()
 
-    const style = makeTextStyle(theme, kind, {
+    const styleOptions: Partial<TextStyleOptions> = {
       wordWrap: options?.maxWidth ? true : undefined,
       wordWrapWidth: options?.maxWidth,
       align: options?.align ?? 'left',
-    })
+      breakWords: options?.breakWords,
+    }
+    if (typeof options?.leading === 'number') {
+      styleOptions.leading = options.leading
+    }
+
+    const style = makeTextStyle(theme, kind, styleOptions)
 
     this._text = new Text({ text: initialText, style })
     this.addChild(this._text)
