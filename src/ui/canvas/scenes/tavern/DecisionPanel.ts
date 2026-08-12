@@ -430,17 +430,9 @@ export class DecisionPanel extends Container {
     danger.x = rightX
     danger.y = y
     this._predictionContent.addChild(danger)
-    y += danger.textHeight + 8
+    y += danger.textHeight
 
-    const breakdownButton = new GameButton({
-      width: 120,
-      height: 28,
-      theme: this._theme,
-      label: '内訳を見る',
-    })
-    breakdownButton.x = rightWidth - 120
-    breakdownButton.y = y
-    breakdownButton.onActivate = () => this._onOpenBreakdown()
-    this._predictionContent.addChild(breakdownButton)
+    const bottomBarHeight = this._height - this._bottomBar.y
+    this._predictionContent.y = Math.max(0, (bottomBarHeight - y) / 2)
   }
 }
