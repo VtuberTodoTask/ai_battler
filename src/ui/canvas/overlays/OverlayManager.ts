@@ -35,8 +35,12 @@ export class OverlayManager {
     this._tooltip.hide()
   }
 
-  openModal(title: string, content: Container | string): void {
-    this._modal.open(title, content)
+  openModal(
+    title: string,
+    content: Container | string,
+    footer?: Container,
+  ): void {
+    this._modal.open(title, content, footer)
   }
 
   closeModal(): void {

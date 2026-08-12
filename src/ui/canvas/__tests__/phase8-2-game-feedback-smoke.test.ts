@@ -526,6 +526,7 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
     expect(openModalSpy).toHaveBeenCalledWith(
       `遠征報告：${report.questTitle}`,
       expect.anything(),
+      expect.anything(),
     )
   })
 

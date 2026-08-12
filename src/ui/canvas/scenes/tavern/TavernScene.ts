@@ -502,8 +502,7 @@ export class TavernScene implements GameScene {
 
   private openStayExtensionDetail(activity: TavernActivityItemViewModel): void {
     const theme = this._context!.theme
-    const content = new Container()
-    const scroll = new GameScrollView(theme, 520, 200)
+    const scroll = new GameScrollView(theme, 520, 170)
 
     let y = 0
     if (activity.summary) {
@@ -525,12 +524,13 @@ export class TavernScene implements GameScene {
       label: '物語として読む',
       disabled: !canReadNarrative,
     })
-    narrativeButton.y = y
     narrativeButton.onActivate = () => this.openStayExtensionNarrative(activity)
-    scroll.content.addChild(narrativeButton)
 
-    content.addChild(scroll)
-    this._context!.overlayManager.openModal(activity.title, content)
+    this._context!.overlayManager.openModal(
+      activity.title,
+      scroll,
+      narrativeButton,
+    )
   }
 
   private openStayExtensionNarrative(
@@ -683,8 +683,7 @@ export class TavernScene implements GameScene {
     this.markReportViewed(report.id)
 
     const theme = this._context!.theme
-    const content = new Container()
-    const scroll = new GameScrollView(theme, 520, 200)
+    const scroll = new GameScrollView(theme, 520, 170)
 
     const lines = this.buildReportLines(report)
     let y = 0
@@ -705,14 +704,12 @@ export class TavernScene implements GameScene {
       label: '物語として読む',
       disabled: !canReadNarrative,
     })
-    narrativeButton.y = y + 12
     narrativeButton.onActivate = () => this.openNarrativeModal(report)
-    scroll.content.addChild(narrativeButton)
 
-    content.addChild(scroll)
     this._context!.overlayManager.openModal(
       `遠征報告：${report.questTitle}`,
-      content,
+      scroll,
+      narrativeButton,
     )
   }
 
@@ -749,13 +746,6 @@ export class TavernScene implements GameScene {
           : '記録なし'
       }`,
     )
-    if (report.majorEvents.length > 0) {
-      lines.push('')
-      lines.push('主な出来事')
-      for (const event of report.majorEvents) {
-        lines.push(`・${event}`)
-      }
-    }
     return lines
   }
 
