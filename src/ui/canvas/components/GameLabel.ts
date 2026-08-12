@@ -22,7 +22,6 @@ export class GameLabel extends Container {
       maxWidth?: number
       align?: 'left' | 'center' | 'right'
       breakWords?: boolean
-      leading?: number
     },
   ) {
     super()
@@ -32,9 +31,6 @@ export class GameLabel extends Container {
       wordWrapWidth: options?.maxWidth,
       align: options?.align ?? 'left',
       breakWords: options?.breakWords,
-    }
-    if (typeof options?.leading === 'number') {
-      styleOptions.leading = options.leading
     }
 
     const style = makeTextStyle(theme, kind, styleOptions)
