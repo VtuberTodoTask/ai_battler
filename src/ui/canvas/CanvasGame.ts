@@ -8,6 +8,7 @@ import { BootScene } from './scenes/BootScene.ts'
 import { FoundationDemoScene } from './scenes/FoundationDemoScene.ts'
 import { TavernScene } from './scenes/tavern/TavernScene.ts'
 import { SoundNovelScene } from './scenes/soundNovel/SoundNovelScene.ts'
+import { ExpeditionResultsScene } from './scenes/expeditionResults/ExpeditionResultsScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -109,6 +110,7 @@ export class CanvasGame {
     this._sceneManager.register(new FoundationDemoScene())
     this._sceneManager.register(new TavernScene())
     this._sceneManager.register(new SoundNovelScene())
+    this._sceneManager.register(new ExpeditionResultsScene())
 
     app.ticker.add(this.handleTick)
 

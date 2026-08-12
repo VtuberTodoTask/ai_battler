@@ -28,6 +28,10 @@ import type {
   SoundNovelSceneInput,
   SoundNovelVisualContext,
 } from '../soundNovel/types.ts'
+import {
+  buildExpeditionResultsSceneViewModel,
+  type ExpeditionResultsSceneInput,
+} from '../expeditionResults/expeditionResultsViewModel.ts'
 import { ActivityPanel } from './ActivityPanel.ts'
 import { DecisionPanel } from './DecisionPanel.ts'
 import { PartyListPanel } from './PartyListPanel.ts'
@@ -146,6 +150,34 @@ export class TavernScene implements GameScene {
     this._uiState = { ...uiState }
     this._previousPartyCount = campaign.parties.length
 
+    const dayAdvanced =
+      previousDayNumber > 0 && campaign.dayNumber > previousDayNumber
+    if (dayAdvanced) {
+      const previousRecord = campaign.history[campaign.history.length - 1]
+      if (previousRecord && previousRecord.results.length > 0) {
+        const resultViewModel = buildExpeditionResultsSceneViewModel(
+          {
+            campaign,
+            dayNumber: previousRecord.dayNumber,
+            selectedResultId: undefined,
+          },
+          this._uiState.viewedReportIds ?? [],
+        )
+        if (resultViewModel.results.length > 0) {
+          const input: ExpeditionResultsSceneInput = {
+            campaign,
+            dayNumber: previousRecord.dayNumber,
+            selectedResultId: resultViewModel.results[0].id,
+          }
+          this._context!.canvasGame.sceneManager?.push(
+            'expeditionResults',
+            input,
+          )
+          return
+        }
+      }
+    }
+
     const partyIds = new Set(campaign.currentDay.parties.map((p) => p.id))
     const requestIds = new Set(campaign.currentDay.requests.map((r) => r.id))
 
@@ -192,8 +224,6 @@ export class TavernScene implements GameScene {
     this.updateViewModel()
     this.render()
 
-    const dayAdvanced =
-      previousDayNumber > 0 && campaign.dayNumber > previousDayNumber
     const resolvedTransition =
       campaign.currentDay.status === 'resolved' && previousStatus === 'planning'
     if (dayAdvanced || resolvedTransition) {
