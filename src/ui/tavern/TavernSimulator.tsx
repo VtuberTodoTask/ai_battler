@@ -24,6 +24,7 @@ import { CampaignHistory } from './CampaignHistory.tsx'
 import { ExpeditionPredictionPanel } from './ExpeditionPredictionPanel.tsx'
 import { NarrativeQueue } from './NarrativeQueue.tsx'
 import { NarrativeSettings } from './NarrativeSettings.tsx'
+import { AudioSettings } from '../canvas/audio/AudioSettings.tsx'
 import type { NarrativeProvider } from '../../ai/narrative/types.ts'
 import type { NarrativeProviderConfig } from './NarrativeSettings.tsx'
 import './tavern.css'
@@ -337,7 +338,7 @@ export function TavernSimulator() {
           <div className="canvas-settings-modal-overlay">
             <div className="canvas-settings-modal">
               <div className="canvas-settings-header">
-                <h3>AI 接続設定</h3>
+                <h3>設定</h3>
                 <button
                   type="button"
                   className="canvas-settings-close"
@@ -353,6 +354,7 @@ export function TavernSimulator() {
                 onChange={setNarrativeConfig}
                 onProviderChange={setNarrativeProvider}
               />
+              <AudioSettings />
             </div>
           </div>
         )}

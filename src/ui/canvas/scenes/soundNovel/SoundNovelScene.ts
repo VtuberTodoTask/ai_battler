@@ -6,6 +6,8 @@ import { GameScrollView } from '../../components/GameScrollView.ts'
 import type { GameScene, GameSceneContext } from '../../types.ts'
 import { SoundNovelPlayer } from './SoundNovelPlayer.ts'
 import { resolveSoundNovelBackground } from './resolveSoundNovelBackground.ts'
+import { resolveSoundNovelBgm } from './resolveSoundNovelBgm.ts'
+import { AudioController } from '../../audio/AudioController.ts'
 import type { SoundNovelSceneInput, SoundNovelSegment } from './types.ts'
 
 const TEXT_X = 170
@@ -101,6 +103,7 @@ export class SoundNovelScene implements GameScene {
     this.drawBackground(
       resolveSoundNovelBackground(sceneInput.source, sceneInput.visualContext),
     )
+    AudioController.playBgm(resolveSoundNovelBgm(sceneInput))
     this.drawDimLayer()
     this.createIndicator()
     this.createControls()
@@ -160,6 +163,7 @@ export class SoundNovelScene implements GameScene {
       this._root = null
     }
 
+    AudioController.stopBgm()
     this._context = null
   }
 

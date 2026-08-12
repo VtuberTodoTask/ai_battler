@@ -10,6 +10,10 @@ import { GameScrollView } from '../../components/GameScrollView.ts'
 import { TavernListRow } from '../../components/TavernListRow.ts'
 import { OUTCOME_LABELS } from '../../../expedition/labels.ts'
 import { getPredictionLabel } from '../../../tavern/predictionLabels.ts'
+import {
+  AudioController,
+  type BgmTrackId,
+} from '../../audio/AudioController.ts'
 import type { GameScene, GameSceneContext, GameUiState } from '../../types.ts'
 import {
   buildTavernScreenViewModel,
@@ -67,6 +71,8 @@ export class TavernScene implements GameScene {
   private _activityGenerationInFlight = new Set<string>()
   private _narrativeGenerationInFlight = new Set<string>()
   private _shownHighFeedbackIds = new Set<string>()
+  private _previousPartyCount = 0
+  private _modalTrack: BgmTrackId | null = null
 
   mount(context: GameSceneContext): void {
     this._context = context
@@ -79,6 +85,9 @@ export class TavernScene implements GameScene {
 
     this.drawBackground(context)
     this.createPanels(context)
+
+    context.overlayManager.onClose(() => this.handleModalClose())
+    AudioController.playBgm('tavern')
 
     if (this._campaign) {
       this.applyCampaign(this._campaign, this._uiState)
@@ -107,6 +116,8 @@ export class TavernScene implements GameScene {
     this._narrativeGenerationInFlight.clear()
     this._shownHighFeedbackIds.clear()
     this._autoSelectPending = true
+    this._modalTrack = null
+    AudioController.stopBgm()
   }
 
   setCampaign(campaign: TavernCampaignState, uiState: GameUiState): void {
@@ -129,9 +140,11 @@ export class TavernScene implements GameScene {
   ): void {
     const previousDayNumber = this._campaign?.dayNumber ?? 0
     const previousStatus = this._campaign?.currentDay.status
+    const previousPartyCount = this._campaign?.parties.length ?? 0
 
     this._campaign = campaign
     this._uiState = { ...uiState }
+    this._previousPartyCount = campaign.parties.length
 
     const partyIds = new Set(campaign.currentDay.parties.map((p) => p.id))
     const requestIds = new Set(campaign.currentDay.requests.map((r) => r.id))
@@ -179,11 +192,28 @@ export class TavernScene implements GameScene {
     this.updateViewModel()
     this.render()
 
-    const dayAdvanced = campaign.dayNumber > previousDayNumber
+    const dayAdvanced =
+      previousDayNumber > 0 && campaign.dayNumber > previousDayNumber
     const resolvedTransition =
-      campaign.currentDay.status === 'resolved' && previousStatus !== 'resolved'
+      campaign.currentDay.status === 'resolved' && previousStatus === 'planning'
     if (dayAdvanced || resolvedTransition) {
       this.showHighImportanceSummary()
+    }
+
+    if (dayAdvanced && campaign.parties.length > previousPartyCount) {
+      AudioController.playSe('newParty')
+    }
+
+    if (resolvedTransition) {
+      const hasSuccess = campaign.currentDay.results.some(
+        (r) =>
+          r.result?.outcome === 'success' ||
+          r.result?.outcome === 'completeSuccess' ||
+          r.result?.outcome === 'partialSuccess',
+      )
+      if (hasSuccess) {
+        AudioController.playSe('successJingle')
+      }
     }
   }
 
@@ -624,6 +654,8 @@ export class TavernScene implements GameScene {
     }
 
     content.addChild(scroll)
+    this._modalTrack = 'expeditionReports'
+    AudioController.playBgm('expeditionReports')
     this._context!.overlayManager.openModal('最近の報告', content)
   }
 
@@ -681,6 +713,9 @@ export class TavernScene implements GameScene {
 
   private openReportModal(report: ExpeditionReportViewModel): void {
     this.markReportViewed(report.id)
+
+    this._modalTrack = 'expeditionReports'
+    AudioController.playBgm('expeditionReports')
 
     const theme = this._context!.theme
     const scroll = new GameScrollView(theme, 520, 170)
@@ -833,6 +868,7 @@ export class TavernScene implements GameScene {
         reportId: report.id,
         partyId: report.partyId,
       },
+      mood: this.resolveReportMood(report),
     })
   }
 
@@ -859,6 +895,7 @@ export class TavernScene implements GameScene {
         activityId: activity.id,
         partyId: activity.partyId,
       },
+      mood: 'daily',
     })
   }
 
@@ -885,11 +922,37 @@ export class TavernScene implements GameScene {
         activityId: activity.id,
         partyId: activity.partyId,
       },
+      mood: 'daily',
     })
   }
 
   private findPartyAcrossCampaign(partyId: string): CampaignParty | undefined {
     return this._campaign?.parties.find((p) => p.id === partyId)
+  }
+
+  private resolveReportMood(
+    report: ExpeditionReportViewModel,
+  ): 'daily' | 'tension' | 'sad' {
+    if (report.outcome === 'failure' || report.outcome === 'retreat') {
+      return 'sad'
+    }
+    const env = (report.environment ?? '').toLowerCase()
+    const tenseEnvironments = [
+      'forest',
+      'cave',
+      'ruins',
+      'dungeon',
+      'mountain',
+      'wetland',
+      'swamp',
+    ]
+    if (
+      tenseEnvironments.includes(env) ||
+      tenseEnvironments.some((value) => env.includes(value))
+    ) {
+      return 'tension'
+    }
+    return 'daily'
   }
 
   private buildFocusCharacterIds(party: CampaignParty | undefined): string[] {
@@ -999,5 +1062,12 @@ export class TavernScene implements GameScene {
     scroll.content.addChild(label)
     content.addChild(scroll)
     return content
+  }
+
+  private handleModalClose(): void {
+    if (this._modalTrack) {
+      this._modalTrack = null
+      AudioController.playBgm('tavern')
+    }
   }
 }

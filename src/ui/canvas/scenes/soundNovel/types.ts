@@ -26,6 +26,8 @@ export interface SoundNovelReturnTarget {
   partyId?: string
 }
 
+export type SoundNovelMood = 'daily' | 'tension' | 'sad'
+
 export interface SoundNovelSceneInput {
   narrativeId: string
   source: SoundNovelSource
@@ -33,6 +35,7 @@ export interface SoundNovelSceneInput {
   text: string
   visualContext: SoundNovelVisualContext
   returnTarget: SoundNovelReturnTarget
+  mood?: SoundNovelMood
 }
 
 export interface SoundNovelPresentationCue {
