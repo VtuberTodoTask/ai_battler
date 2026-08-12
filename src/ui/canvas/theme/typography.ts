@@ -18,37 +18,37 @@ export function makeTextStyle(
       fontSize: 28,
       fill: theme.colors.textPrimary,
       fontWeight: 'bold',
-      leading: 8,
+      leading: 10,
     },
     body: {
       fontFamily: FALLBACK_FAMILIES,
       fontSize: 18,
       fill: theme.colors.textPrimary,
-      leading: 7,
+      leading: 9,
     },
     narration: {
       fontFamily: FALLBACK_FAMILIES,
       fontSize: 22,
       fill: theme.colors.textPrimary,
-      leading: 9,
+      leading: 12,
     },
     caption: {
       fontFamily: FALLBACK_FAMILIES,
       fontSize: 14,
       fill: theme.colors.textMuted,
-      leading: 5,
+      leading: 6,
     },
     button: {
       fontFamily: FALLBACK_FAMILIES,
       fontSize: 16,
       fill: theme.colors.textPrimary,
-      leading: 6,
+      leading: 8,
     },
     numeric: {
       fontFamily: '"Roboto Mono", "SF Mono", monospace',
       fontSize: 18,
       fill: theme.colors.textPrimary,
-      leading: 6,
+      leading: 8,
     },
   }
 
