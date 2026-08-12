@@ -1,4 +1,5 @@
 import type {
+  EnvironmentType,
   ExpeditionInjury,
   ExpeditionOutcome,
 } from '../../../core/expedition/types.ts'
@@ -40,10 +41,12 @@ export interface ExpeditionReportViewModel {
   day: number
   questTitle: string
   partyName: string
+  partyId?: string
   outcome: ReportOutcome
   outcomeLabel: string
   objectiveSummary: string
   survivalText: string
+  environment?: EnvironmentType
   casualties: ExpeditionCasualtyViewModel[]
   injuries: ExpeditionInjuryViewModel[]
   injuryRecordMissing: boolean
@@ -255,10 +258,12 @@ function buildReportFromResult(
     day,
     questTitle: result.request.title,
     partyName: result.partyName ?? '不明',
+    partyId: result.partyId,
     outcome: reportOutcomeFromExpedition(report.outcome),
     outcomeLabel: OUTCOME_LABELS[report.outcome] ?? report.outcome,
     objectiveSummary: objectiveSummary(report.objective),
     survivalText: `${surviving} / ${total} 生還`,
+    environment: result.request.environment,
     casualties,
     injuries,
     injuryRecordMissing,

@@ -2,7 +2,7 @@ import type { TextStyleOptions } from 'pixi.js'
 import type { GameUiTheme } from './gameTheme.ts'
 
 export type TypographyKind =
-  'heading' | 'body' | 'caption' | 'button' | 'numeric'
+  'heading' | 'body' | 'narration' | 'caption' | 'button' | 'numeric'
 
 const FALLBACK_FAMILIES =
   '"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif'
@@ -18,26 +18,37 @@ export function makeTextStyle(
       fontSize: 28,
       fill: theme.colors.textPrimary,
       fontWeight: 'bold',
+      lineHeight: 38,
     },
     body: {
       fontFamily: FALLBACK_FAMILIES,
       fontSize: 18,
       fill: theme.colors.textPrimary,
+      lineHeight: 28,
+    },
+    narration: {
+      fontFamily: FALLBACK_FAMILIES,
+      fontSize: 22,
+      fill: theme.colors.textPrimary,
+      lineHeight: 34,
     },
     caption: {
       fontFamily: FALLBACK_FAMILIES,
       fontSize: 14,
       fill: theme.colors.textMuted,
+      lineHeight: 22,
     },
     button: {
       fontFamily: FALLBACK_FAMILIES,
       fontSize: 16,
       fill: theme.colors.textPrimary,
+      lineHeight: 24,
     },
     numeric: {
       fontFamily: '"Roboto Mono", "SF Mono", monospace',
       fontSize: 18,
       fill: theme.colors.textPrimary,
+      lineHeight: 26,
     },
   }
 

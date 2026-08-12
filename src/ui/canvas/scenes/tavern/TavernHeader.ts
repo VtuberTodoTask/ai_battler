@@ -1,4 +1,11 @@
-import { Assets, Container, Rectangle, Sprite, Texture } from 'pixi.js'
+import {
+  Assets,
+  Container,
+  Graphics,
+  Rectangle,
+  Sprite,
+  Texture,
+} from 'pixi.js'
 import { GameButton } from '../../components/GameButton.ts'
 import { GameLabel } from '../../components/GameLabel.ts'
 import { GamePanel } from '../../components/GamePanel.ts'
@@ -124,18 +131,24 @@ export class TavernHeader extends Container {
     if (typeof Assets.load !== 'function') return
     void Assets.load(SETTINGS_ICON_URL)
       .then((texture) => {
+        const button = new Graphics()
+        button.x = x
+        button.y = y
+        button.eventMode = 'static'
+        button.cursor = 'pointer'
+        button.hitArea = new Rectangle(0, 0, GEAR_SIZE, GEAR_SIZE)
+        button.rect(0, 0, GEAR_SIZE, GEAR_SIZE).fill({ alpha: 0 })
+
         const sprite = new Sprite(texture as Texture)
+        sprite.eventMode = 'none'
         sprite.width = GEAR_SIZE
         sprite.height = GEAR_SIZE
-        sprite.x = x
-        sprite.y = y
-        sprite.eventMode = 'static'
-        sprite.cursor = 'pointer'
-        sprite.hitArea = new Rectangle(0, 0, GEAR_SIZE, GEAR_SIZE)
-        sprite.on('pointertap', () => {
+        button.addChild(sprite)
+
+        button.on('pointertap', () => {
           this._onOpenSettings?.()
         })
-        this.addChild(sprite)
+        this.addChild(button)
       })
       .catch(() => {
         // Ignore icon load failures (e.g., in test environments).

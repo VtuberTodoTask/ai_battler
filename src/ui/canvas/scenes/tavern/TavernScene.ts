@@ -1,6 +1,9 @@
 import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js'
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '../../GameViewport.ts'
-import type { TavernCampaignState } from '../../../../core/tavern/campaign/types.ts'
+import type {
+  CampaignParty,
+  TavernCampaignState,
+} from '../../../../core/tavern/campaign/types.ts'
 import { GameButton } from '../../components/GameButton.ts'
 import { GameLabel } from '../../components/GameLabel.ts'
 import { GameScrollView } from '../../components/GameScrollView.ts'
@@ -15,6 +18,10 @@ import {
   findExpeditionReportById,
   type ExpeditionReportViewModel,
 } from '../../viewModel/expeditionReportViewModel.ts'
+import type {
+  SoundNovelSceneInput,
+  SoundNovelVisualContext,
+} from '../soundNovel/types.ts'
 import { ActivityPanel } from './ActivityPanel.ts'
 import { PartyListPanel } from './PartyListPanel.ts'
 import { PartySummaryPanel } from './PartySummaryPanel.ts'
@@ -412,7 +419,7 @@ export class TavernScene implements GameScene {
     }
 
     if (activity.narrativeStatus === 'viewed') {
-      this.openActivityModal(activity.title, activity.summary)
+      this.openSoundNovelForDowntime(activity, activity.summary)
       return
     }
 
@@ -430,7 +437,7 @@ export class TavernScene implements GameScene {
             )
             return
           }
-          this.openActivityModal(activity.title, result.data)
+          this.openSoundNovelForDowntime(activity, result.data)
         })
         .catch((e) => {
           this._activityGenerationInFlight.delete(activity.id)
@@ -466,7 +473,8 @@ export class TavernScene implements GameScene {
           )
           return
         }
-        this.openActivityModal(activity.title, result.data)
+        this._context!.overlayManager.closeModal()
+        this.openSoundNovelForDowntime(activity, result.data)
       })
       .catch((e) => {
         this._activityGenerationInFlight.delete(activity.id)
@@ -530,7 +538,7 @@ export class TavernScene implements GameScene {
           (g) => g.id === candidate.activeGenerationId,
         )
         if (record) {
-          this.openActivityModal('滞在延長の物語', record.generatedText)
+          this.openSoundNovelForStayExtension(activity, record.generatedText)
           return
         }
       }
@@ -561,7 +569,8 @@ export class TavernScene implements GameScene {
           )
           return
         }
-        this.openActivityModal('滞在延長の物語', result.data)
+        this._context!.overlayManager.closeModal()
+        this.openSoundNovelForStayExtension(activity, result.data)
       })
       .catch((e) => {
         this._narrativeGenerationInFlight.delete(targetId)
@@ -691,7 +700,7 @@ export class TavernScene implements GameScene {
     if (this._narrativeGenerationInFlight.has(report.id)) return
 
     if (report.generatedText && report.generatedText.length > 0) {
-      this.openActivityModal('遠征の物語', report.generatedText)
+      this.openSoundNovelForReport(report, report.generatedText)
       return
     }
 
@@ -728,7 +737,8 @@ export class TavernScene implements GameScene {
           )
           return
         }
-        this.openActivityModal('遠征の物語', result.data)
+        this._context!.overlayManager.closeModal()
+        this.openSoundNovelForReport(report, result.data)
       })
       .catch((e) => {
         this._narrativeGenerationInFlight.delete(report.id)
@@ -741,6 +751,104 @@ export class TavernScene implements GameScene {
           e instanceof Error ? e.message : '物語の生成に失敗しました',
         )
       })
+  }
+
+  private openSoundNovel(input: SoundNovelSceneInput): void {
+    this._context!.canvasGame.sceneManager!.push('soundNovel', input)
+  }
+
+  private openSoundNovelForReport(
+    report: ExpeditionReportViewModel,
+    text: string,
+  ): void {
+    const party = report.partyId
+      ? this.findPartyAcrossCampaign(report.partyId)
+      : undefined
+    const visualContext: SoundNovelVisualContext = {
+      environment: report.environment,
+      participantIds: party?.party.members.map((m) => m.id),
+      focusCharacterIds: this.buildFocusCharacterIds(party),
+    }
+    this.openSoundNovel({
+      narrativeId: report.narrativeTargetId ?? report.id,
+      source: 'expedition',
+      title: `遠征の物語：${report.questTitle}`,
+      text,
+      visualContext,
+      returnTarget: {
+        sceneId: 'tavern',
+        reportId: report.id,
+        partyId: report.partyId,
+      },
+    })
+  }
+
+  private openSoundNovelForStayExtension(
+    activity: TavernActivityItemViewModel,
+    text: string,
+  ): void {
+    const party = activity.partyId
+      ? this.findPartyAcrossCampaign(activity.partyId)
+      : undefined
+    const visualContext: SoundNovelVisualContext = {
+      environment: 'tavern',
+      participantIds: party?.party.members.map((m) => m.id),
+      focusCharacterIds: this.buildFocusCharacterIds(party),
+    }
+    this.openSoundNovel({
+      narrativeId: activity.narrativeTargetId ?? activity.id,
+      source: 'stay_extension',
+      title: activity.title,
+      text,
+      visualContext,
+      returnTarget: {
+        sceneId: 'tavern',
+        activityId: activity.id,
+        partyId: activity.partyId,
+      },
+    })
+  }
+
+  private openSoundNovelForDowntime(
+    activity: TavernActivityItemViewModel,
+    text: string,
+  ): void {
+    const party = activity.partyId
+      ? this.findPartyAcrossCampaign(activity.partyId)
+      : undefined
+    const visualContext: SoundNovelVisualContext = {
+      environment: 'tavern',
+      participantIds: party?.party.members.map((m) => m.id),
+      focusCharacterIds: this.buildFocusCharacterIds(party),
+    }
+    this.openSoundNovel({
+      narrativeId: activity.id,
+      source: 'downtime',
+      title: activity.title,
+      text,
+      visualContext,
+      returnTarget: {
+        sceneId: 'tavern',
+        activityId: activity.id,
+        partyId: activity.partyId,
+      },
+    })
+  }
+
+  private findPartyAcrossCampaign(partyId: string): CampaignParty | undefined {
+    return this._campaign?.parties.find((p) => p.id === partyId)
+  }
+
+  private buildFocusCharacterIds(party: CampaignParty | undefined): string[] {
+    if (!party) return []
+    const leader = party.party.members.find(
+      (m) => m.id === party.party.leaderId,
+    )
+    const first = party.party.members[0]
+    const ids = new Set<string>()
+    if (leader) ids.add(leader.id)
+    if (first) ids.add(first.id)
+    return Array.from(ids)
   }
 
   private showHighImportanceSummary(): void {

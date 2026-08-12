@@ -20,6 +20,7 @@
     "phase8-0-canvas-ui-foundation-smoke": "vitest run src/ui/canvas/__tests__/phase8-0-canvas-ui-foundation-smoke.test.ts",
     "phase8-1-tavern-main-screen-smoke": "vitest run src/ui/canvas/__tests__/phase8-1-tavern-main-screen-smoke.test.ts",
     "phase8-1-1-tavern-integration-smoke": "vitest run src/ui/canvas/__tests__/phase8-1-1-tavern-integration-smoke.test.ts",
+    "phase8-3-sound-novel-scene-smoke": "vitest run src/ui/canvas/__tests__/phase8-3-sound-novel-scene-smoke.test.ts",
     "format": "prettier --write ."
   },
   "dependencies": {

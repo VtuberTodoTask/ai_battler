@@ -144,6 +144,10 @@ function createSceneContext(
       uiStateRef.current = { ...uiStateRef.current, ...partial }
       scene.setUiState(uiStateRef.current)
     }),
+    sceneManager: {
+      push: vi.fn(),
+      pop: vi.fn(),
+    },
   } as unknown as GameSceneContext['canvasGame']
 
   return {
@@ -452,7 +456,6 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
     const scene = new TavernScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(scene, uiStateRef)
-    const openModalSpy = vi.spyOn(context.overlayManager, 'openModal')
     let campaign = createTavernCampaign('phase8-2-cache')
     const party = campaign.currentDay.parties[0]!
     const quest = findAcceptableRequest(campaign, party.id)
@@ -484,9 +487,13 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
     await new Promise((r) => setTimeout(r, 0))
 
     expect(context.actions.openExpeditionNarrative).not.toHaveBeenCalled()
-    expect(
-      openModalSpy.mock.calls.some((call) => call[0] === '遠征の物語'),
-    ).toBe(true)
+    expect(context.canvasGame.sceneManager!.push).toHaveBeenCalledWith(
+      'soundNovel',
+      expect.objectContaining({
+        source: 'expedition',
+        text: 'cached story',
+      }),
+    )
   })
 
   it('J: report detail modal exposes outcome and objective summary', () => {
