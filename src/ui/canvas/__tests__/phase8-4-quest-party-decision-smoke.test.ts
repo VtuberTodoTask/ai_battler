@@ -94,7 +94,11 @@ function createSceneContext(
   uiStateRef: { current: typeof DEFAULT_GAME_UI_STATE },
 ): GameSceneContext {
   const app = {
-    renderer: { on: vi.fn(), off: vi.fn(), events: { features: { wheel: false } } },
+    renderer: {
+      on: vi.fn(),
+      off: vi.fn(),
+      events: { features: { wheel: false } },
+    },
     stage: new Container(),
     screen: { width: 1600, height: 900 },
     canvas: document.createElement('canvas'),
@@ -141,7 +145,11 @@ function createSceneContext(
     app,
     viewport: new GameViewport(),
     layers,
-    overlayManager: new OverlayManager(layers.overlay, layers.modal, DEFAULT_GAME_THEME),
+    overlayManager: new OverlayManager(
+      layers.overlay,
+      layers.modal,
+      DEFAULT_GAME_THEME,
+    ),
     theme: DEFAULT_GAME_THEME,
     assetManager: new GameAssetManager(),
     actions,
@@ -163,14 +171,34 @@ describe('Phase 8.4 Quest & Party Decision Smoke', () => {
       selectedQuestId: quest.id,
     })
 
-    const vm = (scene as unknown as { _viewModel: { decision: { selectedQuest?: { id: string; title: string; rankLabel: string; objectiveTypeLabel: string; terrainLabel: string; combatLabel: string; description: string; tags: string[]; offerStatusLabel: string } } } })._viewModel
+    const vm = (
+      scene as unknown as {
+        _viewModel: {
+          decision: {
+            selectedQuest?: {
+              id: string
+              title: string
+              rankLabel: string
+              objectiveTypeLabel: string
+              terrainLabel: string
+              combatLabel: string
+              description: string
+              tags: string[]
+              offerStatusLabel: string
+            }
+          }
+        }
+      }
+    )._viewModel
 
     expect(vm.decision.selectedQuest).toBeDefined()
     expect(vm.decision.selectedQuest!.id).toBe(quest.id)
     expect(vm.decision.selectedQuest!.title).toBe(quest.title)
     expect(vm.decision.selectedQuest!.rankLabel).toContain('Rank')
     expect(vm.decision.selectedQuest!.objectiveTypeLabel).toBeTruthy()
-    expect(vm.decision.selectedQuest!.terrainLabel).not.toMatch(/^(forest|mountain|cave|ruins|plains|swamp|desert|urban|magical)$/)
+    expect(vm.decision.selectedQuest!.terrainLabel).not.toMatch(
+      /^(forest|mountain|cave|ruins|plains|swamp|desert|urban|magical)$/,
+    )
     expect(['あり', 'なし']).toContain(vm.decision.selectedQuest!.combatLabel)
     expect(vm.decision.selectedQuest!.description).toBe(quest.briefing)
     expect(vm.decision.selectedQuest!.offerStatusLabel).toBeTruthy()
@@ -189,13 +217,33 @@ describe('Phase 8.4 Quest & Party Decision Smoke', () => {
       selectedPartyId: party.id,
     })
 
-    const vm = (scene as unknown as { _viewModel: { decision: { selectedParty?: { id: string; name: string; rankLabel: string; statusLabel: string; memberCount: number; injuryLabel: string; members: unknown[] } } } })._viewModel
+    const vm = (
+      scene as unknown as {
+        _viewModel: {
+          decision: {
+            selectedParty?: {
+              id: string
+              name: string
+              rankLabel: string
+              statusLabel: string
+              memberCount: number
+              injuryLabel: string
+              members: unknown[]
+            }
+          }
+        }
+      }
+    )._viewModel
 
     expect(vm.decision.selectedParty).toBeDefined()
     expect(vm.decision.selectedParty!.rankLabel).toContain('Rank')
-    expect(vm.decision.selectedParty!.memberCount).toBe(party.party.members.length)
+    expect(vm.decision.selectedParty!.memberCount).toBe(
+      party.party.members.length,
+    )
     expect(vm.decision.selectedParty!.injuryLabel).toMatch(/^負傷：/)
-    expect(vm.decision.selectedParty!.members.length).toBe(party.party.members.length)
+    expect(vm.decision.selectedParty!.members.length).toBe(
+      party.party.members.length,
+    )
   })
 
   it('C: selecting both party and quest computes a prediction without mutating state', async () => {
@@ -215,14 +263,29 @@ describe('Phase 8.4 Quest & Party Decision Smoke', () => {
     })
 
     await new Promise((r) => setTimeout(r, 0))
-    const decisionPanel = (scene as unknown as { _decisionPanel: { currentPrediction?: { estimatedSuccessRate: number; sampleCount: number; requestId: string; partyId: string } } })._decisionPanel
+    const decisionPanel = (
+      scene as unknown as {
+        _decisionPanel: {
+          currentPrediction?: {
+            estimatedSuccessRate: number
+            sampleCount: number
+            requestId: string
+            partyId: string
+          }
+        }
+      }
+    )._decisionPanel
 
     expect(decisionPanel.currentPrediction).toBeDefined()
     expect(decisionPanel.currentPrediction!.sampleCount).toBe(200)
     expect(decisionPanel.currentPrediction!.requestId).toBe(quest.id)
     expect(decisionPanel.currentPrediction!.partyId).toBe(party.id)
-    expect(decisionPanel.currentPrediction!.estimatedSuccessRate).toBeGreaterThanOrEqual(0)
-    expect(decisionPanel.currentPrediction!.estimatedSuccessRate).toBeLessThanOrEqual(1)
+    expect(
+      decisionPanel.currentPrediction!.estimatedSuccessRate,
+    ).toBeGreaterThanOrEqual(0)
+    expect(
+      decisionPanel.currentPrediction!.estimatedSuccessRate,
+    ).toBeLessThanOrEqual(1)
     expect(party.party.members[0]!.currentHp).toBe(hpBefore)
   })
 
@@ -235,8 +298,28 @@ describe('Phase 8.4 Quest & Party Decision Smoke', () => {
     scene.mount(context)
     scene.setCampaign(campaign, { ...DEFAULT_GAME_UI_STATE })
 
-    const rows = (scene as unknown as { _questList: { _rows: { _titleLabel: { text: string }; _subtitleLabel: { text: string } }[] } })._questList._rows
-    const questVm = (scene as unknown as { _viewModel: { quests: { rank: string; terrainLabel: string; objectiveLabel: string; statusLabel: string }[] } })._viewModel.quests[0]!
+    const rows = (
+      scene as unknown as {
+        _questList: {
+          _rows: {
+            _titleLabel: { text: string }
+            _subtitleLabel: { text: string }
+          }[]
+        }
+      }
+    )._questList._rows
+    const questVm = (
+      scene as unknown as {
+        _viewModel: {
+          quests: {
+            rank: string
+            terrainLabel: string
+            objectiveLabel: string
+            statusLabel: string
+          }[]
+        }
+      }
+    )._viewModel.quests[0]!
 
     expect(questVm.rank).toBe(campaign.currentDay.requests[0]!.rank)
     expect(questVm.terrainLabel).toBeTruthy()
@@ -269,7 +352,11 @@ describe('Phase 8.4 Quest & Party Decision Smoke', () => {
     })
 
     await new Promise((r) => setTimeout(r, 0))
-    const decisionPanel = (scene as unknown as { _decisionPanel: { currentPrediction?: { requestId: string } } })._decisionPanel
+    const decisionPanel = (
+      scene as unknown as {
+        _decisionPanel: { currentPrediction?: { requestId: string } }
+      }
+    )._decisionPanel
 
     expect(decisionPanel.currentPrediction?.requestId).toBe(secondQuest.id)
   })
