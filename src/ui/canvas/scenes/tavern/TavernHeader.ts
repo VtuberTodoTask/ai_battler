@@ -16,7 +16,6 @@ export interface TavernHeaderOptions {
   theme: GameUiTheme
   width: number
   height: number
-  onResolve?: () => void
   onAdvance?: () => void
   onOpenReports?: () => void
   onOpenSettings?: () => void
@@ -34,7 +33,6 @@ export class TavernHeader extends Container {
   private readonly _statusLabel: GameLabel
   private readonly _actionButton: GameButton
   private readonly _reportButton: GameButton
-  private readonly _onResolve?: () => void
   private readonly _onAdvance?: () => void
   private readonly _onOpenReports?: () => void
   private readonly _onOpenSettings?: () => void
@@ -45,7 +43,6 @@ export class TavernHeader extends Container {
     this._theme = options.theme
     this._width = options.width
     this._height = options.height
-    this._onResolve = options.onResolve
     this._onAdvance = options.onAdvance
     this._onOpenReports = options.onOpenReports
     this._onOpenSettings = options.onOpenSettings
@@ -91,18 +88,14 @@ export class TavernHeader extends Container {
       width: actionButtonWidth,
       height: 44,
       theme: this._theme,
-      label: '本日を確定',
+      label: '翌日へ',
       disabled: true,
     })
     this._actionButton.x = startX
     this._actionButton.y = 10
     this._actionButton.onActivate = () => {
       if (this._actionButton.state === 'disabled') return
-      if (this._actionButtonLabel === '本日を確定') {
-        this._onResolve?.()
-      } else {
-        this._onAdvance?.()
-      }
+      this._onAdvance?.()
     }
     this.addChild(this._actionButton)
 
@@ -155,8 +148,6 @@ export class TavernHeader extends Container {
       })
   }
 
-  private _actionButtonLabel = '本日を確定'
-
   update(viewModel: TavernHeaderViewModel): void {
     this._dayLabel.text = `DAY ${viewModel.day}`
     this._reputationLabel.text = viewModel.reputationLabel
@@ -169,24 +160,17 @@ export class TavernHeader extends Container {
       this._statusLabel.visible = false
     }
 
-    if (viewModel.canResolveDay) {
-      this._actionButtonLabel = '本日を確定'
-      this._actionButton.setLabel(this._actionButtonLabel)
-      this._actionButton.setEnabled(true)
-    } else if (viewModel.canAdvanceDay) {
-      this._actionButtonLabel = '翌日へ'
-      this._actionButton.setLabel(this._actionButtonLabel)
-      this._actionButton.setEnabled(true)
-    } else {
-      this._actionButtonLabel = '本日を確定'
-      this._actionButton.setLabel(this._actionButtonLabel)
-      this._actionButton.setEnabled(false)
-    }
+    const canAdvance = viewModel.canResolveDay || viewModel.canAdvanceDay
+    this._actionButton.setEnabled(canAdvance)
 
     const reportLabel =
       viewModel.unreadReportCount > 0
         ? `報告 \u25cf${viewModel.unreadReportCount}`
         : '報告'
     this._reportButton.setLabel(reportLabel)
+  }
+
+  setActionEnabled(enabled: boolean): void {
+    this._actionButton.setEnabled(enabled)
   }
 }

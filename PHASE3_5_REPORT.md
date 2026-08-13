@@ -130,7 +130,7 @@ Carriers are selected from active party members after securing and when battle e
 
 - outcome: forcedRetreat
 - targetId: target-1
-- currentIntegrity: 75/80
+- currentIntegrity: 80/80
 - minimumAcceptableIntegrity: 60
 - located: true
 - reached: true
@@ -138,7 +138,7 @@ Carriers are selected from active party members after securing and when battle e
 - extracted: false
 - returned: false
 - carrierIds: []
-- battleExposureDamage: 5
+- battleExposureDamage: 0
 - securingDamage: 0
 - extractionDamage: 0
 
@@ -146,12 +146,12 @@ Carriers are selected from active party members after securing and when battle e
 
 | role     | metric                                               | withRole | withoutRole | paired delta | trials |
 | -------- | ---------------------------------------------------- | -------- | ----------- | ------------ | ------ |
-| Scout    | 発見率                                               | 0.995    | 0.768       | +0.227       | 1000   |
-| Ranger   | 搬出率（portable）                                   | 0.657    | 0.492       | +0.165       | 1000   |
-| Mage     | magical環境到達率                                    | 0.958    | 0.806       | +0.152       | 1000   |
-| Support  | 確保率（standard）                                   | 0.523    | 0.501       | +0.022       | 1000   |
-| Vanguard | 搬出率（heavy）                                      | 0.632    | 0.603       | +0.029       | 1000   |
-| Guardian | 戦闘余波ダメージ平均                                 | 3.544    | 5.047       | -1.503       | 1000   |
+| Scout    | 発見率                                               | 0.999    | 0.932       | +0.067       | 1000   |
+| Ranger   | 搬出率（portable）                                   | 0.814    | 0.708       | +0.106       | 1000   |
+| Mage     | magical環境到達率                                    | 0.983    | 0.893       | +0.090       | 1000   |
+| Support  | 確保率（standard）                                   | 0.876    | 0.862       | +0.014       | 1000   |
+| Vanguard | 搬出率（heavy）                                      | 0.784    | 0.751       | +0.033       | 1000   |
+| Guardian | 戦闘余波ダメージ平均                                 | 2.378    | 3.750       | -1.372       | 1000   |
 | Healer   | completeSuccess率（Healer vs 中性Vanguard 直接対照） | 1.000    | 1.000       | +0.000       | 1000   |
 
 ## Healer negative control

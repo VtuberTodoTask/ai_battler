@@ -53,7 +53,7 @@
 - areaName: 測量地域
 - minimumAcceptableQuality: 70
 - coveragePercent: 100.00%
-- averageQuality: 86.67
+- averageQuality: 93.33
 - reportPrepared: true
 - reportReturned: true
 - reportLostDuringReturn: false
@@ -61,7 +61,7 @@
 - sectors:
 - 北区画 (route): surveyed=true, quality=80, result=success
 - 中央区画 (terrain): surveyed=true, quality=100, result=criticalSuccess
-- 南区画 (arcane): surveyed=true, quality=80, result=success
+- 南区画 (arcane): surveyed=true, quality=100, result=criticalSuccess
 
 ### B: success: 全3区画を測量し報告したがcomplete閾値には至らない
 
@@ -80,9 +80,9 @@
 - 中央区画 (terrain): surveyed=true, quality=55, result=partialSuccess
 - 南区画 (arcane): surveyed=true, quality=80, result=success
 
-### C: partialSuccess: 2区画の測量記録を持ち帰ったが1区画の測量に失敗した
+### C: success: 2区画の測量記録を持ち帰ったが1区画の測量に失敗した
 
-- outcome: partialSuccess
+- outcome: success
 - areaId: area-1
 - areaName: 測量地域
 - minimumAcceptableQuality: 70
@@ -121,13 +121,13 @@
 - areaName: 測量地域
 - minimumAcceptableQuality: 70
 - coveragePercent: 33.33%
-- averageQuality: 100.00
+- averageQuality: 80.00
 - reportPrepared: true
 - reportReturned: true
 - reportLostDuringReturn: false
 - progress: 50%
 - sectors:
-- 北区画 (route): surveyed=true, quality=100, result=criticalSuccess
+- 北区画 (route): surveyed=true, quality=80, result=success
 - 中央区画 (terrain): surveyed=false, quality=0, result=none
 - 南区画 (arcane): surveyed=false, quality=0, result=none
 
@@ -135,13 +135,13 @@
 
 | role     | metric                                         | withRole | withoutRole | paired delta | trials |
 | -------- | ---------------------------------------------- | -------- | ----------- | ------------ | ------ |
-| Scout    | 平均quality（route/hazard主体）                | 76.992   | 64.341      | +12.651      | 1000   |
-| Ranger   | 平均quality（terrain主体）                     | 71.727   | 69.737      | +1.991       | 1000   |
-| Mage     | 平均quality（arcane主体）                      | 77.092   | 72.790      | +4.302       | 1000   |
-| Support  | 平均quality（mixed: route/terrain/arcane）     | 74.941   | 73.712      | +1.229       | 1000   |
-| Vanguard | 平均quality（mixed: route/terrain/arcane）     | 76.301   | 76.381      | -0.080       | 1000   |
-| Guardian | 平均quality（mixed: route/terrain/arcane）     | 75.944   | 75.933      | +0.011       | 1000   |
-| Healer   | 平均quality（Healer vs 中性Vanguard 直接対照） | 82.375   | 82.375      | +0.000       | 1000   |
+| Scout    | 平均quality（route/hazard主体）                | 80.334   | 72.748      | +7.586       | 1000   |
+| Ranger   | 平均quality（terrain主体）                     | 75.315   | 73.452      | +1.862       | 1000   |
+| Mage     | 平均quality（arcane主体）                      | 78.596   | 75.465      | +3.131       | 1000   |
+| Support  | 平均quality（mixed: route/terrain/arcane）     | 77.565   | 76.557      | +1.008       | 1000   |
+| Vanguard | 平均quality（mixed: route/terrain/arcane）     | 78.774   | 78.838      | -0.064       | 1000   |
+| Guardian | 平均quality（mixed: route/terrain/arcane）     | 78.703   | 78.758      | -0.055       | 1000   |
+| Healer   | 平均quality（Healer vs 中性Vanguard 直接対照） | 83.585   | 83.585      | +0.000       | 1000   |
 
 ## Healer negative control
 
