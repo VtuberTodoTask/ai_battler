@@ -29,9 +29,9 @@ import type {
   SoundNovelVisualContext,
 } from '../soundNovel/types.ts'
 import {
-  buildExpeditionResultsSceneViewModel,
-  type ExpeditionResultsSceneInput,
-} from '../expeditionResults/expeditionResultsViewModel.ts'
+  buildDayResultsSceneViewModel,
+  type DayResultsSceneInput,
+} from '../dayResults/dayResultsViewModel.ts'
 import { ActivityPanel } from './ActivityPanel.ts'
 import { DecisionPanel } from './DecisionPanel.ts'
 import { PartyListPanel } from './PartyListPanel.ts'
@@ -74,7 +74,7 @@ export class TavernScene implements GameScene {
   private _autoSelectPending = true
   private _activityGenerationInFlight = new Set<string>()
   private _narrativeGenerationInFlight = new Set<string>()
-  private _shownHighFeedbackIds = new Set<string>()
+  private _advancing = false
   private _previousPartyCount = 0
   private _modalTrack: BgmTrackId | null = null
 
@@ -118,7 +118,7 @@ export class TavernScene implements GameScene {
     this._campaign = null
     this._activityGenerationInFlight.clear()
     this._narrativeGenerationInFlight.clear()
-    this._shownHighFeedbackIds.clear()
+    this._advancing = false
     this._autoSelectPending = true
     this._modalTrack = null
     AudioController.stopBgm()
@@ -142,9 +142,8 @@ export class TavernScene implements GameScene {
     campaign: TavernCampaignState,
     uiState: GameUiState,
   ): void {
+    this._advancing = false
     const previousDayNumber = this._campaign?.dayNumber ?? 0
-    const previousStatus = this._campaign?.currentDay.status
-    const previousPartyCount = this._campaign?.parties.length ?? 0
 
     this._campaign = campaign
     this._uiState = { ...uiState }
@@ -154,27 +153,28 @@ export class TavernScene implements GameScene {
       previousDayNumber > 0 && campaign.dayNumber > previousDayNumber
     if (dayAdvanced) {
       const previousRecord = campaign.history[campaign.history.length - 1]
-      if (previousRecord && previousRecord.results.length > 0) {
-        const resultViewModel = buildExpeditionResultsSceneViewModel(
-          {
-            campaign,
-            dayNumber: previousRecord.dayNumber,
-            selectedResultId: undefined,
-          },
-          this._uiState.viewedReportIds ?? [],
-        )
-        if (resultViewModel.results.length > 0) {
-          const input: ExpeditionResultsSceneInput = {
-            campaign,
-            dayNumber: previousRecord.dayNumber,
-            selectedResultId: resultViewModel.results[0].id,
-          }
-          this._context!.canvasGame.sceneManager?.push(
-            'expeditionResults',
-            input,
-          )
-          return
+      if (previousRecord) {
+        const selectedResultId =
+          previousRecord.results.length > 0
+            ? buildDayResultsSceneViewModel(
+                {
+                  campaign,
+                  resolvedDay: previousRecord.dayNumber,
+                  nextDay: campaign.dayNumber,
+                },
+                this._uiState.viewedReportIds ?? [],
+              ).expeditionResults[0]?.id
+            : undefined
+        const input: DayResultsSceneInput = {
+          campaign,
+          resolvedDay: previousRecord.dayNumber,
+          nextDay: campaign.dayNumber,
+          selectedResultId,
+          step: 'important_events',
+          returnTarget: { sceneId: 'tavern' },
         }
+        this._context!.canvasGame.sceneManager?.push('dayResults', input)
+        return
       }
     }
 
@@ -223,28 +223,6 @@ export class TavernScene implements GameScene {
 
     this.updateViewModel()
     this.render()
-
-    const resolvedTransition =
-      campaign.currentDay.status === 'resolved' && previousStatus === 'planning'
-    if (dayAdvanced || resolvedTransition) {
-      this.showHighImportanceSummary()
-    }
-
-    if (dayAdvanced && campaign.parties.length > previousPartyCount) {
-      AudioController.playSe('newParty')
-    }
-
-    if (resolvedTransition) {
-      const hasSuccess = campaign.currentDay.results.some(
-        (r) =>
-          r.result?.outcome === 'success' ||
-          r.result?.outcome === 'completeSuccess' ||
-          r.result?.outcome === 'partialSuccess',
-      )
-      if (hasSuccess) {
-        AudioController.playSe('successJingle')
-      }
-    }
   }
 
   private updateViewModel(): void {
@@ -296,7 +274,6 @@ export class TavernScene implements GameScene {
       theme,
       width: VIRTUAL_WIDTH,
       height: TOP_BAR_HEIGHT,
-      onResolve: () => this.handleResolve(),
       onAdvance: () => this.handleAdvance(),
       onOpenReports: () => this.openReportArchiveModal(),
       onOpenSettings: () => this._context!.actions.openSettings(),
@@ -358,31 +335,26 @@ export class TavernScene implements GameScene {
   private render(): void {
     if (!this._viewModel) return
     this._header?.update(this._viewModel.header)
+    this._header?.setActionEnabled(!this._advancing)
     this._partyList?.update(this._viewModel.parties)
     this._decisionPanel?.update(this._viewModel.decision)
     this._questList?.update(this._viewModel.quests)
     this._activityPanel?.update(this._viewModel.activities)
   }
 
-  private handleResolve(): void {
-    this.clearActionMessage()
-    const result = this._context!.actions.resolveDay()
-    if (!result.ok) {
-      this.setActionMessage(
-        'error',
-        result.message ?? '本日の仲介確定に失敗しました',
-      )
-    }
-  }
-
   private handleAdvance(): void {
+    if (this._advancing) return
+    this._advancing = true
     this.clearActionMessage()
+    this.render()
     const result = this._context!.actions.advanceDay()
     if (!result.ok) {
+      this._advancing = false
       this.setActionMessage(
         'error',
         result.message ?? '翌日への進行に失敗しました',
       )
+      this.render()
     }
   }
 
@@ -995,93 +967,6 @@ export class TavernScene implements GameScene {
     if (leader) ids.add(leader.id)
     if (first) ids.add(first.id)
     return Array.from(ids)
-  }
-
-  private showHighImportanceSummary(): void {
-    if (!this._viewModel) return
-    const highItems = this._viewModel.activities.filter(
-      (a) => a.importance === 'high' && !this._shownHighFeedbackIds.has(a.id),
-    )
-    if (highItems.length === 0) return
-
-    for (const item of highItems) {
-      this._shownHighFeedbackIds.add(item.id)
-    }
-
-    const theme = this._context!.theme
-    const content = new Container()
-    const scroll = new GameScrollView(theme, 520, 220)
-
-    let y = 0
-    for (const item of highItems) {
-      const title = new GameLabel(`・${item.title}`, theme, 'body', {
-        maxWidth: 520,
-      })
-      title.y = y
-      scroll.content.addChild(title)
-      y += title.textHeight + 8
-
-      if (item.summary) {
-        const summary = new GameLabel(`  ${item.summary}`, theme, 'caption', {
-          maxWidth: 520,
-        })
-        summary.y = y
-        scroll.content.addChild(summary)
-        y += summary.textHeight + 8
-      }
-
-      const action = this.createHighNotificationAction(item)
-      if (action) {
-        action.y = y
-        scroll.content.addChild(action)
-        y += action.height + 12
-      }
-    }
-
-    content.addChild(scroll)
-    this._context!.overlayManager.openModal('本日の重要な出来事', content)
-  }
-
-  private createHighNotificationAction(
-    item: TavernActivityItemViewModel,
-  ): Container | null {
-    const theme = this._context!.theme
-
-    if (item.kind === 'expedition_return' && item.reportId) {
-      const report = findExpeditionReportById(
-        this._viewModel?.reports ?? [],
-        item.reportId,
-      )
-      if (!report) return null
-      const btn = new GameButton({
-        width: 140,
-        height: 32,
-        theme,
-        label: '報告を見る',
-      })
-      btn.onActivate = () => {
-        this._context!.overlayManager.closeModal()
-        this.markActivityViewed(item.id)
-        this.openReportModal(report)
-      }
-      return btn
-    }
-
-    if (item.kind === 'party_arrival' && item.partyId) {
-      const btn = new GameButton({
-        width: 140,
-        height: 32,
-        theme,
-        label: '選択する',
-      })
-      btn.onActivate = () => {
-        this._context!.overlayManager.closeModal()
-        this._context!.actions.selectParty(item.partyId!)
-      }
-      return btn
-    }
-
-    return null
   }
 
   private errorModalContent(text: string): Container {

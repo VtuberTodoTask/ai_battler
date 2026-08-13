@@ -502,22 +502,32 @@ describe('Phase 8.1 Tavern Main Screen Smoke', () => {
       selectedPartyId: party.id,
     })
 
-    const resolveButton = (
+    const actionButton = (
       scene as unknown as {
         _header: { _actionButton: { emit: (event: string) => void } }
       }
     )._header._actionButton
-    resolveButton.emit('pointertap')
-    expect(context.actions.resolveDay).toHaveBeenCalledTimes(1)
+    actionButton.emit('pointertap')
+    expect(context.actions.advanceDay).toHaveBeenCalledTimes(1)
+    expect(context.actions.resolveDay).not.toHaveBeenCalled()
 
     const resolved = resolveCampaignDay(campaign)
     expect(resolved.currentDay.status).toBe('resolved')
 
-    scene.setCampaign(resolved, uiStateRef.current)
-    resolveButton.emit('pointertap')
-    expect(context.actions.advanceDay).toHaveBeenCalledTimes(1)
-
     const advanced = advanceCampaignDay(resolved)
+    scene.setCampaign(advanced, uiStateRef.current)
+
+    const push = context.canvasGame.sceneManager!.push as ReturnType<
+      typeof vi.fn
+    >
+    expect(push).toHaveBeenCalledWith(
+      'dayResults',
+      expect.objectContaining({
+        resolvedDay: campaign.dayNumber,
+        nextDay: advanced.dayNumber,
+        step: 'important_events',
+      }),
+    )
     expect(advanced.dayNumber).toBe(campaign.dayNumber + 1)
     expect(advanced.currentDay.status).toBe('planning')
   })

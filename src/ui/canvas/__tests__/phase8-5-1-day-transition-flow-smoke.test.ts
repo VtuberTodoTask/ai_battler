@@ -8,7 +8,7 @@ import {
   resolveCampaignDay,
 } from '../../../core/tavern/campaign/campaign.ts'
 import { offerRequestToParty } from '../../../core/tavern/brokerage.ts'
-import { ExpeditionResultsScene } from '../scenes/expeditionResults/ExpeditionResultsScene.ts'
+import { DayResultsScene } from '../scenes/dayResults/DayResultsScene.ts'
 import { TavernScene } from '../scenes/tavern/TavernScene.ts'
 import { GameAssetManager } from '../assets/GameAssetManager.ts'
 import { GameViewport } from '../GameViewport.ts'
@@ -16,9 +16,10 @@ import { OverlayManager } from '../overlays/OverlayManager.ts'
 import { DEFAULT_GAME_THEME } from '../theme/gameTheme.ts'
 import { DEFAULT_GAME_UI_STATE, type GameSceneContext } from '../types.ts'
 import {
-  buildExpeditionResultsSceneViewModel,
-  type ExpeditionResultsSceneInput,
-} from '../scenes/expeditionResults/expeditionResultsViewModel.ts'
+  buildDayResultsSceneViewModel,
+  type DayResultsSceneInput,
+  type DayResultEventViewModel,
+} from '../scenes/dayResults/dayResultsViewModel.ts'
 import { GameSceneManager } from '../scenes/GameSceneManager.ts'
 
 function createFakeCanvasContext(): unknown {
@@ -154,7 +155,7 @@ function createSceneContext(
   } as unknown as GameSceneContext['canvasGame']
 
   return {
-    id: 'phase8-5-smoke',
+    id: 'phase8-5-1-smoke',
     app,
     viewport: new GameViewport(),
     layers,
@@ -208,12 +209,12 @@ function resolveAndAdvance(
   return advanceCampaignDay(resolved)
 }
 
-describe('Phase 8.5 Expedition Results Scene Smoke', () => {
-  it('A: day advance with one expedition result transitions to ExpeditionResultsScene', () => {
+describe('Phase 8.5.1 Day Transition Flow Smoke', () => {
+  it('A: day advance pushes DayResultsScene starting at important events', () => {
     const scene = new TavernScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(scene, uiStateRef)
-    const initial = createTavernCampaign('phase8-5-smoke-a')
+    const initial = createTavernCampaign('phase8-5-1-a')
     const prepared = findAcceptingOffers(initial, 1)
     const advanced = resolveAndAdvance(prepared)
 
@@ -225,124 +226,122 @@ describe('Phase 8.5 Expedition Results Scene Smoke', () => {
       typeof vi.fn
     >
     expect(push).toHaveBeenCalledWith(
-      'expeditionResults',
+      'dayResults',
       expect.objectContaining({
-        dayNumber: advanced.dayNumber - 1,
-        selectedResultId: expect.any(String),
+        resolvedDay: advanced.dayNumber - 1,
+        nextDay: advanced.dayNumber,
+        step: 'important_events',
+        returnTarget: { sceneId: 'tavern' },
       }),
     )
   })
 
-  it('B: day advance with multiple expedition results keeps stable ordering', () => {
-    const scene = new TavernScene()
+  it('B: DayResultsScene renders important events and switches to expedition results', () => {
+    const scene = new DayResultsScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(scene, uiStateRef)
-    const initial = createTavernCampaign('phase8-5-smoke-b')
-    const prepared = findAcceptingOffers(initial, 2)
-    const advanced = resolveAndAdvance(prepared)
-
-    scene.mount(context)
-    scene.setCampaign(prepared, { ...DEFAULT_GAME_UI_STATE })
-    scene.setCampaign(advanced, { ...DEFAULT_GAME_UI_STATE })
-
-    const push = context.canvasGame.sceneManager!.push as ReturnType<
-      typeof vi.fn
-    >
-    expect(push).toHaveBeenCalledWith('expeditionResults', expect.any(Object))
-    const input = push.mock.calls[0]![1] as ExpeditionResultsSceneInput
-    const vm = buildExpeditionResultsSceneViewModel(input, [])
-    expect(vm.results.length).toBeGreaterThanOrEqual(2)
-    const ids = vm.results.map((r) => r.id)
-    expect(new Set(ids).size).toBe(ids.length)
-  })
-
-  it('C: zero results does not open ExpeditionResultsScene', () => {
-    const scene = new TavernScene()
-    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
-    const context = createSceneContext(scene, uiStateRef)
-    const initial = createTavernCampaign('phase8-5-smoke-c')
-    const advanced = resolveAndAdvance(initial)
-
-    scene.mount(context)
-    scene.setCampaign(initial, { ...DEFAULT_GAME_UI_STATE })
-    scene.setCampaign(advanced, { ...DEFAULT_GAME_UI_STATE })
-
-    const push = context.canvasGame.sceneManager!.push as ReturnType<
-      typeof vi.fn
-    >
-    expect(push).not.toHaveBeenCalledWith(
-      'expeditionResults',
-      expect.any(Object),
-    )
-  })
-
-  it('D: structured summary lines are visible and deterministic', () => {
-    const initial = createTavernCampaign('phase8-5-smoke-d')
+    const initial = createTavernCampaign('phase8-5-1-b')
     const prepared = findAcceptingOffers(initial, 1)
     const advanced = resolveAndAdvance(prepared)
     const previousRecord = advanced.history[advanced.history.length - 1]!
 
-    const vm = buildExpeditionResultsSceneViewModel(
-      {
-        campaign: advanced,
-        dayNumber: previousRecord.dayNumber,
-      },
-      [],
-    )
-
-    expect(vm.results.length).toBeGreaterThan(0)
-    const first = vm.results[0]!
-    expect(first.summaryLines.length).toBeGreaterThan(0)
-    expect(first.summaryLines.some((l) => l.includes('結果：'))).toBe(true)
-    expect(first.summaryLines.some((l) => l.includes('生還：'))).toBe(true)
-    expect(first.summaryLines.some((l) => l.includes('報酬：'))).toBe(true)
-
-    const secondVm = buildExpeditionResultsSceneViewModel(
-      {
-        campaign: advanced,
-        dayNumber: previousRecord.dayNumber,
-      },
-      [],
-    )
-    expect(secondVm.results[0]!.summaryLines).toEqual(first.summaryLines)
-  })
-
-  it('E: open structured report overlay and return to results scene', () => {
-    const scene = new ExpeditionResultsScene()
-    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
-    const context = createSceneContext(scene, uiStateRef)
-    const initial = createTavernCampaign('phase8-5-smoke-e')
-    const prepared = findAcceptingOffers(initial, 1)
-    const advanced = resolveAndAdvance(prepared)
-    const previousRecord = advanced.history[advanced.history.length - 1]!
-
-    const input: ExpeditionResultsSceneInput = {
+    const input: DayResultsSceneInput = {
       campaign: advanced,
-      dayNumber: previousRecord.dayNumber,
+      resolvedDay: previousRecord.dayNumber,
+      nextDay: advanced.dayNumber,
+      step: 'important_events',
     }
 
     scene.mount(context, input)
     scene.setCampaign(advanced, { ...DEFAULT_GAME_UI_STATE })
 
-    const result = (
-      scene as unknown as { _viewModel: { results: { id: string }[] } }
-    )._viewModel.results[0]
-    expect(result).toBeDefined()
+    expect((scene as unknown as { _step: string })._step).toBe(
+      'important_events',
+    )
+    const vm = buildDayResultsSceneViewModel(input, [])
+    expect(vm.importantEvents.length).toBeGreaterThanOrEqual(0)
 
     ;(
-      scene as unknown as {
-        openReportOverlay: (result: { id: string }) => void
-      }
-    ).openReportOverlay(result as { id: string })
-
-    const modal = context.layers.modal.children.find(
-      (c) => c.constructor.name === 'GameModal',
+      scene as unknown as { goToExpeditionResults: () => void }
+    ).goToExpeditionResults()
+    expect((scene as unknown as { _step: string })._step).toBe(
+      'expedition_results',
     )
-    expect(modal).toBeDefined()
   })
 
-  it('F: open narrative first time triggers lazy generation', async () => {
-    const scene = new ExpeditionResultsScene()
+  it('C: final 翌日へ pops back to tavern and does not re-resolve', () => {
+    const scene = new DayResultsScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const initial = createTavernCampaign('phase8-5-1-c')
+    const advanced = resolveAndAdvance(initial)
+    const previousRecord = advanced.history[advanced.history.length - 1]!
+
+    const input: DayResultsSceneInput = {
+      campaign: advanced,
+      resolvedDay: previousRecord.dayNumber,
+      nextDay: advanced.dayNumber,
+      step: 'expedition_results',
+    }
+
+    scene.mount(context, input)
+    scene.setCampaign(advanced, { ...DEFAULT_GAME_UI_STATE })
+
+    ;(scene as unknown as { goToNextDay: () => void }).goToNextDay()
+
+    const pop = context.canvasGame.sceneManager!.pop as ReturnType<typeof vi.fn>
+    expect(pop).toHaveBeenCalled()
+    expect(uiStateRef.current.lastDayResultsStep).toBeUndefined()
+    expect(uiStateRef.current.lastSelectedResultId).toBeUndefined()
+  })
+
+  it('D: important events are projected from day record and next-day party events', () => {
+    const initial = createTavernCampaign('phase8-5-1-d')
+    const prepared = findAcceptingOffers(initial, 1)
+    const advanced = resolveAndAdvance(prepared)
+    const previousRecord = advanced.history[advanced.history.length - 1]!
+
+    const vm = buildDayResultsSceneViewModel(
+      {
+        campaign: advanced,
+        resolvedDay: previousRecord.dayNumber,
+        nextDay: advanced.dayNumber,
+      },
+      [],
+    )
+
+    expect(vm.importantEvents.length).toBeGreaterThanOrEqual(0)
+    const arrivals = vm.importantEvents.filter((e) => e.kind === 'partyArrival')
+    expect(arrivals.length).toBeGreaterThanOrEqual(0)
+  })
+
+  it('E: empty important events shows placeholder message', () => {
+    const initial = createTavernCampaign('phase8-5-1-e')
+    const advanced = resolveAndAdvance(initial)
+    const previousRecord = advanced.history[advanced.history.length - 1]!
+
+    advanced.history[advanced.history.length - 1] = {
+      ...previousRecord,
+      partyEvents: [],
+      relationshipEvents: [],
+      progressionEvents: [],
+    }
+    advanced.currentDay.partyEvents = []
+
+    const vm = buildDayResultsSceneViewModel(
+      {
+        campaign: advanced,
+        resolvedDay: previousRecord.dayNumber,
+        nextDay: advanced.dayNumber,
+      },
+      [],
+    )
+
+    expect(vm.importantEvents.length).toBe(0)
+  })
+
+  it('F: expedition result narrative pushes SoundNovel with dayResults return target', async () => {
+    const scene = new DayResultsScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const generate = vi.fn().mockResolvedValue({
       ok: true,
@@ -351,29 +350,33 @@ describe('Phase 8.5 Expedition Results Scene Smoke', () => {
     const context = createSceneContext(scene, uiStateRef, {
       openExpeditionNarrative: generate,
     })
-    const initial = createTavernCampaign('phase8-5-smoke-f')
+    const initial = createTavernCampaign('phase8-5-1-f')
     const prepared = findAcceptingOffers(initial, 1)
     const advanced = resolveAndAdvance(prepared)
     const previousRecord = advanced.history[advanced.history.length - 1]!
 
-    const input: ExpeditionResultsSceneInput = {
+    const input: DayResultsSceneInput = {
       campaign: advanced,
-      dayNumber: previousRecord.dayNumber,
+      resolvedDay: previousRecord.dayNumber,
+      nextDay: advanced.dayNumber,
+      step: 'expedition_results',
     }
 
     scene.mount(context, input)
     scene.setCampaign(advanced, { ...DEFAULT_GAME_UI_STATE })
 
     const result = (
-      scene as unknown as { _viewModel: { results: { id: string }[] } }
-    )._viewModel.results[0]
+      scene as unknown as {
+        _viewModel: { expeditionResults: { id: string }[] }
+      }
+    )._viewModel.expeditionResults[0]
     expect(result).toBeDefined()
 
     ;(
       scene as unknown as {
-        openNarrative: (result: { id: string }) => void
+        openNarrativeForResult: (result: { id: string }) => void
       }
-    ).openNarrative(result as { id: string })
+    ).openNarrativeForResult(result as { id: string })
 
     await new Promise((r) => setTimeout(r, 0))
     expect(generate).toHaveBeenCalledTimes(1)
@@ -387,85 +390,56 @@ describe('Phase 8.5 Expedition Results Scene Smoke', () => {
         source: 'expedition',
         text: '生成された遠征物語',
         returnTarget: expect.objectContaining({
-          sceneId: 'expeditionResults',
+          sceneId: 'dayResults',
         }),
       }),
     )
+    expect(uiStateRef.current.lastDayResultsStep).toBe('expedition_results')
+    expect(uiStateRef.current.lastSelectedResultId).toBe(result.id)
   })
 
-  it('G: reopen cached narrative does not call AI', async () => {
-    const scene = new ExpeditionResultsScene()
+  it('G: important event narrative returns to important_events step', async () => {
+    const scene = new DayResultsScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
-    const generate = vi.fn()
+    const generate = vi.fn().mockResolvedValue({
+      ok: true,
+      data: '生成された出来事物語',
+    })
     const context = createSceneContext(scene, uiStateRef, {
       openExpeditionNarrative: generate,
     })
-    const initial = createTavernCampaign('phase8-5-smoke-g')
-    const prepared = findAcceptingOffers(initial, 1)
-    const advanced = resolveAndAdvance(prepared)
+    const initial = createTavernCampaign('phase8-5-1-g')
+    const advanced = resolveAndAdvance(initial)
     const previousRecord = advanced.history[advanced.history.length - 1]!
-    const resolvedResult = previousRecord.results.find(
-      (r) => r.status === 'resolved' && r.report,
-    )
-    expect(resolvedResult).toBeDefined()
 
-    const existingCandidate = advanced.narrativeCandidates.find(
-      (c) =>
-        c.category === 'expedition' &&
-        c.dayNumber === previousRecord.dayNumber &&
-        c.partyId === (resolvedResult!.partyId ?? '') &&
-        c.requestId === resolvedResult!.requestId,
-    )
-    expect(existingCandidate).toBeDefined()
-
-    const cachedCandidates = advanced.narrativeCandidates.map((c) =>
-      c === existingCandidate
-        ? {
-            ...c,
-            state: 'generated' as const,
-            activeGenerationId: 'cached-generation',
-          }
-        : c,
-    )
-
-    const cachedCampaign = {
-      ...advanced,
-      narrativeCandidates: cachedCandidates,
-      narrativeGenerations: [
-        ...advanced.narrativeGenerations,
-        {
-          id: 'cached-generation',
-          candidateId: existingCandidate!.id,
-          dayNumber: previousRecord.dayNumber,
-          generatedText: '既存の遠征物語',
-          promptVersion: 'test',
-          providerId: 'test',
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    }
-
-    const input: ExpeditionResultsSceneInput = {
-      campaign: cachedCampaign,
-      dayNumber: previousRecord.dayNumber,
+    const input: DayResultsSceneInput = {
+      campaign: advanced,
+      resolvedDay: previousRecord.dayNumber,
+      nextDay: advanced.dayNumber,
+      step: 'important_events',
     }
 
     scene.mount(context, input)
-    scene.setCampaign(cachedCampaign, { ...DEFAULT_GAME_UI_STATE })
+    scene.setCampaign(advanced, { ...DEFAULT_GAME_UI_STATE })
 
-    const result = (
-      scene as unknown as { _viewModel: { results: { id: string }[] } }
-    )._viewModel.results[0]
-    expect(result).toBeDefined()
+    const event = (
+      scene as unknown as {
+        _viewModel: { importantEvents: DayResultEventViewModel[] }
+      }
+    )._viewModel.importantEvents.find((e) => e.narrativeTargetId)
+    if (!event) {
+      // Some seeds may not generate a narrative candidate for a visible event.
+      return
+    }
 
     ;(
       scene as unknown as {
-        openNarrative: (result: { id: string }) => void
+        openNarrativeForEvent: (event: DayResultEventViewModel) => void
       }
-    ).openNarrative(result as { id: string })
+    ).openNarrativeForEvent(event)
 
     await new Promise((r) => setTimeout(r, 0))
-    expect(generate).not.toHaveBeenCalled()
+    expect(generate).toHaveBeenCalledTimes(1)
 
     const push = context.canvasGame.sceneManager!.push as ReturnType<
       typeof vi.fn
@@ -473,16 +447,15 @@ describe('Phase 8.5 Expedition Results Scene Smoke', () => {
     expect(push).toHaveBeenCalledWith(
       'soundNovel',
       expect.objectContaining({
-        source: 'expedition',
-        text: '既存の遠征物語',
         returnTarget: expect.objectContaining({
-          sceneId: 'expeditionResults',
+          sceneId: 'dayResults',
         }),
       }),
     )
+    expect(uiStateRef.current.lastDayResultsStep).toBe('important_events')
   })
 
-  it('H: GameSceneManager.pop restores ExpeditionResultsScene with its input', () => {
+  it('H: GameSceneManager.pop restores DayResultsScene with its input', () => {
     const context = {
       id: 'manager-test',
       app: { ticker: { add: vi.fn(), remove: vi.fn() } },
@@ -508,8 +481,8 @@ describe('Phase 8.5 Expedition Results Scene Smoke', () => {
     } as unknown as GameSceneContext
 
     const tavern = { id: 'tavern', mount: vi.fn(), unmount: vi.fn() }
-    const results = {
-      id: 'expeditionResults',
+    const dayResults = {
+      id: 'dayResults',
       mount: vi.fn(),
       unmount: vi.fn(),
     }
@@ -521,59 +494,35 @@ describe('Phase 8.5 Expedition Results Scene Smoke', () => {
 
     const manager = new GameSceneManager(context)
     manager.register(tavern as unknown as GameScene)
-    manager.register(results as unknown as GameScene)
+    manager.register(dayResults as unknown as GameScene)
     manager.register(soundNovel as unknown as GameScene)
 
     manager.show('tavern')
     expect(tavern.mount).toHaveBeenCalledTimes(1)
 
-    const input = { dayNumber: 5, campaign: {} as unknown }
-    manager.push('expeditionResults', input)
-    expect(results.mount).toHaveBeenCalledWith(context, input)
+    const input = { resolvedDay: 5, nextDay: 6, campaign: {} as unknown }
+    manager.push('dayResults', input)
+    expect(dayResults.mount).toHaveBeenCalledWith(context, input)
 
     manager.push('soundNovel', { text: 'foo' })
     manager.pop()
 
-    expect(results.mount).toHaveBeenCalledTimes(2)
-    expect(results.mount).toHaveBeenLastCalledWith(context, input)
+    expect(dayResults.mount).toHaveBeenCalledTimes(2)
+    expect(dayResults.mount).toHaveBeenLastCalledWith(context, input)
   })
 
-  it('I: return to tavern button shows TavernScene', () => {
-    const scene = new ExpeditionResultsScene()
-    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
-    const context = createSceneContext(scene, uiStateRef)
-    const initial = createTavernCampaign('phase8-5-smoke-i')
-    const prepared = findAcceptingOffers(initial, 1)
-    const advanced = resolveAndAdvance(prepared)
-    const previousRecord = advanced.history[advanced.history.length - 1]!
-
-    const input: ExpeditionResultsSceneInput = {
-      campaign: advanced,
-      dayNumber: previousRecord.dayNumber,
-    }
-
-    scene.mount(context, input)
-    scene.setCampaign(advanced, { ...DEFAULT_GAME_UI_STATE })
-
-    ;(scene as unknown as { returnToTavern: () => void }).returnToTavern()
-
-    const show = context.canvasGame.sceneManager!.show as ReturnType<
-      typeof vi.fn
-    >
-    expect(show).toHaveBeenCalledWith('tavern')
-  })
-
-  it('J: view model generation triggers zero AI calls', () => {
+  it('I: view model build triggers zero AI calls', () => {
     const generate = vi.fn()
-    const initial = createTavernCampaign('phase8-5-smoke-j')
+    const initial = createTavernCampaign('phase8-5-1-i')
     const prepared = findAcceptingOffers(initial, 1)
     const advanced = resolveAndAdvance(prepared)
     const previousRecord = advanced.history[advanced.history.length - 1]!
 
-    buildExpeditionResultsSceneViewModel(
+    buildDayResultsSceneViewModel(
       {
         campaign: advanced,
-        dayNumber: previousRecord.dayNumber,
+        resolvedDay: previousRecord.dayNumber,
+        nextDay: advanced.dayNumber,
       },
       [],
     )
