@@ -4,12 +4,13 @@ import type {
   GameUiActions,
   GameUiState,
   OfferRequestActionData,
+  SaveSlotSummaryFromActions,
   UiActionResult,
 } from './types.ts'
 import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
 
 export interface GameCanvasHostProps {
-  campaign: TavernCampaignState
+  campaign: TavernCampaignState | null
   onAdvanceDay: () => UiActionResult
   onResolveDay: () => UiActionResult
   onOfferRequest: (
@@ -25,6 +26,11 @@ export interface GameCanvasHostProps {
   ) => Promise<UiActionResult<string>>
   onOpenSettings?: () => void
   onSwitchToLegacy: () => void
+  onNewGame?: () => UiActionResult
+  onLoadGame?: (slotId: string) => Promise<UiActionResult>
+  onSaveGame?: (slotId: string) => Promise<UiActionResult>
+  onDeleteSave?: (slotId: string) => Promise<UiActionResult>
+  onListSaves?: () => Promise<UiActionResult<SaveSlotSummaryFromActions[]>>
 }
 
 export default function GameCanvasHost({
@@ -36,10 +42,16 @@ export default function GameCanvasHost({
   onOpenExpeditionNarrative,
   onOpenSettings,
   onSwitchToLegacy,
+  onNewGame,
+  onLoadGame,
+  onSaveGame,
+  onDeleteSave,
+  onListSaves,
 }: GameCanvasHostProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const canvasGameRef = useRef<CanvasGame | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const prevCampaignRef = useRef<TavernCampaignState | null>(null)
 
   const onAdvanceRef = useRef(onAdvanceDay)
   const onResolveRef = useRef(onResolveDay)
@@ -48,6 +60,11 @@ export default function GameCanvasHost({
   const onOpenExpeditionNarrativeRef = useRef(onOpenExpeditionNarrative)
   const onOpenSettingsRef = useRef(onOpenSettings)
   const onSwitchRef = useRef(onSwitchToLegacy)
+  const onNewGameRef = useRef(onNewGame)
+  const onLoadGameRef = useRef(onLoadGame)
+  const onSaveGameRef = useRef(onSaveGame)
+  const onDeleteSaveRef = useRef(onDeleteSave)
+  const onListSavesRef = useRef(onListSaves)
 
   useEffect(() => {
     onAdvanceRef.current = onAdvanceDay
@@ -57,6 +74,11 @@ export default function GameCanvasHost({
     onOpenExpeditionNarrativeRef.current = onOpenExpeditionNarrative
     onOpenSettingsRef.current = onOpenSettings
     onSwitchRef.current = onSwitchToLegacy
+    onNewGameRef.current = onNewGame
+    onLoadGameRef.current = onLoadGame
+    onSaveGameRef.current = onSaveGame
+    onDeleteSaveRef.current = onDeleteSave
+    onListSavesRef.current = onListSaves
   }, [
     onAdvanceDay,
     onResolveDay,
@@ -65,6 +87,11 @@ export default function GameCanvasHost({
     onOpenExpeditionNarrative,
     onOpenSettings,
     onSwitchToLegacy,
+    onNewGame,
+    onLoadGame,
+    onSaveGame,
+    onDeleteSave,
+    onListSaves,
   ])
 
   useEffect(() => {
@@ -173,6 +200,74 @@ export default function GameCanvasHost({
       switchToLegacy: () => {
         onSwitchRef.current()
       },
+      newGame: () => {
+        try {
+          const handler = onNewGameRef.current
+          if (!handler) return { ok: false, message: 'newGame not connected' }
+          return handler()
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '新規ゲームの開始に失敗しました',
+          }
+        }
+      },
+      loadGame: async (slotId) => {
+        try {
+          const handler = onLoadGameRef.current
+          if (!handler) return { ok: false, message: 'loadGame not connected' }
+          return await handler(slotId)
+        } catch (e) {
+          return {
+            ok: false,
+            message: e instanceof Error ? e.message : 'ロードに失敗しました',
+          }
+        }
+      },
+      saveGame: async (slotId) => {
+        try {
+          const handler = onSaveGameRef.current
+          if (!handler) return { ok: false, message: 'saveGame not connected' }
+          return await handler(slotId)
+        } catch (e) {
+          return {
+            ok: false,
+            message: e instanceof Error ? e.message : 'セーブに失敗しました',
+          }
+        }
+      },
+      deleteSave: async (slotId) => {
+        try {
+          const handler = onDeleteSaveRef.current
+          if (!handler)
+            return { ok: false, message: 'deleteSave not connected' }
+          return await handler(slotId)
+        } catch (e) {
+          return {
+            ok: false,
+            message: e instanceof Error ? e.message : '削除に失敗しました',
+          }
+        }
+      },
+      listSaves: async () => {
+        try {
+          const handler = onListSavesRef.current
+          if (!handler) return { ok: true, data: [] }
+          return await handler()
+        } catch (e) {
+          return {
+            ok: false,
+            message: e instanceof Error ? e.message : '一覧取得に失敗しました',
+          }
+        }
+      },
+      openSaveLoad: (mode) => {
+        cg.openSaveLoad(mode)
+      },
+      returnToTitle: () => {
+        cg.returnToTitle()
+      },
     }
 
     cg.actions = actions
@@ -181,7 +276,10 @@ export default function GameCanvasHost({
     cg.init(host).then(
       () => {
         if (!mounted) return
-        cg.setCampaign(campaign)
+        if (campaign) {
+          cg.setCampaign(campaign)
+          prevCampaignRef.current = campaign
+        }
       },
       (err) => {
         if (!mounted) return
@@ -193,12 +291,17 @@ export default function GameCanvasHost({
       mounted = false
       cg.destroy()
       canvasGameRef.current = null
+      prevCampaignRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    canvasGameRef.current?.setCampaign(campaign)
+    const cg = canvasGameRef.current
+    if (!cg || !campaign) return
+    if (campaign === prevCampaignRef.current) return
+    cg.setCampaign(campaign)
+    prevCampaignRef.current = campaign
   }, [campaign])
 
   if (error) {

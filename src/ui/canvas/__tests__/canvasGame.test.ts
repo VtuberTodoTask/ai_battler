@@ -97,6 +97,9 @@ vi.mock('pixi.js', () => {
     roundRect(): this {
       return this
     }
+    circle(): this {
+      return this
+    }
     fill(): this {
       return this
     }
@@ -253,7 +256,7 @@ describe('CanvasGame lifecycle', () => {
 
     app.ticker.callbacks[0]!({ deltaMS: 1300 })
 
-    expect(cg.sceneManager?.current?.id).toBe('tavern')
+    expect(cg.sceneManager?.current?.id).toBe('title')
     cg.destroy()
   })
 

@@ -274,6 +274,7 @@ export class TavernScene implements GameScene {
       height: TOP_BAR_HEIGHT,
       onAdvance: () => this.handleAdvance(),
       onOpenSettings: () => this._context!.actions.openSettings(),
+      onOpenSave: () => this._context!.actions.openSaveLoad?.('save'),
     })
     this._header.x = 0
     this._header.y = 0

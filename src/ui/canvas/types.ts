@@ -28,6 +28,22 @@ export interface OfferRequestActionData {
   reasonText?: string
 }
 
+export interface SaveSlotSummaryFromActions {
+  slotId: string
+  label: string
+  empty: boolean
+  isAutosave: boolean
+  metadata?: {
+    currentDay: number
+    updatedAt: string
+    campaignSeed: string
+    gameVersion: string
+    saveFormatVersion: string
+  }
+  incompatible?: boolean
+  incompatibilityReason?: string
+}
+
 export interface GameUiActions {
   advanceDay: () => UiActionResult
   resolveDay: () => UiActionResult
@@ -49,6 +65,14 @@ export interface GameUiActions {
   openSettings: () => void
   closeModal: () => void
   switchToLegacy: () => void
+  /** Title / save-load lifecycle actions. */
+  newGame?: () => UiActionResult
+  loadGame?: (slotId: string) => Promise<UiActionResult>
+  saveGame?: (slotId: string) => Promise<UiActionResult>
+  deleteSave?: (slotId: string) => Promise<UiActionResult>
+  listSaves?: () => Promise<UiActionResult<SaveSlotSummaryFromActions[]>>
+  openSaveLoad?: (mode: 'save' | 'load') => void
+  returnToTitle?: () => void
 }
 
 export interface UiActionMessage {

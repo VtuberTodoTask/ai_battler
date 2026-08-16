@@ -17,32 +17,30 @@ function cyrb128(str: string): [number, number, number, number] {
   return [h1 >>> 0, h2 >>> 0, h3 >>> 0, h4 >>> 0]
 }
 
-function sfc32(a: number, b: number, c: number, d: number): () => number {
-  return () => {
-    a >>>= 0
-    b >>>= 0
-    c >>>= 0
-    d >>>= 0
-    let t = (a + b) | 0
-    a = b ^ (b >>> 9)
-    b = (c + (c << 3)) | 0
-    c = (c << 21) | (c >>> 11)
-    d = (d + 1) | 0
-    t = (t + d) | 0
-    c = (c + t) | 0
-    return (t >>> 0) / 4294967296
-  }
+export interface SeededRngState {
+  seed: string
+  callCount: number
+  a: number
+  b: number
+  c: number
+  d: number
 }
 
 export class SeededRng {
   private readonly seed: string
-  private readonly random: () => number
+  private a: number
+  private b: number
+  private c: number
+  private d: number
   private callCount = 0
 
   constructor(seed: string) {
     this.seed = seed
     const [a, b, c, d] = cyrb128(seed)
-    this.random = sfc32(a, b, c, d)
+    this.a = a
+    this.b = b
+    this.c = c
+    this.d = d
   }
 
   getSeed(): string {
@@ -54,8 +52,26 @@ export class SeededRng {
   }
 
   next(): number {
+    let a = this.a >>> 0
+    let b = this.b >>> 0
+    let c = this.c >>> 0
+    let d = this.d >>> 0
+
+    let t = (a + b) | 0
+    a = b ^ (b >>> 9)
+    b = (c + (c << 3)) | 0
+    c = (c << 21) | (c >>> 11)
+    d = (d + 1) | 0
+    t = (t + d) | 0
+    c = (c + t) | 0
+
+    this.a = a
+    this.b = b
+    this.c = c
+    this.d = d
     this.callCount++
-    return this.random()
+
+    return (t >>> 0) / 4294967296
   }
 
   float(min = 0, max = 1): number {
@@ -112,5 +128,26 @@ export class SeededRng {
     while (v === 0) v = this.next()
     const z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v)
     return mean + z * stdDev
+  }
+
+  serialize(): SeededRngState {
+    return {
+      seed: this.seed,
+      callCount: this.callCount,
+      a: this.a,
+      b: this.b,
+      c: this.c,
+      d: this.d,
+    }
+  }
+
+  static restore(state: SeededRngState): SeededRng {
+    const rng = new SeededRng(state.seed)
+    rng.callCount = state.callCount
+    rng.a = state.a
+    rng.b = state.b
+    rng.c = state.c
+    rng.d = state.d
+    return rng
   }
 }
