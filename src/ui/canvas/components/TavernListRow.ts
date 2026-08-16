@@ -49,7 +49,7 @@ export class TavernListRow extends Container {
       maxWidth: titleMaxWidth,
     })
     this._titleLabel.x = this._theme.spacing.s12
-    this._titleLabel.y = this._theme.spacing.s8
+    this._titleLabel.y = this._theme.spacing.s4
     this.addChild(this._titleLabel)
 
     if (options.trailing) {
@@ -64,7 +64,7 @@ export class TavernListRow extends Container {
       { maxWidth: this._width - this._theme.spacing.s24 },
     )
     this._subtitleLabel.x = this._theme.spacing.s12
-    this._subtitleLabel.y = this._theme.spacing.s8 + 30
+    this._subtitleLabel.y = this._theme.spacing.s8 + this._theme.spacing.s24
     this._subtitleLabel.visible = (options.subtitle ?? '').length > 0
     this.addChild(this._subtitleLabel)
 
@@ -144,7 +144,7 @@ export class TavernListRow extends Container {
     const trailingWidth = measured.width || this._trailingLabel.textWidth
     this._trailingLabel.x =
       this._width - trailingWidth - this._theme.spacing.s12
-    this._trailingLabel.y = this._theme.spacing.s8
+    this._trailingLabel.y = this._theme.spacing.s4
   }
 
   private draw(): void {

@@ -57,6 +57,7 @@ export class DayResultsScene implements GameScene {
   private _returnTarget: { sceneId: string } = { sceneId: 'tavern' }
   private _viewModel: DayResultsSceneViewModel | null = null
   private _narrativeGenerationInFlight = new Set<string>()
+  private _spinner: Container | null = null
 
   mount(context: GameSceneContext, input?: unknown): void {
     this._context = context
@@ -81,7 +82,6 @@ export class DayResultsScene implements GameScene {
   }
 
   unmount(): void {
-    AudioController.stopBgm()
     if (this._root && this._root.parent) {
       this._root.parent.removeChild(this._root)
     }
@@ -116,7 +116,9 @@ export class DayResultsScene implements GameScene {
   }
 
   update(_dt: number): void {
-    // Static scene; no per-frame animation.
+    if (this._spinner) {
+      this._spinner.rotation += _dt * 0.004
+    }
   }
 
   private updateViewModel(): void {
@@ -572,24 +574,20 @@ export class DayResultsScene implements GameScene {
     }
 
     this._narrativeGenerationInFlight.add(result.id)
+    this.openGeneratingModal('遠征の物語')
     this._context!.actions.openExpeditionNarrative(result.narrativeTargetId)
       .then((res) => {
         this._narrativeGenerationInFlight.delete(result.id)
         if (!res.ok || res.data === undefined) {
-          this._context!.overlayManager.openModal(
-            '遠征の物語',
-            `物語の生成に失敗しました。${res.message ?? ''}`,
-          )
+          this.showNarrativeError('遠征の物語', res.message)
           return
         }
+        this.closeGeneratingModal()
         this.openSoundNovelForResult(result, res.data)
       })
       .catch(() => {
         this._narrativeGenerationInFlight.delete(result.id)
-        this._context!.overlayManager.openModal(
-          '遠征の物語',
-          '物語の生成に失敗しました。',
-        )
+        this.showNarrativeError('遠征の物語')
       })
   }
 
@@ -651,24 +649,20 @@ export class DayResultsScene implements GameScene {
     }
 
     this._narrativeGenerationInFlight.add(event.narrativeTargetId)
+    this.openGeneratingModal('出来事の物語')
     this._context!.actions.openExpeditionNarrative(event.narrativeTargetId)
       .then((res) => {
         this._narrativeGenerationInFlight.delete(event.narrativeTargetId!)
         if (!res.ok || res.data === undefined) {
-          this._context!.overlayManager.openModal(
-            '出来事の物語',
-            `物語の生成に失敗しました。${res.message ?? ''}`,
-          )
+          this.showNarrativeError('出来事の物語', res.message)
           return
         }
+        this.closeGeneratingModal()
         this.openSoundNovelForEvent(event, res.data)
       })
       .catch(() => {
         this._narrativeGenerationInFlight.delete(event.narrativeTargetId!)
-        this._context!.overlayManager.openModal(
-          '出来事の物語',
-          '物語の生成に失敗しました。',
-        )
+        this.showNarrativeError('出来事の物語')
       })
   }
 
@@ -709,6 +703,48 @@ export class DayResultsScene implements GameScene {
     }
 
     this._context?.canvasGame.sceneManager?.push('soundNovel', input)
+  }
+
+  private openGeneratingModal(title: string): void {
+    if (!this._context) return
+    const theme = this._context.theme
+    const content = new Container()
+    const bodyWidth = 600 - theme.spacing.s48
+
+    const label = new GameLabel('生成中です', theme, 'body', {
+      align: 'center',
+      maxWidth: bodyWidth,
+    })
+    const measured = label.measure()
+    label.x = (bodyWidth - measured.width) / 2
+    label.y = 0
+    content.addChild(label)
+
+    const spinner = new Container()
+    const graphics = new Graphics()
+    graphics.arc(0, 0, 14, Math.PI * 0.2, Math.PI * 1.6, false)
+    graphics.stroke({ width: 4, color: theme.colors.textPrimary })
+    spinner.addChild(graphics)
+    spinner.x = bodyWidth / 2
+    spinner.y = 48
+    content.addChild(spinner)
+
+    this._spinner = spinner
+    this._context.overlayManager.openModal(title, content)
+  }
+
+  private closeGeneratingModal(): void {
+    this._spinner = null
+    this._context?.overlayManager.closeModal()
+  }
+
+  private showNarrativeError(title: string, message?: string): void {
+    this._spinner = null
+    const body =
+      message && message.length > 0
+        ? `物語の生成に失敗しました。${message}`
+        : '物語の生成に失敗しました。'
+    this._context!.overlayManager.openModal(title, body)
   }
 
   private resolveReportMood(

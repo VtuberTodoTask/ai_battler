@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest'
 import { GameSceneManager } from '../scenes/GameSceneManager.ts'
 import type { GameScene, GameSceneContext } from '../types.ts'
@@ -24,6 +25,7 @@ function createFakeContext(): GameSceneContext {
         removeChildren: vi.fn(),
       } as unknown as GameSceneContext['layers']['modal'],
       transition: {
+        addChild: vi.fn(),
         removeChildren: vi.fn(),
       } as unknown as GameSceneContext['layers']['transition'],
       debug: {

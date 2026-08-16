@@ -163,7 +163,6 @@ export class SoundNovelScene implements GameScene {
       this._root = null
     }
 
-    AudioController.stopBgm()
     this._context = null
   }
 

@@ -22,6 +22,8 @@ const SE_URLS: Record<SeTrackId, string> = {
   newParty: '/bgm/new_comrade.mp3',
 }
 
+const FADE_MS = 300
+
 function canUseAudio(): boolean {
   if (typeof document === 'undefined' || typeof Audio === 'undefined')
     return false
@@ -50,7 +52,10 @@ function saveVolume(value: number): void {
 class AudioControllerImpl {
   private _volume = loadStoredVolume()
   private _bgm: HTMLAudioElement | null = null
+  private _bgmFadeRaf: ReturnType<typeof requestAnimationFrame> | null = null
   private _currentBgmId: BgmTrackId | null = null
+  private _nextBgmId: BgmTrackId | null = null
+  private _nextBgmOptions: { loop?: boolean } | undefined
 
   constructor() {
     if (typeof document !== 'undefined') {
@@ -68,7 +73,14 @@ class AudioControllerImpl {
     const clamped = Math.max(0, Math.min(1, value))
     this._volume = clamped
     saveVolume(clamped)
-    if (this._bgm) {
+
+    if (!this._bgm) return
+
+    this.stopFade()
+    if (this._nextBgmId !== null) {
+      // A new track is queued; keep fading out the current BGM.
+      this.fadeElement(this._bgm, 0, FADE_MS, () => this.startQueuedBgm())
+    } else {
       this._bgm.volume = clamped
     }
   }
@@ -76,25 +88,41 @@ class AudioControllerImpl {
   playBgm(trackId: BgmTrackId, options?: { loop?: boolean }): void {
     if (!canUseAudio()) return
     if (this._currentBgmId === trackId && this._bgm && !this._bgm.paused) return
+    if (this._nextBgmId === trackId) return
 
-    this.stopBgm()
-    const audio = new Audio(BGM_URLS[trackId])
-    audio.loop = options?.loop ?? true
-    audio.volume = this._volume
-    audio.play().catch(() => {
-      // Browsers may block playback until user interaction.
-    })
-    this._bgm = audio
-    this._currentBgmId = trackId
+    this.cancelQueuedBgm()
+
+    if (this._bgm) {
+      this._nextBgmId = trackId
+      this._nextBgmOptions = options
+      this.fadeElement(this._bgm, 0, FADE_MS, () => this.startQueuedBgm())
+    } else {
+      this.startBgm(trackId, options)
+    }
   }
 
   stopBgm(): void {
+    this.cancelQueuedBgm()
     if (this._bgm) {
       this._bgm.pause()
       this._bgm.src = ''
       this._bgm = null
-      this._currentBgmId = null
     }
+    this._currentBgmId = null
+  }
+
+  fadeOut(durationMs = FADE_MS): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this._bgm || !canUseAudio()) {
+        resolve()
+        return
+      }
+      this.cancelQueuedBgm()
+      this.fadeElement(this._bgm, 0, durationMs, () => {
+        this.stopBgm()
+        resolve()
+      })
+    })
   }
 
   playSe(trackId: SeTrackId): void {
@@ -110,6 +138,80 @@ class AudioControllerImpl {
     if (this._bgm && this._bgm.paused) {
       this._bgm.play().catch(() => {})
     }
+  }
+
+  private startBgm(trackId: BgmTrackId, options?: { loop?: boolean }): void {
+    if (!canUseAudio()) return
+    const audio = new Audio(BGM_URLS[trackId])
+    audio.loop = options?.loop ?? true
+    audio.volume = 0
+    audio.play().catch(() => {
+      // Browsers may block playback until user interaction.
+    })
+
+    this._bgm = audio
+    this._currentBgmId = trackId
+    this.fadeElement(this._bgm, this._volume, FADE_MS)
+  }
+
+  private startQueuedBgm(): void {
+    const id = this._nextBgmId
+    const options = this._nextBgmOptions
+    this._nextBgmId = null
+    this._nextBgmOptions = undefined
+    if (!id || !canUseAudio()) return
+    this.stopBgm()
+    this.startBgm(id, options)
+  }
+
+  private cancelQueuedBgm(): void {
+    if (this._bgmFadeRaf !== null) {
+      cancelAnimationFrame(this._bgmFadeRaf)
+      this._bgmFadeRaf = null
+    }
+    this._nextBgmId = null
+    this._nextBgmOptions = undefined
+  }
+
+  private stopFade(): void {
+    if (this._bgmFadeRaf !== null) {
+      cancelAnimationFrame(this._bgmFadeRaf)
+      this._bgmFadeRaf = null
+    }
+  }
+
+  private fadeElement(
+    audio: HTMLAudioElement,
+    targetVolume: number,
+    durationMs: number,
+    onComplete?: () => void,
+  ): void {
+    if (!canUseAudio()) {
+      onComplete?.()
+      return
+    }
+
+    this.stopFade()
+
+    const startVolume = audio.volume
+    const startTime = performance.now()
+
+    const tick = (now: number): void => {
+      const elapsed = now - startTime
+      const progress = Math.min(1, elapsed / Math.max(1, durationMs))
+      const value = startVolume + (targetVolume - startVolume) * progress
+      audio.volume = Math.max(0, Math.min(1, value))
+
+      if (progress >= 1) {
+        this._bgmFadeRaf = null
+        onComplete?.()
+        return
+      }
+
+      this._bgmFadeRaf = requestAnimationFrame(tick)
+    }
+
+    this._bgmFadeRaf = requestAnimationFrame(tick)
   }
 }
 

@@ -7,7 +7,6 @@ import type {
 import { GameButton } from '../../components/GameButton.ts'
 import { GameLabel } from '../../components/GameLabel.ts'
 import { GameScrollView } from '../../components/GameScrollView.ts'
-import { TavernListRow } from '../../components/TavernListRow.ts'
 import { OUTCOME_LABELS } from '../../../expedition/labels.ts'
 import { getPredictionLabel } from '../../../tavern/predictionLabels.ts'
 import {
@@ -121,7 +120,6 @@ export class TavernScene implements GameScene {
     this._advancing = false
     this._autoSelectPending = true
     this._modalTrack = null
-    AudioController.stopBgm()
   }
 
   setCampaign(campaign: TavernCampaignState, uiState: GameUiState): void {
@@ -275,7 +273,6 @@ export class TavernScene implements GameScene {
       width: VIRTUAL_WIDTH,
       height: TOP_BAR_HEIGHT,
       onAdvance: () => this.handleAdvance(),
-      onOpenReports: () => this.openReportArchiveModal(),
       onOpenSettings: () => this._context!.actions.openSettings(),
     })
     this._header.x = 0
@@ -626,39 +623,6 @@ export class TavernScene implements GameScene {
           e instanceof Error ? e.message : '物語の生成に失敗しました',
         )
       })
-  }
-
-  private openReportArchiveModal(): void {
-    if (!this._viewModel) return
-    const theme = this._context!.theme
-    const content = new Container()
-    const scroll = new GameScrollView(theme, 520, 220)
-
-    if (this._viewModel.reports.length === 0) {
-      const empty = new GameLabel('報告はまだありません。', theme, 'body', {
-        maxWidth: 520,
-      })
-      scroll.content.addChild(empty)
-    } else {
-      const rowHeight = 36
-      for (const report of this._viewModel.reports) {
-        const title = `Day ${report.day}  ${report.questTitle}  ${report.partyName}  ${report.outcomeLabel}`
-        const row = new TavernListRow({
-          width: 520,
-          height: rowHeight,
-          theme,
-          title,
-          disabled: false,
-        })
-        row.onActivate = () => this.openReportModal(report)
-        scroll.addItem(row)
-      }
-    }
-
-    content.addChild(scroll)
-    this._modalTrack = 'expeditionReports'
-    AudioController.playBgm('expeditionReports')
-    this._context!.overlayManager.openModal('最近の報告', content)
   }
 
   private openPredictionBreakdown(): void {

@@ -1,5 +1,6 @@
 import { Application, Container, Ticker } from 'pixi.js'
 import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
+import { AudioController } from './audio/AudioController.ts'
 import { GameAssetManager } from './assets/GameAssetManager.ts'
 import { DEFAULT_GAME_THEME, type GameUiTheme } from './theme/gameTheme.ts'
 import { GameViewport, VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from './GameViewport.ts'
@@ -139,6 +140,7 @@ export class CanvasGame {
     this._app?.ticker.remove(this.handleTick)
 
     this._sceneManager?.unmountCurrent()
+    AudioController.stopBgm()
 
     if (this._app) {
       this._app.destroy({ removeView: true }, { children: true })

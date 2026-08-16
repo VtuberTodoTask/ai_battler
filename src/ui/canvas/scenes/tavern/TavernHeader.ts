@@ -17,7 +17,6 @@ export interface TavernHeaderOptions {
   width: number
   height: number
   onAdvance?: () => void
-  onOpenReports?: () => void
   onOpenSettings?: () => void
 }
 
@@ -32,9 +31,7 @@ export class TavernHeader extends Container {
   private readonly _reputationLabel: GameLabel
   private readonly _statusLabel: GameLabel
   private readonly _actionButton: GameButton
-  private readonly _reportButton: GameButton
   private readonly _onAdvance?: () => void
-  private readonly _onOpenReports?: () => void
   private readonly _onOpenSettings?: () => void
 
   constructor(options: TavernHeaderOptions) {
@@ -44,7 +41,6 @@ export class TavernHeader extends Container {
     this._width = options.width
     this._height = options.height
     this._onAdvance = options.onAdvance
-    this._onOpenReports = options.onOpenReports
     this._onOpenSettings = options.onOpenSettings
 
     const panel = new GamePanel({
@@ -77,11 +73,9 @@ export class TavernHeader extends Container {
 
     const rightMargin = this._theme.spacing.s16
     const actionButtonWidth = 180
-    const reportButtonWidth = 120
     const gearSize = GEAR_SIZE
     const gap = this._theme.spacing.s8
-    const rightClusterWidth =
-      actionButtonWidth + gap + reportButtonWidth + gap + gearSize
+    const rightClusterWidth = actionButtonWidth + gap + gearSize
     const startX = this._width - rightMargin - rightClusterWidth
 
     this._actionButton = new GameButton({
@@ -99,23 +93,7 @@ export class TavernHeader extends Container {
     }
     this.addChild(this._actionButton)
 
-    this._reportButton = new GameButton({
-      width: reportButtonWidth,
-      height: 44,
-      theme: this._theme,
-      label: '報告',
-      disabled: false,
-    })
-    this._reportButton.x = startX + actionButtonWidth + gap
-    this._reportButton.y = 10
-    this._reportButton.onActivate = () => {
-      if (this._reportButton.state !== 'disabled') {
-        this._onOpenReports?.()
-      }
-    }
-    this.addChild(this._reportButton)
-
-    const gearX = this._reportButton.x + reportButtonWidth + gap
+    const gearX = startX + actionButtonWidth + gap
     const gearY = (this._height - gearSize) / 2
     this._setupSettingsIcon(gearX, gearY)
   }
@@ -162,12 +140,6 @@ export class TavernHeader extends Container {
 
     const canAdvance = viewModel.canResolveDay || viewModel.canAdvanceDay
     this._actionButton.setEnabled(canAdvance)
-
-    const reportLabel =
-      viewModel.unreadReportCount > 0
-        ? `報告 \u25cf${viewModel.unreadReportCount}`
-        : '報告'
-    this._reportButton.setLabel(reportLabel)
   }
 
   setActionEnabled(enabled: boolean): void {
