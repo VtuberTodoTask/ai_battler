@@ -8,7 +8,14 @@ export type BgmTrackId =
   | 'soundNovelTension'
   | 'soundNovelSad'
 
-export type SeTrackId = 'successJingle' | 'newParty' | 'cursor' | 'decision'
+export type SeTrackId =
+  | 'successJingle'
+  | 'newParty'
+  | 'cursor'
+  | 'decision'
+  | 'pageTurn'
+  | 'stamp'
+  | 'shopBell'
 
 const BGM_URLS: Record<BgmTrackId, string> = {
   title: '/bgm/title.mp3',
@@ -24,6 +31,9 @@ const SE_URLS: Record<SeTrackId, string> = {
   newParty: '/bgm/new_comrade.mp3',
   cursor: '/se/cursor.mp3',
   decision: '/se/decision.mp3',
+  pageTurn: '/se/page_turn.mp3',
+  stamp: '/se/stamp.mp3',
+  shopBell: '/se/shop_bell.mp3',
 }
 
 const FADE_MS = 300

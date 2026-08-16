@@ -353,7 +353,9 @@ export class TavernScene implements GameScene {
         result.message ?? '翌日への進行に失敗しました',
       )
       this.render()
+      return
     }
+    AudioController.playSe('shopBell')
   }
 
   private handleAssign(): void {

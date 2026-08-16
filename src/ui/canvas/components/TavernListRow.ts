@@ -1,5 +1,6 @@
 import { Container, Graphics, Rectangle } from 'pixi.js'
 import type { GameUiTheme } from '../theme/gameTheme.ts'
+import { AudioController } from '../audio/AudioController.ts'
 import { GameLabel } from './GameLabel.ts'
 
 export interface TavernListRowOptions {
@@ -124,6 +125,9 @@ export class TavernListRow extends Container {
 
   private onPointerOver = (): void => {
     if (this._disabled) return
+    if (!this._hover) {
+      AudioController.playSe('pageTurn')
+    }
     this._hover = true
     this.draw()
   }
@@ -135,6 +139,7 @@ export class TavernListRow extends Container {
 
   private onPointerTap = (): void => {
     if (this._disabled) return
+    AudioController.playSe('stamp')
     this.onActivate?.()
   }
 
