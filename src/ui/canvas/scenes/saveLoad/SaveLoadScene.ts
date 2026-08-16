@@ -116,14 +116,14 @@ export class SaveLoadScene implements GameScene {
   private drawSlotList(): void {
     if (!this._root || !this._context) return
 
-    const existing = this._root.children.find((c) => c.name === 'slot-list')
+    const existing = this._root.getChildByLabel('slot-list')
     if (existing) {
       this._root.removeChild(existing)
       existing.destroy({ children: true })
     }
 
     const container = new Container()
-    container.name = 'slot-list'
+    container.label = 'slot-list'
     const startY = 200
     const left = (VIRTUAL_WIDTH - PANEL_WIDTH) / 2 + 32
     const width = PANEL_WIDTH - 64

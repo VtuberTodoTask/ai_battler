@@ -21,6 +21,7 @@ export interface DecisionPanelOptions {
   width: number
   height: number
   onAssign: () => void
+  onOpenPartyDetail: () => void
   getSelectedParty: () => TavernParty | undefined
   getSelectedQuest: () => TavernRequestOffer | undefined
   onOpenBreakdown: () => void
@@ -33,6 +34,7 @@ export class DecisionPanel extends Container {
   private readonly _width: number
   private readonly _height: number
   private readonly _onAssign: () => void
+  private readonly _onOpenPartyDetail: () => void
   private readonly _getSelectedParty: () => TavernParty | undefined
   private readonly _getSelectedQuest: () => TavernRequestOffer | undefined
   private readonly _onOpenBreakdown: () => void
@@ -41,6 +43,7 @@ export class DecisionPanel extends Container {
   private readonly _scrollWidth: number
   private readonly _scrollHeight: number
   private readonly _assignButton: GameButton
+  private readonly _partyDetailButton: GameButton
   private readonly _bottomBar: Container
   private readonly _predictionContent: Container
   private _viewModel?: TavernDecisionViewModel
@@ -57,6 +60,7 @@ export class DecisionPanel extends Container {
     this._width = options.width
     this._height = options.height
     this._onAssign = options.onAssign
+    this._onOpenPartyDetail = options.onOpenPartyDetail
     this._getSelectedParty = options.getSelectedParty
     this._getSelectedQuest = options.getSelectedQuest
     this._onOpenBreakdown = options.onOpenBreakdown
@@ -73,6 +77,7 @@ export class DecisionPanel extends Container {
     this.addChild(this._panel)
 
     const margin = this._theme.spacing.s12
+    const gap = this._theme.spacing.s16
     const bottomBarHeight = 120
     this._scrollWidth = this._width - margin * 2
     this._scrollHeight = this._height - margin - bottomBarHeight - margin
@@ -100,6 +105,18 @@ export class DecisionPanel extends Container {
     this._assignButton.y = (bottomBarHeight - 44) / 2
     this._assignButton.onActivate = () => this._onAssign()
     this._bottomBar.addChild(this._assignButton)
+
+    this._partyDetailButton = new GameButton({
+      width: 120,
+      height: 44,
+      theme: this._theme,
+      label: 'パーティ詳細',
+      disabled: true,
+    })
+    this._partyDetailButton.x = margin + 200 + gap
+    this._partyDetailButton.y = (bottomBarHeight - 44) / 2
+    this._partyDetailButton.onActivate = () => this._onOpenPartyDetail()
+    this._bottomBar.addChild(this._partyDetailButton)
 
     this._predictionContent = new Container()
     this._bottomBar.addChild(this._predictionContent)
@@ -166,9 +183,10 @@ export class DecisionPanel extends Container {
 
     this._assignButton.setEnabled(false)
     this._assignButton.setLabel('この依頼を紹介する')
+    this._partyDetailButton.setEnabled(false)
 
     const vm = this._viewModel
-    if (!vm?.selectedQuest) {
+    if (!vm?.selectedParty && !vm?.selectedQuest) {
       const label = new GameLabel(
         '依頼を選択してください',
         this._theme,
@@ -191,7 +209,18 @@ export class DecisionPanel extends Container {
     content.addChild(leftColumn)
     content.addChild(rightColumn)
 
-    this.renderQuestDetail(leftColumn, vm.selectedQuest, leftWidth)
+    if (vm.selectedQuest) {
+      this.renderQuestDetail(leftColumn, vm.selectedQuest, leftWidth)
+    } else {
+      const hint = new GameLabel(
+        '依頼を選択してください',
+        this._theme,
+        'body',
+        { maxWidth: leftWidth, breakWords: true },
+      )
+      leftColumn.addChild(hint)
+    }
+
     if (vm.selectedParty) {
       this.renderPartySummary(rightColumn, vm.selectedParty, rightWidth)
     } else {
@@ -205,6 +234,7 @@ export class DecisionPanel extends Container {
     }
 
     this._assignButton.setEnabled(vm.canOffer)
+    this._partyDetailButton.setEnabled(!!vm.selectedParty)
     if (!vm.canOffer && vm.offerDisabledReason) {
       this._assignButton.setLabel(
         vm.offerDisabledReason.length > 10
