@@ -222,7 +222,7 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
     expect(state._viewModel.header.unreadReportCount).toBeGreaterThan(0)
   })
 
-  it('B: notification summary opens after resolving a day', () => {
+  it('B: resolve does not open a high-importance modal; advance pushes dayResults scene', () => {
     const scene = new TavernScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(scene, uiStateRef)
@@ -241,9 +241,25 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
 
     scene.setCampaign(resolved, uiStateRef.current)
 
-    expect(openModalSpy).toHaveBeenCalled()
-    const lastCall = openModalSpy.mock.calls.at(-1)
-    expect(lastCall?.[0]).toContain('重要')
+    const highImportanceModals = openModalSpy.mock.calls.filter((call) =>
+      String(call[0]).includes('重要'),
+    )
+    expect(highImportanceModals.length).toBe(0)
+
+    const advanced = advanceCampaignDay(resolved)
+    scene.setCampaign(advanced, uiStateRef.current)
+
+    const push = context.canvasGame.sceneManager!.push as ReturnType<
+      typeof vi.fn
+    >
+    expect(push).toHaveBeenCalledWith(
+      'dayResults',
+      expect.objectContaining({
+        resolvedDay: resolved.dayNumber,
+        nextDay: advanced.dayNumber,
+        step: 'important_events',
+      }),
+    )
   })
 
   it('C: offer rejection is shown in quest list and activity', () => {
@@ -422,11 +438,10 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
     expect(state._viewModel.reports.length).toBeGreaterThan(0)
   })
 
-  it('H: notification queue prevents duplicate high-importance summary', () => {
+  it('H: advance pushes dayResults scene only once', () => {
     const scene = new TavernScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(scene, uiStateRef)
-    const openModalSpy = vi.spyOn(context.overlayManager, 'openModal')
     let campaign = createTavernCampaign('phase8-2-queue')
     const party = campaign.currentDay.parties[0]!
     const quest = findAcceptableRequest(campaign, party.id)
@@ -438,18 +453,23 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
     const nextDay = offerRequestToParty(campaign.currentDay, quest.id, party.id)
     campaign = { ...campaign, currentDay: nextDay }
     const resolved = resolveCampaignDay(campaign)
+    const advanced = advanceCampaignDay(resolved)
 
-    scene.setCampaign(resolved, uiStateRef.current)
-    const countAfterFirst = openModalSpy.mock.calls.filter((call) =>
-      String(call[0]).includes('重要'),
-    ).length
-    expect(countAfterFirst).toBeGreaterThan(0)
+    scene.setCampaign(advanced, uiStateRef.current)
 
-    scene.setCampaign(resolved, uiStateRef.current)
-    const countAfterSecond = openModalSpy.mock.calls.filter((call) =>
-      String(call[0]).includes('重要'),
-    ).length
-    expect(countAfterSecond).toBe(countAfterFirst)
+    const push = context.canvasGame.sceneManager!.push as ReturnType<
+      typeof vi.fn
+    >
+    const dayResultsPushes = push.mock.calls.filter(
+      (call) => call[0] === 'dayResults',
+    )
+    expect(dayResultsPushes.length).toBe(1)
+
+    scene.setCampaign(advanced, uiStateRef.current)
+    const dayResultsPushesAfterRepeat = push.mock.calls.filter(
+      (call) => call[0] === 'dayResults',
+    )
+    expect(dayResultsPushesAfterRepeat.length).toBe(1)
   })
 
   it('I: expedition narrative action uses cached text on reopen', async () => {
@@ -525,6 +545,7 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
 
     expect(openModalSpy).toHaveBeenCalledWith(
       `遠征報告：${report.questTitle}`,
+      expect.anything(),
       expect.anything(),
     )
   })

@@ -8,6 +8,12 @@ import { GameButton } from '../../components/GameButton.ts'
 import { GameLabel } from '../../components/GameLabel.ts'
 import { GameScrollView } from '../../components/GameScrollView.ts'
 import { TavernListRow } from '../../components/TavernListRow.ts'
+import { OUTCOME_LABELS } from '../../../expedition/labels.ts'
+import { getPredictionLabel } from '../../../tavern/predictionLabels.ts'
+import {
+  AudioController,
+  type BgmTrackId,
+} from '../../audio/AudioController.ts'
 import type { GameScene, GameSceneContext, GameUiState } from '../../types.ts'
 import {
   buildTavernScreenViewModel,
@@ -22,9 +28,13 @@ import type {
   SoundNovelSceneInput,
   SoundNovelVisualContext,
 } from '../soundNovel/types.ts'
+import {
+  buildDayResultsSceneViewModel,
+  type DayResultsSceneInput,
+} from '../dayResults/dayResultsViewModel.ts'
 import { ActivityPanel } from './ActivityPanel.ts'
+import { DecisionPanel } from './DecisionPanel.ts'
 import { PartyListPanel } from './PartyListPanel.ts'
-import { PartySummaryPanel } from './PartySummaryPanel.ts'
 import { QuestListPanel } from './QuestListPanel.ts'
 import { TavernHeader } from './TavernHeader.ts'
 
@@ -58,13 +68,15 @@ export class TavernScene implements GameScene {
   private _viewModel: TavernScreenViewModel | null = null
   private _header: TavernHeader | null = null
   private _partyList: PartyListPanel | null = null
-  private _partySummary: PartySummaryPanel | null = null
+  private _decisionPanel: DecisionPanel | null = null
   private _questList: QuestListPanel | null = null
   private _activityPanel: ActivityPanel | null = null
   private _autoSelectPending = true
   private _activityGenerationInFlight = new Set<string>()
   private _narrativeGenerationInFlight = new Set<string>()
-  private _shownHighFeedbackIds = new Set<string>()
+  private _advancing = false
+  private _previousPartyCount = 0
+  private _modalTrack: BgmTrackId | null = null
 
   mount(context: GameSceneContext): void {
     this._context = context
@@ -77,6 +89,9 @@ export class TavernScene implements GameScene {
 
     this.drawBackground(context)
     this.createPanels(context)
+
+    context.overlayManager.onClose(() => this.handleModalClose())
+    AudioController.playBgm('tavern')
 
     if (this._campaign) {
       this.applyCampaign(this._campaign, this._uiState)
@@ -96,15 +111,17 @@ export class TavernScene implements GameScene {
     }
     this._header = null
     this._partyList = null
-    this._partySummary = null
+    this._decisionPanel = null
     this._questList = null
     this._activityPanel = null
     this._context = null
     this._campaign = null
     this._activityGenerationInFlight.clear()
     this._narrativeGenerationInFlight.clear()
-    this._shownHighFeedbackIds.clear()
+    this._advancing = false
     this._autoSelectPending = true
+    this._modalTrack = null
+    AudioController.stopBgm()
   }
 
   setCampaign(campaign: TavernCampaignState, uiState: GameUiState): void {
@@ -125,11 +142,41 @@ export class TavernScene implements GameScene {
     campaign: TavernCampaignState,
     uiState: GameUiState,
   ): void {
+    this._advancing = false
     const previousDayNumber = this._campaign?.dayNumber ?? 0
-    const previousStatus = this._campaign?.currentDay.status
 
     this._campaign = campaign
     this._uiState = { ...uiState }
+    this._previousPartyCount = campaign.parties.length
+
+    const dayAdvanced =
+      previousDayNumber > 0 && campaign.dayNumber > previousDayNumber
+    if (dayAdvanced) {
+      const previousRecord = campaign.history[campaign.history.length - 1]
+      if (previousRecord) {
+        const selectedResultId =
+          previousRecord.results.length > 0
+            ? buildDayResultsSceneViewModel(
+                {
+                  campaign,
+                  resolvedDay: previousRecord.dayNumber,
+                  nextDay: campaign.dayNumber,
+                },
+                this._uiState.viewedReportIds ?? [],
+              ).expeditionResults[0]?.id
+            : undefined
+        const input: DayResultsSceneInput = {
+          campaign,
+          resolvedDay: previousRecord.dayNumber,
+          nextDay: campaign.dayNumber,
+          selectedResultId,
+          step: 'important_events',
+          returnTarget: { sceneId: 'tavern' },
+        }
+        this._context!.canvasGame.sceneManager?.push('dayResults', input)
+        return
+      }
+    }
 
     const partyIds = new Set(campaign.currentDay.parties.map((p) => p.id))
     const requestIds = new Set(campaign.currentDay.requests.map((r) => r.id))
@@ -176,13 +223,6 @@ export class TavernScene implements GameScene {
 
     this.updateViewModel()
     this.render()
-
-    const dayAdvanced = campaign.dayNumber > previousDayNumber
-    const resolvedTransition =
-      campaign.currentDay.status === 'resolved' && previousStatus !== 'resolved'
-    if (dayAdvanced || resolvedTransition) {
-      this.showHighImportanceSummary()
-    }
   }
 
   private updateViewModel(): void {
@@ -234,7 +274,6 @@ export class TavernScene implements GameScene {
       theme,
       width: VIRTUAL_WIDTH,
       height: TOP_BAR_HEIGHT,
-      onResolve: () => this.handleResolve(),
       onAdvance: () => this.handleAdvance(),
       onOpenReports: () => this.openReportArchiveModal(),
       onOpenSettings: () => this._context!.actions.openSettings(),
@@ -253,15 +292,24 @@ export class TavernScene implements GameScene {
     this._partyList.y = MAIN_Y
     this._uiRoot!.addChild(this._partyList)
 
-    this._partySummary = new PartySummaryPanel({
+    this._decisionPanel = new DecisionPanel({
       theme,
       width: CENTER_WIDTH - MARGIN,
       height: MAIN_HEIGHT,
       onAssign: () => this.handleAssign(),
+      getSelectedParty: () =>
+        this._campaign?.currentDay.parties.find(
+          (p) => p.id === this._uiState.selectedPartyId,
+        ),
+      getSelectedQuest: () =>
+        this._campaign?.currentDay.requests.find(
+          (r) => r.id === this._uiState.selectedQuestId,
+        ),
+      onOpenBreakdown: () => this.openPredictionBreakdown(),
     })
-    this._partySummary.x = LEFT_WIDTH + MARGIN
-    this._partySummary.y = MAIN_Y
-    this._uiRoot!.addChild(this._partySummary)
+    this._decisionPanel.x = LEFT_WIDTH + MARGIN
+    this._decisionPanel.y = MAIN_Y
+    this._uiRoot!.addChild(this._decisionPanel)
 
     this._questList = new QuestListPanel({
       theme,
@@ -287,31 +335,26 @@ export class TavernScene implements GameScene {
   private render(): void {
     if (!this._viewModel) return
     this._header?.update(this._viewModel.header)
+    this._header?.setActionEnabled(!this._advancing)
     this._partyList?.update(this._viewModel.parties)
-    this._partySummary?.update(this._viewModel.selectedParty)
+    this._decisionPanel?.update(this._viewModel.decision)
     this._questList?.update(this._viewModel.quests)
     this._activityPanel?.update(this._viewModel.activities)
   }
 
-  private handleResolve(): void {
-    this.clearActionMessage()
-    const result = this._context!.actions.resolveDay()
-    if (!result.ok) {
-      this.setActionMessage(
-        'error',
-        result.message ?? '本日の仲介確定に失敗しました',
-      )
-    }
-  }
-
   private handleAdvance(): void {
+    if (this._advancing) return
+    this._advancing = true
     this.clearActionMessage()
+    this.render()
     const result = this._context!.actions.advanceDay()
     if (!result.ok) {
+      this._advancing = false
       this.setActionMessage(
         'error',
         result.message ?? '翌日への進行に失敗しました',
       )
+      this.render()
     }
   }
 
@@ -491,8 +534,7 @@ export class TavernScene implements GameScene {
 
   private openStayExtensionDetail(activity: TavernActivityItemViewModel): void {
     const theme = this._context!.theme
-    const content = new Container()
-    const scroll = new GameScrollView(theme, 520, 200)
+    const scroll = new GameScrollView(theme, 520, 170)
 
     let y = 0
     if (activity.summary) {
@@ -514,12 +556,13 @@ export class TavernScene implements GameScene {
       label: '物語として読む',
       disabled: !canReadNarrative,
     })
-    narrativeButton.y = y
     narrativeButton.onActivate = () => this.openStayExtensionNarrative(activity)
-    scroll.content.addChild(narrativeButton)
 
-    content.addChild(scroll)
-    this._context!.overlayManager.openModal(activity.title, content)
+    this._context!.overlayManager.openModal(
+      activity.title,
+      scroll,
+      narrativeButton,
+    )
   }
 
   private openStayExtensionNarrative(
@@ -613,15 +656,71 @@ export class TavernScene implements GameScene {
     }
 
     content.addChild(scroll)
+    this._modalTrack = 'expeditionReports'
+    AudioController.playBgm('expeditionReports')
     this._context!.overlayManager.openModal('最近の報告', content)
+  }
+
+  private openPredictionBreakdown(): void {
+    const prediction = this._decisionPanel?.currentPrediction
+    const decision = this._viewModel?.decision
+    if (!prediction || !decision) return
+
+    const theme = this._context!.theme
+    const content = new Container()
+    const scroll = new GameScrollView(theme, 520, 260)
+
+    const partyName = decision.selectedParty?.name ?? 'パーティ'
+    const questTitle = decision.selectedQuest?.title ?? '依頼'
+
+    const outcomes = [
+      'completeSuccess',
+      'success',
+      'partialSuccess',
+      'failedObjective',
+      'forcedRetreat',
+      'lostExpedition',
+    ] as const
+
+    let y = 0
+    const add = (
+      text: string,
+      kind: 'heading' | 'body' | 'caption' = 'body',
+    ) => {
+      const label = new GameLabel(text, theme, kind, { maxWidth: 520 })
+      label.y = y
+      scroll.content.addChild(label)
+      y += label.textHeight + 8
+    }
+
+    add('遠征予測', 'heading')
+    add(`${partyName} × ${questTitle}`)
+    add(`仮想遠征数           ${prediction.sampleCount}`)
+    for (const outcome of outcomes) {
+      const count = prediction.counts[outcome]
+      const rate = Math.round(prediction.rates[outcome] * 100)
+      add(`${OUTCOME_LABELS[outcome]}                  ${count} (${rate}%)`)
+    }
+    add(
+      `推定依頼達成率       ${Math.round(
+        prediction.estimatedSuccessRate * 100,
+      )}%`,
+      'heading',
+    )
+    add(getPredictionLabel(prediction.estimatedSuccessRate))
+
+    content.addChild(scroll)
+    this._context!.overlayManager.openModal('遠征予測の内訳', content)
   }
 
   private openReportModal(report: ExpeditionReportViewModel): void {
     this.markReportViewed(report.id)
 
+    this._modalTrack = 'expeditionReports'
+    AudioController.playBgm('expeditionReports')
+
     const theme = this._context!.theme
-    const content = new Container()
-    const scroll = new GameScrollView(theme, 520, 200)
+    const scroll = new GameScrollView(theme, 520, 170)
 
     const lines = this.buildReportLines(report)
     let y = 0
@@ -642,14 +741,12 @@ export class TavernScene implements GameScene {
       label: '物語として読む',
       disabled: !canReadNarrative,
     })
-    narrativeButton.y = y + 12
     narrativeButton.onActivate = () => this.openNarrativeModal(report)
-    scroll.content.addChild(narrativeButton)
 
-    content.addChild(scroll)
     this._context!.overlayManager.openModal(
       `遠征報告：${report.questTitle}`,
-      content,
+      scroll,
+      narrativeButton,
     )
   }
 
@@ -686,13 +783,6 @@ export class TavernScene implements GameScene {
           : '記録なし'
       }`,
     )
-    if (report.majorEvents.length > 0) {
-      lines.push('')
-      lines.push('主な出来事')
-      for (const event of report.majorEvents) {
-        lines.push(`・${event}`)
-      }
-    }
     return lines
   }
 
@@ -780,6 +870,7 @@ export class TavernScene implements GameScene {
         reportId: report.id,
         partyId: report.partyId,
       },
+      mood: this.resolveReportMood(report),
     })
   }
 
@@ -806,6 +897,7 @@ export class TavernScene implements GameScene {
         activityId: activity.id,
         partyId: activity.partyId,
       },
+      mood: 'daily',
     })
   }
 
@@ -832,11 +924,37 @@ export class TavernScene implements GameScene {
         activityId: activity.id,
         partyId: activity.partyId,
       },
+      mood: 'daily',
     })
   }
 
   private findPartyAcrossCampaign(partyId: string): CampaignParty | undefined {
     return this._campaign?.parties.find((p) => p.id === partyId)
+  }
+
+  private resolveReportMood(
+    report: ExpeditionReportViewModel,
+  ): 'daily' | 'tension' | 'sad' {
+    if (report.outcome === 'failure' || report.outcome === 'retreat') {
+      return 'sad'
+    }
+    const env = (report.environment ?? '').toLowerCase()
+    const tenseEnvironments = [
+      'forest',
+      'cave',
+      'ruins',
+      'dungeon',
+      'mountain',
+      'wetland',
+      'swamp',
+    ]
+    if (
+      tenseEnvironments.includes(env) ||
+      tenseEnvironments.some((value) => env.includes(value))
+    ) {
+      return 'tension'
+    }
+    return 'daily'
   }
 
   private buildFocusCharacterIds(party: CampaignParty | undefined): string[] {
@@ -851,93 +969,6 @@ export class TavernScene implements GameScene {
     return Array.from(ids)
   }
 
-  private showHighImportanceSummary(): void {
-    if (!this._viewModel) return
-    const highItems = this._viewModel.activities.filter(
-      (a) => a.importance === 'high' && !this._shownHighFeedbackIds.has(a.id),
-    )
-    if (highItems.length === 0) return
-
-    for (const item of highItems) {
-      this._shownHighFeedbackIds.add(item.id)
-    }
-
-    const theme = this._context!.theme
-    const content = new Container()
-    const scroll = new GameScrollView(theme, 520, 220)
-
-    let y = 0
-    for (const item of highItems) {
-      const title = new GameLabel(`・${item.title}`, theme, 'body', {
-        maxWidth: 520,
-      })
-      title.y = y
-      scroll.content.addChild(title)
-      y += title.textHeight + 8
-
-      if (item.summary) {
-        const summary = new GameLabel(`  ${item.summary}`, theme, 'caption', {
-          maxWidth: 520,
-        })
-        summary.y = y
-        scroll.content.addChild(summary)
-        y += summary.textHeight + 8
-      }
-
-      const action = this.createHighNotificationAction(item)
-      if (action) {
-        action.y = y
-        scroll.content.addChild(action)
-        y += action.height + 12
-      }
-    }
-
-    content.addChild(scroll)
-    this._context!.overlayManager.openModal('本日の重要な出来事', content)
-  }
-
-  private createHighNotificationAction(
-    item: TavernActivityItemViewModel,
-  ): Container | null {
-    const theme = this._context!.theme
-
-    if (item.kind === 'expedition_return' && item.reportId) {
-      const report = findExpeditionReportById(
-        this._viewModel?.reports ?? [],
-        item.reportId,
-      )
-      if (!report) return null
-      const btn = new GameButton({
-        width: 140,
-        height: 32,
-        theme,
-        label: '報告を見る',
-      })
-      btn.onActivate = () => {
-        this._context!.overlayManager.closeModal()
-        this.markActivityViewed(item.id)
-        this.openReportModal(report)
-      }
-      return btn
-    }
-
-    if (item.kind === 'party_arrival' && item.partyId) {
-      const btn = new GameButton({
-        width: 140,
-        height: 32,
-        theme,
-        label: '選択する',
-      })
-      btn.onActivate = () => {
-        this._context!.overlayManager.closeModal()
-        this._context!.actions.selectParty(item.partyId!)
-      }
-      return btn
-    }
-
-    return null
-  }
-
   private errorModalContent(text: string): Container {
     const theme = this._context!.theme
     const content = new Container()
@@ -946,5 +977,12 @@ export class TavernScene implements GameScene {
     scroll.content.addChild(label)
     content.addChild(scroll)
     return content
+  }
+
+  private handleModalClose(): void {
+    if (this._modalTrack) {
+      this._modalTrack = null
+      AudioController.playBgm('tavern')
+    }
   }
 }

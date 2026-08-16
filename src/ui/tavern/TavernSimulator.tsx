@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react'
 import {
   advanceCampaignDay,
   createTavernCampaign,
@@ -24,6 +24,7 @@ import { CampaignHistory } from './CampaignHistory.tsx'
 import { ExpeditionPredictionPanel } from './ExpeditionPredictionPanel.tsx'
 import { NarrativeQueue } from './NarrativeQueue.tsx'
 import { NarrativeSettings } from './NarrativeSettings.tsx'
+import { AudioSettings } from '../canvas/audio/AudioSettings.tsx'
 import type { NarrativeProvider } from '../../ai/narrative/types.ts'
 import type { NarrativeProviderConfig } from './NarrativeSettings.tsx'
 import './tavern.css'
@@ -231,6 +232,39 @@ export function TavernSimulator() {
     }
   }, [campaign, selectedRequestId])
 
+  const finishingRef = useRef(false)
+
+  const handleFinishDay = useCallback(():
+    { ok: true } | { ok: false; message: string } => {
+    if (finishingRef.current) {
+      return { ok: false, message: '処理中です' }
+    }
+    finishingRef.current = true
+    try {
+      setCampaign((prev) => {
+        let next = prev
+        if (next.currentDay.status === 'planning') {
+          next = resolveCampaignDay(next)
+        }
+        if (next.currentDay.status === 'resolved') {
+          next = advanceCampaignDay(next)
+        }
+        return next
+      })
+      setSelectedRequestId(null)
+      setSelectedPartyId(null)
+      setSelectedResultId(null)
+      setError(null)
+      return { ok: true }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : '日次処理に失敗しました'
+      setError(message)
+      return { ok: false, message }
+    } finally {
+      finishingRef.current = false
+    }
+  }, [])
+
   const handleOpenExpeditionNarrative = useCallback(
     async (candidateId: string): Promise<UiActionResult<string>> => {
       const candidate = campaign.narrativeCandidates.find(
@@ -324,7 +358,7 @@ export function TavernSimulator() {
         >
           <GameCanvasHost
             campaign={campaign}
-            onAdvanceDay={handleAdvance}
+            onAdvanceDay={handleFinishDay}
             onResolveDay={handleResolve}
             onOfferRequest={handleOfferRequest}
             onOpenActivity={handleOpenActivity}
@@ -337,7 +371,7 @@ export function TavernSimulator() {
           <div className="canvas-settings-modal-overlay">
             <div className="canvas-settings-modal">
               <div className="canvas-settings-header">
-                <h3>AI 接続設定</h3>
+                <h3>設定</h3>
                 <button
                   type="button"
                   className="canvas-settings-close"
@@ -353,6 +387,7 @@ export function TavernSimulator() {
                 onChange={setNarrativeConfig}
                 onProviderChange={setNarrativeProvider}
               />
+              <AudioSettings />
             </div>
           </div>
         )}

@@ -231,7 +231,7 @@ export function narrativeStatusForCandidate(
   return { status: 'unseen', canGenerate: true }
 }
 
-function buildReportFromResult(
+export function buildReportFromResult(
   day: number,
   result: ResolvedDispatch,
   candidates: NarrativeCandidate[],

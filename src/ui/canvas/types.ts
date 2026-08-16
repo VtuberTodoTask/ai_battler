@@ -64,6 +64,8 @@ export interface GameUiState {
   actionMessage?: UiActionMessage
   viewedActivityIds?: string[]
   viewedReportIds?: string[]
+  lastDayResultsStep?: 'important_events' | 'expedition_results'
+  lastSelectedResultId?: string
 }
 
 export const DEFAULT_GAME_UI_STATE: GameUiState = {

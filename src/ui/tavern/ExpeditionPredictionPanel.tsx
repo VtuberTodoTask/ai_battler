@@ -1,6 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { predictExpeditionOutcome } from '../../core/tavern/prediction/prediction.ts'
-import { buildPredictionCacheKey } from '../../core/tavern/prediction/predictionCacheKey.ts'
+import { useEffect, useMemo, useState } from 'react'
 import {
   EXPEDITION_PREDICTION_SAMPLES,
   type ExpeditionPrediction,
@@ -9,6 +7,7 @@ import type {
   TavernParty,
   TavernRequestOffer,
 } from '../../core/tavern/types.ts'
+import { getExpeditionPrediction } from '../shared/expeditionPredictionService.ts'
 import { getPredictionLabel, OUTCOME_LABELS } from './predictionLabels.ts'
 
 export interface ExpeditionPredictionPanelProps {
@@ -25,7 +24,6 @@ export function ExpeditionPredictionPanel({
   const [prediction, setPrediction] = useState<ExpeditionPrediction | null>(
     null,
   )
-  const cacheRef = useRef<Map<string, ExpeditionPrediction>>(new Map())
 
   const canPredict = useMemo(() => {
     return (
@@ -34,11 +32,6 @@ export function ExpeditionPredictionPanel({
       tavernParty.availability !== 'recovering'
     )
   }, [requestOffer, tavernParty])
-
-  const currentKey = useMemo(() => {
-    if (!canPredict || !requestOffer || !tavernParty) return null
-    return buildPredictionCacheKey(requestOffer, tavernParty, sampleCount)
-  }, [canPredict, requestOffer, tavernParty, sampleCount])
 
   const isMatch = useMemo(() => {
     if (!prediction || !requestOffer || !tavernParty) return false
@@ -50,28 +43,23 @@ export function ExpeditionPredictionPanel({
   }, [prediction, requestOffer, tavernParty, sampleCount])
 
   useEffect(() => {
-    if (!currentKey || !requestOffer || !tavernParty) {
-      return undefined
-    }
+    if (!canPredict || !requestOffer || !tavernParty) return undefined
 
-    const cached = cacheRef.current.get(currentKey)
-    if (cached) {
-      const handle = setTimeout(() => {
-        setPrediction(cached)
-      }, 0)
-      return () => clearTimeout(handle)
-    }
-
-    const handle = setTimeout(() => {
-      const next = predictExpeditionOutcome(requestOffer, tavernParty.party, {
-        sampleCount,
+    let ignore = false
+    getExpeditionPrediction(requestOffer, tavernParty, { sampleCount })
+      .then((next) => {
+        if (ignore) return
+        setPrediction(next)
       })
-      cacheRef.current.set(currentKey, next)
-      setPrediction(next)
-    }, 0)
+      .catch(() => {
+        if (ignore) return
+        setPrediction(null)
+      })
 
-    return () => clearTimeout(handle)
-  }, [currentKey, requestOffer, tavernParty, sampleCount])
+    return () => {
+      ignore = true
+    }
+  }, [canPredict, requestOffer, tavernParty, sampleCount])
 
   if (!requestOffer) {
     return (

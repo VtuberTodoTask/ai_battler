@@ -24,6 +24,7 @@ export class GameModal extends Container {
   private readonly _theme: GameUiTheme
   private _width = 600
   private _height = 360
+  private _footer?: Container
 
   constructor(theme: GameUiTheme, onClose: () => void) {
     super()
@@ -78,9 +79,14 @@ export class GameModal extends Container {
     this.addChild(this._closeButton)
   }
 
-  open(title: string, content: Container | string): void {
+  open(title: string, content: Container | string, footer?: Container): void {
     this._titleLabel.text = title
     destroyChildren(this._bodyContainer)
+    if (this._footer) {
+      this.removeChild(this._footer)
+      this._footer.destroy({ children: true })
+      this._footer = undefined
+    }
 
     const titleBottom =
       this._titleLabel.y +
@@ -95,6 +101,15 @@ export class GameModal extends Container {
       this._bodyContainer.addChild(label)
     } else {
       this._bodyContainer.addChild(content)
+    }
+
+    if (footer) {
+      this._footer = footer
+      const footerHeight = footer.height || 40
+      footer.x = this._panel.x + this._theme.spacing.s24
+      footer.y =
+        this._panel.y + this._height - footerHeight - this._theme.spacing.s24
+      this.addChild(footer)
     }
 
     this.visible = true

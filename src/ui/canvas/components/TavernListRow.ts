@@ -8,6 +8,7 @@ export interface TavernListRowOptions {
   theme: GameUiTheme
   title: string
   subtitle?: string
+  trailing?: string
   selected?: boolean
   disabled?: boolean
   unread?: boolean
@@ -17,6 +18,7 @@ export class TavernListRow extends Container {
   private readonly _graphics: Graphics
   private readonly _titleLabel: GameLabel
   private readonly _subtitleLabel: GameLabel
+  private readonly _trailingLabel?: GameLabel
   private readonly _unreadDot: Graphics
   private readonly _theme: GameUiTheme
   private readonly _width: number
@@ -40,10 +42,20 @@ export class TavernListRow extends Container {
     this._graphics = new Graphics()
     this.addChild(this._graphics)
 
-    this._titleLabel = new GameLabel(options.title, this._theme, 'body')
+    const titleMaxWidth = options.trailing
+      ? this._width - 80
+      : this._width - this._theme.spacing.s24
+    this._titleLabel = new GameLabel(options.title, this._theme, 'body', {
+      maxWidth: titleMaxWidth,
+    })
     this._titleLabel.x = this._theme.spacing.s12
     this._titleLabel.y = this._theme.spacing.s8
     this.addChild(this._titleLabel)
+
+    if (options.trailing) {
+      this._trailingLabel = new GameLabel(options.trailing, this._theme, 'body')
+      this.addChild(this._trailingLabel)
+    }
 
     this._subtitleLabel = new GameLabel(
       options.subtitle ?? '',
@@ -66,17 +78,27 @@ export class TavernListRow extends Container {
     this.on('pointerout', this.onPointerOut)
     this.on('pointertap', this.onPointerTap)
 
+    this.layout()
     this.cursor = this._disabled ? 'default' : 'pointer'
     this.draw()
   }
 
   setTitle(value: string): void {
     this._titleLabel.text = value
+    this.layout()
   }
 
   setSubtitle(value: string): void {
     this._subtitleLabel.text = value
     this._subtitleLabel.visible = value.length > 0
+    this.draw()
+  }
+
+  setTrailing(value: string | undefined): void {
+    if (!this._trailingLabel) return
+    this._trailingLabel.text = value ?? ''
+    this._trailingLabel.visible = (value ?? '').length > 0
+    this.layout()
     this.draw()
   }
 
@@ -114,6 +136,15 @@ export class TavernListRow extends Container {
   private onPointerTap = (): void => {
     if (this._disabled) return
     this.onActivate?.()
+  }
+
+  private layout(): void {
+    if (!this._trailingLabel) return
+    const measured = this._trailingLabel.measure()
+    const trailingWidth = measured.width || this._trailingLabel.textWidth
+    this._trailingLabel.x =
+      this._width - trailingWidth - this._theme.spacing.s12
+    this._trailingLabel.y = this._theme.spacing.s8
   }
 
   private draw(): void {

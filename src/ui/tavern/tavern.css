@@ -878,3 +878,26 @@
   color: #f0e6d2;
   border-color: #8b5e3c;
 }
+
+.audio-settings {
+  padding: 1rem 0;
+  border-top: 1px solid #3d2b1f;
+  color: #f0e6d2;
+}
+
+.audio-settings h4 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.audio-volume-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.audio-volume-label input[type='range'] {
+  width: 100%;
+  accent-color: #c9a86c;
+}

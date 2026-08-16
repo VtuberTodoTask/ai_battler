@@ -9,7 +9,10 @@ import type {
   TavernParty,
   TavernRequestOffer,
 } from '../../../core/tavern/types.ts'
-import { OBJECTIVE_LABELS } from '../../expedition/labels.ts'
+import {
+  ENVIRONMENT_LABELS,
+  OBJECTIVE_LABELS,
+} from '../../expedition/labels.ts'
 import type { GameUiState, UiActionMessage } from '../types.ts'
 import {
   buildExpeditionReportViewModels,
@@ -62,7 +65,10 @@ export interface TavernPartyListItemViewModel {
 export interface TavernPartySummaryViewModel {
   id: string
   name: string
+  rankLabel: string
   statusLabel: string
+  memberCount: number
+  injuryLabel: string
   members: TavernPartyMemberViewModel[]
   currentQuest?: { id: string; title: string }
   stayInfo?: {
@@ -79,14 +85,35 @@ export interface TavernPartySummaryViewModel {
 export interface TavernQuestListItemViewModel {
   id: string
   title: string
+  rank: string
   rankLabel: string
   difficultyLabel?: string
   objectiveLabel: string
+  terrainLabel: string
   rewardLabel?: string
   statusLabel: string
   selected: boolean
   assignable: boolean
   disabledReason?: string
+}
+
+export interface TavernQuestDetailViewModel {
+  id: string
+  title: string
+  rankLabel: string
+  objectiveTypeLabel: string
+  terrainLabel: string
+  combatLabel: string
+  description: string
+  tags: string[]
+  offerStatusLabel: string
+}
+
+export interface TavernDecisionViewModel {
+  selectedParty?: TavernPartySummaryViewModel
+  selectedQuest?: TavernQuestDetailViewModel
+  canOffer: boolean
+  offerDisabledReason?: string
 }
 
 export type TavernActivityItemViewModel = TavernFeedbackItem
@@ -96,6 +123,7 @@ export interface TavernScreenViewModel {
   parties: TavernPartyListItemViewModel[]
   quests: TavernQuestListItemViewModel[]
   selectedParty?: TavernPartySummaryViewModel
+  decision?: TavernDecisionViewModel
   activities: TavernActivityItemViewModel[]
   reports: ExpeditionReportViewModel[]
 }
@@ -254,6 +282,12 @@ function buildPartySummary(
     }),
   )
 
+  const injuredCount = party.party.members.filter(
+    (m) => m.currentHp < m.maxHp || (m.statusEffects?.length ?? 0) > 0,
+  ).length
+  const injuryLabel =
+    injuredCount === 0 ? '負傷：なし' : `負傷：あり（${injuredCount}名）`
+
   let canAssignQuest = false
   let assignDisabledReason: string | undefined
   if (selectedQuestId && day.status === 'planning') {
@@ -272,7 +306,10 @@ function buildPartySummary(
   return {
     id: party.id,
     name: party.party.name,
+    rankLabel: `Rank ${party.party.rank}`,
     statusLabel: selectedPartyStatusLabel(party, day),
+    memberCount: party.party.members.length,
+    injuryLabel,
     members,
     currentQuest: currentQuestForParty(party, day),
     stayInfo: stayInfoForParty(party, dayNumber, history),
@@ -325,12 +362,71 @@ function buildQuestListItem(
   return {
     id: request.id,
     title: request.title,
+    rank: request.rank,
     rankLabel: `Rank ${request.rank}`,
     objectiveLabel: OBJECTIVE_LABELS[request.objectiveType],
+    terrainLabel:
+      ENVIRONMENT_LABELS[request.environment] ?? request.environment,
     statusLabel: questStatusLabel(request, day, selectedPartyId),
     selected,
     assignable,
     disabledReason,
+  }
+}
+
+function buildQuestDetail(
+  request: TavernRequestOffer,
+  day: TavernDayState,
+  selectedPartyId: string | null,
+): TavernQuestDetailViewModel {
+  return {
+    id: request.id,
+    title: request.title,
+    rankLabel: `Rank ${request.rank}`,
+    objectiveTypeLabel: OBJECTIVE_LABELS[request.objectiveType],
+    terrainLabel:
+      ENVIRONMENT_LABELS[request.environment] ?? request.environment,
+    combatLabel: request.expeditionRequest.battle ? 'あり' : 'なし',
+    description: request.briefing,
+    tags: request.publicTags,
+    offerStatusLabel: questStatusLabel(request, day, selectedPartyId),
+  }
+}
+
+function buildDecision(
+  selectedParty: TavernParty | undefined,
+  selectedQuest: TavernRequestOffer | undefined,
+  day: TavernDayState,
+  dayNumber: number,
+  history: TavernCampaignState['history'],
+): TavernDecisionViewModel {
+  const partySummary = selectedParty
+    ? buildPartySummary(
+        selectedParty,
+        day,
+        dayNumber,
+        history,
+        selectedQuest?.id ?? null,
+      )
+    : undefined
+  const questDetail = selectedQuest
+    ? buildQuestDetail(selectedQuest, day, selectedParty?.id ?? null)
+    : undefined
+
+  const canOffer =
+    !!selectedParty &&
+    !!selectedQuest &&
+    day.status === 'planning' &&
+    partySummary?.canAssignQuest === true
+  const offerDisabledReason = selectedParty
+    ? partySummary?.assignDisabledReason
+    : 'パーティを選択してください'
+
+  return {
+    selectedParty: partySummary,
+    selectedQuest: questDetail,
+    canOffer,
+    offerDisabledReason,
   }
 }
 
@@ -384,20 +480,24 @@ export function buildTavernScreenViewModel(
   const selectedParty = day.parties.find(
     (p) => p.id === uiState.selectedPartyId,
   )
+  const selectedQuest = day.requests.find(
+    (r) => r.id === uiState.selectedQuestId,
+  )
+
+  const decision = buildDecision(
+    selectedParty,
+    selectedQuest,
+    day,
+    campaign.dayNumber,
+    campaign.history,
+  )
 
   return {
     header,
     parties,
     quests,
-    selectedParty: selectedParty
-      ? buildPartySummary(
-          selectedParty,
-          day,
-          campaign.dayNumber,
-          campaign.history,
-          uiState.selectedQuestId,
-        )
-      : undefined,
+    selectedParty: decision.selectedParty,
+    decision,
     activities: sortFeedbackItems(
       buildActivities(campaign, uiState.viewedActivityIds ?? []),
     ),
