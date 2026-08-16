@@ -27,7 +27,7 @@ export class TitleScene implements GameScene {
     void this.loadAssets().then(() => {
       this._loaded = true
       this.drawScene(context)
-      AudioController.playBgm('tavern')
+      AudioController.playBgm('title')
     })
   }
 
