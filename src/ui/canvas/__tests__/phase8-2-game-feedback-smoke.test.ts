@@ -296,7 +296,7 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
     expect(activity?.summary).toContain('理由：')
   })
 
-  it('D: report archive and narrative actions are wired', async () => {
+  it('D: report modal and narrative actions are wired', async () => {
     const scene = new TavernScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(scene, uiStateRef)
@@ -312,10 +312,7 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
     scene.mount(context)
     scene.setCampaign(resolved, { ...DEFAULT_GAME_UI_STATE })
 
-    const openModalSpy = vi.spyOn(context.overlayManager, 'openModal')
-
     const scenePrivate = scene as unknown as {
-      openReportArchiveModal: () => void
       openReportModal: (report: {
         id: string
         narrativeTargetId?: string
@@ -326,9 +323,6 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
         generatedText?: string
       }) => void
     }
-
-    scenePrivate.openReportArchiveModal()
-    expect(openModalSpy).toHaveBeenCalled()
 
     const state = scene as unknown as {
       _viewModel: { reports: { id: string; narrativeTargetId?: string }[] }
