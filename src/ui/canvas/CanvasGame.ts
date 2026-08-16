@@ -10,6 +10,8 @@ import { FoundationDemoScene } from './scenes/FoundationDemoScene.ts'
 import { TavernScene } from './scenes/tavern/TavernScene.ts'
 import { SoundNovelScene } from './scenes/soundNovel/SoundNovelScene.ts'
 import { DayResultsScene } from './scenes/dayResults/DayResultsScene.ts'
+import { TitleScene } from './scenes/title/TitleScene.ts'
+import { SaveLoadScene } from './scenes/saveLoad/SaveLoadScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -107,11 +109,13 @@ export class CanvasGame {
         }
       },
     })
-    this._sceneManager.register(new BootScene('tavern'))
+    this._sceneManager.register(new BootScene('title'))
     this._sceneManager.register(new FoundationDemoScene())
     this._sceneManager.register(new TavernScene())
     this._sceneManager.register(new SoundNovelScene())
     this._sceneManager.register(new DayResultsScene())
+    this._sceneManager.register(new TitleScene())
+    this._sceneManager.register(new SaveLoadScene())
 
     app.ticker.add(this.handleTick)
 
@@ -156,6 +160,10 @@ export class CanvasGame {
 
   setCampaign(campaign: TavernCampaignState): void {
     this._currentCampaign = campaign
+    const currentId = this._sceneManager?.current?.id
+    if (currentId && currentId !== 'tavern') {
+      this._sceneManager?.show('tavern')
+    }
     const current = this._sceneManager?.current
     current?.setCampaign?.(campaign, { ...this._uiState })
   }
@@ -164,6 +172,15 @@ export class CanvasGame {
     this._uiState = { ...this._uiState, ...partial }
     const current = this._sceneManager?.current
     current?.setUiState?.({ ...this._uiState })
+  }
+
+  openSaveLoad(mode: 'save' | 'load'): void {
+    this._sceneManager?.push('saveLoad', { mode })
+  }
+
+  returnToTitle(): void {
+    this._uiState = { ...DEFAULT_GAME_UI_STATE }
+    this._sceneManager?.show('title')
   }
 
   private handleRendererResize = (): void => {
@@ -248,6 +265,16 @@ export class CanvasGame {
       openSettings: () => {},
       closeModal: () => {},
       switchToLegacy: () => {},
+      newGame: () => ({ ok: false, message: 'newGame not connected' }),
+      loadGame: () =>
+        Promise.resolve({ ok: false, message: 'loadGame not connected' }),
+      saveGame: () =>
+        Promise.resolve({ ok: false, message: 'saveGame not connected' }),
+      deleteSave: () =>
+        Promise.resolve({ ok: false, message: 'deleteSave not connected' }),
+      listSaves: () => Promise.resolve({ ok: true, data: [] }),
+      openSaveLoad: () => {},
+      returnToTitle: () => {},
     }
   }
 }

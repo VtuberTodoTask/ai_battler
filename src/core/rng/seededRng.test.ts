@@ -41,4 +41,32 @@ describe('SeededRng', () => {
     const items = ['a', 'b', 'c']
     expect(items).toContain(rng.pick(items))
   })
+
+  it('serialize/restoreで位置を完全に復元できる', () => {
+    const rng = new SeededRng('restore-test')
+    const samples1: number[] = []
+    for (let i = 0; i < 50; i++) {
+      samples1.push(rng.next())
+    }
+
+    const state = rng.serialize()
+    const restored = SeededRng.restore(state)
+    const samples2: number[] = []
+    for (let i = 0; i < 50; i++) {
+      samples2.push(restored.next())
+    }
+
+    const fresh = new SeededRng('restore-test')
+    for (let i = 0; i < 50; i++) {
+      fresh.next()
+    }
+    const samples3: number[] = []
+    for (let i = 0; i < 50; i++) {
+      samples3.push(fresh.next())
+    }
+
+    expect(samples2).toEqual(samples3)
+    expect(restored.getCallCount()).toBe(fresh.getCallCount())
+    expect(restored.getSeed()).toBe('restore-test')
+  })
 })

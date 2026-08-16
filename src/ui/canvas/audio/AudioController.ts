@@ -1,15 +1,24 @@
 const VOLUME_KEY = 'ai_battler_volume'
 
 export type BgmTrackId =
+  | 'title'
   | 'tavern'
   | 'expeditionReports'
   | 'soundNovelDaily'
   | 'soundNovelTension'
   | 'soundNovelSad'
 
-export type SeTrackId = 'successJingle' | 'newParty'
+export type SeTrackId =
+  | 'successJingle'
+  | 'newParty'
+  | 'cursor'
+  | 'decision'
+  | 'pageTurn'
+  | 'stamp'
+  | 'shopBell'
 
 const BGM_URLS: Record<BgmTrackId, string> = {
+  title: '/bgm/title.mp3',
   tavern: '/bgm/untitled.mp3',
   expeditionReports: '/bgm/expedition_reports.mp3',
   soundNovelDaily: '/bgm/wooden_cup_afternoon.mp3',
@@ -20,6 +29,11 @@ const BGM_URLS: Record<BgmTrackId, string> = {
 const SE_URLS: Record<SeTrackId, string> = {
   successJingle: '/bgm/return_of_ale.mp3',
   newParty: '/bgm/new_comrade.mp3',
+  cursor: '/se/cursor.mp3',
+  decision: '/se/decision.mp3',
+  pageTurn: '/se/page_turn.mp3',
+  stamp: '/se/stamp.mp3',
+  shopBell: '/se/shop_bell.mp3',
 }
 
 const FADE_MS = 300
@@ -56,6 +70,7 @@ class AudioControllerImpl {
   private _currentBgmId: BgmTrackId | null = null
   private _nextBgmId: BgmTrackId | null = null
   private _nextBgmOptions: { loop?: boolean } | undefined
+  private _seAudios: HTMLAudioElement[] = []
 
   constructor() {
     if (typeof document !== 'undefined') {
@@ -73,6 +88,10 @@ class AudioControllerImpl {
     const clamped = Math.max(0, Math.min(1, value))
     this._volume = clamped
     saveVolume(clamped)
+
+    for (const audio of this._seAudios) {
+      audio.volume = clamped
+    }
 
     if (!this._bgm) return
 
@@ -129,7 +148,15 @@ class AudioControllerImpl {
     if (!canUseAudio()) return
     const audio = new Audio(SE_URLS[trackId])
     audio.volume = this._volume
+    this._seAudios.push(audio)
+    const remove = (): void => {
+      const i = this._seAudios.indexOf(audio)
+      if (i >= 0) this._seAudios.splice(i, 1)
+    }
+    audio.addEventListener('ended', remove)
+    audio.addEventListener('error', remove)
     audio.play().catch(() => {
+      remove()
       // Browsers may block playback until user interaction.
     })
   }
