@@ -70,6 +70,7 @@ class AudioControllerImpl {
   private _currentBgmId: BgmTrackId | null = null
   private _nextBgmId: BgmTrackId | null = null
   private _nextBgmOptions: { loop?: boolean } | undefined
+  private _seAudios: HTMLAudioElement[] = []
 
   constructor() {
     if (typeof document !== 'undefined') {
@@ -87,6 +88,10 @@ class AudioControllerImpl {
     const clamped = Math.max(0, Math.min(1, value))
     this._volume = clamped
     saveVolume(clamped)
+
+    for (const audio of this._seAudios) {
+      audio.volume = clamped
+    }
 
     if (!this._bgm) return
 
@@ -143,7 +148,15 @@ class AudioControllerImpl {
     if (!canUseAudio()) return
     const audio = new Audio(SE_URLS[trackId])
     audio.volume = this._volume
+    this._seAudios.push(audio)
+    const remove = (): void => {
+      const i = this._seAudios.indexOf(audio)
+      if (i >= 0) this._seAudios.splice(i, 1)
+    }
+    audio.addEventListener('ended', remove)
+    audio.addEventListener('error', remove)
     audio.play().catch(() => {
+      remove()
       // Browsers may block playback until user interaction.
     })
   }
