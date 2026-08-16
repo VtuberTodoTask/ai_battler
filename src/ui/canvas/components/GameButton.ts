@@ -1,5 +1,6 @@
 import { Container, Graphics, Rectangle } from 'pixi.js'
 import type { GameUiTheme } from '../theme/gameTheme.ts'
+import { AudioController } from '../audio/AudioController.ts'
 import { GameLabel } from './GameLabel.ts'
 
 export type ButtonState =
@@ -96,6 +97,9 @@ export class GameButton extends Container {
 
   private onPointerOver = (): void => {
     if (!this._isEnabled) return
+    if (this._state !== 'hover') {
+      AudioController.playSe('cursor')
+    }
     this._state = 'hover'
     this.draw()
   }
@@ -120,6 +124,7 @@ export class GameButton extends Container {
 
   private onPointerTap = (): void => {
     if (!this._isEnabled) return
+    AudioController.playSe('decision')
     this.activate()
   }
 
