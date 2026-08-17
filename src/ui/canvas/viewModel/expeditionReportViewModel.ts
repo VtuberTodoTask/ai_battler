@@ -8,6 +8,11 @@ import type {
   ResolvedDispatch,
 } from '../../../core/tavern/types.ts'
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
+import {
+  computeQuestSettlement,
+  getOrComputeRewardTerms,
+} from '../../../core/economy/index.ts'
+import type { QuestSettlement } from '../../../core/economy/types.ts'
 import { OUTCOME_LABELS } from '../../expedition/labels.ts'
 import type {
   NarrativeCandidate,
@@ -28,10 +33,6 @@ export interface ExpeditionInjuryViewModel {
   cause?: string
 }
 
-export interface ExpeditionRewardViewModel {
-  label: string
-}
-
 export interface ExpeditionReportEventViewModel {
   text: string
 }
@@ -50,7 +51,7 @@ export interface ExpeditionReportViewModel {
   casualties: ExpeditionCasualtyViewModel[]
   injuries: ExpeditionInjuryViewModel[]
   injuryRecordMissing: boolean
-  rewards: ExpeditionRewardViewModel[]
+  settlement?: QuestSettlement
   majorEvents: string[]
   narrativeStatus: 'unseen' | 'generated' | 'viewed'
   narrativeTargetId?: string
@@ -253,6 +254,15 @@ export function buildReportFromResult(
   )
   const narrative = narrativeStatusForCandidate(candidate, generations)
 
+  const settlement =
+    result.settlement ??
+    (result.result
+      ? computeQuestSettlement(
+          getOrComputeRewardTerms(result.request),
+          result.result.outcome,
+        )
+      : undefined)
+
   return {
     id: buildExpeditionReportId(day, result.partyId, result.requestId),
     day,
@@ -267,7 +277,7 @@ export function buildReportFromResult(
     casualties,
     injuries,
     injuryRecordMissing,
-    rewards: [{ label: '記録なし' }],
+    settlement,
     majorEvents: report.keyFacts.slice(0, 5),
     narrativeStatus: narrative.status,
     narrativeTargetId: candidate?.id,

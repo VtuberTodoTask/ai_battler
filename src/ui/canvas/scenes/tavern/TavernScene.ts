@@ -25,6 +25,7 @@ import {
 } from '../../viewModel/expeditionReportViewModel.ts'
 import type { PartyDetailSceneInput } from '../../viewModel/partyDetailViewModel.ts'
 import type { WorldEncyclopediaSceneInput } from '../../viewModel/worldEncyclopediaViewModel.ts'
+import type { TavernLedgerSceneInput } from '../../viewModel/tavernLedgerViewModel.ts'
 import type {
   SoundNovelSceneInput,
   SoundNovelVisualContext,
@@ -278,6 +279,7 @@ export class TavernScene implements GameScene {
       onOpenSettings: () => this._context!.actions.openSettings(),
       onOpenSave: () => this._context!.actions.openSaveLoad?.('save'),
       onOpenLibrary: () => this.openWorldEncyclopedia(),
+      onOpenLedger: () => this.openTavernLedger(),
     })
     this._header.x = 0
     this._header.y = 0
@@ -427,6 +429,19 @@ export class TavernScene implements GameScene {
       },
     }
     this._context.canvasGame.sceneManager?.push('worldEncyclopedia', input)
+  }
+
+  private openTavernLedger(): void {
+    if (!this._context) return
+
+    const input: TavernLedgerSceneInput = {
+      returnTarget: {
+        sceneId: 'tavern',
+        selectedPartyId: this._uiState.selectedPartyId ?? undefined,
+        selectedQuestId: this._uiState.selectedQuestId ?? undefined,
+      },
+    }
+    this._context.canvasGame.sceneManager?.push('tavernLedger', input)
   }
 
   private setActionMessage(
@@ -781,13 +796,21 @@ export class TavernScene implements GameScene {
           : 'なし'
       }`,
     )
-    lines.push(
-      `報酬：${
-        report.rewards.length > 0
-          ? report.rewards.map((r) => r.label).join(' / ')
-          : '記録なし'
-      }`,
-    )
+    if (report.settlement) {
+      const { settlement } = report
+      const formatter = (v: number) => v.toLocaleString('ja-JP')
+      lines.push('精算')
+      lines.push(`提示報酬 ${formatter(settlement.promisedReward)}`)
+      lines.push(`支払額 ${formatter(settlement.paidReward)}`)
+      lines.push(`酒場収入 ${formatter(settlement.tavernCommission)}`)
+      if (settlement.settlementReason === 'objective_failed') {
+        lines.push('依頼目標を達成できなかったため、報酬は支払われなかった。')
+      } else if (settlement.settlementReason === 'partial_objective') {
+        lines.push('目標を一部達成したため、報酬は半額支払われた。')
+      }
+    } else {
+      lines.push('報酬：記録なし')
+    }
     return lines
   }
 

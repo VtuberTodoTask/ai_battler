@@ -1,4 +1,5 @@
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
+import { formatCurrencyAmount } from '../../../core/economy/index.ts'
 import type {
   BrokerageOfferAttempt,
   CampaignPartyEvent,
@@ -303,12 +304,20 @@ function buildExpeditionReturnFeedback(
   )
   const report = reports.find((r) => r.id === reportId)
   const id = `expedition-return:${result.partyId ?? ''}:${result.requestId}`
+  const outcomeLabel =
+    OUTCOME_LABELS[result.result.outcome] ?? result.result.outcome
+  const commission = result.settlement?.tavernCommission
+  const summary =
+    commission !== undefined
+      ? `結果：${outcomeLabel} / 酒場収入 +${formatCurrencyAmount(commission)}`
+      : `結果：${outcomeLabel}`
+
   return {
     id,
     partyId: result.partyId ?? undefined,
     partyName: result.partyName ?? undefined,
     title: `遠征から帰還：${result.request.title}`,
-    summary: `結果：${OUTCOME_LABELS[result.result.outcome] ?? result.result.outcome}`,
+    summary,
     unread: !viewedIds.has(id),
     narrativeStatus: report?.narrativeStatus ?? 'viewed',
     kind: 'expedition_return',

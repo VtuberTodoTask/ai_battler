@@ -10,6 +10,7 @@ import {
   calculateRecoveryDays,
   updateCampaignPartyStats,
 } from './partyState.ts'
+import { applyQuestSettlement } from '../../economy/finance.ts'
 import { getPartyRankWeights, getRequestRankWeights } from './rankWeights.ts'
 import {
   getReputationTier,
@@ -496,6 +497,50 @@ describe('Campaign domain', () => {
         financialPressure: campaignParty.relationship.financialPressure,
         riskTolerance: campaignParty.relationship.riskTolerance,
         stayExtensionDaysUsed: campaignParty.relationship.stayExtensionDaysUsed,
+      })
+    })
+
+    describe('Campaign finance', () => {
+      it('computes settlement when resolving a day with an offer', () => {
+        let campaign = createTavernCampaign('tavern-finance-settle-001')
+        const pair = findAcceptingPair(campaign)
+        expect(pair).not.toBeNull()
+        if (!pair) return
+
+        const initialFunds = campaign.finance.funds
+        campaign = { ...campaign, currentDay: pair.next }
+        campaign = resolveCampaignDay(campaign)
+
+        expect(campaign.currentDay.status).toBe('resolved')
+        const result = campaign.currentDay.results[0]
+        expect(result).toBeDefined()
+        expect(result?.settlement).toBeDefined()
+        expect(campaign.finance.funds).toBe(
+          initialFunds + (result?.settlement?.tavernCommission ?? 0),
+        )
+      })
+
+      it('is idempotent: settlement application does not add duplicate ledger entries', () => {
+        let campaign = createTavernCampaign('tavern-finance-idempotent-001')
+        const pair = findAcceptingPair(campaign)
+        expect(pair).not.toBeNull()
+        if (!pair) return
+
+        campaign = { ...campaign, currentDay: pair.next }
+        const resolved = resolveCampaignDay(campaign)
+        const settlement = resolved.currentDay.results[0]?.settlement
+        expect(settlement).toBeDefined()
+        const before = resolved.finance
+        const after = applyQuestSettlement(
+          before,
+          settlement!,
+          resolved.dayNumber,
+          {
+            requestId: resolved.currentDay.results[0]!.requestId,
+            partyId: resolved.currentDay.results[0]!.partyId,
+          },
+        )
+        expect(after).toBe(before)
       })
     })
   })

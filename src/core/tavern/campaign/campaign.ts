@@ -1,4 +1,10 @@
 import { deepClone } from '../../util.ts'
+import {
+  applyQuestSettlement,
+  computeQuestSettlement,
+  createInitialFinanceState,
+  getOrComputeRewardTerms,
+} from '../../economy/index.ts'
 import { resolveTavernDay } from '../brokerage.ts'
 import {
   deriveAdvanceCandidates,
@@ -46,7 +52,11 @@ import type {
   TavernCampaignState,
   TavernDayRecord,
 } from './types.ts'
-import type { CampaignPartyEvent, TavernDayState } from '../types.ts'
+import type {
+  CampaignPartyEvent,
+  ResolvedDispatch,
+  TavernDayState,
+} from '../types.ts'
 
 export function createTavernCampaign(seed: string): TavernCampaignState {
   const dayNumber = 1
@@ -77,6 +87,7 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
     history: [],
     narrativeCandidates: [],
     narrativeGenerations: [],
+    finance: createInitialFinanceState(),
   }
 }
 
@@ -91,17 +102,46 @@ export function resolveCampaignDay(
   const dayNumber = nextCampaign.dayNumber
   const results = resolveTavernDay(nextCampaign.currentDay)
 
-  nextCampaign.currentDay = {
-    ...nextCampaign.currentDay,
-    status: 'resolved',
-    results,
-  }
-
   const postEvents: CampaignPartyEvent[] = []
   const progressionEvents: CampaignProgressionEvent[] = []
   const relationshipEvents: CampaignRelationshipEvent[] = []
 
+  let finance = nextCampaign.finance
+  const resultsWithSettlement: ResolvedDispatch[] = []
+
   for (const resolved of results) {
+    if (resolved.status === 'resolved' && resolved.result) {
+      const rewardTerms = getOrComputeRewardTerms(resolved.request)
+      const settlement = computeQuestSettlement(
+        rewardTerms,
+        resolved.result.outcome,
+      )
+      const reportWithSettlement = resolved.report
+        ? { ...resolved.report, settlement }
+        : undefined
+      const withSettlement: ResolvedDispatch = {
+        ...resolved,
+        settlement,
+        report: reportWithSettlement,
+      }
+      finance = applyQuestSettlement(finance, settlement, dayNumber, {
+        requestId: withSettlement.requestId,
+        partyId: withSettlement.partyId,
+      })
+      resultsWithSettlement.push(withSettlement)
+      continue
+    }
+    resultsWithSettlement.push(resolved)
+  }
+
+  nextCampaign.currentDay = {
+    ...nextCampaign.currentDay,
+    status: 'resolved',
+    results: resultsWithSettlement,
+  }
+  nextCampaign.finance = finance
+
+  for (const resolved of resultsWithSettlement) {
     if (resolved.status !== 'resolved' || !resolved.result) {
       continue
     }
@@ -232,7 +272,7 @@ export function resolveCampaignDay(
     reputationBefore: reputationSummary.before,
     reputationAfter: reputationSummary.after,
     reputationChange: reputationSummary,
-    results: deepClone(results),
+    results: deepClone(resultsWithSettlement),
     partyEvents: [
       ...(nextCampaign.currentDay.partyEvents ?? []),
       ...postEvents,

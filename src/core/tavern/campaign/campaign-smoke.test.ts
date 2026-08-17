@@ -5,6 +5,7 @@ import {
   resolveCampaignDay,
 } from './campaign.ts'
 import { offerRequestToParty } from '../brokerage.ts'
+import { financeInvariantHolds, ledgerTotal } from '../../economy/finance.ts'
 
 function findAnyAcceptingOffer(
   campaign: ReturnType<typeof createTavernCampaign>,
@@ -73,6 +74,12 @@ describe('Campaign 30-day smoke', () => {
 
           campaign = resolveWithOptionalOffer(campaign)
           expect(campaign.currentDay.status).toBe('resolved')
+
+          // Finance invariant: ledger sums to funds and all entries are valid.
+          expect(financeInvariantHolds(campaign.finance)).toBe(true)
+          expect(campaign.finance.funds).toBe(
+            ledgerTotal(campaign.finance.ledgerEntries),
+          )
 
           // PartyStats invariant: outcome categories sum to totalExpeditions.
           for (const party of campaign.parties) {

@@ -3,6 +3,11 @@ import {
   getReputationTier,
   getReputationTierLabel,
 } from '../../../core/tavern/campaign/reputation.ts'
+import {
+  computeSuccessCommission,
+  formatCurrencyAmount,
+  getOrComputeRewardTerms,
+} from '../../../core/economy/index.ts'
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
 import type {
   TavernDayState,
@@ -107,6 +112,8 @@ export interface TavernQuestDetailViewModel {
   description: string
   tags: string[]
   offerStatusLabel: string
+  promisedRewardLabel: string
+  successCommissionLabel: string
 }
 
 export interface TavernDecisionViewModel {
@@ -359,6 +366,9 @@ function buildQuestListItem(
     }
   }
 
+  const rewardTerms = getOrComputeRewardTerms(request)
+  const rewardAmount = formatCurrencyAmount(rewardTerms.promisedReward)
+
   return {
     id: request.id,
     title: request.title,
@@ -368,6 +378,7 @@ function buildQuestListItem(
     terrainLabel:
       ENVIRONMENT_LABELS[request.environment] ?? request.environment,
     statusLabel: questStatusLabel(request, day, selectedPartyId),
+    rewardLabel: `報酬 ${rewardAmount}`,
     selected,
     assignable,
     disabledReason,
@@ -379,6 +390,11 @@ function buildQuestDetail(
   day: TavernDayState,
   selectedPartyId: string | null,
 ): TavernQuestDetailViewModel {
+  const rewardTerms = getOrComputeRewardTerms(request)
+  const promisedReward = formatCurrencyAmount(rewardTerms.promisedReward)
+  const successCommission = formatCurrencyAmount(
+    computeSuccessCommission(rewardTerms),
+  )
   return {
     id: request.id,
     title: request.title,
@@ -390,6 +406,8 @@ function buildQuestDetail(
     description: request.briefing,
     tags: request.publicTags,
     offerStatusLabel: questStatusLabel(request, day, selectedPartyId),
+    promisedRewardLabel: `依頼報酬 ${promisedReward}`,
+    successCommissionLabel: `成功時手数料 ${successCommission}`,
   }
 }
 
@@ -448,12 +466,14 @@ export function buildTavernScreenViewModel(
     (r) => !viewedReportIds.has(r.id),
   ).length
 
+  const funds = campaign.finance?.funds ?? 0
   const header: TavernHeaderViewModel = {
     day: campaign.dayNumber,
     reputation: campaign.reputation,
     reputationLabel: `酒場評判 ${campaign.reputation}（${getReputationTierLabel(
       getReputationTier(campaign.reputation),
     )}）`,
+    moneyLabel: `資金 ${formatCurrencyAmount(funds)}`,
     canResolveDay: day.status === 'planning',
     canAdvanceDay: day.status === 'resolved',
     advanceDayDisabledReason:

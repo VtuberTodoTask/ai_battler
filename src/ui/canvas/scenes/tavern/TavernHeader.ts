@@ -20,6 +20,7 @@ export interface TavernHeaderOptions {
   onOpenSettings?: () => void
   onOpenSave?: () => void
   onOpenLibrary?: () => void
+  onOpenLedger?: () => void
 }
 
 const SETTINGS_ICON_URL = '/settings-icon.png'
@@ -31,12 +32,14 @@ export class TavernHeader extends Container {
   private readonly _height: number
   private readonly _dayLabel: GameLabel
   private readonly _reputationLabel: GameLabel
+  private readonly _moneyLabel: GameLabel
   private readonly _statusLabel: GameLabel
   private readonly _actionButton: GameButton
   private readonly _onAdvance?: () => void
   private readonly _onOpenSettings?: () => void
   private readonly _onOpenSave?: () => void
   private readonly _onOpenLibrary?: () => void
+  private readonly _onOpenLedger?: () => void
 
   constructor(options: TavernHeaderOptions) {
     super()
@@ -48,6 +51,7 @@ export class TavernHeader extends Container {
     this._onOpenSettings = options.onOpenSettings
     this._onOpenSave = options.onOpenSave
     this._onOpenLibrary = options.onOpenLibrary
+    this._onOpenLedger = options.onOpenLedger
 
     const panel = new GamePanel({
       width: this._width,
@@ -66,9 +70,14 @@ export class TavernHeader extends Container {
     this.addChild(this._dayLabel)
 
     this._reputationLabel = new GameLabel('', this._theme, 'body')
-    this._reputationLabel.x = 280
+    this._reputationLabel.x = 180
     this._reputationLabel.y = 20
     this.addChild(this._reputationLabel)
+
+    this._moneyLabel = new GameLabel('', this._theme, 'body')
+    this._moneyLabel.x = 500
+    this._moneyLabel.y = 20
+    this.addChild(this._moneyLabel)
 
     this._statusLabel = new GameLabel('', this._theme, 'caption', {
       maxWidth: this._width - 420,
@@ -81,12 +90,15 @@ export class TavernHeader extends Container {
     const actionButtonWidth = 140
     const saveButtonWidth = 100
     const libraryButtonWidth = 100
+    const ledgerButtonWidth = 100
     const gearSize = GEAR_SIZE
     const gap = this._theme.spacing.s8
     const rightClusterWidth =
       saveButtonWidth +
       gap +
       libraryButtonWidth +
+      gap +
+      ledgerButtonWidth +
       gap +
       actionButtonWidth +
       gap +
@@ -119,6 +131,19 @@ export class TavernHeader extends Container {
     }
     this.addChild(libraryButton)
 
+    const ledgerButton = new GameButton({
+      width: ledgerButtonWidth,
+      height: 44,
+      theme: this._theme,
+      label: '帳簿',
+    })
+    ledgerButton.x = startX + saveButtonWidth + gap + libraryButtonWidth + gap
+    ledgerButton.y = 10
+    ledgerButton.onActivate = () => {
+      this._onOpenLedger?.()
+    }
+    this.addChild(ledgerButton)
+
     this._actionButton = new GameButton({
       width: actionButtonWidth,
       height: 44,
@@ -127,7 +152,13 @@ export class TavernHeader extends Container {
       disabled: true,
     })
     this._actionButton.x =
-      startX + saveButtonWidth + gap + libraryButtonWidth + gap
+      startX +
+      saveButtonWidth +
+      gap +
+      libraryButtonWidth +
+      gap +
+      ledgerButtonWidth +
+      gap
     this._actionButton.y = 10
     this._actionButton.onActivate = () => {
       if (this._actionButton.state === 'disabled') return
@@ -140,6 +171,8 @@ export class TavernHeader extends Container {
       saveButtonWidth +
       gap +
       libraryButtonWidth +
+      gap +
+      ledgerButtonWidth +
       gap +
       actionButtonWidth +
       gap
@@ -178,6 +211,7 @@ export class TavernHeader extends Container {
   update(viewModel: TavernHeaderViewModel): void {
     this._dayLabel.text = `DAY ${viewModel.day}`
     this._reputationLabel.text = viewModel.reputationLabel
+    this._moneyLabel.text = viewModel.moneyLabel ?? ''
 
     if (viewModel.statusMessage) {
       this._statusLabel.text = viewModel.statusMessage.text
