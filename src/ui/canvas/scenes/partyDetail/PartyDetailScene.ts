@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite } from 'pixi.js'
+import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js'
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '../../GameViewport.ts'
 import { GameButton } from '../../components/GameButton.ts'
 import { GameLabel } from '../../components/GameLabel.ts'
@@ -22,6 +22,7 @@ import { buildPartyDetailSceneViewModel } from '../../viewModel/partyDetailViewM
 const MARGIN = 16
 const TOP_BAR_HEIGHT = 64
 const FOOTER_HEIGHT = 120
+const PARTY_DETAIL_BG_URL = '/party-detail-bg.jpg'
 const LEFT_WIDTH = 300
 const MAIN_Y = TOP_BAR_HEIGHT + MARGIN
 const MAIN_HEIGHT = VIRTUAL_HEIGHT - TOP_BAR_HEIGHT - FOOTER_HEIGHT - MARGIN * 2
@@ -47,6 +48,8 @@ export class PartyDetailScene implements GameScene {
   private _returnButton: GameButton | null = null
   private _tabButtons: GameButton[] = []
   private _detailScroll: GameScrollView | null = null
+  private _profilePortrait: Sprite | null = null
+  private _rightPanel: GamePanel | null = null
   private _selectedTab: DetailTab = 'profile'
 
   mount(context: GameSceneContext, input?: unknown): void {
@@ -112,11 +115,37 @@ export class PartyDetailScene implements GameScene {
   private drawBackground(): void {
     if (!this._bgRoot || !this._context) return
     const { theme } = this._context
-    const g = new Graphics()
-    g.rect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT).fill({
+    const base = new Graphics()
+    base.rect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT).fill({
       color: theme.colors.background,
     })
-    this._bgRoot.addChild(g)
+    this._bgRoot.addChild(base)
+
+    if (
+      typeof import.meta.env !== 'undefined' &&
+      import.meta.env.MODE === 'test'
+    ) {
+      return
+    }
+
+    if (typeof Assets.load !== 'function') return
+
+    void Assets.load(PARTY_DETAIL_BG_URL)
+      .then((texture) => {
+        const sprite = new Sprite(texture as Texture)
+        const scale = VIRTUAL_HEIGHT / sprite.height
+        sprite.anchor.set(0.5)
+        sprite.scale.set(scale)
+        sprite.x = VIRTUAL_WIDTH / 2
+        sprite.y = VIRTUAL_HEIGHT / 2
+        base.clear()
+        this._bgRoot!.removeChild(base)
+        base.destroy()
+        this._bgRoot!.addChild(sprite)
+      })
+      .catch(() => {
+        // Keep base color if loading fails.
+      })
   }
 
   private createPanels(context: GameSceneContext): void {
@@ -169,6 +198,7 @@ export class PartyDetailScene implements GameScene {
       radius: theme.radius.large,
       alpha: 0.82,
     })
+    this._rightPanel = rightPanel
     this._detailRoot.addChild(rightPanel)
 
     this._footerRoot = new Container()
@@ -192,6 +222,14 @@ export class PartyDetailScene implements GameScene {
   }
 
   private createTabs(theme: GameUiTheme): void {
+    const portrait = new Sprite(Texture.WHITE)
+    portrait.anchor.set(0.5)
+    portrait.alpha = 0.45
+    portrait.visible = false
+    portrait.eventMode = 'none'
+    this._detailRoot!.addChild(portrait)
+    this._profilePortrait = portrait
+
     const tabs: { id: DetailTab; label: string }[] = [
       { id: 'profile', label: 'プロフィール' },
       { id: 'relationship', label: '関係' },
@@ -393,6 +431,10 @@ export class PartyDetailScene implements GameScene {
 
   private renderDetail(): void {
     if (!this._detailScroll || !this._viewModel || !this._context) return
+    if (this._profilePortrait) {
+      this._profilePortrait.visible =
+        this._selectedTab === 'profile' && !!this._viewModel.selectedCharacter
+    }
     const content = this._detailScroll.content
     for (const child of [...content.children]) {
       content.removeChild(child)
@@ -448,12 +490,13 @@ export class PartyDetailScene implements GameScene {
     const width = RIGHT_WIDTH - theme.spacing.s24
     const char = this._viewModel!.selectedCharacter!
 
+    const textMaxWidth = width * 0.45
     let y = 0
     const add = (
       text: string,
       kind: 'heading' | 'body' | 'caption' = 'body',
     ): GameLabel => {
-      const label = this.addLabel(content, text, kind, width, y)
+      const label = this.addLabel(content, text, kind, textMaxWidth, y)
       y += label.textHeight + 8
       return label
     }
@@ -461,20 +504,29 @@ export class PartyDetailScene implements GameScene {
     const portraitTexture = this._context!.assetManager.getCharacterTexture(
       char.speciesId,
     )
-    const portrait = new Sprite(portraitTexture)
-    portrait.anchor.set(0.5)
-    const maxPortraitHeight = 360
-    const maxPortraitWidth = width * 0.7
-    const portraitScale = Math.min(
-      maxPortraitWidth / Math.max(portrait.width, 1),
-      maxPortraitHeight / Math.max(portrait.height, 1),
-      1,
-    )
-    portrait.scale.set(portraitScale)
-    portrait.x = width / 2
-    portrait.y = y + maxPortraitHeight / 2
-    content.addChild(portrait)
-    y += maxPortraitHeight + theme.spacing.s16
+    if (this._profilePortrait) {
+      const fallback = portraitTexture === Texture.WHITE
+      this._profilePortrait.visible = !fallback
+      if (!fallback) {
+        this._profilePortrait.texture = portraitTexture
+        this._profilePortrait.mask =
+          (this._rightPanel?.getChildAt(0) as Graphics | undefined) ?? null
+        const scrollHeight = MAIN_HEIGHT - TABS_HEIGHT - theme.spacing.s16 * 2
+        const maxPortraitHeight = scrollHeight * 0.95
+        const maxPortraitWidth = width * 0.55
+        const portraitScale = Math.min(
+          maxPortraitWidth / Math.max(this._profilePortrait.width, 1),
+          maxPortraitHeight / Math.max(this._profilePortrait.height, 1),
+        )
+        this._profilePortrait.scale.set(portraitScale)
+        this._profilePortrait.anchor.set(1, 0.5)
+        this._profilePortrait.x = theme.spacing.s12 + width
+        this._profilePortrait.y =
+          TABS_HEIGHT + theme.spacing.s8 + scrollHeight / 2
+      } else {
+        this._profilePortrait.mask = null
+      }
+    }
 
     add(char.name, 'heading')
     add(
