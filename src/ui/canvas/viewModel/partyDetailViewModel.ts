@@ -7,6 +7,7 @@ import type {
 } from '../../../core/tavern/campaign/types.ts'
 import type { TavernParty } from '../../../core/tavern/types.ts'
 import { isUnresolvedInjury } from '../../../core/expedition/injuries.ts'
+import { MORALE_MAX } from '../../../core/balance/constants.ts'
 import { OUTCOME_LABELS } from '../../expedition/labels.ts'
 import { COUNTRY_WORLD_PROFILES } from '../../../core/identity/worldData.ts'
 import type { CountryId, SpeciesId } from '../../../core/identity/types.ts'
@@ -61,11 +62,19 @@ export interface CharacterConditionInjuryViewModel {
   cause?: string
 }
 
+export interface CharacterResourceViewModel {
+  current: number
+  max: number
+}
+
 export interface CharacterConditionViewModel {
   status: string
   hp: string
   mp: string
   morale: string
+  hpValue: CharacterResourceViewModel
+  mpValue: CharacterResourceViewModel
+  moraleValue: CharacterResourceViewModel
   injuries: CharacterConditionInjuryViewModel[]
   recoveryDaysRemaining?: number
 }
@@ -279,6 +288,9 @@ function buildCharacterCondition(
     hp: `${member.currentHp}/${member.maxHp}`,
     mp: `${member.currentMp}/${member.maxMp}`,
     morale: `${member.morale}`,
+    hpValue: { current: member.currentHp, max: member.maxHp },
+    mpValue: { current: member.currentMp, max: member.maxMp },
+    moraleValue: { current: member.morale, max: MORALE_MAX },
     injuries,
     recoveryDaysRemaining,
   }

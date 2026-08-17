@@ -365,6 +365,9 @@ describe('partyDetailViewModel', () => {
     expect(char.condition.hp).toMatch(/\d+\/\d+/)
     expect(char.condition.mp).toMatch(/\d+\/\d+/)
     expect(char.condition.morale).toMatch(/\d+/)
+    expect(char.condition.hpValue.max).toBeGreaterThan(0)
+    expect(char.condition.mpValue.max).toBeGreaterThan(0)
+    expect(char.condition.moraleValue.max).toBe(100)
   })
 
   it('exposes speciesId only when identity exists and localizes country', () => {

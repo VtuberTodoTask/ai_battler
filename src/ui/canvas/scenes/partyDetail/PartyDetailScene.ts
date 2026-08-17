@@ -5,7 +5,10 @@ import { GameLabel } from '../../components/GameLabel.ts'
 import { GamePanel } from '../../components/GamePanel.ts'
 import { GameScrollView } from '../../components/GameScrollView.ts'
 import { TavernListRow } from '../../components/TavernListRow.ts'
+import { CharacterAbilityRadar } from '../../components/CharacterAbilityRadar.ts'
+import { StatusGauge } from '../../components/StatusGauge.ts'
 import type { TavernCampaignState } from '../../../../core/tavern/campaign/types.ts'
+import { MAX_STAT_S, MIN_STAT } from '../../../../core/balance/constants.ts'
 import type { GameScene, GameSceneContext, GameUiState } from '../../types.ts'
 import type { GameUiTheme } from '../../theme/gameTheme.ts'
 import { AudioController } from '../../audio/AudioController.ts'
@@ -603,20 +606,58 @@ export class PartyDetailScene implements GameScene {
     y += 8
 
     add('能力値', 'heading')
-    for (let i = 0; i < char.abilities.length; i += 3) {
-      const row = char.abilities
-        .slice(i, i + 3)
-        .map((a) => `${a.name} ${a.value}`)
-        .join('   ')
-      add(row)
-    }
-    y += 8
+    const radarWidth = this._textMaxWidth
+    const radarHeight = Math.min(260, radarWidth * 0.7)
+    const radar = new CharacterAbilityRadar({
+      width: radarWidth,
+      height: radarHeight,
+      theme: this._context!.theme,
+      stats: char.abilities.map((a) => ({ name: a.name, value: a.value })),
+      min: MIN_STAT,
+      max: MAX_STAT_S,
+    })
+    radar.y = y
+    radar.eventMode = 'none'
+    content.addChild(radar)
+    y += radar.height + 12
 
     add('状態', 'heading')
     add(`全体：${char.condition.status}`)
-    add(
-      `HP ${char.condition.hp}    MP ${char.condition.mp}    士気 ${char.condition.morale}`,
-    )
+
+    const gaugeWidth = this._textMaxWidth
+    const gaugeHeight = 16
+    const gauges = [
+      {
+        label: 'HP',
+        current: char.condition.hpValue.current,
+        max: char.condition.hpValue.max,
+      },
+      {
+        label: 'MP',
+        current: char.condition.mpValue.current,
+        max: char.condition.mpValue.max,
+      },
+      {
+        label: '士気',
+        current: char.condition.moraleValue.current,
+        max: char.condition.moraleValue.max,
+      },
+    ]
+    for (const g of gauges) {
+      const gauge = new StatusGauge({
+        label: g.label,
+        current: g.current,
+        max: g.max,
+        width: gaugeWidth,
+        height: gaugeHeight,
+        theme: this._context!.theme,
+      })
+      gauge.y = y
+      gauge.eventMode = 'none'
+      content.addChild(gauge)
+      y += gauge.height + 8
+    }
+
     if (char.condition.injuries.length > 0) {
       const injuryText = char.condition.injuries
         .map((i) => (i.cause ? `${i.type}（${i.cause}）` : i.type))

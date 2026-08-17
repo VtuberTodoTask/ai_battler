@@ -85,6 +85,7 @@ export const MAX_HIT_CHANCE = 95
 export const MAX_ROUNDS = 20
 
 export const MORALE_INITIAL_BASE = 20
+export const MORALE_MAX = 100
 
 export const RETREAT_MORALE_THRESHOLD = 30
 

@@ -461,4 +461,154 @@ describe('Phase 8.8 Party & Character Detail Smoke', () => {
     )
     expect(hasGiantRect).toBe(false)
   })
+
+  it('V: profile tab renders a CharacterAbilityRadar', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-v')
+    const party = campaign.parties[0]!
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      _selectedTab: 'profile'
+      _detailScroll: { content: { children: unknown[] } }
+    }
+    const hasRadar = internal._detailScroll.content.children.some(
+      (child: unknown) =>
+        child &&
+        typeof child === 'object' &&
+        'getAxisCount' in (child as object),
+    )
+    expect(hasRadar).toBe(true)
+  })
+
+  it('W: radar points change when switching characters', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-w')
+    const party = campaign.parties[0]!
+    const [a, b] = party.party.members
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const findRadar = (s: typeof scene) => {
+      const internal = s as unknown as {
+        _detailScroll: { content: { children: unknown[] } }
+      }
+      return internal._detailScroll.content.children.find(
+        (child: unknown) =>
+          child &&
+          typeof child === 'object' &&
+          'getValuePolygonPoints' in (child as object),
+      ) as
+        { getValuePolygonPoints: () => { x: number; y: number }[] } | undefined
+    }
+
+    const radarA = findRadar(scene)!
+    const pointsA = radarA.getValuePolygonPoints()
+
+    const internal = scene as unknown as {
+      selectCharacter: (id: string) => void
+    }
+    internal.selectCharacter(b!.id)
+
+    const radarB = findRadar(scene)!
+    const pointsB = radarB.getValuePolygonPoints()
+
+    expect(pointsA).toHaveLength(7)
+    expect(pointsB).toHaveLength(7)
+
+    let changed = false
+    for (let i = 0; i < pointsA.length; i++) {
+      if (pointsA[i]!.x !== pointsB[i]!.x || pointsA[i]!.y !== pointsB[i]!.y) {
+        changed = true
+        break
+      }
+    }
+    expect(changed).toBe(a!.stats !== b!.stats)
+  })
+
+  it('X: profile tab renders HP and MP StatusGauges', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-x')
+    const party = campaign.parties[0]!
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      _detailScroll: { content: { children: unknown[] } }
+    }
+    const gauges = internal._detailScroll.content.children.filter(
+      (child: unknown) =>
+        child && typeof child === 'object' && 'setValues' in (child as object),
+    )
+    expect(gauges.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('Y: status gauge values match character condition', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-y')
+    const party = campaign.parties[0]!
+    const member = party.party.members[0]!
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      _detailScroll: { content: { children: unknown[] } }
+    }
+    const gauges = internal._detailScroll.content.children.filter(
+      (child: unknown) =>
+        child &&
+        typeof child === 'object' &&
+        'current' in (child as object) &&
+        'max' in (child as object),
+    ) as { current: number; max: number }[]
+
+    const hpGauge = gauges.find((g) => g.current === member.currentHp)
+    expect(hpGauge).toBeDefined()
+    expect(hpGauge!.max).toBe(member.maxHp)
+  })
+
+  it('Z: switching characters keeps gauges updated without runtime errors', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-z')
+    const party = campaign.parties[0]!
+    const [, second] = party.party.members
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      selectCharacter: (id: string) => void
+    }
+    expect(() => internal.selectCharacter(second!.id)).not.toThrow()
+  })
 })
