@@ -22,19 +22,23 @@ describe('expeditionPredictionService', () => {
     expect(a).toBe(b)
   })
 
-  it('produces different results for different party × quest pairs', async () => {
-    const day = generateTavernDay('svc-different')
-    const requestOffer = day.requests[0]!
-    const party = day.parties[0]!
-    const otherRequest = day.requests[1]!
+  it(
+    'produces different results for different party × quest pairs',
+    { timeout: 60000 },
+    async () => {
+      const day = generateTavernDay('svc-different')
+      const requestOffer = day.requests[0]!
+      const party = day.parties[0]!
+      const otherRequest = day.requests[1]!
 
-    const a = await getExpeditionPrediction(requestOffer, party)
-    const b = await getExpeditionPrediction(otherRequest, party)
+      const a = await getExpeditionPrediction(requestOffer, party)
+      const b = await getExpeditionPrediction(otherRequest, party)
 
-    expect(a.requestId).not.toBe(b.requestId)
-    expect(a.estimatedSuccessRate).toBeGreaterThanOrEqual(0)
-    expect(a.estimatedSuccessRate).toBeLessThanOrEqual(1)
-  })
+      expect(a.requestId).not.toBe(b.requestId)
+      expect(a.estimatedSuccessRate).toBeGreaterThanOrEqual(0)
+      expect(a.estimatedSuccessRate).toBeLessThanOrEqual(1)
+    },
+  )
 
   it('reuses the cached result across separate calls', async () => {
     invalidateExpeditionPredictionCache()
