@@ -258,10 +258,13 @@ export class PartyDetailScene implements GameScene {
       this._tabButtons.push(button)
     }
 
+    const contentWidth = RIGHT_WIDTH - theme.spacing.s24
+    const leftContentWidth = contentWidth * 0.7
+    const scrollHeight = MAIN_HEIGHT - TABS_HEIGHT - theme.spacing.s16 * 2
     this._detailScroll = new GameScrollView(
       theme,
-      RIGHT_WIDTH - theme.spacing.s24,
-      MAIN_HEIGHT - TABS_HEIGHT - theme.spacing.s16 * 2,
+      leftContentWidth,
+      scrollHeight,
     )
     this._detailScroll.x = theme.spacing.s12
     this._detailScroll.y = TABS_HEIGHT + theme.spacing.s8
@@ -490,7 +493,8 @@ export class PartyDetailScene implements GameScene {
     const width = RIGHT_WIDTH - theme.spacing.s24
     const char = this._viewModel!.selectedCharacter!
 
-    const textMaxWidth = width * 0.45
+    const contentWidth = width
+    const textMaxWidth = contentWidth * 0.68
     let y = 0
     const add = (
       text: string,
@@ -512,17 +516,15 @@ export class PartyDetailScene implements GameScene {
         this._profilePortrait.mask =
           (this._rightPanel?.getChildAt(0) as Graphics | undefined) ?? null
         const scrollHeight = MAIN_HEIGHT - TABS_HEIGHT - theme.spacing.s16 * 2
-        const maxPortraitHeight = scrollHeight * 0.95
-        const maxPortraitWidth = width * 0.55
+        const rightAreaWidth = contentWidth * 0.3
         const portraitScale = Math.min(
-          maxPortraitWidth / Math.max(this._profilePortrait.width, 1),
-          maxPortraitHeight / Math.max(this._profilePortrait.height, 1),
+          rightAreaWidth / Math.max(this._profilePortrait.width, 1),
+          scrollHeight / Math.max(this._profilePortrait.height, 1),
         )
         this._profilePortrait.scale.set(portraitScale)
-        this._profilePortrait.anchor.set(1, 0.5)
-        this._profilePortrait.x = theme.spacing.s12 + width
-        this._profilePortrait.y =
-          TABS_HEIGHT + theme.spacing.s8 + scrollHeight / 2
+        this._profilePortrait.anchor.set(1, 0)
+        this._profilePortrait.x = theme.spacing.s12 + contentWidth
+        this._profilePortrait.y = TABS_HEIGHT + theme.spacing.s8
       } else {
         this._profilePortrait.mask = null
       }
