@@ -99,32 +99,32 @@ Canvas/PixiJS 版の酒場 UI に、いつでも閲覧できる世界資料室�
 - `酒場へ戻る` → `TavernScene` へ復帰、翌日へ進行しないことを確認
 - エラー/未処理 Promise/AI コールはすべて 0
 
-| チェック | 結果 |
-|---|---|
-| タイトル → 酒場 → 資料室遷移 | PASS |
-| 資料室がモーダルでない | PASS |
-| 初期カテゴリ「世界について」 | PASS |
-| 初期エントリ「七国世界」 | PASS |
-| カテゴリ切り替え | PASS |
-| 国家 7 件 | PASS |
-| 種族 9 件 | PASS |
-| エントリ切り替え | PASS |
-| 長文スクロール | PASS |
-| 酒場へ戻る | PASS |
+| チェック                         | 結果             |
+| -------------------------------- | ---------------- |
+| タイトル → 酒場 → 資料室遷移     | PASS             |
+| 資料室がモーダルでない           | PASS             |
+| 初期カテゴリ「世界について」     | PASS             |
+| 初期エントリ「七国世界」         | PASS             |
+| カテゴリ切り替え                 | PASS             |
+| 国家 7 件                        | PASS             |
+| 種族 9 件                        | PASS             |
+| エントリ切り替え                 | PASS             |
+| 長文スクロール                   | PASS             |
+| 酒場へ戻る                       | PASS             |
 | BGM 変化（partyDetail ↔ tavern） | PASS（コード上） |
-| console.error | 0 |
-| pageerror | 0 |
-| unhandled rejection | 0 |
-| AI コール | 0 |
+| console.error                    | 0                |
+| pageerror                        | 0                |
+| unhandled rejection              | 0                |
+| AI コール                        | 0                |
 
 ### スクリーンショット
 
-| 画面 | ファイル |
-|---|---|
-| 世界について / 七国世界 | `.github/screenshots/encyclopedia_world_seven_kingdoms.png` |
-| 国家 / アルデン王国 | `.github/screenshots/encyclopedia_country_alden.png` |
-| 種族 / 鱗人族 | `.github/screenshots/encyclopedia_species_scalefolk.png` |
-| 酒場へ戻る後の TavernScene | `.github/screenshots/encyclopedia_return_to_tavern.png` |
+| 画面                       | ファイル                                                    |
+| -------------------------- | ----------------------------------------------------------- |
+| 世界について / 七国世界    | `.github/screenshots/encyclopedia_world_seven_kingdoms.png` |
+| 国家 / アルデン王国        | `.github/screenshots/encyclopedia_country_alden.png`        |
+| 種族 / 鱗人族              | `.github/screenshots/encyclopedia_species_scalefolk.png`    |
+| 酒場へ戻る後の TavernScene | `.github/screenshots/encyclopedia_return_to_tavern.png`     |
 
 ## 注意点
 
