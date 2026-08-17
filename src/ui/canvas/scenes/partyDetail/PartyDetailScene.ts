@@ -260,14 +260,15 @@ export class PartyDetailScene implements GameScene {
 
     const contentWidth = RIGHT_WIDTH - theme.spacing.s24
     const leftContentWidth = contentWidth * 0.7
-    const scrollHeight = MAIN_HEIGHT - TABS_HEIGHT - theme.spacing.s16 * 2
+    const scrollTop = startY + tabHeight + theme.spacing.s8
+    const scrollHeight = MAIN_HEIGHT - scrollTop - theme.spacing.s16
     this._detailScroll = new GameScrollView(
       theme,
       leftContentWidth,
       scrollHeight,
     )
     this._detailScroll.x = theme.spacing.s12
-    this._detailScroll.y = TABS_HEIGHT + theme.spacing.s8
+    this._detailScroll.y = scrollTop
     this._detailRoot!.addChild(this._detailScroll)
   }
 
@@ -450,7 +451,7 @@ export class PartyDetailScene implements GameScene {
         this._context.theme,
         'body',
         {
-          maxWidth: RIGHT_WIDTH - this._context.theme.spacing.s24,
+          maxWidth: this._detailScroll.width - this._context.theme.spacing.s16,
           breakWords: true,
         },
       )
@@ -488,6 +489,21 @@ export class PartyDetailScene implements GameScene {
     return label
   }
 
+  private addScrollBackground(
+    content: Container,
+    width: number,
+    height: number,
+  ): void {
+    const theme = this._context!.theme
+    const bg = new Graphics()
+    bg.eventMode = 'none'
+    bg.rect(0, 0, width, height).fill({
+      color: theme.colors.panel,
+      alpha: 1,
+    })
+    content.addChildAt(bg, 0)
+  }
+
   private renderProfile(content: Container): void {
     const theme = this._context!.theme
     const width = RIGHT_WIDTH - theme.spacing.s24
@@ -495,6 +511,12 @@ export class PartyDetailScene implements GameScene {
 
     const contentWidth = width
     const textMaxWidth = contentWidth * 0.68
+    const leftWidth = contentWidth * 0.7
+    const tabHeight = TABS_HEIGHT - 4
+    const scrollTop = theme.spacing.s16 + tabHeight + theme.spacing.s8
+    const scrollHeight = MAIN_HEIGHT - scrollTop - theme.spacing.s16
+    this.addScrollBackground(content, leftWidth, 10000)
+
     let y = 0
     const add = (
       text: string,
@@ -515,7 +537,6 @@ export class PartyDetailScene implements GameScene {
         this._profilePortrait.texture = portraitTexture
         this._profilePortrait.mask =
           (this._rightPanel?.getChildAt(0) as Graphics | undefined) ?? null
-        const scrollHeight = MAIN_HEIGHT - TABS_HEIGHT - theme.spacing.s16 * 2
         const rightAreaWidth = contentWidth * 0.3
         const portraitScale = Math.min(
           rightAreaWidth / Math.max(this._profilePortrait.width, 1),
@@ -524,7 +545,7 @@ export class PartyDetailScene implements GameScene {
         this._profilePortrait.scale.set(portraitScale)
         this._profilePortrait.anchor.set(1, 0)
         this._profilePortrait.x = theme.spacing.s12 + contentWidth
-        this._profilePortrait.y = TABS_HEIGHT + theme.spacing.s8
+        this._profilePortrait.y = scrollTop
       } else {
         this._profilePortrait.mask = null
       }
@@ -565,11 +586,20 @@ export class PartyDetailScene implements GameScene {
 
   private renderRelationship(content: Container): void {
     const theme = this._context!.theme
-    const width = RIGHT_WIDTH - theme.spacing.s24
+    const contentWidth = RIGHT_WIDTH - theme.spacing.s24
+    const leftWidth = contentWidth * 0.7
+    const textMaxWidth = leftWidth - 130
     const char = this._viewModel!.selectedCharacter!
 
+    this.addScrollBackground(content, leftWidth, 10000)
+
     if (char.relationships.length === 0) {
-      this.addLabel(content, 'まだ特筆すべき関係はありません', 'body', width)
+      this.addLabel(
+        content,
+        'まだ特筆すべき関係はありません',
+        'body',
+        textMaxWidth,
+      )
       return
     }
 
@@ -578,7 +608,7 @@ export class PartyDetailScene implements GameScene {
       text: string,
       kind: 'heading' | 'body' | 'caption' = 'body',
     ): GameLabel => {
-      const label = this.addLabel(content, text, kind, width, y)
+      const label = this.addLabel(content, text, kind, textMaxWidth, y)
       y += label.textHeight + 8
       return label
     }
@@ -593,7 +623,7 @@ export class PartyDetailScene implements GameScene {
         theme,
         label: 'この人物を見る',
       })
-      viewButton.x = width - 120
+      viewButton.x = leftWidth - 120 - theme.spacing.s8
       viewButton.y = headingY + 2
       viewButton.onActivate = () => this.selectCharacter(rel.targetId)
       content.addChild(viewButton)
@@ -623,15 +653,19 @@ export class PartyDetailScene implements GameScene {
 
   private renderHistory(content: Container): void {
     const theme = this._context!.theme
-    const width = RIGHT_WIDTH - theme.spacing.s24
+    const contentWidth = RIGHT_WIDTH - theme.spacing.s24
+    const leftWidth = contentWidth * 0.7
+    const textMaxWidth = leftWidth - 140
     const char = this._viewModel!.selectedCharacter!
+
+    this.addScrollBackground(content, leftWidth, 10000)
 
     let y = 0
     const add = (
       text: string,
       kind: 'heading' | 'body' | 'caption' = 'body',
     ): GameLabel => {
-      const label = this.addLabel(content, text, kind, width, y)
+      const label = this.addLabel(content, text, kind, leftWidth, y)
       y += label.textHeight + 8
       return label
     }
@@ -657,7 +691,7 @@ export class PartyDetailScene implements GameScene {
           `DAY ${exp.day}  ${exp.title} ／ ${exp.outcomeLabel}`,
           theme,
           'body',
-          { maxWidth: width - 140, breakWords: true },
+          { maxWidth: textMaxWidth, breakWords: true },
         )
         text.y = 0
         row.addChild(text)
@@ -669,7 +703,7 @@ export class PartyDetailScene implements GameScene {
             theme,
             label: '報告を見る',
           })
-          reportButton.x = width - 120
+          reportButton.x = leftWidth - 120 - theme.spacing.s8
           reportButton.y = 0
           reportButton.onActivate = () => this.openReport(exp.reportId!)
           row.addChild(reportButton)
