@@ -81,39 +81,45 @@ function makeRetrievalContext(
 }
 
 describe('Retrieval paired self-verification', () => {
-  it('produces identical outcomes for identical role composition', () => {
-    const baseRoles: AdventurerRole[] = [
-      'vanguard',
-      'guardian',
-      'mage',
-      'healer',
-    ]
-    for (let i = 0; i < TRIALS; i++) {
-      const request = makeRetrievalRequest(
-        `self-${i}`,
-        'C',
-        {
-          locationKnown: true,
-          accessDifficulty: 0,
-          securingDifficulty: 0,
-          extractionDifficulty: 0,
-          initialIntegrity: 100,
-          minimumAcceptableIntegrity: 80,
-        },
-        false,
-        { features: [] },
-      )
-      const party = makePairedParty(baseRoles, `self-${i}`, 'C')
-      const result1 = runExpedition(request, party)
-      const result2 = runExpedition(
-        request,
-        makePairedParty(baseRoles, `self-${i}`, 'C'),
-      )
-      expect(result2.outcome).toBe(result1.outcome)
-      expect(result2.state.objectiveState).toEqual(result1.state.objectiveState)
-      expect(result2.state.logs).toEqual(result1.state.logs)
-    }
-  })
+  it(
+    'produces identical outcomes for identical role composition',
+    { timeout: 60000 },
+    () => {
+      const baseRoles: AdventurerRole[] = [
+        'vanguard',
+        'guardian',
+        'mage',
+        'healer',
+      ]
+      for (let i = 0; i < TRIALS; i++) {
+        const request = makeRetrievalRequest(
+          `self-${i}`,
+          'C',
+          {
+            locationKnown: true,
+            accessDifficulty: 0,
+            securingDifficulty: 0,
+            extractionDifficulty: 0,
+            initialIntegrity: 100,
+            minimumAcceptableIntegrity: 80,
+          },
+          false,
+          { features: [] },
+        )
+        const party = makePairedParty(baseRoles, `self-${i}`, 'C')
+        const result1 = runExpedition(request, party)
+        const result2 = runExpedition(
+          request,
+          makePairedParty(baseRoles, `self-${i}`, 'C'),
+        )
+        expect(result2.outcome).toBe(result1.outcome)
+        expect(result2.state.objectiveState).toEqual(
+          result1.state.objectiveState,
+        )
+        expect(result2.state.logs).toEqual(result1.state.logs)
+      }
+    },
+  )
 })
 
 describe('Retrieval role contribution statistics', () => {

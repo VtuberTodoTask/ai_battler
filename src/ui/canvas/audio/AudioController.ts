@@ -3,6 +3,7 @@ const VOLUME_KEY = 'ai_battler_volume'
 export type BgmTrackId =
   | 'title'
   | 'tavern'
+  | 'partyDetail'
   | 'expeditionReports'
   | 'soundNovelDaily'
   | 'soundNovelTension'
@@ -20,6 +21,7 @@ export type SeTrackId =
 const BGM_URLS: Record<BgmTrackId, string> = {
   title: '/bgm/title.mp3',
   tavern: '/bgm/untitled.mp3',
+  partyDetail: '/bgm/party_detail.mp3',
   expeditionReports: '/bgm/expedition_reports.mp3',
   soundNovelDaily: '/bgm/wooden_cup_afternoon.mp3',
   soundNovelTension: '/bgm/forest_alert.mp3',

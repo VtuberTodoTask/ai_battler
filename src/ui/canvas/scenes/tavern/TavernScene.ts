@@ -23,6 +23,7 @@ import {
   findExpeditionReportById,
   type ExpeditionReportViewModel,
 } from '../../viewModel/expeditionReportViewModel.ts'
+import type { PartyDetailSceneInput } from '../../viewModel/partyDetailViewModel.ts'
 import type {
   SoundNovelSceneInput,
   SoundNovelVisualContext,
@@ -295,6 +296,7 @@ export class TavernScene implements GameScene {
       width: CENTER_WIDTH - MARGIN,
       height: MAIN_HEIGHT,
       onAssign: () => this.handleAssign(),
+      onOpenPartyDetail: () => this.openPartyDetail(),
       getSelectedParty: () =>
         this._campaign?.currentDay.parties.find(
           (p) => p.id === this._uiState.selectedPartyId,
@@ -389,6 +391,27 @@ export class TavernScene implements GameScene {
         this.openActivityModal(`${partyName}は依頼を断りました`, body)
       }
     }
+  }
+
+  private openPartyDetail(): void {
+    const partyId = this._uiState.selectedPartyId
+    if (!partyId || !this._campaign || !this._context) return
+    const campaignParty = this._campaign.parties.find((p) => p.id === partyId)
+    if (!campaignParty) return
+
+    const initialCharacterId =
+      this._uiState.openCharacterId ?? campaignParty.party.members[0]?.id
+
+    const input: PartyDetailSceneInput = {
+      partyId,
+      initialCharacterId,
+      returnTarget: {
+        sceneId: 'tavern',
+        selectedPartyId: partyId,
+        selectedQuestId: this._uiState.selectedQuestId ?? undefined,
+      },
+    }
+    this._context.canvasGame.sceneManager?.push('partyDetail', input)
   }
 
   private setActionMessage(

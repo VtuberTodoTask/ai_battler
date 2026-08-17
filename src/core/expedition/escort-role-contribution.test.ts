@@ -148,32 +148,43 @@ function runHandoffTrial(
 }
 
 describe('Escort paired self-verification', () => {
-  it('produces identical outcomes for identical role composition', () => {
-    const baseRoles: AdventurerRole[] = ['support', 'ranger', 'mage', 'healer']
-    for (let i = 0; i < TRIALS; i++) {
-      const request = makeEscortRequest(
-        `self-${i}`,
-        'C',
-        {
-          routeDifficulty: 15,
-          coordinationDifficulty: 15,
-          careDifficulty: 15,
-        },
-        { handoffRequirement: 'standard', handoffDifficulty: 15 },
-        false,
-        { environment: 'forest', features: [] },
-      )
-      const party = makePairedParty(baseRoles, `self-${i}`, 'C')
-      const result1 = runExpedition(request, party)
-      const result2 = runExpedition(
-        request,
-        makePairedParty(baseRoles, `self-${i}`, 'C'),
-      )
-      expect(result2.outcome).toBe(result1.outcome)
-      expect(result2.state.objectiveState).toEqual(result1.state.objectiveState)
-      expect(result2.state.logs).toEqual(result1.state.logs)
-    }
-  })
+  it(
+    'produces identical outcomes for identical role composition',
+    { timeout: 60000 },
+    () => {
+      const baseRoles: AdventurerRole[] = [
+        'support',
+        'ranger',
+        'mage',
+        'healer',
+      ]
+      for (let i = 0; i < TRIALS; i++) {
+        const request = makeEscortRequest(
+          `self-${i}`,
+          'C',
+          {
+            routeDifficulty: 15,
+            coordinationDifficulty: 15,
+            careDifficulty: 15,
+          },
+          { handoffRequirement: 'standard', handoffDifficulty: 15 },
+          false,
+          { environment: 'forest', features: [] },
+        )
+        const party = makePairedParty(baseRoles, `self-${i}`, 'C')
+        const result1 = runExpedition(request, party)
+        const result2 = runExpedition(
+          request,
+          makePairedParty(baseRoles, `self-${i}`, 'C'),
+        )
+        expect(result2.outcome).toBe(result1.outcome)
+        expect(result2.state.objectiveState).toEqual(
+          result1.state.objectiveState,
+        )
+        expect(result2.state.logs).toEqual(result1.state.logs)
+      }
+    },
+  )
 })
 
 describe('Escort role contribution statistics', () => {

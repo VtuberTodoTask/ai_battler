@@ -12,6 +12,7 @@ import { SoundNovelScene } from './scenes/soundNovel/SoundNovelScene.ts'
 import { DayResultsScene } from './scenes/dayResults/DayResultsScene.ts'
 import { TitleScene } from './scenes/title/TitleScene.ts'
 import { SaveLoadScene } from './scenes/saveLoad/SaveLoadScene.ts'
+import { PartyDetailScene } from './scenes/partyDetail/PartyDetailScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -102,6 +103,7 @@ export class CanvasGame {
     )
 
     const context = this.createSceneContext(app, this._layers)
+    void this._assetManager.preloadCharacterSilhouettes()
     this._sceneManager = new GameSceneManager(context, {
       onMount: (scene) => {
         if (this._currentCampaign) {
@@ -116,6 +118,7 @@ export class CanvasGame {
     this._sceneManager.register(new DayResultsScene())
     this._sceneManager.register(new TitleScene())
     this._sceneManager.register(new SaveLoadScene())
+    this._sceneManager.register(new PartyDetailScene())
 
     app.ticker.add(this.handleTick)
 

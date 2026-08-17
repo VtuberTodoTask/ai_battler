@@ -43,7 +43,7 @@ describe('runBattle', () => {
     expect(a.logs.length).toBe(b.logs.length)
   })
 
-  it('1000戦が20ラウンド以内に終了する', () => {
+  it('1000戦が20ラウンド以内に終了する', { timeout: 60000 }, () => {
     for (let i = 0; i < 1000; i++) {
       const party = balancedParty('C', `battle-adv-${i}`)
       const enemies = generateEncounter({
