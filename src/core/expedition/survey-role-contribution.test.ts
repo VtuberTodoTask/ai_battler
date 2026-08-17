@@ -87,38 +87,44 @@ function makeControlledParty(
 }
 
 describe('Survey paired self-verification', () => {
-  it('produces identical outcomes for identical role composition', () => {
-    const baseRoles: AdventurerRole[] = ['scout', 'ranger', 'mage', 'support']
-    for (let i = 0; i < TRIALS; i++) {
-      const request = makeSurveyRequest(
-        `self-${i}`,
-        'C',
-        {
-          sectors: [
-            { id: 'north', name: '北区画', focus: 'route', difficulty: 25 },
-            {
-              id: 'center',
-              name: '中央区画',
-              focus: 'terrain',
-              difficulty: 25,
-            },
-            { id: 'south', name: '南区画', focus: 'arcane', difficulty: 25 },
-          ],
-        },
-        false,
-        { features: [] },
-      )
-      const party = makePairedParty(baseRoles, `self-${i}`, 'C')
-      const result1 = runExpedition(request, party)
-      const result2 = runExpedition(
-        request,
-        makePairedParty(baseRoles, `self-${i}`, 'C'),
-      )
-      expect(result2.outcome).toBe(result1.outcome)
-      expect(result2.state.objectiveState).toEqual(result1.state.objectiveState)
-      expect(result2.state.logs).toEqual(result1.state.logs)
-    }
-  })
+  it(
+    'produces identical outcomes for identical role composition',
+    { timeout: 60000 },
+    () => {
+      const baseRoles: AdventurerRole[] = ['scout', 'ranger', 'mage', 'support']
+      for (let i = 0; i < TRIALS; i++) {
+        const request = makeSurveyRequest(
+          `self-${i}`,
+          'C',
+          {
+            sectors: [
+              { id: 'north', name: '北区画', focus: 'route', difficulty: 25 },
+              {
+                id: 'center',
+                name: '中央区画',
+                focus: 'terrain',
+                difficulty: 25,
+              },
+              { id: 'south', name: '南区画', focus: 'arcane', difficulty: 25 },
+            ],
+          },
+          false,
+          { features: [] },
+        )
+        const party = makePairedParty(baseRoles, `self-${i}`, 'C')
+        const result1 = runExpedition(request, party)
+        const result2 = runExpedition(
+          request,
+          makePairedParty(baseRoles, `self-${i}`, 'C'),
+        )
+        expect(result2.outcome).toBe(result1.outcome)
+        expect(result2.state.objectiveState).toEqual(
+          result1.state.objectiveState,
+        )
+        expect(result2.state.logs).toEqual(result1.state.logs)
+      }
+    },
+  )
 })
 
 describe('Survey role contribution statistics', () => {

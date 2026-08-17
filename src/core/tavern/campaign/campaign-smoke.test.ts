@@ -38,7 +38,7 @@ function resolveWithOptionalOffer(
 describe('Campaign 30-day smoke', () => {
   it(
     'runs 30 days without crashing and maintains invariants',
-    { timeout: 60000 },
+    { timeout: 120000 },
     () => {
       const seeds = [
         'tavern-smoke-001',

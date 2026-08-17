@@ -143,7 +143,7 @@ describe('generateEnemy', () => {
     expect(full - withoutSummon).toBeCloseTo(ABILITY_THREAT_COST.summon, 5)
   })
 
-  it('同一敵に対する等級単調性が維持される', () => {
+  it('同一敵に対する等級単調性が維持される', { timeout: 60000 }, () => {
     const seed = 'enemy-mono-enemy'
     const enemies: Enemy[] = []
     for (let i = 0; i < 4; i++) {

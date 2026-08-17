@@ -1,162 +1,26 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { Container } from 'pixi.js'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { Rectangle, Texture } from 'pixi.js'
 import { createTavernCampaign } from '../../../core/tavern/campaign/campaign.ts'
 import { PartyDetailScene } from '../scenes/partyDetail/PartyDetailScene.ts'
 import { TavernScene } from '../scenes/tavern/TavernScene.ts'
-import { GameAssetManager } from '../assets/GameAssetManager.ts'
-import { GameViewport } from '../GameViewport.ts'
-import { OverlayManager } from '../overlays/OverlayManager.ts'
-import { DEFAULT_GAME_THEME } from '../theme/gameTheme.ts'
-import { DEFAULT_GAME_UI_STATE, type GameSceneContext } from '../types.ts'
+import { DEFAULT_GAME_UI_STATE } from '../types.ts'
 import {
   buildPartyDetailHeader,
   buildPartyDetailSceneViewModel,
 } from '../viewModel/partyDetailViewModel.ts'
-
-function createFakeCanvasContext(): unknown {
-  const emptyMetrics = () =>
-    ({
-      width: 0,
-      actualBoundingBoxLeft: 0,
-      actualBoundingBoxRight: 0,
-      actualBoundingBoxAscent: 0,
-      actualBoundingBoxDescent: 0,
-      alphabeticBaseline: 0,
-      emHeightAscent: 0,
-      emHeightDescent: 0,
-      fontBoundingBoxAscent: 0,
-      fontBoundingBoxDescent: 0,
-      hangingBaseline: 0,
-      ideographicBaseline: 0,
-    }) as TextMetrics
-
-  return {
-    canvas: null,
-    font: '10px sans-serif',
-    fillStyle: '#000',
-    strokeStyle: '#000',
-    textAlign: 'left',
-    textBaseline: 'alphabetic',
-    direction: 'ltr',
-    save: () => {},
-    restore: () => {},
-    fillText: () => {},
-    strokeText: () => {},
-    measureText: emptyMetrics,
-    beginPath: () => {},
-    closePath: () => {},
-    moveTo: () => {},
-    lineTo: () => {},
-    rect: () => {},
-    arc: () => {},
-    arcTo: () => {},
-    ellipse: () => {},
-    bezierCurveTo: () => {},
-    quadraticCurveTo: () => {},
-    fill: () => {},
-    stroke: () => {},
-    clearRect: () => {},
-    fillRect: () => {},
-    strokeRect: () => {},
-    setTransform: () => {},
-    resetTransform: () => {},
-    scale: () => {},
-    translate: () => {},
-    rotate: () => {},
-    getImageData: () => ({ data: new Uint8ClampedArray(0) }),
-    putImageData: () => {},
-    drawImage: () => {},
-    createLinearGradient: () => ({ addColorStop: () => {} }),
-    createPattern: () => null,
-    createRadialGradient: () => ({ addColorStop: () => {} }),
-  }
-}
+import { setupCanvasMock, createSceneContext } from './partyDetailTestUtils.ts'
 
 beforeEach(() => {
-  if (
-    typeof (globalThis as unknown as { CanvasRenderingContext2D?: unknown })
-      .CanvasRenderingContext2D === 'undefined'
-  ) {
-    ;(
-      globalThis as unknown as { CanvasRenderingContext2D: unknown }
-    ).CanvasRenderingContext2D = class FakeCanvasRenderingContext2D {}
-  }
-
-  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(((
-    type: string,
-  ) =>
-    type === '2d'
-      ? (createFakeCanvasContext() as unknown as CanvasRenderingContext2D)
-      : null) as unknown as typeof HTMLCanvasElement.prototype.getContext)
+  setupCanvasMock()
 })
 
-function createSceneContext(
-  scene: PartyDetailScene | TavernScene,
-  uiStateRef: { current: typeof DEFAULT_GAME_UI_STATE },
-): GameSceneContext {
-  const app = {
-    renderer: {
-      on: vi.fn(),
-      off: vi.fn(),
-      events: { features: { wheel: false } },
-    },
-    stage: new Container(),
-    screen: { width: 1600, height: 900 },
-    canvas: document.createElement('canvas'),
-    ticker: { add: vi.fn(), remove: vi.fn() },
-    init: vi.fn(),
-  } as unknown as GameSceneContext['app']
-
-  const layers = {
-    background: new Container(),
-    content: new Container(),
-    ui: new Container(),
-    overlay: new Container(),
-    modal: new Container(),
-    transition: new Container(),
-    debug: new Container(),
-  }
-
-  return {
-    id: 'phase8-8-smoke',
-    app,
-    viewport: new GameViewport(),
-    layers,
-    overlayManager: new OverlayManager(
-      layers.overlay,
-      layers.modal,
-      DEFAULT_GAME_THEME,
-    ),
-    theme: DEFAULT_GAME_THEME,
-    assetManager: new GameAssetManager(),
-    actions: {
-      advanceDay: vi.fn(() => ({ ok: true })),
-      resolveDay: vi.fn(() => ({ ok: true })),
-      offerRequest: vi.fn(() => ({ ok: true })),
-      selectParty: vi.fn((id) => {
-        uiStateRef.current.selectedPartyId = id
-      }),
-      selectQuest: vi.fn((id) => {
-        uiStateRef.current.selectedQuestId = id
-      }),
-      openCharacter: vi.fn(),
-      openActivity: vi.fn().mockResolvedValue({ ok: true, data: '' }),
-      openExpeditionNarrative: vi
-        .fn()
-        .mockResolvedValue({ ok: true, data: '' }),
-      openSettings: vi.fn(),
-      closeModal: vi.fn(),
-      switchToLegacy: vi.fn(),
-    },
-    canvasGame: {
-      setUiState: vi.fn((partial) => {
-        uiStateRef.current = { ...uiStateRef.current, ...partial }
-        scene.setUiState(uiStateRef.current)
-      }),
-      sceneManager: { push: vi.fn(), pop: vi.fn() },
-    } as unknown as GameSceneContext['canvasGame'],
-  }
+function makeTexture(width: number, height: number): Texture {
+  return new Texture({
+    source: Texture.WHITE.source,
+    frame: new Rectangle(0, 0, width, height),
+    orig: new Rectangle(0, 0, width, height),
+  } as ConstructorParameters<typeof Texture>[0])
 }
 
 describe('Phase 8.8 Party & Character Detail Smoke', () => {
@@ -407,5 +271,194 @@ describe('Phase 8.8 Party & Character Detail Smoke', () => {
         returnTarget: expect.anything(),
       }),
     )
+  })
+
+  it('P: species texture resolves and is applied to portrait', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-p')
+    const party = campaign.parties[0]!
+    const member = party.party.members[0]!
+    const texture = makeTexture(300, 800)
+    const speciesId = member.identity?.species ?? 'human'
+    ;(
+      context.assetManager as unknown as { _cache: Map<string, Texture> }
+    )._cache.set(speciesId, texture)
+
+    scene.mount(context, {
+      partyId: party.id,
+      initialCharacterId: member.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      _profilePortrait: { texture: Texture; visible: boolean }
+    }
+    expect(internal._profilePortrait.visible).toBe(true)
+    expect(internal._profilePortrait.texture).toBe(texture)
+  })
+
+  it('Q: portrait is visible on all tabs', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-q')
+    const party = campaign.parties[0]!
+    const texture = makeTexture(300, 800)
+    const member = party.party.members[0]!
+    const speciesId = member.identity?.species ?? 'human'
+    ;(
+      context.assetManager as unknown as { _cache: Map<string, Texture> }
+    )._cache.set(speciesId, texture)
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      _selectedTab: string
+      selectTab: (tab: 'profile' | 'relationship' | 'history') => void
+      _profilePortrait: { visible: boolean }
+    }
+    expect(internal._profilePortrait.visible).toBe(true)
+
+    for (const tab of ['relationship', 'history'] as const) {
+      internal.selectTab(tab)
+      expect(internal._profilePortrait.visible).toBe(true)
+    }
+  })
+
+  it('R: portrait switches with character and maintains size', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-r')
+    const party = campaign.parties[0]!
+    const [a, b, c] = party.party.members
+    const textureA = makeTexture(400, 900)
+    const textureB = makeTexture(600, 700)
+    const textureC = makeTexture(500, 800)
+    ;(
+      context.assetManager as unknown as { _cache: Map<string, Texture> }
+    )._cache.set(a!.identity!.species, textureA)
+    ;(
+      context.assetManager as unknown as { _cache: Map<string, Texture> }
+    )._cache.set(b!.identity!.species, textureB)
+    ;(
+      context.assetManager as unknown as { _cache: Map<string, Texture> }
+    )._cache.set(c!.identity!.species, textureC)
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      _profilePortrait: {
+        texture: Texture
+        scale: { x: number; y: number }
+        visible: boolean
+      }
+      selectCharacter: (id: string) => void
+    }
+    expect(internal._profilePortrait.visible).toBe(true)
+
+    const startScale = internal._profilePortrait.scale.x
+    internal.selectCharacter(b!.id)
+    expect(internal._profilePortrait.scale.x).not.toBe(startScale)
+    const bScale = internal._profilePortrait.scale.x
+    internal.selectCharacter(c!.id)
+    internal.selectCharacter(a!.id)
+    expect(internal._profilePortrait.scale.x).toBe(startScale)
+    expect(bScale).toBeGreaterThan(0)
+    expect(internal._profilePortrait.scale.y).toBe(
+      internal._profilePortrait.scale.x,
+    )
+  })
+
+  it('S: portrait remains visible on relationship tab', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-s')
+    const party = campaign.parties[0]!
+    const texture = makeTexture(300, 800)
+    const member = party.party.members[0]!
+    const speciesId = member.identity?.species ?? 'human'
+    ;(
+      context.assetManager as unknown as { _cache: Map<string, Texture> }
+    )._cache.set(speciesId, texture)
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      selectTab: (tab: 'profile' | 'relationship' | 'history') => void
+      _profilePortrait: { visible: boolean }
+    }
+    internal.selectTab('relationship')
+    expect(internal._profilePortrait.visible).toBe(true)
+  })
+
+  it('T: portrait remains visible on history tab', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-t')
+    const party = campaign.parties[0]!
+    const texture = makeTexture(300, 800)
+    const member = party.party.members[0]!
+    const speciesId = member.identity?.species ?? 'human'
+    ;(
+      context.assetManager as unknown as { _cache: Map<string, Texture> }
+    )._cache.set(speciesId, texture)
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      selectTab: (tab: 'profile' | 'relationship' | 'history') => void
+      _profilePortrait: { visible: boolean }
+    }
+    internal.selectTab('history')
+    expect(internal._profilePortrait.visible).toBe(true)
+  })
+
+  it('U: scroll content does not contain a giant background rectangle', () => {
+    const scene = new PartyDetailScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const context = createSceneContext(scene, uiStateRef)
+    const campaign = createTavernCampaign('phase8-8-u')
+    const party = campaign.parties[0]!
+
+    scene.mount(context, {
+      partyId: party.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const internal = scene as unknown as {
+      _detailScroll: { content: { height: number; children: unknown[] } }
+    }
+    expect(internal._detailScroll.content.height).toBeLessThan(10000)
+    const hasGiantRect = internal._detailScroll.content.children.some(
+      (child: unknown) =>
+        child &&
+        typeof child === 'object' &&
+        'height' in child &&
+        (child as { height: number }).height >= 10000,
+    )
+    expect(hasGiantRect).toBe(false)
   })
 })

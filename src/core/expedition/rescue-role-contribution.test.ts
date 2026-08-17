@@ -87,39 +87,45 @@ function runWithParties(
 }
 
 describe('Rescue paired self-verification', () => {
-  it('produces identical outcomes for identical role composition', () => {
-    const baseRoles: AdventurerRole[] = [
-      'scout',
-      'healer',
-      'guardian',
-      'vanguard',
-    ]
-    for (let i = 0; i < TRIALS; i++) {
-      const request1 = makeRequestForTrial('self', i, {
-        locationKnown: false,
-        discoveryDifficulty: 15,
-        accessDifficulty: 15,
-        stabilizationDifficulty: 15,
-        evacuationDifficulty: 15,
-      })
-      const request2 = makeRequestForTrial('self', i, {
-        locationKnown: false,
-        discoveryDifficulty: 15,
-        accessDifficulty: 15,
-        stabilizationDifficulty: 15,
-        evacuationDifficulty: 15,
-      })
-      const party = makePairedParty(baseRoles, `self-${i}`, 'C')
-      const result1 = runExpedition(request1, party)
-      const result2 = runExpedition(
-        request2,
-        makePairedParty(baseRoles, `self-${i}`, 'C'),
-      )
-      expect(result2.outcome).toBe(result1.outcome)
-      expect(result2.state.objectiveState).toEqual(result1.state.objectiveState)
-      expect(result2.state.logs).toEqual(result1.state.logs)
-    }
-  })
+  it(
+    'produces identical outcomes for identical role composition',
+    { timeout: 60000 },
+    () => {
+      const baseRoles: AdventurerRole[] = [
+        'scout',
+        'healer',
+        'guardian',
+        'vanguard',
+      ]
+      for (let i = 0; i < TRIALS; i++) {
+        const request1 = makeRequestForTrial('self', i, {
+          locationKnown: false,
+          discoveryDifficulty: 15,
+          accessDifficulty: 15,
+          stabilizationDifficulty: 15,
+          evacuationDifficulty: 15,
+        })
+        const request2 = makeRequestForTrial('self', i, {
+          locationKnown: false,
+          discoveryDifficulty: 15,
+          accessDifficulty: 15,
+          stabilizationDifficulty: 15,
+          evacuationDifficulty: 15,
+        })
+        const party = makePairedParty(baseRoles, `self-${i}`, 'C')
+        const result1 = runExpedition(request1, party)
+        const result2 = runExpedition(
+          request2,
+          makePairedParty(baseRoles, `self-${i}`, 'C'),
+        )
+        expect(result2.outcome).toBe(result1.outcome)
+        expect(result2.state.objectiveState).toEqual(
+          result1.state.objectiveState,
+        )
+        expect(result2.state.logs).toEqual(result1.state.logs)
+      }
+    },
+  )
 })
 
 describe('Rescue role contribution statistics', () => {

@@ -103,7 +103,7 @@ export class CanvasGame {
     )
 
     const context = this.createSceneContext(app, this._layers)
-    await this._assetManager.loadCharacterSilhouettes()
+    void this._assetManager.preloadCharacterSilhouettes()
     this._sceneManager = new GameSceneManager(context, {
       onMount: (scene) => {
         if (this._currentCampaign) {

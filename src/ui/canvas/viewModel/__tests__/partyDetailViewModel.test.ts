@@ -279,7 +279,7 @@ describe('partyDetailViewModel', () => {
     })
     const summaries = vm.selectedCharacter!.recentEvents.map((e) => e.summary)
     expect(summaries.some((s) => s.includes('花を見た'))).toBe(true)
-    expect(summaries.some((s) => s.includes('scouting'))).toBe(true)
+    expect(summaries.some((s) => s.includes('偵察'))).toBe(true)
     expect(vm.selectedCharacter!.recentEvents.length).toBeGreaterThanOrEqual(2)
   })
 
@@ -334,5 +334,126 @@ describe('partyDetailViewModel', () => {
     expect(vm.selectedCharacter!.expeditions).toHaveLength(1)
     expect(vm.selectedCharacter!.expeditions[0]!.outcomeLabel).toBe('成功')
     expect(vm.selectedCharacter!.expeditions[0]!.reportId).toBeDefined()
+  })
+
+  it('keeps abilities to core stats and condition to HP/MP/morale', () => {
+    const campaign = createTavernCampaign('party-detail-abilities')
+    const party = campaign.parties[0]!
+    const member = party.party.members[0]!
+
+    const vm = buildPartyDetailSceneViewModel(campaign, {
+      partyId: party.id,
+      initialCharacterId: member.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+
+    const char = vm.selectedCharacter!
+    const abilityNames = char.abilities.map((a) => a.name)
+    expect(abilityNames).toEqual([
+      'STR',
+      'CON',
+      'DEX',
+      'INT',
+      'PER',
+      'WIL',
+      'SOC',
+    ])
+    expect(abilityNames).not.toContain('HP')
+    expect(abilityNames).not.toContain('MP')
+    expect(abilityNames).not.toContain('Morale')
+
+    expect(char.condition.hp).toMatch(/\d+\/\d+/)
+    expect(char.condition.mp).toMatch(/\d+\/\d+/)
+    expect(char.condition.morale).toMatch(/\d+/)
+  })
+
+  it('exposes speciesId only when identity exists and localizes country', () => {
+    const campaign = createTavernCampaign('party-detail-identity')
+    const party = campaign.parties[0]!
+
+    for (const member of party.party.members) {
+      const vm = buildPartyDetailSceneViewModel(campaign, {
+        partyId: party.id,
+        initialCharacterId: member.id,
+        returnTarget: { sceneId: 'tavern' },
+      })
+      const char = vm.selectedCharacter!
+
+      if (member.identity?.species) {
+        expect(char.speciesId).toBe(member.identity.species)
+        expect(char.speciesLabel).toBeTruthy()
+      } else {
+        expect(char.speciesId).toBeUndefined()
+        expect(char.speciesLabel).toMatch(/不明|未記録/)
+      }
+
+      if (member.identity?.countryOfOrigin) {
+        expect(char.country.name).not.toBe('')
+        expect(char.country.name).not.toBe('記録なし')
+        expect(char.country.culture).toBeDefined()
+      } else {
+        expect(char.country.name).toBe('記録なし')
+      }
+    }
+  })
+
+  it('localizes status effects and skill gains', () => {
+    const campaign = createTavernCampaign('party-detail-localize')
+    const party = campaign.parties[0]!
+    const member = party.party.members[0]!
+
+    member.statusEffects = [
+      {
+        type: 'poisoned',
+        duration: 3,
+        sourceId: 'enemy',
+      },
+    ]
+
+    campaign.history = [
+      {
+        dayNumber: 1,
+        daySeed: 'seed',
+        reputationBefore: 10,
+        reputationAfter: 10,
+        reputationChange: {
+          before: 10,
+          rawDelta: 0,
+          appliedDelta: 0,
+          after: 10,
+          entries: [],
+        },
+        results: [],
+        partyEvents: [],
+        progressionEvents: [
+          {
+            type: 'skillImproved',
+            partyId: party.id,
+            partyName: party.party.name,
+            memberId: member.id,
+            memberName: member.name,
+            skill: 'scouting',
+            before: 1,
+            after: 2,
+            milestone: 0,
+            dayNumber: 1,
+          },
+        ],
+        relationshipEvents: [],
+      },
+    ]
+
+    const vm = buildPartyDetailSceneViewModel(campaign, {
+      partyId: party.id,
+      initialCharacterId: member.id,
+      returnTarget: { sceneId: 'tavern' },
+    })
+
+    expect(vm.selectedCharacter!.condition.status).toContain('毒')
+    expect(
+      vm.selectedCharacter!.recentEvents.some((e) =>
+        e.summary.includes('偵察'),
+      ),
+    ).toBe(true)
   })
 })

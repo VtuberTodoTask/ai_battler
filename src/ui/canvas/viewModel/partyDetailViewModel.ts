@@ -1,9 +1,4 @@
-import type {
-  Adventurer,
-  AdventurerRole,
-  BaseStats,
-} from '../../../core/models/types.ts'
-import type { CharacterRelationship } from '../../../core/narrative/types.ts'
+import type { Adventurer, BaseStats } from '../../../core/models/types.ts'
 import { downtimeEventSummary } from '../../../core/narrative/downtime.ts'
 import { milestoneSummary } from '../../../core/narrative/milestones.ts'
 import type {
@@ -13,13 +8,18 @@ import type {
 import type { TavernParty } from '../../../core/tavern/types.ts'
 import { isUnresolvedInjury } from '../../../core/expedition/injuries.ts'
 import { OUTCOME_LABELS } from '../../expedition/labels.ts'
-import {
-  countryLabel,
-  genderLabel,
-  speciesLabel,
-} from '../../../core/identity/labels.ts'
 import { COUNTRY_WORLD_PROFILES } from '../../../core/identity/worldData.ts'
+import type { CountryId, SpeciesId } from '../../../core/identity/types.ts'
 import { buildExpeditionReportId } from './expeditionReportViewModel.ts'
+import {
+  genderLabel,
+  injuryTypeLabel,
+  relationshipPresentationLabel,
+  roleLabel,
+  skillLabel,
+  speciesLabel,
+  statusEffectLabel,
+} from './characterLabels.ts'
 
 export interface PartyDetailReturnTarget {
   sceneId: string
@@ -100,13 +100,17 @@ export interface CharacterExpeditionHistoryViewModel {
   reportId?: string
 }
 
+export interface CharacterCountryViewModel {
+  name: string
+  culture: string
+}
+
 export interface CharacterDetailViewModel {
   id: string
   name: string
-  speciesId: string
+  speciesId?: SpeciesId
   speciesLabel: string
-  countryLabel: string
-  countrySummary: string
+  country: CharacterCountryViewModel
   genderLabel: string
   roleLabel: string
   abilities: CharacterAbilityViewModel[]
@@ -122,21 +126,6 @@ export interface PartyDetailSceneViewModel {
   members: PartyMemberListItemViewModel[]
   selectedCharacter?: CharacterDetailViewModel
   emptyMessage?: string
-}
-
-const ROLE_LABELS: Record<AdventurerRole, string> = {
-  vanguard: '前衛',
-  guardian: '護衛',
-  scout: '偵察',
-  ranger: '射手',
-  mage: '魔術師',
-  healer: '治療師',
-  support: '支援',
-}
-
-const INJURY_TYPE_LABELS: Record<'light' | 'serious', string> = {
-  light: '軽傷',
-  serious: '重症',
 }
 
 const STAT_ORDER: (keyof BaseStats)[] = [
@@ -158,20 +147,22 @@ const STAT_LABELS: Record<keyof BaseStats, string> = {
   soc: 'SOC',
 }
 
-function countrySummaryText(countryId: string | undefined): string {
-  if (!countryId) return '出身：記録なし'
+function buildCountryInfo(
+  countryId: CountryId | undefined,
+): CharacterCountryViewModel {
+  if (!countryId) {
+    return { name: '記録なし', culture: '' }
+  }
   const profile =
     COUNTRY_WORLD_PROFILES[countryId as keyof typeof COUNTRY_WORLD_PROFILES]
-  if (!profile) return `出身：${countryId}`
+  if (!profile) {
+    return { name: '記録なし', culture: '' }
+  }
   const values = profile.culturalValues.slice(0, 3).join('・')
-  const history = profile.historicalContext[0] ?? ''
-  const parts = [profile.nameJa, history, values].filter((s) => s.length > 0)
-  return parts.join(' / ')
-}
-
-function roleLabel(role: AdventurerRole | undefined): string {
-  if (!role) return '—'
-  return ROLE_LABELS[role] ?? role
+  return {
+    name: profile.nameJa,
+    culture: values,
+  }
 }
 
 function memberStatusText(
@@ -196,15 +187,13 @@ function memberStatusText(
     (i) => i.adventurerId === member.id && isUnresolvedInjury(i),
   )
   if (activeInjuries.length > 0) {
-    const types = activeInjuries.map(
-      (i) => INJURY_TYPE_LABELS[i.type] ?? i.type,
-    )
+    const types = activeInjuries.map((i) => injuryTypeLabel(i.type))
     return `負傷：${types.join('・')}`
   }
 
   if (member.statusEffects.length > 0) {
-    const names = member.statusEffects.map((e) => e.type).join('・')
-    return `状態：${names}`
+    const names = member.statusEffects.map((e) => statusEffectLabel(e.type))
+    return `状態：${names.join('・')}`
   }
 
   return '健康'
@@ -256,19 +245,6 @@ function formatPersonality(profile: Adventurer['narrativeProfile']): string[] {
   return lines
 }
 
-function relationshipLabel(rel: CharacterRelationship | undefined): string {
-  if (!rel) return 'まだ特筆すべき関係はない'
-  const parts: string[] = []
-  if (rel.affinity >= 60) parts.push('親密')
-  else if (rel.affinity <= 40) parts.push('一定の距離がある')
-  if (rel.trust >= 60) parts.push('強く信頼している')
-  else if (rel.trust <= 40) parts.push('信頼が薄い')
-  if (rel.respect >= 60) parts.push('尊敬している')
-  if (rel.tension >= 60) parts.push('意見が衝突しやすい')
-  if (parts.length === 0) return 'まだ特筆すべき関係はない'
-  return parts.join('・')
-}
-
 function memberNameMap(party: CampaignParty): Map<string, string> {
   return new Map(party.party.members.map((m) => [m.id, m.name]))
 }
@@ -280,7 +256,7 @@ function buildCharacterInjuries(
   return party.condition.injuries
     .filter((i) => i.adventurerId === member.id && isUnresolvedInjury(i))
     .map((i) => ({
-      type: INJURY_TYPE_LABELS[i.type] ?? i.type,
+      type: injuryTypeLabel(i.type),
       cause: i.cause,
     }))
 }
@@ -311,16 +287,10 @@ function buildCharacterCondition(
 function buildCharacterAbilities(
   member: Adventurer,
 ): CharacterAbilityViewModel[] {
-  const base = STAT_ORDER.map((key) => ({
+  return STAT_ORDER.map((key) => ({
     name: STAT_LABELS[key],
     value: member.stats[key],
   }))
-  base.push(
-    { name: 'HP', value: member.currentHp },
-    { name: 'MP', value: member.currentMp },
-    { name: '士気', value: member.morale },
-  )
-  return base
 }
 
 function buildRelationshipViewModel(
@@ -353,7 +323,7 @@ function buildRelationshipViewModel(
   return {
     targetId: target.id,
     targetName: target.name,
-    label: relationshipLabel(rel),
+    label: relationshipPresentationLabel(rel),
     sharedExpeditions: rel?.sharedExpeditions ?? 0,
     recentMemories: recent,
     milestones,
@@ -401,7 +371,8 @@ function buildCharacterRecentEvents(
   for (const record of campaign.history) {
     for (const ev of record.progressionEvents) {
       if (ev.type === 'skillImproved' && ev.memberId === member.id) {
-        add(ev.dayNumber, `${ev.skill} ${ev.before} → ${ev.after}`)
+        const label = skillLabel(ev.skill)
+        add(ev.dayNumber, `${label} ${ev.before} → ${ev.after}`)
       }
     }
   }
@@ -450,15 +421,16 @@ function buildCharacterDetail(
   const identity = member.identity
   const otherMembers = party.party.members.filter((m) => m.id !== member.id)
 
+  const speciesId = identity?.species
+  const species = speciesId ? speciesLabel(speciesId) : '記録なし'
+  const country = buildCountryInfo(identity?.countryOfOrigin)
+
   return {
     id: member.id,
     name: member.name,
-    speciesId: identity?.species ?? 'human',
-    speciesLabel: identity ? speciesLabel(identity.species) : '記録なし',
-    countryLabel: identity
-      ? countryLabel(identity.countryOfOrigin)
-      : '記録なし',
-    countrySummary: countrySummaryText(identity?.countryOfOrigin),
+    speciesId,
+    speciesLabel: species,
+    country,
     genderLabel: identity ? genderLabel(identity.gender) : '記録なし',
     roleLabel: roleLabel(member.role),
     abilities: buildCharacterAbilities(member),

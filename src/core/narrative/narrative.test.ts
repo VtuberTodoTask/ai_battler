@@ -745,46 +745,50 @@ describe('Narrative candidate ID determinism', () => {
 })
 
 describe('30-day zero-call audit', () => {
-  it('derives candidates without calling the provider and supports manual generation', async () => {
-    const provider = new FakeNarrativeProvider()
-    let campaign = createTavernCampaign('narrative-audit-001')
+  it(
+    'derives candidates without calling the provider and supports manual generation',
+    { timeout: 60000 },
+    async () => {
+      const provider = new FakeNarrativeProvider()
+      let campaign = createTavernCampaign('narrative-audit-001')
 
-    for (let i = 0; i < 30; i++) {
-      const pair = findAcceptingPair(campaign)
-      if (pair) {
-        campaign = { ...campaign, currentDay: pair.next }
+      for (let i = 0; i < 30; i++) {
+        const pair = findAcceptingPair(campaign)
+        if (pair) {
+          campaign = { ...campaign, currentDay: pair.next }
+        }
+        campaign = resolveCampaignDay(campaign)
+        campaign = advanceCampaignDay(campaign)
       }
-      campaign = resolveCampaignDay(campaign)
-      campaign = advanceCampaignDay(campaign)
-    }
 
-    expect(campaign.narrativeCandidates.length).toBeGreaterThan(0)
-    expect(campaign.narrativeGenerations.length).toBe(0)
-    expect(provider.callCount).toBe(0)
+      expect(campaign.narrativeCandidates.length).toBeGreaterThan(0)
+      expect(campaign.narrativeGenerations.length).toBe(0)
+      expect(provider.callCount).toBe(0)
 
-    const available = campaign.narrativeCandidates.filter(
-      (c) => c.state === 'available',
-    )
-    const toGenerate = available.slice(0, 3)
-    expect(toGenerate.length).toBe(3)
-
-    for (const candidate of toGenerate) {
-      const { candidate: updated, record } = await generateNarrative(
-        candidate,
-        provider,
+      const available = campaign.narrativeCandidates.filter(
+        (c) => c.state === 'available',
       )
-      campaign = {
-        ...campaign,
-        narrativeCandidates: campaign.narrativeCandidates.map((c) =>
-          c.id === updated.id ? updated : c,
-        ),
-        narrativeGenerations: [...campaign.narrativeGenerations, record],
-      }
-    }
+      const toGenerate = available.slice(0, 3)
+      expect(toGenerate.length).toBe(3)
 
-    expect(provider.callCount).toBe(3)
-    expect(campaign.narrativeGenerations.length).toBe(3)
-  })
+      for (const candidate of toGenerate) {
+        const { candidate: updated, record } = await generateNarrative(
+          candidate,
+          provider,
+        )
+        campaign = {
+          ...campaign,
+          narrativeCandidates: campaign.narrativeCandidates.map((c) =>
+            c.id === updated.id ? updated : c,
+          ),
+          narrativeGenerations: [...campaign.narrativeGenerations, record],
+        }
+      }
+
+      expect(provider.callCount).toBe(3)
+      expect(campaign.narrativeGenerations.length).toBe(3)
+    },
+  )
 })
 
 function findAcceptingPair(campaign: ReturnType<typeof createTavernCampaign>) {

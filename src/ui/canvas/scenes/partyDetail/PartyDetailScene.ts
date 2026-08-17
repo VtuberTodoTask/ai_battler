@@ -21,16 +21,26 @@ import { buildPartyDetailSceneViewModel } from '../../viewModel/partyDetailViewM
 
 const MARGIN = 16
 const TOP_BAR_HEIGHT = 64
-const FOOTER_HEIGHT = 120
+const PANEL_PADDING = 16
 const PARTY_DETAIL_BG_URL = '/party-detail-bg.jpg'
 const LEFT_WIDTH = 300
 const MAIN_Y = TOP_BAR_HEIGHT + MARGIN
-const MAIN_HEIGHT = VIRTUAL_HEIGHT - TOP_BAR_HEIGHT - FOOTER_HEIGHT - MARGIN * 2
+const MAIN_HEIGHT = VIRTUAL_HEIGHT - TOP_BAR_HEIGHT - MARGIN * 2
 const RIGHT_X = LEFT_WIDTH + MARGIN * 2
 const RIGHT_WIDTH = VIRTUAL_WIDTH - RIGHT_X - MARGIN
 const TABS_HEIGHT = 44
+const PORTRAIT_RATIO = 0.32
+const RETURN_BUTTON_WIDTH = 160
+const RETURN_BUTTON_HEIGHT = 44
 
 type DetailTab = 'profile' | 'relationship' | 'history'
+
+interface PortraitRect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
 
 export class PartyDetailScene implements GameScene {
   readonly id = 'partyDetail'
@@ -44,13 +54,16 @@ export class PartyDetailScene implements GameScene {
   private _headerRoot: Container | null = null
   private _memberListRoot: Container | null = null
   private _detailRoot: Container | null = null
-  private _footerRoot: Container | null = null
   private _returnButton: GameButton | null = null
   private _tabButtons: GameButton[] = []
   private _detailScroll: GameScrollView | null = null
   private _profilePortrait: Sprite | null = null
-  private _rightPanel: GamePanel | null = null
+  private _portraitMask: Graphics | null = null
+  private _portraitPlaceholder: GameLabel | null = null
+  private _portraitArea: PortraitRect | null = null
+  private _textMaxWidth = 0
   private _selectedTab: DetailTab = 'profile'
+  private _bgLoadToken = 0
 
   mount(context: GameSceneContext, input?: unknown): void {
     this._context = context
@@ -90,14 +103,18 @@ export class PartyDetailScene implements GameScene {
     this._headerRoot = null
     this._memberListRoot = null
     this._detailRoot = null
-    this._footerRoot = null
     this._returnButton = null
     this._tabButtons = []
     this._detailScroll = null
+    this._profilePortrait = null
+    this._portraitMask = null
+    this._portraitPlaceholder = null
+    this._portraitArea = null
     this._context = null
     this._campaign = null
     this._input = null
     this._viewModel = null
+    this._bgLoadToken++
   }
 
   setCampaign(campaign: TavernCampaignState, _uiState: GameUiState): void {
@@ -130,10 +147,18 @@ export class PartyDetailScene implements GameScene {
 
     if (typeof Assets.load !== 'function') return
 
+    const token = ++this._bgLoadToken
     void Assets.load(PARTY_DETAIL_BG_URL)
       .then((texture) => {
-        const sprite = new Sprite(texture as Texture)
-        const scale = VIRTUAL_HEIGHT / sprite.height
+        if (!this._bgRoot || token !== this._bgLoadToken) return
+        const sourceTexture = texture as Texture
+        const sourceWidth = sourceTexture.width
+        const sourceHeight = sourceTexture.height
+        const scale = Math.max(
+          VIRTUAL_WIDTH / sourceWidth,
+          VIRTUAL_HEIGHT / sourceHeight,
+        )
+        const sprite = new Sprite(sourceTexture)
         sprite.anchor.set(0.5)
         sprite.scale.set(scale)
         sprite.x = VIRTUAL_WIDTH / 2
@@ -198,37 +223,77 @@ export class PartyDetailScene implements GameScene {
       radius: theme.radius.large,
       alpha: 0.82,
     })
-    this._rightPanel = rightPanel
     this._detailRoot.addChild(rightPanel)
 
-    this._footerRoot = new Container()
-    this._footerRoot.x = MARGIN
-    this._footerRoot.y = VIRTUAL_HEIGHT - FOOTER_HEIGHT - MARGIN
-    this._uiRoot!.addChild(this._footerRoot)
-
-    const footerPanel = new GamePanel({
-      width: VIRTUAL_WIDTH - MARGIN * 2,
-      height: FOOTER_HEIGHT,
-      theme,
-      color: theme.colors.panel,
-      borderColor: theme.colors.panelBorder,
-      radius: theme.radius.large,
-      alpha: 0.82,
-    })
-    this._footerRoot.addChild(footerPanel)
-
-    this.createTabs(theme)
     this.createReturnButton(theme)
+    this.createTabs(theme)
+  }
+
+  private createReturnButton(theme: GameUiTheme): void {
+    this._returnButton = new GameButton({
+      width: RETURN_BUTTON_WIDTH,
+      height: RETURN_BUTTON_HEIGHT,
+      theme,
+      label: '酒場へ戻る',
+    })
+    this._returnButton.x =
+      VIRTUAL_WIDTH - MARGIN * 2 - RETURN_BUTTON_WIDTH - PANEL_PADDING
+    this._returnButton.y = (TOP_BAR_HEIGHT - RETURN_BUTTON_HEIGHT) / 2
+    this._returnButton.onActivate = () => this.returnToTavern()
+    this._headerRoot!.addChild(this._returnButton)
   }
 
   private createTabs(theme: GameUiTheme): void {
+    const contentWidth = RIGHT_WIDTH - PANEL_PADDING * 2
+    const textAreaWidth = Math.floor(contentWidth * (1 - PORTRAIT_RATIO))
+    const portraitAreaWidth = contentWidth - textAreaWidth
+    const tabHeight = TABS_HEIGHT - 4
+    const scrollTop = PANEL_PADDING + tabHeight + 8
+    const scrollHeight = MAIN_HEIGHT - scrollTop - PANEL_PADDING
+
+    this._textMaxWidth = textAreaWidth - 24
+
+    const portraitRect: PortraitRect = {
+      x: PANEL_PADDING + textAreaWidth,
+      y: scrollTop,
+      width: portraitAreaWidth,
+      height: scrollHeight,
+    }
+    this._portraitArea = portraitRect
+
+    const portraitMask = new Graphics()
+    portraitMask.eventMode = 'none'
+    portraitMask
+      .rect(
+        portraitRect.x,
+        portraitRect.y,
+        portraitRect.width,
+        portraitRect.height,
+      )
+      .fill({ color: 0xffffff })
+    this._detailRoot!.addChild(portraitMask)
+    this._portraitMask = portraitMask
+
     const portrait = new Sprite(Texture.WHITE)
-    portrait.anchor.set(0.5)
-    portrait.alpha = 0.45
+    portrait.anchor.set(0.5, 1)
+    portrait.alpha = 1
     portrait.visible = false
     portrait.eventMode = 'none'
+    portrait.mask = portraitMask
     this._detailRoot!.addChild(portrait)
     this._profilePortrait = portrait
+
+    const placeholder = new GameLabel('立ち絵なし', theme, 'caption', {
+      maxWidth: portraitRect.width - 16,
+      align: 'center',
+    })
+    placeholder.anchor.set(0.5)
+    placeholder.x = portraitRect.x + portraitRect.width / 2
+    placeholder.y = portraitRect.y + portraitRect.height / 2
+    placeholder.visible = false
+    placeholder.eventMode = 'none'
+    this._detailRoot!.addChild(placeholder)
+    this._portraitPlaceholder = placeholder
 
     const tabs: { id: DetailTab; label: string }[] = [
       { id: 'profile', label: 'プロフィール' },
@@ -236,10 +301,9 @@ export class PartyDetailScene implements GameScene {
       { id: 'history', label: '履歴' },
     ]
     const tabWidth = 120
-    const tabHeight = TABS_HEIGHT - 4
     const gap = 8
-    const startX = theme.spacing.s16
-    const startY = theme.spacing.s16
+    const startX = PANEL_PADDING
+    const startY = PANEL_PADDING
 
     this._tabButtons = []
     for (let i = 0; i < tabs.length; i++) {
@@ -258,31 +322,10 @@ export class PartyDetailScene implements GameScene {
       this._tabButtons.push(button)
     }
 
-    const contentWidth = RIGHT_WIDTH - theme.spacing.s24
-    const leftContentWidth = contentWidth * 0.7
-    const scrollTop = startY + tabHeight + theme.spacing.s8
-    const scrollHeight = MAIN_HEIGHT - scrollTop - theme.spacing.s16
-    this._detailScroll = new GameScrollView(
-      theme,
-      leftContentWidth,
-      scrollHeight,
-    )
-    this._detailScroll.x = theme.spacing.s12
+    this._detailScroll = new GameScrollView(theme, textAreaWidth, scrollHeight)
+    this._detailScroll.x = PANEL_PADDING
     this._detailScroll.y = scrollTop
     this._detailRoot!.addChild(this._detailScroll)
-  }
-
-  private createReturnButton(theme: GameUiTheme): void {
-    this._returnButton = new GameButton({
-      width: 160,
-      height: 44,
-      theme,
-      label: '酒場へ戻る',
-    })
-    this._returnButton.x = (VIRTUAL_WIDTH - MARGIN * 2 - 160) / 2
-    this._returnButton.y = (FOOTER_HEIGHT - 44) / 2
-    this._returnButton.onActivate = () => this.returnToTavern()
-    this._footerRoot!.addChild(this._returnButton)
   }
 
   private applyCampaign(campaign: TavernCampaignState): void {
@@ -290,6 +333,17 @@ export class PartyDetailScene implements GameScene {
     if (!this._input || !this._context) return
     this._viewModel = buildPartyDetailSceneViewModel(campaign, this._input)
     this.render()
+    this.ensurePortraitAssets()
+  }
+
+  private ensurePortraitAssets(): void {
+    if (!this._context) return
+    const selected = this._viewModel?.selectedCharacter
+    if (!selected) return
+    void this._context.assetManager.ensureCharacterSilhouettes().then(() => {
+      if (!this._context) return
+      this.updatePortrait()
+    })
   }
 
   private selectTab(tab: DetailTab): void {
@@ -323,13 +377,14 @@ export class PartyDetailScene implements GameScene {
     this.renderMemberList()
     this.updateTabStyles()
     this.renderDetail()
+    this.updatePortrait()
   }
 
   private renderHeader(): void {
     if (!this._headerRoot || !this._viewModel || !this._context) return
     const panel = this._headerRoot.children[0]
     for (const child of [...this._headerRoot.children]) {
-      if (child !== panel) {
+      if (child !== panel && child !== this._returnButton) {
         this._headerRoot.removeChild(child)
         child.destroy({ children: true })
       }
@@ -435,10 +490,6 @@ export class PartyDetailScene implements GameScene {
 
   private renderDetail(): void {
     if (!this._detailScroll || !this._viewModel || !this._context) return
-    if (this._profilePortrait) {
-      this._profilePortrait.visible =
-        this._selectedTab === 'profile' && !!this._viewModel.selectedCharacter
-    }
     const content = this._detailScroll.content
     for (const child of [...content.children]) {
       content.removeChild(child)
@@ -476,12 +527,11 @@ export class PartyDetailScene implements GameScene {
     container: Container,
     text: string,
     kind: 'heading' | 'body' | 'caption' = 'body',
-    width?: number,
     y?: number,
   ): GameLabel {
     const theme = this._context!.theme
     const label = new GameLabel(text, theme, kind, {
-      maxWidth: width ?? RIGHT_WIDTH - theme.spacing.s24,
+      maxWidth: this._textMaxWidth,
       breakWords: true,
     })
     if (y !== undefined) label.y = y
@@ -489,83 +539,83 @@ export class PartyDetailScene implements GameScene {
     return label
   }
 
-  private addScrollBackground(
-    content: Container,
-    width: number,
-    height: number,
-  ): void {
-    const theme = this._context!.theme
-    const bg = new Graphics()
-    bg.eventMode = 'none'
-    bg.rect(0, 0, width, height).fill({
-      color: theme.colors.panel,
-      alpha: 1,
-    })
-    content.addChildAt(bg, 0)
+  private updatePortrait(): void {
+    if (
+      !this._profilePortrait ||
+      !this._portraitPlaceholder ||
+      !this._context
+    ) {
+      return
+    }
+    const char = this._viewModel?.selectedCharacter
+    const portrait = this._profilePortrait
+    const placeholder = this._portraitPlaceholder
+    const rect = this._portraitArea
+    if (!char || !rect) {
+      portrait.visible = false
+      placeholder.visible = false
+      return
+    }
+
+    const visual = this._context.assetManager.getCharacterVisual(char.speciesId)
+    if (visual.status === 'ready' && visual.texture) {
+      portrait.visible = true
+      placeholder.visible = false
+      portrait.texture = visual.texture
+      const sourceWidth = visual.texture.orig.width
+      const sourceHeight = visual.texture.orig.height
+      const scale = Math.min(
+        rect.width / Math.max(sourceWidth, 1),
+        rect.height / Math.max(sourceHeight, 1),
+      )
+      portrait.scale.set(scale)
+      portrait.anchor.set(0.5, 1)
+      portrait.x = rect.x + rect.width / 2
+      portrait.y = rect.y + rect.height
+    } else {
+      portrait.visible = false
+      placeholder.visible = true
+      placeholder.text =
+        visual.status === 'loading' ? '読み込み中…' : '立ち絵なし'
+    }
   }
 
   private renderProfile(content: Container): void {
-    const theme = this._context!.theme
-    const width = RIGHT_WIDTH - theme.spacing.s24
     const char = this._viewModel!.selectedCharacter!
-
-    const contentWidth = width
-    const textMaxWidth = contentWidth * 0.68
-    const leftWidth = contentWidth * 0.7
-    const tabHeight = TABS_HEIGHT - 4
-    const scrollTop = theme.spacing.s16 + tabHeight + theme.spacing.s8
-    const scrollHeight = MAIN_HEIGHT - scrollTop - theme.spacing.s16
-    this.addScrollBackground(content, leftWidth, 10000)
 
     let y = 0
     const add = (
       text: string,
       kind: 'heading' | 'body' | 'caption' = 'body',
     ): GameLabel => {
-      const label = this.addLabel(content, text, kind, textMaxWidth, y)
+      const label = this.addLabel(content, text, kind, y)
       y += label.textHeight + 8
       return label
     }
 
-    const portraitTexture = this._context!.assetManager.getCharacterTexture(
-      char.speciesId,
-    )
-    if (this._profilePortrait) {
-      const fallback = portraitTexture === Texture.WHITE
-      this._profilePortrait.visible = !fallback
-      if (!fallback) {
-        this._profilePortrait.texture = portraitTexture
-        this._profilePortrait.mask =
-          (this._rightPanel?.getChildAt(0) as Graphics | undefined) ?? null
-        const rightAreaWidth = contentWidth * 0.3
-        const portraitScale = Math.min(
-          rightAreaWidth / Math.max(this._profilePortrait.width, 1),
-          scrollHeight / Math.max(this._profilePortrait.height, 1),
-        )
-        this._profilePortrait.scale.set(portraitScale)
-        this._profilePortrait.anchor.set(1, 0)
-        this._profilePortrait.x = theme.spacing.s12 + contentWidth
-        this._profilePortrait.y = scrollTop
-      } else {
-        this._profilePortrait.mask = null
-      }
-    }
-
     add(char.name, 'heading')
     add(
-      `${char.speciesLabel} ・ ${char.countryLabel} ・ ${char.genderLabel} ・ ${char.roleLabel}`,
+      `${char.speciesLabel} ・ ${char.country.name} ・ ${char.genderLabel} ・ ${char.roleLabel}`,
     )
-    add(char.countrySummary, 'caption')
+    if (char.country.culture.length > 0) {
+      add(`文化：${char.country.culture}`, 'caption')
+    }
     y += 8
 
     add('能力値', 'heading')
-    add(char.abilities.map((a) => `${a.name} ${a.value}`).join('  '))
+    for (let i = 0; i < char.abilities.length; i += 3) {
+      const row = char.abilities
+        .slice(i, i + 3)
+        .map((a) => `${a.name} ${a.value}`)
+        .join('   ')
+      add(row)
+    }
     y += 8
 
     add('状態', 'heading')
     add(`全体：${char.condition.status}`)
     add(
-      `HP ${char.condition.hp} / MP ${char.condition.mp} / 士気 ${char.condition.morale}`,
+      `HP ${char.condition.hp}    MP ${char.condition.mp}    士気 ${char.condition.morale}`,
     )
     if (char.condition.injuries.length > 0) {
       const injuryText = char.condition.injuries
@@ -585,21 +635,10 @@ export class PartyDetailScene implements GameScene {
   }
 
   private renderRelationship(content: Container): void {
-    const theme = this._context!.theme
-    const contentWidth = RIGHT_WIDTH - theme.spacing.s24
-    const leftWidth = contentWidth * 0.7
-    const textMaxWidth = leftWidth - 130
     const char = this._viewModel!.selectedCharacter!
 
-    this.addScrollBackground(content, leftWidth, 10000)
-
     if (char.relationships.length === 0) {
-      this.addLabel(
-        content,
-        'まだ特筆すべき関係はありません',
-        'body',
-        textMaxWidth,
-      )
+      this.addLabel(content, 'まだ特筆すべき関係はありません', 'body')
       return
     }
 
@@ -608,7 +647,7 @@ export class PartyDetailScene implements GameScene {
       text: string,
       kind: 'heading' | 'body' | 'caption' = 'body',
     ): GameLabel => {
-      const label = this.addLabel(content, text, kind, textMaxWidth, y)
+      const label = this.addLabel(content, text, kind, y)
       y += label.textHeight + 8
       return label
     }
@@ -620,10 +659,10 @@ export class PartyDetailScene implements GameScene {
       const viewButton = new GameButton({
         width: 120,
         height: 28,
-        theme,
+        theme: this._context!.theme,
         label: 'この人物を見る',
       })
-      viewButton.x = leftWidth - 120 - theme.spacing.s8
+      viewButton.x = this._textMaxWidth + 8 - 120
       viewButton.y = headingY + 2
       viewButton.onActivate = () => this.selectCharacter(rel.targetId)
       content.addChild(viewButton)
@@ -652,20 +691,14 @@ export class PartyDetailScene implements GameScene {
   }
 
   private renderHistory(content: Container): void {
-    const theme = this._context!.theme
-    const contentWidth = RIGHT_WIDTH - theme.spacing.s24
-    const leftWidth = contentWidth * 0.7
-    const textMaxWidth = leftWidth - 140
     const char = this._viewModel!.selectedCharacter!
-
-    this.addScrollBackground(content, leftWidth, 10000)
 
     let y = 0
     const add = (
       text: string,
       kind: 'heading' | 'body' | 'caption' = 'body',
     ): GameLabel => {
-      const label = this.addLabel(content, text, kind, leftWidth, y)
+      const label = this.addLabel(content, text, kind, y)
       y += label.textHeight + 8
       return label
     }
@@ -689,9 +722,9 @@ export class PartyDetailScene implements GameScene {
         const row = new Container()
         const text = new GameLabel(
           `DAY ${exp.day}  ${exp.title} ／ ${exp.outcomeLabel}`,
-          theme,
+          this._context!.theme,
           'body',
-          { maxWidth: textMaxWidth, breakWords: true },
+          { maxWidth: this._textMaxWidth, breakWords: true },
         )
         text.y = 0
         row.addChild(text)
@@ -700,10 +733,10 @@ export class PartyDetailScene implements GameScene {
           const reportButton = new GameButton({
             width: 120,
             height: 32,
-            theme,
+            theme: this._context!.theme,
             label: '報告を見る',
           })
-          reportButton.x = leftWidth - 120 - theme.spacing.s8
+          reportButton.x = this._textMaxWidth - 120
           reportButton.y = 0
           reportButton.onActivate = () => this.openReport(exp.reportId!)
           row.addChild(reportButton)
