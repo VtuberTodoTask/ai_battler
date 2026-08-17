@@ -126,6 +126,75 @@ Canvas/PixiJS 版の酒場 UI に、いつでも閲覧できる世界資料室�
 | 種族 / 鱗人族              | `.github/screenshots/encyclopedia_species_scalefolk.png`    |
 | 酒場へ戻る後の TavernScene | `.github/screenshots/encyclopedia_return_to_tavern.png`     |
 
+## Phase 8.9.1 世界資料室 コンテンツ・ナビゲーション安定化
+
+### 変更概要
+
+- 世界・国家・種族の資料テキストを「正史/プレイヤー向け」文章に差し替え
+  - `src/world/lore/worldLore.ts`
+  - `src/world/lore/countryLore.ts`
+  - `src/world/lore/speciesLore.ts`
+- `WorldEncyclopediaScene` の日本語長文が右端で切れないよう `breakWords: true` を有効化
+  - タイトル・短説明・セクション見出し・本文すべてに適用
+  - 記事末尾に 32 px のボトムパディングを追加
+- エントリ一覧を `GameScrollView` 化し、固定 15 行プールを撤廃
+  - 動的に行を生成・再利用し、20 件以上でも対応
+  - カテゴリ切替時のみ一覧スクロールを先頭にリセット
+  - エントリ切替時は記事スクロールを先頭にリセット
+- `returnTarget` 経由で `selectedPartyId` / `selectedQuestId` を `TavernScene` に復元してから `pop()`
+- `COMMON_NOTE` を統一
+  > 種族による身体的特徴や歴史的背景は、個人の性格・価値観・職業を決めるものではない。
+  > 同じ種族であっても、その生き方は出身地や家庭、職業、経験によって大きく異なる。
+- 校閲：「一般貿易」「時間の感覚」等の誤字、メタ言語（Player / Canon / Phase 8.9 / 現在のゲーム / 現実の人間 等）を排除
+- 新規テストを追加
+  - `worldLoreCanonConsistency.test.ts`：国/種族タイトルと `worldData.ts` の整合、ID 一意性
+  - `worldLoreMetaLanguage.test.ts`：プレイヤー向け文章にメタ言語が含まれないことを検証
+  - `worldEncyclopediaSceneLifecycle.test.ts`：return 時の `setUiState`、選択状態復元、20 件以上のエントリ一覧対応
+
+### 検証結果
+
+#### 静的検証
+
+- `npm run typecheck` PASS
+- `npm run lint` PASS
+- `npm run build` PASS
+- `npm run test` ... 1263 / 1263 PASS
+- `npm run test:coverage` ... 89.4% statements / 81.0% branches / 90.6% functions
+- `npm run test:expedition-regression` ... 22 / 22 PASS
+- `src/core/tavern/campaign/campaign-smoke.test.ts` / `campaign-progression-smoke.test.ts` ... PASS（30 日シミュレーション、AI 0 コール）
+
+#### ブラウザ E2E（Phase 8.9.1 再検証）
+
+- タイトル → ニューゲーム → `TavernScene`
+- 2 番目のパーティ（炎獅子団）と 2 番目の依頼（古代魔導核の回収）を選択
+- `資料室` ボタン → `WorldEncyclopediaScene`
+- カテゴリ切替：世界 → 国家 → 種族
+- 世界「七国世界」、国家「アルデン王国」、種族「人族」「鱗人族」を表示
+- 長文記事を `wheel` で最下部までスクロール可能（右端切れなし）
+- `酒場へ戻る` → `TavernScene` に復帰、選択中のパーティ・依頼が維持され、翌日へ進行しない
+- console.error / pageerror / unhandled rejection = 0
+
+| チェック | 結果 |
+| -------- | ---- |
+| 正史テキストへの差し替え | PASS |
+| メタ言語/誤字不在 | PASS（テスト） |
+| 日本語長文の右端切れなし | PASS |
+| エントリ一覧の動的スクロール | PASS |
+| カテゴリ切替で初期エントリ選択 | PASS |
+| 酒場復帰時 selectedPartyId/QuestId 維持 | PASS |
+| console.error | 0 |
+| unhandled rejection | 0 |
+| AI コール | 0 |
+
+### スクリーンショット
+
+| 画面 | ファイル |
+| ---- | -------- |
+| 世界について / 七国世界 | `.github/screenshots/encyclopedia_world_seven_kingdoms.png` |
+| 国家 / アルデン王国 | `.github/screenshots/encyclopedia_country_alden.png` |
+| 種族 / 鱗人族 | `.github/screenshots/encyclopedia_species_scalefolk.png` |
+| 酒場復帰後の選択維持 | `.github/screenshots/encyclopedia_return_to_tavern.png` |
+
 ## 注意点
 
 - ブラウザ E2E は Canvas 座標変換後の `PointerEvent` を `canvas` 要素に dispatch して実施。

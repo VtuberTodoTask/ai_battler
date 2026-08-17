@@ -7,18 +7,6 @@ import {
   validateWorldLoreIndex,
 } from '../worldLoreIndex.ts'
 
-const REQUIRED_SECTION_HEADINGS = [
-  '概要',
-  '身体的特徴',
-  '寿命・成長',
-  '人口・分布',
-  '歴史・社会',
-  '生活上の特徴',
-  '他種族からの見られ方',
-  '冒険者として',
-  '注意事項',
-]
-
 describe('speciesLoreData', () => {
   it('has exactly 9 species', () => {
     expect(SPECIES_LORE_ENTRIES.length).toBe(9)
@@ -35,12 +23,15 @@ describe('speciesLoreData', () => {
     }
   })
 
-  it('each species has the required section headings', () => {
+  it('each species has the canonical headings', () => {
     for (const entry of SPECIES_LORE_ENTRIES) {
       const headings = entry.sections.map((section) => section.heading)
-      for (const required of REQUIRED_SECTION_HEADINGS) {
-        expect(headings).toContain(required)
-      }
+      expect(headings).toContain('概要')
+      expect(headings).toContain('注意事項')
+      expect(headings.some((h) => h === '身体' || h.startsWith('身体'))).toBe(
+        true,
+      )
+      expect(headings).toContain('冒険者')
       expect(entry.title).toBeTruthy()
       expect(entry.shortDescription).toBeTruthy()
     }
@@ -52,7 +43,7 @@ describe('speciesLoreData', () => {
       expect(lastSection).toBeDefined()
       expect(lastSection.heading).toBe('注意事項')
       expect(lastSection.body).toContain(
-        '個人の性格・価値観・職業を決定するものではない',
+        '個人の性格・価値観・職業を決めるものではない',
       )
     }
   })

@@ -213,4 +213,80 @@ describe('WorldEncyclopediaScene lifecycle', () => {
 
     expect(context.canvasGame.sceneManager?.pop).toHaveBeenCalled()
   })
+
+  it('sets selectedPartyId and selectedQuestId before returning', () => {
+    const scene = new WorldEncyclopediaScene()
+    const context = createSceneContext(scene)
+
+    scene.mount(context, {
+      returnTarget: {
+        sceneId: 'tavern',
+        selectedPartyId: 'party-1',
+        selectedQuestId: 'quest-1',
+      },
+    })
+    const internal = scene as unknown as {
+      _returnButton: { activate: () => void }
+    }
+    internal._returnButton.activate()
+
+    expect(context.canvasGame.setUiState).toHaveBeenCalledWith({
+      selectedPartyId: 'party-1',
+      selectedQuestId: 'quest-1',
+    })
+    expect(context.canvasGame.sceneManager?.pop).toHaveBeenCalled()
+  })
+
+  it('does not set UI state when return target has no selection', () => {
+    const scene = new WorldEncyclopediaScene()
+    const context = createSceneContext(scene)
+
+    scene.mount(context, { returnTarget: { sceneId: 'tavern' } })
+    const internal = scene as unknown as {
+      _returnButton: { activate: () => void }
+    }
+    internal._returnButton.activate()
+
+    expect(context.canvasGame.setUiState).not.toHaveBeenCalled()
+    expect(context.canvasGame.sceneManager?.pop).toHaveBeenCalled()
+  })
+
+  it('creates rows for more than 15 entries', () => {
+    const scene = new WorldEncyclopediaScene()
+    const context = createSceneContext(scene)
+
+    scene.mount(context, { returnTarget: { sceneId: 'tavern' } })
+
+    const entries = Array.from({ length: 25 }, (_, i) => ({
+      id: `entry-${i}`,
+      title: `Entry ${i}`,
+      shortDescription: '',
+      selected: i === 0,
+    }))
+    const viewModel = {
+      category: 'world' as const,
+      categories: [] as { id: string; label: string; selected: boolean }[],
+      entryList: entries,
+      article: {
+        id: 'entry-0',
+        title: 'Entry 0',
+        shortDescription: '',
+        category: 'world' as const,
+        sections: [{ id: 'overview', heading: '概要', body: 'body text' }],
+      },
+      returnTarget: { sceneId: 'tavern' as const },
+    }
+    ;(
+      scene as unknown as {
+        applyViewModel: (vm: unknown, reset?: boolean) => void
+      }
+    ).applyViewModel(viewModel, true)
+
+    const internal = scene as unknown as {
+      _entryRows: { visible: boolean }[]
+      _entryListScroll: { content: { children: unknown[] } }
+    }
+    expect(internal._entryRows.length).toBe(25)
+    expect(internal._entryListScroll.content.children.length).toBe(25)
+  })
 })

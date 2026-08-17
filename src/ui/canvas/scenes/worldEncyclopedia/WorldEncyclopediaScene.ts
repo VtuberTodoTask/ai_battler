@@ -157,6 +157,7 @@ export class WorldEncyclopediaScene implements GameScene {
   private _entryListPanel: GamePanel | null = null
   private _articlePanel: GamePanel | null = null
   private _entryRows: TavernListRow[] = []
+  private _entryListScroll: GameScrollView | null = null
   private _articleScroll: GameScrollView | null = null
   private _articleLabels: Container[] = []
   private _bgLoadToken = 0
@@ -186,7 +187,7 @@ export class WorldEncyclopediaScene implements GameScene {
       this._entryId,
       this._input.returnTarget,
     )
-    this.applyViewModel(this._viewModel)
+    this.applyViewModel(this._viewModel, true)
 
     AudioController.playBgm('partyDetail', { loop: true })
   }
@@ -207,6 +208,10 @@ export class WorldEncyclopediaScene implements GameScene {
     this._returnButton = null
     this._tabButtons = []
     this._entryListPanel = null
+    if (this._entryListScroll) {
+      this._entryListScroll.destroy({ children: true })
+      this._entryListScroll = null
+    }
     this._articlePanel = null
     this._entryRows = []
     this._articleScroll = null
@@ -345,26 +350,14 @@ export class WorldEncyclopediaScene implements GameScene {
     })
     this._contentRoot!.addChild(this._entryListPanel)
 
-    const rowHeight = 52
-    const rowWidth = ENTRY_LIST_WIDTH - theme.spacing.s16 * 2
-    const startX = theme.spacing.s16
-    const startY = theme.spacing.s16
-    const gap = 8
-    for (let i = 0; i < 15; i++) {
-      const row = new TavernListRow({
-        width: rowWidth,
-        height: rowHeight,
-        theme,
-        title: '',
-        selected: false,
-      })
-      row.x = startX
-      row.y = startY + i * (rowHeight + gap)
-      row.visible = false
-      row.onActivate = undefined
-      this._contentRoot!.addChild(row)
-      this._entryRows.push(row)
-    }
+    this._entryListScroll = new GameScrollView(
+      theme,
+      ENTRY_LIST_WIDTH - theme.spacing.s16 * 2,
+      CONTENT_HEIGHT - theme.spacing.s16 * 2,
+    )
+    this._entryListScroll.x = theme.spacing.s16
+    this._entryListScroll.y = theme.spacing.s16
+    this._entryListPanel.addChild(this._entryListScroll)
   }
 
   private createArticle(context: GameSceneContext): void {
@@ -407,7 +400,7 @@ export class WorldEncyclopediaScene implements GameScene {
     )
     this._viewModel = viewModel
     this._entryId = viewModel.article.id
-    this.applyViewModel(viewModel)
+    this.applyViewModel(viewModel, true)
   }
 
   private selectEntry(entryId: string): void {
@@ -423,9 +416,13 @@ export class WorldEncyclopediaScene implements GameScene {
     this.applyViewModel(viewModel)
   }
 
-  private applyViewModel(viewModel: WorldEncyclopediaViewModel): void {
+  private applyViewModel(
+    viewModel: WorldEncyclopediaViewModel,
+    resetListScroll = false,
+  ): void {
     this.updateTabs(viewModel)
     this.updateEntryList(viewModel)
+    if (resetListScroll) this._entryListScroll?.scrollToTop()
     this.updateArticle(viewModel)
   }
 
@@ -436,21 +433,53 @@ export class WorldEncyclopediaScene implements GameScene {
   }
 
   private updateEntryList(viewModel: WorldEncyclopediaViewModel): void {
-    for (let i = 0; i < this._entryRows.length; i++) {
-      const row = this._entryRows[i]
+    if (!this._entryListScroll) return
+
+    const rowHeight = 52
+    const rowWidth = ENTRY_LIST_WIDTH - this._context!.theme.spacing.s16 * 2
+    const gap = 8
+    const content = this._entryListScroll.content
+
+    for (let i = 0; i < viewModel.entryList.length; i++) {
       const entry = viewModel.entryList[i]
-      if (!entry) {
-        row.visible = false
-        row.onActivate = undefined
-        continue
+      let row = this._entryRows[i]
+      if (!row) {
+        row = new TavernListRow({
+          width: rowWidth,
+          height: rowHeight,
+          theme: this._context!.theme,
+          title: '',
+          selected: false,
+        })
+        row.x = 0
+        content.addChild(row)
+        this._entryRows[i] = row
       }
+      if (row.parent !== content) content.addChild(row)
       row.visible = true
+      row.y = i * (rowHeight + gap)
       row.setTitle(entry.title)
-      row.setSubtitle(entry.shortDescription)
+      row.setSubtitle('')
       row.setSelected(entry.selected)
       row.setEnabled(true)
       row.onActivate = () => this.selectEntry(entry.id)
     }
+
+    for (let i = viewModel.entryList.length; i < this._entryRows.length; i++) {
+      const row = this._entryRows[i]
+      if (row && row.parent === content) {
+        content.removeChild(row)
+      }
+      if (row) {
+        row.visible = false
+        row.onActivate = undefined
+      }
+    }
+
+    this._entryListScroll.setViewportSize(
+      ENTRY_LIST_WIDTH - this._context!.theme.spacing.s16 * 2,
+      CONTENT_HEIGHT - this._context!.theme.spacing.s16 * 2,
+    )
   }
 
   private updateArticle(viewModel: WorldEncyclopediaViewModel): void {
@@ -466,22 +495,25 @@ export class WorldEncyclopediaScene implements GameScene {
     const maxTextWidth = contentWidth - 24
     const theme = this._context!.theme
 
-    const title = new GameLabel(viewModel.article.title, theme, 'heading', {
-      maxWidth: maxTextWidth,
-    })
+    const createArticleLabel = (
+      text: string,
+      kind: 'heading' | 'body',
+    ): GameLabel =>
+      new GameLabel(text, theme, kind, {
+        maxWidth: maxTextWidth,
+        breakWords: true,
+      })
+
+    const title = createArticleLabel(viewModel.article.title, 'heading')
     title.y = 0
     this._articleScroll.content.addChild(title)
     this._articleLabels.push(title)
 
     let currentY = title.y + title.textHeight + 8
 
-    const shortDesc = new GameLabel(
+    const shortDesc = createArticleLabel(
       viewModel.article.shortDescription,
-      theme,
       'body',
-      {
-        maxWidth: maxTextWidth,
-      },
     )
     shortDesc.y = currentY
     shortDesc.alpha = 0.9
@@ -491,22 +523,27 @@ export class WorldEncyclopediaScene implements GameScene {
     currentY += shortDesc.textHeight + 20
 
     for (const section of viewModel.article.sections) {
-      const heading = new GameLabel(section.heading, theme, 'heading', {
-        maxWidth: maxTextWidth,
-      })
+      const heading = createArticleLabel(section.heading, 'heading')
       heading.y = currentY
       this._articleScroll.content.addChild(heading)
       this._articleLabels.push(heading)
       currentY += heading.textHeight + 6
 
-      const body = new GameLabel(section.body, theme, 'body', {
-        maxWidth: maxTextWidth,
-      })
+      const body = createArticleLabel(section.body, 'body')
       body.y = currentY
       this._articleScroll.content.addChild(body)
       this._articleLabels.push(body)
       currentY += body.textHeight + 18
     }
+
+    const BOTTOM_PADDING = 32
+    const spacer = new Graphics()
+    spacer.rect(0, currentY, 1, BOTTOM_PADDING).fill({
+      color: theme.colors.textPrimary,
+      alpha: 1e-4,
+    })
+    this._articleScroll.content.addChild(spacer)
+    this._articleLabels.push(spacer)
 
     this._articleScroll.setViewportSize(
       RIGHT_WIDTH - theme.spacing.s16 * 2,
@@ -516,6 +553,16 @@ export class WorldEncyclopediaScene implements GameScene {
   }
 
   private returnToTavern(): void {
-    this._context?.canvasGame.sceneManager?.pop()
+    if (!this._context) return
+
+    const target = this._input?.returnTarget ?? { sceneId: 'tavern' }
+    if (target.selectedPartyId || target.selectedQuestId) {
+      this._context.canvasGame.setUiState({
+        selectedPartyId: target.selectedPartyId ?? null,
+        selectedQuestId: target.selectedQuestId ?? null,
+      })
+    }
+
+    this._context.canvasGame.sceneManager?.pop()
   }
 }
