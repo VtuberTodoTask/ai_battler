@@ -19,6 +19,7 @@ export interface TavernHeaderOptions {
   onAdvance?: () => void
   onOpenSettings?: () => void
   onOpenSave?: () => void
+  onOpenLibrary?: () => void
 }
 
 const SETTINGS_ICON_URL = '/settings-icon.png'
@@ -35,6 +36,7 @@ export class TavernHeader extends Container {
   private readonly _onAdvance?: () => void
   private readonly _onOpenSettings?: () => void
   private readonly _onOpenSave?: () => void
+  private readonly _onOpenLibrary?: () => void
 
   constructor(options: TavernHeaderOptions) {
     super()
@@ -45,6 +47,7 @@ export class TavernHeader extends Container {
     this._onAdvance = options.onAdvance
     this._onOpenSettings = options.onOpenSettings
     this._onOpenSave = options.onOpenSave
+    this._onOpenLibrary = options.onOpenLibrary
 
     const panel = new GamePanel({
       width: this._width,
@@ -77,10 +80,17 @@ export class TavernHeader extends Container {
     const rightMargin = this._theme.spacing.s16
     const actionButtonWidth = 140
     const saveButtonWidth = 100
+    const libraryButtonWidth = 100
     const gearSize = GEAR_SIZE
     const gap = this._theme.spacing.s8
     const rightClusterWidth =
-      saveButtonWidth + gap + actionButtonWidth + gap + gearSize
+      saveButtonWidth +
+      gap +
+      libraryButtonWidth +
+      gap +
+      actionButtonWidth +
+      gap +
+      gearSize
     const startX = this._width - rightMargin - rightClusterWidth
 
     const saveButton = new GameButton({
@@ -96,6 +106,19 @@ export class TavernHeader extends Container {
     }
     this.addChild(saveButton)
 
+    const libraryButton = new GameButton({
+      width: libraryButtonWidth,
+      height: 44,
+      theme: this._theme,
+      label: '資料室',
+    })
+    libraryButton.x = startX + saveButtonWidth + gap
+    libraryButton.y = 10
+    libraryButton.onActivate = () => {
+      this._onOpenLibrary?.()
+    }
+    this.addChild(libraryButton)
+
     this._actionButton = new GameButton({
       width: actionButtonWidth,
       height: 44,
@@ -103,7 +126,8 @@ export class TavernHeader extends Container {
       label: '翌日へ',
       disabled: true,
     })
-    this._actionButton.x = startX + saveButtonWidth + gap
+    this._actionButton.x =
+      startX + saveButtonWidth + gap + libraryButtonWidth + gap
     this._actionButton.y = 10
     this._actionButton.onActivate = () => {
       if (this._actionButton.state === 'disabled') return
@@ -111,7 +135,14 @@ export class TavernHeader extends Container {
     }
     this.addChild(this._actionButton)
 
-    const gearX = startX + saveButtonWidth + gap + actionButtonWidth + gap
+    const gearX =
+      startX +
+      saveButtonWidth +
+      gap +
+      libraryButtonWidth +
+      gap +
+      actionButtonWidth +
+      gap
     const gearY = (this._height - gearSize) / 2
     this._setupSettingsIcon(gearX, gearY)
   }

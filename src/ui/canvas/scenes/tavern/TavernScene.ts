@@ -24,6 +24,7 @@ import {
   type ExpeditionReportViewModel,
 } from '../../viewModel/expeditionReportViewModel.ts'
 import type { PartyDetailSceneInput } from '../../viewModel/partyDetailViewModel.ts'
+import type { WorldEncyclopediaSceneInput } from '../../viewModel/worldEncyclopediaViewModel.ts'
 import type {
   SoundNovelSceneInput,
   SoundNovelVisualContext,
@@ -276,6 +277,7 @@ export class TavernScene implements GameScene {
       onAdvance: () => this.handleAdvance(),
       onOpenSettings: () => this._context!.actions.openSettings(),
       onOpenSave: () => this._context!.actions.openSaveLoad?.('save'),
+      onOpenLibrary: () => this.openWorldEncyclopedia(),
     })
     this._header.x = 0
     this._header.y = 0
@@ -412,6 +414,19 @@ export class TavernScene implements GameScene {
       },
     }
     this._context.canvasGame.sceneManager?.push('partyDetail', input)
+  }
+
+  private openWorldEncyclopedia(): void {
+    if (!this._context) return
+
+    const input: WorldEncyclopediaSceneInput = {
+      returnTarget: {
+        sceneId: 'tavern',
+        selectedPartyId: this._uiState.selectedPartyId ?? undefined,
+        selectedQuestId: this._uiState.selectedQuestId ?? undefined,
+      },
+    }
+    this._context.canvasGame.sceneManager?.push('worldEncyclopedia', input)
   }
 
   private setActionMessage(

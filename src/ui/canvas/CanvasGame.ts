@@ -13,6 +13,7 @@ import { DayResultsScene } from './scenes/dayResults/DayResultsScene.ts'
 import { TitleScene } from './scenes/title/TitleScene.ts'
 import { SaveLoadScene } from './scenes/saveLoad/SaveLoadScene.ts'
 import { PartyDetailScene } from './scenes/partyDetail/PartyDetailScene.ts'
+import { WorldEncyclopediaScene } from './scenes/worldEncyclopedia/WorldEncyclopediaScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -119,6 +120,7 @@ export class CanvasGame {
     this._sceneManager.register(new TitleScene())
     this._sceneManager.register(new SaveLoadScene())
     this._sceneManager.register(new PartyDetailScene())
+    this._sceneManager.register(new WorldEncyclopediaScene())
 
     app.ticker.add(this.handleTick)
 

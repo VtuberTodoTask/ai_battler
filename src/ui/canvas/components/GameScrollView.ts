@@ -54,6 +54,11 @@ export class GameScrollView extends Container {
     this._content.addChild(item)
   }
 
+  scrollToTop(): void {
+    this._contentY = 0
+    this.clampContent()
+  }
+
   private onWheel = (event: FederatedWheelEvent): void => {
     this._contentY += (event.deltaY ?? 0) * 0.5
     this.clampContent()
@@ -63,6 +68,6 @@ export class GameScrollView extends Container {
   private clampContent(): void {
     const maxScroll = Math.max(0, this._content.height - this._viewportHeight)
     this._contentY = Math.max(0, Math.min(maxScroll, this._contentY))
-    this._content.y = -this._contentY
+    this._content.y = this._contentY === 0 ? 0 : -this._contentY
   }
 }
