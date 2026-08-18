@@ -516,7 +516,7 @@ describe('Campaign domain', () => {
         expect(result).toBeDefined()
         expect(result?.settlement).toBeDefined()
         expect(campaign.finance.funds).toBe(
-          initialFunds + (result?.settlement?.tavernCommission ?? 0),
+          initialFunds - 10 + (result?.settlement?.tavernCommission ?? 0),
         )
       })
 

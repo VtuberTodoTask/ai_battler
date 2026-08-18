@@ -1,6 +1,7 @@
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
 import {
-  formatCurrencyAmount,
+  formatLedgerAmount,
+  formatSignedCurrencyAmount,
   type TavernLedgerEntry,
 } from '../../../core/economy/index.ts'
 
@@ -56,13 +57,33 @@ function buildRow(
   entry: TavernLedgerEntry,
   campaign: TavernCampaignState,
 ): TavernLedgerRowViewModel {
-  const title = findRequestTitle(campaign, entry.source.requestId)
-  return {
-    id: entry.id,
-    day: entry.day,
-    title: title ?? '名称不明の依頼',
-    subtitle: `DAY ${entry.day} / 仲介手数料`,
-    amountLabel: `+${formatCurrencyAmount(entry.amount)}`,
+  switch (entry.kind) {
+    case 'opening_balance':
+      return {
+        id: entry.id,
+        day: entry.day,
+        title: '開業資金',
+        subtitle: '開業時',
+        amountLabel: formatLedgerAmount(entry.amount),
+      }
+    case 'daily_operating_cost':
+      return {
+        id: entry.id,
+        day: entry.day,
+        title: '営業費',
+        subtitle: `DAY ${entry.day}`,
+        amountLabel: formatLedgerAmount(entry.amount),
+      }
+    case 'quest_commission': {
+      const title = findRequestTitle(campaign, entry.source.requestId)
+      return {
+        id: entry.id,
+        day: entry.day,
+        title: title ?? '名称不明の依頼',
+        subtitle: `DAY ${entry.day} / 依頼仲介`,
+        amountLabel: formatLedgerAmount(entry.amount),
+      }
+    }
   }
 }
 
@@ -71,9 +92,13 @@ export function buildTavernLedgerViewModel(
   returnTarget: TavernLedgerReturnTarget,
 ): TavernLedgerViewModel {
   const funds = campaign.finance.funds
+  const fundsLabel =
+    funds < 0
+      ? `資金 ${formatSignedCurrencyAmount(funds)} / 資金不足`
+      : `資金 ${formatSignedCurrencyAmount(funds)}`
   const entries = [...campaign.finance.ledgerEntries].reverse()
   return {
-    fundsLabel: `資金 ${formatCurrencyAmount(funds)}`,
+    fundsLabel,
     rows: entries.map((entry) => buildRow(entry, campaign)),
     returnTarget,
   }

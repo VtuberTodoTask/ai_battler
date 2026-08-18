@@ -3,6 +3,10 @@ import type {
   CampaignParty,
   TavernCampaignState,
 } from '../../../../core/tavern/campaign/types.ts'
+import {
+  formatLedgerAmount,
+  formatSignedCurrencyAmount,
+} from '../../../../core/economy/index.ts'
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '../../GameViewport.ts'
 import { AudioController } from '../../audio/AudioController.ts'
 import { GameButton } from '../../components/GameButton.ts'
@@ -32,6 +36,7 @@ const LIST_ROW_HEIGHT = 74
 const CONTENT_Y = TOP_BAR_HEIGHT + MARGIN
 const CONTENT_HEIGHT =
   VIRTUAL_HEIGHT - TOP_BAR_HEIGHT - BOTTOM_BAR_HEIGHT - MARGIN * 3
+const FINANCE_SUMMARY_HEIGHT = 108
 const BOTTOM_Y = CONTENT_Y + CONTENT_HEIGHT + MARGIN
 const DETAIL_X = LIST_WIDTH + MARGIN * 2
 const DETAIL_WIDTH = VIRTUAL_WIDTH - LIST_WIDTH - MARGIN * 3
@@ -286,23 +291,119 @@ export class DayResultsScene implements GameScene {
     context: GameSceneContext,
     viewModel: DayResultsSceneViewModel,
   ): void {
-    this.drawResultsList(context, viewModel)
-    this.drawDetailPanel(context, viewModel)
+    const contentStartY = CONTENT_Y + FINANCE_SUMMARY_HEIGHT + MARGIN
+    const contentHeight = CONTENT_HEIGHT - FINANCE_SUMMARY_HEIGHT - MARGIN
+
+    this.drawFinanceSummary(context, viewModel, CONTENT_Y)
+    this.drawResultsList(context, viewModel, contentStartY, contentHeight)
+    this.drawDetailPanel(context, viewModel, contentStartY, contentHeight)
+  }
+
+  private drawFinanceSummary(
+    context: GameSceneContext,
+    viewModel: DayResultsSceneViewModel,
+    startY: number,
+  ): void {
+    const panel = new GamePanel({
+      width: VIRTUAL_WIDTH - MARGIN * 2,
+      height: FINANCE_SUMMARY_HEIGHT,
+      theme: context.theme,
+      title: '本日の収支',
+      alpha: 0.82,
+    })
+    panel.x = MARGIN
+    panel.y = startY
+    this._root!.addChild(panel)
+
+    const summary = viewModel.dailyFinanceSummary
+    const left = MARGIN * 2
+    const right = VIRTUAL_WIDTH - MARGIN * 2
+    const rowHeight = 22
+    let y = startY + 42
+
+    const commissionLabel = new GameLabel('依頼仲介収入', context.theme, 'body')
+    commissionLabel.anchor.set(0, 0.5)
+    commissionLabel.x = left
+    commissionLabel.y = y
+    this._root!.addChild(commissionLabel)
+
+    const commissionValue = new GameLabel(
+      formatLedgerAmount(summary.commissionIncome),
+      context.theme,
+      'body',
+    )
+    commissionValue.anchor.set(1, 0.5)
+    commissionValue.x = right
+    commissionValue.y = y
+    this._root!.addChild(commissionValue)
+    y += rowHeight
+
+    const operatingLabel = new GameLabel('営業費', context.theme, 'body')
+    operatingLabel.anchor.set(0, 0.5)
+    operatingLabel.x = left
+    operatingLabel.y = y
+    this._root!.addChild(operatingLabel)
+
+    const operatingValue = new GameLabel(
+      formatLedgerAmount(summary.operatingCost),
+      context.theme,
+      'body',
+    )
+    operatingValue.anchor.set(1, 0.5)
+    operatingValue.x = right
+    operatingValue.y = y
+    this._root!.addChild(operatingValue)
+    y += rowHeight + 4
+
+    const separator = new Graphics()
+    separator
+      .rect(left, y - 2, right - left - MARGIN * 2, 1)
+      .fill({ color: context.theme.colors.panelBorder, alpha: 0.6 })
+    this._root!.addChild(separator)
+
+    const netLabel = new GameLabel('本日収支', context.theme, 'body')
+    netLabel.anchor.set(0, 0.5)
+    netLabel.x = left
+    netLabel.y = y
+    this._root!.addChild(netLabel)
+
+    const netValue = new GameLabel(
+      formatLedgerAmount(summary.net),
+      context.theme,
+      'body',
+    )
+    netValue.anchor.set(1, 0.5)
+    netValue.x = right
+    netValue.y = y
+    this._root!.addChild(netValue)
+    y += rowHeight
+
+    const fundsLabel = new GameLabel(
+      `現在資金 ${formatSignedCurrencyAmount(summary.currentFunds)}`,
+      context.theme,
+      'body',
+    )
+    fundsLabel.anchor.set(0, 0.5)
+    fundsLabel.x = left
+    fundsLabel.y = y
+    this._root!.addChild(fundsLabel)
   }
 
   private drawResultsList(
     context: GameSceneContext,
     viewModel: DayResultsSceneViewModel,
+    startY: number,
+    panelHeight: number,
   ): void {
     const panel = new GamePanel({
       width: LIST_WIDTH,
-      height: CONTENT_HEIGHT,
+      height: panelHeight,
       theme: context.theme,
       title: '帰還したパーティ',
       alpha: 0.82,
     })
     panel.x = MARGIN
-    panel.y = CONTENT_Y
+    panel.y = startY
     this._root!.addChild(panel)
 
     if (viewModel.expeditionResults.length === 0) {
@@ -313,7 +414,7 @@ export class DayResultsScene implements GameScene {
         { maxWidth: LIST_WIDTH - MARGIN * 2 },
       )
       empty.x = MARGIN * 2
-      empty.y = CONTENT_Y + MARGIN * 2
+      empty.y = startY + MARGIN * 2
       this._root!.addChild(empty)
       return
     }
@@ -321,10 +422,10 @@ export class DayResultsScene implements GameScene {
     const scroll = new GameScrollView(
       context.theme,
       LIST_WIDTH - MARGIN * 2,
-      CONTENT_HEIGHT - 60,
+      panelHeight - 60,
     )
     scroll.x = MARGIN * 2
-    scroll.y = CONTENT_Y + 50
+    scroll.y = startY + 50
 
     for (let i = 0; i < viewModel.expeditionResults.length; i++) {
       const result = viewModel.expeditionResults[i]
@@ -348,16 +449,18 @@ export class DayResultsScene implements GameScene {
   private drawDetailPanel(
     context: GameSceneContext,
     viewModel: DayResultsSceneViewModel,
+    startY: number,
+    panelHeight: number,
   ): void {
     const panel = new GamePanel({
       width: DETAIL_WIDTH,
-      height: CONTENT_HEIGHT,
+      height: panelHeight,
       theme: context.theme,
       title: '選択中の結果詳細',
       alpha: 0.82,
     })
     panel.x = DETAIL_X
-    panel.y = CONTENT_Y
+    panel.y = startY
     this._root!.addChild(panel)
 
     const selected = viewModel.selectedResult
@@ -369,12 +472,12 @@ export class DayResultsScene implements GameScene {
         { maxWidth: DETAIL_WIDTH - MARGIN * 2 },
       )
       empty.x = DETAIL_X + MARGIN
-      empty.y = CONTENT_Y + MARGIN * 2
+      empty.y = startY + MARGIN * 2
       this._root!.addChild(empty)
       return
     }
 
-    let y = CONTENT_Y + 56
+    let y = startY + 56
     const left = DETAIL_X + MARGIN
 
     const partyLabel = new GameLabel(

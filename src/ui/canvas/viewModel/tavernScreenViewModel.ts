@@ -6,6 +6,7 @@ import {
 import {
   computeSuccessCommission,
   formatCurrencyAmount,
+  formatSignedCurrencyAmount,
 } from '../../../core/economy/index.ts'
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
 import type {
@@ -472,7 +473,10 @@ export function buildTavernScreenViewModel(
     reputationLabel: `酒場評判 ${campaign.reputation}（${getReputationTierLabel(
       getReputationTier(campaign.reputation),
     )}）`,
-    moneyLabel: `資金 ${formatCurrencyAmount(funds)}`,
+    moneyLabel:
+      funds < 0
+        ? `資金 ${formatSignedCurrencyAmount(funds)} / 資金不足`
+        : `資金 ${formatSignedCurrencyAmount(funds)}`,
     canResolveDay: day.status === 'planning',
     canAdvanceDay: day.status === 'resolved',
     advanceDayDisabledReason:

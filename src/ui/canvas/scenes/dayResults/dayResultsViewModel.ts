@@ -11,7 +11,11 @@ import {
   buildReportFromResult,
   type ExpeditionReportViewModel,
 } from '../../viewModel/expeditionReportViewModel.ts'
-import { formatCurrencyAmount } from '../../../../core/economy/index.ts'
+import {
+  formatCurrencyAmount,
+  validateSignedCurrencyAmount,
+  type TavernLedgerEntry,
+} from '../../../../core/economy/index.ts'
 
 export type DayResultsStep = 'important_events' | 'expedition_results'
 
@@ -54,12 +58,20 @@ export interface DayResultsSceneInput {
   expeditionResults?: ExpeditionResultItemViewModel[]
 }
 
+export interface DailyFinanceSummary {
+  commissionIncome: number
+  operatingCost: number
+  net: number
+  currentFunds: number
+}
+
 export interface DayResultsSceneViewModel {
   resolvedDay: number
   nextDay: number
   step: DayResultsStep
   importantEvents: DayResultEventViewModel[]
   expeditionResults: ExpeditionResultItemViewModel[]
+  dailyFinanceSummary: DailyFinanceSummary
   selectedResult?: ExpeditionResultItemViewModel
   selectedIndex: number
   canGoPrevious: boolean
@@ -442,6 +454,27 @@ function buildExpeditionResults(
   return results
 }
 
+export function projectDayFinanceSummary(
+  ledgerEntries: readonly TavernLedgerEntry[],
+  resolvedDay: number,
+  currentFunds: number,
+): DailyFinanceSummary {
+  let commissionIncome = 0
+  let operatingCost = 0
+  for (const entry of ledgerEntries) {
+    if (entry.day !== resolvedDay) continue
+    if (entry.kind === 'quest_commission') {
+      commissionIncome = validateSignedCurrencyAmount(
+        commissionIncome + entry.amount,
+      )
+    } else if (entry.kind === 'daily_operating_cost') {
+      operatingCost = validateSignedCurrencyAmount(operatingCost + entry.amount)
+    }
+  }
+  const net = validateSignedCurrencyAmount(commissionIncome + operatingCost)
+  return { commissionIncome, operatingCost, net, currentFunds }
+}
+
 export function buildDayResultsSceneViewModel(
   input: DayResultsSceneInput,
   seenResultIds: readonly string[] = [],
@@ -452,6 +485,12 @@ export function buildDayResultsSceneViewModel(
   const expeditionResults =
     input.expeditionResults ??
     buildExpeditionResults(input.campaign, input.resolvedDay, seenResultIds)
+
+  const dailyFinanceSummary = projectDayFinanceSummary(
+    input.campaign.finance.ledgerEntries,
+    input.resolvedDay,
+    input.campaign.finance.funds,
+  )
 
   const selectedId = input.selectedResultId ?? expeditionResults[0]?.id
   const selectedIndex = expeditionResults.findIndex((r) => r.id === selectedId)
@@ -464,6 +503,7 @@ export function buildDayResultsSceneViewModel(
     step: input.step ?? 'important_events',
     importantEvents,
     expeditionResults,
+    dailyFinanceSummary,
     selectedResult,
     selectedIndex: safeIndex,
     canGoPrevious: safeIndex > 0,

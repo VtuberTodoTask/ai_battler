@@ -1,6 +1,10 @@
 import { GAME_VERSION, SAVE_FORMAT_VERSION } from '../../version.ts'
+import {
+  TAVERN_ECONOMY_CONFIG,
+  buildDailyOperatingCostEntryId,
+  buildLedgerEntryId,
+} from '../economy/index.ts'
 import { computeQuestSettlement } from '../economy/questReward.ts'
-import { buildLedgerEntryId } from '../economy/finance.ts'
 import type { GameSaveData, SaveMetadata } from './types.ts'
 import { SaveValidationErrorClass, type SaveValidationError } from './types.ts'
 
@@ -21,7 +25,11 @@ const ALLOWED_SETTLEMENT_REASONS = [
   'objective_failed',
 ] as const
 
-const ALLOWED_LEDGER_KINDS = ['quest_commission'] as const
+const ALLOWED_LEDGER_KINDS = [
+  'opening_balance',
+  'quest_commission',
+  'daily_operating_cost',
+] as const
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -41,18 +49,24 @@ function isValidCurrencyAmount(value: unknown): value is number {
   )
 }
 
-function isValidInteger(
-  value: unknown,
-  min: number,
-  max: number,
-): value is number {
+function isValidSignedCurrencyAmount(value: unknown): value is number {
   return (
     typeof value === 'number' &&
     Number.isFinite(value) &&
     Number.isInteger(value) &&
-    value >= min &&
-    value <= max
+    value >= Number.MIN_SAFE_INTEGER &&
+    value <= Number.MAX_SAFE_INTEGER
   )
+}
+
+function assertValidSignedCurrencyAmount(
+  value: number,
+  message: string,
+): number {
+  if (!isValidSignedCurrencyAmount(value)) {
+    throw new SaveValidationErrorClass(message, 'corrupted-data')
+  }
+  return value
 }
 
 function assertPlainObject(
@@ -75,7 +89,12 @@ function validateRewardTerms(
       'corrupted-data',
     )
   }
-  if (!isValidInteger(value.tavernCommissionBps, 0, 10000)) {
+  if (
+    typeof value.tavernCommissionBps !== 'number' ||
+    !Number.isInteger(value.tavernCommissionBps) ||
+    value.tavernCommissionBps < 0 ||
+    value.tavernCommissionBps > 10000
+  ) {
     throw new SaveValidationErrorClass(
       `${context}の手数料率が不正です`,
       'corrupted-data',
@@ -103,7 +122,12 @@ function validateSettlement(
       'corrupted-data',
     )
   }
-  if (!isValidInteger(value.payoutRateBps, 0, 10000)) {
+  if (
+    typeof value.payoutRateBps !== 'number' ||
+    !Number.isInteger(value.payoutRateBps) ||
+    value.payoutRateBps < 0 ||
+    value.payoutRateBps > 10000
+  ) {
     throw new SaveValidationErrorClass(
       `${context}の支払率が不正です`,
       'corrupted-data',
@@ -174,16 +198,22 @@ function validateRequest(
   }
 }
 
+type LedgerValidationRecord =
+  | { kind: 'opening_balance'; day: number; amount: number; id: string }
+  | {
+      kind: 'quest_commission'
+      day: number
+      amount: number
+      id: string
+      requestId: string
+      partyId: string
+    }
+  | { kind: 'daily_operating_cost'; day: number; amount: number; id: string }
+
 function validateLedgerEntry(
   value: unknown,
   seenIds: Set<string>,
-): {
-  day: number
-  amount: number
-  id: string
-  requestId: string
-  partyId?: string
-} {
+): LedgerValidationRecord {
   assertPlainObject(value, '帳簿エントリの形式が不正です')
 
   if (!hasString(value, 'id') || (value.id as string).length === 0) {
@@ -204,13 +234,14 @@ function validateLedgerEntry(
   if (
     typeof value.day !== 'number' ||
     !Number.isInteger(value.day) ||
-    value.day < 1
+    value.day < 0
   ) {
     throw new SaveValidationErrorClass(
       '帳簿エントリの日数が不正です',
       'corrupted-data',
     )
   }
+  const day = value.day as number
 
   if (!ALLOWED_LEDGER_KINDS.includes(value.kind as never)) {
     throw new SaveValidationErrorClass(
@@ -218,15 +249,16 @@ function validateLedgerEntry(
       'corrupted-data',
     )
   }
+  const kind = value.kind as LedgerValidationRecord['kind']
 
-  if (!isValidCurrencyAmount(value.amount)) {
+  if (!isValidSignedCurrencyAmount(value.amount)) {
     throw new SaveValidationErrorClass(
       '帳簿エントリの金額が不正です',
       'corrupted-data',
     )
   }
-
-  if (value.amount === 0) {
+  const amount = value.amount as number
+  if (amount === 0) {
     throw new SaveValidationErrorClass(
       '帳簿に0円の取引が含まれています',
       'corrupted-data',
@@ -235,71 +267,122 @@ function validateLedgerEntry(
 
   assertPlainObject(value.source, '帳簿エントリのソースが不正です')
   const source = value.source as Record<string, unknown>
-  if (source.type !== 'expedition') {
-    throw new SaveValidationErrorClass(
-      '帳簿エントリのソース種別が不正です',
-      'corrupted-data',
-    )
-  }
-  if (
-    !hasString(source, 'requestId') ||
-    (source.requestId as string).length === 0
-  ) {
-    throw new SaveValidationErrorClass(
-      '帳簿エントリの依頼IDがありません',
-      'corrupted-data',
-    )
-  }
 
-  if (
-    source.partyId !== undefined &&
-    (typeof source.partyId !== 'string' ||
-      (source.partyId as string).length === 0)
-  ) {
-    throw new SaveValidationErrorClass(
-      '帳簿エントリのパーティIDが不正です',
-      'corrupted-data',
-    )
-  }
-
-  const expectedId = buildLedgerEntryId(
-    value.day as number,
-    source.requestId as string,
-    source.partyId as string | undefined,
-  )
-  if (id !== expectedId) {
-    throw new SaveValidationErrorClass(
-      '帳簿エントリIDが計算値と一致しません',
-      'corrupted-data',
-    )
-  }
-
-  return {
-    day: value.day as number,
-    amount: value.amount as number,
-    id,
-    requestId: source.requestId as string,
-    partyId: source.partyId as string | undefined,
+  switch (kind) {
+    case 'opening_balance': {
+      if (id !== 'opening-balance') {
+        throw new SaveValidationErrorClass(
+          '開業資金の帳簿IDが不正です',
+          'corrupted-data',
+        )
+      }
+      if (day !== 0) {
+        throw new SaveValidationErrorClass(
+          '開業資金の日数が不正です',
+          'corrupted-data',
+        )
+      }
+      if (amount !== TAVERN_ECONOMY_CONFIG.initialFunds) {
+        throw new SaveValidationErrorClass(
+          '開業資金の金額が不正です',
+          'corrupted-data',
+        )
+      }
+      if (source.type !== 'campaign_start') {
+        throw new SaveValidationErrorClass(
+          '開業資金のソース種別が不正です',
+          'corrupted-data',
+        )
+      }
+      return { kind, day, amount, id }
+    }
+    case 'daily_operating_cost': {
+      const expectedId = buildDailyOperatingCostEntryId(day)
+      if (id !== expectedId) {
+        throw new SaveValidationErrorClass(
+          '営業費の帳簿IDが不正です',
+          'corrupted-data',
+        )
+      }
+      if (day < 1) {
+        throw new SaveValidationErrorClass(
+          '営業費の日数が不正です',
+          'corrupted-data',
+        )
+      }
+      if (amount !== -TAVERN_ECONOMY_CONFIG.dailyOperatingCost) {
+        throw new SaveValidationErrorClass(
+          '営業費の金額が不正です',
+          'corrupted-data',
+        )
+      }
+      if (source.type !== 'daily_operating_cost') {
+        throw new SaveValidationErrorClass(
+          '営業費のソース種別が不正です',
+          'corrupted-data',
+        )
+      }
+      return { kind, day, amount, id }
+    }
+    case 'quest_commission': {
+      if (day < 1) {
+        throw new SaveValidationErrorClass(
+          '手数料エントリの日数が不正です',
+          'corrupted-data',
+        )
+      }
+      if (amount <= 0) {
+        throw new SaveValidationErrorClass(
+          '手数料エントリの金額が不正です',
+          'corrupted-data',
+        )
+      }
+      if (source.type !== 'expedition') {
+        throw new SaveValidationErrorClass(
+          '手数料エントリのソース種別が不正です',
+          'corrupted-data',
+        )
+      }
+      if (
+        !hasString(source, 'requestId') ||
+        (source.requestId as string).length === 0
+      ) {
+        throw new SaveValidationErrorClass(
+          '帳簿エントリの依頼IDがありません',
+          'corrupted-data',
+        )
+      }
+      if (
+        !hasString(source, 'partyId') ||
+        (source.partyId as string).length === 0
+      ) {
+        throw new SaveValidationErrorClass(
+          '帳簿エントリのパーティIDがありません',
+          'corrupted-data',
+        )
+      }
+      const requestId = source.requestId as string
+      const partyId = source.partyId as string
+      const expectedId = buildLedgerEntryId(day, requestId, partyId)
+      if (id !== expectedId) {
+        throw new SaveValidationErrorClass(
+          '帳簿エントリIDが計算値と一致しません',
+          'corrupted-data',
+        )
+      }
+      return { kind, day, amount, id, requestId, partyId }
+    }
   }
 }
 
 function validateFinance(value: unknown): {
   funds: number
-  ledgerById: Map<
-    string,
-    {
-      day: number
-      amount: number
-      id: string
-      requestId: string
-      partyId?: string
-    }
-  >
+  ledgerById: Map<string, LedgerValidationRecord>
 } {
   assertPlainObject(value, '酒場資金データが壊れています')
   const finance = value as Record<string, unknown>
 
-  if (!isValidCurrencyAmount(finance.funds)) {
+  if (!isValidSignedCurrencyAmount(finance.funds)) {
     throw new SaveValidationErrorClass(
       '酒場資金の値が不正です',
       'corrupted-data',
@@ -314,21 +397,27 @@ function validateFinance(value: unknown): {
   }
 
   const seenIds = new Set<string>()
-  const ledgerById = new Map<
-    string,
-    {
-      day: number
-      amount: number
-      id: string
-      requestId: string
-      partyId?: string
-    }
-  >()
+  const ledgerById = new Map<string, LedgerValidationRecord>()
   let runningTotal = 0
+  let openingBalanceCount = 0
+
   for (const entry of finance.ledgerEntries) {
     const validated = validateLedgerEntry(entry, seenIds)
     ledgerById.set(validated.id, validated)
-    runningTotal = validateCurrencyAmount(runningTotal + validated.amount)
+    runningTotal = assertValidSignedCurrencyAmount(
+      runningTotal + validated.amount,
+      '帳簿合計が安全な整数範囲を超えました',
+    )
+    if (validated.kind === 'opening_balance') {
+      openingBalanceCount++
+    }
+  }
+
+  if (openingBalanceCount !== 1) {
+    throw new SaveValidationErrorClass(
+      '開業資金の帳簿エントリが1件ではありません',
+      'corrupted-data',
+    )
   }
 
   if ((finance.funds as number) !== runningTotal) {
@@ -341,27 +430,21 @@ function validateFinance(value: unknown): {
   return { funds: finance.funds as number, ledgerById }
 }
 
-type ExpectedCommissionLedger = {
-  day: number
-  requestId: string
-  partyId: string
-  amount: number
-}
+type ExpectedLedgerEntry =
+  | {
+      kind: 'quest_commission'
+      day: number
+      requestId: string
+      partyId: string
+      amount: number
+    }
+  | { kind: 'daily_operating_cost'; day: number }
 
 function validateResolvedDispatch(
   value: unknown,
   day: number,
-  ledgerById: Map<
-    string,
-    {
-      day: number
-      amount: number
-      id: string
-      requestId: string
-      partyId?: string
-    }
-  >,
-  expectedLedgerById: Map<string, ExpectedCommissionLedger>,
+  ledgerById: Map<string, LedgerValidationRecord>,
+  expectedLedgerById: Map<string, ExpectedLedgerEntry>,
 ): void {
   assertPlainObject(value, '依頼結果の形式が不正です')
   const resolved = value as Record<string, unknown>
@@ -481,20 +564,21 @@ function validateResolvedDispatch(
       partyId,
     )
 
-    if (expectedLedgerById.has(expectedId)) {
-      throw new SaveValidationErrorClass(
-        '重複した精算用帳簿IDが検出されました',
-        'corrupted-data',
-      )
-    }
-    expectedLedgerById.set(expectedId, {
-      day,
-      requestId: resolved.requestId as string,
-      partyId,
-      amount: settlement.tavernCommission,
-    })
-
     if (settlement.tavernCommission > 0) {
+      if (expectedLedgerById.has(expectedId)) {
+        throw new SaveValidationErrorClass(
+          '重複した精算用帳簿IDが検出されました',
+          'corrupted-data',
+        )
+      }
+      expectedLedgerById.set(expectedId, {
+        kind: 'quest_commission',
+        day,
+        requestId: resolved.requestId as string,
+        partyId,
+        amount: settlement.tavernCommission,
+      })
+
       const entry = ledgerById.get(expectedId)
       if (!entry) {
         throw new SaveValidationErrorClass(
@@ -502,7 +586,10 @@ function validateResolvedDispatch(
           'corrupted-data',
         )
       }
-      if (entry.amount !== settlement.tavernCommission) {
+      if (
+        entry.kind !== 'quest_commission' ||
+        entry.amount !== settlement.tavernCommission
+      ) {
         throw new SaveValidationErrorClass(
           '帳簿エントリの金額と手数料が一致しません',
           'corrupted-data',
@@ -609,17 +696,8 @@ function validateDayRequests(value: unknown): void {
 function validateDayResults(
   value: unknown,
   day: number,
-  ledgerById: Map<
-    string,
-    {
-      day: number
-      amount: number
-      id: string
-      requestId: string
-      partyId?: string
-    }
-  >,
-  expectedLedgerById: Map<string, ExpectedCommissionLedger>,
+  ledgerById: Map<string, LedgerValidationRecord>,
+  expectedLedgerById: Map<string, ExpectedLedgerEntry>,
 ): void {
   if (!Array.isArray(value)) {
     throw new SaveValidationErrorClass(
@@ -634,36 +712,29 @@ function validateDayResults(
 
 function validateHistoryRecord(
   value: unknown,
-  ledgerById: Map<
-    string,
-    {
-      day: number
-      amount: number
-      id: string
-      requestId: string
-      partyId?: string
-    }
-  >,
-  expectedLedgerById: Map<string, ExpectedCommissionLedger>,
+  ledgerById: Map<string, LedgerValidationRecord>,
+  expectedLedgerById: Map<string, ExpectedLedgerEntry>,
 ): void {
   assertPlainObject(value, '履歴レコードの形式が不正です')
   const record = value as Record<string, unknown>
   if (
     typeof record.dayNumber !== 'number' ||
     !Number.isInteger(record.dayNumber) ||
-    record.dayNumber < 1
+    (record.dayNumber as number) < 1
   ) {
     throw new SaveValidationErrorClass(
       '履歴レコードの日数が不正です',
       'corrupted-data',
     )
   }
-  validateDayResults(
-    record.results,
-    record.dayNumber as number,
-    ledgerById,
-    expectedLedgerById,
-  )
+
+  const dayNumber = record.dayNumber as number
+  expectedLedgerById.set(buildDailyOperatingCostEntryId(dayNumber), {
+    kind: 'daily_operating_cost',
+    day: dayNumber,
+  })
+
+  validateDayResults(record.results, dayNumber, ledgerById, expectedLedgerById)
 }
 
 export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
@@ -758,27 +829,107 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
 
   const { ledgerById } = validateFinance(campaign.finance)
 
-  const expectedLedgerById = new Map<string, ExpectedCommissionLedger>()
+  const expectedLedgerById = new Map<string, ExpectedLedgerEntry>()
 
   const currentDay = campaign.currentDay as Record<string, unknown>
+  const currentDayStatus = currentDay.status
+  if (currentDayStatus !== 'planning' && currentDayStatus !== 'resolved') {
+    throw new SaveValidationErrorClass('本日の状態が不正です', 'corrupted-data')
+  }
+
   validateDayRequests(currentDay.requests)
+
+  if (
+    currentDayStatus !== 'resolved' &&
+    Array.isArray(currentDay.results) &&
+    currentDay.results.length > 0
+  ) {
+    throw new SaveValidationErrorClass(
+      '未確定の日に依頼結果が含まれています',
+      'corrupted-data',
+    )
+  }
+
+  if (currentDayStatus === 'resolved') {
+    expectedLedgerById.set(
+      buildDailyOperatingCostEntryId(campaign.dayNumber as number),
+      {
+        kind: 'daily_operating_cost',
+        day: campaign.dayNumber as number,
+      },
+    )
+  }
+
   validateDayResults(
     currentDay.results,
-    campaign.dayNumber,
+    campaign.dayNumber as number,
     ledgerById,
     expectedLedgerById,
   )
 
+  const historyDays = new Set<number>()
   for (const record of campaign.history) {
+    assertPlainObject(record, '履歴レコードの形式が不正です')
+    const recordDay = (record as Record<string, unknown>).dayNumber
+    if (
+      typeof recordDay !== 'number' ||
+      !Number.isInteger(recordDay) ||
+      recordDay < 1
+    ) {
+      throw new SaveValidationErrorClass(
+        '履歴レコードの日数が不正です',
+        'corrupted-data',
+      )
+    }
+    if (historyDays.has(recordDay as number)) {
+      throw new SaveValidationErrorClass(
+        '履歴に重複した日付があります',
+        'corrupted-data',
+      )
+    }
+    historyDays.add(recordDay as number)
     validateHistoryRecord(record, ledgerById, expectedLedgerById)
   }
 
-  for (const [id] of ledgerById) {
+  for (const [id, entry] of ledgerById) {
+    if (entry.kind === 'opening_balance') {
+      continue
+    }
     if (!expectedLedgerById.has(id)) {
       throw new SaveValidationErrorClass(
         '孤立した帳簿エントリがあります',
         'corrupted-data',
       )
+    }
+  }
+
+  for (const [id, expected] of expectedLedgerById) {
+    const entry = ledgerById.get(id)
+    if (!entry) {
+      throw new SaveValidationErrorClass(
+        '帳簿に必要なエントリがありません',
+        'corrupted-data',
+      )
+    }
+    if (expected.kind === 'quest_commission') {
+      if (
+        entry.kind !== 'quest_commission' ||
+        entry.requestId !== expected.requestId ||
+        entry.partyId !== expected.partyId ||
+        entry.amount !== expected.amount
+      ) {
+        throw new SaveValidationErrorClass(
+          '帳簿エントリと精算が一致しません',
+          'corrupted-data',
+        )
+      }
+    } else if (expected.kind === 'daily_operating_cost') {
+      if (entry.kind !== 'daily_operating_cost') {
+        throw new SaveValidationErrorClass(
+          '営業費帳簿エントリの種別が一致しません',
+          'corrupted-data',
+        )
+      }
     }
   }
 
@@ -798,11 +949,4 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
       'corrupted-data',
     )
   }
-}
-
-function validateCurrencyAmount(value: number): number {
-  if (!isValidCurrencyAmount(value)) {
-    throw new SaveValidationErrorClass('金額の値が不正です', 'corrupted-data')
-  }
-  return value
 }

@@ -1,6 +1,9 @@
 import { deepClone } from '../../util.ts'
 import {
+  applyLedgerTransaction,
   applyQuestSettlement,
+  buildDailyOperatingCostTransaction,
+  buildOpeningBalanceTransaction,
   computeQuestSettlement,
   createInitialFinanceState,
 } from '../../economy/index.ts'
@@ -86,7 +89,10 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
     history: [],
     narrativeCandidates: [],
     narrativeGenerations: [],
-    finance: createInitialFinanceState(),
+    finance: applyLedgerTransaction(
+      createInitialFinanceState(),
+      buildOpeningBalanceTransaction(),
+    ),
   }
 }
 
@@ -131,6 +137,11 @@ export function resolveCampaignDay(
     }
     resultsWithSettlement.push(resolved)
   }
+
+  finance = applyLedgerTransaction(
+    finance,
+    buildDailyOperatingCostTransaction(dayNumber),
+  )
 
   nextCampaign.currentDay = {
     ...nextCampaign.currentDay,

@@ -1,16 +1,47 @@
 import { deepClone } from '../util.ts'
+import { TAVERN_ECONOMY_CONFIG } from './economyConfig.ts'
+import {
+  validateCurrencyAmount,
+  validateSignedCurrencyAmount,
+} from './currency.ts'
 import type {
   CurrencyAmount,
   QuestSettlement,
+  SignedCurrencyAmount,
   TavernFinanceState,
   TavernLedgerEntry,
 } from './types.ts'
-import { validateCurrencyAmount } from './currency.ts'
 
 export function createInitialFinanceState(): TavernFinanceState {
   return {
     funds: 0,
     ledgerEntries: [],
+  }
+}
+
+export function buildOpeningBalanceTransaction(): TavernLedgerEntry {
+  return {
+    id: 'opening-balance',
+    day: 0,
+    kind: 'opening_balance',
+    amount: TAVERN_ECONOMY_CONFIG.initialFunds,
+    source: { type: 'campaign_start' },
+  }
+}
+
+export function buildDailyOperatingCostEntryId(day: number): string {
+  return `daily-operating-cost:${day}`
+}
+
+export function buildDailyOperatingCostTransaction(
+  day: number,
+): TavernLedgerEntry {
+  return {
+    id: buildDailyOperatingCostEntryId(day),
+    day,
+    kind: 'daily_operating_cost',
+    amount: -TAVERN_ECONOMY_CONFIG.dailyOperatingCost,
+    source: { type: 'daily_operating_cost' },
   }
 }
 
@@ -27,53 +58,67 @@ export function buildLedgerEntryId(
   return `quest-commission:${day}:${requestId}:${partyId ?? 'none'}`
 }
 
-export function applyQuestSettlement(
-  finance: TavernFinanceState,
-  settlement: QuestSettlement,
+export function buildQuestCommissionTransaction(
   day: number,
   source: SettlementSource,
-): TavernFinanceState {
-  const entryId = buildLedgerEntryId(day, source.requestId, source.partyId)
-  if (
-    settlement.tavernCommission === 0 ||
-    finance.ledgerEntries.some((entry) => entry.id === entryId)
-  ) {
-    return finance
-  }
-
-  const next = deepClone(finance)
-  const newFunds = validateCurrencyAmount(
-    next.funds + settlement.tavernCommission,
-  )
-  const entry: TavernLedgerEntry = {
-    id: entryId,
+  amount: CurrencyAmount,
+): TavernLedgerEntry {
+  validateCurrencyAmount(amount)
+  return {
+    id: buildLedgerEntryId(day, source.requestId, source.partyId),
     day,
     kind: 'quest_commission',
-    amount: settlement.tavernCommission,
+    amount,
     source: {
       type: 'expedition',
       requestId: source.requestId,
       partyId: source.partyId,
     },
   }
-  next.funds = newFunds
+}
+
+export function applyLedgerTransaction(
+  finance: TavernFinanceState,
+  entry: TavernLedgerEntry,
+): TavernFinanceState {
+  if (finance.ledgerEntries.some((existing) => existing.id === entry.id)) {
+    return finance
+  }
+
+  const next = deepClone(finance)
+  next.funds = validateSignedCurrencyAmount(next.funds + entry.amount)
   next.ledgerEntries = [...next.ledgerEntries, entry]
   return next
 }
 
+export function applyQuestSettlement(
+  finance: TavernFinanceState,
+  settlement: QuestSettlement,
+  day: number,
+  source: SettlementSource,
+): TavernFinanceState {
+  if (settlement.tavernCommission === 0) {
+    return finance
+  }
+
+  const entry = buildQuestCommissionTransaction(
+    day,
+    source,
+    settlement.tavernCommission,
+  )
+  return applyLedgerTransaction(finance, entry)
+}
+
 export function ledgerTotal(
   entries: readonly TavernLedgerEntry[],
-): CurrencyAmount {
+): SignedCurrencyAmount {
   let total = 0
   for (const entry of entries) {
-    total = validateCurrencyAmount(total + entry.amount)
+    total = validateSignedCurrencyAmount(total + entry.amount)
   }
   return total
 }
 
-export function financeInvariantHolds(
-  finance: TavernFinanceState,
-  initialFunds = 0,
-): boolean {
-  return finance.funds === initialFunds + ledgerTotal(finance.ledgerEntries)
+export function financeInvariantHolds(finance: TavernFinanceState): boolean {
+  return finance.funds === ledgerTotal(finance.ledgerEntries)
 }
