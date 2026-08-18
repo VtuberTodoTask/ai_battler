@@ -809,7 +809,7 @@ export class TavernScene implements GameScene {
         lines.push('目標を一部達成したため、報酬は半額支払われた。')
       }
     } else {
-      lines.push('報酬：記録なし')
+      lines.push('精算記録なし')
     }
     return lines
   }

@@ -8,10 +8,6 @@ import type {
   ResolvedDispatch,
 } from '../../../core/tavern/types.ts'
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
-import {
-  computeQuestSettlement,
-  getOrComputeRewardTerms,
-} from '../../../core/economy/index.ts'
 import type { QuestSettlement } from '../../../core/economy/types.ts'
 import { OUTCOME_LABELS } from '../../expedition/labels.ts'
 import type {
@@ -254,14 +250,7 @@ export function buildReportFromResult(
   )
   const narrative = narrativeStatusForCandidate(candidate, generations)
 
-  const settlement =
-    result.settlement ??
-    (result.result
-      ? computeQuestSettlement(
-          getOrComputeRewardTerms(result.request),
-          result.result.outcome,
-        )
-      : undefined)
+  const settlement = result.settlement
 
   return {
     id: buildExpeditionReportId(day, result.partyId, result.requestId),

@@ -81,4 +81,27 @@ describe('questReward', () => {
     expect(settlement.paidReward).toBe(1100)
     expect(settlement.tavernCommission).toBe(110)
   })
+
+  it('I: outcome mapping is exhaustive for all ExpeditionOutcome values', () => {
+    const terms = computeQuestRewardTerms('C')
+    const outcomes = [
+      'completeSuccess',
+      'success',
+      'partialSuccess',
+      'failedObjective',
+      'forcedRetreat',
+      'lostExpedition',
+    ] as const
+    for (const outcome of outcomes) {
+      const settlement = computeQuestSettlement(terms, outcome)
+      expect(settlement.promisedReward).toBe(260)
+      expect([0, 5000, 10000]).toContain(settlement.payoutRateBps)
+      expect(settlement.paidReward).toBe(
+        Math.floor((terms.promisedReward * settlement.payoutRateBps) / 10000),
+      )
+      expect(settlement.tavernCommission).toBe(
+        Math.floor((settlement.paidReward * 1000) / 10000),
+      )
+    }
+  })
 })

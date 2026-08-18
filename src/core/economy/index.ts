@@ -19,7 +19,6 @@ export {
   computeQuestRewardTerms,
   computeQuestSettlement,
   computeSuccessCommission,
-  getOrComputeRewardTerms,
   payoutRateBpsFromOutcome,
 } from './questReward.ts'
 export { formatCurrencyAmount, validateCurrencyAmount } from './currency.ts'

@@ -34,7 +34,10 @@ export function applyQuestSettlement(
   source: SettlementSource,
 ): TavernFinanceState {
   const entryId = buildLedgerEntryId(day, source.requestId, source.partyId)
-  if (finance.ledgerEntries.some((entry) => entry.id === entryId)) {
+  if (
+    settlement.tavernCommission === 0 ||
+    finance.ledgerEntries.some((entry) => entry.id === entryId)
+  ) {
     return finance
   }
 

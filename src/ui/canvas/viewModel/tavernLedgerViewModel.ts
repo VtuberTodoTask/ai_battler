@@ -60,7 +60,7 @@ function buildRow(
   return {
     id: entry.id,
     day: entry.day,
-    title: title ?? `依頼 ${entry.source.requestId}`,
+    title: title ?? '名称不明の依頼',
     subtitle: `DAY ${entry.day} / 仲介手数料`,
     amountLabel: `+${formatCurrencyAmount(entry.amount)}`,
   }
@@ -70,8 +70,8 @@ export function buildTavernLedgerViewModel(
   campaign: TavernCampaignState,
   returnTarget: TavernLedgerReturnTarget,
 ): TavernLedgerViewModel {
-  const funds = campaign.finance?.funds ?? 0
-  const entries = [...(campaign.finance?.ledgerEntries ?? [])].reverse()
+  const funds = campaign.finance.funds
+  const entries = [...campaign.finance.ledgerEntries].reverse()
   return {
     fundsLabel: `資金 ${formatCurrencyAmount(funds)}`,
     rows: entries.map((entry) => buildRow(entry, campaign)),

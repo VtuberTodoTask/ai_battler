@@ -37,6 +37,22 @@ export class GameScrollView extends Container {
     return this._content
   }
 
+  get viewportWidth(): number {
+    return this._viewportWidth
+  }
+
+  get viewportHeight(): number {
+    return this._viewportHeight
+  }
+
+  get contentHeight(): number {
+    return this._content.height
+  }
+
+  get maxScroll(): number {
+    return Math.max(0, this._content.height - this._viewportHeight)
+  }
+
   setViewportSize(width: number, height: number): void {
     this._viewportWidth = width
     this._viewportHeight = height

@@ -13,6 +13,7 @@ import {
 } from '../../../core/save/serializer.ts'
 import {
   applyQuestSettlement,
+  buildLedgerEntryId,
   financeInvariantHolds,
   ledgerTotal,
 } from '../../../core/economy/finance.ts'
@@ -29,6 +30,7 @@ import {
 import { buildExpeditionReportViewModels } from '../viewModel/expeditionReportViewModel.ts'
 import { GameAssetManager } from '../assets/GameAssetManager.ts'
 import { GameViewport } from '../GameViewport.ts'
+import { GameScrollView } from '../components/GameScrollView.ts'
 import { OverlayManager } from '../overlays/OverlayManager.ts'
 import { DEFAULT_GAME_THEME } from '../theme/gameTheme.ts'
 import { DEFAULT_GAME_UI_STATE, type GameSceneContext } from '../types.ts'
@@ -285,20 +287,42 @@ describe('phase9-0-reward-ledger-smoke', () => {
     expect(lines.some((l) => l.startsWith('酒場収入 '))).toBe(true)
   })
 
-  it('F: ledger scene mounts, renders rows, and returns to tavern without mutation', () => {
-    const campaign = resolveSampleDay(createTavernCampaign('phase9-0-f-001'))
+  it('F: ledger scene mounts with fixed viewport and scrollable content for 30+ entries', () => {
+    const campaign = createTavernCampaign('phase9-0-f-001')
+    const entries = []
+    let total = 0
+    for (let i = 1; i <= 35; i++) {
+      const entry = {
+        id: buildLedgerEntryId(i, `req-${i}`, `party-${i}`),
+        day: i,
+        kind: 'quest_commission' as const,
+        amount: 10,
+        source: {
+          type: 'expedition' as const,
+          requestId: `req-${i}`,
+          partyId: `party-${i}`,
+        },
+      }
+      entries.push(entry)
+      total += entry.amount
+    }
+    campaign.finance.ledgerEntries = entries
+    campaign.finance.funds = total
+
     const scene = new TavernLedgerScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(scene, uiStateRef)
     const fundsBefore = campaign.finance.funds
-    const ledgerCountBefore = campaign.finance.ledgerEntries.length
 
     scene.mount(context, createTavernLedgerSceneInput({ sceneId: 'tavern' }))
     scene.setCampaign(campaign, uiStateRef.current)
 
-    expect(context.layers.ui.children.length).toBeGreaterThan(0)
+    const scroll = (scene as unknown as { _scroll: GameScrollView })._scroll
+    expect(scroll).not.toBeNull()
+    expect(scroll.viewportHeight).toBeGreaterThan(0)
+    expect(scroll.contentHeight).toBeGreaterThan(scroll.viewportHeight)
+    expect(scroll.maxScroll).toBeGreaterThan(0)
     expect(campaign.finance.funds).toBe(fundsBefore)
-    expect(campaign.finance.ledgerEntries.length).toBe(ledgerCountBefore)
 
     scene.unmount()
     expect(context.layers.ui.children.length).toBe(0)
@@ -344,14 +368,20 @@ describe('phase9-0-reward-ledger-smoke', () => {
     expect(after).toBe(before)
   })
 
-  it('I: ledger entries have stable ids and are not exposed as raw UI ids', () => {
+  it('I: ledger entries have stable ids and player-facing labels do not expose raw UI ids', () => {
     const campaign = resolveSampleDay(createTavernCampaign('phase9-0-i-001'))
     const input = createTavernLedgerSceneInput({ sceneId: 'tavern' })
     const vm = buildTavernLedgerViewModel(campaign, input.returnTarget)
     const ids = new Set(vm.rows.map((row) => row.id))
     expect(ids.size).toBe(vm.rows.length)
+    const rawPatterns = ['tavern-request-', 'quest-commission:', 'party-']
     for (const row of vm.rows) {
       expect(row.id.startsWith('quest-commission:')).toBe(true)
+      for (const raw of rawPatterns) {
+        expect(row.title).not.toContain(raw)
+        expect(row.subtitle).not.toContain(raw)
+        expect(row.amountLabel).not.toContain(raw)
+      }
     }
   })
 
@@ -365,5 +395,43 @@ describe('phase9-0-reward-ledger-smoke', () => {
     expect(financeInvariantHolds(campaign.finance)).toBe(true)
     campaign = advanceCampaignDay(campaign)
     expect(financeInvariantHolds(campaign.finance)).toBe(true)
+  })
+
+  it('K: reward/settlement/ledger view models and save/load do not trigger AI generation', () => {
+    const campaign = resolveSampleDay(createTavernCampaign('phase9-0-k-001'))
+    const generationsBefore = campaign.narrativeGenerations.length
+
+    buildTavernScreenViewModel(campaign, DEFAULT_GAME_UI_STATE)
+    buildExpeditionReportViewModels(campaign)
+    buildDayResultsSceneViewModel({
+      campaign,
+      resolvedDay: campaign.dayNumber - 1,
+      nextDay: campaign.dayNumber,
+    })
+    buildTavernLedgerViewModel(
+      campaign,
+      createTavernLedgerSceneInput({ sceneId: 'tavern' }).returnTarget,
+    )
+    serializeGameSave({ campaign })
+
+    expect(campaign.narrativeGenerations.length).toBe(generationsBefore)
+  })
+
+  it('L: missing settlement is presented as 精算記録なし without recompute', () => {
+    const campaign = resolveSampleDay(createTavernCampaign('phase9-0-l-001'))
+    const dayRecord = campaign.history[0]
+    const resolvedResult = dayRecord?.results[0]
+    expect(resolvedResult).toBeDefined()
+    if (!resolvedResult) return
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(resolvedResult as any).settlement = undefined
+
+    const reports = buildExpeditionReportViewModels(campaign)
+    const report = reports.find((r) => r.id.includes(resolvedResult.requestId))
+    expect(report).toBeDefined()
+    expect(report?.settlement).toBeUndefined()
+    const lines = buildSummaryLines(report!)
+    expect(lines).toContain('精算記録なし')
   })
 })

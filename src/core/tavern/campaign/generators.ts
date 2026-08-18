@@ -1,6 +1,5 @@
 import { SeededRng } from '../../rng/seededRng.ts'
 import { deepClone } from '../../util.ts'
-import { computeQuestRewardTerms } from '../../economy/index.ts'
 import type { AdventurerRank } from '../../models/types.ts'
 import type { ObjectiveType } from '../../expedition/types.ts'
 import { generateAdventurerParty } from '../partyGenerator.ts'
@@ -248,7 +247,6 @@ function generateRequestForCampaign(
     rank,
     battleEnabled,
   })
-  offer.rewardTerms = computeQuestRewardTerms(rank)
   return offer
 }
 

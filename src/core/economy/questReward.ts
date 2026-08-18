@@ -1,6 +1,5 @@
 import type { AdventurerRank } from '../models/types.ts'
 import type { ExpeditionOutcome } from '../expedition/types.ts'
-import type { TavernRequestOffer } from '../tavern/types.ts'
 import type {
   CurrencyAmount,
   QuestRewardTerms,
@@ -39,47 +38,32 @@ export function computeSuccessCommission(
   )
 }
 
-export function getOrComputeRewardTerms(
-  request: TavernRequestOffer,
-): QuestRewardTerms {
-  if (request.rewardTerms) {
-    return request.rewardTerms
-  }
-  return computeQuestRewardTerms(request.rank)
-}
+const PAYOUT_BPS_BY_OUTCOME = {
+  completeSuccess: 10000,
+  success: 10000,
+  partialSuccess: 5000,
+  failedObjective: 0,
+  forcedRetreat: 0,
+  lostExpedition: 0,
+} satisfies Record<ExpeditionOutcome, number>
+
+const SETTLEMENT_REASON_BY_OUTCOME = {
+  completeSuccess: 'objective_completed',
+  success: 'objective_completed',
+  partialSuccess: 'partial_objective',
+  failedObjective: 'objective_failed',
+  forcedRetreat: 'objective_failed',
+  lostExpedition: 'objective_failed',
+} satisfies Record<ExpeditionOutcome, SettlementReason>
 
 export function payoutRateBpsFromOutcome(outcome: ExpeditionOutcome): number {
-  switch (outcome) {
-    case 'completeSuccess':
-    case 'success':
-      return 10000
-    case 'partialSuccess':
-      return 5000
-    case 'failedObjective':
-    case 'forcedRetreat':
-    case 'lostExpedition':
-      return 0
-    default:
-      return 0
-  }
+  return PAYOUT_BPS_BY_OUTCOME[outcome]
 }
 
 function settlementReasonFromOutcome(
   outcome: ExpeditionOutcome,
 ): SettlementReason {
-  switch (outcome) {
-    case 'completeSuccess':
-    case 'success':
-      return 'objective_completed'
-    case 'partialSuccess':
-      return 'partial_objective'
-    case 'failedObjective':
-    case 'forcedRetreat':
-    case 'lostExpedition':
-      return 'objective_failed'
-    default:
-      return 'objective_failed'
-  }
+  return SETTLEMENT_REASON_BY_OUTCOME[outcome]
 }
 
 export function computeQuestSettlement(

@@ -89,4 +89,31 @@ describe('finance', () => {
     expect(id1).not.toBe(id3)
     expect(id1).toBe('quest-commission:1:req-1:party-1')
   })
+
+  it('G: zero commission settlement does not create a ledger entry', () => {
+    let finance = createInitialFinanceState()
+    const settlement = computeQuestSettlement(
+      computeQuestRewardTerms('C'),
+      'failedObjective',
+    )
+    expect(settlement.tavernCommission).toBe(0)
+    finance = applyQuestSettlement(finance, settlement, 1, {
+      requestId: 'req-1',
+      partyId: 'party-1',
+    })
+    expect(finance.funds).toBe(0)
+    expect(finance.ledgerEntries).toEqual([])
+  })
+
+  it('H: duplicate zero commission settlement returns unchanged finance', () => {
+    let finance = createInitialFinanceState()
+    const settlement = computeQuestSettlement(
+      computeQuestRewardTerms('C'),
+      'lostExpedition',
+    )
+    const source = { requestId: 'req-1', partyId: 'party-1' }
+    finance = applyQuestSettlement(finance, settlement, 1, source)
+    const duplicate = applyQuestSettlement(finance, settlement, 1, source)
+    expect(duplicate).toBe(finance)
+  })
 })

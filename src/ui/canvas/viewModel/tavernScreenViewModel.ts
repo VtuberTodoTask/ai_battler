@@ -6,7 +6,6 @@ import {
 import {
   computeSuccessCommission,
   formatCurrencyAmount,
-  getOrComputeRewardTerms,
 } from '../../../core/economy/index.ts'
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
 import type {
@@ -366,8 +365,7 @@ function buildQuestListItem(
     }
   }
 
-  const rewardTerms = getOrComputeRewardTerms(request)
-  const rewardAmount = formatCurrencyAmount(rewardTerms.promisedReward)
+  const rewardAmount = formatCurrencyAmount(request.rewardTerms.promisedReward)
 
   return {
     id: request.id,
@@ -390,10 +388,11 @@ function buildQuestDetail(
   day: TavernDayState,
   selectedPartyId: string | null,
 ): TavernQuestDetailViewModel {
-  const rewardTerms = getOrComputeRewardTerms(request)
-  const promisedReward = formatCurrencyAmount(rewardTerms.promisedReward)
+  const promisedReward = formatCurrencyAmount(
+    request.rewardTerms.promisedReward,
+  )
   const successCommission = formatCurrencyAmount(
-    computeSuccessCommission(rewardTerms),
+    computeSuccessCommission(request.rewardTerms),
   )
   return {
     id: request.id,
@@ -466,7 +465,7 @@ export function buildTavernScreenViewModel(
     (r) => !viewedReportIds.has(r.id),
   ).length
 
-  const funds = campaign.finance?.funds ?? 0
+  const funds = campaign.finance.funds
   const header: TavernHeaderViewModel = {
     day: campaign.dayNumber,
     reputation: campaign.reputation,

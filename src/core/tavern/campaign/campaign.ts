@@ -3,7 +3,6 @@ import {
   applyQuestSettlement,
   computeQuestSettlement,
   createInitialFinanceState,
-  getOrComputeRewardTerms,
 } from '../../economy/index.ts'
 import { resolveTavernDay } from '../brokerage.ts'
 import {
@@ -111,9 +110,8 @@ export function resolveCampaignDay(
 
   for (const resolved of results) {
     if (resolved.status === 'resolved' && resolved.result) {
-      const rewardTerms = getOrComputeRewardTerms(resolved.request)
       const settlement = computeQuestSettlement(
-        rewardTerms,
+        resolved.request.rewardTerms,
         resolved.result.outcome,
       )
       const reportWithSettlement = resolved.report

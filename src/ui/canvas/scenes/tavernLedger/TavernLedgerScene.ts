@@ -32,6 +32,7 @@ export class TavernLedgerScene implements GameScene {
   private _input: TavernLedgerSceneInput | undefined = undefined
   private _viewModel: TavernLedgerViewModel | null = null
   private _scroll: GameScrollView | null = null
+  private _bgLoadToken = 0
   private _uiState: GameUiState = {
     selectedPartyId: null,
     selectedQuestId: null,
@@ -51,7 +52,7 @@ export class TavernLedgerScene implements GameScene {
     context.layers.background.addChild(this._bgRoot)
     context.layers.ui.addChild(this._root)
 
-    void this.loadBackground(context.theme)
+    void this.drawBackground(context.theme)
     AudioController.playBgm('tavern', { loop: true })
 
     if (this._campaign) {
@@ -61,12 +62,14 @@ export class TavernLedgerScene implements GameScene {
   }
 
   unmount(): void {
+    this._bgLoadToken++
     if (this._bgRoot && this._bgRoot.parent) {
       this._bgRoot.parent.removeChild(this._bgRoot)
     }
     this._bgRoot?.destroy({ children: true })
     this._bgRoot = null
 
+    this.clearUi()
     if (this._root && this._root.parent) {
       this._root.parent.removeChild(this._root)
     }
@@ -97,9 +100,17 @@ export class TavernLedgerScene implements GameScene {
     )
   }
 
+  private clearUi(): void {
+    if (!this._root) return
+    for (const child of this._root.removeChildren()) {
+      child.destroy({ children: true })
+    }
+    this._scroll = null
+  }
+
   private render(context: GameSceneContext): void {
     if (!this._root || !this._viewModel) return
-    this._root.removeChildren()
+    this.clearUi()
 
     const { theme } = context
 
@@ -137,6 +148,7 @@ export class TavernLedgerScene implements GameScene {
     this._scroll = scroll
 
     this.renderRows(contentWidth, scroll, this._viewModel.rows, theme)
+    scroll.scrollToTop()
 
     const backButton = new GameButton({
       width: 160,
@@ -145,7 +157,7 @@ export class TavernLedgerScene implements GameScene {
       label: '酒場へ戻る',
     })
     backButton.x = VIRTUAL_WIDTH - MARGIN - 160
-    backButton.y = 8
+    backButton.y = VIRTUAL_HEIGHT - BOTTOM_BAR_HEIGHT + 8
     backButton.onActivate = () => this.returnToTavern()
     this._root.addChild(backButton)
   }
@@ -164,27 +176,27 @@ export class TavernLedgerScene implements GameScene {
       const empty = new GameLabel('取引履歴はありません', theme, 'body')
       empty.y = 8
       scroll.content.addChild(empty)
-      scroll.setViewportSize(scroll.width, 40)
-      return
+    } else {
+      for (const row of rows) {
+        const listRow = new TavernListRow({
+          width: rowWidth,
+          height: rowHeight,
+          theme,
+          title: row.title,
+          subtitle: row.subtitle,
+          trailing: row.amountLabel,
+          disabled: true,
+        })
+        listRow.y = y
+        scroll.content.addChild(listRow)
+        y += rowHeight + gap
+      }
     }
 
-    for (const row of rows) {
-      const listRow = new TavernListRow({
-        width: rowWidth,
-        height: rowHeight,
-        theme,
-        title: row.title,
-        subtitle: row.subtitle,
-        trailing: row.amountLabel,
-        disabled: true,
-      })
-      listRow.y = y
-      scroll.content.addChild(listRow)
-      y += rowHeight + gap
-    }
-
-    const totalHeight = Math.max(y - gap, 0)
-    scroll.setViewportSize(rowWidth, totalHeight + 8)
+    const spacer = new Graphics()
+    spacer.rect(0, 0, rowWidth, gap).fill({ color: 0xffffff, alpha: 0 })
+    spacer.y = y
+    scroll.content.addChild(spacer)
   }
 
   private returnToTavern(): void {
@@ -197,28 +209,42 @@ export class TavernLedgerScene implements GameScene {
     this._context.canvasGame.sceneManager?.pop()
   }
 
-  private async loadBackground(theme: GameUiTheme): Promise<void> {
-    if (
-      !this._bgRoot ||
-      import.meta.env.MODE === 'test' ||
-      typeof Assets.load !== 'function'
-    )
+  private async drawBackground(theme: GameUiTheme): Promise<void> {
+    if (!this._bgRoot) return
+
+    const base = new Graphics()
+    base.rect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT).fill({
+      color: theme.colors.background,
+    })
+    this._bgRoot.removeChildren()
+    this._bgRoot.addChild(base)
+
+    if (import.meta.env.MODE === 'test' || typeof Assets.load !== 'function') {
       return
+    }
+
+    const token = ++this._bgLoadToken
     try {
       const texture = (await Assets.load(TAVERN_BG_URL)) as Texture
-      const sprite = Sprite.from(texture)
-      sprite.width = VIRTUAL_WIDTH
-      sprite.height = VIRTUAL_HEIGHT
-      sprite.eventMode = 'none'
-      this._bgRoot.removeChildren()
+      if (!this._bgRoot || token !== this._bgLoadToken) return
+      const sourceWidth = texture.width
+      const sourceHeight = texture.height
+      const scale = Math.max(
+        VIRTUAL_WIDTH / sourceWidth,
+        VIRTUAL_HEIGHT / sourceHeight,
+      )
+      const sprite = new Sprite(texture)
+      sprite.anchor.set(0.5)
+      sprite.scale.set(scale)
+      sprite.x = VIRTUAL_WIDTH / 2
+      sprite.y = VIRTUAL_HEIGHT / 2
+      sprite.alpha = 1
+      base.clear()
+      this._bgRoot.removeChild(base)
+      base.destroy()
       this._bgRoot.addChild(sprite)
     } catch {
-      const bg = new Graphics()
-      bg.rect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT).fill({
-        color: theme.colors.background,
-      })
-      this._bgRoot.removeChildren()
-      this._bgRoot.addChild(bg)
+      // Keep base color if loading fails.
     }
   }
 }

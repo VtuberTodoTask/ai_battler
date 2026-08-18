@@ -27,5 +27,13 @@ describe('save/load determinism', () => {
       direct.currentDay.requests.length,
     )
     expect(afterLoad.history.length).toBe(direct.history.length)
+    expect(afterLoad.finance).toEqual(direct.finance)
+    expect(afterLoad.history).toEqual(direct.history)
+    expect(afterLoad.currentDay.requests[0]?.rewardTerms).toEqual(
+      direct.currentDay.requests[0]?.rewardTerms,
+    )
+    expect(afterLoad.history[0]?.results[0]?.settlement).toEqual(
+      direct.history[0]?.results[0]?.settlement,
+    )
   })
 })
