@@ -6,7 +6,7 @@ import {
 } from '../tavern/campaign/campaign.ts'
 import { offerRequestToParty } from '../tavern/brokerage.ts'
 import type { ResolvedDispatch } from '../tavern/types.ts'
-import { buildLedgerEntryId } from '../economy/finance.ts'
+import { buildLedgerEntryId, ledgerTotal } from '../economy/finance.ts'
 import { serializeGameSave } from './serializer.ts'
 import { SaveValidationErrorClass, validateGameSave } from './validation.ts'
 
@@ -75,6 +75,61 @@ function makeSave(seed: string) {
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
+}
+
+function findQuestCommissionEntry(save: ReturnType<typeof makeSave>) {
+  return save.campaign.finance.ledgerEntries.find(
+    (entry) => entry.kind === 'quest_commission',
+  )
+}
+
+function findDailyOperatingCostEntry(save: ReturnType<typeof makeSave>) {
+  return save.campaign.finance.ledgerEntries.find(
+    (entry) => entry.kind === 'daily_operating_cost',
+  )
+}
+
+function findOpeningBalanceEntry(save: ReturnType<typeof makeSave>) {
+  return save.campaign.finance.ledgerEntries.find(
+    (entry) => entry.kind === 'opening_balance',
+  )
+}
+
+function buildNegativeFundsSave(seed: string) {
+  return buildContinuousPlanningSave(seed, 12)
+}
+
+function buildContinuousPlanningSave(seed: string, dayNumber: number) {
+  const save = serializeGameSave({ campaign: createTavernCampaign(seed) })
+  save.campaign.dayNumber = dayNumber
+  save.campaign.history = []
+  for (let day = 1; day < dayNumber; day++) {
+    save.campaign.history.push({
+      dayNumber: day,
+      results: [],
+      partyEvents: [],
+      relationshipEvents: [],
+      progressionEvents: [],
+    } as never)
+  }
+  save.campaign.finance.ledgerEntries = [
+    {
+      id: 'opening-balance',
+      day: 0,
+      kind: 'opening_balance',
+      amount: 100,
+      source: { type: 'campaign_start' },
+    },
+    ...Array.from({ length: dayNumber - 1 }, (_, i) => ({
+      id: `daily-operating-cost:${i + 1}`,
+      day: i + 1,
+      kind: 'daily_operating_cost' as const,
+      amount: -10,
+      source: { type: 'daily_operating_cost' as const },
+    })),
+  ]
+  save.campaign.finance.funds = ledgerTotal(save.campaign.finance.ledgerEntries)
+  return save
 }
 
 describe('save economy validation', () => {
@@ -152,7 +207,8 @@ describe('save economy validation', () => {
   it('ledger amount that does not match settlement is rejected', () => {
     const save = makeSave('ledger-amount-mismatch')
     const bad = clone(save)
-    const entry = bad.campaign.finance.ledgerEntries[0]
+    const entry = findQuestCommissionEntry(bad)
+    if (!entry) throw new Error('no quest commission entry')
     entry.amount += 10
     bad.campaign.finance.funds += 10
     expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
@@ -161,8 +217,9 @@ describe('save economy validation', () => {
   it('malformed ledger source is rejected', () => {
     const save = makeSave('ledger-source-malformed')
     const bad = clone(save)
-    ;(bad.campaign.finance.ledgerEntries[0].source as { type: string }).type =
-      'invalid'
+    const entry = findQuestCommissionEntry(bad)
+    if (!entry) throw new Error('no quest commission entry')
+    ;(entry.source as { type: string }).type = 'invalid'
     expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
   })
 
@@ -176,8 +233,8 @@ describe('save economy validation', () => {
     expect(result.settlement).toBeDefined()
     if (!result.settlement) return
     campaign = advanceCampaignDay(campaign)
-    expect(campaign.finance.ledgerEntries.length).toBe(0)
-    expect(campaign.finance.funds).toBe(0)
+    expect(campaign.finance.ledgerEntries.length).toBe(2)
+    expect(campaign.finance.funds).toBe(90)
 
     const save = serializeGameSave({ campaign })
     expect(() => validateGameSave(save)).not.toThrow()
@@ -198,15 +255,17 @@ describe('save economy validation', () => {
         partyId: result.partyId,
       },
     }
-    bad.campaign.finance.ledgerEntries = [entry]
-    bad.campaign.finance.funds = entry.amount
+    bad.campaign.finance.ledgerEntries.push(entry)
+    bad.campaign.finance.funds += entry.amount
     expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
   })
 
   it('ledger id must match computed id from source fields', () => {
     const save = makeSave('ledger-id-mismatch')
     const bad = clone(save)
-    bad.campaign.finance.ledgerEntries[0].id = 'custom-id'
+    const entry = findQuestCommissionEntry(bad)
+    if (!entry) throw new Error('no quest commission entry')
+    entry.id = 'custom-id'
     expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
   })
 
@@ -262,18 +321,18 @@ describe('save economy validation', () => {
   it('wrong ledger requestId is rejected', () => {
     const save = makeSave('wrong-ledger-requestId')
     const bad = clone(save)
-    ;(
-      bad.campaign.finance.ledgerEntries[0].source as { requestId: string }
-    ).requestId = 'other-request'
+    const entry = findQuestCommissionEntry(bad)
+    if (!entry) throw new Error('no quest commission entry')
+    ;(entry.source as { requestId: string }).requestId = 'other-request'
     expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
   })
 
   it('wrong ledger partyId is rejected', () => {
     const save = makeSave('wrong-ledger-partyId')
     const bad = clone(save)
-    ;(
-      bad.campaign.finance.ledgerEntries[0].source as { partyId?: string }
-    ).partyId = 'other-party'
+    const entry = findQuestCommissionEntry(bad)
+    if (!entry) throw new Error('no quest commission entry')
+    ;(entry.source as { partyId?: string }).partyId = 'other-party'
     expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
   })
 
@@ -289,10 +348,137 @@ describe('save economy validation', () => {
 
     let campaign = resolved.campaign
     campaign = advanceCampaignDay(campaign)
-    expect(campaign.finance.ledgerEntries.length).toBe(0)
-    expect(campaign.finance.funds).toBe(0)
+    expect(campaign.finance.ledgerEntries.length).toBe(2)
+    expect(campaign.finance.funds).toBe(90)
 
     const save = serializeGameSave({ campaign })
     expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  it('missing opening balance is rejected', () => {
+    const save = makeSave('missing-opening')
+    const bad = clone(save)
+    bad.campaign.finance.ledgerEntries =
+      bad.campaign.finance.ledgerEntries.filter(
+        (entry) => entry.kind !== 'opening_balance',
+      )
+    bad.campaign.finance.funds = ledgerTotal(bad.campaign.finance.ledgerEntries)
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('wrong opening balance amount is rejected', () => {
+    const save = makeSave('wrong-opening-amount')
+    const bad = clone(save)
+    const entry = findOpeningBalanceEntry(bad)
+    if (!entry) throw new Error('no opening balance entry')
+    entry.amount = 50
+    bad.campaign.finance.funds = 50
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('negative opening balance amount is rejected', () => {
+    const save = makeSave('negative-opening-amount')
+    const bad = clone(save)
+    const entry = findOpeningBalanceEntry(bad)
+    if (!entry) throw new Error('no opening balance entry')
+    entry.amount = -100
+    bad.campaign.finance.funds = ledgerTotal(bad.campaign.finance.ledgerEntries)
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('missing daily operating cost is rejected', () => {
+    const save = makeSave('missing-daily-cost')
+    const bad = clone(save)
+    const entry = findDailyOperatingCostEntry(bad)
+    if (!entry) throw new Error('no daily operating cost entry')
+    bad.campaign.finance.ledgerEntries =
+      bad.campaign.finance.ledgerEntries.filter((e) => e !== entry)
+    bad.campaign.finance.funds = ledgerTotal(bad.campaign.finance.ledgerEntries)
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('wrong daily operating cost amount is rejected', () => {
+    const save = makeSave('wrong-daily-cost-amount')
+    const bad = clone(save)
+    const entry = findDailyOperatingCostEntry(bad)
+    if (!entry) throw new Error('no daily operating cost entry')
+    entry.amount = -20
+    bad.campaign.finance.funds = ledgerTotal(bad.campaign.finance.ledgerEntries)
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('negative funds are valid when ledger matches', () => {
+    const save = buildNegativeFundsSave('negative-funds')
+    expect(save.campaign.finance.funds).toBe(-10)
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  it('unknown ledger kind is rejected', () => {
+    const save = makeSave('unknown-ledger-kind')
+    const bad = clone(save)
+    const entry = {
+      id: 'custom-entry',
+      day: 1,
+      kind: 'unknown_kind' as const,
+      amount: 10,
+      source: { type: 'expedition' as const, requestId: 'x', partyId: 'y' },
+    }
+    bad.campaign.finance.ledgerEntries.push(entry as never)
+    bad.campaign.finance.funds += entry.amount
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('planning save with continuous history is accepted', () => {
+    const save = buildContinuousPlanningSave('planning-continuous', 5)
+    expect(save.campaign.dayNumber).toBe(5)
+    expect(save.campaign.history.length).toBe(4)
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  it('resolved state save is rejected', () => {
+    const resolved = resolveCampaignDay(createTavernCampaign('resolved-save'))
+    expect(resolved.currentDay.status).toBe('resolved')
+    const save = serializeGameSave({ campaign: resolved })
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('missing history day is rejected', () => {
+    const save = buildContinuousPlanningSave('missing-history-day', 5)
+    // Remove DAY 3 from history and its operating cost, then recompute funds.
+    save.campaign.history = save.campaign.history.filter(
+      (record) => (record as { dayNumber: number }).dayNumber !== 3,
+    )
+    save.campaign.finance.ledgerEntries =
+      save.campaign.finance.ledgerEntries.filter(
+        (entry) => entry.id !== 'daily-operating-cost:3',
+      )
+    save.campaign.finance.funds = ledgerTotal(
+      save.campaign.finance.ledgerEntries,
+    )
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('extra history day beyond dayNumber is rejected', () => {
+    const save = buildContinuousPlanningSave('extra-history-day', 5)
+    save.campaign.history.push({
+      dayNumber: 5,
+      results: [],
+      partyEvents: [],
+      relationshipEvents: [],
+      progressionEvents: [],
+    } as never)
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('future history day is rejected', () => {
+    const save = buildContinuousPlanningSave('future-history-day', 5)
+    save.campaign.history.push({
+      dayNumber: 6,
+      results: [],
+      partyEvents: [],
+      relationshipEvents: [],
+      progressionEvents: [],
+    } as never)
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })
 })

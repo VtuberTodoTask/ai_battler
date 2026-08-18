@@ -174,4 +174,28 @@ describe('buildDayResultsSceneViewModel', () => {
       )
     }
   })
+
+  it('computes daily finance summary from ledger entries', () => {
+    const campaign = createTavernCampaign('vm-finance-summary')
+    const prepared = findAcceptingOffers(campaign, 1)
+    const advanced = resolveAndAdvance(prepared)
+    const previousRecord = advanced.history[advanced.history.length - 1]!
+
+    const vm = buildDayResultsSceneViewModel(
+      {
+        campaign: advanced,
+        resolvedDay: previousRecord.dayNumber,
+        nextDay: advanced.dayNumber,
+      },
+      [],
+    )
+
+    expect(vm.dailyFinanceSummary).toBeDefined()
+    expect(vm.dailyFinanceSummary.operatingCost).toBe(-10)
+    expect(vm.dailyFinanceSummary.currentFunds).toBe(advanced.finance.funds)
+    expect(
+      vm.dailyFinanceSummary.commissionIncome +
+        vm.dailyFinanceSummary.operatingCost,
+    ).toBe(vm.dailyFinanceSummary.net)
+  })
 })

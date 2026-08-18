@@ -1,4 +1,5 @@
 export type CurrencyAmount = number
+export type SignedCurrencyAmount = number
 
 export interface QuestRewardTerms {
   promisedReward: CurrencyAmount
@@ -16,11 +17,19 @@ export interface QuestSettlement {
   settlementReason: SettlementReason
 }
 
-export interface TavernLedgerEntry {
+export interface TavernLedgerBase {
   id: string
   day: number
+  amount: SignedCurrencyAmount
+}
+
+export interface OpeningBalanceLedgerEntry extends TavernLedgerBase {
+  kind: 'opening_balance'
+  source: { type: 'campaign_start' }
+}
+
+export interface QuestCommissionLedgerEntry extends TavernLedgerBase {
   kind: 'quest_commission'
-  amount: CurrencyAmount
   source: {
     type: 'expedition'
     requestId: string
@@ -28,7 +37,17 @@ export interface TavernLedgerEntry {
   }
 }
 
+export interface DailyOperatingCostLedgerEntry extends TavernLedgerBase {
+  kind: 'daily_operating_cost'
+  source: { type: 'daily_operating_cost' }
+}
+
+export type TavernLedgerEntry =
+  | OpeningBalanceLedgerEntry
+  | QuestCommissionLedgerEntry
+  | DailyOperatingCostLedgerEntry
+
 export interface TavernFinanceState {
-  funds: CurrencyAmount
+  funds: SignedCurrencyAmount
   ledgerEntries: TavernLedgerEntry[]
 }

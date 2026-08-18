@@ -3,12 +3,18 @@ export type {
   QuestRewardTerms,
   QuestSettlement,
   SettlementReason,
+  SignedCurrencyAmount,
   TavernFinanceState,
   TavernLedgerEntry,
 } from './types.ts'
 export {
+  applyLedgerTransaction,
   applyQuestSettlement,
+  buildDailyOperatingCostEntryId,
+  buildDailyOperatingCostTransaction,
   buildLedgerEntryId,
+  buildOpeningBalanceTransaction,
+  buildQuestCommissionTransaction,
   createInitialFinanceState,
   financeInvariantHolds,
   ledgerTotal,
@@ -21,4 +27,11 @@ export {
   computeSuccessCommission,
   payoutRateBpsFromOutcome,
 } from './questReward.ts'
-export { formatCurrencyAmount, validateCurrencyAmount } from './currency.ts'
+export { TAVERN_ECONOMY_CONFIG } from './economyConfig.ts'
+export {
+  formatCurrencyAmount,
+  formatLedgerAmount,
+  formatSignedCurrencyAmount,
+  validateCurrencyAmount,
+  validateSignedCurrencyAmount,
+} from './currency.ts'
