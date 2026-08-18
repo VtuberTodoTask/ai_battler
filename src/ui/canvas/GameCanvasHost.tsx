@@ -7,7 +7,10 @@ import type {
   SaveSlotSummaryFromActions,
   UiActionResult,
 } from './types.ts'
-import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
+import type {
+  TavernCampaignState,
+  TavernUpgradeId,
+} from '../../core/tavern/campaign/types.ts'
 
 export interface GameCanvasHostProps {
   campaign: TavernCampaignState | null
@@ -17,6 +20,7 @@ export interface GameCanvasHostProps {
     partyId: string,
     requestId: string,
   ) => UiActionResult<OfferRequestActionData>
+  onPurchaseUpgrade: (upgradeId: TavernUpgradeId) => UiActionResult
   onOpenActivity: (
     partyId: string,
     eventId: string,
@@ -38,6 +42,7 @@ export default function GameCanvasHost({
   onAdvanceDay,
   onResolveDay,
   onOfferRequest,
+  onPurchaseUpgrade,
   onOpenActivity,
   onOpenExpeditionNarrative,
   onOpenSettings,
@@ -56,6 +61,7 @@ export default function GameCanvasHost({
   const onAdvanceRef = useRef(onAdvanceDay)
   const onResolveRef = useRef(onResolveDay)
   const onOfferRef = useRef(onOfferRequest)
+  const onPurchaseUpgradeRef = useRef(onPurchaseUpgrade)
   const onOpenActivityRef = useRef(onOpenActivity)
   const onOpenExpeditionNarrativeRef = useRef(onOpenExpeditionNarrative)
   const onOpenSettingsRef = useRef(onOpenSettings)
@@ -70,6 +76,7 @@ export default function GameCanvasHost({
     onAdvanceRef.current = onAdvanceDay
     onResolveRef.current = onResolveDay
     onOfferRef.current = onOfferRequest
+    onPurchaseUpgradeRef.current = onPurchaseUpgrade
     onOpenActivityRef.current = onOpenActivity
     onOpenExpeditionNarrativeRef.current = onOpenExpeditionNarrative
     onOpenSettingsRef.current = onOpenSettings
@@ -83,6 +90,7 @@ export default function GameCanvasHost({
     onAdvanceDay,
     onResolveDay,
     onOfferRequest,
+    onPurchaseUpgrade,
     onOpenActivity,
     onOpenExpeditionNarrative,
     onOpenSettings,
@@ -142,6 +150,17 @@ export default function GameCanvasHost({
             ok: false,
             message:
               e instanceof Error ? e.message : '依頼の紹介に失敗しました',
+          }
+        }
+      },
+      purchaseUpgrade: (upgradeId) => {
+        try {
+          return onPurchaseUpgradeRef.current(upgradeId)
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '設備の購入に失敗しました',
           }
         }
       },

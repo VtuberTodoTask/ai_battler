@@ -30,6 +30,7 @@ describe('GameCanvasHost lifecycle', () => {
         onAdvanceDay={() => ({ ok: true })}
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -54,6 +55,7 @@ describe('GameCanvasHost lifecycle', () => {
         onAdvanceDay={() => ({ ok: true })}
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -67,6 +69,7 @@ describe('GameCanvasHost lifecycle', () => {
         onAdvanceDay={() => ({ ok: true })}
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,

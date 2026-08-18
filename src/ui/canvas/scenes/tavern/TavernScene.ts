@@ -26,6 +26,7 @@ import {
 import type { PartyDetailSceneInput } from '../../viewModel/partyDetailViewModel.ts'
 import type { WorldEncyclopediaSceneInput } from '../../viewModel/worldEncyclopediaViewModel.ts'
 import type { TavernLedgerSceneInput } from '../../viewModel/tavernLedgerViewModel.ts'
+import type { TavernUpgradeSceneInput } from '../../viewModel/tavernUpgradeViewModel.ts'
 import type {
   SoundNovelSceneInput,
   SoundNovelVisualContext,
@@ -39,6 +40,8 @@ import { DecisionPanel } from './DecisionPanel.ts'
 import { PartyListPanel } from './PartyListPanel.ts'
 import { QuestListPanel } from './QuestListPanel.ts'
 import { TavernHeader } from './TavernHeader.ts'
+import { EXPEDITION_PREDICTION_SAMPLES } from '../../../../core/tavern/prediction/types.ts'
+import { getEffectiveSampleCount } from '../../../../core/tavern/campaign/upgrades.ts'
 
 const MARGIN = 16
 const TOP_BAR_HEIGHT = 64
@@ -280,6 +283,7 @@ export class TavernScene implements GameScene {
       onOpenSave: () => this._context!.actions.openSaveLoad?.('save'),
       onOpenLibrary: () => this.openWorldEncyclopedia(),
       onOpenLedger: () => this.openTavernLedger(),
+      onOpenUpgrade: () => this.openTavernUpgrade(),
     })
     this._header.x = 0
     this._header.y = 0
@@ -310,6 +314,13 @@ export class TavernScene implements GameScene {
           (r) => r.id === this._uiState.selectedQuestId,
         ),
       onOpenBreakdown: () => this.openPredictionBreakdown(),
+      getSampleCount: () =>
+        this._campaign
+          ? getEffectiveSampleCount(
+              EXPEDITION_PREDICTION_SAMPLES,
+              this._campaign.upgrades,
+            )
+          : EXPEDITION_PREDICTION_SAMPLES,
     })
     this._decisionPanel.x = LEFT_WIDTH + MARGIN
     this._decisionPanel.y = MAIN_Y
@@ -442,6 +453,19 @@ export class TavernScene implements GameScene {
       },
     }
     this._context.canvasGame.sceneManager?.push('tavernLedger', input)
+  }
+
+  private openTavernUpgrade(): void {
+    if (!this._context) return
+
+    const input: TavernUpgradeSceneInput = {
+      returnTarget: {
+        sceneId: 'tavern',
+        selectedPartyId: this._uiState.selectedPartyId ?? undefined,
+        selectedQuestId: this._uiState.selectedQuestId ?? undefined,
+      },
+    }
+    this._context.canvasGame.sceneManager?.push('tavernUpgrade', input)
   }
 
   private setActionMessage(

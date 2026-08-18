@@ -77,6 +77,29 @@ export function buildQuestCommissionTransaction(
   }
 }
 
+export function buildUpgradePurchaseEntryId(
+  upgradeId: string,
+  targetLevel: number,
+): string {
+  return `upgrade-purchase:${upgradeId}:${targetLevel}`
+}
+
+export function buildUpgradePurchaseTransaction(
+  day: number,
+  upgradeId: string,
+  targetLevel: number,
+  cost: CurrencyAmount,
+): TavernLedgerEntry {
+  validateCurrencyAmount(cost)
+  return {
+    id: buildUpgradePurchaseEntryId(upgradeId, targetLevel),
+    day,
+    kind: 'upgrade_purchase',
+    amount: -cost,
+    source: { type: 'tavern_upgrade', upgradeId, targetLevel },
+  }
+}
+
 export function applyLedgerTransaction(
   finance: TavernFinanceState,
   entry: TavernLedgerEntry,

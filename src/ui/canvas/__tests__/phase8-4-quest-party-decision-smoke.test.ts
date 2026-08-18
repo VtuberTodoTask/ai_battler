@@ -120,6 +120,7 @@ function createSceneContext(
     advanceDay: vi.fn(() => ({ ok: true })),
     resolveDay: vi.fn(() => ({ ok: true })),
     offerRequest: vi.fn(() => ({ ok: true })),
+    purchaseUpgrade: vi.fn(() => ({ ok: true })),
     selectParty: vi.fn(),
     selectQuest: vi.fn(),
     openCharacter: vi.fn(),

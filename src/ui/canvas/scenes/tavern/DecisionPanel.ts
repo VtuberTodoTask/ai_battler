@@ -25,6 +25,8 @@ export interface DecisionPanelOptions {
   getSelectedParty: () => TavernParty | undefined
   getSelectedQuest: () => TavernRequestOffer | undefined
   onOpenBreakdown: () => void
+  /** Effective prediction sample count, derived from intel_archive level. */
+  getSampleCount?: () => number
 }
 
 type PredictionStatus = 'idle' | 'loading' | 'error'
@@ -38,6 +40,7 @@ export class DecisionPanel extends Container {
   private readonly _getSelectedParty: () => TavernParty | undefined
   private readonly _getSelectedQuest: () => TavernRequestOffer | undefined
   private readonly _onOpenBreakdown: () => void
+  private readonly _getSampleCount?: () => number
   private readonly _panel: GamePanel
   private readonly _scroll: GameScrollView
   private readonly _scrollWidth: number
@@ -52,6 +55,7 @@ export class DecisionPanel extends Container {
   private _sequence = 0
   private _lastPartyId?: string
   private _lastQuestId?: string
+  private _lastSampleCount?: number
 
   constructor(options: DecisionPanelOptions) {
     super()
@@ -64,6 +68,7 @@ export class DecisionPanel extends Container {
     this._getSelectedParty = options.getSelectedParty
     this._getSelectedQuest = options.getSelectedQuest
     this._onOpenBreakdown = options.onOpenBreakdown
+    this._getSampleCount = options.getSampleCount
 
     this._panel = new GamePanel({
       width: this._width,
@@ -135,27 +140,34 @@ export class DecisionPanel extends Container {
   private updatePrediction(): void {
     const party = this._getSelectedParty()
     const quest = this._getSelectedQuest()
+    const sampleCount = this._getSampleCount?.()
 
     if (!party || !quest) {
       this._prediction = undefined
       this._predictionStatus = 'idle'
       this._lastPartyId = undefined
       this._lastQuestId = undefined
+      this._lastSampleCount = undefined
       return
     }
 
-    if (party.id === this._lastPartyId && quest.id === this._lastQuestId) {
+    if (
+      party.id === this._lastPartyId &&
+      quest.id === this._lastQuestId &&
+      sampleCount === this._lastSampleCount
+    ) {
       return
     }
 
     this._lastPartyId = party.id
     this._lastQuestId = quest.id
+    this._lastSampleCount = sampleCount
     this._prediction = undefined
     this._predictionStatus = 'loading'
     this._sequence++
     const seq = this._sequence
 
-    getExpeditionPrediction(quest, party)
+    getExpeditionPrediction(quest, party, { sampleCount })
       .then((prediction) => {
         if (seq !== this._sequence) return
         this._prediction = prediction

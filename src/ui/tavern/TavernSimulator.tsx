@@ -17,7 +17,12 @@ import { deepClone } from '../../core/util.ts'
 import { generateNarrative } from '../../core/narrative/generation.ts'
 import { generateDowntimeNarrative } from '../../core/narrative/downtime.ts'
 import type { NarrativeCandidate } from '../../core/narrative/types.ts'
-import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
+import type {
+  TavernCampaignState,
+  TavernUpgradeId,
+} from '../../core/tavern/campaign/types.ts'
+import { purchaseTavernUpgrade } from '../../core/tavern/campaign/upgrades.ts'
+import { tavernUpgradeBlockReasonText } from '../canvas/viewModel/tavernUpgradeViewModel.ts'
 import { acceptanceReasonText } from '../../core/tavern/acceptance.ts'
 import { generateCampaignSeed } from '../../core/save/seed.ts'
 import {
@@ -307,6 +312,30 @@ export function TavernSimulator() {
     [campaign],
   )
 
+  const handlePurchaseUpgrade = useCallback(
+    (upgradeId: TavernUpgradeId): UiActionResult => {
+      if (!campaign) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      try {
+        const result = purchaseTavernUpgrade(campaign, upgradeId)
+        if (!result.ok) {
+          const message = tavernUpgradeBlockReasonText(result.blockedReason)
+          return { ok: false, message: message ?? '設備の購入に失敗しました' }
+        }
+        setCampaign(result.campaign)
+        setError(null)
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : '設備の購入に失敗しました'
+        setError(message)
+        return { ok: false, message }
+      }
+    },
+    [campaign],
+  )
+
   const handleOpenActivity = useCallback(
     async (
       partyId: string,
@@ -577,6 +606,7 @@ export function TavernSimulator() {
             onAdvanceDay={handleFinishDay}
             onResolveDay={handleResolve}
             onOfferRequest={handleOfferRequest}
+            onPurchaseUpgrade={handlePurchaseUpgrade}
             onOpenActivity={handleOpenActivity}
             onOpenExpeditionNarrative={handleOpenExpeditionNarrative}
             onOpenSettings={handleOpenCanvasSettings}

@@ -148,6 +148,8 @@ export interface RequestRankPlan {
   serviceableA: AdventurerRank
   serviceableB: AdventurerRank
   open: AdventurerRank
+  /** Extra "open"-style aspirational slots beyond the base 3, one per quest_board level. */
+  extra: AdventurerRank[]
 }
 
 export function rankIndex(rank: AdventurerRank): number {
@@ -174,6 +176,7 @@ export function planRequestRanksForDay(
   daySeed: string,
   tavernRank: TavernRank,
   availablePartyRanks: AdventurerRank[],
+  extraCount = 0,
 ): RequestRankPlan {
   const rankRng = new SeededRng(`${daySeed}:request-ranks`)
 
@@ -189,6 +192,7 @@ export function planRequestRanksForDay(
       serviceableA: pick(),
       serviceableB: pick(),
       open: pick(),
+      extra: Array.from({ length: extraCount }, pick),
     }
   }
 
@@ -202,6 +206,8 @@ export function planRequestRanksForDay(
   const highestAvailableRank = RANKS[highestIndex] ?? 'S'
 
   const openMaxIndex = Math.min(highestIndex + 1, RANKS.length - 1)
+  const pickOpenLike = (): AdventurerRank =>
+    pickRequestRank(rankRng, openMaxIndex, tavernRank, highestAvailableRank)
 
   return {
     serviceableA: pickRequestRank(
@@ -216,12 +222,8 @@ export function planRequestRanksForDay(
       tavernRank,
       anchorB,
     ),
-    open: pickRequestRank(
-      rankRng,
-      openMaxIndex,
-      tavernRank,
-      highestAvailableRank,
-    ),
+    open: pickOpenLike(),
+    extra: Array.from({ length: extraCount }, pickOpenLike),
   }
 }
 
@@ -250,21 +252,35 @@ function generateRequestForCampaign(
   return offer
 }
 
+const BASE_REQUEST_COUNT = 3
+
 export function generateTavernRequestsForDay(
   daySeed: string,
   tavernRank: TavernRank,
   availablePartyRanks: AdventurerRank[],
+  requestCount: number = BASE_REQUEST_COUNT,
 ): TavernRequestOffer[] {
-  const plan = planRequestRanksForDay(daySeed, tavernRank, availablePartyRanks)
+  const extraCount = Math.max(0, requestCount - BASE_REQUEST_COUNT)
+  const plan = planRequestRanksForDay(
+    daySeed,
+    tavernRank,
+    availablePartyRanks,
+    extraCount,
+  )
   const objectiveRng = new SeededRng(`${daySeed}:objectives`)
   const objectiveTypes = objectiveRng
     .shuffle([...ALL_OBJECTIVE_TYPES])
-    .slice(0, 3)
+    .slice(0, requestCount)
 
-  const rankPlan = [plan.serviceableA, plan.serviceableB, plan.open]
+  const rankPlan = [
+    plan.serviceableA,
+    plan.serviceableB,
+    plan.open,
+    ...plan.extra,
+  ]
 
   const requests: TavernRequestOffer[] = []
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < requestCount; i++) {
     const offer = generateRequestForCampaign(
       i,
       daySeed,

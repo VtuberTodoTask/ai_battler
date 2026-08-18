@@ -20,6 +20,11 @@ import {
   deriveTavernRank,
 } from './reputation.ts'
 import {
+  applyRecoveryRoomModifier,
+  createInitialUpgradeState,
+  getDailyRequestBonus,
+} from './upgrades.ts'
+import {
   applyOvernightRecovery,
   applyRecoveryCompletion,
   calculateRecoveryDays,
@@ -68,6 +73,7 @@ import type {
 export function createTavernCampaign(seed: string): TavernCampaignState {
   const dayNumber = 1
   const reputation = createInitialReputationState()
+  const upgrades = createInitialUpgradeState()
   const tavernRank = deriveTavernRank(reputation.peakScore)
   const { parties, nextSerial } = generateInitialCampaignParties(
     seed,
@@ -77,10 +83,12 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
 
   const daySeed = `${seed}:day:${dayNumber}`
   const availablePartyRanks = parties.map((p) => p.party.rank)
+  const requestCount = 3 + getDailyRequestBonus(upgrades)
   const requests = generateTavernRequestsForDay(
     daySeed,
     tavernRank,
     availablePartyRanks,
+    requestCount,
   )
   const currentDay = buildTavernDay(daySeed, requests, parties, dayNumber)
 
@@ -99,6 +107,7 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
       createInitialFinanceState(),
       buildOpeningBalanceTransaction(),
     ),
+    upgrades,
   }
 }
 
@@ -214,8 +223,12 @@ export function resolveCampaignDay(
       )
     }
 
-    const recoveryDays = calculateRecoveryDays(party)
-    if (recoveryDays > 0) {
+    const baseRecoveryDays = calculateRecoveryDays(party)
+    if (baseRecoveryDays > 0) {
+      const recoveryDays = applyRecoveryRoomModifier(
+        baseRecoveryDays,
+        nextCampaign.upgrades,
+      )
       party.recoveringThroughDay = dayNumber + recoveryDays
       postEvents.push({
         type: 'startedRecovery',
@@ -456,10 +469,12 @@ export function advanceCampaignDay(
   const availablePartyRanks = remaining
     .filter((p) => !isRecoveringOnDay(p, nextDayNumber))
     .map((p) => p.party.rank)
+  const requestCount = 3 + getDailyRequestBonus(nextCampaign.upgrades)
   const requests = generateTavernRequestsForDay(
     daySeed,
     tavernRank,
     availablePartyRanks,
+    requestCount,
   )
   const currentDay = buildTavernDay(daySeed, requests, remaining, nextDayNumber)
   currentDay.partyEvents = [...preEvents, ...(currentDay.partyEvents ?? [])]

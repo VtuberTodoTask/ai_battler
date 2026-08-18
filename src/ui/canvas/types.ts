@@ -1,5 +1,8 @@
 import type { Application, Container } from 'pixi.js'
-import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
+import type {
+  TavernCampaignState,
+  TavernUpgradeId,
+} from '../../core/tavern/campaign/types.ts'
 import type { CanvasGame } from './CanvasGame.ts'
 import type { GameAssetManager } from './assets/GameAssetManager.ts'
 import type { OverlayManager } from './overlays/OverlayManager.ts'
@@ -51,6 +54,7 @@ export interface GameUiActions {
     partyId: string,
     requestId: string,
   ) => UiActionResult<OfferRequestActionData>
+  purchaseUpgrade: (upgradeId: TavernUpgradeId) => UiActionResult
   selectParty: (partyId: string) => void
   selectQuest: (questId: string) => void
   openCharacter: (characterId: string) => void

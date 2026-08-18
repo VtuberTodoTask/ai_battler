@@ -42,10 +42,20 @@ export interface DailyOperatingCostLedgerEntry extends TavernLedgerBase {
   source: { type: 'daily_operating_cost' }
 }
 
+export interface TavernUpgradePurchaseLedgerEntry extends TavernLedgerBase {
+  kind: 'upgrade_purchase'
+  source: {
+    type: 'tavern_upgrade'
+    upgradeId: string
+    targetLevel: number
+  }
+}
+
 export type TavernLedgerEntry =
   | OpeningBalanceLedgerEntry
   | QuestCommissionLedgerEntry
   | DailyOperatingCostLedgerEntry
+  | TavernUpgradePurchaseLedgerEntry
 
 export interface TavernFinanceState {
   funds: SignedCurrencyAmount
