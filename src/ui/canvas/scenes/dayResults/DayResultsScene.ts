@@ -396,6 +396,20 @@ export class DayResultsScene implements GameScene {
     this._root!.addChild(reputationSeparator)
 
     const reputation = viewModel.dailyReputationSummary
+
+    if (!reputation) {
+      const missingLabel = new GameLabel(
+        '本日の評判：評判記録なし',
+        context.theme,
+        'body',
+      )
+      missingLabel.anchor.set(0, 0.5)
+      missingLabel.x = left
+      missingLabel.y = y
+      this._root!.addChild(missingLabel)
+      return
+    }
+
     const deltaText =
       reputation.delta >= 0 ? `+${reputation.delta}` : `${reputation.delta}`
 

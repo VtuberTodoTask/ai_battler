@@ -214,16 +214,33 @@ describe('buildDayResultsSceneViewModel', () => {
       [],
     )
 
-    expect(vm.dailyReputationSummary.beforeScore).toBe(
+    expect(vm.dailyReputationSummary).toBeDefined()
+    expect(vm.dailyReputationSummary!.beforeScore).toBe(
       previousRecord.reputationSummary.beforeScore,
     )
-    expect(vm.dailyReputationSummary.delta).toBe(
+    expect(vm.dailyReputationSummary!.delta).toBe(
       previousRecord.reputationSummary.delta,
     )
-    expect(vm.dailyReputationSummary.afterScore).toBe(
+    expect(vm.dailyReputationSummary!.afterScore).toBe(
       previousRecord.reputationSummary.afterScore,
     )
-    expect(vm.dailyReputationSummary.afterRankLabel).toContain('酒場ランク')
+    expect(vm.dailyReputationSummary!.afterRankLabel).toContain('酒場ランク')
+  })
+
+  it('leaves dailyReputationSummary undefined when no history record exists for resolvedDay, rather than fabricating a 0/Rank 1 result', () => {
+    const campaign = createTavernCampaign('vm-reputation-missing')
+
+    const vm = buildDayResultsSceneViewModel(
+      {
+        campaign,
+        // No history record exists yet (day 1 hasn't been resolved).
+        resolvedDay: campaign.dayNumber,
+        nextDay: campaign.dayNumber,
+      },
+      [],
+    )
+
+    expect(vm.dailyReputationSummary).toBeUndefined()
   })
 
   it('surfaces a rank-up important event when the day promotes the tavern rank', () => {

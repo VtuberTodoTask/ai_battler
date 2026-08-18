@@ -84,7 +84,7 @@ export interface DayResultsSceneViewModel {
   importantEvents: DayResultEventViewModel[]
   expeditionResults: ExpeditionResultItemViewModel[]
   dailyFinanceSummary: DailyFinanceSummary
-  dailyReputationSummary: DailyReputationSummary
+  dailyReputationSummary?: DailyReputationSummary
   selectedResult?: ExpeditionResultItemViewModel
   selectedIndex: number
   canGoPrevious: boolean
@@ -508,23 +508,17 @@ export function projectDayFinanceSummary(
   return { commissionIncome, operatingCost, net, currentFunds }
 }
 
-const ZERO_REPUTATION_SUMMARY: DailyReputationSummary = {
-  beforeScore: 0,
-  delta: 0,
-  afterScore: 0,
-  beforeRank: 1,
-  afterRank: 1,
-  promoted: false,
-  beforeRankLabel: tavernRankLabel(1),
-  afterRankLabel: tavernRankLabel(1),
-}
-
+/**
+ * Returns undefined when no history record exists for resolvedDay. This is
+ * a genuine "unknown" state, not "no change" — a fabricated 0/Rank 1
+ * fallback would misrepresent a missing record as an actual outcome.
+ */
 export function projectDayReputationSummary(
   campaign: TavernCampaignState,
   resolvedDay: number,
-): DailyReputationSummary {
+): DailyReputationSummary | undefined {
   const dayRecord = findDayRecord(campaign, resolvedDay)
-  if (!dayRecord) return ZERO_REPUTATION_SUMMARY
+  if (!dayRecord) return undefined
   const summary = dayRecord.reputationSummary
   return {
     ...summary,

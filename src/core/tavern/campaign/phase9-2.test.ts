@@ -5,7 +5,11 @@ import {
   resolveCampaignDay,
 } from './campaign.ts'
 import { offerRequestToParty } from '../brokerage.ts'
-import { deriveTavernRank, getMaxQuestRank } from './reputation.ts'
+import {
+  computeQuestReputationDelta,
+  deriveTavernRank,
+  getMaxQuestRank,
+} from './reputation.ts'
 import {
   serializeGameSave,
   deserializeGameSave,
@@ -65,7 +69,7 @@ describe('Phase 9.2 tavern reputation & rank smoke', () => {
     expect(deriveTavernRank(campaign.reputation.peakScore)).toBe(1)
   })
 
-  it('B: a successful expedition increases reputation', () => {
+  it('B: resolved expedition creates the exact reputation event for its rank and outcome', () => {
     const campaign = createTavernCampaign('phase9-2-b')
     const pair = findAcceptingPair(campaign)
     expect(pair).not.toBeNull()
@@ -75,16 +79,28 @@ describe('Phase 9.2 tavern reputation & rank smoke', () => {
       ...campaign,
       currentDay: pair.next,
     })
-    const event = resolved.reputation.events.find(
+    const result = resolved.currentDay.results.find(
+      (r) => r.requestId === pair.requestId,
+    )
+    expect(result).toBeDefined()
+    expect(result?.status).toBe('resolved')
+    if (!result || result.status !== 'resolved' || !result.result) return
+
+    const expectedDelta = computeQuestReputationDelta(
+      result.request.rank,
+      result.result.outcome,
+    )
+
+    const matchingEvents = resolved.reputation.events.filter(
       (e) => e.source.requestId === pair.requestId,
     )
-    expect(event).toBeDefined()
-    if (event && event.delta > 0) {
-      expect(resolved.reputation.score).toBeGreaterThan(0)
-    }
+    expect(matchingEvents).toHaveLength(1)
+    expect(matchingEvents[0]!.delta).toBe(expectedDelta)
+    // Day 1 has no prior reputation, so score reflects this single event.
+    expect(resolved.reputation.score).toBe(expectedDelta)
   })
 
-  it('C: an unresolved day (no accepted offers) leaves reputation unchanged, and repeated failure can lower it', () => {
+  it('C: no dispatched expedition creates no reputation event', () => {
     let campaign = createTavernCampaign('phase9-2-c')
     campaign = resolveCampaignDay(campaign)
     // No matches accepted -> no reputation events -> no change.
@@ -92,7 +108,7 @@ describe('Phase 9.2 tavern reputation & rank smoke', () => {
     expect(campaign.reputation.events).toEqual([])
   })
 
-  it('D: negative reputation keeps the campaign valid and playable', () => {
+  it('D: long-running campaign preserves valid reputation invariants', () => {
     let campaign = createTavernCampaign('phase9-2-d')
     for (let day = 1; day <= 15; day++) {
       const prepared = acceptAllPossible(campaign)
@@ -101,7 +117,9 @@ describe('Phase 9.2 tavern reputation & rank smoke', () => {
         campaign = advanceCampaignDay(campaign)
       }
     }
-    // Whatever the sign, the campaign must remain structurally valid.
+    // Whatever the sign, the campaign must remain structurally valid:
+    // score is a safe integer, peak is non-negative, and peak >= score
+    // (negative scores are separately proven allowed in reputation.test.ts).
     expect(Number.isSafeInteger(campaign.reputation.score)).toBe(true)
     expect(campaign.reputation.peakScore).toBeGreaterThanOrEqual(0)
     expect(campaign.reputation.peakScore).toBeGreaterThanOrEqual(
