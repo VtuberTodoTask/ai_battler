@@ -198,4 +198,63 @@ describe('buildDayResultsSceneViewModel', () => {
         vm.dailyFinanceSummary.operatingCost,
     ).toBe(vm.dailyFinanceSummary.net)
   })
+
+  it('computes daily reputation summary matching the resolved day record', () => {
+    const campaign = createTavernCampaign('vm-reputation-summary')
+    const prepared = findAcceptingOffers(campaign, 1)
+    const advanced = resolveAndAdvance(prepared)
+    const previousRecord = advanced.history[advanced.history.length - 1]!
+
+    const vm = buildDayResultsSceneViewModel(
+      {
+        campaign: advanced,
+        resolvedDay: previousRecord.dayNumber,
+        nextDay: advanced.dayNumber,
+      },
+      [],
+    )
+
+    expect(vm.dailyReputationSummary.beforeScore).toBe(
+      previousRecord.reputationSummary.beforeScore,
+    )
+    expect(vm.dailyReputationSummary.delta).toBe(
+      previousRecord.reputationSummary.delta,
+    )
+    expect(vm.dailyReputationSummary.afterScore).toBe(
+      previousRecord.reputationSummary.afterScore,
+    )
+    expect(vm.dailyReputationSummary.afterRankLabel).toContain('酒場ランク')
+  })
+
+  it('surfaces a rank-up important event when the day promotes the tavern rank', () => {
+    let campaign = createTavernCampaign('vm-rank-up')
+    let advanced: ReturnType<typeof createTavernCampaign> | null = null
+
+    // Simulate enough successful days to cross the rank-2 threshold (peak >= 20).
+    for (let day = 1; day <= 30; day++) {
+      const prepared = findAcceptingOffers(campaign, 4)
+      campaign = resolveCampaignDay(prepared)
+      const lastRecord = campaign.history[campaign.history.length - 1]!
+      if (lastRecord.reputationSummary.promoted) {
+        advanced = advanceCampaignDay(campaign)
+        const vm = buildDayResultsSceneViewModel(
+          {
+            campaign: advanced,
+            resolvedDay: lastRecord.dayNumber,
+            nextDay: advanced.dayNumber,
+          },
+          [],
+        )
+        const rankUpEvent = vm.importantEvents.find(
+          (e) => e.kind === 'tavernRankUp',
+        )
+        expect(rankUpEvent).toBeDefined()
+        expect(rankUpEvent?.importance).toBe('high')
+        break
+      }
+      campaign = advanceCampaignDay(campaign)
+    }
+
+    expect(advanced).not.toBeNull()
+  })
 })

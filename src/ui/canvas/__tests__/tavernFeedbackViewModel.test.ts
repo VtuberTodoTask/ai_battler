@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
 import {
+  advanceCampaignDay,
   createTavernCampaign,
   resolveCampaignDay,
 } from '../../../core/tavern/campaign/campaign.ts'
@@ -148,14 +149,13 @@ describe('TavernFeedbackViewModel', () => {
       {
         dayNumber: campaign.dayNumber,
         daySeed: campaign.currentDay.seed,
-        reputationBefore: campaign.reputation,
-        reputationAfter: campaign.reputation,
-        reputationChange: {
-          before: campaign.reputation,
-          rawDelta: 0,
-          appliedDelta: 0,
-          after: campaign.reputation,
-          entries: [],
+        reputationSummary: {
+          beforeScore: campaign.reputation.score,
+          delta: 0,
+          afterScore: campaign.reputation.score,
+          beforeRank: 1,
+          afterRank: 1,
+          promoted: false,
         },
         results: [],
         partyEvents: [],
@@ -396,14 +396,13 @@ describe('TavernFeedbackViewModel', () => {
       {
         dayNumber: campaign.dayNumber,
         daySeed: campaign.currentDay.seed,
-        reputationBefore: campaign.reputation,
-        reputationAfter: campaign.reputation,
-        reputationChange: {
-          before: campaign.reputation,
-          rawDelta: 0,
-          appliedDelta: 0,
-          after: campaign.reputation,
-          entries: [],
+        reputationSummary: {
+          beforeScore: campaign.reputation.score,
+          delta: 0,
+          afterScore: campaign.reputation.score,
+          beforeRank: 1,
+          afterRank: 1,
+          promoted: false,
         },
         results: [],
         partyEvents: [],
@@ -482,5 +481,46 @@ describe('TavernFeedbackViewModel', () => {
         expect(expedition.reportId).toBeTruthy()
       }
     }
+  })
+
+  it('surfaces a high-importance tavern_rank_up item on a promotion day', () => {
+    let campaign = createTavernCampaign('feedback-rank-up')
+    let found = false
+
+    for (let day = 1; day <= 30 && !found; day++) {
+      let state = campaign.currentDay
+      for (const request of state.requests) {
+        for (const party of state.parties) {
+          if (party.availability === 'recovering') continue
+          try {
+            const next = offerRequestToParty(state, request.id, party.id)
+            if (next.matches.some((m) => m.requestId === request.id)) {
+              state = next
+              break
+            }
+          } catch {
+            // continue
+          }
+        }
+      }
+      campaign = resolveCampaignDay({ ...campaign, currentDay: state })
+      const lastRecord = campaign.history[campaign.history.length - 1]!
+      if (lastRecord.reputationSummary.promoted) {
+        const items = buildTavernFeedbackItems(campaign)
+        const rankUp = items.find((i) => i.kind === 'tavern_rank_up')
+        expect(rankUp).toBeDefined()
+        expect(rankUp?.importance).toBe('high')
+        expect(rankUp?.id).toBe(
+          `tavern-rank-up:${lastRecord.reputationSummary.afterRank}`,
+        )
+        found = true
+        break
+      }
+      if (day < 30) {
+        campaign = advanceCampaignDay(campaign)
+      }
+    }
+
+    expect(found).toBe(true)
   })
 })

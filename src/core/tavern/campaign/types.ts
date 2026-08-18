@@ -24,8 +24,36 @@ import type {
 } from '../../narrative/types.ts'
 import type { TavernFinanceState } from '../../economy/types.ts'
 
-export type TavernReputationTier =
-  'unknown' | 'local' | 'trusted' | 'renowned' | 'legendary'
+export type TavernRank = 1 | 2 | 3 | 4 | 5
+
+export interface TavernReputationEventSource {
+  type: 'expedition'
+  requestId: string
+  partyId: string
+}
+
+export interface TavernReputationEvent {
+  id: string
+  day: number
+  kind: 'quest_outcome'
+  delta: number
+  source: TavernReputationEventSource
+}
+
+export interface TavernReputationState {
+  score: number
+  peakScore: number
+  events: TavernReputationEvent[]
+}
+
+export interface DayReputationSummary {
+  beforeScore: number
+  delta: number
+  afterScore: number
+  beforeRank: TavernRank
+  afterRank: TavernRank
+  promoted: boolean
+}
 
 export interface CampaignPartyCondition {
   incapacitatedIds: string[]
@@ -160,26 +188,10 @@ export interface CampaignParty {
   departingCasualty?: boolean
 }
 
-export interface ReputationChangeEntry {
-  requestId: string
-  outcome: ExpeditionOutcome
-  rawDelta: number
-}
-
-export interface ReputationChangeSummary {
-  before: number
-  rawDelta: number
-  appliedDelta: number
-  after: number
-  entries: ReputationChangeEntry[]
-}
-
 export interface TavernDayRecord {
   dayNumber: number
   daySeed: string
-  reputationBefore: number
-  reputationAfter: number
-  reputationChange: ReputationChangeSummary
+  reputationSummary: DayReputationSummary
   results: ResolvedDispatch[]
   partyEvents: CampaignPartyEvent[]
   progressionEvents: CampaignProgressionEvent[]
@@ -190,7 +202,7 @@ export interface TavernCampaignState {
   version: 1
   seed: string
   dayNumber: number
-  reputation: number
+  reputation: TavernReputationState
   nextPartySerial: number
   parties: CampaignParty[]
   currentDay: TavernDayState

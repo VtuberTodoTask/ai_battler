@@ -259,14 +259,13 @@ describe('Phase 8.1.1 Tavern Integration Smoke', () => {
     campaign.history.push({
       dayNumber: campaign.dayNumber,
       daySeed: campaign.seed,
-      reputationBefore: campaign.reputation,
-      reputationAfter: campaign.reputation,
-      reputationChange: {
-        before: campaign.reputation,
-        after: campaign.reputation,
-        rawDelta: 0,
-        appliedDelta: 0,
-        entries: [],
+      reputationSummary: {
+        beforeScore: campaign.reputation.score,
+        delta: 0,
+        afterScore: campaign.reputation.score,
+        beforeRank: 1,
+        afterRank: 1,
+        promoted: false,
       },
       results: [],
       partyEvents: [],

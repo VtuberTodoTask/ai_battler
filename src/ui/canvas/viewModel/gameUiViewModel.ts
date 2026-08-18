@@ -1,7 +1,7 @@
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
 import {
-  getReputationTier,
-  getReputationTierLabel,
+  deriveTavernRank,
+  tavernRankLabel,
 } from '../../../core/tavern/campaign/reputation.ts'
 import type { TavernParty } from '../../../core/tavern/types.ts'
 
@@ -49,9 +49,9 @@ export function buildGameUiViewModel(
 ): GameUiViewModel {
   return {
     day: campaign.dayNumber,
-    reputation: campaign.reputation,
-    reputationLabel: getReputationTierLabel(
-      getReputationTier(campaign.reputation),
+    reputation: campaign.reputation.score,
+    reputationLabel: tavernRankLabel(
+      deriveTavernRank(campaign.reputation.peakScore),
     ),
     parties: campaign.currentDay.parties.map((p) =>
       buildPartyListItemViewModel(p),

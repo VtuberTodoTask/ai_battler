@@ -243,14 +243,13 @@ describe('partyDetailViewModel', () => {
       {
         dayNumber: 4,
         daySeed: 'seed',
-        reputationBefore: 10,
-        reputationAfter: 12,
-        reputationChange: {
-          before: 10,
-          rawDelta: 2,
-          appliedDelta: 2,
-          after: 12,
-          entries: [],
+        reputationSummary: {
+          beforeScore: 10,
+          delta: 2,
+          afterScore: 12,
+          beforeRank: 1,
+          afterRank: 1,
+          promoted: false,
         },
         results: [],
         partyEvents: [],
@@ -300,14 +299,13 @@ describe('partyDetailViewModel', () => {
       {
         dayNumber: 2,
         daySeed: 'seed',
-        reputationBefore: 10,
-        reputationAfter: 15,
-        reputationChange: {
-          before: 10,
-          rawDelta: 5,
-          appliedDelta: 5,
-          after: 15,
-          entries: [],
+        reputationSummary: {
+          beforeScore: 10,
+          delta: 5,
+          afterScore: 15,
+          beforeRank: 1,
+          afterRank: 1,
+          promoted: false,
         },
         results: [
           {
@@ -417,14 +415,13 @@ describe('partyDetailViewModel', () => {
       {
         dayNumber: 1,
         daySeed: 'seed',
-        reputationBefore: 10,
-        reputationAfter: 10,
-        reputationChange: {
-          before: 10,
-          rawDelta: 0,
-          appliedDelta: 0,
-          after: 10,
-          entries: [],
+        reputationSummary: {
+          beforeScore: 10,
+          delta: 0,
+          afterScore: 10,
+          beforeRank: 1,
+          afterRank: 1,
+          promoted: false,
         },
         results: [],
         partyEvents: [],

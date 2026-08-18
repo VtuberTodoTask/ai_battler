@@ -32,7 +32,7 @@ function fakeLeader(
 
 describe('relationship', () => {
   it('initializes with fixed affinity and seeded financial pressure', () => {
-    const party = generateCampaignParty('seed-a', 0, 10, 1)
+    const party = generateCampaignParty('seed-a', 0, 1, 1)
     expect(party.relationship.affinity).toBe(10)
     expect(party.relationship.financialPressure).toBeGreaterThanOrEqual(20)
     expect(party.relationship.financialPressure).toBeLessThanOrEqual(60)
@@ -40,14 +40,14 @@ describe('relationship', () => {
   })
 
   it('produces deterministic financial pressure and risk tolerance', () => {
-    const p1 = generateCampaignParty('seed-b', 1, 10, 1)
-    const p2 = generateCampaignParty('seed-b', 1, 10, 1)
+    const p1 = generateCampaignParty('seed-b', 1, 1, 1)
+    const p2 = generateCampaignParty('seed-b', 1, 1, 1)
     expect(p1.relationship).toEqual(p2.relationship)
   })
 
   it('does not disturb existing party generation rng streams', () => {
-    const p1 = generateCampaignParty('seed-c', 0, 10, 1)
-    const p2 = generateCampaignParty('seed-c', 1, 10, 1)
+    const p1 = generateCampaignParty('seed-c', 0, 1, 1)
+    const p2 = generateCampaignParty('seed-c', 1, 1, 1)
     expect(p1.relationship).not.toEqual(p2.relationship)
     expect(p1.party.id).not.toBe(p2.party.id)
   })
@@ -112,7 +112,7 @@ describe('relationship', () => {
     })
 
     it('updates affinity from outcome', () => {
-      const party = generateCampaignParty('seed-d', 0, 10, 1)
+      const party = generateCampaignParty('seed-d', 0, 1, 1)
       party.relationship.affinity = 50
       const event = applyAffinityFromOutcome(party, 'success', 1)
       expect(event.type).toBe('affinityChanged')
@@ -125,7 +125,7 @@ describe('relationship', () => {
     })
 
     it('clamps affinity to 0..100', () => {
-      const party = generateCampaignParty('seed-e', 0, 10, 1)
+      const party = generateCampaignParty('seed-e', 0, 1, 1)
       party.relationship.affinity = 5
       applyAffinityFromOutcome(party, 'forcedRetreat', 1)
       expect(party.relationship.affinity).toBe(0)
@@ -137,7 +137,7 @@ describe('relationship', () => {
 
   describe('financial pressure updates', () => {
     it('updates pressure from outcome', () => {
-      const party = generateCampaignParty('seed-f', 0, 10, 1)
+      const party = generateCampaignParty('seed-f', 0, 1, 1)
       party.relationship.financialPressure = 40
       const event = applyFinancialPressureFromOutcome(party, 'success', 1)
       expect(event.type).toBe('financialPressureChanged')
@@ -148,7 +148,7 @@ describe('relationship', () => {
     })
 
     it('applies idle pressure', () => {
-      const party = generateCampaignParty('seed-g', 0, 10, 1)
+      const party = generateCampaignParty('seed-g', 0, 1, 1)
       party.relationship.financialPressure = 10
       const event = applyIdleFinancialPressure(party, 1)
       if (event.type === 'financialPressureChanged') {
@@ -158,7 +158,7 @@ describe('relationship', () => {
     })
 
     it('applies recovery pressure', () => {
-      const party = generateCampaignParty('seed-h', 0, 10, 1)
+      const party = generateCampaignParty('seed-h', 0, 1, 1)
       party.relationship.financialPressure = 10
       const event = applyRecoveryFinancialPressure(party, 1)
       if (event.type === 'financialPressureChanged') {
@@ -168,7 +168,7 @@ describe('relationship', () => {
     })
 
     it('clamps financial pressure to 0..100', () => {
-      const party = generateCampaignParty('seed-i', 0, 10, 1)
+      const party = generateCampaignParty('seed-i', 0, 1, 1)
       party.relationship.financialPressure = 95
       applyIdleFinancialPressure(party, 1)
       expect(party.relationship.financialPressure).toBe(100)
@@ -185,7 +185,7 @@ describe('relationship', () => {
         casualty?: boolean
       } = {},
     ): CampaignParty {
-      const party = generateCampaignParty('stay-seed', 0, 10, 1)
+      const party = generateCampaignParty('stay-seed', 0, 1, 1)
       party.relationship = {
         ...party.relationship,
         ...overrides,

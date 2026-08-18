@@ -186,7 +186,7 @@ describe('Phase 8.1 Tavern Main Screen Smoke', () => {
         _viewModel: {
           header: {
             day: number
-            reputation: number
+            reputationScore: number
             canResolveDay: boolean
             canAdvanceDay: boolean
           }
@@ -194,7 +194,7 @@ describe('Phase 8.1 Tavern Main Screen Smoke', () => {
       }
     )._viewModel
     expect(vm.header.day).toBe(campaign.dayNumber)
-    expect(vm.header.reputation).toBe(campaign.reputation)
+    expect(vm.header.reputationScore).toBe(campaign.reputation.score)
     expect(vm.header.canResolveDay).toBe(true)
     expect(vm.header.canAdvanceDay).toBe(false)
   })

@@ -6,6 +6,7 @@ import {
 } from './campaign.ts'
 import { offerRequestToParty } from '../brokerage.ts'
 import { financeInvariantHolds, ledgerTotal } from '../../economy/finance.ts'
+import { deriveTavernRank } from './reputation.ts'
 
 function findAnyAcceptingOffer(
   campaign: ReturnType<typeof createTavernCampaign>,
@@ -52,11 +53,20 @@ describe('Campaign 30-day smoke', () => {
       for (const seed of seeds) {
         let campaign = createTavernCampaign(seed)
         const seenMemberIds = new Map<number, Set<string>>()
+        let previousPeakScore = campaign.reputation.peakScore
+        let previousTavernRank = deriveTavernRank(previousPeakScore)
 
         for (let day = 1; day <= 30; day++) {
           expect(campaign.dayNumber).toBe(day)
-          expect(campaign.reputation).toBeGreaterThanOrEqual(0)
-          expect(campaign.reputation).toBeLessThanOrEqual(100)
+          expect(Number.isSafeInteger(campaign.reputation.score)).toBe(true)
+          expect(Number.isSafeInteger(campaign.reputation.peakScore)).toBe(true)
+          expect(campaign.reputation.peakScore).toBeGreaterThanOrEqual(
+            previousPeakScore,
+          )
+          const tavernRank = deriveTavernRank(campaign.reputation.peakScore)
+          expect(tavernRank).toBeGreaterThanOrEqual(previousTavernRank)
+          previousPeakScore = campaign.reputation.peakScore
+          previousTavernRank = tavernRank
           expect(campaign.parties).toHaveLength(4)
           expect(campaign.currentDay.requests).toHaveLength(3)
           expect(campaign.currentDay.status).toBe('planning')

@@ -679,7 +679,10 @@ export function TavernSimulator() {
         <>
           <CampaignResultSummary
             results={legacyDay.results}
-            reputationChange={currentDayRecord.reputationChange}
+            reputationSummary={currentDayRecord.reputationSummary}
+            reputationEvents={(campaign?.reputation.events ?? []).filter(
+              (e) => e.day === currentDayRecord.dayNumber,
+            )}
           />
           <DispatchResults
             results={legacyDay.results}

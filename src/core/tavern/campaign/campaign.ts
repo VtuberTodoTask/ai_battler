@@ -13,7 +13,12 @@ import {
   deriveResolveCandidates,
   mergeCandidates,
 } from '../../narrative/candidates.ts'
-import { computeReputationChange } from './reputation.ts'
+import {
+  applyDailyReputationDelta,
+  buildQuestReputationEvent,
+  createInitialReputationState,
+  deriveTavernRank,
+} from './reputation.ts'
 import {
   applyOvernightRecovery,
   applyRecoveryCompletion,
@@ -62,10 +67,11 @@ import type {
 
 export function createTavernCampaign(seed: string): TavernCampaignState {
   const dayNumber = 1
-  const reputation = 10
+  const reputation = createInitialReputationState()
+  const tavernRank = deriveTavernRank(reputation.peakScore)
   const { parties, nextSerial } = generateInitialCampaignParties(
     seed,
-    reputation,
+    tavernRank,
     0,
   )
 
@@ -73,7 +79,7 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
   const availablePartyRanks = parties.map((p) => p.party.rank)
   const requests = generateTavernRequestsForDay(
     daySeed,
-    reputation,
+    tavernRank,
     availablePartyRanks,
   )
   const currentDay = buildTavernDay(daySeed, requests, parties, dayNumber)
@@ -253,18 +259,21 @@ export function resolveCampaignDay(
     dayNumber,
   )
 
-  const reputationOutcomes = results
-    .filter((r) => r.status === 'resolved' && r.result)
-    .map((r) => ({
-      requestId: r.requestId,
-      outcome: r.result!.outcome,
-    }))
+  const reputationEvents = resultsWithSettlement
+    .filter((r) => r.status === 'resolved' && r.result && r.partyId)
+    .map((r) =>
+      buildQuestReputationEvent(
+        dayNumber,
+        r.requestId,
+        r.partyId!,
+        r.request.rank,
+        r.result!.outcome,
+      ),
+    )
 
-  const reputationSummary = computeReputationChange(
-    nextCampaign.reputation,
-    reputationOutcomes,
-  )
-  nextCampaign.reputation = reputationSummary.after
+  const { state: reputationState, summary: reputationSummary } =
+    applyDailyReputationDelta(nextCampaign.reputation, reputationEvents)
+  nextCampaign.reputation = reputationState
 
   const resolveCandidates = deriveResolveCandidates(
     nextCampaign,
@@ -278,9 +287,7 @@ export function resolveCampaignDay(
   const dayRecord: TavernDayRecord = {
     dayNumber,
     daySeed: nextCampaign.currentDay.seed,
-    reputationBefore: reputationSummary.before,
-    reputationAfter: reputationSummary.after,
-    reputationChange: reputationSummary,
+    reputationSummary,
     results: deepClone(resultsWithSettlement),
     partyEvents: [
       ...(nextCampaign.currentDay.partyEvents ?? []),
@@ -420,6 +427,10 @@ export function advanceCampaignDay(
   }
 
   // Fill roster to 4 with new arrivals.
+  // Rank effects apply from the day after they are earned: today's newly
+  // generated content uses the Tavern Rank derived from the latest resolved
+  // peak reputation, never a mid-day recomputation.
+  const tavernRank = deriveTavernRank(nextCampaign.reputation.peakScore)
   const usedNames = new Set(remaining.map((p) => p.party.name))
   const arrivals: CampaignParty[] = []
   while (remaining.length < 4) {
@@ -427,7 +438,7 @@ export function advanceCampaignDay(
     const newParty = generateCampaignParty(
       nextCampaign.seed,
       serial,
-      nextCampaign.reputation,
+      tavernRank,
       nextDayNumber,
     )
     const name = pickUniquePartyName(
@@ -447,7 +458,7 @@ export function advanceCampaignDay(
     .map((p) => p.party.rank)
   const requests = generateTavernRequestsForDay(
     daySeed,
-    nextCampaign.reputation,
+    tavernRank,
     availablePartyRanks,
   )
   const currentDay = buildTavernDay(daySeed, requests, remaining, nextDayNumber)

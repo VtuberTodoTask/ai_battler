@@ -26,7 +26,7 @@ import type { CharacterEventNarrativeContext } from './types.ts'
 type StayEvent = Extract<CampaignRelationshipEvent, { type: 'stayExtended' }>
 
 function makeParty(seed = 'minor-test'): CampaignParty {
-  const party = generateCampaignParty(seed, 0, 10, 1)
+  const party = generateCampaignParty(seed, 0, 1, 1)
   party.relationship.affinity = 50
   party.memberRelationships ??= {}
   const members = party.party.members

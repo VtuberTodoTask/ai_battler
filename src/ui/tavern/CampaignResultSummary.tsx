@@ -1,15 +1,20 @@
 import { OUTCOME_LABELS } from '../expedition/labels.ts'
-import type { ReputationChangeSummary } from '../../core/tavern/campaign/types.ts'
+import type {
+  DayReputationSummary,
+  TavernReputationEvent,
+} from '../../core/tavern/campaign/types.ts'
 import type { ResolvedDispatch } from '../../core/tavern/types.ts'
 
 export interface CampaignResultSummaryProps {
   results: ResolvedDispatch[]
-  reputationChange: ReputationChangeSummary
+  reputationSummary: DayReputationSummary
+  reputationEvents: TavernReputationEvent[]
 }
 
 export function CampaignResultSummary({
   results,
-  reputationChange,
+  reputationSummary,
+  reputationEvents,
 }: CampaignResultSummaryProps) {
   return (
     <div
@@ -27,10 +32,10 @@ export function CampaignResultSummary({
             {r.status === 'resolved' &&
               r.report &&
               (() => {
-                const entry = reputationChange.entries.find(
-                  (e) => e.requestId === r.requestId,
+                const event = reputationEvents.find(
+                  (e) => e.source.requestId === r.requestId,
                 )
-                const delta = entry?.rawDelta
+                const delta = event?.delta
                 if (delta === undefined) return null
                 return (
                   <span className="reputation-delta">
@@ -45,9 +50,9 @@ export function CampaignResultSummary({
         ))}
       </ul>
       <div className="reputation-total">
-        本日の評判変化: {reputationChange.appliedDelta >= 0 ? '+' : ''}
-        {reputationChange.appliedDelta} ({reputationChange.before} →{' '}
-        {reputationChange.after})
+        本日の評判変化: {reputationSummary.delta >= 0 ? '+' : ''}
+        {reputationSummary.delta} ({reputationSummary.beforeScore} →{' '}
+        {reputationSummary.afterScore})
       </div>
     </div>
   )

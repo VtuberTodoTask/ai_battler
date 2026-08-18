@@ -4,6 +4,7 @@ import { SeededRng } from '../rng/seededRng.ts'
 import { generatePartyPool } from './partyGenerator.ts'
 import { TEMPLATES_BY_OBJECTIVE_TYPE } from './requestTemplates.ts'
 import { planRequestRanksForDay } from './campaign/generators.ts'
+import type { TavernRank } from './campaign/types.ts'
 import type { TavernDayState, TavernRequestOffer } from './types.ts'
 
 const ALL_OBJECTIVE_TYPES: ObjectiveType[] = [
@@ -15,7 +16,7 @@ const ALL_OBJECTIVE_TYPES: ObjectiveType[] = [
   'survey',
 ]
 
-const DEFAULT_REPUTATION = 10
+const DEFAULT_TAVERN_RANK: TavernRank = 1
 
 function generateRequest(
   index: number,
@@ -45,7 +46,7 @@ export function generateTavernDay(seed: string): TavernDayState {
   const availablePartyRanks = parties.map((p) => p.party.rank)
   const rankPlan = planRequestRanksForDay(
     seed,
-    DEFAULT_REPUTATION,
+    DEFAULT_TAVERN_RANK,
     availablePartyRanks,
   )
 

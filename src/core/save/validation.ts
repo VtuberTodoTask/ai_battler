@@ -5,6 +5,13 @@ import {
   buildLedgerEntryId,
 } from '../economy/index.ts'
 import { computeQuestSettlement } from '../economy/questReward.ts'
+import {
+  buildQuestReputationEventId,
+  computeQuestReputationDelta,
+  deriveTavernRank,
+} from '../tavern/campaign/reputation.ts'
+import type { AdventurerRank } from '../models/types.ts'
+import type { ExpeditionOutcome } from '../expedition/types.ts'
 import type { GameSaveData, SaveMetadata } from './types.ts'
 import { SaveValidationErrorClass, type SaveValidationError } from './types.ts'
 
@@ -31,6 +38,8 @@ const ALLOWED_LEDGER_KINDS = [
   'daily_operating_cost',
 ] as const
 
+const ALLOWED_RANKS = ['E', 'D', 'C', 'B', 'A', 'S'] as const
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -50,6 +59,16 @@ function isValidCurrencyAmount(value: unknown): value is number {
 }
 
 function isValidSignedCurrencyAmount(value: unknown): value is number {
+  return (
+    typeof value === 'number' &&
+    Number.isFinite(value) &&
+    Number.isInteger(value) &&
+    value >= Number.MIN_SAFE_INTEGER &&
+    value <= Number.MAX_SAFE_INTEGER
+  )
+}
+
+function isValidReputationScore(value: unknown): value is number {
   return (
     typeof value === 'number' &&
     Number.isFinite(value) &&
@@ -183,7 +202,11 @@ function validateSettlement(
 function validateRequest(
   value: unknown,
   context: string,
-): { promisedReward: number; tavernCommissionBps: number } {
+): {
+  promisedReward: number
+  tavernCommissionBps: number
+  rank: AdventurerRank
+} {
   assertPlainObject(value, `${context}の形式が不正です`)
   if (!hasString(value, 'id') || (value.id as string).length === 0) {
     throw new SaveValidationErrorClass(
@@ -191,10 +214,19 @@ function validateRequest(
       'corrupted-data',
     )
   }
+  if (!ALLOWED_RANKS.includes(value.rank as never)) {
+    throw new SaveValidationErrorClass(
+      `${context}のランクが不正です`,
+      'corrupted-data',
+    )
+  }
   validateRewardTerms(value.rewardTerms, `${context}の報酬条件`)
-  return value.rewardTerms as {
-    promisedReward: number
-    tavernCommissionBps: number
+  return {
+    ...(value.rewardTerms as {
+      promisedReward: number
+      tavernCommissionBps: number
+    }),
+    rank: value.rank as AdventurerRank,
   }
 }
 
@@ -430,6 +462,188 @@ function validateFinance(value: unknown): {
   return { funds: finance.funds as number, ledgerById }
 }
 
+interface ReputationEventValidationRecord {
+  id: string
+  day: number
+  delta: number
+  requestId: string
+  partyId: string
+}
+
+function validateReputationEvent(
+  value: unknown,
+  seenIds: Set<string>,
+): ReputationEventValidationRecord {
+  assertPlainObject(value, '評判イベントの形式が不正です')
+
+  if (!hasString(value, 'id') || (value.id as string).length === 0) {
+    throw new SaveValidationErrorClass(
+      '評判イベントIDがありません',
+      'corrupted-data',
+    )
+  }
+  const id = value.id as string
+  if (seenIds.has(id)) {
+    throw new SaveValidationErrorClass(
+      '重複した評判イベントIDがあります',
+      'corrupted-data',
+    )
+  }
+  seenIds.add(id)
+
+  if (
+    typeof value.day !== 'number' ||
+    !Number.isInteger(value.day) ||
+    value.day < 1
+  ) {
+    throw new SaveValidationErrorClass(
+      '評判イベントの日数が不正です',
+      'corrupted-data',
+    )
+  }
+  const day = value.day as number
+
+  if (value.kind !== 'quest_outcome') {
+    throw new SaveValidationErrorClass(
+      '評判イベントの種別が不正です',
+      'corrupted-data',
+    )
+  }
+
+  if (!isValidReputationScore(value.delta) || (value.delta as number) === 0) {
+    throw new SaveValidationErrorClass(
+      '評判イベントの変化量が不正です',
+      'corrupted-data',
+    )
+  }
+  const delta = value.delta as number
+
+  assertPlainObject(value.source, '評判イベントのソースが不正です')
+  const source = value.source as Record<string, unknown>
+  if (source.type !== 'expedition') {
+    throw new SaveValidationErrorClass(
+      '評判イベントのソース種別が不正です',
+      'corrupted-data',
+    )
+  }
+  if (
+    !hasString(source, 'requestId') ||
+    (source.requestId as string).length === 0
+  ) {
+    throw new SaveValidationErrorClass(
+      '評判イベントの依頼IDがありません',
+      'corrupted-data',
+    )
+  }
+  if (
+    !hasString(source, 'partyId') ||
+    (source.partyId as string).length === 0
+  ) {
+    throw new SaveValidationErrorClass(
+      '評判イベントのパーティIDがありません',
+      'corrupted-data',
+    )
+  }
+  const requestId = source.requestId as string
+  const partyId = source.partyId as string
+
+  const expectedId = buildQuestReputationEventId(day, requestId, partyId)
+  if (id !== expectedId) {
+    throw new SaveValidationErrorClass(
+      '評判イベントIDが計算値と一致しません',
+      'corrupted-data',
+    )
+  }
+
+  return { id, day, delta, requestId, partyId }
+}
+
+function validateReputationState(value: unknown): {
+  score: number
+  peakScore: number
+  eventById: Map<string, ReputationEventValidationRecord>
+  eventsByDay: Map<number, ReputationEventValidationRecord[]>
+} {
+  assertPlainObject(value, '酒場評判データが壊れています')
+  const reputation = value as Record<string, unknown>
+
+  if (!isValidReputationScore(reputation.score)) {
+    throw new SaveValidationErrorClass(
+      '酒場評判の値が不正です',
+      'corrupted-data',
+    )
+  }
+  if (!isValidReputationScore(reputation.peakScore)) {
+    throw new SaveValidationErrorClass(
+      '酒場評判の最高値が不正です',
+      'corrupted-data',
+    )
+  }
+  const score = reputation.score as number
+  const peakScore = reputation.peakScore as number
+
+  if (peakScore < 0) {
+    throw new SaveValidationErrorClass(
+      '酒場評判の最高値が負の値です',
+      'corrupted-data',
+    )
+  }
+  if (peakScore < score) {
+    throw new SaveValidationErrorClass(
+      '酒場評判の最高値が現在値を下回っています',
+      'corrupted-data',
+    )
+  }
+
+  if (!Array.isArray(reputation.events)) {
+    throw new SaveValidationErrorClass(
+      '評判イベントデータが壊れています',
+      'corrupted-data',
+    )
+  }
+
+  const seenIds = new Set<string>()
+  const eventById = new Map<string, ReputationEventValidationRecord>()
+  const eventsByDay = new Map<number, ReputationEventValidationRecord[]>()
+  for (const raw of reputation.events) {
+    const event = validateReputationEvent(raw, seenIds)
+    eventById.set(event.id, event)
+    const list = eventsByDay.get(event.day) ?? []
+    list.push(event)
+    eventsByDay.set(event.day, list)
+  }
+
+  return { score, peakScore, eventById, eventsByDay }
+}
+
+function validateDayReputationSummary(
+  value: unknown,
+  expected: {
+    beforeScore: number
+    delta: number
+    afterScore: number
+    beforeRank: number
+    afterRank: number
+    promoted: boolean
+  },
+): void {
+  assertPlainObject(value, '評判サマリーの形式が不正です')
+  const summary = value as Record<string, unknown>
+  if (
+    summary.beforeScore !== expected.beforeScore ||
+    summary.delta !== expected.delta ||
+    summary.afterScore !== expected.afterScore ||
+    summary.beforeRank !== expected.beforeRank ||
+    summary.afterRank !== expected.afterRank ||
+    summary.promoted !== expected.promoted
+  ) {
+    throw new SaveValidationErrorClass(
+      '評判サマリーが期待値と一致しません',
+      'corrupted-data',
+    )
+  }
+}
+
 type ExpectedLedgerEntry =
   | {
       kind: 'quest_commission'
@@ -440,11 +654,20 @@ type ExpectedLedgerEntry =
     }
   | { kind: 'daily_operating_cost'; day: number }
 
+interface ExpectedReputationEvent {
+  day: number
+  requestId: string
+  partyId: string
+  delta: number
+}
+
 function validateResolvedDispatch(
   value: unknown,
   day: number,
   ledgerById: Map<string, LedgerValidationRecord>,
   expectedLedgerById: Map<string, ExpectedLedgerEntry>,
+  reputationEventById: Map<string, ReputationEventValidationRecord>,
+  expectedReputationEventById: Map<string, ExpectedReputationEvent>,
 ): void {
   assertPlainObject(value, '依頼結果の形式が不正です')
   const resolved = value as Record<string, unknown>
@@ -604,6 +827,41 @@ function validateResolvedDispatch(
       }
     }
 
+    const expectedReputationEventId = buildQuestReputationEventId(
+      day,
+      resolved.requestId as string,
+      partyId,
+    )
+    if (expectedReputationEventById.has(expectedReputationEventId)) {
+      throw new SaveValidationErrorClass(
+        '重複した評判イベントIDが検出されました',
+        'corrupted-data',
+      )
+    }
+    const expectedReputationDelta = computeQuestReputationDelta(
+      request.rank,
+      result.outcome as ExpeditionOutcome,
+    )
+    expectedReputationEventById.set(expectedReputationEventId, {
+      day,
+      requestId: resolved.requestId as string,
+      partyId,
+      delta: expectedReputationDelta,
+    })
+    const reputationEvent = reputationEventById.get(expectedReputationEventId)
+    if (!reputationEvent) {
+      throw new SaveValidationErrorClass(
+        '遠征結果に対応する評判イベントがありません',
+        'corrupted-data',
+      )
+    }
+    if (reputationEvent.delta !== expectedReputationDelta) {
+      throw new SaveValidationErrorClass(
+        '評判イベントの変化量が期待値と一致しません',
+        'corrupted-data',
+      )
+    }
+
     if (resolved.report && isPlainObject(resolved.report)) {
       const report = resolved.report as Record<string, unknown>
       if (report.settlement) {
@@ -698,6 +956,8 @@ function validateDayResults(
   day: number,
   ledgerById: Map<string, LedgerValidationRecord>,
   expectedLedgerById: Map<string, ExpectedLedgerEntry>,
+  reputationEventById: Map<string, ReputationEventValidationRecord>,
+  expectedReputationEventById: Map<string, ExpectedReputationEvent>,
 ): void {
   if (!Array.isArray(value)) {
     throw new SaveValidationErrorClass(
@@ -706,14 +966,30 @@ function validateDayResults(
     )
   }
   for (const result of value) {
-    validateResolvedDispatch(result, day, ledgerById, expectedLedgerById)
+    validateResolvedDispatch(
+      result,
+      day,
+      ledgerById,
+      expectedLedgerById,
+      reputationEventById,
+      expectedReputationEventById,
+    )
   }
+}
+
+interface ReputationReplayState {
+  score: number
+  peak: number
 }
 
 function validateHistoryRecord(
   value: unknown,
   ledgerById: Map<string, LedgerValidationRecord>,
   expectedLedgerById: Map<string, ExpectedLedgerEntry>,
+  reputationEventById: Map<string, ReputationEventValidationRecord>,
+  expectedReputationEventById: Map<string, ExpectedReputationEvent>,
+  reputationEventsByDay: Map<number, ReputationEventValidationRecord[]>,
+  replay: ReputationReplayState,
 ): void {
   assertPlainObject(value, '履歴レコードの形式が不正です')
   const record = value as Record<string, unknown>
@@ -734,7 +1010,35 @@ function validateHistoryRecord(
     day: dayNumber,
   })
 
-  validateDayResults(record.results, dayNumber, ledgerById, expectedLedgerById)
+  validateDayResults(
+    record.results,
+    dayNumber,
+    ledgerById,
+    expectedLedgerById,
+    reputationEventById,
+    expectedReputationEventById,
+  )
+
+  const beforeScore = replay.score
+  const beforePeak = replay.peak
+  const beforeRank = deriveTavernRank(beforePeak)
+  const dayEvents = reputationEventsByDay.get(dayNumber) ?? []
+  const dayDelta = dayEvents.reduce((sum, event) => sum + event.delta, 0)
+  const afterScore = beforeScore + dayDelta
+  const afterPeak = Math.max(beforePeak, afterScore)
+  const afterRank = deriveTavernRank(afterPeak)
+
+  validateDayReputationSummary(record.reputationSummary, {
+    beforeScore,
+    delta: dayDelta,
+    afterScore,
+    beforeRank,
+    afterRank,
+    promoted: afterRank > beforeRank,
+  })
+
+  replay.score = afterScore
+  replay.peak = afterPeak
 }
 
 export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
@@ -832,6 +1136,15 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
 
   const expectedLedgerById = new Map<string, ExpectedLedgerEntry>()
 
+  const {
+    score: reputationScore,
+    peakScore: reputationPeakScore,
+    eventById: reputationEventById,
+    eventsByDay: reputationEventsByDay,
+  } = validateReputationState(campaign.reputation)
+
+  const expectedReputationEventById = new Map<string, ExpectedReputationEvent>()
+
   const currentDay = campaign.currentDay as Record<string, unknown>
   const currentDayStatus = currentDay.status
   if (currentDayStatus !== 'planning') {
@@ -858,6 +1171,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
     )
   }
 
+  const reputationReplay: ReputationReplayState = { score: 0, peak: 0 }
+
   for (let i = 0; i < campaign.history.length; i++) {
     const record = campaign.history[i]
     assertPlainObject(record, '履歴レコードの形式が不正です')
@@ -878,7 +1193,55 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
         'corrupted-data',
       )
     }
-    validateHistoryRecord(record, ledgerById, expectedLedgerById)
+    validateHistoryRecord(
+      record,
+      ledgerById,
+      expectedLedgerById,
+      reputationEventById,
+      expectedReputationEventById,
+      reputationEventsByDay,
+      reputationReplay,
+    )
+  }
+
+  if (
+    reputationReplay.score !== reputationScore ||
+    reputationReplay.peak !== reputationPeakScore
+  ) {
+    throw new SaveValidationErrorClass(
+      '酒場評判の合計が履歴の再計算結果と一致しません',
+      'corrupted-data',
+    )
+  }
+
+  for (const id of reputationEventById.keys()) {
+    if (!expectedReputationEventById.has(id)) {
+      throw new SaveValidationErrorClass(
+        '孤立した評判イベントがあります',
+        'corrupted-data',
+      )
+    }
+  }
+
+  for (const [id, expected] of expectedReputationEventById) {
+    const event = reputationEventById.get(id)
+    if (!event) {
+      throw new SaveValidationErrorClass(
+        '遠征結果に対応する評判イベントがありません',
+        'corrupted-data',
+      )
+    }
+    if (
+      event.day !== expected.day ||
+      event.requestId !== expected.requestId ||
+      event.partyId !== expected.partyId ||
+      event.delta !== expected.delta
+    ) {
+      throw new SaveValidationErrorClass(
+        '評判イベントが精算内容と一致しません',
+        'corrupted-data',
+      )
+    }
   }
 
   for (const [id, entry] of ledgerById) {
