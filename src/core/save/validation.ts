@@ -341,6 +341,13 @@ function validateFinance(value: unknown): {
   return { funds: finance.funds as number, ledgerById }
 }
 
+type ExpectedCommissionLedger = {
+  day: number
+  requestId: string
+  partyId: string
+  amount: number
+}
+
 function validateResolvedDispatch(
   value: unknown,
   day: number,
@@ -354,9 +361,17 @@ function validateResolvedDispatch(
       partyId?: string
     }
   >,
+  expectedLedgerById: Map<string, ExpectedCommissionLedger>,
 ): void {
   assertPlainObject(value, '依頼結果の形式が不正です')
   const resolved = value as Record<string, unknown>
+
+  if (resolved.status !== 'resolved' && resolved.status !== 'notBrokered') {
+    throw new SaveValidationErrorClass(
+      '依頼結果の status が不正です',
+      'corrupted-data',
+    )
+  }
 
   if (
     !hasString(resolved, 'requestId') ||
@@ -373,7 +388,66 @@ function validateResolvedDispatch(
     `依頼 ${resolved.requestId as string} のデータ`,
   )
 
-  if (resolved.status === 'resolved' && resolved.result) {
+  if (!Array.isArray(resolved.memberIds)) {
+    throw new SaveValidationErrorClass(
+      '依頼結果のメンバー一覧が不正です',
+      'corrupted-data',
+    )
+  }
+  for (const id of resolved.memberIds as unknown[]) {
+    if (typeof id !== 'string') {
+      throw new SaveValidationErrorClass(
+        '依頼結果のメンバーIDが不正です',
+        'corrupted-data',
+      )
+    }
+  }
+
+  if (resolved.status === 'resolved') {
+    if (
+      !hasString(resolved, 'partyId') ||
+      (resolved.partyId as string).length === 0
+    ) {
+      throw new SaveValidationErrorClass(
+        '依頼結果のパーティIDがありません',
+        'corrupted-data',
+      )
+    }
+
+    if (
+      resolved.partyName !== undefined &&
+      typeof resolved.partyName !== 'string'
+    ) {
+      throw new SaveValidationErrorClass(
+        '依頼結果のパーティ名が不正です',
+        'corrupted-data',
+      )
+    }
+
+    if (
+      resolved.leaderName !== undefined &&
+      typeof resolved.leaderName !== 'string'
+    ) {
+      throw new SaveValidationErrorClass(
+        '依頼結果のリーダー名が不正です',
+        'corrupted-data',
+      )
+    }
+
+    if (resolved.memberIds.length === 0) {
+      throw new SaveValidationErrorClass(
+        '依頼結果のメンバー一覧が空です',
+        'corrupted-data',
+      )
+    }
+
+    if (!resolved.result) {
+      throw new SaveValidationErrorClass(
+        '解決済み依頼結果に遠征結果がありません',
+        'corrupted-data',
+      )
+    }
+
     assertPlainObject(resolved.result, '遠征結果の形式が不正です')
     const result = resolved.result as Record<string, unknown>
     if (!ALLOWED_OUTCOMES.includes(result.outcome as never)) {
@@ -400,11 +474,25 @@ function validateResolvedDispatch(
     const settlement = resolved.settlement as {
       tavernCommission: number
     }
+    const partyId = resolved.partyId as string
     const expectedId = buildLedgerEntryId(
       day,
       resolved.requestId as string,
-      resolved.partyId as string | undefined,
+      partyId,
     )
+
+    if (expectedLedgerById.has(expectedId)) {
+      throw new SaveValidationErrorClass(
+        '重複した精算用帳簿IDが検出されました',
+        'corrupted-data',
+      )
+    }
+    expectedLedgerById.set(expectedId, {
+      day,
+      requestId: resolved.requestId as string,
+      partyId,
+      amount: settlement.tavernCommission,
+    })
 
     if (settlement.tavernCommission > 0) {
       const entry = ledgerById.get(expectedId)
@@ -460,11 +548,49 @@ function validateResolvedDispatch(
         }
       }
     }
-  } else if (resolved.settlement) {
-    throw new SaveValidationErrorClass(
-      '未解決の依頼結果に精算情報が含まれています',
-      'corrupted-data',
-    )
+  } else {
+    if (resolved.result) {
+      throw new SaveValidationErrorClass(
+        '未解決の依頼結果に遠征結果が含まれています',
+        'corrupted-data',
+      )
+    }
+    if (resolved.report) {
+      throw new SaveValidationErrorClass(
+        '未解決の依頼結果に報告書が含まれています',
+        'corrupted-data',
+      )
+    }
+    if (resolved.settlement) {
+      throw new SaveValidationErrorClass(
+        '未解決の依頼結果に精算情報が含まれています',
+        'corrupted-data',
+      )
+    }
+    if (resolved.partyId !== undefined) {
+      throw new SaveValidationErrorClass(
+        '未解決の依頼結果にパーティIDが含まれています',
+        'corrupted-data',
+      )
+    }
+    if (resolved.partyName !== undefined) {
+      throw new SaveValidationErrorClass(
+        '未解決の依頼結果にパーティ名が含まれています',
+        'corrupted-data',
+      )
+    }
+    if (resolved.leaderName !== undefined) {
+      throw new SaveValidationErrorClass(
+        '未解決の依頼結果にリーダー名が含まれています',
+        'corrupted-data',
+      )
+    }
+    if (resolved.memberIds.length !== 0) {
+      throw new SaveValidationErrorClass(
+        '未解決の依頼結果のメンバー一覧が空ではありません',
+        'corrupted-data',
+      )
+    }
   }
 }
 
@@ -493,6 +619,7 @@ function validateDayResults(
       partyId?: string
     }
   >,
+  expectedLedgerById: Map<string, ExpectedCommissionLedger>,
 ): void {
   if (!Array.isArray(value)) {
     throw new SaveValidationErrorClass(
@@ -501,7 +628,7 @@ function validateDayResults(
     )
   }
   for (const result of value) {
-    validateResolvedDispatch(result, day, ledgerById)
+    validateResolvedDispatch(result, day, ledgerById, expectedLedgerById)
   }
 }
 
@@ -517,6 +644,7 @@ function validateHistoryRecord(
       partyId?: string
     }
   >,
+  expectedLedgerById: Map<string, ExpectedCommissionLedger>,
 ): void {
   assertPlainObject(value, '履歴レコードの形式が不正です')
   const record = value as Record<string, unknown>
@@ -530,7 +658,12 @@ function validateHistoryRecord(
       'corrupted-data',
     )
   }
-  validateDayResults(record.results, record.dayNumber as number, ledgerById)
+  validateDayResults(
+    record.results,
+    record.dayNumber as number,
+    ledgerById,
+    expectedLedgerById,
+  )
 }
 
 export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
@@ -625,12 +758,28 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
 
   const { ledgerById } = validateFinance(campaign.finance)
 
+  const expectedLedgerById = new Map<string, ExpectedCommissionLedger>()
+
   const currentDay = campaign.currentDay as Record<string, unknown>
   validateDayRequests(currentDay.requests)
-  validateDayResults(currentDay.results, campaign.dayNumber, ledgerById)
+  validateDayResults(
+    currentDay.results,
+    campaign.dayNumber,
+    ledgerById,
+    expectedLedgerById,
+  )
 
   for (const record of campaign.history) {
-    validateHistoryRecord(record, ledgerById)
+    validateHistoryRecord(record, ledgerById, expectedLedgerById)
+  }
+
+  for (const [id] of ledgerById) {
+    if (!expectedLedgerById.has(id)) {
+      throw new SaveValidationErrorClass(
+        '孤立した帳簿エントリがあります',
+        'corrupted-data',
+      )
+    }
   }
 
   if (

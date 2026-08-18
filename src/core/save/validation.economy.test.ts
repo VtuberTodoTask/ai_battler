@@ -209,4 +209,90 @@ describe('save economy validation', () => {
     bad.campaign.finance.ledgerEntries[0].id = 'custom-id'
     expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
   })
+
+  it('resolved status with missing result is rejected', () => {
+    const save = makeSave('missing-result')
+    const bad = clone(save)
+    const resolved = bad.campaign.history[0].results.find(
+      (r) => r.status === 'resolved',
+    )!
+    delete (resolved as { result?: unknown }).result
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('resolved status with missing settlement is rejected', () => {
+    const save = makeSave('missing-settlement')
+    const bad = clone(save)
+    const resolved = bad.campaign.history[0].results.find(
+      (r) => r.status === 'resolved',
+    )!
+    delete (resolved as { settlement?: unknown }).settlement
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('invalid dispatch status is rejected', () => {
+    const save = makeSave('invalid-status')
+    const bad = clone(save)
+    const resolved = bad.campaign.history[0].results.find(
+      (r) => r.status === 'resolved',
+    )!
+    ;(resolved as { status: string }).status = 'invalid-status'
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('orphan ledger entry is rejected', () => {
+    const save = makeSave('orphan-ledger')
+    const bad = clone(save)
+    const entry = {
+      id: buildLedgerEntryId(999, 'fake-request', 'fake-party'),
+      day: 999,
+      kind: 'quest_commission' as const,
+      amount: 100,
+      source: {
+        type: 'expedition' as const,
+        requestId: 'fake-request',
+        partyId: 'fake-party',
+      },
+    }
+    bad.campaign.finance.ledgerEntries.push(entry)
+    bad.campaign.finance.funds += entry.amount
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('wrong ledger requestId is rejected', () => {
+    const save = makeSave('wrong-ledger-requestId')
+    const bad = clone(save)
+    ;(
+      bad.campaign.finance.ledgerEntries[0].source as { requestId: string }
+    ).requestId = 'other-request'
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('wrong ledger partyId is rejected', () => {
+    const save = makeSave('wrong-ledger-partyId')
+    const bad = clone(save)
+    ;(
+      bad.campaign.finance.ledgerEntries[0].source as { partyId?: string }
+    ).partyId = 'other-party'
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('valid positive settlement with matching ledger is accepted', () => {
+    const save = makeSave('valid-positive')
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  it('valid zero commission settlement with no ledger is accepted', () => {
+    const resolved = resolveZeroCommissionPair('valid-zero-commission')
+    expect(resolved).not.toBeNull()
+    if (!resolved) return
+
+    let campaign = resolved.campaign
+    campaign = advanceCampaignDay(campaign)
+    expect(campaign.finance.ledgerEntries.length).toBe(0)
+    expect(campaign.finance.funds).toBe(0)
+
+    const save = serializeGameSave({ campaign })
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
 })
