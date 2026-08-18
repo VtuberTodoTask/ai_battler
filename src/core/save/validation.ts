@@ -789,10 +789,11 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   }
   if (
     typeof campaign.dayNumber !== 'number' ||
-    !Number.isInteger(campaign.dayNumber)
+    !Number.isInteger(campaign.dayNumber) ||
+    (campaign.dayNumber as number) < 1
   ) {
     throw new SaveValidationErrorClass(
-      'キャンペーン日数がありません',
+      'キャンペーン日数が1以上の整数ではありません',
       'corrupted-data',
     )
   }
@@ -833,42 +834,32 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
 
   const currentDay = campaign.currentDay as Record<string, unknown>
   const currentDayStatus = currentDay.status
-  if (currentDayStatus !== 'planning' && currentDayStatus !== 'resolved') {
-    throw new SaveValidationErrorClass('本日の状態が不正です', 'corrupted-data')
+  if (currentDayStatus !== 'planning') {
+    throw new SaveValidationErrorClass(
+      '本日の状態が確定(planning)ではありません',
+      'corrupted-data',
+    )
   }
 
   validateDayRequests(currentDay.requests)
 
-  if (
-    currentDayStatus !== 'resolved' &&
-    Array.isArray(currentDay.results) &&
-    currentDay.results.length > 0
-  ) {
+  if (Array.isArray(currentDay.results) && currentDay.results.length > 0) {
     throw new SaveValidationErrorClass(
       '未確定の日に依頼結果が含まれています',
       'corrupted-data',
     )
   }
 
-  if (currentDayStatus === 'resolved') {
-    expectedLedgerById.set(
-      buildDailyOperatingCostEntryId(campaign.dayNumber as number),
-      {
-        kind: 'daily_operating_cost',
-        day: campaign.dayNumber as number,
-      },
+  const expectedHistoryLength = (campaign.dayNumber as number) - 1
+  if (campaign.history.length !== expectedHistoryLength) {
+    throw new SaveValidationErrorClass(
+      `履歴の日数が campaign.dayNumber と連続していません。期待: ${expectedHistoryLength}件, 実際: ${campaign.history.length}件`,
+      'corrupted-data',
     )
   }
 
-  validateDayResults(
-    currentDay.results,
-    campaign.dayNumber as number,
-    ledgerById,
-    expectedLedgerById,
-  )
-
-  const historyDays = new Set<number>()
-  for (const record of campaign.history) {
+  for (let i = 0; i < campaign.history.length; i++) {
+    const record = campaign.history[i]
     assertPlainObject(record, '履歴レコードの形式が不正です')
     const recordDay = (record as Record<string, unknown>).dayNumber
     if (
@@ -881,13 +872,12 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
         'corrupted-data',
       )
     }
-    if (historyDays.has(recordDay as number)) {
+    if (recordDay !== i + 1) {
       throw new SaveValidationErrorClass(
-        '履歴に重複した日付があります',
+        `履歴の日付が連続していません。index ${i} の期待日付は ${i + 1}です`,
         'corrupted-data',
       )
     }
-    historyDays.add(recordDay as number)
     validateHistoryRecord(record, ledgerById, expectedLedgerById)
   }
 

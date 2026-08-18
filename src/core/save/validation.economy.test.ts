@@ -96,10 +96,14 @@ function findOpeningBalanceEntry(save: ReturnType<typeof makeSave>) {
 }
 
 function buildNegativeFundsSave(seed: string) {
+  return buildContinuousPlanningSave(seed, 12)
+}
+
+function buildContinuousPlanningSave(seed: string, dayNumber: number) {
   const save = serializeGameSave({ campaign: createTavernCampaign(seed) })
-  save.campaign.dayNumber = 12
+  save.campaign.dayNumber = dayNumber
   save.campaign.history = []
-  for (let day = 1; day <= 11; day++) {
+  for (let day = 1; day < dayNumber; day++) {
     save.campaign.history.push({
       dayNumber: day,
       results: [],
@@ -116,7 +120,7 @@ function buildNegativeFundsSave(seed: string) {
       amount: 100,
       source: { type: 'campaign_start' },
     },
-    ...Array.from({ length: 11 }, (_, i) => ({
+    ...Array.from({ length: dayNumber - 1 }, (_, i) => ({
       id: `daily-operating-cost:${i + 1}`,
       day: i + 1,
       kind: 'daily_operating_cost' as const,
@@ -422,5 +426,59 @@ describe('save economy validation', () => {
     bad.campaign.finance.ledgerEntries.push(entry as never)
     bad.campaign.finance.funds += entry.amount
     expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('planning save with continuous history is accepted', () => {
+    const save = buildContinuousPlanningSave('planning-continuous', 5)
+    expect(save.campaign.dayNumber).toBe(5)
+    expect(save.campaign.history.length).toBe(4)
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  it('resolved state save is rejected', () => {
+    const resolved = resolveCampaignDay(createTavernCampaign('resolved-save'))
+    expect(resolved.currentDay.status).toBe('resolved')
+    const save = serializeGameSave({ campaign: resolved })
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('missing history day is rejected', () => {
+    const save = buildContinuousPlanningSave('missing-history-day', 5)
+    // Remove DAY 3 from history and its operating cost, then recompute funds.
+    save.campaign.history = save.campaign.history.filter(
+      (record) => (record as { dayNumber: number }).dayNumber !== 3,
+    )
+    save.campaign.finance.ledgerEntries =
+      save.campaign.finance.ledgerEntries.filter(
+        (entry) => entry.id !== 'daily-operating-cost:3',
+      )
+    save.campaign.finance.funds = ledgerTotal(
+      save.campaign.finance.ledgerEntries,
+    )
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('extra history day beyond dayNumber is rejected', () => {
+    const save = buildContinuousPlanningSave('extra-history-day', 5)
+    save.campaign.history.push({
+      dayNumber: 5,
+      results: [],
+      partyEvents: [],
+      relationshipEvents: [],
+      progressionEvents: [],
+    } as never)
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('future history day is rejected', () => {
+    const save = buildContinuousPlanningSave('future-history-day', 5)
+    save.campaign.history.push({
+      dayNumber: 6,
+      results: [],
+      partyEvents: [],
+      relationshipEvents: [],
+      progressionEvents: [],
+    } as never)
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })
 })

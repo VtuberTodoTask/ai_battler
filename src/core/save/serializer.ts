@@ -120,6 +120,12 @@ export async function saveToSlot(
   slotId: string,
   input: SaveInput,
 ): Promise<void> {
+  if (input.campaign.currentDay.status !== 'planning') {
+    throw new SaveValidationErrorClass(
+      '保存できません。翌日へ進んでから保存してください',
+      'corrupted-data',
+    )
+  }
   const data = serializeGameSave(input)
   data.metadata.slotId = slotId
   await repository.save(slotId, data)
