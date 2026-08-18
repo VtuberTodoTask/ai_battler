@@ -11,8 +11,11 @@ describe('TavernScreenViewModel', () => {
     const vm = buildTavernScreenViewModel(campaign, DEFAULT_GAME_UI_STATE)
 
     expect(vm.header.day).toBe(campaign.dayNumber)
-    expect(vm.header.reputation).toBe(campaign.reputation)
-    expect(vm.header.reputationLabel).toContain(String(campaign.reputation))
+    expect(vm.header.reputationScore).toBe(campaign.reputation.score)
+    expect(vm.header.tavernRank).toBe(1)
+    expect(vm.header.reputationLabel).toContain(
+      String(campaign.reputation.score),
+    )
     expect(vm.header.canResolveDay).toBe(true)
     expect(vm.header.canAdvanceDay).toBe(false)
   })

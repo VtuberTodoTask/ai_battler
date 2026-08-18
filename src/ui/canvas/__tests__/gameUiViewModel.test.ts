@@ -11,7 +11,7 @@ describe('gameUiViewModel', () => {
     const vm = buildGameUiViewModel(campaign)
 
     expect(vm.day).toBe(campaign.dayNumber)
-    expect(vm.reputation).toBe(campaign.reputation)
+    expect(vm.reputation).toBe(campaign.reputation.score)
     expect(typeof vm.reputationLabel).toBe('string')
   })
 

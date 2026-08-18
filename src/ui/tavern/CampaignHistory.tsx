@@ -34,10 +34,11 @@ export function CampaignHistory({
                 )
               }
             >
-              Day {record.dayNumber} — 評判 {record.reputationBefore} →{' '}
-              {record.reputationAfter} (
-              {record.reputationChange.appliedDelta >= 0 ? '+' : ''}
-              {record.reputationChange.appliedDelta})
+              Day {record.dayNumber} — 評判{' '}
+              {record.reputationSummary.beforeScore} →{' '}
+              {record.reputationSummary.afterScore} (
+              {record.reputationSummary.delta >= 0 ? '+' : ''}
+              {record.reputationSummary.delta})
             </button>
             {expandedDay === record.dayNumber && (
               <div className="history-detail">

@@ -2,6 +2,7 @@ import type { CampaignPartyEvent } from '../../../../core/tavern/types.ts'
 import type {
   CampaignProgressionEvent,
   CampaignRelationshipEvent,
+  DayReputationSummary,
   TavernCampaignState,
   TavernDayRecord,
 } from '../../../../core/tavern/campaign/types.ts'
@@ -16,6 +17,11 @@ import {
   validateSignedCurrencyAmount,
   type TavernLedgerEntry,
 } from '../../../../core/economy/index.ts'
+import {
+  getMaxQuestRank,
+  questRankUnlockLabel,
+  tavernRankLabel,
+} from '../../../../core/tavern/campaign/reputation.ts'
 
 export type DayResultsStep = 'important_events' | 'expedition_results'
 
@@ -32,6 +38,7 @@ export interface DayResultEventViewModel {
     | 'startedRecovery'
     | 'relationshipChange'
     | 'progression'
+    | 'tavernRankUp'
   title: string
   summary: string
   importance: DayResultEventImportance
@@ -65,6 +72,11 @@ export interface DailyFinanceSummary {
   currentFunds: number
 }
 
+export interface DailyReputationSummary extends DayReputationSummary {
+  beforeRankLabel: string
+  afterRankLabel: string
+}
+
 export interface DayResultsSceneViewModel {
   resolvedDay: number
   nextDay: number
@@ -72,6 +84,7 @@ export interface DayResultsSceneViewModel {
   importantEvents: DayResultEventViewModel[]
   expeditionResults: ExpeditionResultItemViewModel[]
   dailyFinanceSummary: DailyFinanceSummary
+  dailyReputationSummary?: DailyReputationSummary
   selectedResult?: ExpeditionResultItemViewModel
   selectedIndex: number
   canGoPrevious: boolean
@@ -363,6 +376,29 @@ function buildProgressionEvent(
   return null
 }
 
+function findDayRecord(
+  campaign: TavernCampaignState,
+  resolvedDay: number,
+): TavernDayRecord | undefined {
+  return campaign.history[campaign.history.length - 1]?.dayNumber ===
+    resolvedDay
+    ? campaign.history[campaign.history.length - 1]
+    : campaign.history.find((h) => h.dayNumber === resolvedDay)
+}
+
+function buildTavernRankUpEvent(
+  summary: DayReputationSummary,
+): DayResultEventViewModel {
+  const unlocked = questRankUnlockLabel(getMaxQuestRank(summary.afterRank))
+  return {
+    id: `tavern-rank-up:${summary.afterRank}`,
+    kind: 'tavernRankUp',
+    title: '酒場ランクが上がりました',
+    summary: `${tavernRankLabel(summary.beforeRank)} → ${tavernRankLabel(summary.afterRank)}\n${unlocked}が届くようになります。`,
+    importance: 'high',
+  }
+}
+
 function buildImportantEvents(
   campaign: TavernCampaignState,
   resolvedDay: number,
@@ -370,12 +406,12 @@ function buildImportantEvents(
 ): DayResultEventViewModel[] {
   const events: DayResultEventViewModel[] = []
 
-  const dayRecord: TavernDayRecord | undefined =
-    campaign.history[campaign.history.length - 1]?.dayNumber === resolvedDay
-      ? campaign.history[campaign.history.length - 1]
-      : campaign.history.find((h) => h.dayNumber === resolvedDay)
+  const dayRecord = findDayRecord(campaign, resolvedDay)
 
   if (dayRecord) {
+    if (dayRecord.reputationSummary.promoted) {
+      events.push(buildTavernRankUpEvent(dayRecord.reputationSummary))
+    }
     for (const event of dayRecord.partyEvents ?? []) {
       const vm = buildPartyEvent(event, campaign)
       if (vm) events.push(vm)
@@ -417,10 +453,7 @@ function buildExpeditionResults(
   seenResultIds: readonly string[],
 ): ExpeditionResultItemViewModel[] {
   const seen = new Set(seenResultIds)
-  const dayRecord: TavernDayRecord | undefined =
-    campaign.history[campaign.history.length - 1]?.dayNumber === resolvedDay
-      ? campaign.history[campaign.history.length - 1]
-      : campaign.history.find((h) => h.dayNumber === resolvedDay)
+  const dayRecord = findDayRecord(campaign, resolvedDay)
 
   const rawResults = dayRecord?.results ?? []
   const results: ExpeditionResultItemViewModel[] = []
@@ -475,6 +508,25 @@ export function projectDayFinanceSummary(
   return { commissionIncome, operatingCost, net, currentFunds }
 }
 
+/**
+ * Returns undefined when no history record exists for resolvedDay. This is
+ * a genuine "unknown" state, not "no change" — a fabricated 0/Rank 1
+ * fallback would misrepresent a missing record as an actual outcome.
+ */
+export function projectDayReputationSummary(
+  campaign: TavernCampaignState,
+  resolvedDay: number,
+): DailyReputationSummary | undefined {
+  const dayRecord = findDayRecord(campaign, resolvedDay)
+  if (!dayRecord) return undefined
+  const summary = dayRecord.reputationSummary
+  return {
+    ...summary,
+    beforeRankLabel: tavernRankLabel(summary.beforeRank),
+    afterRankLabel: tavernRankLabel(summary.afterRank),
+  }
+}
+
 export function buildDayResultsSceneViewModel(
   input: DayResultsSceneInput,
   seenResultIds: readonly string[] = [],
@@ -485,6 +537,11 @@ export function buildDayResultsSceneViewModel(
   const expeditionResults =
     input.expeditionResults ??
     buildExpeditionResults(input.campaign, input.resolvedDay, seenResultIds)
+
+  const dailyReputationSummary = projectDayReputationSummary(
+    input.campaign,
+    input.resolvedDay,
+  )
 
   const dailyFinanceSummary = projectDayFinanceSummary(
     input.campaign.finance.ledgerEntries,
@@ -504,6 +561,7 @@ export function buildDayResultsSceneViewModel(
     importantEvents,
     expeditionResults,
     dailyFinanceSummary,
+    dailyReputationSummary,
     selectedResult,
     selectedIndex: safeIndex,
     canGoPrevious: safeIndex > 0,

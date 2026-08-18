@@ -573,14 +573,13 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
       {
         dayNumber: campaign.dayNumber,
         daySeed: campaign.currentDay.seed,
-        reputationBefore: campaign.reputation,
-        reputationAfter: campaign.reputation,
-        reputationChange: {
-          before: campaign.reputation,
-          rawDelta: 0,
-          appliedDelta: 0,
-          after: campaign.reputation,
-          entries: [],
+        reputationSummary: {
+          beforeScore: campaign.reputation.score,
+          delta: 0,
+          afterScore: campaign.reputation.score,
+          beforeRank: 1,
+          afterRank: 1,
+          promoted: false,
         },
         results: [],
         partyEvents: [],

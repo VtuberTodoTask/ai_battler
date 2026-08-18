@@ -36,7 +36,7 @@ const LIST_ROW_HEIGHT = 74
 const CONTENT_Y = TOP_BAR_HEIGHT + MARGIN
 const CONTENT_HEIGHT =
   VIRTUAL_HEIGHT - TOP_BAR_HEIGHT - BOTTOM_BAR_HEIGHT - MARGIN * 3
-const FINANCE_SUMMARY_HEIGHT = 132
+const FINANCE_SUMMARY_HEIGHT = 192
 const BOTTOM_Y = CONTENT_Y + CONTENT_HEIGHT + MARGIN
 const DETAIL_X = LIST_WIDTH + MARGIN * 2
 const DETAIL_WIDTH = VIRTUAL_WIDTH - LIST_WIDTH - MARGIN * 3
@@ -308,7 +308,7 @@ export class DayResultsScene implements GameScene {
       width: VIRTUAL_WIDTH - MARGIN * 2,
       height: FINANCE_SUMMARY_HEIGHT,
       theme: context.theme,
-      title: '本日の収支',
+      title: '本日の収支・評判',
       alpha: 0.82,
     })
     panel.x = MARGIN
@@ -387,6 +387,58 @@ export class DayResultsScene implements GameScene {
     fundsLabel.x = left
     fundsLabel.y = y
     this._root!.addChild(fundsLabel)
+    y += rowHeight + 4
+
+    const reputationSeparator = new Graphics()
+    reputationSeparator
+      .rect(left, y - 2, right - left - MARGIN * 2, 1)
+      .fill({ color: context.theme.colors.panelBorder, alpha: 0.4 })
+    this._root!.addChild(reputationSeparator)
+
+    const reputation = viewModel.dailyReputationSummary
+
+    if (!reputation) {
+      const missingLabel = new GameLabel(
+        '本日の評判：評判記録なし',
+        context.theme,
+        'body',
+      )
+      missingLabel.anchor.set(0, 0.5)
+      missingLabel.x = left
+      missingLabel.y = y
+      this._root!.addChild(missingLabel)
+      return
+    }
+
+    const deltaText =
+      reputation.delta >= 0 ? `+${reputation.delta}` : `${reputation.delta}`
+
+    const reputationDeltaLabel = new GameLabel(
+      '本日の評判変動',
+      context.theme,
+      'body',
+    )
+    reputationDeltaLabel.anchor.set(0, 0.5)
+    reputationDeltaLabel.x = left
+    reputationDeltaLabel.y = y
+    this._root!.addChild(reputationDeltaLabel)
+
+    const reputationDeltaValue = new GameLabel(deltaText, context.theme, 'body')
+    reputationDeltaValue.anchor.set(1, 0.5)
+    reputationDeltaValue.x = right
+    reputationDeltaValue.y = y
+    this._root!.addChild(reputationDeltaValue)
+    y += rowHeight
+
+    const reputationLabel = new GameLabel(
+      `評判 ${reputation.beforeScore} → ${reputation.afterScore}（${reputation.afterRankLabel}）`,
+      context.theme,
+      'body',
+    )
+    reputationLabel.anchor.set(0, 0.5)
+    reputationLabel.x = left
+    reputationLabel.y = y
+    this._root!.addChild(reputationLabel)
   }
 
   private drawResultsList(

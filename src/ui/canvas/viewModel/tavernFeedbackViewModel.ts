@@ -1,4 +1,7 @@
-import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
+import type {
+  DayReputationSummary,
+  TavernCampaignState,
+} from '../../../core/tavern/campaign/types.ts'
 import { formatCurrencyAmount } from '../../../core/economy/index.ts'
 import type {
   BrokerageOfferAttempt,
@@ -7,6 +10,11 @@ import type {
   TavernParty,
 } from '../../../core/tavern/types.ts'
 import type { CampaignRelationshipEvent } from '../../../core/tavern/campaign/types.ts'
+import {
+  getMaxQuestRank,
+  questRankUnlockLabel,
+  tavernRankLabel,
+} from '../../../core/tavern/campaign/reputation.ts'
 import type { DowntimeEvent } from '../../../core/narrative/types.ts'
 import { acceptanceReasonText } from '../../../core/tavern/acceptance.ts'
 import { downtimeEventSummary } from '../../../core/narrative/downtime.ts'
@@ -29,6 +37,7 @@ export type TavernFeedbackKind =
   | 'stay_extension'
   | 'expedition_return'
   | 'downtime'
+  | 'tavern_rank_up'
   | 'other'
 
 export interface TavernFeedbackItem {
@@ -328,6 +337,44 @@ function buildExpeditionReturnFeedback(
   }
 }
 
+function buildTavernRankUpFeedback(
+  summary: DayReputationSummary,
+  viewedIds: Set<string>,
+): TavernFeedbackItem {
+  const id = `tavern-rank-up:${summary.afterRank}`
+  const unlocked = questRankUnlockLabel(getMaxQuestRank(summary.afterRank))
+  return {
+    id,
+    title: '酒場ランクが上がりました',
+    summary: `${tavernRankLabel(summary.beforeRank)} → ${tavernRankLabel(summary.afterRank)} / ${unlocked}が届くようになります`,
+    unread: !viewedIds.has(id),
+    narrativeStatus: 'viewed',
+    kind: 'tavern_rank_up',
+    canOpen: true,
+    importance: 'high',
+  }
+}
+
+/**
+ * The rank-up banner belongs to whichever day the player can currently
+ * make sense of: the day just resolved (still status 'resolved', before
+ * advancing) or, once advanced, the most recently completed day (status
+ * 'planning'). Only ever the single most recent relevant day is checked —
+ * an old promotion from several days back must not resurface here once a
+ * later, non-promoting day has been resolved.
+ */
+function findRelevantRankUpSummary(
+  campaign: TavernCampaignState,
+): { day: number; summary: DayReputationSummary } | undefined {
+  const record =
+    campaign.currentDay.status === 'resolved'
+      ? campaign.history.find((h) => h.dayNumber === campaign.dayNumber)
+      : campaign.history[campaign.history.length - 1]
+
+  if (!record || !record.reputationSummary.promoted) return undefined
+  return { day: record.dayNumber, summary: record.reputationSummary }
+}
+
 function pushUniqueFeedback(
   items: TavernFeedbackItem[],
   seen: Set<string>,
@@ -401,6 +448,17 @@ export function buildTavernFeedbackItems(
         nextSeq(),
       )
     }
+  }
+
+  const rankUp = findRelevantRankUpSummary(campaign)
+  if (rankUp) {
+    pushUniqueFeedback(
+      items,
+      seen,
+      buildTavernRankUpFeedback(rankUp.summary, viewedIds),
+      rankUp.day,
+      nextSeq(),
+    )
   }
 
   for (const event of postPartyEvents) {

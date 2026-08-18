@@ -31,7 +31,7 @@ const RELATIONSHIP_TYPES: string[] = [
 ]
 
 function makeParty(seed = 'downtime-test'): CampaignParty {
-  const party = generateCampaignParty(seed, 0, 10, 1)
+  const party = generateCampaignParty(seed, 0, 1, 1)
   // Ensure deterministic defaults for relationship tests.
   party.memberRelationships ??= {}
   const members = party.party.members

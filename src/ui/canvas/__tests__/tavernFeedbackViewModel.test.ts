@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
 import {
+  advanceCampaignDay,
   createTavernCampaign,
   resolveCampaignDay,
 } from '../../../core/tavern/campaign/campaign.ts'
@@ -148,14 +149,13 @@ describe('TavernFeedbackViewModel', () => {
       {
         dayNumber: campaign.dayNumber,
         daySeed: campaign.currentDay.seed,
-        reputationBefore: campaign.reputation,
-        reputationAfter: campaign.reputation,
-        reputationChange: {
-          before: campaign.reputation,
-          rawDelta: 0,
-          appliedDelta: 0,
-          after: campaign.reputation,
-          entries: [],
+        reputationSummary: {
+          beforeScore: campaign.reputation.score,
+          delta: 0,
+          afterScore: campaign.reputation.score,
+          beforeRank: 1,
+          afterRank: 1,
+          promoted: false,
         },
         results: [],
         partyEvents: [],
@@ -396,14 +396,13 @@ describe('TavernFeedbackViewModel', () => {
       {
         dayNumber: campaign.dayNumber,
         daySeed: campaign.currentDay.seed,
-        reputationBefore: campaign.reputation,
-        reputationAfter: campaign.reputation,
-        reputationChange: {
-          before: campaign.reputation,
-          rawDelta: 0,
-          appliedDelta: 0,
-          after: campaign.reputation,
-          entries: [],
+        reputationSummary: {
+          beforeScore: campaign.reputation.score,
+          delta: 0,
+          afterScore: campaign.reputation.score,
+          beforeRank: 1,
+          afterRank: 1,
+          promoted: false,
         },
         results: [],
         partyEvents: [],
@@ -482,5 +481,167 @@ describe('TavernFeedbackViewModel', () => {
         expect(expedition.reportId).toBeTruthy()
       }
     }
+  })
+
+  it('surfaces a high-importance tavern_rank_up item on a promotion day', () => {
+    let campaign = createTavernCampaign('feedback-rank-up')
+    let found = false
+
+    for (let day = 1; day <= 30 && !found; day++) {
+      let state = campaign.currentDay
+      for (const request of state.requests) {
+        for (const party of state.parties) {
+          if (party.availability === 'recovering') continue
+          try {
+            const next = offerRequestToParty(state, request.id, party.id)
+            if (next.matches.some((m) => m.requestId === request.id)) {
+              state = next
+              break
+            }
+          } catch {
+            // continue
+          }
+        }
+      }
+      campaign = resolveCampaignDay({ ...campaign, currentDay: state })
+      const lastRecord = campaign.history[campaign.history.length - 1]!
+      if (lastRecord.reputationSummary.promoted) {
+        const items = buildTavernFeedbackItems(campaign)
+        const rankUp = items.find((i) => i.kind === 'tavern_rank_up')
+        expect(rankUp).toBeDefined()
+        expect(rankUp?.importance).toBe('high')
+        expect(rankUp?.id).toBe(
+          `tavern-rank-up:${lastRecord.reputationSummary.afterRank}`,
+        )
+        found = true
+        break
+      }
+      if (day < 30) {
+        campaign = advanceCampaignDay(campaign)
+      }
+    }
+
+    expect(found).toBe(true)
+  })
+
+  describe('tavern rank-up activity lifecycle', () => {
+    function buildPlanningFixture(
+      dayNumber: number,
+      historyOverrides: {
+        dayNumber: number
+        beforeRank: 1 | 2 | 3 | 4 | 5
+        afterRank: 1 | 2 | 3 | 4 | 5
+        promoted: boolean
+      }[],
+    ) {
+      const campaign = createTavernCampaign('rank-up-fixture')
+      return {
+        ...campaign,
+        dayNumber,
+        currentDay: { ...campaign.currentDay, status: 'planning' as const },
+        history: historyOverrides.map((h) => ({
+          dayNumber: h.dayNumber,
+          daySeed: `fixture-day-${h.dayNumber}`,
+          reputationSummary: {
+            beforeScore: 0,
+            delta: 0,
+            afterScore: 0,
+            beforeRank: h.beforeRank,
+            afterRank: h.afterRank,
+            promoted: h.promoted,
+          },
+          results: [],
+          partyEvents: [],
+          progressionEvents: [],
+          relationshipEvents: [],
+        })),
+      }
+    }
+
+    it('shows exactly one rank-up activity for the most recently resolved day while in planning state', () => {
+      const fixture = buildPlanningFixture(6, [
+        { dayNumber: 5, beforeRank: 1, afterRank: 2, promoted: true },
+      ])
+
+      const items = buildTavernFeedbackItems(fixture)
+      const rankUpItems = items.filter((i) => i.kind === 'tavern_rank_up')
+
+      expect(rankUpItems).toHaveLength(1)
+      const rankUp = rankUpItems[0]!
+      expect(rankUp.id).toBe('tavern-rank-up:2')
+      expect(rankUp.day).toBe(5)
+      expect(rankUp.canOpen).toBe(true)
+      expect(rankUp.importance).toBe('high')
+      expect(rankUp.unread).toBe(true)
+    })
+
+    it('marks the rank-up activity as read once its stable id is in viewedActivityIds', () => {
+      const fixture = buildPlanningFixture(6, [
+        { dayNumber: 5, beforeRank: 1, afterRank: 2, promoted: true },
+      ])
+
+      const items = buildTavernFeedbackItems(fixture, ['tavern-rank-up:2'])
+      const rankUp = items.find((i) => i.kind === 'tavern_rank_up')
+
+      expect(rankUp).toBeDefined()
+      expect(rankUp?.unread).toBe(false)
+    })
+
+    it('shows no rank-up activity when the most recently resolved day did not promote', () => {
+      const fixture = buildPlanningFixture(6, [
+        { dayNumber: 5, beforeRank: 2, afterRank: 2, promoted: false },
+      ])
+
+      const items = buildTavernFeedbackItems(fixture)
+      expect(items.filter((i) => i.kind === 'tavern_rank_up')).toHaveLength(0)
+    })
+
+    it('does not resurface an old promotion once a later, non-promoting day has resolved', () => {
+      // Day 5 promoted 1 -> 2, but days 6-9 resolved with no further
+      // promotion. Now on day 10 planning, only day 9 (non-promoting) is
+      // the "most recent" day to check.
+      const fixture = buildPlanningFixture(10, [
+        { dayNumber: 5, beforeRank: 1, afterRank: 2, promoted: true },
+        { dayNumber: 6, beforeRank: 2, afterRank: 2, promoted: false },
+        { dayNumber: 7, beforeRank: 2, afterRank: 2, promoted: false },
+        { dayNumber: 8, beforeRank: 2, afterRank: 2, promoted: false },
+        { dayNumber: 9, beforeRank: 2, afterRank: 2, promoted: false },
+      ])
+
+      const items = buildTavernFeedbackItems(fixture)
+      expect(items.filter((i) => i.kind === 'tavern_rank_up')).toHaveLength(0)
+    })
+
+    it('surfaces the rank-up activity for the current day while it is still resolved (before advancing)', () => {
+      const campaign = createTavernCampaign('rank-up-fixture-resolved')
+      const fixture = {
+        ...campaign,
+        dayNumber: 5,
+        currentDay: { ...campaign.currentDay, status: 'resolved' as const },
+        history: [
+          {
+            dayNumber: 5,
+            daySeed: 'fixture-day-5',
+            reputationSummary: {
+              beforeScore: 15,
+              delta: 10,
+              afterScore: 25,
+              beforeRank: 1 as const,
+              afterRank: 2 as const,
+              promoted: true,
+            },
+            results: [],
+            partyEvents: [],
+            progressionEvents: [],
+            relationshipEvents: [],
+          },
+        ],
+      }
+
+      const items = buildTavernFeedbackItems(fixture)
+      const rankUpItems = items.filter((i) => i.kind === 'tavern_rank_up')
+      expect(rankUpItems).toHaveLength(1)
+      expect(rankUpItems[0]!.day).toBe(5)
+    })
   })
 })

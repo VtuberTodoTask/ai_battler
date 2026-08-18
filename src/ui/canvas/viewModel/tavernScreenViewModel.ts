@@ -1,14 +1,14 @@
 import { getOfferErrors } from '../../../core/tavern/brokerage.ts'
-import {
-  getReputationTier,
-  getReputationTierLabel,
-} from '../../../core/tavern/campaign/reputation.ts'
+import { deriveTavernRank } from '../../../core/tavern/campaign/reputation.ts'
 import {
   computeSuccessCommission,
   formatCurrencyAmount,
   formatSignedCurrencyAmount,
 } from '../../../core/economy/index.ts'
-import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
+import type {
+  TavernCampaignState,
+  TavernRank,
+} from '../../../core/tavern/campaign/types.ts'
 import type {
   TavernDayState,
   TavernParty,
@@ -31,7 +31,8 @@ import {
 
 export interface TavernHeaderViewModel {
   day: number
-  reputation: number
+  reputationScore: number
+  tavernRank: TavernRank
   reputationLabel: string
   moneyLabel?: string
   canAdvanceDay: boolean
@@ -467,12 +468,12 @@ export function buildTavernScreenViewModel(
   ).length
 
   const funds = campaign.finance.funds
+  const tavernRank = deriveTavernRank(campaign.reputation.peakScore)
   const header: TavernHeaderViewModel = {
     day: campaign.dayNumber,
-    reputation: campaign.reputation,
-    reputationLabel: `酒場評判 ${campaign.reputation}（${getReputationTierLabel(
-      getReputationTier(campaign.reputation),
-    )}）`,
+    reputationScore: campaign.reputation.score,
+    tavernRank,
+    reputationLabel: `酒場ランク ${tavernRank} / 評判 ${campaign.reputation.score}`,
     moneyLabel:
       funds < 0
         ? `資金 ${formatSignedCurrencyAmount(funds)} / 資金不足`

@@ -8,6 +8,7 @@ PHASE*_REPORT.md
 docs
 screenshots
 .github/screenshots
+.github/workflows
 *.png
 *.jpg
 *.jpeg

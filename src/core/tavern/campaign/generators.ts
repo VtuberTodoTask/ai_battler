@@ -13,7 +13,7 @@ import type {
 } from '../types.ts'
 import { getPartyRankWeights, getRequestRankWeights } from './rankWeights.ts'
 import { createInitialRelationship } from './relationship.ts'
-import type { CampaignParty } from './types.ts'
+import type { CampaignParty, TavernRank } from './types.ts'
 import { initializePartyMemberRelationships } from '../../narrative/characterRelationships.ts'
 
 const PARTY_NAMES = [
@@ -72,12 +72,12 @@ export function pickUniquePartyName(
 export function generateCampaignParty(
   campaignSeed: string,
   serial: number,
-  reputation: number,
+  tavernRank: TavernRank,
   arrivalDay: number,
 ): CampaignParty {
   const seed = `${campaignSeed}:arrival:${serial}`
   const templateRng = new SeededRng(`${seed}:template`)
-  const rankWeights = getPartyRankWeights(reputation)
+  const rankWeights = getPartyRankWeights(tavernRank)
   const rankRng = new SeededRng(`${seed}:rank`)
   const stayRng = new SeededRng(`${seed}:stay`)
 
@@ -122,7 +122,7 @@ export function generateCampaignParty(
 
 export function generateInitialCampaignParties(
   campaignSeed: string,
-  reputation: number,
+  tavernRank: TavernRank,
   startSerial: number,
 ): { parties: CampaignParty[]; nextSerial: number } {
   const parties: CampaignParty[] = []
@@ -130,7 +130,7 @@ export function generateInitialCampaignParties(
   let serial = startSerial
 
   for (let i = 0; i < 4; i++) {
-    const party = generateCampaignParty(campaignSeed, serial, reputation, 1)
+    const party = generateCampaignParty(campaignSeed, serial, tavernRank, 1)
     const name = pickUniquePartyName(
       `${campaignSeed}:arrival:${serial}`,
       usedNames,
@@ -157,10 +157,10 @@ export function rankIndex(rank: AdventurerRank): number {
 function pickRequestRank(
   rankRng: SeededRng,
   allowedMaxIndex: number,
-  reputation: number,
+  tavernRank: TavernRank,
   fallbackRank: AdventurerRank,
 ): AdventurerRank {
-  const weights = getRequestRankWeights(reputation)
+  const weights = getRequestRankWeights(tavernRank)
   const allowedRanks = RANKS.slice(0, allowedMaxIndex + 1)
   const allowedWeights = allowedRanks.map((r) => weights[r])
   const total = allowedWeights.reduce((a, b) => a + b, 0)
@@ -172,13 +172,13 @@ function pickRequestRank(
 
 export function planRequestRanksForDay(
   daySeed: string,
-  reputation: number,
+  tavernRank: TavernRank,
   availablePartyRanks: AdventurerRank[],
 ): RequestRankPlan {
   const rankRng = new SeededRng(`${daySeed}:request-ranks`)
 
   if (availablePartyRanks.length === 0) {
-    const weights = getRequestRankWeights(reputation)
+    const weights = getRequestRankWeights(tavernRank)
     const rankList = RANKS.map((r) => weights[r])
     const total = rankList.reduce((a, b) => a + b, 0)
     const pick = (): AdventurerRank => {
@@ -207,19 +207,19 @@ export function planRequestRanksForDay(
     serviceableA: pickRequestRank(
       rankRng,
       rankIndex(anchorA),
-      reputation,
+      tavernRank,
       anchorA,
     ),
     serviceableB: pickRequestRank(
       rankRng,
       rankIndex(anchorB),
-      reputation,
+      tavernRank,
       anchorB,
     ),
     open: pickRequestRank(
       rankRng,
       openMaxIndex,
-      reputation,
+      tavernRank,
       highestAvailableRank,
     ),
   }
@@ -252,10 +252,10 @@ function generateRequestForCampaign(
 
 export function generateTavernRequestsForDay(
   daySeed: string,
-  reputation: number,
+  tavernRank: TavernRank,
   availablePartyRanks: AdventurerRank[],
 ): TavernRequestOffer[] {
-  const plan = planRequestRanksForDay(daySeed, reputation, availablePartyRanks)
+  const plan = planRequestRanksForDay(daySeed, tavernRank, availablePartyRanks)
   const objectiveRng = new SeededRng(`${daySeed}:objectives`)
   const objectiveTypes = objectiveRng
     .shuffle([...ALL_OBJECTIVE_TYPES])

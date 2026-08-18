@@ -25,21 +25,21 @@ function isServiceable(
 describe('planRequestRanksForDay', () => {
   it('is deterministic for identical inputs', () => {
     const ranks: AdventurerRank[] = ['E', 'E', 'D', 'D']
-    const plan1 = planRequestRanksForDay('det-001', 10, ranks)
-    const plan2 = planRequestRanksForDay('det-001', 10, ranks)
+    const plan1 = planRequestRanksForDay('det-001', 1, ranks)
+    const plan2 = planRequestRanksForDay('det-001', 1, ranks)
     expect(plan2).toEqual(plan1)
   })
 
   it('is independent of array order for the same rank multiset', () => {
-    const plan1 = planRequestRanksForDay('order-001', 10, ['E', 'D', 'C', 'E'])
-    const plan2 = planRequestRanksForDay('order-001', 10, ['C', 'E', 'E', 'D'])
+    const plan1 = planRequestRanksForDay('order-001', 1, ['E', 'D', 'C', 'E'])
+    const plan2 = planRequestRanksForDay('order-001', 1, ['C', 'E', 'E', 'D'])
     expect(plan2).toEqual(plan1)
   })
 
   it('E-only roster produces at least 2 E ranks and no C/B/A/S', () => {
     const ranks: AdventurerRank[] = ['E', 'E', 'E', 'E']
     for (let i = 0; i < 100; i++) {
-      const plan = planRequestRanksForDay(`e-only-${i}`, 10, ranks)
+      const plan = planRequestRanksForDay(`e-only-${i}`, 1, ranks)
       const requestRanks = [plan.serviceableA, plan.serviceableB, plan.open]
       const dCount = requestRanks.filter((r) => r === 'D').length
       expect(requestRanks.every((r) => rankValue(r) <= rankValue('D'))).toBe(
@@ -54,7 +54,7 @@ describe('planRequestRanksForDay', () => {
   it('D-only roster produces at least 2 <= D ranks and no B/A/S', () => {
     const ranks: AdventurerRank[] = ['D', 'D', 'D', 'D']
     for (let i = 0; i < 100; i++) {
-      const plan = planRequestRanksForDay(`d-only-${i}`, 10, ranks)
+      const plan = planRequestRanksForDay(`d-only-${i}`, 1, ranks)
       const requestRanks = [plan.serviceableA, plan.serviceableB, plan.open]
       expect(requestRanks.every((r) => rankValue(r) <= rankValue('C'))).toBe(
         true,
@@ -72,7 +72,7 @@ describe('planRequestRanksForDay', () => {
   it('mixed E/E/D/D roster keeps requests <= C with at least 2 <= D', () => {
     const ranks: AdventurerRank[] = ['E', 'E', 'D', 'D']
     for (let i = 0; i < 100; i++) {
-      const plan = planRequestRanksForDay(`mixed-${i}`, 10, ranks)
+      const plan = planRequestRanksForDay(`mixed-${i}`, 1, ranks)
       const requestRanks = [plan.serviceableA, plan.serviceableB, plan.open]
       expect(requestRanks.every((r) => rankValue(r) <= rankValue('C'))).toBe(
         true,
@@ -87,7 +87,7 @@ describe('planRequestRanksForDay', () => {
   it('S-only roster never exceeds the S challenge cap', () => {
     const ranks: AdventurerRank[] = ['S', 'S', 'S', 'S']
     for (let i = 0; i < 100; i++) {
-      const plan = planRequestRanksForDay(`s-only-${i}`, 90, ranks)
+      const plan = planRequestRanksForDay(`s-only-${i}`, 5, ranks)
       const requestRanks = [plan.serviceableA, plan.serviceableB, plan.open]
       expect(requestRanks.every((r) => rankValue(r) <= rankValue('S'))).toBe(
         true,
@@ -98,23 +98,25 @@ describe('planRequestRanksForDay', () => {
     }
   })
 
-  it('high reputation with weak C roster keeps serviceable slots at C', () => {
+  it('high tavern rank with weak C roster keeps serviceable slots at or below C', () => {
     const ranks: AdventurerRank[] = ['C', 'C', 'C', 'C']
     for (let i = 0; i < 100; i++) {
-      const plan = planRequestRanksForDay(`weak-c-${i}`, 90, ranks)
+      const plan = planRequestRanksForDay(`weak-c-${i}`, 5, ranks)
       const requestRanks = [plan.serviceableA, plan.serviceableB, plan.open]
-      const cServiceable = [plan.serviceableA, plan.serviceableB].filter(
-        (r) => r === 'C',
+      // Serviceable slots are anchored to the C-only roster, so they must
+      // stay at or below C even though the tavern rank allows up to S.
+      const serviceableCount = [plan.serviceableA, plan.serviceableB].filter(
+        (r) => rankValue(r) <= rankValue('C'),
       ).length
-      expect(cServiceable).toBe(2)
+      expect(serviceableCount).toBe(2)
       expect(requestRanks.every((r) => rankValue(r) <= rankValue('B'))).toBe(
         true,
       )
     }
   })
 
-  it('falls back to reputation-only generation when no parties are available', () => {
-    const requests = generateTavernRequestsForDay('empty-001', 10, [])
+  it('falls back to tavern-rank-only generation when no parties are available', () => {
+    const requests = generateTavernRequestsForDay('empty-001', 1, [])
     expect(requests).toHaveLength(3)
     for (const request of requests) {
       expect(RANKS).toContain(request.rank)
@@ -128,7 +130,7 @@ describe('generateTavernRequestsForDay', () => {
     for (let i = 0; i < 100; i++) {
       const requests = generateTavernRequestsForDay(
         `gen-invariant-${i}`,
-        10,
+        1,
         availableRanks,
       )
       expect(requests).toHaveLength(3)

@@ -110,6 +110,14 @@ function buildContinuousPlanningSave(seed: string, dayNumber: number) {
       partyEvents: [],
       relationshipEvents: [],
       progressionEvents: [],
+      reputationSummary: {
+        beforeScore: 0,
+        delta: 0,
+        afterScore: 0,
+        beforeRank: 1,
+        afterRank: 1,
+        promoted: false,
+      },
     } as never)
   }
   save.campaign.finance.ledgerEntries = [

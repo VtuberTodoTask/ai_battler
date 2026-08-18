@@ -12,11 +12,7 @@ import {
 } from './partyState.ts'
 import { applyQuestSettlement } from '../../economy/finance.ts'
 import { getPartyRankWeights, getRequestRankWeights } from './rankWeights.ts'
-import {
-  getReputationTier,
-  getReputationTierLabel,
-  computeReputationChange,
-} from './reputation.ts'
+import { deriveTavernRank } from './reputation.ts'
 
 function findAcceptingPair(campaign: ReturnType<typeof createTavernCampaign>) {
   for (const request of campaign.currentDay.requests) {
@@ -35,11 +31,13 @@ function findAcceptingPair(campaign: ReturnType<typeof createTavernCampaign>) {
 }
 
 describe('Campaign domain', () => {
-  it('creates a new campaign with day 1, reputation 10, 4 parties and 3 requests', () => {
+  it('creates a new campaign with day 1, zero reputation, 4 parties and 3 requests', () => {
     const campaign = createTavernCampaign('tavern-campaign-test-001')
     expect(campaign.version).toBe(1)
     expect(campaign.dayNumber).toBe(1)
-    expect(campaign.reputation).toBe(10)
+    expect(campaign.reputation.score).toBe(0)
+    expect(campaign.reputation.peakScore).toBe(0)
+    expect(campaign.reputation.events).toEqual([])
     expect(campaign.parties).toHaveLength(4)
     expect(campaign.currentDay.requests).toHaveLength(3)
     expect(campaign.currentDay.parties).toHaveLength(4)
@@ -47,10 +45,9 @@ describe('Campaign domain', () => {
     expect(campaign.currentDay.status).toBe('planning')
   })
 
-  it('starts with the unknown reputation tier', () => {
+  it('starts at tavern rank 1', () => {
     const campaign = createTavernCampaign('tavern-campaign-tier-001')
-    expect(getReputationTier(campaign.reputation)).toBe('unknown')
-    expect(getReputationTierLabel('unknown')).toBe('駆け出し')
+    expect(deriveTavernRank(campaign.reputation.peakScore)).toBe(1)
   })
 
   it('advances party serial and assigns unique ids', () => {
@@ -65,9 +62,10 @@ describe('Campaign domain', () => {
     campaign = resolveCampaignDay(campaign)
     expect(campaign.currentDay.status).toBe('resolved')
     expect(campaign.currentDay.results).toHaveLength(3)
-    expect(campaign.reputation).toBe(10)
+    expect(campaign.reputation.score).toBe(0)
+    expect(campaign.reputation.events).toEqual([])
     expect(campaign.history).toHaveLength(1)
-    expect(campaign.history[0].reputationChange.appliedDelta).toBe(0)
+    expect(campaign.history[0].reputationSummary.delta).toBe(0)
   })
 
   it('resolves a day with an accepted match and updates party stats and reputation', () => {
@@ -80,7 +78,7 @@ describe('Campaign domain', () => {
         ...campaign,
         currentDay: pair.next,
       }
-      const beforeReputation = campaign.reputation
+      const beforeReputation = campaign.reputation.score
       const partyBefore = campaign.parties.find((p) => p.id === pair.partyId)!
       campaign = resolveCampaignDay(campaign)
       const partyAfter = campaign.parties.find((p) => p.id === pair.partyId)!
@@ -88,9 +86,12 @@ describe('Campaign domain', () => {
         partyBefore.stats.totalExpeditions + 1,
       )
       expect(campaign.currentDay.status).toBe('resolved')
-      expect(campaign.reputation).toBeGreaterThanOrEqual(0)
-      expect(campaign.reputation).toBeLessThanOrEqual(100)
-      expect(campaign.history[0].reputationBefore).toBe(beforeReputation)
+      expect(Number.isInteger(campaign.reputation.score)).toBe(true)
+      expect(campaign.reputation.peakScore).toBeGreaterThanOrEqual(0)
+      expect(campaign.history[0].reputationSummary.beforeScore).toBe(
+        beforeReputation,
+      )
+      expect(campaign.reputation.events).toHaveLength(1)
     }
   })
 
@@ -165,17 +166,6 @@ describe('Campaign domain', () => {
       party.party.members[0].maxHp * 0.2,
     )
     expect(calculateRecoveryDays(party)).toBe(2)
-  })
-
-  it('clamps reputation between 0 and 100', () => {
-    const summary = computeReputationChange(95, [
-      { requestId: 'r1', outcome: 'completeSuccess' },
-      { requestId: 'r2', outcome: 'completeSuccess' },
-      { requestId: 'r3', outcome: 'completeSuccess' },
-    ])
-    expect(summary.after).toBe(100)
-    expect(summary.rawDelta).toBe(9)
-    expect(summary.appliedDelta).toBe(5)
   })
 
   it('recovery completion gives minimum 70 morale and avoids double overnight recovery', () => {
@@ -352,18 +342,34 @@ describe('Campaign domain', () => {
     ).toBe(party.stats.totalExpeditions)
   })
 
-  it('returns rank weights by reputation tier', () => {
-    expect(
-      Object.values(getPartyRankWeights(10)).reduce((a, b) => a + b, 0),
-    ).toBe(100)
-    expect(getPartyRankWeights(10).A).toBe(0)
-    expect(getPartyRankWeights(50).A).toBeGreaterThan(0)
+  it('returns rank weights hard-capped by tavern rank', () => {
+    expect(getPartyRankWeights(1).A).toBe(0)
+    expect(getPartyRankWeights(1).C).toBe(0)
+    expect(getPartyRankWeights(4).A).toBeGreaterThan(0)
+    expect(getPartyRankWeights(4).S).toBe(0)
 
-    expect(
-      Object.values(getRequestRankWeights(10)).reduce((a, b) => a + b, 0),
-    ).toBe(100)
-    expect(getRequestRankWeights(10).S).toBe(0)
-    expect(getRequestRankWeights(90).S).toBeGreaterThan(0)
+    expect(getRequestRankWeights(1).S).toBe(0)
+    expect(getRequestRankWeights(1).C).toBe(0)
+    expect(getRequestRankWeights(5).S).toBeGreaterThan(0)
+  })
+
+  it('never excludes lower ranks from the candidate pool, even at tavern rank 5', () => {
+    // Raising the rank ceiling must never crowd out E/D/C content.
+    const partyWeights5 = getPartyRankWeights(5)
+    expect(partyWeights5.E).toBeGreaterThan(0)
+    expect(partyWeights5.D).toBeGreaterThan(0)
+    expect(partyWeights5.C).toBeGreaterThan(0)
+    expect(partyWeights5.B).toBeGreaterThan(0)
+    expect(partyWeights5.A).toBeGreaterThan(0)
+    expect(partyWeights5.S).toBeGreaterThan(0)
+
+    const requestWeights5 = getRequestRankWeights(5)
+    expect(requestWeights5.E).toBeGreaterThan(0)
+    expect(requestWeights5.D).toBeGreaterThan(0)
+    expect(requestWeights5.C).toBeGreaterThan(0)
+    expect(requestWeights5.B).toBeGreaterThan(0)
+    expect(requestWeights5.A).toBeGreaterThan(0)
+    expect(requestWeights5.S).toBeGreaterThan(0)
   })
 
   describe('relationship and stay extension', () => {

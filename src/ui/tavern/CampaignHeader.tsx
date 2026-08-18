@@ -1,7 +1,7 @@
 import {
-  getNextTierThreshold,
-  getReputationTier,
-  getReputationTierLabel,
+  deriveTavernRank,
+  getNextTavernRankThreshold,
+  isMaxTavernRank,
 } from '../../core/tavern/campaign/reputation.ts'
 import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
 
@@ -10,9 +10,9 @@ export interface CampaignHeaderProps {
 }
 
 export function CampaignHeader({ campaign }: CampaignHeaderProps) {
-  const tier = getReputationTier(campaign.reputation)
-  const tierLabel = getReputationTierLabel(tier)
-  const nextThreshold = getNextTierThreshold(campaign.reputation)
+  const { score, peakScore } = campaign.reputation
+  const tavernRank = deriveTavernRank(peakScore)
+  const nextThreshold = getNextTavernRankThreshold(tavernRank)
 
   return (
     <div className="campaign-header" data-testid="campaign-header">
@@ -22,15 +22,12 @@ export function CampaignHeader({ campaign }: CampaignHeaderProps) {
       </div>
       <div className="reputation-bar" data-testid="reputation-bar">
         <div className="reputation-label">
-          <span>酒場評判</span>
-          <span>
-            {campaign.reputation} / 100 「{tierLabel}」
-          </span>
+          <span>酒場ランク {tavernRank}</span>
+          <span>評判 {score}</span>
         </div>
-        <progress max={100} value={campaign.reputation} />
-        {nextThreshold !== null && (
+        {!isMaxTavernRank(tavernRank) && nextThreshold !== null && (
           <span className="reputation-next">
-            次のTierまで {nextThreshold - campaign.reputation}
+            次のランクまで 評判 {nextThreshold}
           </span>
         )}
       </div>
