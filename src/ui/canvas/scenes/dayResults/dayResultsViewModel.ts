@@ -11,6 +11,7 @@ import {
   buildReportFromResult,
   type ExpeditionReportViewModel,
 } from '../../viewModel/expeditionReportViewModel.ts'
+import { formatCurrencyAmount } from '../../../../core/economy/index.ts'
 
 export type DayResultsStep = 'important_events' | 'expedition_results'
 
@@ -91,8 +92,20 @@ export function buildSummaryLines(report: ExpeditionReportViewModel): string[] {
   if (report.survivalText) {
     lines.push(`生還：${report.survivalText}`)
   }
-  const reward = report.rewards.map((r) => r.label).join(' / ') || '記録なし'
-  lines.push(`報酬：${reward}`)
+  if (report.settlement) {
+    const { settlement } = report
+    lines.push('精算')
+    lines.push(`提示報酬 ${formatCurrencyAmount(settlement.promisedReward)}`)
+    lines.push(`支払額 ${formatCurrencyAmount(settlement.paidReward)}`)
+    lines.push(`酒場収入 ${formatCurrencyAmount(settlement.tavernCommission)}`)
+    if (settlement.settlementReason === 'objective_failed') {
+      lines.push('依頼目標を達成できなかったため、報酬は支払われなかった。')
+    } else if (settlement.settlementReason === 'partial_objective') {
+      lines.push('目標を一部達成したため、報酬は半額支払われた。')
+    }
+  } else {
+    lines.push('精算記録なし')
+  }
 
   const casualties = report.casualties.map((c) => `${c.name}（${c.condition}）`)
   if (casualties.length > 0) {

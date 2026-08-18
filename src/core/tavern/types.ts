@@ -24,6 +24,7 @@ import type {
   DowntimeEvent,
   RelationshipMilestone,
 } from '../narrative/types.ts'
+import type { QuestRewardTerms, QuestSettlement } from '../economy/types.ts'
 
 export type PartyRiskTolerance = 'cautious' | 'balanced' | 'bold'
 
@@ -63,6 +64,7 @@ export interface TavernRequestOffer {
   publicTags: string[]
   recommendedPartySize: number
   expeditionRequest: ExpeditionRequest
+  rewardTerms: QuestRewardTerms
 }
 
 export interface PublicRequestProfile {
@@ -209,6 +211,7 @@ export interface ResolvedDispatch {
   status: 'resolved' | 'notBrokered'
   result?: ExpeditionResult
   report?: DispatchReport
+  settlement?: QuestSettlement
 }
 
 export interface DispatchPartyResult {
@@ -318,6 +321,7 @@ export interface DispatchReport {
   incapacitated: string[]
   keyFacts: string[]
   objective: DispatchObjectiveSummary
+  settlement?: QuestSettlement
 }
 
 export interface TavernRequestTemplate {

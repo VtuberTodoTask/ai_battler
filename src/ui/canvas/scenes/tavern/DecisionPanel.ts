@@ -270,6 +270,18 @@ export class DecisionPanel extends Container {
     container.addChild(rank)
     y += rank.textHeight + 12
 
+    const rewardBlock = [
+      quest.promisedRewardLabel,
+      quest.successCommissionLabel,
+    ].join('\n')
+    const reward = new GameLabel(rewardBlock, this._theme, 'body', {
+      maxWidth,
+      breakWords: true,
+    })
+    reward.y = y
+    container.addChild(reward)
+    y += reward.textHeight + 12
+
     const infoBlock = [
       `種別：${quest.objectiveTypeLabel}`,
       `地域：${quest.terrainLabel}`,

@@ -22,6 +22,7 @@ import type {
   RelationshipMilestone,
   StayExtensionReason,
 } from '../../narrative/types.ts'
+import type { TavernFinanceState } from '../../economy/types.ts'
 
 export type TavernReputationTier =
   'unknown' | 'local' | 'trusted' | 'renowned' | 'legendary'
@@ -196,4 +197,5 @@ export interface TavernCampaignState {
   history: TavernDayRecord[]
   narrativeCandidates: NarrativeCandidate[]
   narrativeGenerations: NarrativeGenerationRecord[]
+  finance: TavernFinanceState
 }

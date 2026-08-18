@@ -241,12 +241,13 @@ function generateRequestForCampaign(
   const requestSeed = `${daySeed}:request:${index}:expedition`
   const requestId = `tavern-request-${index}-${daySeed}`
 
-  return template.build({
+  const offer = template.build({
     requestId,
     seed: requestSeed,
     rank,
     battleEnabled,
   })
+  return offer
 }
 
 export function generateTavernRequestsForDay(

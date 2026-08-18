@@ -7,6 +7,7 @@ import type {
   HiddenInformation,
   ObjectiveType,
 } from '../expedition/types.ts'
+import { computeQuestRewardTerms } from '../economy/index.ts'
 import type { TavernRequestOffer, TavernRequestTemplate } from './types.ts'
 
 function baseRequest(
@@ -71,6 +72,7 @@ function buildOffer(
     publicTags,
     recommendedPartySize: 4,
     expeditionRequest: request,
+    rewardTerms: computeQuestRewardTerms(rank),
   }
 }
 
