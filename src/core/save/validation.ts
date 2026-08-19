@@ -1488,6 +1488,148 @@ function validatePartyLifecycle(
   for (const p of retiredParties) checkPartyEntry(p, 'retired')
 }
 
+/**
+ * Proves that the planning day's roster snapshot (currentDay.parties) is
+ * exactly the persistent staying roster (campaign.parties) — same set of
+ * partyIds, no duplicates, no away/retired party smuggled in, and no
+ * staying party missing. Also cross-checks a few identity fields
+ * (arrivalDay, plannedDepartureDay, member id set) so the snapshot can only
+ * represent the persistent party it claims to. Day-local presentation
+ * fields (acceptedRequestId, availability, recoveryDaysRemaining, isNew,
+ * arrivalBadge) are derived fresh every day from campaign state and are
+ * deliberately NOT required to match anything stored on the persistent
+ * party — this is not a full CampaignParty/TavernParty deep-equality
+ * validator, only an identity/membership check.
+ */
+function validateCurrentDayRosterIntegrity(
+  campaign: Record<string, unknown>,
+  currentDay: Record<string, unknown>,
+): void {
+  if (!Array.isArray(currentDay.parties)) {
+    throw new SaveValidationErrorClass(
+      '本日のパーティ一覧が壊れています',
+      'corrupted-data',
+    )
+  }
+  const persistentParties = campaign.parties as unknown[]
+  const snapshotParties = currentDay.parties
+
+  if (snapshotParties.length !== persistentParties.length) {
+    throw new SaveValidationErrorClass(
+      '本日のパーティ数が滞在中のパーティ数と一致しません',
+      'corrupted-data',
+    )
+  }
+
+  const persistentById = new Map<string, Record<string, unknown>>()
+  for (const raw of persistentParties) {
+    assertPlainObject(raw, 'パーティデータが壊れています')
+    if (!hasString(raw, 'id') || (raw.id as string).length === 0) {
+      throw new SaveValidationErrorClass(
+        'パーティIDがありません',
+        'corrupted-data',
+      )
+    }
+    persistentById.set(raw.id as string, raw)
+  }
+
+  const collectIds = (value: unknown): Set<string> => {
+    const ids = new Set<string>()
+    if (!Array.isArray(value)) return ids
+    for (const raw of value) {
+      assertPlainObject(raw, 'パーティデータが壊れています')
+      if (hasString(raw, 'id')) ids.add(raw.id as string)
+    }
+    return ids
+  }
+  const awayIds = collectIds(campaign.awayParties)
+  const retiredIds = collectIds(campaign.retiredParties)
+
+  const seenSnapshotIds = new Set<string>()
+  for (const raw of snapshotParties) {
+    assertPlainObject(raw, '本日のパーティデータが壊れています')
+    if (!hasString(raw, 'id') || (raw.id as string).length === 0) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティIDがありません',
+        'corrupted-data',
+      )
+    }
+    const id = raw.id as string
+    if (seenSnapshotIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティ一覧に重複したパーティIDがあります',
+        'corrupted-data',
+      )
+    }
+    seenSnapshotIds.add(id)
+
+    if (awayIds.has(id) || retiredIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '旅立った、または引退したパーティが本日のパーティ一覧に含まれています',
+        'corrupted-data',
+      )
+    }
+
+    const persistent = persistentById.get(id)
+    if (!persistent) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティが滞在中のパーティ一覧にありません',
+        'corrupted-data',
+      )
+    }
+
+    if (raw.arrivalDay !== persistent.arrivalDay) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティの来訪日が滞在中のパーティと一致しません',
+        'corrupted-data',
+      )
+    }
+    if (raw.plannedDepartureDay !== persistent.plannedDepartureDay) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティの滞在予定日が滞在中のパーティと一致しません',
+        'corrupted-data',
+      )
+    }
+
+    const snapshotPartyObj = raw.party
+    const persistentPartyObj = persistent.party
+    if (isPlainObject(snapshotPartyObj) && isPlainObject(persistentPartyObj)) {
+      const toMemberIdSet = (value: unknown): string[] | undefined => {
+        if (!Array.isArray(value)) return undefined
+        return value
+          .filter(
+            (m): m is Record<string, unknown> =>
+              isPlainObject(m) && hasString(m, 'id'),
+          )
+          .map((m) => m.id as string)
+          .sort()
+      }
+      const snapshotMemberIds = toMemberIdSet(snapshotPartyObj.members)
+      const persistentMemberIds = toMemberIdSet(persistentPartyObj.members)
+      if (snapshotMemberIds && persistentMemberIds) {
+        const mismatched =
+          snapshotMemberIds.length !== persistentMemberIds.length ||
+          snapshotMemberIds.some((mid, i) => mid !== persistentMemberIds[i])
+        if (mismatched) {
+          throw new SaveValidationErrorClass(
+            '本日のパーティのメンバー構成が滞在中のパーティと一致しません',
+            'corrupted-data',
+          )
+        }
+      }
+    }
+  }
+
+  for (const id of persistentById.keys()) {
+    if (!seenSnapshotIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '滞在中のパーティが本日のパーティ一覧に存在しません',
+        'corrupted-data',
+      )
+    }
+  }
+}
+
 export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   if (!isPlainObject(raw)) {
     throw new SaveValidationErrorClass(
@@ -1830,6 +1972,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
     campaign.dayNumber as number,
     effectivePartyCapacity,
   )
+
+  validateCurrentDayRosterIntegrity(campaign, currentDay)
 
   if (
     !isPlainObject(raw.randomState) ||

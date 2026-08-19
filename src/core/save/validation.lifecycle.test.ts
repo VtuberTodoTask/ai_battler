@@ -16,6 +16,37 @@ function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
 }
 
+/**
+ * Removes a party from the planning day's roster snapshot to keep it in
+ * sync with a persistent-side mutation (e.g. moving a party out of
+ * campaign.parties) — otherwise the new currentDay/persistent roster
+ * integrity check (Phase 9.4.1) would reject the save for an unrelated
+ * reason before the invariant under test is even reached.
+ */
+function removeFromCurrentDaySnapshot(
+  save: ReturnType<typeof serializeGameSave>,
+  partyId: string,
+): void {
+  save.campaign.currentDay.parties = save.campaign.currentDay.parties.filter(
+    (p) => p.id !== partyId,
+  )
+}
+
+/** Clones a party-shaped object (persistent CampaignParty or day-snapshot
+ * TavernParty) and renames its id and every member id by appending suffix,
+ * so a persistent-side "extra party" fixture and its matching currentDay
+ * snapshot entry can be built with exactly the same identity. */
+function cloneWithSuffix<
+  T extends { id: string; party: { members: { id: string }[] } },
+>(value: T, suffix: string): T {
+  const cloned = clone(value)
+  cloned.id = `${cloned.id}${suffix}`
+  for (const member of cloned.party.members) {
+    member.id = `${member.id}${suffix}`
+  }
+  return cloned
+}
+
 function acceptAllPossible(campaign: TavernCampaignState): TavernCampaignState {
   let state = campaign.currentDay
   const matchedPartyIds = new Set<string>()
@@ -99,6 +130,7 @@ describe('save validation: party lifecycle (Phase 9.4)', () => {
     const save = baseSave('lifecycle-away-missing-departure')
     const dayNumber = save.campaign.dayNumber as number
     const away = clone(save.campaign.parties.pop()!)
+    removeFromCurrentDaySnapshot(save, away.id)
     away.lifecycle = {
       status: 'away',
       firstArrivalDay: away.lifecycle.firstArrivalDay,
@@ -113,6 +145,7 @@ describe('save validation: party lifecycle (Phase 9.4)', () => {
     const save = baseSave('lifecycle-away-bad-cooldown')
     const dayNumber = save.campaign.dayNumber as number
     const away = clone(save.campaign.parties.pop()!)
+    removeFromCurrentDaySnapshot(save, away.id)
     away.lifecycle = {
       status: 'away',
       firstArrivalDay: away.lifecycle.firstArrivalDay,
@@ -135,6 +168,7 @@ describe('save validation: party lifecycle (Phase 9.4)', () => {
     const save = baseSave('lifecycle-retired-with-return-day')
     const dayNumber = save.campaign.dayNumber as number
     const retired = clone(save.campaign.parties.pop()!)
+    removeFromCurrentDaySnapshot(save, retired.id)
     retired.lifecycle = {
       status: 'retired',
       firstArrivalDay: retired.lifecycle.firstArrivalDay,
@@ -150,6 +184,7 @@ describe('save validation: party lifecycle (Phase 9.4)', () => {
   it('rejects a retired party missing lastDepartureDay', () => {
     const save = baseSave('lifecycle-retired-missing-departure')
     const retired = clone(save.campaign.parties.pop()!)
+    removeFromCurrentDaySnapshot(save, retired.id)
     retired.lifecycle = {
       status: 'retired',
       firstArrivalDay: retired.lifecycle.firstArrivalDay,
@@ -170,6 +205,7 @@ describe('save validation: party lifecycle (Phase 9.4)', () => {
     const save = baseSave('lifecycle-future-departure')
     const dayNumber = save.campaign.dayNumber as number
     const away = clone(save.campaign.parties.pop()!)
+    removeFromCurrentDaySnapshot(save, away.id)
     away.lifecycle = {
       status: 'away',
       firstArrivalDay: away.lifecycle.firstArrivalDay,
@@ -185,6 +221,7 @@ describe('save validation: party lifecycle (Phase 9.4)', () => {
     const save = baseSave('lifecycle-future-return-eligible-ok')
     const dayNumber = save.campaign.dayNumber as number
     const away = clone(save.campaign.parties.pop()!)
+    removeFromCurrentDaySnapshot(save, away.id)
     away.lifecycle = {
       status: 'away',
       firstArrivalDay: away.lifecycle.firstArrivalDay,
@@ -219,12 +256,13 @@ describe('save validation: party lifecycle (Phase 9.4)', () => {
 
   it('rejects a staying-party roster larger than the effective (Guest Room derived) capacity', () => {
     const save = baseSave('lifecycle-capacity-exceeded')
-    const extra = clone(save.campaign.parties[0])
-    extra.id = `${extra.id}-clone`
-    for (const member of extra.party.members) {
-      member.id = `${member.id}-clone`
-    }
+    const extra = cloneWithSuffix(save.campaign.parties[0], '-clone')
+    const extraSnapshot = cloneWithSuffix(
+      save.campaign.currentDay.parties[0],
+      '-clone',
+    )
     save.campaign.parties.push(extra)
+    save.campaign.currentDay.parties.push(extraSnapshot)
     expect(() => validateGameSave(save)).toThrow()
   })
 
@@ -249,12 +287,13 @@ describe('save validation: party lifecycle (Phase 9.4)', () => {
     campaign = purchase.campaign
 
     const save = clone(serializeGameSave({ campaign }))
-    const extra = clone(save.campaign.parties[0])
-    extra.id = `${extra.id}-clone`
-    for (const member of extra.party.members) {
-      member.id = `${member.id}-clone`
-    }
+    const extra = cloneWithSuffix(save.campaign.parties[0], '-clone')
+    const extraSnapshot = cloneWithSuffix(
+      save.campaign.currentDay.parties[0],
+      '-clone',
+    )
     save.campaign.parties.push(extra)
+    save.campaign.currentDay.parties.push(extraSnapshot)
     expect(() => validateGameSave(save)).not.toThrow()
   })
 

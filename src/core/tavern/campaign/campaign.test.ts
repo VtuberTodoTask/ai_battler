@@ -216,7 +216,7 @@ describe('Campaign domain', () => {
     expect(tavernParty.availability).toBe('available')
   })
 
-  it('prioritizes scheduled departure over recovery completion', () => {
+  it('completes recovery before evaluating departure when both land on the same transition', () => {
     let campaign = createTavernCampaign(
       'tavern-campaign-departure-over-recovery-001',
     )
@@ -233,10 +233,16 @@ describe('Campaign domain', () => {
     expect(campaign.parties.some((p) => p.id === targetId)).toBe(false)
     const day3Events = campaign.currentDay.partyEvents ?? []
     expect(day3Events.some((e) => e.type === 'departedScheduled')).toBe(true)
-    expect(day3Events.some((e) => e.type === 'finishedRecovery')).toBe(false)
+    // Recovery completed on the same transition it departs on — the party
+    // must be fully recovered before its lifecycle state is captured as
+    // 'away', not carried into the away roster mid-recovery.
+    expect(day3Events.some((e) => e.type === 'finishedRecovery')).toBe(true)
     expect(
       day3Events.filter((e) => e.partyId === targetId).map((e) => e.type),
-    ).toEqual(['departedScheduled'])
+    ).toEqual(['finishedRecovery', 'departedScheduled'])
+
+    const departed = campaign.awayParties.find((p) => p.id === targetId)
+    expect(departed?.recoveringThroughDay).toBeUndefined()
   })
 
   it('orders departure, recovery completion, and overnight recovery correctly', () => {
