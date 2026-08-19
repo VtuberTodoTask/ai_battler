@@ -12,13 +12,20 @@ import {
   deriveTavernRank,
 } from '../tavern/campaign/reputation.ts'
 import {
+  BASE_PARTY_CAPACITY,
   MAX_TAVERN_UPGRADE_LEVEL,
   TAVERN_UPGRADE_IDS,
+  getEffectivePartyCapacity,
   getUpgradeLevelConfig,
 } from '../tavern/campaign/upgrades.ts'
+import { PARTY_LIFECYCLE_CONFIG } from '../tavern/campaign/lifecycle.ts'
 import type { AdventurerRank } from '../models/types.ts'
 import type { ExpeditionOutcome } from '../expedition/types.ts'
-import type { TavernRank, TavernUpgradeId } from '../tavern/campaign/types.ts'
+import type {
+  PartyLifecycleStatus,
+  TavernRank,
+  TavernUpgradeId,
+} from '../tavern/campaign/types.ts'
 import type { GameSaveData, SaveMetadata } from './types.ts'
 import { SaveValidationErrorClass, type SaveValidationError } from './types.ts'
 
@@ -1215,6 +1222,414 @@ function validateHistoryRecord(
   replay.peak = afterPeak
 }
 
+interface ValidatedLifecycleState {
+  firstArrivalDay: number
+  visitCount: number
+  lastDepartureDay?: number
+  returnEligibleDay?: number
+}
+
+function validateLifecycleState(
+  value: unknown,
+  expectedStatus: PartyLifecycleStatus,
+  context: string,
+): ValidatedLifecycleState {
+  assertPlainObject(value, `${context}のLifecycleデータが壊れています`)
+  const lifecycle = value as Record<string, unknown>
+
+  if (lifecycle.status !== expectedStatus) {
+    throw new SaveValidationErrorClass(
+      `${context}のLifecycle状態が不正です`,
+      'corrupted-data',
+    )
+  }
+
+  if (
+    typeof lifecycle.firstArrivalDay !== 'number' ||
+    !Number.isInteger(lifecycle.firstArrivalDay) ||
+    lifecycle.firstArrivalDay < 1
+  ) {
+    throw new SaveValidationErrorClass(
+      `${context}の初回来訪日が不正です`,
+      'corrupted-data',
+    )
+  }
+
+  if (
+    typeof lifecycle.visitCount !== 'number' ||
+    !Number.isInteger(lifecycle.visitCount) ||
+    lifecycle.visitCount < 1
+  ) {
+    throw new SaveValidationErrorClass(
+      `${context}の来訪回数が不正です`,
+      'corrupted-data',
+    )
+  }
+
+  let lastDepartureDay: number | undefined
+  if (lifecycle.lastDepartureDay !== undefined) {
+    if (
+      typeof lifecycle.lastDepartureDay !== 'number' ||
+      !Number.isInteger(lifecycle.lastDepartureDay) ||
+      lifecycle.lastDepartureDay < 1
+    ) {
+      throw new SaveValidationErrorClass(
+        `${context}の旅立ち日が不正です`,
+        'corrupted-data',
+      )
+    }
+    lastDepartureDay = lifecycle.lastDepartureDay
+  }
+
+  let returnEligibleDay: number | undefined
+  if (lifecycle.returnEligibleDay !== undefined) {
+    if (
+      typeof lifecycle.returnEligibleDay !== 'number' ||
+      !Number.isInteger(lifecycle.returnEligibleDay)
+    ) {
+      throw new SaveValidationErrorClass(
+        `${context}の再訪可能日が不正です`,
+        'corrupted-data',
+      )
+    }
+    returnEligibleDay = lifecycle.returnEligibleDay
+  }
+
+  return {
+    firstArrivalDay: lifecycle.firstArrivalDay,
+    visitCount: lifecycle.visitCount,
+    lastDepartureDay,
+    returnEligibleDay,
+  }
+}
+
+/**
+ * Validates the persistent party roster across all three lifecycle
+ * collections: unique party/character identity, valid status per
+ * collection, arrival/departure/return-eligibility date invariants, and
+ * that the staying roster never exceeds the (upgrade-derived) effective
+ * capacity. Deliberately does not validate the full AdventurerParty
+ * structure (members' stats etc.) — that is outside the existing save
+ * validation's scope.
+ */
+function validatePartyLifecycle(
+  campaign: Record<string, unknown>,
+  currentDayNumber: number,
+  effectiveCapacity: number,
+): void {
+  if (!Array.isArray(campaign.awayParties)) {
+    throw new SaveValidationErrorClass(
+      '旅立ったパーティのデータが壊れています',
+      'corrupted-data',
+    )
+  }
+  if (!Array.isArray(campaign.retiredParties)) {
+    throw new SaveValidationErrorClass(
+      '引退したパーティのデータが壊れています',
+      'corrupted-data',
+    )
+  }
+
+  const parties = campaign.parties as unknown[]
+  const awayParties = campaign.awayParties
+  const retiredParties = campaign.retiredParties
+
+  if (parties.length > effectiveCapacity) {
+    throw new SaveValidationErrorClass(
+      '滞在中のパーティ数が設備上限を超えています',
+      'corrupted-data',
+    )
+  }
+
+  const seenPartyIds = new Set<string>()
+  const seenCharacterIds = new Set<string>()
+
+  function checkPartyEntry(
+    value: unknown,
+    expectedStatus: PartyLifecycleStatus,
+  ): void {
+    assertPlainObject(value, 'パーティデータが壊れています')
+    const party = value as Record<string, unknown>
+
+    if (!hasString(party, 'id') || (party.id as string).length === 0) {
+      throw new SaveValidationErrorClass(
+        'パーティIDがありません',
+        'corrupted-data',
+      )
+    }
+    const id = party.id as string
+    if (seenPartyIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '同じパーティIDが複数のLifecycle集合に存在します',
+        'corrupted-data',
+      )
+    }
+    seenPartyIds.add(id)
+
+    if (
+      typeof party.arrivalDay !== 'number' ||
+      !Number.isInteger(party.arrivalDay) ||
+      party.arrivalDay < 1
+    ) {
+      throw new SaveValidationErrorClass(
+        'パーティの来訪日が不正です',
+        'corrupted-data',
+      )
+    }
+    const arrivalDay = party.arrivalDay as number
+    if (arrivalDay > currentDayNumber) {
+      throw new SaveValidationErrorClass(
+        'パーティの来訪日が未来の日付です',
+        'corrupted-data',
+      )
+    }
+
+    const lifecycle = validateLifecycleState(
+      party.lifecycle,
+      expectedStatus,
+      `パーティ ${id}`,
+    )
+
+    if (lifecycle.firstArrivalDay > arrivalDay) {
+      throw new SaveValidationErrorClass(
+        '初回来訪日が今回の来訪日より後になっています',
+        'corrupted-data',
+      )
+    }
+    if (
+      lifecycle.visitCount === 1 &&
+      lifecycle.firstArrivalDay !== arrivalDay
+    ) {
+      throw new SaveValidationErrorClass(
+        '来訪回数が1のパーティは初回来訪日と今回の来訪日が一致する必要があります',
+        'corrupted-data',
+      )
+    }
+    if (lifecycle.visitCount >= 2 && lifecycle.firstArrivalDay >= arrivalDay) {
+      throw new SaveValidationErrorClass(
+        '来訪回数が2以上のパーティは初回来訪日が今回の来訪日より前である必要があります',
+        'corrupted-data',
+      )
+    }
+
+    if (expectedStatus === 'staying') {
+      if (lifecycle.returnEligibleDay !== undefined) {
+        throw new SaveValidationErrorClass(
+          '滞在中のパーティに再訪可能日が設定されています',
+          'corrupted-data',
+        )
+      }
+    } else {
+      if (lifecycle.lastDepartureDay === undefined) {
+        throw new SaveValidationErrorClass(
+          '旅立ったパーティに旅立ち日がありません',
+          'corrupted-data',
+        )
+      }
+      if (lifecycle.lastDepartureDay < arrivalDay) {
+        throw new SaveValidationErrorClass(
+          '旅立ち日が来訪日より前になっています',
+          'corrupted-data',
+        )
+      }
+      if (lifecycle.lastDepartureDay > currentDayNumber - 1) {
+        throw new SaveValidationErrorClass(
+          '旅立ち日が未来の日付です',
+          'corrupted-data',
+        )
+      }
+
+      if (expectedStatus === 'away') {
+        if (lifecycle.returnEligibleDay === undefined) {
+          throw new SaveValidationErrorClass(
+            '旅立ったパーティに再訪可能日がありません',
+            'corrupted-data',
+          )
+        }
+        if (
+          lifecycle.returnEligibleDay !==
+          lifecycle.lastDepartureDay + PARTY_LIFECYCLE_CONFIG.returnCooldownDays
+        ) {
+          throw new SaveValidationErrorClass(
+            '再訪可能日がクールダウン計算と一致しません',
+            'corrupted-data',
+          )
+        }
+      } else {
+        if (lifecycle.returnEligibleDay !== undefined) {
+          throw new SaveValidationErrorClass(
+            '引退したパーティに再訪可能日が設定されています',
+            'corrupted-data',
+          )
+        }
+      }
+    }
+
+    const partyMembers = (party.party as Record<string, unknown> | undefined)
+      ?.members
+    if (Array.isArray(partyMembers)) {
+      for (const member of partyMembers) {
+        if (isPlainObject(member) && hasString(member, 'id')) {
+          const memberId = member.id as string
+          if (seenCharacterIds.has(memberId)) {
+            throw new SaveValidationErrorClass(
+              '同じ冒険者IDが複数のパーティに存在します',
+              'corrupted-data',
+            )
+          }
+          seenCharacterIds.add(memberId)
+        }
+      }
+    }
+  }
+
+  for (const p of parties) checkPartyEntry(p, 'staying')
+  for (const p of awayParties) checkPartyEntry(p, 'away')
+  for (const p of retiredParties) checkPartyEntry(p, 'retired')
+}
+
+/**
+ * Proves that the planning day's roster snapshot (currentDay.parties) is
+ * exactly the persistent staying roster (campaign.parties) — same set of
+ * partyIds, no duplicates, no away/retired party smuggled in, and no
+ * staying party missing. Also cross-checks a few identity fields
+ * (arrivalDay, plannedDepartureDay, member id set) so the snapshot can only
+ * represent the persistent party it claims to. Day-local presentation
+ * fields (acceptedRequestId, availability, recoveryDaysRemaining, isNew,
+ * arrivalBadge) are derived fresh every day from campaign state and are
+ * deliberately NOT required to match anything stored on the persistent
+ * party — this is not a full CampaignParty/TavernParty deep-equality
+ * validator, only an identity/membership check.
+ */
+function validateCurrentDayRosterIntegrity(
+  campaign: Record<string, unknown>,
+  currentDay: Record<string, unknown>,
+): void {
+  if (!Array.isArray(currentDay.parties)) {
+    throw new SaveValidationErrorClass(
+      '本日のパーティ一覧が壊れています',
+      'corrupted-data',
+    )
+  }
+  const persistentParties = campaign.parties as unknown[]
+  const snapshotParties = currentDay.parties
+
+  if (snapshotParties.length !== persistentParties.length) {
+    throw new SaveValidationErrorClass(
+      '本日のパーティ数が滞在中のパーティ数と一致しません',
+      'corrupted-data',
+    )
+  }
+
+  const persistentById = new Map<string, Record<string, unknown>>()
+  for (const raw of persistentParties) {
+    assertPlainObject(raw, 'パーティデータが壊れています')
+    if (!hasString(raw, 'id') || (raw.id as string).length === 0) {
+      throw new SaveValidationErrorClass(
+        'パーティIDがありません',
+        'corrupted-data',
+      )
+    }
+    persistentById.set(raw.id as string, raw)
+  }
+
+  const collectIds = (value: unknown): Set<string> => {
+    const ids = new Set<string>()
+    if (!Array.isArray(value)) return ids
+    for (const raw of value) {
+      assertPlainObject(raw, 'パーティデータが壊れています')
+      if (hasString(raw, 'id')) ids.add(raw.id as string)
+    }
+    return ids
+  }
+  const awayIds = collectIds(campaign.awayParties)
+  const retiredIds = collectIds(campaign.retiredParties)
+
+  const seenSnapshotIds = new Set<string>()
+  for (const raw of snapshotParties) {
+    assertPlainObject(raw, '本日のパーティデータが壊れています')
+    if (!hasString(raw, 'id') || (raw.id as string).length === 0) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティIDがありません',
+        'corrupted-data',
+      )
+    }
+    const id = raw.id as string
+    if (seenSnapshotIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティ一覧に重複したパーティIDがあります',
+        'corrupted-data',
+      )
+    }
+    seenSnapshotIds.add(id)
+
+    if (awayIds.has(id) || retiredIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '旅立った、または引退したパーティが本日のパーティ一覧に含まれています',
+        'corrupted-data',
+      )
+    }
+
+    const persistent = persistentById.get(id)
+    if (!persistent) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティが滞在中のパーティ一覧にありません',
+        'corrupted-data',
+      )
+    }
+
+    if (raw.arrivalDay !== persistent.arrivalDay) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティの来訪日が滞在中のパーティと一致しません',
+        'corrupted-data',
+      )
+    }
+    if (raw.plannedDepartureDay !== persistent.plannedDepartureDay) {
+      throw new SaveValidationErrorClass(
+        '本日のパーティの滞在予定日が滞在中のパーティと一致しません',
+        'corrupted-data',
+      )
+    }
+
+    const snapshotPartyObj = raw.party
+    const persistentPartyObj = persistent.party
+    if (isPlainObject(snapshotPartyObj) && isPlainObject(persistentPartyObj)) {
+      const toMemberIdSet = (value: unknown): string[] | undefined => {
+        if (!Array.isArray(value)) return undefined
+        return value
+          .filter(
+            (m): m is Record<string, unknown> =>
+              isPlainObject(m) && hasString(m, 'id'),
+          )
+          .map((m) => m.id as string)
+          .sort()
+      }
+      const snapshotMemberIds = toMemberIdSet(snapshotPartyObj.members)
+      const persistentMemberIds = toMemberIdSet(persistentPartyObj.members)
+      if (snapshotMemberIds && persistentMemberIds) {
+        const mismatched =
+          snapshotMemberIds.length !== persistentMemberIds.length ||
+          snapshotMemberIds.some((mid, i) => mid !== persistentMemberIds[i])
+        if (mismatched) {
+          throw new SaveValidationErrorClass(
+            '本日のパーティのメンバー構成が滞在中のパーティと一致しません',
+            'corrupted-data',
+          )
+        }
+      }
+    }
+  }
+
+  for (const id of persistentById.keys()) {
+    if (!seenSnapshotIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '滞在中のパーティが本日のパーティ一覧に存在しません',
+        'corrupted-data',
+      )
+    }
+  }
+}
+
 export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   if (!isPlainObject(raw)) {
     throw new SaveValidationErrorClass(
@@ -1547,6 +1962,18 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   }
 
   validateUpgradePurchaseAffordability(ledgerById, campaign.dayNumber as number)
+
+  const effectivePartyCapacity = getEffectivePartyCapacity(
+    BASE_PARTY_CAPACITY,
+    { levels: upgradeLevels },
+  )
+  validatePartyLifecycle(
+    campaign,
+    campaign.dayNumber as number,
+    effectivePartyCapacity,
+  )
+
+  validateCurrentDayRosterIntegrity(campaign, currentDay)
 
   if (
     !isPlainObject(raw.randomState) ||

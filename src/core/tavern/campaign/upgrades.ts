@@ -16,6 +16,7 @@ export const TAVERN_UPGRADE_IDS: readonly TavernUpgradeId[] = [
   'quest_board',
   'intel_archive',
   'recovery_room',
+  'guest_room',
 ]
 
 export const MAX_TAVERN_UPGRADE_LEVEL = 2
@@ -42,6 +43,10 @@ export const TAVERN_UPGRADE_CONFIG: Record<
     { level: 1, cost: 120, requiredTavernRank: 2 },
     { level: 2, cost: 280, requiredTavernRank: 4 },
   ],
+  guest_room: [
+    { level: 1, cost: 150, requiredTavernRank: 2 },
+    { level: 2, cost: 360, requiredTavernRank: 4 },
+  ],
 }
 
 export function getUpgradeLevelConfig(
@@ -55,6 +60,7 @@ export const TAVERN_UPGRADE_LABELS: Record<TavernUpgradeId, string> = {
   quest_board: '依頼掲示板',
   intel_archive: '調査資料棚',
   recovery_room: '療養室',
+  guest_room: '客室',
 }
 
 export function tavernUpgradeLabel(id: TavernUpgradeId): string {
@@ -67,6 +73,7 @@ export function createInitialUpgradeState(): TavernUpgradeState {
       quest_board: 0,
       intel_archive: 0,
       recovery_room: 0,
+      guest_room: 0,
     },
   }
 }
@@ -137,6 +144,22 @@ export function applyRecoveryRoomModifier(
   if (baseDays <= 0) return baseDays
   const reduction = getRecoveryDayReduction(upgrades)
   return Math.max(1, baseDays - reduction)
+}
+
+/** The standing daily party roster size before any Guest Room upgrade. */
+export const BASE_PARTY_CAPACITY = 4
+
+/**
+ * Pure capacity selector: the base roster size plus +1 per Guest Room
+ * level (Lv1 +1, Lv2 +2 total). Capacity is never stored directly —
+ * always derive it from the upgrade level so there is a single source of
+ * truth.
+ */
+export function getEffectivePartyCapacity(
+  baseCapacity: number,
+  upgrades: TavernUpgradeState,
+): number {
+  return baseCapacity + upgrades.levels.guest_room
 }
 
 // --- Purchase ----------------------------------------------------------

@@ -1,4 +1,5 @@
 import { deepClone } from '../../util.ts'
+import { SeededRng } from '../../rng/seededRng.ts'
 import {
   applyLedgerTransaction,
   applyQuestSettlement,
@@ -21,8 +22,10 @@ import {
 } from './reputation.ts'
 import {
   applyRecoveryRoomModifier,
+  BASE_PARTY_CAPACITY,
   createInitialUpgradeState,
   getDailyRequestBonus,
+  getEffectivePartyCapacity,
 } from './upgrades.ts'
 import {
   applyOvernightRecovery,
@@ -37,8 +40,16 @@ import {
   applyFinancialPressureFromOutcome,
   applyIdleFinancialPressure,
   applyRecoveryFinancialPressure,
+  forceExtendStayForRecovery,
   tryExtendStay,
 } from './relationship.ts'
+import {
+  applyDeparture,
+  applyReturn,
+  attemptPartyReturn,
+  PARTY_LIFECYCLE_CONFIG,
+  selectEligibleAwayParties,
+} from './lifecycle.ts'
 import { applyCharacterRelationshipChanges } from '../../narrative/characterRelationships.ts'
 import { applyExpeditionMemory } from '../../narrative/memory.ts'
 import { updateArcSignals } from '../../narrative/arcSignals.ts'
@@ -99,6 +110,8 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
     reputation,
     nextPartySerial: nextSerial,
     parties,
+    awayParties: [],
+    retiredParties: [],
     currentDay,
     history: [],
     narrativeCandidates: [],
@@ -367,6 +380,7 @@ export function advanceCampaignDay(
   }
 
   const nextCampaign = deepClone(campaign)
+  const resolvedDay = nextCampaign.dayNumber
   const nextDayNumber = nextCampaign.dayNumber + 1
 
   const parties = nextCampaign.parties
@@ -377,8 +391,13 @@ export function advanceCampaignDay(
   const departing: { party: CampaignParty; scheduled: boolean }[] = []
   const recovered: CampaignParty[] = []
 
-  // 1. Evaluate stay extensions for non-casualty parties, then remove
-  //    parties whose scheduled departure is not extended.
+  // 1. Complete recovery, THEN evaluate stay extension/departure, for each
+  //    non-casualty party in turn. Recovery completion must be resolved
+  //    before the departure decision so a party whose recovery window ends
+  //    on the same day it becomes eligible to leave departs in a fully
+  //    recovered state (HP/MP/injuries/status effects cleared) rather than
+  //    carrying stale recovery data into the away roster.
+  const recoveredToday = new Set<string>()
   const remaining: CampaignParty[] = []
   for (const party of parties) {
     if (party.departingCasualty) {
@@ -386,7 +405,38 @@ export function advanceCampaignDay(
       departing.push({ party, scheduled: false })
       continue
     }
+
+    if (
+      party.recoveringThroughDay !== undefined &&
+      party.recoveringThroughDay < nextDayNumber
+    ) {
+      applyRecoveryCompletion(party)
+      recoveredToday.add(party.id)
+      recovered.push(party)
+      preEvents.push({
+        type: 'finishedRecovery',
+        partyId: party.id,
+        partyName: party.party.name,
+        dayNumber: nextDayNumber,
+      })
+    }
+
     if (party.plannedDepartureDay < nextDayNumber) {
+      // A recovering party must never depart mid-recovery: force the stay
+      // through recovery completion, independent of the affinity-based
+      // extension budget used below. Recovery completion above may have
+      // already cleared recoveringThroughDay for this same day, in which
+      // case isRecoveringOnDay is correctly false and departure proceeds.
+      if (isRecoveringOnDay(party, nextDayNumber)) {
+        const forcedEvent = forceExtendStayForRecovery(
+          party,
+          nextDayNumber,
+          `${nextCampaign.seed}:${party.id}:stay:${nextDayNumber}:recovery-forced`,
+        )
+        extensionEvents.push(forcedEvent)
+        remaining.push(party)
+        continue
+      }
       const stayEvent = tryExtendStay(
         party,
         nextDayNumber,
@@ -410,26 +460,22 @@ export function advanceCampaignDay(
     remaining.push(party)
   }
 
-  // 2. Complete recovery for remaining parties whose recovery window has passed.
-  const recoveredToday = new Set<string>()
-  for (const party of remaining) {
-    if (
-      party.recoveringThroughDay !== undefined &&
-      party.recoveringThroughDay < nextDayNumber
-    ) {
-      applyRecoveryCompletion(party)
-      recoveredToday.add(party.id)
-      recovered.push(party)
-      preEvents.push({
-        type: 'finishedRecovery',
-        partyId: party.id,
-        partyName: party.party.name,
-        dayNumber: nextDayNumber,
-      })
+  // Move departing parties out of the active roster into the away/retired
+  // collections — departure is never a delete. Scheduled departures become
+  // 'away' (return-eligible after the cooldown); casualty departures
+  // become 'retired' (permanent; Phase 9.4 adds no other retirement
+  // trigger). Recovery completion (above) has already been applied to any
+  // scheduled-departure party before it reaches this step.
+  for (const { party, scheduled } of departing) {
+    applyDeparture(party, resolvedDay, !scheduled)
+    if (scheduled) {
+      nextCampaign.awayParties.push(party)
+    } else {
+      nextCampaign.retiredParties.push(party)
     }
   }
 
-  // 3. Overnight recovery for available parties (skip same-day recovery completes).
+  // 2. Overnight recovery for available parties (skip same-day recovery completes).
   for (const party of remaining) {
     if (recoveredToday.has(party.id)) {
       continue
@@ -439,14 +485,55 @@ export function advanceCampaignDay(
     }
   }
 
-  // Fill roster to 4 with new arrivals.
+  // Fill vacancies up to the effective capacity (base + Guest Room bonus):
+  // first at most one returning party (deterministic Campaign RNG only),
+  // then brand-new arrivals for whatever vacancy remains.
   // Rank effects apply from the day after they are earned: today's newly
   // generated content uses the Tavern Rank derived from the latest resolved
   // peak reputation, never a mid-day recomputation.
   const tavernRank = deriveTavernRank(nextCampaign.reputation.peakScore)
-  const usedNames = new Set(remaining.map((p) => p.party.name))
+  // New party names must never collide with ANY known persistent party —
+  // not just those currently staying, but every party ever encountered
+  // (away or retired) — so a name is never reused within the Visitor
+  // Registry's lifetime.
+  const usedNames = new Set([
+    ...remaining.map((p) => p.party.name),
+    ...nextCampaign.awayParties.map((p) => p.party.name),
+    ...nextCampaign.retiredParties.map((p) => p.party.name),
+  ])
   const arrivals: CampaignParty[] = []
-  while (remaining.length < 4) {
+
+  const effectiveCapacity = getEffectivePartyCapacity(
+    BASE_PARTY_CAPACITY,
+    nextCampaign.upgrades,
+  )
+  let vacancies = Math.max(0, effectiveCapacity - remaining.length)
+
+  if (vacancies > 0 && PARTY_LIFECYCLE_CONFIG.maxReturningPartiesPerDay > 0) {
+    const eligible = selectEligibleAwayParties(
+      nextCampaign.awayParties,
+      nextDayNumber,
+    )
+    const returnRng = new SeededRng(
+      `${nextCampaign.seed}:day:${nextDayNumber}:return-roll`,
+    )
+    const returned = attemptPartyReturn(returnRng, eligible)
+    if (returned) {
+      nextCampaign.awayParties = nextCampaign.awayParties.filter(
+        (p) => p.id !== returned.id,
+      )
+      applyReturn(returned, nextCampaign.seed, nextDayNumber)
+      remaining.push(returned)
+      usedNames.add(returned.party.name)
+      vacancies -= 1
+      // Not added to `arrivals` (which drives the "新しい顔" narrative
+      // candidate pool) — a returning party is not a new face. buildTavernDay
+      // still derives its 'arrived' CampaignPartyEvent automatically from
+      // arrivalDay, same as any other party.
+    }
+  }
+
+  while (vacancies > 0) {
     const serial = nextCampaign.nextPartySerial
     const newParty = generateCampaignParty(
       nextCampaign.seed,
@@ -463,6 +550,7 @@ export function advanceCampaignDay(
     remaining.push(newParty)
     arrivals.push(newParty)
     nextCampaign.nextPartySerial += 1
+    vacancies -= 1
   }
 
   const daySeed = `${nextCampaign.seed}:day:${nextDayNumber}`

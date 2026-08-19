@@ -105,7 +105,10 @@ export function PartyCard({
     >
       <div className="party-header">
         <h4>
-          {party.isNew && <span className="new-badge">NEW </span>}《{ap.name}》
+          {party.arrivalBadge && (
+            <span className="new-badge">{party.arrivalBadge} </span>
+          )}
+          《{ap.name}》
         </h4>
         <span className={`rank-badge rank-${ap.rank}`}>{ap.rank}</span>
       </div>

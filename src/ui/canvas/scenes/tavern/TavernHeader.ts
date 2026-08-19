@@ -22,6 +22,7 @@ export interface TavernHeaderOptions {
   onOpenLibrary?: () => void
   onOpenLedger?: () => void
   onOpenUpgrade?: () => void
+  onOpenVisitorRegistry?: () => void
 }
 
 const SETTINGS_ICON_URL = '/settings-icon.png'
@@ -42,6 +43,7 @@ export class TavernHeader extends Container {
   private readonly _onOpenLibrary?: () => void
   private readonly _onOpenLedger?: () => void
   private readonly _onOpenUpgrade?: () => void
+  private readonly _onOpenVisitorRegistry?: () => void
 
   constructor(options: TavernHeaderOptions) {
     super()
@@ -55,6 +57,7 @@ export class TavernHeader extends Container {
     this._onOpenLibrary = options.onOpenLibrary
     this._onOpenLedger = options.onOpenLedger
     this._onOpenUpgrade = options.onOpenUpgrade
+    this._onOpenVisitorRegistry = options.onOpenVisitorRegistry
 
     const panel = new GamePanel({
       width: this._width,
@@ -95,6 +98,7 @@ export class TavernHeader extends Container {
     const libraryButtonWidth = 100
     const ledgerButtonWidth = 100
     const upgradeButtonWidth = 100
+    const registryButtonWidth = 140
     const gearSize = GEAR_SIZE
     const gap = this._theme.spacing.s8
     const rightClusterWidth =
@@ -105,6 +109,8 @@ export class TavernHeader extends Container {
       ledgerButtonWidth +
       gap +
       upgradeButtonWidth +
+      gap +
+      registryButtonWidth +
       gap +
       actionButtonWidth +
       gap +
@@ -170,6 +176,28 @@ export class TavernHeader extends Container {
     }
     this.addChild(upgradeButton)
 
+    const registryButton = new GameButton({
+      width: registryButtonWidth,
+      height: 44,
+      theme: this._theme,
+      label: '来訪者台帳',
+    })
+    registryButton.x =
+      startX +
+      saveButtonWidth +
+      gap +
+      libraryButtonWidth +
+      gap +
+      ledgerButtonWidth +
+      gap +
+      upgradeButtonWidth +
+      gap
+    registryButton.y = 10
+    registryButton.onActivate = () => {
+      this._onOpenVisitorRegistry?.()
+    }
+    this.addChild(registryButton)
+
     this._actionButton = new GameButton({
       width: actionButtonWidth,
       height: 44,
@@ -186,6 +214,8 @@ export class TavernHeader extends Container {
       ledgerButtonWidth +
       gap +
       upgradeButtonWidth +
+      gap +
+      registryButtonWidth +
       gap
     this._actionButton.y = 10
     this._actionButton.onActivate = () => {
@@ -203,6 +233,8 @@ export class TavernHeader extends Container {
       ledgerButtonWidth +
       gap +
       upgradeButtonWidth +
+      gap +
+      registryButtonWidth +
       gap +
       actionButtonWidth +
       gap

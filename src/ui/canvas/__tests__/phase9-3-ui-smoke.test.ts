@@ -174,7 +174,7 @@ describe('phase9-3-ui-smoke', () => {
     expect(vm.tavernRankLabel).toBe('酒場ランク 1')
     expect(vm.fundsLabel).toBe('資金 100')
     expect(vm.entries.map((e) => e.id).sort()).toEqual(
-      ['intel_archive', 'quest_board', 'recovery_room'].sort(),
+      ['intel_archive', 'quest_board', 'recovery_room', 'guest_room'].sort(),
     )
 
     const questBoard = vm.entries.find((e) => e.id === 'quest_board')!

@@ -1,5 +1,6 @@
 import type { AdventurerRole } from '../../../core/models/types.ts'
 import type { CharacterRelationship } from '../../../core/narrative/types.ts'
+import type { PartyLifecycleStatus } from '../../../core/tavern/campaign/types.ts'
 import {
   countryLabel as identityCountryLabel,
   genderLabel as identityGenderLabel,
@@ -25,6 +26,18 @@ const ROLE_LABELS: Record<AdventurerRole, string> = {
 export function roleLabel(role: AdventurerRole | undefined): string {
   if (!role) return '—'
   return ROLE_LABELS[role] ?? role
+}
+
+const LIFECYCLE_STATUS_LABELS: Record<PartyLifecycleStatus, string> = {
+  staying: '滞在中',
+  away: '旅の途中',
+  retired: '引退',
+}
+
+/** Player-facing translation of a party's internal lifecycle status. Internal
+ * values (staying/away/retired) must never be shown to the player raw. */
+export function lifecycleStatusLabel(status: PartyLifecycleStatus): string {
+  return LIFECYCLE_STATUS_LABELS[status]
 }
 
 const INJURY_TYPE_LABELS: Record<'light' | 'serious', string> = {

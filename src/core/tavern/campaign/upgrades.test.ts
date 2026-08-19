@@ -30,11 +30,12 @@ function fixtureCampaign(
 }
 
 describe('TAVERN_UPGRADE_IDS / labels / config', () => {
-  it('lists exactly the three known upgrade ids', () => {
+  it('lists exactly the four known upgrade ids', () => {
     expect(TAVERN_UPGRADE_IDS).toEqual([
       'quest_board',
       'intel_archive',
       'recovery_room',
+      'guest_room',
     ])
   })
 
@@ -47,6 +48,7 @@ describe('TAVERN_UPGRADE_IDS / labels / config', () => {
     expect(tavernUpgradeLabel('quest_board')).toBe('依頼掲示板')
     expect(tavernUpgradeLabel('intel_archive')).toBe('調査資料棚')
     expect(tavernUpgradeLabel('recovery_room')).toBe('療養室')
+    expect(tavernUpgradeLabel('guest_room')).toBe('客室')
   })
 
   it('exposes exact cost/rank config per spec for every level of every upgrade', () => {
@@ -80,6 +82,16 @@ describe('TAVERN_UPGRADE_IDS / labels / config', () => {
       cost: 280,
       requiredTavernRank: 4,
     })
+    expect(getUpgradeLevelConfig('guest_room', 1)).toEqual({
+      level: 1,
+      cost: 150,
+      requiredTavernRank: 2,
+    })
+    expect(getUpgradeLevelConfig('guest_room', 2)).toEqual({
+      level: 2,
+      cost: 360,
+      requiredTavernRank: 4,
+    })
   })
 
   it('has no config beyond level 0 or above MAX_TAVERN_UPGRADE_LEVEL', () => {
@@ -92,7 +104,12 @@ describe('TAVERN_UPGRADE_IDS / labels / config', () => {
 
   it('createInitialUpgradeState starts every facility at level 0', () => {
     expect(createInitialUpgradeState()).toEqual({
-      levels: { quest_board: 0, intel_archive: 0, recovery_room: 0 },
+      levels: {
+        quest_board: 0,
+        intel_archive: 0,
+        recovery_room: 0,
+        guest_room: 0,
+      },
     })
   })
 })

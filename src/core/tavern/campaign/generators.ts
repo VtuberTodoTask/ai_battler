@@ -13,6 +13,7 @@ import type {
 } from '../types.ts'
 import { getPartyRankWeights, getRequestRankWeights } from './rankWeights.ts'
 import { createInitialRelationship } from './relationship.ts'
+import { createInitialLifecycleState } from './lifecycle.ts'
 import type { CampaignParty, TavernRank } from './types.ts'
 import { initializePartyMemberRelationships } from '../../narrative/characterRelationships.ts'
 
@@ -117,6 +118,7 @@ export function generateCampaignParty(
     },
     relationship: createInitialRelationship(campaignSeed, serial, leader),
     memberRelationships: initializePartyMemberRelationships(party.members),
+    lifecycle: createInitialLifecycleState(arrivalDay),
   }
 }
 
@@ -316,6 +318,12 @@ export function buildTavernDay(
       arrivalDay: cp.arrivalDay,
       plannedDepartureDay: cp.plannedDepartureDay,
       isNew: cp.arrivalDay === dayNumber,
+      arrivalBadge:
+        cp.arrivalDay === dayNumber
+          ? cp.lifecycle.visitCount === 1
+            ? '新規'
+            : '再訪'
+          : undefined,
       progression: {
         growthXp: cp.progression.growthXp,
         growthMilestones: cp.progression.growthMilestones,

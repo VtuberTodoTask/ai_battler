@@ -116,6 +116,8 @@ export interface TavernParty {
   arrivalDay?: number
   plannedDepartureDay?: number
   isNew?: boolean
+  /** Player-facing arrival badge for today's arrivals: '新規' (first visit) or '再訪' (returning). Undefined if the party did not arrive today. */
+  arrivalBadge?: '新規' | '再訪'
   progression?: TavernPartyProgressionSnapshot
   relationship?: TavernPartyRelationshipSnapshot
   stats?: TavernPartyStats

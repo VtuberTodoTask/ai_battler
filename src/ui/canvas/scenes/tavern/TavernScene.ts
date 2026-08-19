@@ -26,6 +26,7 @@ import {
 import type { PartyDetailSceneInput } from '../../viewModel/partyDetailViewModel.ts'
 import type { WorldEncyclopediaSceneInput } from '../../viewModel/worldEncyclopediaViewModel.ts'
 import type { TavernLedgerSceneInput } from '../../viewModel/tavernLedgerViewModel.ts'
+import type { VisitorRegistrySceneInput } from '../../viewModel/visitorRegistryViewModel.ts'
 import type { TavernUpgradeSceneInput } from '../../viewModel/tavernUpgradeViewModel.ts'
 import type {
   SoundNovelSceneInput,
@@ -284,6 +285,7 @@ export class TavernScene implements GameScene {
       onOpenLibrary: () => this.openWorldEncyclopedia(),
       onOpenLedger: () => this.openTavernLedger(),
       onOpenUpgrade: () => this.openTavernUpgrade(),
+      onOpenVisitorRegistry: () => this.openVisitorRegistry(),
     })
     this._header.x = 0
     this._header.y = 0
@@ -466,6 +468,19 @@ export class TavernScene implements GameScene {
       },
     }
     this._context.canvasGame.sceneManager?.push('tavernUpgrade', input)
+  }
+
+  private openVisitorRegistry(): void {
+    if (!this._context) return
+
+    const input: VisitorRegistrySceneInput = {
+      returnTarget: {
+        sceneId: 'tavern',
+        selectedPartyId: this._uiState.selectedPartyId ?? undefined,
+        selectedQuestId: this._uiState.selectedQuestId ?? undefined,
+      },
+    }
+    this._context.canvasGame.sceneManager?.push('visitorRegistry', input)
   }
 
   private setActionMessage(

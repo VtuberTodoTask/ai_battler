@@ -216,7 +216,7 @@ describe('Campaign domain', () => {
     expect(tavernParty.availability).toBe('available')
   })
 
-  it('prioritizes scheduled departure over recovery completion', () => {
+  it('completes recovery before evaluating departure when both land on the same transition', () => {
     let campaign = createTavernCampaign(
       'tavern-campaign-departure-over-recovery-001',
     )
@@ -233,10 +233,16 @@ describe('Campaign domain', () => {
     expect(campaign.parties.some((p) => p.id === targetId)).toBe(false)
     const day3Events = campaign.currentDay.partyEvents ?? []
     expect(day3Events.some((e) => e.type === 'departedScheduled')).toBe(true)
-    expect(day3Events.some((e) => e.type === 'finishedRecovery')).toBe(false)
+    // Recovery completed on the same transition it departs on — the party
+    // must be fully recovered before its lifecycle state is captured as
+    // 'away', not carried into the away roster mid-recovery.
+    expect(day3Events.some((e) => e.type === 'finishedRecovery')).toBe(true)
     expect(
       day3Events.filter((e) => e.partyId === targetId).map((e) => e.type),
-    ).toEqual(['departedScheduled'])
+    ).toEqual(['finishedRecovery', 'departedScheduled'])
+
+    const departed = campaign.awayParties.find((p) => p.id === targetId)
+    expect(departed?.recoveringThroughDay).toBeUndefined()
   })
 
   it('orders departure, recovery completion, and overnight recovery correctly', () => {
@@ -464,7 +470,11 @@ describe('Campaign domain', () => {
       expect(pair).not.toBeNull()
       if (!pair) return
 
-      const party = campaign.parties.find((p) => p.id === pair.partyId)!
+      // Use a party that is not dispatched, so the affinity-based stay
+      // extension path being tested here can never collide with the
+      // separate (unconditional) recovery-forced extension path.
+      const party = campaign.parties.find((p) => p.id !== pair.partyId)!
+      const partyId = party.id
       party.relationship.affinity = 50
       party.plannedDepartureDay = campaign.dayNumber
 
@@ -472,9 +482,9 @@ describe('Campaign domain', () => {
       campaign = resolveCampaignDay(campaign)
       campaign = advanceCampaignDay(campaign)
 
-      const extendedParty = campaign.parties.find((p) => p.id === pair.partyId)
+      const extendedParty = campaign.parties.find((p) => p.id === partyId)
       const extensionEvent = campaign.history[0].relationshipEvents.find(
-        (e) => e.type === 'stayExtended' && e.partyId === pair.partyId,
+        (e) => e.type === 'stayExtended' && e.partyId === partyId,
       )
       expect(extensionEvent).toBeDefined()
       expect(extendedParty?.plannedDepartureDay).toBeGreaterThan(
