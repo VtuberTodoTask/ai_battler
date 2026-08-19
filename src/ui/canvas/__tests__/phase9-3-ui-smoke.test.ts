@@ -6,6 +6,7 @@ import { purchaseTavernUpgrade } from '../../../core/tavern/campaign/upgrades.ts
 import { deepClone } from '../../../core/util.ts'
 import {
   buildTavernUpgradeSceneViewModel,
+  buildUpgradePurchaseSuccessMessage,
   createTavernUpgradeSceneInput,
   tavernUpgradeBlockReasonText,
 } from '../viewModel/tavernUpgradeViewModel.ts'
@@ -215,6 +216,18 @@ describe('phase9-3-ui-smoke', () => {
     expect(tavernUpgradeBlockReasonText(undefined)).toBeUndefined()
   })
 
+  it('C2: buildUpgradePurchaseSuccessMessage is structured (no AI) and player-facing', () => {
+    expect(buildUpgradePurchaseSuccessMessage('quest_board', 1)).toBe(
+      '依頼掲示板をLv1へ改装しました。',
+    )
+    expect(buildUpgradePurchaseSuccessMessage('intel_archive', 1)).toBe(
+      '調査資料棚をLv1へ改装しました。',
+    )
+    expect(buildUpgradePurchaseSuccessMessage('recovery_room', 2)).toBe(
+      '療養室をLv2へ改装しました。',
+    )
+  })
+
   it('D: no player-facing viewModel text ever exposes a raw internal id', () => {
     const campaign = deepClone(createTavernCampaign('phase9-3-ui-d'))
     campaign.finance.funds = 100000
@@ -300,6 +313,30 @@ describe('phase9-3-ui-smoke', () => {
     expect(
       (scene as unknown as { _statusMessage: string | null })._statusMessage,
     ).toBe('資金が足りません。')
+  })
+
+  it('F3: a successful purchase shows a structured Japanese success message, not raw ids', () => {
+    const campaign = createTavernCampaign('phase9-3-ui-f3')
+    const scene = new TavernUpgradeScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const purchaseUpgrade = vi.fn(() => ({ ok: true }))
+    const context = createSceneContext(scene, uiStateRef, { purchaseUpgrade })
+
+    scene.mount(context, createTavernUpgradeSceneInput({ sceneId: 'tavern' }))
+    scene.setCampaign(campaign, uiStateRef.current)
+
+    const vm = buildTavernUpgradeSceneViewModel(campaign, { sceneId: 'tavern' })
+    const questBoard = vm.entries.find((e) => e.id === 'quest_board')!
+
+    ;(
+      scene as unknown as {
+        handlePurchase: (entry: typeof questBoard) => void
+      }
+    ).handlePurchase(questBoard)
+
+    expect(
+      (scene as unknown as { _statusMessage: string | null })._statusMessage,
+    ).toBe('依頼掲示板をLv1へ改装しました。')
   })
 
   it('G: returning to the tavern restores the return target and pops the scene', () => {

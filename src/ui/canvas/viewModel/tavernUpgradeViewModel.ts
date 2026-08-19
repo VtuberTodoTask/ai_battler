@@ -148,6 +148,13 @@ export function createTavernUpgradeSceneInput(
   return { returnTarget }
 }
 
+export function buildUpgradePurchaseSuccessMessage(
+  id: TavernUpgradeId,
+  targetLevel: number,
+): string {
+  return `${tavernUpgradeLabel(id)}をLv${targetLevel}へ改装しました。`
+}
+
 export function tavernUpgradeBlockReasonText(
   reason: TavernUpgradeBlockReason | undefined,
 ): string | undefined {

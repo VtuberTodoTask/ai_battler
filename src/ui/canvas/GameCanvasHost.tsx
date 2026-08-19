@@ -57,6 +57,7 @@ export default function GameCanvasHost({
   const canvasGameRef = useRef<CanvasGame | null>(null)
   const [error, setError] = useState<string | null>(null)
   const prevCampaignRef = useRef<TavernCampaignState | null>(null)
+  const preserveSceneOnNextSyncRef = useRef(false)
 
   const onAdvanceRef = useRef(onAdvanceDay)
   const onResolveRef = useRef(onResolveDay)
@@ -155,7 +156,14 @@ export default function GameCanvasHost({
       },
       purchaseUpgrade: (upgradeId) => {
         try {
-          return onPurchaseUpgradeRef.current(upgradeId)
+          const result = onPurchaseUpgradeRef.current(upgradeId)
+          if (result.ok) {
+            // A successful purchase re-syncs the campaign prop, but the
+            // player should stay on the upgrade scene to see the result
+            // rather than being bounced back to the tavern.
+            preserveSceneOnNextSyncRef.current = true
+          }
+          return result
         } catch (e) {
           return {
             ok: false,
@@ -319,7 +327,9 @@ export default function GameCanvasHost({
     const cg = canvasGameRef.current
     if (!cg || !campaign) return
     if (campaign === prevCampaignRef.current) return
-    cg.setCampaign(campaign)
+    const preserveCurrentScene = preserveSceneOnNextSyncRef.current
+    preserveSceneOnNextSyncRef.current = false
+    cg.setCampaign(campaign, { preserveCurrentScene })
     prevCampaignRef.current = campaign
   }, [campaign])
 

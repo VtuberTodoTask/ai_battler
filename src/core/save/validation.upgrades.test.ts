@@ -47,6 +47,106 @@ function forgeUpgradePurchase(
   return bad
 }
 
+/**
+ * Same as forgeUpgradePurchase, but for forging several purchases at once
+ * (potentially all dated to the same day), so multi-purchase aggregation
+ * tests can be built without going through purchaseTavernUpgrade.
+ */
+function forgeUpgradePurchases(
+  save: ReturnType<typeof freshSave>,
+  purchases: {
+    upgradeId: string
+    targetLevel: number
+    cost: number
+    day: number
+  }[],
+) {
+  const bad = clone(save)
+  for (const p of purchases) {
+    bad.campaign.upgrades.levels[
+      p.upgradeId as keyof typeof bad.campaign.upgrades.levels
+    ] = p.targetLevel
+    bad.campaign.finance.ledgerEntries.push({
+      id: buildUpgradePurchaseEntryId(p.upgradeId, p.targetLevel),
+      day: p.day,
+      kind: 'upgrade_purchase',
+      amount: -p.cost,
+      source: {
+        type: 'tavern_upgrade',
+        upgradeId: p.upgradeId,
+        targetLevel: p.targetLevel,
+      },
+    })
+    bad.campaign.finance.funds -= p.cost
+  }
+  return bad
+}
+
+/**
+ * Advances n days without ever accepting a request, so funds only ever
+ * move by the fixed daily operating cost (-10/day) — no quest commissions,
+ * no reputation events. Gives exact, deterministic control over a target
+ * day's start-of-day funds (100 - 10*n after n such days).
+ */
+function advanceDaysWithoutQuests(
+  campaign: ReturnType<typeof createTavernCampaign>,
+  n: number,
+): ReturnType<typeof createTavernCampaign> {
+  let c = campaign
+  for (let i = 0; i < n; i++) {
+    c = resolveCampaignDay(c)
+    c = advanceCampaignDay(c)
+  }
+  return c
+}
+
+function findBestCommissionPair(
+  campaign: ReturnType<typeof createTavernCampaign>,
+) {
+  let best: {
+    next: ReturnType<typeof createTavernCampaign>['currentDay']
+    commission: number
+  } | null = null
+  for (const request of campaign.currentDay.requests) {
+    for (const party of campaign.currentDay.parties) {
+      if (party.availability === 'recovering') continue
+      try {
+        const next = offerRequestToParty(
+          campaign.currentDay,
+          request.id,
+          party.id,
+        )
+        if (!next.matches.some((m) => m.requestId === request.id)) continue
+        const resolved = resolveCampaignDay({ ...campaign, currentDay: next })
+        const commission = resolved.currentDay.results.find(
+          (r) => r.status === 'resolved',
+        )?.settlement?.tavernCommission
+        if (commission && (!best || commission > best.commission)) {
+          best = { next, commission }
+        }
+      } catch {
+        // continue
+      }
+    }
+  }
+  return best
+}
+
+function simulateToRank(
+  seed: string,
+  minRank: number,
+): ReturnType<typeof createTavernCampaign> {
+  let campaign = createTavernCampaign(seed)
+  for (let day = 1; day <= 150; day++) {
+    campaign = resolveCampaignDay(acceptAllPossible(campaign))
+    if (deriveTavernRank(campaign.reputation.peakScore) >= minRank) break
+    campaign = advanceCampaignDay(campaign)
+  }
+  // resolveCampaignDay leaves currentDay.status === 'resolved'; advance
+  // once more so the campaign is back in 'planning'.
+  return advanceCampaignDay(campaign)
+}
+
 function acceptAllPossible(
   campaign: ReturnType<typeof createTavernCampaign>,
 ): ReturnType<typeof createTavernCampaign> {
@@ -258,5 +358,117 @@ describe('save upgrade state validation', () => {
         buildUpgradePurchaseEntryId('quest_board', 2),
       ].sort(),
     )
+  })
+})
+
+describe('save upgrade purchase affordability (Phase 9.3.1)', () => {
+  it("Malformed Test A: a single purchase costing more than that day's start-of-day funds is rejected", () => {
+    // 5 no-quest days bring day 6's start-of-day funds to exactly
+    // 100 - 10*5 = 50, deterministically. A forged quest_board Lv1
+    // purchase (cost 60) dated to day 6 must be rejected even though
+    // funds/ledger totals are otherwise perfectly consistent.
+    const campaign = advanceDaysWithoutQuests(
+      createTavernCampaign('afford-a'),
+      5,
+    )
+    expect(campaign.finance.funds).toBe(50)
+    const save = serializeGameSave({ campaign })
+    const bad = forgeUpgradePurchases(save, [
+      { upgradeId: 'quest_board', targetLevel: 1, cost: 60, day: 6 },
+    ])
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('Malformed Test B: same-day purchases that are each individually affordable but exceed the day-start total combined are rejected', () => {
+    const campaign = simulateToRank('afford-b', 4)
+    const dayStartFunds = campaign.finance.funds
+    const day = campaign.dayNumber
+    // Every individual level here costs far less than dayStartFunds
+    // (typically several hundred at rank 4), but their sum (950) does not.
+    const purchases = [
+      { upgradeId: 'quest_board', targetLevel: 1, cost: 60, day },
+      { upgradeId: 'quest_board', targetLevel: 2, cost: 180, day },
+      { upgradeId: 'intel_archive', targetLevel: 1, cost: 90, day },
+      { upgradeId: 'intel_archive', targetLevel: 2, cost: 220, day },
+      { upgradeId: 'recovery_room', targetLevel: 1, cost: 120, day },
+      { upgradeId: 'recovery_room', targetLevel: 2, cost: 280, day },
+    ]
+    const totalCost = purchases.reduce((sum, p) => sum + p.cost, 0)
+    expect(totalCost).toBeGreaterThan(dayStartFunds)
+    for (const p of purchases) {
+      expect(p.cost).toBeLessThan(dayStartFunds)
+    }
+
+    const save = serializeGameSave({ campaign })
+    const bad = forgeUpgradePurchases(save, purchases)
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('Valid Test: same-day purchases whose combined cost fits within the day-start funds are accepted', () => {
+    const campaign = simulateToRank('afford-valid', 4)
+    const dayStartFunds = campaign.finance.funds
+    const day = campaign.dayNumber
+    const purchases = [
+      { upgradeId: 'quest_board', targetLevel: 1, cost: 60, day },
+      { upgradeId: 'intel_archive', targetLevel: 1, cost: 90, day },
+      { upgradeId: 'recovery_room', targetLevel: 1, cost: 120, day },
+    ]
+    const totalCost = purchases.reduce((sum, p) => sum + p.cost, 0)
+    expect(totalCost).toBeLessThanOrEqual(dayStartFunds)
+
+    const save = serializeGameSave({ campaign })
+    const good = forgeUpgradePurchases(save, purchases)
+    expect(() => validateGameSave(good)).not.toThrow()
+  })
+
+  it("Same-day income Test: a purchase unaffordable at day-start cannot be financed by that same day's later quest commission", () => {
+    // 5 no-quest days -> day 6 starts with exactly 50 funds. A real quest
+    // is then accepted and resolved on day 6 too, earning commission
+    // income *within* that same day (added after planning, at resolve
+    // time). A forged quest_board Lv1 purchase (cost 60) dated to day 6
+    // must still be rejected: it exceeds the funds available at the start
+    // of day 6, regardless of what day 6 itself later earns.
+    let found:
+      | {
+          campaign: ReturnType<typeof createTavernCampaign>
+          startFunds: number
+        }
+      | undefined
+    for (let i = 1; i <= 40 && !found; i++) {
+      const seed = `afford-income-${i}`
+      const base = advanceDaysWithoutQuests(createTavernCampaign(seed), 5)
+      const best = findBestCommissionPair(base)
+      if (!best) continue
+      const resolved = resolveCampaignDay({ ...base, currentDay: best.next })
+      const campaign = advanceCampaignDay(resolved)
+      found = { campaign, startFunds: base.finance.funds }
+    }
+    expect(found).toBeDefined()
+    if (!found) return
+
+    expect(found.startFunds).toBe(50)
+    const save = serializeGameSave({ campaign: found.campaign })
+    const bad = forgeUpgradePurchases(save, [
+      { upgradeId: 'quest_board', targetLevel: 1, cost: 60, day: 6 },
+    ])
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('Negative start Test: a purchase dated to a day that started with negative funds is rejected', () => {
+    // 11 no-quest days bring funds to 100 - 10*11 = -10 (legal on its
+    // own since negative funds are allowed post-Phase-9.1), but any
+    // upgrade purchase dated to that day must still be rejected.
+    const campaign = advanceDaysWithoutQuests(
+      createTavernCampaign('afford-negative'),
+      11,
+    )
+    expect(campaign.finance.funds).toBe(-10)
+    const save = serializeGameSave({ campaign })
+    expect(() => validateGameSave(save)).not.toThrow()
+
+    const bad = forgeUpgradePurchases(save, [
+      { upgradeId: 'quest_board', targetLevel: 1, cost: 60, day: 12 },
+    ])
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
   })
 })

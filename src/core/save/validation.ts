@@ -740,6 +740,54 @@ function validateUpgradeState(value: unknown): Record<TavernUpgradeId, number> {
   return result as Record<TavernUpgradeId, number>
 }
 
+/**
+ * Proves that every upgrade purchase was affordable at the moment it
+ * happened, using the funds available at the *start* of its day (day 0's
+ * opening balance through the end of the prior day) — never that day's
+ * later income (quest commissions) and never the ledger array's insertion
+ * order, since same-day purchases are aggregated rather than treated as a
+ * sequence. Negative funds are otherwise legal (Phase 9.1+), so this checks
+ * affordability at purchase time rather than requiring non-negative final
+ * funds.
+ */
+function validateUpgradePurchaseAffordability(
+  ledgerById: Map<string, LedgerValidationRecord>,
+  currentDayNumber: number,
+): void {
+  const entriesByDay = new Map<number, LedgerValidationRecord[]>()
+  for (const entry of ledgerById.values()) {
+    const list = entriesByDay.get(entry.day)
+    if (list) {
+      list.push(entry)
+    } else {
+      entriesByDay.set(entry.day, [entry])
+    }
+  }
+
+  let runningFunds = 0
+  for (let day = 0; day <= currentDayNumber; day++) {
+    const dayEntries = entriesByDay.get(day) ?? []
+    const fundsAtStartOfDay = runningFunds
+
+    const upgradeSpendForDay = dayEntries
+      .filter((entry) => entry.kind === 'upgrade_purchase')
+      .reduce((sum, entry) => sum - entry.amount, 0)
+
+    if (upgradeSpendForDay > 0 && upgradeSpendForDay > fundsAtStartOfDay) {
+      throw new SaveValidationErrorClass(
+        '設備購入エントリの時点で資金が不足しています',
+        'corrupted-data',
+      )
+    }
+
+    const dayTotal = dayEntries.reduce((sum, entry) => sum + entry.amount, 0)
+    runningFunds = assertValidSignedCurrencyAmount(
+      runningFunds + dayTotal,
+      '帳簿合計が安全な整数範囲を超えました',
+    )
+  }
+}
+
 function validateDayReputationSummary(
   value: unknown,
   expected: {
@@ -1497,6 +1545,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
       )
     }
   }
+
+  validateUpgradePurchaseAffordability(ledgerById, campaign.dayNumber as number)
 
   if (
     !isPlainObject(raw.randomState) ||

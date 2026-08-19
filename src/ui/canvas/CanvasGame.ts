@@ -167,10 +167,13 @@ export class CanvasGame {
     this._host = null
   }
 
-  setCampaign(campaign: TavernCampaignState): void {
+  setCampaign(
+    campaign: TavernCampaignState,
+    options?: { preserveCurrentScene?: boolean },
+  ): void {
     this._currentCampaign = campaign
     const currentId = this._sceneManager?.current?.id
-    if (currentId && currentId !== 'tavern') {
+    if (currentId && currentId !== 'tavern' && !options?.preserveCurrentScene) {
       this._sceneManager?.show('tavern')
     }
     const current = this._sceneManager?.current

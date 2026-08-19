@@ -10,6 +10,7 @@ import { AudioController } from '../../audio/AudioController.ts'
 import type { GameScene, GameSceneContext, GameUiState } from '../../types.ts'
 import {
   buildTavernUpgradeSceneViewModel,
+  buildUpgradePurchaseSuccessMessage,
   createTavernUpgradeSceneInput,
   tavernUpgradeBlockReasonText,
   type TavernUpgradeEntryViewModel,
@@ -323,7 +324,13 @@ export class TavernUpgradeScene implements GameScene {
       this.render(this._context)
       return
     }
-    this._statusMessage = null
+    // entry.nextLevel is the level that was just purchased (the button is
+    // only enabled when it's defined and purchasable).
+    this._statusMessage =
+      entry.nextLevel !== undefined
+        ? buildUpgradePurchaseSuccessMessage(entry.id, entry.nextLevel)
+        : null
+    this.render(this._context)
     AudioController.playSe('shopBell')
   }
 
