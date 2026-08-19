@@ -349,22 +349,6 @@ function buildRelationshipEvent(
   return null
 }
 
-function buildProgressionEvent(
-  event: CampaignProgressionEvent,
-): DayResultEventViewModel | null {
-  if (event.type === 'progressionSkipped' && event.reason) {
-    return {
-      id: `progression-event:${event.dayNumber}:skip:${event.partyId}`,
-      kind: 'progression',
-      title: '成長イベント',
-      summary: `${event.partyName}：${event.reason}`,
-      importance: 'low',
-      partyId: event.partyId,
-    }
-  }
-  return null
-}
-
 /**
  * Consolidates a day's skillImproved events into at most one DayResults
  * item per party ("「Party名」が成長しました", one line per grown member)
@@ -448,10 +432,6 @@ function buildImportantEvents(
     }
     for (const event of dayRecord.relationshipEvents ?? []) {
       const vm = buildRelationshipEvent(event, campaign)
-      if (vm) events.push(vm)
-    }
-    for (const event of dayRecord.progressionEvents ?? []) {
-      const vm = buildProgressionEvent(event)
       if (vm) events.push(vm)
     }
     events.push(

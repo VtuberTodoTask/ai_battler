@@ -17,12 +17,14 @@ import {
   TAVERN_UPGRADE_IDS,
   getEffectivePartyCapacity,
   getUpgradeLevelConfig,
+  trainingYardXpBonusForLevel,
 } from '../tavern/campaign/upgrades.ts'
 import { PARTY_LIFECYCLE_CONFIG } from '../tavern/campaign/lifecycle.ts'
 import {
   EXPEDITION_GROWTH_XP,
   PARTY_GROWTH_XP_THRESHOLD,
   SKILL_GROWTH_PER_MILESTONE,
+  TRAINING_GROWTH_XP,
 } from '../tavern/campaign/progression.ts'
 import { MAX_SKILL_NORMAL, MAX_SKILL_S } from '../balance/constants.ts'
 import { ROLE_MAP } from '../../data/roles.ts'
@@ -1646,21 +1648,23 @@ interface KnownPartyProgressionInfo {
 }
 
 /**
- * Phase 9.5 growth validation: every known party's (staying/away/retired)
- * progression fields must satisfy the growth-arithmetic invariant, and
- * replaying every experienceGained/skillImproved event across the entire
- * campaign history must reconstruct exactly the currently-stored
- * progression and skill values — proving growth was actually earned, not
- * merely internally consistent. Also validates skillImproved event
- * structure: the grown skill must be a role candidate (expert/trained),
- * the delta must be within the milestone's growth amount and never exceed
- * the rank-appropriate cap, at most one skillImproved event may exist per
- * (party, member, milestone), and a member+skill growing more than once
- * must chain (previous.after === next.before).
+ * Phase 9.5.1 growth causal-integrity validation. Progression Events are
+ * not self-authoritative: every experienceGained/progressionSkipped event
+ * must be traceable to an actual Day Fact — a resolved Expedition outcome,
+ * a same-day casualty departure, or genuine idle-training eligibility
+ * reconstructed from the historical party lifecycle (replayed from
+ * partyEvents) plus the historical Training Yard level (replayed from the
+ * upgrade_purchase ledger) — and every skillImproved event must land on a
+ * milestone actually newly earned that same day. Only once the stored
+ * events are proven to match these expected causal events does the
+ * arithmetic replay (growthXp/totalGrowthXp/growthMilestones/trainingDays,
+ * and the before/after skill chain) run to confirm the currently-stored
+ * progression/skills are exactly its result.
  */
 function validatePartyProgressionAndSkills(
   campaign: Record<string, unknown>,
   history: unknown[],
+  ledgerById: Map<string, LedgerValidationRecord>,
 ): void {
   const known = new Map<string, KnownPartyProgressionInfo>()
 
@@ -1738,17 +1742,144 @@ function validatePartyProgressionAndSkills(
     'training',
   ]
 
-  for (const rawRecord of history) {
-    assertPlainObject(rawRecord, '履歴レコードの形式が不正です')
-    const record = rawRecord
-    const events = record.progressionEvents
-    if (events === undefined) continue
-    if (!Array.isArray(events)) {
+  // --- Historical Active/Recovery state + Training Yard level replay ---
+  // Reconstructed purely from the same CampaignPartyEvent vocabulary the
+  // runtime already emits — arrived/departedScheduled/finishedRecovery are
+  // that day's *pre*-events (applied before evaluating that day's training
+  // eligibility, mirroring advanceCampaignDay building the next day's
+  // roster before resolveCampaignDay runs the idle loop);
+  // departedCasualty/startedRecovery are that day's *post*-events (applied
+  // only for future days, mirroring resolveCampaignDay deciding them
+  // during that day's own resolution, after which the party is no longer
+  // eligible going forward) — and from `upgrade_purchase` ledger entries
+  // for training_yard. No new lifecycle-event vocabulary is introduced.
+  const activeParties = new Set<string>()
+  const recoveringParties = new Set<string>()
+
+  const trainingYardPurchases = [...ledgerById.values()]
+    .filter(
+      (e): e is Extract<LedgerValidationRecord, { kind: 'upgrade_purchase' }> =>
+        e.kind === 'upgrade_purchase' && e.upgradeId === 'training_yard',
+    )
+    .sort((a, b) => a.day - b.day)
+  let trainingYardPurchaseIndex = 0
+  let trainingYardLevel = 0
+
+  type PartyEventLike = Record<string, unknown>
+
+  function readPartyEvents(record: Record<string, unknown>): PartyEventLike[] {
+    if (!Array.isArray(record.partyEvents)) {
       throw new SaveValidationErrorClass(
-        '成長イベント一覧の形式が不正です',
+        '移動イベント一覧の形式が不正です',
         'corrupted-data',
       )
     }
+    return record.partyEvents.map((raw) => {
+      assertPlainObject(raw, '移動イベントの形式が不正です')
+      return raw
+    })
+  }
+
+  for (let dayIndex = 0; dayIndex < history.length; dayIndex++) {
+    const rawRecord = history[dayIndex]
+    assertPlainObject(rawRecord, '履歴レコードの形式が不正です')
+    const record = rawRecord
+    // The caller has already proven record.dayNumber === dayIndex + 1
+    // (strictly sequential, no gaps) before this function runs.
+    const dayNumber = dayIndex + 1
+
+    const partyEvents = readPartyEvents(record)
+
+    // Pre-events: apply BEFORE evaluating this day's training eligibility.
+    for (const event of partyEvents) {
+      if (typeof event.partyId !== 'string') continue
+      if (event.type === 'arrived') activeParties.add(event.partyId)
+      else if (event.type === 'departedScheduled')
+        activeParties.delete(event.partyId)
+      else if (event.type === 'finishedRecovery')
+        recoveringParties.delete(event.partyId)
+    }
+
+    while (
+      trainingYardPurchaseIndex < trainingYardPurchases.length &&
+      trainingYardPurchases[trainingYardPurchaseIndex].day <= dayNumber
+    ) {
+      trainingYardLevel =
+        trainingYardPurchases[trainingYardPurchaseIndex].targetLevel
+      trainingYardPurchaseIndex++
+    }
+    const expectedTrainingXp =
+      TRAINING_GROWTH_XP + trainingYardXpBonusForLevel(trainingYardLevel)
+
+    if (!Array.isArray(record.results)) {
+      throw new SaveValidationErrorClass(
+        '依頼結果一覧の形式が不正です',
+        'corrupted-data',
+      )
+    }
+    const dispatchedOutcomeByParty = new Map<string, string>()
+    for (const raw of record.results) {
+      if (!isPlainObject(raw)) continue
+      if (
+        raw.status === 'resolved' &&
+        typeof raw.partyId === 'string' &&
+        isPlainObject(raw.result) &&
+        typeof raw.result.outcome === 'string'
+      ) {
+        dispatchedOutcomeByParty.set(raw.partyId, raw.result.outcome)
+      }
+    }
+
+    const casualtyPartyIds = new Set(
+      partyEvents
+        .filter((e) => e.type === 'departedCasualty')
+        .map((e) => e.partyId as string),
+    )
+
+    // Expected Growth Events for this day, derived solely from the Day
+    // Facts above — never from the stored progressionEvents themselves.
+    type ExpectedEvent =
+      { kind: 'xp'; source: string; amount: number } | { kind: 'skip' }
+    const expectedByParty = new Map<string, ExpectedEvent>()
+
+    for (const [partyId, outcome] of dispatchedOutcomeByParty) {
+      if (casualtyPartyIds.has(partyId)) {
+        expectedByParty.set(partyId, { kind: 'skip' })
+        continue
+      }
+      const xpAmount =
+        EXPEDITION_GROWTH_XP[outcome as keyof typeof EXPEDITION_GROWTH_XP]
+      if (xpAmount > 0) {
+        expectedByParty.set(partyId, {
+          kind: 'xp',
+          source: outcome,
+          amount: xpAmount,
+        })
+      }
+    }
+    for (const partyId of activeParties) {
+      if (dispatchedOutcomeByParty.has(partyId)) continue
+      if (recoveringParties.has(partyId)) continue
+      expectedByParty.set(partyId, {
+        kind: 'xp',
+        source: 'training',
+        amount: expectedTrainingXp,
+      })
+    }
+
+    const events = record.progressionEvents
+    if (!Array.isArray(events)) {
+      throw new SaveValidationErrorClass(
+        '成長イベント一覧がありません',
+        'corrupted-data',
+      )
+    }
+
+    // Newly-earned milestone window per party for today, captured around
+    // each experienceGained's replay so a same-day skillImproved can be
+    // proven to land on a milestone this day's XP actually unlocked.
+    const milestonesBeforeToday = new Map<string, number>()
+    const milestonesAfterToday = new Map<string, number>()
 
     for (const rawEvent of events) {
       assertPlainObject(rawEvent, '成長イベントの形式が不正です')
@@ -1775,10 +1906,10 @@ function validatePartyProgressionAndSkills(
       if (
         typeof event.dayNumber !== 'number' ||
         !Number.isInteger(event.dayNumber) ||
-        event.dayNumber < 1
+        event.dayNumber !== dayNumber
       ) {
         throw new SaveValidationErrorClass(
-          '成長イベントの日数が不正です',
+          '成長イベントの日数が履歴レコードと一致しません',
           'corrupted-data',
         )
       }
@@ -1813,7 +1944,28 @@ function validatePartyProgressionAndSkills(
           )
         }
 
+        // Causal cross-check: this event must match a Day-Fact-derived
+        // expectation exactly (party, source, amount) — proving the XP
+        // was actually earned, not merely internally self-consistent.
+        // Consuming the entry also enforces at most one experienceGained
+        // per (partyId, dayNumber): a second event for the same party
+        // finds nothing left to match.
+        const expected = expectedByParty.get(partyId)
+        if (
+          !expected ||
+          expected.kind !== 'xp' ||
+          expected.source !== source ||
+          expected.amount !== amount
+        ) {
+          throw new SaveValidationErrorClass(
+            '成長イベントが実際の遠征結果・訓練資格と一致しません',
+            'corrupted-data',
+          )
+        }
+        expectedByParty.delete(partyId)
+
         const state = replay.get(partyId)!
+        milestonesBeforeToday.set(partyId, state.growthMilestones)
         state.totalGrowthXp += amount
         state.growthXp += amount
         if (source === 'training') {
@@ -1826,6 +1978,7 @@ function validatePartyProgressionAndSkills(
           state.growthXp -= PARTY_GROWTH_XP_THRESHOLD
           state.growthMilestones += 1
         }
+        milestonesAfterToday.set(partyId, state.growthMilestones)
 
         if (
           typeof event.growthXpAfter !== 'number' ||
@@ -1924,11 +2077,31 @@ function validatePartyProgressionAndSkills(
             'corrupted-data',
           )
         }
-        const milestoneKey = JSON.stringify([
-          partyId,
-          memberId,
-          event.milestone,
-        ])
+        const milestone = event.milestone as number
+
+        // Causal check: milestone must be one this party's XP events
+        // actually newly earned TODAY (a strict range check, generalized
+        // beyond the single-milestone-per-award case the current balance
+        // happens to produce) — not a future or not-yet-earned milestone,
+        // and not derived from a day with no XP event for this party at
+        // all (an experienceGained for this party must have already been
+        // processed earlier in this same day's event list, per the
+        // runtime's own emission order).
+        const beforeCount = milestonesBeforeToday.get(partyId)
+        const afterCount = milestonesAfterToday.get(partyId)
+        if (
+          beforeCount === undefined ||
+          afterCount === undefined ||
+          milestone <= beforeCount ||
+          milestone > afterCount
+        ) {
+          throw new SaveValidationErrorClass(
+            'スキル成長イベントのMilestoneがその日に達成されていません',
+            'corrupted-data',
+          )
+        }
+
+        const milestoneKey = JSON.stringify([partyId, memberId, milestone])
         if (seenMilestoneMember.has(milestoneKey)) {
           throw new SaveValidationErrorClass(
             '同じMilestoneで同じメンバーのスキルが複数回成長しています',
@@ -1953,12 +2126,42 @@ function validatePartyProgressionAndSkills(
             'corrupted-data',
           )
         }
+        // Causal check: only a party with a same-day departedCasualty
+        // PartyEvent may skip growth.
+        const expected = expectedByParty.get(partyId)
+        if (!expected || expected.kind !== 'skip') {
+          throw new SaveValidationErrorClass(
+            '成長スキップイベントが死亡離脱の事実と一致しません',
+            'corrupted-data',
+          )
+        }
+        expectedByParty.delete(partyId)
       } else {
         throw new SaveValidationErrorClass(
           '成長イベントの種別が不正です',
           'corrupted-data',
         )
       }
+    }
+
+    // Anything left unconsumed is a Day Fact that should have produced a
+    // growth event but didn't — e.g. an idle-eligible party with no
+    // Training experienceGained, or a casualty with no progressionSkipped.
+    if (expectedByParty.size > 0) {
+      throw new SaveValidationErrorClass(
+        '実際に発生したはずの成長イベントが記録されていません',
+        'corrupted-data',
+      )
+    }
+
+    // Post-events: apply for FUTURE days only — this day's training
+    // eligibility has already been evaluated above using the state as of
+    // this day's *planning*, before these facts were decided.
+    for (const event of partyEvents) {
+      if (typeof event.partyId !== 'string') continue
+      if (event.type === 'startedRecovery') recoveringParties.add(event.partyId)
+      else if (event.type === 'departedCasualty')
+        activeParties.delete(event.partyId)
     }
   }
 
@@ -2538,7 +2741,11 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
     effectivePartyCapacity,
   )
 
-  validatePartyProgressionAndSkills(campaign, campaign.history as unknown[])
+  validatePartyProgressionAndSkills(
+    campaign,
+    campaign.history as unknown[],
+    ledgerById,
+  )
 
   validateCurrentDayRosterIntegrity(campaign, currentDay)
 
