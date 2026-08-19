@@ -3,6 +3,7 @@ import {
   TAVERN_ECONOMY_CONFIG,
   buildDailyOperatingCostEntryId,
   buildLedgerEntryId,
+  buildUpgradePurchaseEntryId,
 } from '../economy/index.ts'
 import { computeQuestSettlement } from '../economy/questReward.ts'
 import {
@@ -10,8 +11,14 @@ import {
   computeQuestReputationDelta,
   deriveTavernRank,
 } from '../tavern/campaign/reputation.ts'
+import {
+  MAX_TAVERN_UPGRADE_LEVEL,
+  TAVERN_UPGRADE_IDS,
+  getUpgradeLevelConfig,
+} from '../tavern/campaign/upgrades.ts'
 import type { AdventurerRank } from '../models/types.ts'
 import type { ExpeditionOutcome } from '../expedition/types.ts'
+import type { TavernRank, TavernUpgradeId } from '../tavern/campaign/types.ts'
 import type { GameSaveData, SaveMetadata } from './types.ts'
 import { SaveValidationErrorClass, type SaveValidationError } from './types.ts'
 
@@ -36,6 +43,7 @@ const ALLOWED_LEDGER_KINDS = [
   'opening_balance',
   'quest_commission',
   'daily_operating_cost',
+  'upgrade_purchase',
 ] as const
 
 const ALLOWED_RANKS = ['E', 'D', 'C', 'B', 'A', 'S'] as const
@@ -241,6 +249,14 @@ type LedgerValidationRecord =
       partyId: string
     }
   | { kind: 'daily_operating_cost'; day: number; amount: number; id: string }
+  | {
+      kind: 'upgrade_purchase'
+      day: number
+      amount: number
+      id: string
+      upgradeId: string
+      targetLevel: number
+    }
 
 function validateLedgerEntry(
   value: unknown,
@@ -403,6 +419,78 @@ function validateLedgerEntry(
         )
       }
       return { kind, day, amount, id, requestId, partyId }
+    }
+    case 'upgrade_purchase': {
+      if (day < 1) {
+        throw new SaveValidationErrorClass(
+          '設備購入エントリの日数が不正です',
+          'corrupted-data',
+        )
+      }
+      if (amount >= 0) {
+        throw new SaveValidationErrorClass(
+          '設備購入エントリの金額が不正です',
+          'corrupted-data',
+        )
+      }
+      if (source.type !== 'tavern_upgrade') {
+        throw new SaveValidationErrorClass(
+          '設備購入エントリのソース種別が不正です',
+          'corrupted-data',
+        )
+      }
+      if (
+        !hasString(source, 'upgradeId') ||
+        (source.upgradeId as string).length === 0
+      ) {
+        throw new SaveValidationErrorClass(
+          '設備購入エントリの設備IDがありません',
+          'corrupted-data',
+        )
+      }
+      const upgradeId = source.upgradeId as string
+      if (!TAVERN_UPGRADE_IDS.includes(upgradeId as TavernUpgradeId)) {
+        throw new SaveValidationErrorClass(
+          '設備購入エントリの設備IDが不明です',
+          'corrupted-data',
+        )
+      }
+      if (
+        typeof source.targetLevel !== 'number' ||
+        !Number.isInteger(source.targetLevel) ||
+        source.targetLevel < 1 ||
+        source.targetLevel > MAX_TAVERN_UPGRADE_LEVEL
+      ) {
+        throw new SaveValidationErrorClass(
+          '設備購入エントリの対象レベルが不正です',
+          'corrupted-data',
+        )
+      }
+      const targetLevel = source.targetLevel as number
+      const levelConfig = getUpgradeLevelConfig(
+        upgradeId as TavernUpgradeId,
+        targetLevel,
+      )
+      if (!levelConfig) {
+        throw new SaveValidationErrorClass(
+          '設備購入エントリの対象レベルが定義されていません',
+          'corrupted-data',
+        )
+      }
+      if (amount !== -levelConfig.cost) {
+        throw new SaveValidationErrorClass(
+          '設備購入エントリの金額が費用と一致しません',
+          'corrupted-data',
+        )
+      }
+      const expectedId = buildUpgradePurchaseEntryId(upgradeId, targetLevel)
+      if (id !== expectedId) {
+        throw new SaveValidationErrorClass(
+          '設備購入エントリIDが計算値と一致しません',
+          'corrupted-data',
+        )
+      }
+      return { kind, day, amount, id, upgradeId, targetLevel }
     }
   }
 }
@@ -614,6 +702,90 @@ function validateReputationState(value: unknown): {
   }
 
   return { score, peakScore, eventById, eventsByDay }
+}
+
+function validateUpgradeState(value: unknown): Record<TavernUpgradeId, number> {
+  assertPlainObject(value, '設備データが壊れています')
+  const upgrades = value as Record<string, unknown>
+
+  assertPlainObject(upgrades.levels, '設備レベルデータが壊れています')
+  const levels = upgrades.levels as Record<string, unknown>
+
+  const result: Record<string, number> = {}
+  for (const upgradeId of TAVERN_UPGRADE_IDS) {
+    const level = levels[upgradeId]
+    if (
+      typeof level !== 'number' ||
+      !Number.isInteger(level) ||
+      level < 0 ||
+      level > MAX_TAVERN_UPGRADE_LEVEL
+    ) {
+      throw new SaveValidationErrorClass(
+        `設備 ${upgradeId} のレベルが不正です`,
+        'corrupted-data',
+      )
+    }
+    result[upgradeId] = level
+  }
+
+  for (const key of Object.keys(levels)) {
+    if (!TAVERN_UPGRADE_IDS.includes(key as TavernUpgradeId)) {
+      throw new SaveValidationErrorClass(
+        `未知の設備IDがあります: ${key}`,
+        'corrupted-data',
+      )
+    }
+  }
+
+  return result as Record<TavernUpgradeId, number>
+}
+
+/**
+ * Proves that every upgrade purchase was affordable at the moment it
+ * happened, using the funds available at the *start* of its day (day 0's
+ * opening balance through the end of the prior day) — never that day's
+ * later income (quest commissions) and never the ledger array's insertion
+ * order, since same-day purchases are aggregated rather than treated as a
+ * sequence. Negative funds are otherwise legal (Phase 9.1+), so this checks
+ * affordability at purchase time rather than requiring non-negative final
+ * funds.
+ */
+function validateUpgradePurchaseAffordability(
+  ledgerById: Map<string, LedgerValidationRecord>,
+  currentDayNumber: number,
+): void {
+  const entriesByDay = new Map<number, LedgerValidationRecord[]>()
+  for (const entry of ledgerById.values()) {
+    const list = entriesByDay.get(entry.day)
+    if (list) {
+      list.push(entry)
+    } else {
+      entriesByDay.set(entry.day, [entry])
+    }
+  }
+
+  let runningFunds = 0
+  for (let day = 0; day <= currentDayNumber; day++) {
+    const dayEntries = entriesByDay.get(day) ?? []
+    const fundsAtStartOfDay = runningFunds
+
+    const upgradeSpendForDay = dayEntries
+      .filter((entry) => entry.kind === 'upgrade_purchase')
+      .reduce((sum, entry) => sum - entry.amount, 0)
+
+    if (upgradeSpendForDay > 0 && upgradeSpendForDay > fundsAtStartOfDay) {
+      throw new SaveValidationErrorClass(
+        '設備購入エントリの時点で資金が不足しています',
+        'corrupted-data',
+      )
+    }
+
+    const dayTotal = dayEntries.reduce((sum, entry) => sum + entry.amount, 0)
+    runningFunds = assertValidSignedCurrencyAmount(
+      runningFunds + dayTotal,
+      '帳簿合計が安全な整数範囲を超えました',
+    )
+  }
 }
 
 function validateDayReputationSummary(
@@ -990,6 +1162,7 @@ function validateHistoryRecord(
   expectedReputationEventById: Map<string, ExpectedReputationEvent>,
   reputationEventsByDay: Map<number, ReputationEventValidationRecord[]>,
   replay: ReputationReplayState,
+  rankAtStartOfDay: Map<number, TavernRank>,
 ): void {
   assertPlainObject(value, '履歴レコードの形式が不正です')
   const record = value as Record<string, unknown>
@@ -1022,6 +1195,7 @@ function validateHistoryRecord(
   const beforeScore = replay.score
   const beforePeak = replay.peak
   const beforeRank = deriveTavernRank(beforePeak)
+  rankAtStartOfDay.set(dayNumber, beforeRank)
   const dayEvents = reputationEventsByDay.get(dayNumber) ?? []
   const dayDelta = dayEvents.reduce((sum, event) => sum + event.delta, 0)
   const afterScore = beforeScore + dayDelta
@@ -1132,6 +1306,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
     )
   }
 
+  const upgradeLevels = validateUpgradeState(campaign.upgrades)
+
   const { ledgerById } = validateFinance(campaign.finance)
 
   const expectedLedgerById = new Map<string, ExpectedLedgerEntry>()
@@ -1172,6 +1348,7 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   }
 
   const reputationReplay: ReputationReplayState = { score: 0, peak: 0 }
+  const rankAtStartOfDay = new Map<number, TavernRank>()
 
   for (let i = 0; i < campaign.history.length; i++) {
     const record = campaign.history[i]
@@ -1201,8 +1378,17 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
       expectedReputationEventById,
       reputationEventsByDay,
       reputationReplay,
+      rankAtStartOfDay,
     )
   }
+
+  // The rank in effect while the current (still-planning) day is being
+  // played is derived from the peak accumulated through the prior day —
+  // exactly what `reputationReplay` holds once history replay completes.
+  rankAtStartOfDay.set(
+    campaign.dayNumber as number,
+    deriveTavernRank(reputationReplay.peak),
+  )
 
   if (
     reputationReplay.score !== reputationScore ||
@@ -1245,7 +1431,9 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   }
 
   for (const [id, entry] of ledgerById) {
-    if (entry.kind === 'opening_balance') {
+    if (entry.kind === 'opening_balance' || entry.kind === 'upgrade_purchase') {
+      // upgrade_purchase entries are cross-checked separately below,
+      // against upgrade level state rather than a per-day expected map.
       continue
     }
     if (!expectedLedgerById.has(id)) {
@@ -1285,6 +1473,80 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
       }
     }
   }
+
+  // Upgrade purchase <-> level integrity (forward + reverse, no skipped
+  // levels), plus rank-requirement integrity against the tavern rank that
+  // was actually in effect when each purchase's day began.
+  const expectedUpgradePurchaseById = new Map<
+    string,
+    { upgradeId: TavernUpgradeId; targetLevel: number; cost: number }
+  >()
+  for (const upgradeId of TAVERN_UPGRADE_IDS) {
+    const level = upgradeLevels[upgradeId]
+    for (let lvl = 1; lvl <= level; lvl++) {
+      const config = getUpgradeLevelConfig(upgradeId, lvl)
+      if (!config) {
+        throw new SaveValidationErrorClass(
+          `設備 ${upgradeId} のレベル ${lvl} の設定が見つかりません`,
+          'corrupted-data',
+        )
+      }
+      expectedUpgradePurchaseById.set(
+        buildUpgradePurchaseEntryId(upgradeId, lvl),
+        { upgradeId, targetLevel: lvl, cost: config.cost },
+      )
+    }
+  }
+
+  for (const [id, entry] of ledgerById) {
+    if (entry.kind !== 'upgrade_purchase') continue
+    if (!expectedUpgradePurchaseById.has(id)) {
+      throw new SaveValidationErrorClass(
+        '孤立した設備購入エントリがあります',
+        'corrupted-data',
+      )
+    }
+
+    const rankAtPurchase = rankAtStartOfDay.get(entry.day)
+    if (rankAtPurchase === undefined) {
+      throw new SaveValidationErrorClass(
+        '設備購入エントリの日付が未来の日付です',
+        'corrupted-data',
+      )
+    }
+    const config = getUpgradeLevelConfig(
+      entry.upgradeId as TavernUpgradeId,
+      entry.targetLevel,
+    )
+    if (!config || rankAtPurchase < config.requiredTavernRank) {
+      throw new SaveValidationErrorClass(
+        '設備購入エントリが酒場ランク要件を満たしていません',
+        'corrupted-data',
+      )
+    }
+  }
+
+  for (const [id, expected] of expectedUpgradePurchaseById) {
+    const entry = ledgerById.get(id)
+    if (!entry || entry.kind !== 'upgrade_purchase') {
+      throw new SaveValidationErrorClass(
+        '設備レベルに対応する購入エントリがありません',
+        'corrupted-data',
+      )
+    }
+    if (
+      entry.upgradeId !== expected.upgradeId ||
+      entry.targetLevel !== expected.targetLevel ||
+      entry.amount !== -expected.cost
+    ) {
+      throw new SaveValidationErrorClass(
+        '設備購入エントリが設備レベルと一致しません',
+        'corrupted-data',
+      )
+    }
+  }
+
+  validateUpgradePurchaseAffordability(ledgerById, campaign.dayNumber as number)
 
   if (
     !isPlainObject(raw.randomState) ||

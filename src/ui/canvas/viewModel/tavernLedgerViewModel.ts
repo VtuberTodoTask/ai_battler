@@ -1,9 +1,13 @@
-import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
+import type {
+  TavernCampaignState,
+  TavernUpgradeId,
+} from '../../../core/tavern/campaign/types.ts'
 import {
   formatLedgerAmount,
   formatSignedCurrencyAmount,
   type TavernLedgerEntry,
 } from '../../../core/economy/index.ts'
+import { tavernUpgradeLabel } from '../../../core/tavern/campaign/upgrades.ts'
 
 export interface TavernLedgerRowViewModel {
   id: string
@@ -81,6 +85,18 @@ function buildRow(
         day: entry.day,
         title: title ?? '名称不明の依頼',
         subtitle: `DAY ${entry.day} / 依頼仲介`,
+        amountLabel: formatLedgerAmount(entry.amount),
+      }
+    }
+    case 'upgrade_purchase': {
+      const label = tavernUpgradeLabel(
+        entry.source.upgradeId as TavernUpgradeId,
+      )
+      return {
+        id: entry.id,
+        day: entry.day,
+        title: `設備購入：${label} Lv${entry.source.targetLevel}`,
+        subtitle: `DAY ${entry.day} / 設備投資`,
         amountLabel: formatLedgerAmount(entry.amount),
       }
     }

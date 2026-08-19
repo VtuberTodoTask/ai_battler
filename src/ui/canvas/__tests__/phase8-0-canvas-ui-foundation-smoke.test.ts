@@ -57,6 +57,7 @@ function createTestContext(): GameSceneContext {
       advanceDay: vi.fn(),
       resolveDay: vi.fn(),
       offerRequest: vi.fn(),
+      purchaseUpgrade: vi.fn(),
       selectParty: vi.fn(),
       selectQuest: vi.fn(),
       openCharacter: vi.fn(),

@@ -6,6 +6,7 @@ export type {
   SignedCurrencyAmount,
   TavernFinanceState,
   TavernLedgerEntry,
+  TavernUpgradePurchaseLedgerEntry,
 } from './types.ts'
 export {
   applyLedgerTransaction,
@@ -15,6 +16,8 @@ export {
   buildLedgerEntryId,
   buildOpeningBalanceTransaction,
   buildQuestCommissionTransaction,
+  buildUpgradePurchaseEntryId,
+  buildUpgradePurchaseTransaction,
   createInitialFinanceState,
   financeInvariantHolds,
   ledgerTotal,

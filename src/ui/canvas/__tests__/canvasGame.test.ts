@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { createTavernCampaign } from '../../../core/tavern/campaign/campaign.ts'
+import { purchaseTavernUpgrade } from '../../../core/tavern/campaign/upgrades.ts'
 
 class FakeResizeObserver {
   observe = vi.fn()
@@ -276,6 +277,62 @@ describe('CanvasGame lifecycle', () => {
     const dayLabel = (foundation as unknown as { _dayLabel?: { text: string } })
       ._dayLabel
     expect(dayLabel?.text).toBe(`DAY ${campaign.dayNumber}`)
+
+    cg.destroy()
+  })
+
+  it('preserves the current scene across a preserveCurrentScene campaign sync (Phase 9.3.1)', async () => {
+    const { CanvasGame } = await import('../CanvasGame.ts')
+    const cg = new CanvasGame()
+    const host = document.createElement('div')
+    const campaign = createTavernCampaign('preserve-scene-purchase-001')
+
+    await cg.init(host)
+    cg.setCampaign(campaign)
+    cg.sceneManager?.push('tavernUpgrade', {
+      returnTarget: { sceneId: 'tavern' },
+    })
+    expect(cg.sceneManager?.current?.id).toBe('tavernUpgrade')
+
+    const purchase = purchaseTavernUpgrade(campaign, 'quest_board')
+    expect(purchase.ok).toBe(true)
+
+    cg.setCampaign(purchase.campaign, { preserveCurrentScene: true })
+
+    expect(cg.sceneManager?.current?.id).toBe('tavernUpgrade')
+
+    const scene = cg.sceneManager?.current as unknown as {
+      _viewModel: {
+        fundsLabel: string
+        entries: { id: string; currentLevel: number }[]
+      } | null
+    }
+    expect(scene._viewModel?.fundsLabel).toBe('資金 40')
+    const questBoardEntry = scene._viewModel?.entries.find(
+      (e) => e.id === 'quest_board',
+    )
+    expect(questBoardEntry?.currentLevel).toBe(1)
+
+    cg.destroy()
+  })
+
+  it('still returns to the tavern scene when setCampaign is called without preserveCurrentScene', async () => {
+    const { CanvasGame } = await import('../CanvasGame.ts')
+    const cg = new CanvasGame()
+    const host = document.createElement('div')
+    const campaign = createTavernCampaign('no-preserve-scene-001')
+    const nextCampaign = createTavernCampaign('no-preserve-scene-002')
+
+    await cg.init(host)
+    cg.setCampaign(campaign)
+    cg.sceneManager?.push('tavernUpgrade', {
+      returnTarget: { sceneId: 'tavern' },
+    })
+    expect(cg.sceneManager?.current?.id).toBe('tavernUpgrade')
+
+    cg.setCampaign(nextCampaign)
+
+    expect(cg.sceneManager?.current?.id).toBe('tavern')
 
     cg.destroy()
   })

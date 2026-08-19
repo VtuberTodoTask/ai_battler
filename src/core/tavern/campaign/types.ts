@@ -55,6 +55,18 @@ export interface DayReputationSummary {
   promoted: boolean
 }
 
+export type TavernUpgradeId = 'quest_board' | 'intel_archive' | 'recovery_room'
+
+export interface TavernUpgradeLevels {
+  quest_board: number
+  intel_archive: number
+  recovery_room: number
+}
+
+export interface TavernUpgradeState {
+  levels: TavernUpgradeLevels
+}
+
 export interface CampaignPartyCondition {
   incapacitatedIds: string[]
   injuries: ExpeditionInjury[]
@@ -210,4 +222,5 @@ export interface TavernCampaignState {
   narrativeCandidates: NarrativeCandidate[]
   narrativeGenerations: NarrativeGenerationRecord[]
   finance: TavernFinanceState
+  upgrades: TavernUpgradeState
 }

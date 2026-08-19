@@ -7,7 +7,10 @@ import type {
   SaveSlotSummaryFromActions,
   UiActionResult,
 } from './types.ts'
-import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
+import type {
+  TavernCampaignState,
+  TavernUpgradeId,
+} from '../../core/tavern/campaign/types.ts'
 
 export interface GameCanvasHostProps {
   campaign: TavernCampaignState | null
@@ -17,6 +20,7 @@ export interface GameCanvasHostProps {
     partyId: string,
     requestId: string,
   ) => UiActionResult<OfferRequestActionData>
+  onPurchaseUpgrade: (upgradeId: TavernUpgradeId) => UiActionResult
   onOpenActivity: (
     partyId: string,
     eventId: string,
@@ -38,6 +42,7 @@ export default function GameCanvasHost({
   onAdvanceDay,
   onResolveDay,
   onOfferRequest,
+  onPurchaseUpgrade,
   onOpenActivity,
   onOpenExpeditionNarrative,
   onOpenSettings,
@@ -52,10 +57,12 @@ export default function GameCanvasHost({
   const canvasGameRef = useRef<CanvasGame | null>(null)
   const [error, setError] = useState<string | null>(null)
   const prevCampaignRef = useRef<TavernCampaignState | null>(null)
+  const preserveSceneOnNextSyncRef = useRef(false)
 
   const onAdvanceRef = useRef(onAdvanceDay)
   const onResolveRef = useRef(onResolveDay)
   const onOfferRef = useRef(onOfferRequest)
+  const onPurchaseUpgradeRef = useRef(onPurchaseUpgrade)
   const onOpenActivityRef = useRef(onOpenActivity)
   const onOpenExpeditionNarrativeRef = useRef(onOpenExpeditionNarrative)
   const onOpenSettingsRef = useRef(onOpenSettings)
@@ -70,6 +77,7 @@ export default function GameCanvasHost({
     onAdvanceRef.current = onAdvanceDay
     onResolveRef.current = onResolveDay
     onOfferRef.current = onOfferRequest
+    onPurchaseUpgradeRef.current = onPurchaseUpgrade
     onOpenActivityRef.current = onOpenActivity
     onOpenExpeditionNarrativeRef.current = onOpenExpeditionNarrative
     onOpenSettingsRef.current = onOpenSettings
@@ -83,6 +91,7 @@ export default function GameCanvasHost({
     onAdvanceDay,
     onResolveDay,
     onOfferRequest,
+    onPurchaseUpgrade,
     onOpenActivity,
     onOpenExpeditionNarrative,
     onOpenSettings,
@@ -142,6 +151,24 @@ export default function GameCanvasHost({
             ok: false,
             message:
               e instanceof Error ? e.message : '依頼の紹介に失敗しました',
+          }
+        }
+      },
+      purchaseUpgrade: (upgradeId) => {
+        try {
+          const result = onPurchaseUpgradeRef.current(upgradeId)
+          if (result.ok) {
+            // A successful purchase re-syncs the campaign prop, but the
+            // player should stay on the upgrade scene to see the result
+            // rather than being bounced back to the tavern.
+            preserveSceneOnNextSyncRef.current = true
+          }
+          return result
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '設備の購入に失敗しました',
           }
         }
       },
@@ -300,7 +327,9 @@ export default function GameCanvasHost({
     const cg = canvasGameRef.current
     if (!cg || !campaign) return
     if (campaign === prevCampaignRef.current) return
-    cg.setCampaign(campaign)
+    const preserveCurrentScene = preserveSceneOnNextSyncRef.current
+    preserveSceneOnNextSyncRef.current = false
+    cg.setCampaign(campaign, { preserveCurrentScene })
     prevCampaignRef.current = campaign
   }, [campaign])
 

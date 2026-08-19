@@ -15,6 +15,7 @@ import { SaveLoadScene } from './scenes/saveLoad/SaveLoadScene.ts'
 import { PartyDetailScene } from './scenes/partyDetail/PartyDetailScene.ts'
 import { WorldEncyclopediaScene } from './scenes/worldEncyclopedia/WorldEncyclopediaScene.ts'
 import { TavernLedgerScene } from './scenes/tavernLedger/TavernLedgerScene.ts'
+import { TavernUpgradeScene } from './scenes/tavernUpgrade/TavernUpgradeScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -123,6 +124,7 @@ export class CanvasGame {
     this._sceneManager.register(new PartyDetailScene())
     this._sceneManager.register(new WorldEncyclopediaScene())
     this._sceneManager.register(new TavernLedgerScene())
+    this._sceneManager.register(new TavernUpgradeScene())
 
     app.ticker.add(this.handleTick)
 
@@ -165,10 +167,13 @@ export class CanvasGame {
     this._host = null
   }
 
-  setCampaign(campaign: TavernCampaignState): void {
+  setCampaign(
+    campaign: TavernCampaignState,
+    options?: { preserveCurrentScene?: boolean },
+  ): void {
     this._currentCampaign = campaign
     const currentId = this._sceneManager?.current?.id
-    if (currentId && currentId !== 'tavern') {
+    if (currentId && currentId !== 'tavern' && !options?.preserveCurrentScene) {
       this._sceneManager?.show('tavern')
     }
     const current = this._sceneManager?.current
@@ -263,6 +268,7 @@ export class CanvasGame {
       advanceDay: () => ({ ok: true }),
       resolveDay: () => ({ ok: true }),
       offerRequest: () => ({ ok: true, data: { decision: 'accepted' } }),
+      purchaseUpgrade: () => ({ ok: true }),
       selectParty: () => {},
       selectQuest: () => {},
       openCharacter: () => {},
