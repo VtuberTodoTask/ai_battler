@@ -14,12 +14,15 @@ import {
   getEffectiveSampleCount,
   getPredictionSampleMultiplierBps,
   getRecoveryDayReduction,
+  getTrainingGrowthXp,
   getUpgradeLevelConfig,
   predictionSampleMultiplierBpsForLevel,
   purchaseTavernUpgrade,
   recoveryDayReductionForLevel,
   tavernUpgradeLabel,
+  trainingYardXpBonusForLevel,
 } from './upgrades.ts'
+import { TRAINING_GROWTH_XP } from './progression.ts'
 
 function fixtureCampaign(
   overrides: (campaign: TavernCampaignState) => void = () => {},
@@ -30,12 +33,13 @@ function fixtureCampaign(
 }
 
 describe('TAVERN_UPGRADE_IDS / labels / config', () => {
-  it('lists exactly the four known upgrade ids', () => {
+  it('lists exactly the five known upgrade ids', () => {
     expect(TAVERN_UPGRADE_IDS).toEqual([
       'quest_board',
       'intel_archive',
       'recovery_room',
       'guest_room',
+      'training_yard',
     ])
   })
 
@@ -49,6 +53,7 @@ describe('TAVERN_UPGRADE_IDS / labels / config', () => {
     expect(tavernUpgradeLabel('intel_archive')).toBe('調査資料棚')
     expect(tavernUpgradeLabel('recovery_room')).toBe('療養室')
     expect(tavernUpgradeLabel('guest_room')).toBe('客室')
+    expect(tavernUpgradeLabel('training_yard')).toBe('訓練場')
   })
 
   it('exposes exact cost/rank config per spec for every level of every upgrade', () => {
@@ -92,6 +97,16 @@ describe('TAVERN_UPGRADE_IDS / labels / config', () => {
       cost: 360,
       requiredTavernRank: 4,
     })
+    expect(getUpgradeLevelConfig('training_yard', 1)).toEqual({
+      level: 1,
+      cost: 200,
+      requiredTavernRank: 3,
+    })
+    expect(getUpgradeLevelConfig('training_yard', 2)).toEqual({
+      level: 2,
+      cost: 450,
+      requiredTavernRank: 5,
+    })
   })
 
   it('has no config beyond level 0 or above MAX_TAVERN_UPGRADE_LEVEL', () => {
@@ -109,8 +124,27 @@ describe('TAVERN_UPGRADE_IDS / labels / config', () => {
         intel_archive: 0,
         recovery_room: 0,
         guest_room: 0,
+        training_yard: 0,
       },
     })
+  })
+})
+
+describe('training yard derived effect', () => {
+  it('XP bonus is 0/1/2 for level 0/1/2', () => {
+    expect(trainingYardXpBonusForLevel(0)).toBe(0)
+    expect(trainingYardXpBonusForLevel(1)).toBe(1)
+    expect(trainingYardXpBonusForLevel(2)).toBe(2)
+  })
+
+  it('getTrainingGrowthXp is baseline 1/2/3 for level 0/1/2, never affecting expedition XP tables', () => {
+    const state = createInitialUpgradeState()
+    expect(getTrainingGrowthXp(state)).toBe(TRAINING_GROWTH_XP)
+    expect(getTrainingGrowthXp(state)).toBe(1)
+    state.levels.training_yard = 1
+    expect(getTrainingGrowthXp(state)).toBe(2)
+    state.levels.training_yard = 2
+    expect(getTrainingGrowthXp(state)).toBe(3)
   })
 })
 

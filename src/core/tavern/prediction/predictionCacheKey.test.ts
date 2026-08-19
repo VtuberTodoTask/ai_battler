@@ -83,6 +83,7 @@ describe('buildPredictionCacheKey', () => {
       },
       progression: {
         growthXp: 99,
+        totalGrowthXp: 99,
         growthMilestones: 99,
         trainingDays: 99,
       },

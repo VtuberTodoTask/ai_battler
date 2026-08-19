@@ -184,6 +184,7 @@ describe('save upgrade state validation', () => {
         intel_archive: 0,
         recovery_room: 0,
         guest_room: 0,
+        training_yard: 0,
       },
     })
     expect(() => validateGameSave(save)).not.toThrow()

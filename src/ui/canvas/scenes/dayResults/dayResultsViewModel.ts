@@ -22,6 +22,7 @@ import {
   questRankUnlockLabel,
   tavernRankLabel,
 } from '../../../../core/tavern/campaign/reputation.ts'
+import { skillLabel } from '../../viewModel/characterLabels.ts'
 
 export type DayResultsStep = 'important_events' | 'expedition_results'
 
@@ -350,19 +351,7 @@ function buildRelationshipEvent(
 
 function buildProgressionEvent(
   event: CampaignProgressionEvent,
-  campaign: TavernCampaignState,
 ): DayResultEventViewModel | null {
-  if (event.type === 'skillImproved') {
-    const party = findParty(campaign, event.partyId)
-    return {
-      id: `progression-event:${event.dayNumber}:skill:${event.partyId}:${event.memberId}`,
-      kind: 'progression',
-      title: 'スキルが成長しました',
-      summary: `${event.memberName}（${party?.name ?? event.partyName}）の${event.skill} ${event.before} → ${event.after}`,
-      importance: 'normal',
-      partyId: event.partyId,
-    }
-  }
   if (event.type === 'progressionSkipped' && event.reason) {
     return {
       id: `progression-event:${event.dayNumber}:skip:${event.partyId}`,
@@ -374,6 +363,47 @@ function buildProgressionEvent(
     }
   }
   return null
+}
+
+/**
+ * Consolidates a day's skillImproved events into at most one DayResults
+ * item per party ("「Party名」が成長しました", one line per grown member)
+ * instead of one item per member — a full party growing together
+ * shouldn't flood the day's event list with near-duplicate entries.
+ */
+function buildAggregatedSkillGrowthEvents(
+  events: CampaignProgressionEvent[],
+  campaign: TavernCampaignState,
+  dayNumber: number,
+): DayResultEventViewModel[] {
+  const byParty = new Map<
+    string,
+    Extract<CampaignProgressionEvent, { type: 'skillImproved' }>[]
+  >()
+  for (const event of events) {
+    if (event.type !== 'skillImproved') continue
+    const list = byParty.get(event.partyId) ?? []
+    list.push(event)
+    byParty.set(event.partyId, list)
+  }
+
+  const results: DayResultEventViewModel[] = []
+  for (const [partyId, improvements] of byParty) {
+    const party = findParty(campaign, partyId)
+    const partyName = party?.name ?? improvements[0].partyName
+    const lines = improvements.map(
+      (e) => `${e.memberName}：${skillLabel(e.skill)} ${e.before} → ${e.after}`,
+    )
+    results.push({
+      id: `progression-event:${dayNumber}:skill-growth:${partyId}`,
+      kind: 'progression',
+      title: `「${partyName}」が成長しました`,
+      summary: lines.join('\n'),
+      importance: 'normal',
+      partyId,
+    })
+  }
+  return results
 }
 
 function findDayRecord(
@@ -421,9 +451,16 @@ function buildImportantEvents(
       if (vm) events.push(vm)
     }
     for (const event of dayRecord.progressionEvents ?? []) {
-      const vm = buildProgressionEvent(event, campaign)
+      const vm = buildProgressionEvent(event)
       if (vm) events.push(vm)
     }
+    events.push(
+      ...buildAggregatedSkillGrowthEvents(
+        dayRecord.progressionEvents ?? [],
+        campaign,
+        dayRecord.dayNumber,
+      ),
+    )
   }
 
   for (const event of campaign.currentDay.partyEvents ?? []) {

@@ -163,8 +163,6 @@ function progressionLabel(event: CampaignProgressionEvent): string {
   switch (event.type) {
     case 'experienceGained':
       return `《${event.partyName}》 ${sourceLabelExpedition(event.source)} +${event.amount} XP (計 ${event.totalGrowthXpAfter})`
-    case 'training':
-      return `《${event.partyName}》 自主鍛錬 +${event.amount} XP`
     case 'skillImproved':
       return `${event.memberName}: ${event.skill} ${event.before} → ${event.after}`
     case 'progressionSkipped':

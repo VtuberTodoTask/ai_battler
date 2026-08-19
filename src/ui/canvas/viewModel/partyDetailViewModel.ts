@@ -12,6 +12,7 @@ import { OUTCOME_LABELS } from '../../expedition/labels.ts'
 import { COUNTRY_WORLD_PROFILES } from '../../../core/identity/worldData.ts'
 import type { CountryId, SpeciesId } from '../../../core/identity/types.ts'
 import { buildExpeditionReportId } from './expeditionReportViewModel.ts'
+import { PARTY_GROWTH_XP_THRESHOLD } from '../../../core/tavern/campaign/progression.ts'
 import {
   genderLabel,
   injuryTypeLabel,
@@ -137,9 +138,36 @@ export interface CharacterDetailViewModel {
   expeditions: CharacterExpeditionHistoryViewModel[]
 }
 
+export interface PartyGrowthSummaryViewModel {
+  growthXpLabel: string
+  totalGrowthXpLabel: string
+  growthMilestonesLabel: string
+  trainingDaysLabel: string
+}
+
+export interface MemberSkillGrowthViewModel {
+  skillLabel: string
+  currentValue: number
+  delta: number
+}
+
+export interface MemberGrowthViewModel {
+  memberId: string
+  memberName: string
+  skills: MemberSkillGrowthViewModel[]
+  emptyMessage?: string
+}
+
+export interface PartyGrowthViewModel {
+  summary: PartyGrowthSummaryViewModel
+  members: MemberGrowthViewModel[]
+  emptyMessage?: string
+}
+
 export interface PartyDetailSceneViewModel {
   party: PartyDetailHeaderViewModel
   members: PartyMemberListItemViewModel[]
+  growth: PartyGrowthViewModel
   selectedCharacter?: CharacterDetailViewModel
   emptyMessage?: string
 }
@@ -463,6 +491,76 @@ function buildCharacterDetail(
   }
 }
 
+/**
+ * Aggregates this campaign's skillImproved history into a per-member,
+ * per-skill total delta. The displayed *current* value always comes from
+ * the authoritative party.party.members[].skills — history is only used to
+ * derive how much each skill has grown, never to reconstruct a value.
+ */
+function buildMemberGrowth(
+  member: Adventurer,
+  party: CampaignParty,
+  campaign: TavernCampaignState,
+): MemberGrowthViewModel {
+  const deltaBySkill = new Map<string, number>()
+  for (const record of campaign.history) {
+    for (const ev of record.progressionEvents) {
+      if (
+        ev.type === 'skillImproved' &&
+        ev.partyId === party.id &&
+        ev.memberId === member.id
+      ) {
+        deltaBySkill.set(
+          ev.skill,
+          (deltaBySkill.get(ev.skill) ?? 0) + (ev.after - ev.before),
+        )
+      }
+    }
+  }
+
+  const skills: MemberSkillGrowthViewModel[] = [...deltaBySkill.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([skill, delta]) => ({
+      skillLabel: skillLabel(skill),
+      currentValue: member.skills[skill as keyof typeof member.skills],
+      delta,
+    }))
+
+  return {
+    memberId: member.id,
+    memberName: member.name,
+    skills,
+    emptyMessage:
+      skills.length === 0
+        ? 'この酒場での技能成長記録はまだありません。'
+        : undefined,
+  }
+}
+
+export function buildPartyGrowthViewModel(
+  party: CampaignParty,
+  campaign: TavernCampaignState,
+): PartyGrowthViewModel {
+  const p = party.progression
+  const members = party.party.members.map((m) =>
+    buildMemberGrowth(m, party, campaign),
+  )
+
+  return {
+    summary: {
+      growthXpLabel: `成長経験 ${p.growthXp} / ${PARTY_GROWTH_XP_THRESHOLD}`,
+      totalGrowthXpLabel: `累積経験 ${p.totalGrowthXp}`,
+      growthMilestonesLabel: `成長回数 ${p.growthMilestones}回`,
+      trainingDaysLabel: `訓練日数 ${p.trainingDays}日`,
+    },
+    members,
+    emptyMessage:
+      p.totalGrowthXp === 0
+        ? 'この酒場での技能成長記録はまだありません。'
+        : undefined,
+  }
+}
+
 function findTavernParty(
   campaign: TavernCampaignState,
   partyId: string,
@@ -567,6 +665,16 @@ export function buildPartyDetailSceneViewModel(
         currentArrivalDayLabel: '—',
       },
       members: [],
+      growth: {
+        summary: {
+          growthXpLabel: '—',
+          totalGrowthXpLabel: '—',
+          growthMilestonesLabel: '—',
+          trainingDaysLabel: '—',
+        },
+        members: [],
+        emptyMessage: 'このパーティの情報を表示できません。',
+      },
       emptyMessage: 'このパーティの情報を表示できません。',
     }
   }
@@ -595,6 +703,7 @@ export function buildPartyDetailSceneViewModel(
   return {
     party: buildPartyDetailHeader(party, campaign),
     members,
+    growth: buildPartyGrowthViewModel(party, campaign),
     selectedCharacter: selectedMember
       ? buildCharacterDetail(selectedMember, party, campaign)
       : undefined,

@@ -56,13 +56,18 @@ export interface DayReputationSummary {
 }
 
 export type TavernUpgradeId =
-  'quest_board' | 'intel_archive' | 'recovery_room' | 'guest_room'
+  | 'quest_board'
+  | 'intel_archive'
+  | 'recovery_room'
+  | 'guest_room'
+  | 'training_yard'
 
 export interface TavernUpgradeLevels {
   quest_board: number
   intel_archive: number
   recovery_room: number
   guest_room: number
+  training_yard: number
 }
 
 export interface TavernUpgradeState {
@@ -125,13 +130,6 @@ export type CampaignProgressionEvent =
       amount: number
       growthXpAfter: number
       totalGrowthXpAfter: number
-    }
-  | {
-      type: 'training'
-      partyId: string
-      partyName: string
-      dayNumber: number
-      amount: number
     }
   | {
       type: 'skillImproved'

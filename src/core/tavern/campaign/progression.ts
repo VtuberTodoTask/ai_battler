@@ -56,6 +56,22 @@ export function awardPartyGrowthXp(
   party.progression.growthXp += amount
   party.progression.totalGrowthXp += amount
 
+  if (context.source === 'training') {
+    party.progression.trainingDays += 1
+  }
+
+  // Resolve any milestones (and their skill growth) triggered by this XP
+  // BEFORE snapshotting growthXpAfter, so the experienceGained event
+  // reports the final, already-reduced growthXp (always in
+  // [0, PARTY_GROWTH_XP_THRESHOLD)) rather than a transient pre-reduction
+  // carry value. totalGrowthXp is monotonic and unaffected by milestones,
+  // so its snapshot timing doesn't matter.
+  const milestoneEvents = applyGrowthMilestones(
+    campaignSeed,
+    party,
+    context.dayNumber,
+  )
+
   const events: CampaignProgressionEvent[] = [
     {
       type: 'experienceGained',
@@ -67,18 +83,8 @@ export function awardPartyGrowthXp(
       growthXpAfter: party.progression.growthXp,
       totalGrowthXpAfter: party.progression.totalGrowthXp,
     },
+    ...milestoneEvents,
   ]
-
-  if (context.source === 'training') {
-    party.progression.trainingDays += 1
-  }
-
-  const milestoneEvents = applyGrowthMilestones(
-    campaignSeed,
-    party,
-    context.dayNumber,
-  )
-  events.push(...milestoneEvents)
 
   return events
 }

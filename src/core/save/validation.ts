@@ -19,9 +19,17 @@ import {
   getUpgradeLevelConfig,
 } from '../tavern/campaign/upgrades.ts'
 import { PARTY_LIFECYCLE_CONFIG } from '../tavern/campaign/lifecycle.ts'
+import {
+  EXPEDITION_GROWTH_XP,
+  PARTY_GROWTH_XP_THRESHOLD,
+  SKILL_GROWTH_PER_MILESTONE,
+} from '../tavern/campaign/progression.ts'
+import { MAX_SKILL_NORMAL, MAX_SKILL_S } from '../balance/constants.ts'
+import { ROLE_MAP } from '../../data/roles.ts'
 import type { AdventurerRank } from '../models/types.ts'
 import type { ExpeditionOutcome } from '../expedition/types.ts'
 import type {
+  CampaignProgressionSource,
   PartyLifecycleStatus,
   TavernRank,
   TavernUpgradeId,
@@ -54,6 +62,32 @@ const ALLOWED_LEDGER_KINDS = [
 ] as const
 
 const ALLOWED_RANKS = ['E', 'D', 'C', 'B', 'A', 'S'] as const
+
+const SKILL_NAMES = [
+  'melee',
+  'ranged',
+  'defense',
+  'tactics',
+  'attackMagic',
+  'defenseMagic',
+  'healing',
+  'scouting',
+  'stealth',
+  'trapDetection',
+  'trapDisarm',
+  'survival',
+  'monsterKnowledge',
+  'firstAid',
+  'leadership',
+] as const
+
+const EXPEDITION_XP_SOURCES = [
+  'completeSuccess',
+  'success',
+  'partialSuccess',
+  'failedObjective',
+  'forcedRetreat',
+] as const
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -1488,6 +1522,477 @@ function validatePartyLifecycle(
   for (const p of retiredParties) checkPartyEntry(p, 'retired')
 }
 
+interface ValidatedProgressionFields {
+  growthXp: number
+  totalGrowthXp: number
+  growthMilestones: number
+  trainingDays: number
+}
+
+/**
+ * Validates the Phase 9.5 growth-arithmetic invariant that must hold for
+ * every party's progression at all times:
+ *   0 <= growthXp < PARTY_GROWTH_XP_THRESHOLD
+ *   totalGrowthXp >= 0
+ *   growthMilestones === floor(totalGrowthXp / PARTY_GROWTH_XP_THRESHOLD)
+ *   growthXp === totalGrowthXp % PARTY_GROWTH_XP_THRESHOLD
+ */
+function validateProgressionFields(
+  value: unknown,
+  context: string,
+): ValidatedProgressionFields {
+  assertPlainObject(value, `${context}の成長データが壊れています`)
+  const p = value as Record<string, unknown>
+
+  if (
+    typeof p.growthXp !== 'number' ||
+    !Number.isInteger(p.growthXp) ||
+    p.growthXp < 0 ||
+    p.growthXp >= PARTY_GROWTH_XP_THRESHOLD
+  ) {
+    throw new SaveValidationErrorClass(
+      `${context}の成長経験値が不正です`,
+      'corrupted-data',
+    )
+  }
+  if (
+    typeof p.totalGrowthXp !== 'number' ||
+    !Number.isInteger(p.totalGrowthXp) ||
+    p.totalGrowthXp < 0
+  ) {
+    throw new SaveValidationErrorClass(
+      `${context}の累積成長経験値が不正です`,
+      'corrupted-data',
+    )
+  }
+  if (
+    typeof p.growthMilestones !== 'number' ||
+    !Number.isInteger(p.growthMilestones) ||
+    p.growthMilestones < 0
+  ) {
+    throw new SaveValidationErrorClass(
+      `${context}の成長回数が不正です`,
+      'corrupted-data',
+    )
+  }
+  if (
+    typeof p.trainingDays !== 'number' ||
+    !Number.isInteger(p.trainingDays) ||
+    p.trainingDays < 0
+  ) {
+    throw new SaveValidationErrorClass(
+      `${context}の訓練日数が不正です`,
+      'corrupted-data',
+    )
+  }
+
+  const growthXp = p.growthXp as number
+  const totalGrowthXp = p.totalGrowthXp as number
+  const growthMilestones = p.growthMilestones as number
+
+  if (
+    growthMilestones !== Math.floor(totalGrowthXp / PARTY_GROWTH_XP_THRESHOLD)
+  ) {
+    throw new SaveValidationErrorClass(
+      `${context}の成長回数が累積経験値と一致しません`,
+      'corrupted-data',
+    )
+  }
+  if (growthXp !== totalGrowthXp % PARTY_GROWTH_XP_THRESHOLD) {
+    throw new SaveValidationErrorClass(
+      `${context}の成長経験値が累積経験値と一致しません`,
+      'corrupted-data',
+    )
+  }
+
+  return {
+    growthXp,
+    totalGrowthXp,
+    growthMilestones,
+    trainingDays: p.trainingDays as number,
+  }
+}
+
+/** Validates every known skill is present with an integer value within the
+ * rank-appropriate cap. Returns the parsed skill map for later use. */
+function validateSkillSet(
+  value: unknown,
+  rank: string,
+  context: string,
+): Record<string, number> {
+  assertPlainObject(value, `${context}の技能データが壊れています`)
+  const skills = value as Record<string, unknown>
+  const cap = rank === 'S' ? MAX_SKILL_S : MAX_SKILL_NORMAL
+  const result: Record<string, number> = {}
+  for (const skill of SKILL_NAMES) {
+    const v = skills[skill]
+    if (typeof v !== 'number' || !Number.isInteger(v) || v < 0 || v > cap) {
+      throw new SaveValidationErrorClass(
+        `${context}の技能「${skill}」の値が不正です`,
+        'corrupted-data',
+      )
+    }
+    result[skill] = v
+  }
+  return result
+}
+
+interface KnownPartyProgressionInfo {
+  progression: ValidatedProgressionFields
+  members: Map<
+    string,
+    { role: string; rank: string; skills: Record<string, number> }
+  >
+}
+
+/**
+ * Phase 9.5 growth validation: every known party's (staying/away/retired)
+ * progression fields must satisfy the growth-arithmetic invariant, and
+ * replaying every experienceGained/skillImproved event across the entire
+ * campaign history must reconstruct exactly the currently-stored
+ * progression and skill values — proving growth was actually earned, not
+ * merely internally consistent. Also validates skillImproved event
+ * structure: the grown skill must be a role candidate (expert/trained),
+ * the delta must be within the milestone's growth amount and never exceed
+ * the rank-appropriate cap, at most one skillImproved event may exist per
+ * (party, member, milestone), and a member+skill growing more than once
+ * must chain (previous.after === next.before).
+ */
+function validatePartyProgressionAndSkills(
+  campaign: Record<string, unknown>,
+  history: unknown[],
+): void {
+  const known = new Map<string, KnownPartyProgressionInfo>()
+
+  function collect(value: unknown, context: string): void {
+    if (!isPlainObject(value) || !hasString(value, 'id')) return
+    const party = value
+    const partyId = party.id as string
+
+    const progression = validateProgressionFields(
+      party.progression,
+      `${context}パーティ ${partyId}`,
+    )
+
+    const members = new Map<
+      string,
+      { role: string; rank: string; skills: Record<string, number> }
+    >()
+    const partyMembers = (party.party as Record<string, unknown> | undefined)
+      ?.members
+    if (Array.isArray(partyMembers)) {
+      for (const raw of partyMembers) {
+        assertPlainObject(
+          raw,
+          `${context}パーティ ${partyId} のメンバーデータが壊れています`,
+        )
+        const member = raw
+        if (!hasString(member, 'id')) continue
+        const memberId = member.id as string
+        const role = typeof member.role === 'string' ? member.role : ''
+        const rank = typeof member.rank === 'string' ? member.rank : ''
+        const skills = validateSkillSet(
+          member.skills,
+          rank,
+          `${context}パーティ ${partyId} の ${memberId}`,
+        )
+        members.set(memberId, { role, rank, skills })
+      }
+    }
+
+    known.set(partyId, { progression, members })
+  }
+
+  for (const p of campaign.parties as unknown[]) collect(p, '')
+  for (const p of campaign.awayParties as unknown[]) collect(p, '')
+  for (const p of campaign.retiredParties as unknown[]) collect(p, '')
+
+  interface ReplayState {
+    growthXp: number
+    totalGrowthXp: number
+    growthMilestones: number
+    trainingDays: number
+  }
+  const replay = new Map<string, ReplayState>()
+  for (const id of known.keys()) {
+    replay.set(id, {
+      growthXp: 0,
+      totalGrowthXp: 0,
+      growthMilestones: 0,
+      trainingDays: 0,
+    })
+  }
+
+  // Keyed by JSON.stringify([partyId, memberId, skill]) / [partyId,
+  // memberId, milestone] — party/member IDs can themselves contain ':',
+  // so a colon-joined string key would be ambiguous.
+  const skillChain = new Map<string, number>()
+  const seenMilestoneMember = new Set<string>()
+
+  const validSources: readonly CampaignProgressionSource[] = [
+    'completeSuccess',
+    'success',
+    'partialSuccess',
+    'failedObjective',
+    'forcedRetreat',
+    'training',
+  ]
+
+  for (const rawRecord of history) {
+    assertPlainObject(rawRecord, '履歴レコードの形式が不正です')
+    const record = rawRecord
+    const events = record.progressionEvents
+    if (events === undefined) continue
+    if (!Array.isArray(events)) {
+      throw new SaveValidationErrorClass(
+        '成長イベント一覧の形式が不正です',
+        'corrupted-data',
+      )
+    }
+
+    for (const rawEvent of events) {
+      assertPlainObject(rawEvent, '成長イベントの形式が不正です')
+      const event = rawEvent
+
+      if (
+        !hasString(event, 'partyId') ||
+        (event.partyId as string).length === 0
+      ) {
+        throw new SaveValidationErrorClass(
+          '成長イベントにパーティIDがありません',
+          'corrupted-data',
+        )
+      }
+      const partyId = event.partyId as string
+      const info = known.get(partyId)
+      if (!info) {
+        throw new SaveValidationErrorClass(
+          '孤立した成長イベントがあります',
+          'corrupted-data',
+        )
+      }
+
+      if (
+        typeof event.dayNumber !== 'number' ||
+        !Number.isInteger(event.dayNumber) ||
+        event.dayNumber < 1
+      ) {
+        throw new SaveValidationErrorClass(
+          '成長イベントの日数が不正です',
+          'corrupted-data',
+        )
+      }
+
+      if (event.type === 'experienceGained') {
+        if (!validSources.includes(event.source as CampaignProgressionSource)) {
+          throw new SaveValidationErrorClass(
+            '成長イベントの獲得源が不正です',
+            'corrupted-data',
+          )
+        }
+        const source = event.source as CampaignProgressionSource
+        if (
+          typeof event.amount !== 'number' ||
+          !Number.isInteger(event.amount) ||
+          event.amount <= 0
+        ) {
+          throw new SaveValidationErrorClass(
+            '成長イベントの経験値量が不正です',
+            'corrupted-data',
+          )
+        }
+        const amount = event.amount as number
+        if (
+          (EXPEDITION_XP_SOURCES as readonly string[]).includes(source) &&
+          amount !==
+            EXPEDITION_GROWTH_XP[source as keyof typeof EXPEDITION_GROWTH_XP]
+        ) {
+          throw new SaveValidationErrorClass(
+            '成長イベントの経験値量が固定表と一致しません',
+            'corrupted-data',
+          )
+        }
+
+        const state = replay.get(partyId)!
+        state.totalGrowthXp += amount
+        state.growthXp += amount
+        if (source === 'training') {
+          state.trainingDays += 1
+        }
+        // Milestones (and the skill growth they trigger) resolve before
+        // growthXpAfter is snapshotted — mirrors awardPartyGrowthXp's
+        // actual mutation order (see progression.ts).
+        while (state.growthXp >= PARTY_GROWTH_XP_THRESHOLD) {
+          state.growthXp -= PARTY_GROWTH_XP_THRESHOLD
+          state.growthMilestones += 1
+        }
+
+        if (
+          typeof event.growthXpAfter !== 'number' ||
+          event.growthXpAfter !== state.growthXp
+        ) {
+          throw new SaveValidationErrorClass(
+            '成長イベントの経験値後の値が再計算結果と一致しません',
+            'corrupted-data',
+          )
+        }
+        if (
+          typeof event.totalGrowthXpAfter !== 'number' ||
+          event.totalGrowthXpAfter !== state.totalGrowthXp
+        ) {
+          throw new SaveValidationErrorClass(
+            '成長イベントの累積経験値後の値が再計算結果と一致しません',
+            'corrupted-data',
+          )
+        }
+      } else if (event.type === 'skillImproved') {
+        if (
+          !hasString(event, 'memberId') ||
+          (event.memberId as string).length === 0
+        ) {
+          throw new SaveValidationErrorClass(
+            '成長イベントのメンバーIDがありません',
+            'corrupted-data',
+          )
+        }
+        const memberId = event.memberId as string
+        const member = info.members.get(memberId)
+        if (!member) {
+          throw new SaveValidationErrorClass(
+            '孤立したスキル成長イベントがあります',
+            'corrupted-data',
+          )
+        }
+        if (
+          typeof event.skill !== 'string' ||
+          !(SKILL_NAMES as readonly string[]).includes(event.skill)
+        ) {
+          throw new SaveValidationErrorClass(
+            'スキル成長イベントの技能名が不正です',
+            'corrupted-data',
+          )
+        }
+        const skill = event.skill as string
+        const role = ROLE_MAP[member.role as keyof typeof ROLE_MAP] as
+          | {
+              expertSkills: readonly string[]
+              trainedSkills: readonly string[]
+            }
+          | undefined
+        const isCandidate =
+          role !== undefined &&
+          (role.expertSkills.includes(skill) ||
+            role.trainedSkills.includes(skill))
+        if (!isCandidate) {
+          throw new SaveValidationErrorClass(
+            'スキル成長イベントの技能がRoleの候補外です',
+            'corrupted-data',
+          )
+        }
+        if (
+          typeof event.before !== 'number' ||
+          !Number.isInteger(event.before) ||
+          event.before < 0
+        ) {
+          throw new SaveValidationErrorClass(
+            'スキル成長イベントの成長前の値が不正です',
+            'corrupted-data',
+          )
+        }
+        const before = event.before as number
+        const cap = member.rank === 'S' ? MAX_SKILL_S : MAX_SKILL_NORMAL
+        if (
+          typeof event.after !== 'number' ||
+          !Number.isInteger(event.after) ||
+          event.after <= before ||
+          event.after - before > SKILL_GROWTH_PER_MILESTONE ||
+          event.after > cap
+        ) {
+          throw new SaveValidationErrorClass(
+            'スキル成長イベントの成長後の値が不正です',
+            'corrupted-data',
+          )
+        }
+        const after = event.after as number
+        if (
+          typeof event.milestone !== 'number' ||
+          !Number.isInteger(event.milestone) ||
+          event.milestone < 1
+        ) {
+          throw new SaveValidationErrorClass(
+            'スキル成長イベントのMilestone番号が不正です',
+            'corrupted-data',
+          )
+        }
+        const milestoneKey = JSON.stringify([
+          partyId,
+          memberId,
+          event.milestone,
+        ])
+        if (seenMilestoneMember.has(milestoneKey)) {
+          throw new SaveValidationErrorClass(
+            '同じMilestoneで同じメンバーのスキルが複数回成長しています',
+            'corrupted-data',
+          )
+        }
+        seenMilestoneMember.add(milestoneKey)
+
+        const chainKey = JSON.stringify([partyId, memberId, skill])
+        const previousAfter = skillChain.get(chainKey)
+        if (previousAfter !== undefined && previousAfter !== before) {
+          throw new SaveValidationErrorClass(
+            'スキル成長イベントの連鎖が一致しません',
+            'corrupted-data',
+          )
+        }
+        skillChain.set(chainKey, after)
+      } else if (event.type === 'progressionSkipped') {
+        if (typeof event.reason !== 'string' || event.reason.length === 0) {
+          throw new SaveValidationErrorClass(
+            '成長スキップイベントの理由がありません',
+            'corrupted-data',
+          )
+        }
+      } else {
+        throw new SaveValidationErrorClass(
+          '成長イベントの種別が不正です',
+          'corrupted-data',
+        )
+      }
+    }
+  }
+
+  for (const [partyId, info] of known) {
+    const state = replay.get(partyId)!
+    if (
+      state.growthXp !== info.progression.growthXp ||
+      state.totalGrowthXp !== info.progression.totalGrowthXp ||
+      state.growthMilestones !== info.progression.growthMilestones ||
+      state.trainingDays !== info.progression.trainingDays
+    ) {
+      throw new SaveValidationErrorClass(
+        `パーティ ${partyId} の成長状態が履歴の再計算結果と一致しません`,
+        'corrupted-data',
+      )
+    }
+  }
+
+  for (const [chainKey, after] of skillChain) {
+    const [partyId, memberId, skill] = JSON.parse(chainKey) as [
+      string,
+      string,
+      string,
+    ]
+    const member = known.get(partyId)?.members.get(memberId)
+    if (!member || member.skills[skill] !== after) {
+      throw new SaveValidationErrorClass(
+        '現在の技能値が成長履歴の最新値と一致しません',
+        'corrupted-data',
+      )
+    }
+  }
+}
+
 /**
  * Proves that the planning day's roster snapshot (currentDay.parties) is
  * exactly the persistent staying roster (campaign.parties) — same set of
@@ -1613,6 +2118,66 @@ function validateCurrentDayRosterIntegrity(
         if (mismatched) {
           throw new SaveValidationErrorClass(
             '本日のパーティのメンバー構成が滞在中のパーティと一致しません',
+            'corrupted-data',
+          )
+        }
+      }
+
+      // Skill Snapshot Parity (Phase 9.5): a member's authoritative skill
+      // values must be identical between the persistent party and today's
+      // planning snapshot — growth is never partially reflected.
+      const toMemberById = (
+        value: unknown,
+      ): Map<string, Record<string, unknown>> => {
+        const map = new Map<string, Record<string, unknown>>()
+        if (!Array.isArray(value)) return map
+        for (const m of value) {
+          if (isPlainObject(m) && hasString(m, 'id')) {
+            map.set(m.id as string, m)
+          }
+        }
+        return map
+      }
+      const snapshotMembersById = toMemberById(snapshotPartyObj.members)
+      const persistentMembersById = toMemberById(persistentPartyObj.members)
+      for (const [memberId, persistentMember] of persistentMembersById) {
+        const snapshotMember = snapshotMembersById.get(memberId)
+        if (!snapshotMember) continue
+        const snapshotSkills = isPlainObject(snapshotMember.skills)
+          ? snapshotMember.skills
+          : {}
+        const persistentSkills = isPlainObject(persistentMember.skills)
+          ? persistentMember.skills
+          : {}
+        for (const skill of SKILL_NAMES) {
+          if (snapshotSkills[skill] !== persistentSkills[skill]) {
+            throw new SaveValidationErrorClass(
+              `本日のパーティのメンバー ${memberId} の技能「${skill}」が滞在中のパーティと一致しません`,
+              'corrupted-data',
+            )
+          }
+        }
+      }
+    }
+
+    // Progression Snapshot Parity (Phase 9.5): the day-local progression
+    // snapshot must equal the persistent party's authoritative progression
+    // in all four fields.
+    const snapshotProgression = raw.progression
+    const persistentProgression = persistent.progression
+    if (
+      isPlainObject(snapshotProgression) &&
+      isPlainObject(persistentProgression)
+    ) {
+      for (const field of [
+        'growthXp',
+        'totalGrowthXp',
+        'growthMilestones',
+        'trainingDays',
+      ] as const) {
+        if (snapshotProgression[field] !== persistentProgression[field]) {
+          throw new SaveValidationErrorClass(
+            `本日のパーティの成長状態（${field}）が滞在中のパーティと一致しません`,
             'corrupted-data',
           )
         }
@@ -1972,6 +2537,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
     campaign.dayNumber as number,
     effectivePartyCapacity,
   )
+
+  validatePartyProgressionAndSkills(campaign, campaign.history as unknown[])
 
   validateCurrentDayRosterIntegrity(campaign, currentDay)
 

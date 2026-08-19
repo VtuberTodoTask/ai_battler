@@ -87,6 +87,7 @@ export interface AdventurerParty {
 
 export interface TavernPartyProgressionSnapshot {
   growthXp: number
+  totalGrowthXp: number
   growthMilestones: number
   trainingDays: number
 }

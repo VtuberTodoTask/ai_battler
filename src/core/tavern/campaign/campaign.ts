@@ -26,6 +26,7 @@ import {
   createInitialUpgradeState,
   getDailyRequestBonus,
   getEffectivePartyCapacity,
+  getTrainingGrowthXp,
 } from './upgrades.ts'
 import {
   applyOvernightRecovery,
@@ -55,11 +56,7 @@ import { applyExpeditionMemory } from '../../narrative/memory.ts'
 import { updateArcSignals } from '../../narrative/arcSignals.ts'
 import { updateRelationshipMilestones } from '../../narrative/milestones.ts'
 import { resolveDowntimeForCampaign } from '../../narrative/downtime.ts'
-import {
-  EXPEDITION_GROWTH_XP,
-  TRAINING_GROWTH_XP,
-  awardPartyGrowthXp,
-} from './progression.ts'
+import { EXPEDITION_GROWTH_XP, awardPartyGrowthXp } from './progression.ts'
 import {
   buildTavernDay,
   generateCampaignParty,
@@ -271,10 +268,15 @@ export function resolveCampaignDay(
     }
     relationshipEvents.push(applyIdleFinancialPressure(party, dayNumber))
     progressionEvents.push(
-      ...awardPartyGrowthXp(nextCampaign.seed, party, TRAINING_GROWTH_XP, {
-        source: 'training',
-        dayNumber,
-      }),
+      ...awardPartyGrowthXp(
+        nextCampaign.seed,
+        party,
+        getTrainingGrowthXp(nextCampaign.upgrades),
+        {
+          source: 'training',
+          dayNumber,
+        },
+      ),
     )
   }
 
@@ -340,6 +342,7 @@ function syncCurrentDayParties(
       party: deepClone(campaignParty.party),
       progression: {
         growthXp: campaignParty.progression.growthXp,
+        totalGrowthXp: campaignParty.progression.totalGrowthXp,
         growthMilestones: campaignParty.progression.growthMilestones,
         trainingDays: campaignParty.progression.trainingDays,
       },

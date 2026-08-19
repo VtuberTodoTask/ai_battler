@@ -292,6 +292,19 @@ describe('save validation: party lifecycle (Phase 9.4)', () => {
       save.campaign.currentDay.parties[0],
       '-clone',
     )
+    // This synthetic clone has no matching history events, so its growth
+    // state must be reset to zero (matching what a party with no growth
+    // history would actually have) to satisfy the Phase 9.5 progression
+    // replay check — otherwise it would spuriously fail as "earned growth
+    // with no corresponding events".
+    const zeroProgression = {
+      growthXp: 0,
+      totalGrowthXp: 0,
+      growthMilestones: 0,
+      trainingDays: 0,
+    }
+    extra.progression = { ...zeroProgression }
+    extraSnapshot.progression = { ...zeroProgression }
     save.campaign.parties.push(extra)
     save.campaign.currentDay.parties.push(extraSnapshot)
     expect(() => validateGameSave(save)).not.toThrow()
