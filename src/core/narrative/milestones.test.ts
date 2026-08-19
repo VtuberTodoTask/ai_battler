@@ -51,6 +51,7 @@ function makeParty(members: { id: string; name: string }[]): CampaignParty {
       riskTolerance: 'balanced',
       stayExtensionDaysUsed: 0,
     },
+    lifecycle: { status: 'staying', firstArrivalDay: 1, visitCount: 1 },
   }
 }
 

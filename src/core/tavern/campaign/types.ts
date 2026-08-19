@@ -55,12 +55,14 @@ export interface DayReputationSummary {
   promoted: boolean
 }
 
-export type TavernUpgradeId = 'quest_board' | 'intel_archive' | 'recovery_room'
+export type TavernUpgradeId =
+  'quest_board' | 'intel_archive' | 'recovery_room' | 'guest_room'
 
 export interface TavernUpgradeLevels {
   quest_board: number
   intel_archive: number
   recovery_room: number
+  guest_room: number
 }
 
 export interface TavernUpgradeState {
@@ -70,6 +72,21 @@ export interface TavernUpgradeState {
 export interface CampaignPartyCondition {
   incapacitatedIds: string[]
   injuries: ExpeditionInjury[]
+}
+
+export type PartyLifecycleStatus = 'staying' | 'away' | 'retired'
+
+/**
+ * Persistent visit-history metadata. `arrivalDay` on CampaignParty already
+ * tracks the current/most recent stay's arrival day (lastArrivalDay), so it
+ * is not duplicated here.
+ */
+export interface PartyLifecycleState {
+  status: PartyLifecycleStatus
+  firstArrivalDay: number
+  visitCount: number
+  lastDepartureDay?: number
+  returnEligibleDay?: number
 }
 
 export type CampaignInjurySnapshot = ExpeditionInjury
@@ -198,6 +215,7 @@ export interface CampaignParty {
   /** Recent minor narrative fingerprints for this party, used to avoid repeated framing. Optional for backward compatibility. */
   minorNarrativeFingerprints?: MinorNarrativeFingerprint[]
   departingCasualty?: boolean
+  lifecycle: PartyLifecycleState
 }
 
 export interface TavernDayRecord {
@@ -217,6 +235,8 @@ export interface TavernCampaignState {
   reputation: TavernReputationState
   nextPartySerial: number
   parties: CampaignParty[]
+  awayParties: CampaignParty[]
+  retiredParties: CampaignParty[]
   currentDay: TavernDayState
   history: TavernDayRecord[]
   narrativeCandidates: NarrativeCandidate[]

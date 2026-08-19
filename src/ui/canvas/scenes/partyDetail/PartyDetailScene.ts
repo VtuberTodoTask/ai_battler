@@ -23,7 +23,7 @@ import type {
 import { buildPartyDetailSceneViewModel } from '../../viewModel/partyDetailViewModel.ts'
 
 const MARGIN = 16
-const TOP_BAR_HEIGHT = 64
+const TOP_BAR_HEIGHT = 96
 const PANEL_PADDING = 16
 const PARTY_DETAIL_BG_URL = '/party-detail-bg.jpg'
 const LEFT_WIDTH = 300
@@ -424,6 +424,33 @@ export class PartyDetailScene implements GameScene {
     infoLabel.x = x
     infoLabel.y = y + 4
     this._headerRoot.addChild(infoLabel)
+
+    const lifecycleText = [
+      party.firstArrivalDayLabel,
+      party.visitCountLabel,
+      party.currentArrivalDayLabel,
+      party.lastDepartureDayLabel,
+    ]
+      .filter((s) => s && s.length > 0)
+      .join(' ・ ')
+
+    const lifecycleLabel = new GameLabel(lifecycleText, theme, 'caption', {
+      maxWidth: VIRTUAL_WIDTH - theme.spacing.s16 * 2,
+      breakWords: true,
+    })
+    lifecycleLabel.x = theme.spacing.s16
+    lifecycleLabel.y = y + 32
+    this._headerRoot.addChild(lifecycleLabel)
+
+    if (party.lifecycleNote) {
+      const noteLabel = new GameLabel(party.lifecycleNote, theme, 'caption', {
+        maxWidth: VIRTUAL_WIDTH - theme.spacing.s16 * 2,
+        breakWords: true,
+      })
+      noteLabel.x = theme.spacing.s16
+      noteLabel.y = y + 52
+      this._headerRoot.addChild(noteLabel)
+    }
   }
 
   private renderMemberList(): void {

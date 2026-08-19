@@ -57,12 +57,15 @@ const UPGRADE_DESCRIPTIONS: Record<TavernUpgradeId, string> = {
     '地図や過去の遠征記録を整理し、依頼予測に利用できる資料を増やします。',
   recovery_room:
     '負傷した冒険者を休ませるための設備を整えます。今後新たに始まる回復期間が短縮されます。',
+  guest_room:
+    '冒険者が滞在できる客室を増やします。翌日以降、酒場に滞在できるパーティの数が増加します。',
 }
 
 const UPGRADE_TIMING_NOTES: Record<TavernUpgradeId, string> = {
   quest_board: '効果は翌日から反映されます。',
   intel_archive: '効果はすぐに反映されます。',
   recovery_room: '現在療養中の冒険者には遡って適用されません。',
+  guest_room: '効果は翌日から反映されます。',
 }
 
 function questBoardEffectText(level: number): string {
@@ -84,6 +87,12 @@ function recoveryRoomEffectText(level: number): string {
     : `新たに開始する回復期間 -${reduction}日`
 }
 
+function guestRoomEffectText(level: number): string {
+  return level === 0
+    ? '同時に滞在できるパーティ数は変わりません'
+    : `同時に滞在できるパーティ数 +${level}`
+}
+
 function effectTextForLevel(id: TavernUpgradeId, level: number): string {
   switch (id) {
     case 'quest_board':
@@ -92,6 +101,8 @@ function effectTextForLevel(id: TavernUpgradeId, level: number): string {
       return intelArchiveEffectText(level)
     case 'recovery_room':
       return recoveryRoomEffectText(level)
+    case 'guest_room':
+      return guestRoomEffectText(level)
   }
 }
 

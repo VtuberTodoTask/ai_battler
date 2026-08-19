@@ -66,6 +66,8 @@ export interface TavernPartyListItemViewModel {
   selected: boolean
   unreadEventCount: number
   extensionDaysRemaining?: number
+  /** '新規' for a party arriving for the first time today, '再訪' for a returning party arriving today, undefined otherwise. */
+  arrivalBadge?: '新規' | '再訪'
 }
 
 export interface TavernPartySummaryViewModel {
@@ -270,6 +272,7 @@ function buildPartyListItem(
     selected,
     unreadEventCount: unreadCount,
     extensionDaysRemaining,
+    arrivalBadge: party.arrivalBadge,
   }
 }
 

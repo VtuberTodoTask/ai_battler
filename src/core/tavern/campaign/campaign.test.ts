@@ -464,7 +464,11 @@ describe('Campaign domain', () => {
       expect(pair).not.toBeNull()
       if (!pair) return
 
-      const party = campaign.parties.find((p) => p.id === pair.partyId)!
+      // Use a party that is not dispatched, so the affinity-based stay
+      // extension path being tested here can never collide with the
+      // separate (unconditional) recovery-forced extension path.
+      const party = campaign.parties.find((p) => p.id !== pair.partyId)!
+      const partyId = party.id
       party.relationship.affinity = 50
       party.plannedDepartureDay = campaign.dayNumber
 
@@ -472,9 +476,9 @@ describe('Campaign domain', () => {
       campaign = resolveCampaignDay(campaign)
       campaign = advanceCampaignDay(campaign)
 
-      const extendedParty = campaign.parties.find((p) => p.id === pair.partyId)
+      const extendedParty = campaign.parties.find((p) => p.id === partyId)
       const extensionEvent = campaign.history[0].relationshipEvents.find(
-        (e) => e.type === 'stayExtended' && e.partyId === pair.partyId,
+        (e) => e.type === 'stayExtended' && e.partyId === partyId,
       )
       expect(extensionEvent).toBeDefined()
       expect(extendedParty?.plannedDepartureDay).toBeGreaterThan(

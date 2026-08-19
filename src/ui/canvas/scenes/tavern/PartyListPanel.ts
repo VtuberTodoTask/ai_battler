@@ -85,6 +85,7 @@ export class PartyListPanel extends Container {
         theme: this._theme,
         title: party.name,
         subtitle,
+        trailing: party.arrivalBadge,
         selected: party.selected,
         disabled: false,
         unread: party.unreadEventCount > 0,

@@ -42,11 +42,12 @@ describe('TavernFeedbackViewModel', () => {
     party.downtimeEvents = [event]
 
     const items = buildTavernFeedbackItems(campaign)
-    const arrival = items.find((i) => i.kind === 'party_arrival')
+    const arrival = items.find((i) => i.kind === 'party_lifecycle')
     const downtime = items.find((i) => i.id === event.id)
 
     expect(arrival).toBeDefined()
     expect(arrival?.importance).toBe('high')
+    expect(arrival?.summary).toContain(`「${party.party.name}」`)
     expect(downtime).toBeDefined()
     expect(downtime?.kind).toBe('downtime')
     expect(downtime?.canOpen).toBe(true)
@@ -450,12 +451,13 @@ describe('TavernFeedbackViewModel', () => {
     const campaign = createTavernCampaign('feedback-notification')
     const party = campaign.currentDay.parties[0]!
 
-    // Party arrival on the current day is high importance and can open party summary.
+    // Party arrivals on the current day are consolidated into a single
+    // high-importance, openable "来訪者の動き" feedback item.
     const items = buildTavernFeedbackItems(campaign)
-    const arrival = items.find((i) => i.kind === 'party_arrival')!
+    const arrival = items.find((i) => i.kind === 'party_lifecycle')!
     expect(arrival.importance).toBe('high')
     expect(arrival.canOpen).toBe(true)
-    expect(arrival.partyId).toBe(party.id)
+    expect(arrival.summary).toContain(`「${party.party.name}」`)
 
     // Expedition return exposes the stable report id.
     const quest = campaign.currentDay.requests.find(

@@ -15,6 +15,7 @@ import { buildExpeditionReportId } from './expeditionReportViewModel.ts'
 import {
   genderLabel,
   injuryTypeLabel,
+  lifecycleStatusLabel,
   relationshipPresentationLabel,
   roleLabel,
   skillLabel,
@@ -42,6 +43,12 @@ export interface PartyDetailHeaderViewModel {
   memberCount: number
   stayLabel?: string
   currentQuestLabel?: string
+  /** Longer explanatory note shown for away/retired parties (e.g. "現在は旅の途中です。"). */
+  lifecycleNote?: string
+  firstArrivalDayLabel: string
+  visitCountLabel: string
+  currentArrivalDayLabel: string
+  lastDepartureDayLabel?: string
 }
 
 export interface PartyMemberListItemViewModel {
@@ -467,34 +474,47 @@ export function buildPartyDetailHeader(
   party: CampaignParty,
   campaign: TavernCampaignState,
 ): PartyDetailHeaderViewModel {
-  const tavernParty = findTavernParty(campaign, party.id)
-  const recovering =
-    party.recoveringThroughDay !== undefined &&
-    campaign.dayNumber <= party.recoveringThroughDay
-
-  let statusLabel = '待機中'
+  const lifecycle = party.lifecycle
+  let statusLabel: string
   let stayLabel: string | undefined
   let currentQuestLabel: string | undefined
+  let lifecycleNote: string | undefined
 
-  if (recovering && party.recoveringThroughDay !== undefined) {
-    const remaining = Math.max(
-      0,
-      party.recoveringThroughDay - campaign.dayNumber,
-    )
-    statusLabel = '療養中'
-    stayLabel = `療養残り${remaining}日`
-  } else if (tavernParty?.acceptedRequestId) {
-    const request = campaign.currentDay.requests.find(
-      (r) => r.id === tavernParty.acceptedRequestId,
-    )
-    statusLabel = '遠征中'
-    currentQuestLabel = request ? request.title : tavernParty.acceptedRequestId
-  } else if (party.plannedDepartureDay !== undefined) {
-    const remaining = Math.max(
-      0,
-      party.plannedDepartureDay - campaign.dayNumber + 1,
-    )
-    stayLabel = `滞在残り${remaining}日`
+  if (lifecycle.status === 'away') {
+    statusLabel = lifecycleStatusLabel('away')
+    lifecycleNote = '現在は旅の途中です。'
+  } else if (lifecycle.status === 'retired') {
+    statusLabel = lifecycleStatusLabel('retired')
+    lifecycleNote = 'このパーティは冒険者としての活動を終えています。'
+  } else {
+    const tavernParty = findTavernParty(campaign, party.id)
+    const recovering =
+      party.recoveringThroughDay !== undefined &&
+      campaign.dayNumber <= party.recoveringThroughDay
+
+    statusLabel = '待機中'
+    if (recovering && party.recoveringThroughDay !== undefined) {
+      const remaining = Math.max(
+        0,
+        party.recoveringThroughDay - campaign.dayNumber,
+      )
+      statusLabel = '療養中'
+      stayLabel = `療養残り${remaining}日`
+    } else if (tavernParty?.acceptedRequestId) {
+      const request = campaign.currentDay.requests.find(
+        (r) => r.id === tavernParty.acceptedRequestId,
+      )
+      statusLabel = '遠征中'
+      currentQuestLabel = request
+        ? request.title
+        : tavernParty.acceptedRequestId
+    } else if (party.plannedDepartureDay !== undefined) {
+      const remaining = Math.max(
+        0,
+        party.plannedDepartureDay - campaign.dayNumber + 1,
+      )
+      stayLabel = `滞在残り${remaining}日`
+    }
   }
 
   return {
@@ -505,14 +525,35 @@ export function buildPartyDetailHeader(
     memberCount: party.party.members.length,
     stayLabel,
     currentQuestLabel,
+    lifecycleNote,
+    firstArrivalDayLabel: `初回来訪 DAY ${lifecycle.firstArrivalDay}`,
+    visitCountLabel: `来訪回数 ${lifecycle.visitCount}回`,
+    currentArrivalDayLabel: `${
+      lifecycle.status === 'staying' ? '今回の来訪' : '最終来訪'
+    } DAY ${party.arrivalDay}`,
+    lastDepartureDayLabel:
+      lifecycle.lastDepartureDay !== undefined
+        ? `前回の旅立ち DAY ${lifecycle.lastDepartureDay}`
+        : undefined,
   }
+}
+
+function findCampaignPartyAcrossLifecycle(
+  campaign: TavernCampaignState,
+  partyId: string,
+): CampaignParty | undefined {
+  return (
+    campaign.parties.find((p) => p.id === partyId) ??
+    campaign.awayParties.find((p) => p.id === partyId) ??
+    campaign.retiredParties.find((p) => p.id === partyId)
+  )
 }
 
 export function buildPartyDetailSceneViewModel(
   campaign: TavernCampaignState,
   input: PartyDetailSceneInput,
 ): PartyDetailSceneViewModel {
-  const party = campaign.parties.find((p) => p.id === input.partyId)
+  const party = findCampaignPartyAcrossLifecycle(campaign, input.partyId)
   if (!party) {
     return {
       party: {
@@ -521,6 +562,9 @@ export function buildPartyDetailSceneViewModel(
         rankLabel: '—',
         statusLabel: '—',
         memberCount: 0,
+        firstArrivalDayLabel: '—',
+        visitCountLabel: '—',
+        currentArrivalDayLabel: '—',
       },
       members: [],
       emptyMessage: 'このパーティの情報を表示できません。',

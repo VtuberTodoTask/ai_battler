@@ -51,7 +51,12 @@ describe('Phase 9.3 tavern upgrades smoke', () => {
   it('A: new campaign starts with every facility at level 0 and generates the base 3 daily requests', () => {
     const campaign = createTavernCampaign('phase9-3-a')
     expect(campaign.upgrades).toEqual({
-      levels: { quest_board: 0, intel_archive: 0, recovery_room: 0 },
+      levels: {
+        quest_board: 0,
+        intel_archive: 0,
+        recovery_room: 0,
+        guest_room: 0,
+      },
     })
     expect(campaign.currentDay.requests.length).toBe(3)
   })
@@ -256,7 +261,7 @@ describe('Phase 9.3 tavern upgrades smoke', () => {
       for (let day = 1; day <= 200; day++) {
         campaign = resolveCampaignDay(acceptAllPossible(campaign))
         const rank4 = deriveTavernRank(campaign.reputation.peakScore) >= 4
-        if (rank4 && campaign.finance.funds >= 1000) break
+        if (rank4 && campaign.finance.funds >= 1500) break
         campaign = advanceCampaignDay(campaign)
       }
       campaign = advanceCampaignDay(campaign)
@@ -276,7 +281,7 @@ describe('Phase 9.3 tavern upgrades smoke', () => {
           expectedIds.push(buildUpgradePurchaseEntryId(id, level))
         }
       }
-      totalCost = 60 + 180 + 90 + 220 + 120 + 280
+      totalCost = 60 + 180 + 90 + 220 + 120 + 280 + 150 + 360
 
       expect(campaign.finance.funds).toBe(fundsBefore - totalCost)
 

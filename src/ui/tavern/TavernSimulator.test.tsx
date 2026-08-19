@@ -107,7 +107,7 @@ describe('TavernSimulator UI', () => {
       level: 4,
     })
     const firstPartyNameBefore = partyCardsBefore[0].textContent?.replace(
-      /NEW\s+/,
+      /(新規|再訪)\s+/,
       '',
     )
 
@@ -120,7 +120,8 @@ describe('TavernSimulator UI', () => {
     expect(partyCardsAfter.length).toBe(4)
     expect(
       partyCardsAfter.some(
-        (c) => c.textContent?.replace(/NEW\s+/, '') === firstPartyNameBefore,
+        (c) =>
+          c.textContent?.replace(/(新規|再訪)\s+/, '') === firstPartyNameBefore,
       ),
     ).toBe(true)
   })

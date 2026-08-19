@@ -179,7 +179,12 @@ describe('save upgrade state validation', () => {
   it('a fresh campaign has every facility at level 0 and validates', () => {
     const save = freshSave('upgrades-fresh')
     expect(save.campaign.upgrades).toEqual({
-      levels: { quest_board: 0, intel_archive: 0, recovery_room: 0 },
+      levels: {
+        quest_board: 0,
+        intel_archive: 0,
+        recovery_room: 0,
+        guest_room: 0,
+      },
     })
     expect(() => validateGameSave(save)).not.toThrow()
   })

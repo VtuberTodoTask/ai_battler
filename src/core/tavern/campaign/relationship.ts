@@ -217,6 +217,60 @@ export function tryExtendStay(
   }
 }
 
+/**
+ * Forces a stay extension through the end of an in-progress recovery
+ * period, reusing the existing stayExtended event/presentation
+ * infrastructure (tagged with the 'recovery' reason) rather than a new
+ * parallel mechanism. Unlike tryExtendStay, this is unconditional — it
+ * does not consult or consume the affinity-based extension budget —
+ * because a recovering party must never depart mid-recovery.
+ * Callers must only invoke this when the party is actually still
+ * recovering through nextDayNumber.
+ */
+export function forceExtendStayForRecovery(
+  party: CampaignParty,
+  nextDayNumber: number,
+  seed?: string,
+): CampaignRelationshipEvent {
+  const previousDepartureDay = party.plannedDepartureDay
+  const newDepartureDay = Math.max(
+    party.recoveringThroughDay ?? nextDayNumber,
+    nextDayNumber,
+  )
+  party.plannedDepartureDay = newDepartureDay
+
+  const rng = new SeededRng(
+    seed ?? `${party.id}:stay:${nextDayNumber}:recovery-forced`,
+  )
+  const plan = buildMinorScenePresentationPlan(rng, party, {
+    eventType: 'stayExtended',
+    extensionReason: 'recovery',
+    isStayExtension: true,
+    dayNumber: nextDayNumber,
+  })
+
+  const relevantCharacterIds = [
+    ...new Set([
+      ...(plan.speakingCharacterIds ?? []),
+      ...(plan.backgroundCharacterIds ?? []),
+    ]),
+  ]
+
+  return {
+    type: 'stayExtended',
+    partyId: party.id,
+    partyName: party.party.name,
+    dayNumber: nextDayNumber,
+    previousDepartureDay,
+    newDepartureDay,
+    extensionDays: newDepartureDay - previousDepartureDay,
+    affinity: party.relationship.affinity,
+    primaryReason: 'recovery',
+    relevantCharacterIds,
+    presentationPlan: plan,
+  }
+}
+
 export function getPositiveBrokerageRate(
   stats: TavernPartyStats,
 ): number | null {

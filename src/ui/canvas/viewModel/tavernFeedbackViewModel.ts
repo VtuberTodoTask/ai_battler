@@ -33,6 +33,7 @@ export type TavernFeedbackKind =
   | 'quest_accepted'
   | 'party_arrival'
   | 'party_departure'
+  | 'party_lifecycle'
   | 'recovery_complete'
   | 'stay_extension'
   | 'expedition_return'
@@ -216,6 +217,50 @@ function buildPartyEventFeedback(
   }
 }
 
+/**
+ * Consolidates the day's party comings and goings into a single feedback
+ * item (at most one per day, per Phase 9.4's "来訪者の動き" requirement)
+ * instead of one item per party. Derived on demand from lifecycle metadata
+ * already present on each CampaignParty — no separate event log is kept.
+ * Departures here cover only ordinary (away) departures; a casualty
+ * departure remains its own distinct, more serious feedback item.
+ */
+function buildPartyLifecycleFeedback(
+  campaign: TavernCampaignState,
+  viewedIds: Set<string>,
+): TavernFeedbackItem | null {
+  const dayNumber = campaign.dayNumber
+  const arrivals = campaign.parties.filter((p) => p.arrivalDay === dayNumber)
+  const departures = campaign.awayParties.filter(
+    (p) => p.lifecycle.lastDepartureDay === dayNumber - 1,
+  )
+
+  if (arrivals.length === 0 && departures.length === 0) return null
+
+  const lines: string[] = []
+  for (const party of departures) {
+    lines.push(`「${party.party.name}」が旅立ちました。`)
+  }
+  for (const party of arrivals.filter((p) => p.lifecycle.visitCount >= 2)) {
+    lines.push(`「${party.party.name}」が再び酒場を訪れました。`)
+  }
+  for (const party of arrivals.filter((p) => p.lifecycle.visitCount === 1)) {
+    lines.push(`「${party.party.name}」が新しく訪れました。`)
+  }
+
+  const id = `party-lifecycle:${dayNumber}`
+  return {
+    id,
+    title: '来訪者の動き',
+    summary: lines.join('\n'),
+    unread: !viewedIds.has(id),
+    narrativeStatus: 'viewed',
+    kind: 'party_lifecycle',
+    canOpen: true,
+    importance: 'high',
+  }
+}
+
 function buildStayExtensionFeedback(
   event: Extract<CampaignRelationshipEvent, { type: 'stayExtended' }>,
   party: TavernParty | undefined,
@@ -387,10 +432,11 @@ function pushUniqueFeedback(
   items.push({ ...feedback, day, sequence })
 }
 
+// 'arrived' and 'departedScheduled' are intentionally excluded here — they
+// are consolidated into a single buildPartyLifecycleFeedback item per day
+// instead of one feedback item per party (see below).
 const PRE_PARTY_EVENT_TYPES = new Set<CampaignPartyEvent['type']>([
-  'arrived',
   'finishedRecovery',
-  'departedScheduled',
 ])
 
 const POST_PARTY_EVENT_TYPES = new Set<CampaignPartyEvent['type']>([
@@ -427,6 +473,14 @@ export function buildTavernFeedbackItems(
       nextSeq(),
     )
   }
+
+  pushUniqueFeedback(
+    items,
+    seen,
+    buildPartyLifecycleFeedback(campaign, viewedIds),
+    dayNumber,
+    nextSeq(),
+  )
 
   for (const offer of day.offers) {
     pushUniqueFeedback(
