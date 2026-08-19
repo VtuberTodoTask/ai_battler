@@ -25,10 +25,16 @@ import {
   PARTY_GROWTH_XP_THRESHOLD,
   SKILL_GROWTH_PER_MILESTONE,
   TRAINING_GROWTH_XP,
+  planSkillGrowthForMember,
 } from '../tavern/campaign/progression.ts'
 import { MAX_SKILL_NORMAL, MAX_SKILL_S } from '../balance/constants.ts'
 import { ROLE_MAP } from '../../data/roles.ts'
-import type { AdventurerRank } from '../models/types.ts'
+import type {
+  AdventurerRank,
+  AdventurerRole,
+  SkillName,
+  SkillSet,
+} from '../models/types.ts'
 import type { ExpeditionOutcome } from '../expedition/types.ts'
 import type {
   CampaignProgressionSource,
@@ -1641,6 +1647,7 @@ function validateSkillSet(
 
 interface KnownPartyProgressionInfo {
   progression: ValidatedProgressionFields
+  arrivalSerial: number
   members: Map<
     string,
     { role: string; rank: string; skills: Record<string, number> }
@@ -1678,6 +1685,18 @@ function validatePartyProgressionAndSkills(
       `${context}パーティ ${partyId}`,
     )
 
+    if (
+      typeof party.arrivalSerial !== 'number' ||
+      !Number.isInteger(party.arrivalSerial) ||
+      party.arrivalSerial < 0
+    ) {
+      throw new SaveValidationErrorClass(
+        `パーティ ${partyId} の来訪シリアル番号が不正です`,
+        'corrupted-data',
+      )
+    }
+    const arrivalSerial = party.arrivalSerial as number
+
     const members = new Map<
       string,
       { role: string; rank: string; skills: Record<string, number> }
@@ -1704,7 +1723,7 @@ function validatePartyProgressionAndSkills(
       }
     }
 
-    known.set(partyId, { progression, members })
+    known.set(partyId, { progression, arrivalSerial, members })
   }
 
   for (const p of campaign.parties as unknown[]) collect(p, '')
@@ -1732,6 +1751,74 @@ function validatePartyProgressionAndSkills(
   // so a colon-joined string key would be ambiguous.
   const skillChain = new Map<string, number>()
   const seenMilestoneMember = new Set<string>()
+
+  // --- Phase 9.5.2: deterministic Skill Growth replay -------------------
+  //
+  // Pre-pass: walk every stored skillImproved event in day order and
+  // record, per (partyId, memberId, skill), the FIRST one's `before` —
+  // the value that skill had before any growth ever touched it. A skill
+  // that never appears in any chain never grew, so its current persistent
+  // value already IS its pre-growth value. This lets the forward replay
+  // below bootstrap each member's true starting skills independently of
+  // whether any individual stored event later turns out to be
+  // missing/tampered (a rolled-back "before" value on the very first link
+  // of a chain is exactly the true initial value; a missing event simply
+  // means no chain entry ever anchors that skill, so the fallback to the
+  // current persistent value is used — which the forward replay's
+  // planner-vs-stored cross-check independently proves correct or rejects).
+  const initialSkillValue = new Map<string, number>()
+  for (const rawRecord of history) {
+    if (
+      !isPlainObject(rawRecord) ||
+      !Array.isArray(rawRecord.progressionEvents)
+    ) {
+      continue
+    }
+    for (const rawEvent of rawRecord.progressionEvents) {
+      if (
+        !isPlainObject(rawEvent) ||
+        rawEvent.type !== 'skillImproved' ||
+        typeof rawEvent.partyId !== 'string' ||
+        typeof rawEvent.memberId !== 'string' ||
+        typeof rawEvent.skill !== 'string' ||
+        typeof rawEvent.before !== 'number'
+      ) {
+        continue
+      }
+      const key = JSON.stringify([
+        rawEvent.partyId,
+        rawEvent.memberId,
+        rawEvent.skill,
+      ])
+      if (!initialSkillValue.has(key)) {
+        initialSkillValue.set(key, rawEvent.before)
+      }
+    }
+  }
+
+  const campaignSeed = campaign.seed as string
+
+  // Per-member working skill state, persisted across the entire replay
+  // (not day-scoped) — the deterministic ground truth this member's skills
+  // would actually have at any point, built forward from initialSkillValue
+  // by applying planSkillGrowthForMember's own output at every milestone,
+  // independent of what the save claims. Lazily created on first use.
+  const workingSkills = new Map<string, SkillSet>()
+  function getWorkingSkills(partyId: string, memberId: string): SkillSet {
+    const stateKey = JSON.stringify([partyId, memberId])
+    let skills = workingSkills.get(stateKey)
+    if (!skills) {
+      const member = known.get(partyId)!.members.get(memberId)!
+      const built = {} as Record<string, number>
+      for (const skill of SKILL_NAMES) {
+        const chainKey = JSON.stringify([partyId, memberId, skill])
+        built[skill] = initialSkillValue.get(chainKey) ?? member.skills[skill]
+      }
+      skills = built as unknown as SkillSet
+      workingSkills.set(stateKey, skills)
+    }
+    return skills
+  }
 
   const validSources: readonly CampaignProgressionSource[] = [
     'completeSuccess',
@@ -1881,6 +1968,20 @@ function validatePartyProgressionAndSkills(
     const milestonesBeforeToday = new Map<string, number>()
     const milestonesAfterToday = new Map<string, number>()
 
+    // Expected deterministic Skill Growth for today, keyed by
+    // JSON.stringify([partyId, memberId, milestoneNumber]) — populated the
+    // instant a milestone is crossed (below), using the SAME pure planner
+    // the runtime uses, fed by each member's deterministically-replayed
+    // working skills (never the stored/current values, which is exactly
+    // what is under test). A member whose planner result is null (every
+    // role-candidate skill already at cap) deliberately gets no entry:
+    // absence of a key means "no growth expected", so any stored
+    // skillImproved event referencing that exact key is necessarily fake.
+    const expectedSkillEventsToday = new Map<
+      string,
+      { skill: SkillName; before: number; after: number }
+    >()
+
     for (const rawEvent of events) {
       assertPlainObject(rawEvent, '成長イベントの形式が不正です')
       const event = rawEvent
@@ -1977,6 +2078,28 @@ function validatePartyProgressionAndSkills(
         while (state.growthXp >= PARTY_GROWTH_XP_THRESHOLD) {
           state.growthXp -= PARTY_GROWTH_XP_THRESHOLD
           state.growthMilestones += 1
+          const milestoneNumber = state.growthMilestones
+          const milestoneIndex = milestoneNumber - 1
+          for (const [memberId, memberInfo] of info.members) {
+            const memberSkills = getWorkingSkills(partyId, memberId)
+            const plan = planSkillGrowthForMember(
+              campaignSeed,
+              info.arrivalSerial,
+              {
+                id: memberId,
+                role: memberInfo.role as AdventurerRole,
+                rank: memberInfo.rank as AdventurerRank,
+                skills: memberSkills,
+              },
+              milestoneIndex,
+            )
+            if (!plan) continue
+            memberSkills[plan.skill] = plan.after
+            expectedSkillEventsToday.set(
+              JSON.stringify([partyId, memberId, milestoneNumber]),
+              plan,
+            )
+          }
         }
         milestonesAfterToday.set(partyId, state.growthMilestones)
 
@@ -2101,6 +2224,33 @@ function validatePartyProgressionAndSkills(
           )
         }
 
+        // Primary check: this event must match the deterministic planner's
+        // own output for this exact (party, member, milestone) — same
+        // skill, same before, same after — proving the runtime's
+        // weighted-random selection actually chose this, not merely that
+        // some role-candidate skill within bounds was claimed. Absence of
+        // an entry means the planner found every candidate skill capped at
+        // this milestone (or this member/milestone combo was never
+        // actually earned at all) — either way, no stored event should
+        // exist for it.
+        const expectedSkill = expectedSkillEventsToday.get(
+          JSON.stringify([partyId, memberId, milestone]),
+        )
+        if (
+          !expectedSkill ||
+          expectedSkill.skill !== skill ||
+          expectedSkill.before !== before ||
+          expectedSkill.after !== after
+        ) {
+          throw new SaveValidationErrorClass(
+            'スキル成長イベントが決定論的な成長選択の結果と一致しません',
+            'corrupted-data',
+          )
+        }
+        expectedSkillEventsToday.delete(
+          JSON.stringify([partyId, memberId, milestone]),
+        )
+
         const milestoneKey = JSON.stringify([partyId, memberId, milestone])
         if (seenMilestoneMember.has(milestoneKey)) {
           throw new SaveValidationErrorClass(
@@ -2154,6 +2304,16 @@ function validatePartyProgressionAndSkills(
       )
     }
 
+    // Same idea for Skill Growth: a milestone the deterministic planner
+    // says should have grown some member's skill, but no matching
+    // skillImproved event was ever found among today's stored events.
+    if (expectedSkillEventsToday.size > 0) {
+      throw new SaveValidationErrorClass(
+        '実際に発生したはずのスキル成長イベントが記録されていません',
+        'corrupted-data',
+      )
+    }
+
     // Post-events: apply for FUTURE days only — this day's training
     // eligibility has already been evaluated above using the state as of
     // this day's *planning*, before these facts were decided.
@@ -2192,6 +2352,33 @@ function validatePartyProgressionAndSkills(
         '現在の技能値が成長履歴の最新値と一致しません',
         'corrupted-data',
       )
+    }
+  }
+
+  // Primary Skill Growth check: for every member the deterministic replay
+  // above actually touched (i.e. their party earned >=1 milestone), every
+  // one of their skills — not just the ones that appear in some stored
+  // skillImproved chain — must exactly equal what the pure planner
+  // deterministically produced across the whole campaign. A member whose
+  // party never earned a milestone is never added to workingSkills and is
+  // correctly skipped here — nothing about the deterministic Skill Growth
+  // system could have touched their skills.
+  for (const [stateKey, skills] of workingSkills) {
+    const [partyId, memberId] = JSON.parse(stateKey) as [string, string]
+    const member = known.get(partyId)?.members.get(memberId)
+    if (!member) {
+      throw new SaveValidationErrorClass(
+        '孤立したスキル成長状態があります',
+        'corrupted-data',
+      )
+    }
+    for (const skill of SKILL_NAMES) {
+      if (member.skills[skill] !== skills[skill]) {
+        throw new SaveValidationErrorClass(
+          `パーティ ${partyId} の ${memberId} の技能「${skill}」が決定論的な成長リプレイの結果と一致しません`,
+          'corrupted-data',
+        )
+      }
     }
   }
 }

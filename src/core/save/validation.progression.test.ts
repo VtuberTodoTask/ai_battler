@@ -14,6 +14,7 @@ import {
 import { serializeGameSave } from './serializer.ts'
 import { SaveValidationErrorClass, validateGameSave } from './validation.ts'
 import { ROLE_MAP } from '../../data/roles.ts'
+import { MAX_SKILL_NORMAL, MAX_SKILL_S } from '../balance/constants.ts'
 import type { AdventurerRole, SkillName } from '../models/types.ts'
 import type {
   CampaignProgressionEvent,
@@ -241,6 +242,35 @@ function campaignWithTrainingYardLevel(seed: string, level: 1 | 2) {
   // the returned campaign is back in a valid (planning) save state.
   campaign = resolveCampaignDay(campaign)
   return advanceCampaignDay(campaign)
+}
+
+/** Sets every role-candidate skill of one member to exactly one growth-step
+ * below their rank's cap, BEFORE any growth has ever happened — i.e. this
+ * is the member's true initial value, not a claim made via a tamperable
+ * growth event, so there is nothing for the deterministic replay to
+ * distrust. Advancing through real milestones from here saturates every
+ * candidate to cap one at a time (each pick's `min(cap, before+2)` clips
+ * immediately), fully capping the member after exactly `candidateCount`
+ * real, chain-verified milestones (Phase 9.5.2 item 13). */
+function presetCandidatesNearCap(
+  campaign: TavernCampaignState,
+  partyId: string,
+  memberId: string,
+): { campaign: TavernCampaignState; candidateCount: number } {
+  const next = clone(campaign)
+  const party = next.parties.find((p) => p.id === partyId)!
+  const member = party.party.members.find((m) => m.id === memberId)!
+  const role = ROLE_MAP[member.role]
+  const cap = member.rank === 'S' ? MAX_SKILL_S : MAX_SKILL_NORMAL
+  const candidates = [...role.expertSkills, ...role.trainedSkills]
+  for (const skill of candidates) {
+    member.skills[skill] = cap - 1
+  }
+  // Keep this party staying long enough to observe it fully cap — Phase
+  // 9.4 lifecycle departure/return is exercised elsewhere and is
+  // irrelevant to what this test is proving.
+  party.plannedDepartureDay = next.dayNumber + 1000
+  return { campaign: next, candidateCount: candidates.length }
 }
 
 describe('save validation: growth progression & skills (Phase 9.5)', () => {
@@ -662,6 +692,200 @@ describe('save validation: growth progression & skills (Phase 9.5)', () => {
     reused.dayNumber = milestone2.record.dayNumber
     milestone2.record.progressionEvents.push(reused)
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  // --- Phase 9.5.2: Deterministic Skill Growth Integrity -------------------
+
+  it('rejects a missing skillImproved event when the persistent skill is left at its post-growth value', () => {
+    const { save, partyId } = fixtureSaveWithGrowth(
+      'growth-missing-skill-event',
+    )
+    const record = save.campaign.history.find((h) =>
+      h.progressionEvents.some(
+        (e) => e.type === 'skillImproved' && e.partyId === partyId,
+      ),
+    )!
+    const idx = record.progressionEvents.findIndex(
+      (e) => e.type === 'skillImproved' && e.partyId === partyId,
+    )
+    record.progressionEvents.splice(idx, 1)
+    // Persistent/currentDay skill values are left untouched — they still
+    // reflect the post-growth value the now-deleted event would produce.
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a missing skillImproved event even after rolling the persistent/snapshot skill back to event.before', () => {
+    const { save, partyId } = fixtureSaveWithGrowth(
+      'growth-missing-skill-rollback',
+    )
+    const record = save.campaign.history.find((h) =>
+      h.progressionEvents.some(
+        (e) => e.type === 'skillImproved' && e.partyId === partyId,
+      ),
+    )!
+    const idx = record.progressionEvents.findIndex(
+      (e) => e.type === 'skillImproved' && e.partyId === partyId,
+    )
+    const removed = record.progressionEvents[idx] as Extract<
+      CampaignProgressionEvent,
+      { type: 'skillImproved' }
+    >
+    record.progressionEvents.splice(idx, 1)
+    for (const party of [
+      save.campaign.parties.find((p) => p.id === partyId),
+      save.campaign.currentDay.parties.find((p) => p.id === partyId),
+    ]) {
+      const member = party?.party.members.find((m) => m.id === removed.memberId)
+      if (member) member.skills[removed.skill as SkillName] = removed.before
+    }
+    // Even though the save is now internally self-consistent (no orphan
+    // event, final skill matches "never grew"), the milestone WAS earned —
+    // the runtime's deterministic replay would have produced this growth,
+    // so its total absence is itself the violation.
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a skillImproved event claiming a different (but role-valid) skill than the deterministic choice', () => {
+    const { save, partyId } = fixtureSaveWithGrowth('growth-wrong-skill')
+    const record = save.campaign.history.find((h) =>
+      h.progressionEvents.some(
+        (e) => e.type === 'skillImproved' && e.partyId === partyId,
+      ),
+    )!
+    const event = record.progressionEvents.find(
+      (e) => e.type === 'skillImproved' && e.partyId === partyId,
+    ) as Extract<CampaignProgressionEvent, { type: 'skillImproved' }>
+
+    const persistentParty = save.campaign.parties.find((p) => p.id === partyId)!
+    const member = persistentParty.party.members.find(
+      (m) => m.id === event.memberId,
+    )!
+    const role = ROLE_MAP[member.role]
+    const candidates = [...role.expertSkills, ...role.trainedSkills]
+    const altSkill = candidates.find((s) => s !== event.skill)
+    expect(altSkill).toBeDefined()
+    if (!altSkill) return
+
+    const originalSkill = event.skill as SkillName
+    const originalBefore = event.before
+    const altBefore = member.skills[altSkill]
+
+    event.skill = altSkill
+    event.before = altBefore
+    event.after = altBefore + 2
+
+    for (const party of [
+      save.campaign.parties.find((p) => p.id === partyId),
+      save.campaign.currentDay.parties.find((p) => p.id === partyId),
+    ]) {
+      const m = party?.party.members.find((mm) => mm.id === event.memberId)
+      if (m) {
+        m.skills[originalSkill] = originalBefore // undo the real growth
+        m.skills[altSkill] = altBefore + 2 // apply the fake growth instead
+      }
+    }
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects when one of several members at the same milestone is missing its skillImproved event', () => {
+    const { save, partyId } = fixtureSaveWithGrowth(
+      'growth-wrong-member-missing',
+    )
+    const record = save.campaign.history.find((h) =>
+      h.progressionEvents.some(
+        (e) => e.type === 'skillImproved' && e.partyId === partyId,
+      ),
+    )!
+    const skillEvents = record.progressionEvents.filter(
+      (e) => e.type === 'skillImproved' && e.partyId === partyId,
+    )
+    expect(skillEvents.length).toBeGreaterThan(1)
+    const idx = record.progressionEvents.indexOf(skillEvents[0])
+    record.progressionEvents.splice(idx, 1)
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('accepts a save where a member stops producing skillImproved events once every candidate skill is genuinely capped', () => {
+    let campaign = createTavernCampaign('growth-capped-accept')
+    const partyId = campaign.parties[0].id
+    const memberId = campaign.parties[0].party.members[0].id
+    const preset = presetCandidatesNearCap(campaign, partyId, memberId)
+    campaign = preset.campaign
+
+    // Comfortably more idle days than needed for every candidate to be
+    // picked (each pick saturates immediately since it starts one step
+    // below cap), so the member is fully capped well before the end.
+    campaign = advanceDaysWithoutQuests(
+      campaign,
+      (preset.candidateCount + 5) * 4,
+    )
+
+    const save = clone(serializeGameSave({ campaign }))
+    expect(() => validateGameSave(save)).not.toThrow()
+
+    const skillEventCount = save.campaign.history.reduce(
+      (sum, h) =>
+        sum +
+        h.progressionEvents.filter(
+          (e) => e.type === 'skillImproved' && e.memberId === memberId,
+        ).length,
+      0,
+    )
+    // Exactly one real event per candidate — no more, once capped.
+    expect(skillEventCount).toBe(preset.candidateCount)
+  })
+
+  it('rejects an extra skillImproved event for a member on the milestone that already capped their last candidate skill', () => {
+    let campaign = createTavernCampaign('growth-capped-fake')
+    const partyId = campaign.parties[0].id
+    const memberId = campaign.parties[0].party.members[0].id
+    const preset = presetCandidatesNearCap(campaign, partyId, memberId)
+    campaign = preset.campaign
+    campaign = advanceDaysWithoutQuests(
+      campaign,
+      (preset.candidateCount + 5) * 4,
+    )
+
+    const save = clone(serializeGameSave({ campaign }))
+    // The LAST real skillImproved event for this member is the one that
+    // capped their final remaining candidate — by this point the
+    // validator's deterministic replay has bootstrapped and advanced this
+    // member's working skills entirely from genuine, already-verified
+    // history, so a second (fake) event slipped onto that exact milestone
+    // is provably unearned rather than merely internally consistent.
+    let lastRecord: (typeof save.campaign.history)[number] | undefined
+    let lastEvent:
+      Extract<CampaignProgressionEvent, { type: 'skillImproved' }> | undefined
+    for (const record of save.campaign.history) {
+      for (const event of record.progressionEvents) {
+        if (event.type === 'skillImproved' && event.memberId === memberId) {
+          lastRecord = record
+          lastEvent = event
+        }
+      }
+    }
+    expect(lastRecord).toBeDefined()
+    expect(lastEvent).toBeDefined()
+    if (!lastRecord || !lastEvent) return
+
+    lastRecord.progressionEvents.push({
+      type: 'skillImproved',
+      partyId,
+      partyName: lastEvent.partyName,
+      memberId,
+      memberName: lastEvent.memberName,
+      skill: lastEvent.skill,
+      before: lastEvent.before,
+      after: lastEvent.after,
+      milestone: lastEvent.milestone,
+      dayNumber: lastRecord.dayNumber,
+    })
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('accepts a genuinely-generated save exercising deterministic Skill Growth across multiple milestones for the same skill', () => {
+    const { save } = fixtureSaveWithTwoMilestones('growth-deterministic-replay')
+    expect(() => validateGameSave(save)).not.toThrow()
   })
 
   it('atomic load: a malformed growth save is rejected without mutating stored raw data', async () => {
