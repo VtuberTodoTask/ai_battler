@@ -29,6 +29,7 @@ import {
 } from '../tavern/campaign/progression.ts'
 import { MAX_SKILL_NORMAL, MAX_SKILL_S } from '../balance/constants.ts'
 import { ROLE_MAP } from '../../data/roles.ts'
+import { resolveQuestChainsForDay } from '../tavern/campaign/questChains.ts'
 import type {
   AdventurerRank,
   AdventurerRole,
@@ -36,9 +37,11 @@ import type {
   SkillSet,
 } from '../models/types.ts'
 import type { ExpeditionOutcome } from '../expedition/types.ts'
+import type { ResolvedDispatch } from '../tavern/types.ts'
 import type {
   CampaignProgressionSource,
   PartyLifecycleStatus,
+  QuestChainState,
   TavernRank,
   TavernUpgradeId,
 } from '../tavern/campaign/types.ts'
@@ -1530,6 +1533,207 @@ function validatePartyLifecycle(
   for (const p of retiredParties) checkPartyEntry(p, 'retired')
 }
 
+/** Order-independent structural equality for plain JSON-shaped data — used
+ * instead of JSON.stringify comparison so key insertion order (which can
+ * legitimately differ between a freshly-replayed object literal and a
+ * round-tripped save) never causes a false rejection. `undefined` and a
+ * genuinely-absent key are treated the same, matching how optional fields
+ * are actually constructed (omitted, never set to `undefined`) throughout
+ * this codebase and how JSON serialization drops them. */
+function deepEqualPlain(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+      return false
+    }
+    return a.every((v, i) => deepEqualPlain(v, b[i]))
+  }
+  if (
+    a !== null &&
+    b !== null &&
+    typeof a === 'object' &&
+    typeof b === 'object'
+  ) {
+    const ao = a as Record<string, unknown>
+    const bo = b as Record<string, unknown>
+    const keysA = Object.keys(ao).filter((k) => ao[k] !== undefined)
+    const keysB = Object.keys(bo).filter((k) => bo[k] !== undefined)
+    if (keysA.length !== keysB.length) return false
+    return keysA.every(
+      (k) =>
+        Object.prototype.hasOwnProperty.call(bo, k) &&
+        deepEqualPlain(ao[k], bo[k]),
+    )
+  }
+  return false
+}
+
+/**
+ * Phase 9.6 Quest Chain causal-integrity validation. Quest Chains are not
+ * self-authoritative either: `campaign.questChains` and every
+ * `history[].questChainEvents` must be exactly what
+ * resolveQuestChainsForDay — the SAME pure reducer the runtime uses —
+ * produces when replayed day-by-day from real Day Facts (each day's
+ * resolved results and reputation-derived Tavern Rank), not merely an
+ * internally well-formed chain graph. A single deep-equality check against
+ * the replay's final chains array subsumes nearly every structural
+ * requirement (unique/known/sequential/rank/objective/scheduled-day —
+ * since the reducer only ever constructs a chain that already satisfies
+ * all of them), so this function's own explicit checks are limited to
+ * what a pure day-by-day replay cannot express on its own: the active
+ * chain / currentDay.requests linkage (a "now" snapshot, not history) and
+ * a global duplicate-resolution guard.
+ */
+function validateQuestChains(
+  campaign: Record<string, unknown>,
+  history: readonly unknown[],
+  currentDay: Record<string, unknown>,
+): void {
+  if (!Array.isArray(campaign.questChains)) {
+    throw new SaveValidationErrorClass(
+      '連続依頼データが壊れています',
+      'corrupted-data',
+    )
+  }
+  const campaignSeed = campaign.seed as string
+
+  let replayedChains: QuestChainState[] = []
+  const seenChainRequestIdsGlobally = new Set<string>()
+
+  for (let i = 0; i < history.length; i++) {
+    const record = history[i]
+    assertPlainObject(record, '履歴レコードの形式が不正です')
+    const dayNumber = i + 1
+
+    if (!Array.isArray(record.questChainEvents)) {
+      throw new SaveValidationErrorClass(
+        '連続依頼イベント一覧がありません',
+        'corrupted-data',
+      )
+    }
+    if (!Array.isArray(record.results)) {
+      throw new SaveValidationErrorClass(
+        '依頼結果一覧の形式が不正です',
+        'corrupted-data',
+      )
+    }
+    assertPlainObject(record.reputationSummary, '評判サマリーの形式が不正です')
+    if (typeof record.reputationSummary.afterRank !== 'number') {
+      throw new SaveValidationErrorClass(
+        '評判サマリーの酒場ランクが不正です',
+        'corrupted-data',
+      )
+    }
+    const afterTavernRank = record.reputationSummary.afterRank as TavernRank
+
+    // Global duplicate-resolution guard: a Quest Chain follow-up request
+    // is scheduled for, and can only ever be resolved on, exactly one
+    // day — reusing its id in a later day's results is never legitimate.
+    for (const rawResult of record.results) {
+      if (
+        !isPlainObject(rawResult) ||
+        typeof rawResult.requestId !== 'string'
+      ) {
+        continue
+      }
+      const requestChain = isPlainObject(rawResult.request)
+        ? rawResult.request.chain
+        : undefined
+      if (!isPlainObject(requestChain)) continue
+      if (seenChainRequestIdsGlobally.has(rawResult.requestId)) {
+        throw new SaveValidationErrorClass(
+          '連続依頼の依頼が複数日にわたって解決されています',
+          'corrupted-data',
+        )
+      }
+      seenChainRequestIdsGlobally.add(rawResult.requestId)
+    }
+
+    const { chains: nextChains, events: expectedEvents } =
+      resolveQuestChainsForDay({
+        campaignSeed,
+        dayNumber,
+        currentChains: replayedChains,
+        results: record.results as unknown as ResolvedDispatch[],
+        afterTavernRank,
+      })
+    replayedChains = nextChains
+
+    if (!deepEqualPlain(expectedEvents, record.questChainEvents)) {
+      throw new SaveValidationErrorClass(
+        `連続依頼イベントが実際の日次結果の再計算結果と一致しません (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+  }
+
+  if (!deepEqualPlain(replayedChains, campaign.questChains)) {
+    throw new SaveValidationErrorClass(
+      '連続依頼の状態が履歴の再計算結果と一致しません',
+      'corrupted-data',
+    )
+  }
+
+  // --- Active chain <-> currentDay.requests linkage (a "now" snapshot,
+  // not expressible by the historical replay above) ---
+  if (!Array.isArray(currentDay.requests)) {
+    throw new SaveValidationErrorClass(
+      '本日の依頼一覧の形式が不正です',
+      'corrupted-data',
+    )
+  }
+  const currentDayNumber = campaign.dayNumber as number
+
+  const expectedChainRequestById = new Map<string, unknown>()
+  for (const chain of replayedChains) {
+    if (chain.status !== 'active') continue
+    const scheduledSteps = chain.steps.filter((s) => s.status === 'scheduled')
+    if (scheduledSteps.length !== 1) {
+      throw new SaveValidationErrorClass(
+        '進行中の連続依頼に予定されている依頼が1件ではありません',
+        'corrupted-data',
+      )
+    }
+    const step = scheduledSteps[0]
+    if (step.scheduledDay !== currentDayNumber) {
+      throw new SaveValidationErrorClass(
+        '連続依頼の予定日が本日と一致しません',
+        'corrupted-data',
+      )
+    }
+    expectedChainRequestById.set(step.request.id, step.request)
+  }
+
+  const seenChainRequestIds = new Set<string>()
+  for (const raw of currentDay.requests) {
+    if (!isPlainObject(raw) || typeof raw.id !== 'string') continue
+    if (!isPlainObject(raw.chain)) continue
+    const expected = expectedChainRequestById.get(raw.id)
+    if (!expected) {
+      throw new SaveValidationErrorClass(
+        '対応する進行中の連続依頼が存在しない依頼があります',
+        'corrupted-data',
+      )
+    }
+    if (!deepEqualPlain(raw, expected)) {
+      throw new SaveValidationErrorClass(
+        '本日の連続依頼の内容が連続依頼の状態と一致しません',
+        'corrupted-data',
+      )
+    }
+    seenChainRequestIds.add(raw.id)
+  }
+
+  for (const id of expectedChainRequestById.keys()) {
+    if (!seenChainRequestIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '進行中の連続依頼の依頼が本日の依頼一覧にありません',
+        'corrupted-data',
+      )
+    }
+  }
+}
+
 interface ValidatedProgressionFields {
   growthXp: number
   totalGrowthXp: number
@@ -2935,6 +3139,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   )
 
   validateCurrentDayRosterIntegrity(campaign, currentDay)
+
+  validateQuestChains(campaign, campaign.history as unknown[], currentDay)
 
   if (
     !isPlainObject(raw.randomState) ||

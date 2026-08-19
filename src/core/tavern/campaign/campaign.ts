@@ -64,6 +64,10 @@ import {
   generateTavernRequestsForDay,
   pickUniquePartyName,
 } from './generators.ts'
+import {
+  collectDueChainRequests,
+  resolveQuestChainsForDay,
+} from './questChains.ts'
 import type {
   CampaignParty,
   CampaignProgressionEvent,
@@ -118,6 +122,7 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
       buildOpeningBalanceTransaction(),
     ),
     upgrades,
+    questChains: [],
   }
 }
 
@@ -303,6 +308,20 @@ export function resolveCampaignDay(
     applyDailyReputationDelta(nextCampaign.reputation, reputationEvents)
   nextCampaign.reputation = reputationState
 
+  // Quest Chain transition runs after Settlement/Party state/Growth/
+  // Reputation, and before the day's record is written — see
+  // resolveQuestChainsForDay's own docs for why this is a pure reducer
+  // shared with save validation rather than inline logic here.
+  const { chains: nextQuestChains, events: questChainEvents } =
+    resolveQuestChainsForDay({
+      campaignSeed: nextCampaign.seed,
+      dayNumber,
+      currentChains: nextCampaign.questChains,
+      results: resultsWithSettlement,
+      afterTavernRank: reputationSummary.afterRank,
+    })
+  nextCampaign.questChains = nextQuestChains
+
   const resolveCandidates = deriveResolveCandidates(
     nextCampaign,
     relationshipEvents,
@@ -323,6 +342,7 @@ export function resolveCampaignDay(
     ],
     progressionEvents,
     relationshipEvents,
+    questChainEvents,
   }
   nextCampaign.history.push(dayRecord)
 
@@ -561,12 +581,24 @@ export function advanceCampaignDay(
     .filter((p) => !isRecoveringOnDay(p, nextDayNumber))
     .map((p) => p.party.rank)
   const requestCount = 3 + getDailyRequestBonus(nextCampaign.upgrades)
-  const requests = generateTavernRequestsForDay(
+
+  // Quest Chain follow-ups occupy board slots — they never add to the
+  // day's total request count. Due chain requests are already fully
+  // generated (Step request, reward terms, rank — all frozen) by
+  // resolveQuestChainsForDay when the chain started/advanced; only the
+  // remaining slots are filled by the existing normal request generator.
+  const dueChainRequests = collectDueChainRequests(
+    nextCampaign.questChains,
+    nextDayNumber,
+  )
+  const normalRequestCount = Math.max(0, requestCount - dueChainRequests.length)
+  const normalRequests = generateTavernRequestsForDay(
     daySeed,
     tavernRank,
     availablePartyRanks,
-    requestCount,
+    normalRequestCount,
   )
+  const requests = [...dueChainRequests, ...normalRequests]
   const currentDay = buildTavernDay(daySeed, requests, remaining, nextDayNumber)
   currentDay.partyEvents = [...preEvents, ...(currentDay.partyEvents ?? [])]
 

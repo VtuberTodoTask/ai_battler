@@ -79,11 +79,14 @@ export class QuestListPanel extends Container {
     for (const quest of quests) {
       const rewardPart = quest.rewardLabel ? `${quest.rewardLabel} / ` : ''
       const subtitle = `${rewardPart}${quest.objectiveLabel} / ${quest.terrainLabel} / ${quest.statusLabel}`
+      const title = quest.chainBadgeLabel
+        ? `【${quest.chainBadgeLabel}】${quest.title}`
+        : quest.title
       const row = new TavernListRow({
         width: rowWidth,
         height: rowHeight,
         theme: this._theme,
-        title: quest.title,
+        title,
         subtitle,
         trailing: quest.rank,
         selected: quest.selected,

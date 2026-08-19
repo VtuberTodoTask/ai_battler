@@ -23,6 +23,7 @@ export interface TavernHeaderOptions {
   onOpenLedger?: () => void
   onOpenUpgrade?: () => void
   onOpenVisitorRegistry?: () => void
+  onOpenQuestChainLog?: () => void
 }
 
 const SETTINGS_ICON_URL = '/settings-icon.png'
@@ -44,6 +45,7 @@ export class TavernHeader extends Container {
   private readonly _onOpenLedger?: () => void
   private readonly _onOpenUpgrade?: () => void
   private readonly _onOpenVisitorRegistry?: () => void
+  private readonly _onOpenQuestChainLog?: () => void
 
   constructor(options: TavernHeaderOptions) {
     super()
@@ -58,6 +60,7 @@ export class TavernHeader extends Container {
     this._onOpenLedger = options.onOpenLedger
     this._onOpenUpgrade = options.onOpenUpgrade
     this._onOpenVisitorRegistry = options.onOpenVisitorRegistry
+    this._onOpenQuestChainLog = options.onOpenQuestChainLog
 
     const panel = new GamePanel({
       width: this._width,
@@ -99,6 +102,7 @@ export class TavernHeader extends Container {
     const ledgerButtonWidth = 100
     const upgradeButtonWidth = 100
     const registryButtonWidth = 140
+    const chainLogButtonWidth = 140
     const gearSize = GEAR_SIZE
     const gap = this._theme.spacing.s8
     const rightClusterWidth =
@@ -111,6 +115,8 @@ export class TavernHeader extends Container {
       upgradeButtonWidth +
       gap +
       registryButtonWidth +
+      gap +
+      chainLogButtonWidth +
       gap +
       actionButtonWidth +
       gap +
@@ -198,6 +204,30 @@ export class TavernHeader extends Container {
     }
     this.addChild(registryButton)
 
+    const chainLogButton = new GameButton({
+      width: chainLogButtonWidth,
+      height: 44,
+      theme: this._theme,
+      label: '依頼記録',
+    })
+    chainLogButton.x =
+      startX +
+      saveButtonWidth +
+      gap +
+      libraryButtonWidth +
+      gap +
+      ledgerButtonWidth +
+      gap +
+      upgradeButtonWidth +
+      gap +
+      registryButtonWidth +
+      gap
+    chainLogButton.y = 10
+    chainLogButton.onActivate = () => {
+      this._onOpenQuestChainLog?.()
+    }
+    this.addChild(chainLogButton)
+
     this._actionButton = new GameButton({
       width: actionButtonWidth,
       height: 44,
@@ -216,6 +246,8 @@ export class TavernHeader extends Container {
       upgradeButtonWidth +
       gap +
       registryButtonWidth +
+      gap +
+      chainLogButtonWidth +
       gap
     this._actionButton.y = 10
     this._actionButton.onActivate = () => {
@@ -235,6 +267,8 @@ export class TavernHeader extends Container {
       upgradeButtonWidth +
       gap +
       registryButtonWidth +
+      gap +
+      chainLogButtonWidth +
       gap +
       actionButtonWidth +
       gap

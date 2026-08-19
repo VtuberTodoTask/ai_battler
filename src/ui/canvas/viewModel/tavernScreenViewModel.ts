@@ -1,11 +1,13 @@
 import { getOfferErrors } from '../../../core/tavern/brokerage.ts'
 import { deriveTavernRank } from '../../../core/tavern/campaign/reputation.ts'
+import { getQuestChainDefinition } from '../../../core/tavern/campaign/questChains.ts'
 import {
   computeSuccessCommission,
   formatCurrencyAmount,
   formatSignedCurrencyAmount,
 } from '../../../core/economy/index.ts'
 import type {
+  QuestChainState,
   TavernCampaignState,
   TavernRank,
 } from '../../../core/tavern/campaign/types.ts'
@@ -17,6 +19,7 @@ import type {
 import {
   ENVIRONMENT_LABELS,
   OBJECTIVE_LABELS,
+  OUTCOME_LABELS,
 } from '../../expedition/labels.ts'
 import type { GameUiState, UiActionMessage } from '../types.ts'
 import {
@@ -90,6 +93,15 @@ export interface TavernPartySummaryViewModel {
   assignDisabledReason?: string
 }
 
+/** Phase 9.6: present only for a Quest Chain follow-up (Step 2/3). Never
+ * exposes the raw chainId/definitionId — only player-facing labels. */
+export interface TavernQuestChainInfoViewModel {
+  badgeLabel: string
+  definitionTitle?: string
+  noteText: string
+  previousResultLabel?: string
+}
+
 export interface TavernQuestListItemViewModel {
   id: string
   title: string
@@ -103,6 +115,7 @@ export interface TavernQuestListItemViewModel {
   selected: boolean
   assignable: boolean
   disabledReason?: string
+  chainBadgeLabel?: string
 }
 
 export interface TavernQuestDetailViewModel {
@@ -117,6 +130,7 @@ export interface TavernQuestDetailViewModel {
   offerStatusLabel: string
   promisedRewardLabel: string
   successCommissionLabel: string
+  chain?: TavernQuestChainInfoViewModel
 }
 
 export interface TavernDecisionViewModel {
@@ -353,11 +367,44 @@ function questStatusLabel(
   return '未紹介'
 }
 
+/** Phase 9.6: player-facing Quest Chain badge/detail for a follow-up
+ * request. Returns undefined for a standalone request (no `.chain`) or if
+ * the referenced chain can't be found — never falls back to showing the
+ * raw chainId/definitionId. */
+function buildQuestChainInfo(
+  request: TavernRequestOffer,
+  questChains: readonly QuestChainState[],
+): TavernQuestChainInfoViewModel | undefined {
+  if (!request.chain) return undefined
+  const { chainId, stepNumber, totalSteps } = request.chain
+  const badgeLabel = `連続依頼 ${stepNumber}/${totalSteps}`
+
+  const chain = questChains.find((c) => c.id === chainId)
+  if (!chain) {
+    return { badgeLabel, noteText: '連続依頼（記録を確認できません）' }
+  }
+
+  const definitionTitle = getQuestChainDefinition(chain.definitionId)?.title
+  const previousStep = chain.steps.find((s) => s.stepNumber === stepNumber - 1)
+  const previousResultLabel =
+    previousStep?.outcome !== undefined
+      ? `前回の結果：${OUTCOME_LABELS[previousStep.outcome]}`
+      : undefined
+
+  return {
+    badgeLabel,
+    definitionTitle,
+    noteText: '前回の依頼の結果を受けて発生した続きの依頼です。',
+    previousResultLabel,
+  }
+}
+
 function buildQuestListItem(
   request: TavernRequestOffer,
   day: TavernDayState,
   selectedPartyId: string | null,
   selected: boolean,
+  questChains: readonly QuestChainState[],
 ): TavernQuestListItemViewModel {
   let assignable = false
   let disabledReason: string | undefined
@@ -385,6 +432,7 @@ function buildQuestListItem(
     selected,
     assignable,
     disabledReason,
+    chainBadgeLabel: buildQuestChainInfo(request, questChains)?.badgeLabel,
   }
 }
 
@@ -392,6 +440,7 @@ function buildQuestDetail(
   request: TavernRequestOffer,
   day: TavernDayState,
   selectedPartyId: string | null,
+  questChains: readonly QuestChainState[],
 ): TavernQuestDetailViewModel {
   const promisedReward = formatCurrencyAmount(
     request.rewardTerms.promisedReward,
@@ -412,6 +461,7 @@ function buildQuestDetail(
     offerStatusLabel: questStatusLabel(request, day, selectedPartyId),
     promisedRewardLabel: `依頼報酬 ${promisedReward}`,
     successCommissionLabel: `成功時手数料 ${successCommission}`,
+    chain: buildQuestChainInfo(request, questChains),
   }
 }
 
@@ -421,6 +471,7 @@ function buildDecision(
   day: TavernDayState,
   dayNumber: number,
   history: TavernCampaignState['history'],
+  questChains: readonly QuestChainState[],
 ): TavernDecisionViewModel {
   const partySummary = selectedParty
     ? buildPartySummary(
@@ -432,7 +483,12 @@ function buildDecision(
       )
     : undefined
   const questDetail = selectedQuest
-    ? buildQuestDetail(selectedQuest, day, selectedParty?.id ?? null)
+    ? buildQuestDetail(
+        selectedQuest,
+        day,
+        selectedParty?.id ?? null,
+        questChains,
+      )
     : undefined
 
   const canOffer =
@@ -501,6 +557,7 @@ export function buildTavernScreenViewModel(
       day,
       uiState.selectedPartyId,
       r.id === uiState.selectedQuestId,
+      campaign.questChains,
     ),
   )
 
@@ -517,6 +574,7 @@ export function buildTavernScreenViewModel(
     day,
     campaign.dayNumber,
     campaign.history,
+    campaign.questChains,
   )
 
   return {

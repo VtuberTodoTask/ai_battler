@@ -2,6 +2,7 @@ import type {
   ExpeditionInjury,
   ExpeditionOutcome,
 } from '../../expedition/types.ts'
+import type { AdventurerRank } from '../../models/types.ts'
 import type {
   AdventurerParty,
   CampaignPartyEvent,
@@ -9,6 +10,7 @@ import type {
   ResolvedDispatch,
   TavernDayState,
   TavernPartyStats,
+  TavernRequestOffer,
 } from '../types.ts'
 import type {
   CharacterArcSignal,
@@ -216,6 +218,67 @@ export interface CampaignParty {
   lifecycle: PartyLifecycleState
 }
 
+/**
+ * Phase 9.6 Quest Chain. A short (3-step) persistent follow-up sequence
+ * that starts deterministically from a successful standalone quest — not
+ * a Main Quest / Story system (those are later phases, entirely separate
+ * authoritative state).
+ */
+export type QuestChainDefinitionId =
+  'chain-a' | 'chain-b' | 'chain-c' | 'chain-d'
+
+export type QuestChainStatus = 'active' | 'completed' | 'failed' | 'abandoned'
+
+export type QuestChainStepStatus = 'scheduled' | 'resolved' | 'notBrokered'
+
+export interface QuestChainStepState {
+  stepNumber: 1 | 2 | 3
+  scheduledDay: number
+  request: TavernRequestOffer
+  status: QuestChainStepStatus
+  partyId?: string
+  outcome?: ExpeditionOutcome
+}
+
+export interface QuestChainState {
+  id: string
+  definitionId: QuestChainDefinitionId
+  status: QuestChainStatus
+  startedDay: number
+  rankCeiling: AdventurerRank
+  steps: QuestChainStepState[]
+}
+
+export type QuestChainEvent =
+  | {
+      type: 'started'
+      chainId: string
+      dayNumber: number
+    }
+  | {
+      type: 'advanced'
+      chainId: string
+      dayNumber: number
+      completedStep: number
+      nextStep: number
+    }
+  | {
+      type: 'completed'
+      chainId: string
+      dayNumber: number
+    }
+  | {
+      type: 'failed'
+      chainId: string
+      dayNumber: number
+      outcome: ExpeditionOutcome
+    }
+  | {
+      type: 'abandoned'
+      chainId: string
+      dayNumber: number
+    }
+
 export interface TavernDayRecord {
   dayNumber: number
   daySeed: string
@@ -224,6 +287,7 @@ export interface TavernDayRecord {
   partyEvents: CampaignPartyEvent[]
   progressionEvents: CampaignProgressionEvent[]
   relationshipEvents: CampaignRelationshipEvent[]
+  questChainEvents: QuestChainEvent[]
 }
 
 export interface TavernCampaignState {
@@ -241,4 +305,5 @@ export interface TavernCampaignState {
   narrativeGenerations: NarrativeGenerationRecord[]
   finance: TavernFinanceState
   upgrades: TavernUpgradeState
+  questChains: QuestChainState[]
 }
