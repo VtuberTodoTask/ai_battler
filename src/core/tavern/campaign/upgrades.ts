@@ -5,6 +5,7 @@ import {
   validateCurrencyAmount,
 } from '../../economy/index.ts'
 import { deriveTavernRank } from './reputation.ts'
+import { TRAINING_GROWTH_XP } from './progression.ts'
 import type {
   TavernCampaignState,
   TavernRank,
@@ -17,6 +18,7 @@ export const TAVERN_UPGRADE_IDS: readonly TavernUpgradeId[] = [
   'intel_archive',
   'recovery_room',
   'guest_room',
+  'training_yard',
 ]
 
 export const MAX_TAVERN_UPGRADE_LEVEL = 2
@@ -47,6 +49,10 @@ export const TAVERN_UPGRADE_CONFIG: Record<
     { level: 1, cost: 150, requiredTavernRank: 2 },
     { level: 2, cost: 360, requiredTavernRank: 4 },
   ],
+  training_yard: [
+    { level: 1, cost: 200, requiredTavernRank: 3 },
+    { level: 2, cost: 450, requiredTavernRank: 5 },
+  ],
 }
 
 export function getUpgradeLevelConfig(
@@ -61,6 +67,7 @@ export const TAVERN_UPGRADE_LABELS: Record<TavernUpgradeId, string> = {
   intel_archive: '調査資料棚',
   recovery_room: '療養室',
   guest_room: '客室',
+  training_yard: '訓練場',
 }
 
 export function tavernUpgradeLabel(id: TavernUpgradeId): string {
@@ -74,6 +81,7 @@ export function createInitialUpgradeState(): TavernUpgradeState {
       intel_archive: 0,
       recovery_room: 0,
       guest_room: 0,
+      training_yard: 0,
     },
   }
 }
@@ -144,6 +152,30 @@ export function applyRecoveryRoomModifier(
   if (baseDays <= 0) return baseDays
   const reduction = getRecoveryDayReduction(upgrades)
   return Math.max(1, baseDays - reduction)
+}
+
+const TRAINING_YARD_XP_BONUS_BY_LEVEL: Record<number, number> = {
+  0: 0,
+  1: 1,
+  2: 2,
+}
+
+export function trainingYardXpBonusForLevel(level: number): number {
+  return TRAINING_YARD_XP_BONUS_BY_LEVEL[level] ?? 0
+}
+
+/**
+ * Pure training-XP selector: the baseline idle Training XP
+ * (TRAINING_GROWTH_XP, from progression.ts — the single source of truth
+ * for the base amount) plus a flat bonus per Training Yard level
+ * (Lv1 +1, Lv2 +2 total) — Lv0=1, Lv1=2, Lv2=3. Expedition XP and skill
+ * growth amount/candidates are entirely unaffected by this upgrade.
+ */
+export function getTrainingGrowthXp(upgrades: TavernUpgradeState): number {
+  return (
+    TRAINING_GROWTH_XP +
+    trainingYardXpBonusForLevel(upgrades.levels.training_yard)
+  )
 }
 
 /** The standing daily party roster size before any Guest Room upgrade. */

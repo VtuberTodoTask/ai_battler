@@ -36,7 +36,7 @@ const PORTRAIT_RATIO = 0.32
 const RETURN_BUTTON_WIDTH = 160
 const RETURN_BUTTON_HEIGHT = 44
 
-type DetailTab = 'profile' | 'relationship' | 'history'
+type DetailTab = 'profile' | 'relationship' | 'history' | 'growth'
 
 interface PortraitRect {
   x: number
@@ -302,6 +302,7 @@ export class PartyDetailScene implements GameScene {
       { id: 'profile', label: 'プロフィール' },
       { id: 'relationship', label: '関係' },
       { id: 'history', label: '履歴' },
+      { id: 'growth', label: '成長' },
     ]
     const tabWidth = 120
     const gap = 8
@@ -507,7 +508,9 @@ export class PartyDetailScene implements GameScene {
         ? 0
         : this._selectedTab === 'relationship'
           ? 1
-          : 2
+          : this._selectedTab === 'history'
+            ? 2
+            : 3
     for (let i = 0; i < this._tabButtons.length; i++) {
       const button = this._tabButtons[i]!
       if (i === activeIndex) {
@@ -549,6 +552,9 @@ export class PartyDetailScene implements GameScene {
         break
       case 'history':
         this.renderHistory(content)
+        break
+      case 'growth':
+        this.renderGrowth(content)
         break
     }
   }
@@ -813,6 +819,47 @@ export class PartyDetailScene implements GameScene {
         content.addChild(row)
         y += Math.max(32, text.textHeight) + 12
       }
+    }
+  }
+
+  private renderGrowth(content: Container): void {
+    const growth = this._viewModel!.growth
+
+    let y = 0
+    const add = (
+      text: string,
+      kind: 'heading' | 'body' | 'caption' = 'body',
+    ): GameLabel => {
+      const label = this.addLabel(content, text, kind, y)
+      y += label.textHeight + 8
+      return label
+    }
+
+    add('成長', 'heading')
+    add(growth.summary.growthXpLabel)
+    add(growth.summary.totalGrowthXpLabel)
+    add(growth.summary.growthMilestonesLabel)
+    add(growth.summary.trainingDaysLabel)
+    y += 8
+
+    if (growth.emptyMessage) {
+      add(growth.emptyMessage)
+      return
+    }
+
+    for (const member of growth.members) {
+      add(member.memberName, 'heading')
+      if (member.emptyMessage) {
+        add(member.emptyMessage, 'caption')
+      } else {
+        for (const skill of member.skills) {
+          const sign = skill.delta > 0 ? '+' : ''
+          add(
+            `${skill.skillLabel} ${skill.currentValue}（${sign}${skill.delta}）`,
+          )
+        }
+      }
+      y += 8
     }
   }
 

@@ -56,6 +56,7 @@ describe('Phase 9.3 tavern upgrades smoke', () => {
         intel_archive: 0,
         recovery_room: 0,
         guest_room: 0,
+        training_yard: 0,
       },
     })
     expect(campaign.currentDay.requests.length).toBe(3)
@@ -260,14 +261,14 @@ describe('Phase 9.3 tavern upgrades smoke', () => {
       let campaign = createTavernCampaign('phase9-3-j')
       for (let day = 1; day <= 200; day++) {
         campaign = resolveCampaignDay(acceptAllPossible(campaign))
-        const rank4 = deriveTavernRank(campaign.reputation.peakScore) >= 4
-        if (rank4 && campaign.finance.funds >= 1500) break
+        const rank5 = deriveTavernRank(campaign.reputation.peakScore) >= 5
+        if (rank5 && campaign.finance.funds >= 2300) break
         campaign = advanceCampaignDay(campaign)
       }
       campaign = advanceCampaignDay(campaign)
       expect(
         deriveTavernRank(campaign.reputation.peakScore),
-      ).toBeGreaterThanOrEqual(4)
+      ).toBeGreaterThanOrEqual(5)
 
       const fundsBefore = campaign.finance.funds
       let totalCost = 0
@@ -281,7 +282,7 @@ describe('Phase 9.3 tavern upgrades smoke', () => {
           expectedIds.push(buildUpgradePurchaseEntryId(id, level))
         }
       }
-      totalCost = 60 + 180 + 90 + 220 + 120 + 280 + 150 + 360
+      totalCost = 60 + 180 + 90 + 220 + 120 + 280 + 150 + 360 + 200 + 450
 
       expect(campaign.finance.funds).toBe(fundsBefore - totalCost)
 

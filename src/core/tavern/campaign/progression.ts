@@ -1,7 +1,12 @@
 import { MAX_SKILL_NORMAL, MAX_SKILL_S } from '../../balance/constants.ts'
 import { ROLE_MAP } from '../../../data/roles.ts'
 import { SeededRng } from '../../rng/seededRng.ts'
-import type { Adventurer, SkillName } from '../../models/types.ts'
+import type {
+  AdventurerRank,
+  AdventurerRole,
+  SkillName,
+  SkillSet,
+} from '../../models/types.ts'
 import type { CampaignParty, CampaignProgressionEvent } from './types.ts'
 
 export const PARTY_GROWTH_XP_THRESHOLD = 4
@@ -56,6 +61,22 @@ export function awardPartyGrowthXp(
   party.progression.growthXp += amount
   party.progression.totalGrowthXp += amount
 
+  if (context.source === 'training') {
+    party.progression.trainingDays += 1
+  }
+
+  // Resolve any milestones (and their skill growth) triggered by this XP
+  // BEFORE snapshotting growthXpAfter, so the experienceGained event
+  // reports the final, already-reduced growthXp (always in
+  // [0, PARTY_GROWTH_XP_THRESHOLD)) rather than a transient pre-reduction
+  // carry value. totalGrowthXp is monotonic and unaffected by milestones,
+  // so its snapshot timing doesn't matter.
+  const milestoneEvents = applyGrowthMilestones(
+    campaignSeed,
+    party,
+    context.dayNumber,
+  )
+
   const events: CampaignProgressionEvent[] = [
     {
       type: 'experienceGained',
@@ -67,18 +88,8 @@ export function awardPartyGrowthXp(
       growthXpAfter: party.progression.growthXp,
       totalGrowthXpAfter: party.progression.totalGrowthXp,
     },
+    ...milestoneEvents,
   ]
-
-  if (context.source === 'training') {
-    party.progression.trainingDays += 1
-  }
-
-  const milestoneEvents = applyGrowthMilestones(
-    campaignSeed,
-    party,
-    context.dayNumber,
-  )
-  events.push(...milestoneEvents)
 
   return events
 }
@@ -96,29 +107,70 @@ export function applyGrowthMilestones(
     party.progression.growthMilestones += 1
 
     for (const member of party.party.members) {
-      const improved = applySkillGrowthForMember(
+      const plan = planSkillGrowthForMember(
         campaignSeed,
-        party,
+        party.arrivalSerial,
         member,
         milestoneIndex,
-        dayNumber,
       )
-      if (improved) {
-        events.push(improved)
-      }
+      if (!plan) continue
+
+      member.skills[plan.skill] = plan.after
+      events.push({
+        type: 'skillImproved',
+        partyId: party.id,
+        partyName: party.party.name,
+        memberId: member.id,
+        memberName: member.name,
+        skill: plan.skill,
+        before: plan.before,
+        after: plan.after,
+        milestone: milestoneIndex + 1,
+        dayNumber,
+      })
     }
   }
 
   return events
 }
 
-function applySkillGrowthForMember(
+/** Minimal shape planSkillGrowthForMember needs from a party member — a
+ * full Adventurer satisfies this structurally, and so does the save
+ * validator's reconstructed (working, not-necessarily-current) skill
+ * state, letting both runtime and validator share this exact selection
+ * logic without the validator needing a full Adventurer object. */
+export interface SkillGrowthMemberInput {
+  id: string
+  role: AdventurerRole
+  rank: AdventurerRank
+  skills: SkillSet
+}
+
+export interface SkillGrowthPlan {
+  skill: SkillName
+  before: number
+  after: number
+}
+
+/**
+ * Pure planner for a single member's skill growth at one milestone: given
+ * the member's CURRENT skills (candidate eligibility and `before` are both
+ * read from this snapshot — callers doing a historical replay must pass a
+ * skills snapshot matching that point in time, not necessarily the
+ * member's live/final skills), returns the deterministic
+ * weighted-random-candidate choice and resulting before/after values, or
+ * null if every role-candidate skill is already at cap. Has no side
+ * effects — callers apply the mutation themselves. The seed format
+ * (`growth:v1:${campaignSeed}:${arrivalSerial}:${milestoneIndex}:${memberId}`)
+ * and RNG algorithm must never change: it is replayed independently by the
+ * save validator and must reproduce byte-identical results.
+ */
+export function planSkillGrowthForMember(
   campaignSeed: string,
-  party: CampaignParty,
-  member: Adventurer,
+  arrivalSerial: number,
+  member: SkillGrowthMemberInput,
   milestoneIndex: number,
-  dayNumber: number,
-): CampaignProgressionEvent | null {
+): SkillGrowthPlan | null {
   const role = ROLE_MAP[member.role]
   if (!role) return null
 
@@ -140,7 +192,7 @@ function applySkillGrowthForMember(
     return null
   }
 
-  const seed = `growth:v1:${campaignSeed}:${party.arrivalSerial}:${milestoneIndex}:${member.id}`
+  const seed = `growth:v1:${campaignSeed}:${arrivalSerial}:${milestoneIndex}:${member.id}`
   const rng = new SeededRng(seed)
   const skills = candidates.map((c) => c.skill)
   const weights = candidates.map((c) => c.weight)
@@ -148,18 +200,6 @@ function applySkillGrowthForMember(
 
   const before = member.skills[chosen]
   const after = Math.min(maxSkill, before + SKILL_GROWTH_PER_MILESTONE)
-  member.skills[chosen] = after
 
-  return {
-    type: 'skillImproved',
-    partyId: party.id,
-    partyName: party.party.name,
-    memberId: member.id,
-    memberName: member.name,
-    skill: chosen,
-    before,
-    after,
-    milestone: milestoneIndex + 1,
-    dayNumber,
-  }
+  return { skill: chosen, before, after }
 }

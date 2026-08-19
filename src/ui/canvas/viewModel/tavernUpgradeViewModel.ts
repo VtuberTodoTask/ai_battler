@@ -12,8 +12,10 @@ import {
   predictionSampleMultiplierBpsForLevel,
   recoveryDayReductionForLevel,
   tavernUpgradeLabel,
+  trainingYardXpBonusForLevel,
   type TavernUpgradeBlockReason,
 } from '../../../core/tavern/campaign/upgrades.ts'
+import { TRAINING_GROWTH_XP } from '../../../core/tavern/campaign/progression.ts'
 import { formatSignedCurrencyAmount } from '../../../core/economy/index.ts'
 
 export interface TavernUpgradeReturnTarget {
@@ -59,6 +61,8 @@ const UPGRADE_DESCRIPTIONS: Record<TavernUpgradeId, string> = {
     '負傷した冒険者を休ませるための設備を整えます。今後新たに始まる回復期間が短縮されます。',
   guest_room:
     '冒険者が滞在できる客室を増やします。翌日以降、酒場に滞在できるパーティの数が増加します。',
+  training_yard:
+    '冒険者が基礎訓練や模擬戦を行える場所を整えます。依頼に出ず、療養中でもないパーティが、より多くの成長経験を得られるようになります。',
 }
 
 const UPGRADE_TIMING_NOTES: Record<TavernUpgradeId, string> = {
@@ -66,6 +70,7 @@ const UPGRADE_TIMING_NOTES: Record<TavernUpgradeId, string> = {
   intel_archive: '効果はすぐに反映されます。',
   recovery_room: '現在療養中の冒険者には遡って適用されません。',
   guest_room: '効果は翌日から反映されます。',
+  training_yard: '効果は本日の仲介確定から反映されます。',
 }
 
 function questBoardEffectText(level: number): string {
@@ -93,6 +98,14 @@ function guestRoomEffectText(level: number): string {
     : `同時に滞在できるパーティ数 +${level}`
 }
 
+function trainingYardEffectText(level: number): string {
+  const before = TRAINING_GROWTH_XP + trainingYardXpBonusForLevel(level - 1)
+  const after = TRAINING_GROWTH_XP + trainingYardXpBonusForLevel(level)
+  return level === 0
+    ? `待機時の成長経験 ${after}`
+    : `待機時の成長経験 ${before} → ${after}`
+}
+
 function effectTextForLevel(id: TavernUpgradeId, level: number): string {
   switch (id) {
     case 'quest_board':
@@ -103,6 +116,8 @@ function effectTextForLevel(id: TavernUpgradeId, level: number): string {
       return recoveryRoomEffectText(level)
     case 'guest_room':
       return guestRoomEffectText(level)
+    case 'training_yard':
+      return trainingYardEffectText(level)
   }
 }
 

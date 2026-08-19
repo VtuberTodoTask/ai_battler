@@ -326,6 +326,7 @@ export function buildTavernDay(
           : undefined,
       progression: {
         growthXp: cp.progression.growthXp,
+        totalGrowthXp: cp.progression.totalGrowthXp,
         growthMilestones: cp.progression.growthMilestones,
         trainingDays: cp.progression.trainingDays,
       },
