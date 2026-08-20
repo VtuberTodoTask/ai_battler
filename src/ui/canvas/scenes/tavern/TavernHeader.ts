@@ -24,6 +24,7 @@ export interface TavernHeaderOptions {
   onOpenUpgrade?: () => void
   onOpenVisitorRegistry?: () => void
   onOpenQuestChainLog?: () => void
+  onOpenWorldEventLog?: () => void
 }
 
 const SETTINGS_ICON_URL = '/settings-icon.png'
@@ -37,6 +38,7 @@ export class TavernHeader extends Container {
   private readonly _reputationLabel: GameLabel
   private readonly _moneyLabel: GameLabel
   private readonly _statusLabel: GameLabel
+  private readonly _worldEventLogButton: GameButton
   private readonly _actionButton: GameButton
   private readonly _onAdvance?: () => void
   private readonly _onOpenSettings?: () => void
@@ -46,6 +48,7 @@ export class TavernHeader extends Container {
   private readonly _onOpenUpgrade?: () => void
   private readonly _onOpenVisitorRegistry?: () => void
   private readonly _onOpenQuestChainLog?: () => void
+  private readonly _onOpenWorldEventLog?: () => void
 
   constructor(options: TavernHeaderOptions) {
     super()
@@ -61,6 +64,7 @@ export class TavernHeader extends Container {
     this._onOpenUpgrade = options.onOpenUpgrade
     this._onOpenVisitorRegistry = options.onOpenVisitorRegistry
     this._onOpenQuestChainLog = options.onOpenQuestChainLog
+    this._onOpenWorldEventLog = options.onOpenWorldEventLog
 
     const panel = new GamePanel({
       width: this._width,
@@ -103,6 +107,7 @@ export class TavernHeader extends Container {
     const upgradeButtonWidth = 100
     const registryButtonWidth = 140
     const chainLogButtonWidth = 140
+    const worldEventLogButtonWidth = 140
     const gearSize = GEAR_SIZE
     const gap = this._theme.spacing.s8
     const rightClusterWidth =
@@ -117,6 +122,8 @@ export class TavernHeader extends Container {
       registryButtonWidth +
       gap +
       chainLogButtonWidth +
+      gap +
+      worldEventLogButtonWidth +
       gap +
       actionButtonWidth +
       gap +
@@ -228,6 +235,32 @@ export class TavernHeader extends Container {
     }
     this.addChild(chainLogButton)
 
+    this._worldEventLogButton = new GameButton({
+      width: worldEventLogButtonWidth,
+      height: 44,
+      theme: this._theme,
+      label: '世界情勢',
+    })
+    this._worldEventLogButton.x =
+      startX +
+      saveButtonWidth +
+      gap +
+      libraryButtonWidth +
+      gap +
+      ledgerButtonWidth +
+      gap +
+      upgradeButtonWidth +
+      gap +
+      registryButtonWidth +
+      gap +
+      chainLogButtonWidth +
+      gap
+    this._worldEventLogButton.y = 10
+    this._worldEventLogButton.onActivate = () => {
+      this._onOpenWorldEventLog?.()
+    }
+    this.addChild(this._worldEventLogButton)
+
     this._actionButton = new GameButton({
       width: actionButtonWidth,
       height: 44,
@@ -248,6 +281,8 @@ export class TavernHeader extends Container {
       registryButtonWidth +
       gap +
       chainLogButtonWidth +
+      gap +
+      worldEventLogButtonWidth +
       gap
     this._actionButton.y = 10
     this._actionButton.onActivate = () => {
@@ -269,6 +304,8 @@ export class TavernHeader extends Container {
       registryButtonWidth +
       gap +
       chainLogButtonWidth +
+      gap +
+      worldEventLogButtonWidth +
       gap +
       actionButtonWidth +
       gap
@@ -319,6 +356,15 @@ export class TavernHeader extends Container {
 
     const canAdvance = viewModel.canResolveDay || viewModel.canAdvanceDay
     this._actionButton.setEnabled(canAdvance)
+
+    // Phase 9.7: while a World Event is active, the header button's own
+    // label doubles as the "small World Event Banner" — no separate UI
+    // element is needed, and the header stays as crowded as it already
+    // was rather than gaining new collision risk. Clicking it (unchanged)
+    // opens the full World Event Log.
+    this._worldEventLogButton.setLabel(
+      viewModel.worldEventBanner ? '世界情勢●' : '世界情勢',
+    )
   }
 
   setActionEnabled(enabled: boolean): void {

@@ -5,7 +5,9 @@ import {
   resolveCampaignDay,
 } from '../tavern/campaign/campaign.ts'
 import { offerRequestToParty } from '../tavern/brokerage.ts'
+import { prepareWorldEventsForDay } from '../tavern/campaign/worldEvents.ts'
 import type { ResolvedDispatch } from '../tavern/types.ts'
+import type { WorldEventState } from '../tavern/campaign/types.ts'
 import { buildLedgerEntryId, ledgerTotal } from '../economy/finance.ts'
 import { serializeGameSave } from './serializer.ts'
 import { SaveValidationErrorClass, validateGameSave } from './validation.ts'
@@ -99,8 +101,45 @@ function buildNegativeFundsSave(seed: string) {
   return buildContinuousPlanningSave(seed, 12)
 }
 
+/**
+ * These fixtures fabricate history wholesale with empty `results` on every
+ * day and a fixed Rank 1 throughout — they exist to exercise economy/ledger
+ * validation in isolation, not real gameplay causality. Unlike Quest Chains
+ * (gated on an actual result each day), a World Event's start roll depends
+ * only on (seed, dayNumber, tavernRank), so an arbitrary seed can
+ * legitimately decide "a event should have started" on some day within the
+ * fabricated range even though this synthetic history's `worldEventEvents`
+ * is always `[]`. Search for a seed variant where no event ever starts
+ * across the relevant day range, so these economy-focused fixtures stay
+ * genuinely event-free rather than accidentally colliding with Phase 9.7.
+ */
+function findWorldEventSafeSeed(seedPrefix: string, dayNumber: number): string {
+  for (let i = 0; i < 500; i++) {
+    const candidate = `${seedPrefix}-safe-${i}`
+    let worldEvents: WorldEventState[] = []
+    let safe = true
+    for (let day = 1; day < dayNumber; day++) {
+      const result = prepareWorldEventsForDay({
+        campaignSeed: candidate,
+        dayNumber: day,
+        worldEvents,
+        tavernRank: 1,
+      })
+      if (result.events.length > 0) {
+        safe = false
+        break
+      }
+      worldEvents = result.worldEvents
+    }
+    if (safe) return candidate
+  }
+  throw new Error(`no world-event-safe seed found for prefix ${seedPrefix}`)
+}
+
 function buildContinuousPlanningSave(seed: string, dayNumber: number) {
-  const save = serializeGameSave({ campaign: createTavernCampaign(seed) })
+  const save = serializeGameSave({
+    campaign: createTavernCampaign(findWorldEventSafeSeed(seed, dayNumber)),
+  })
   save.campaign.dayNumber = dayNumber
   save.campaign.history = []
   for (let day = 1; day < dayNumber; day++) {
@@ -111,6 +150,7 @@ function buildContinuousPlanningSave(seed: string, dayNumber: number) {
       relationshipEvents: [],
       progressionEvents: [],
       questChainEvents: [],
+      worldEventEvents: [],
       reputationSummary: {
         beforeScore: 0,
         delta: 0,
@@ -476,6 +516,7 @@ describe('save economy validation', () => {
       relationshipEvents: [],
       progressionEvents: [],
       questChainEvents: [],
+      worldEventEvents: [],
     } as never)
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })
@@ -489,6 +530,7 @@ describe('save economy validation', () => {
       relationshipEvents: [],
       progressionEvents: [],
       questChainEvents: [],
+      worldEventEvents: [],
     } as never)
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })

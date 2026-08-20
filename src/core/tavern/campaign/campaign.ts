@@ -68,6 +68,11 @@ import {
   collectDueChainRequests,
   resolveQuestChainsForDay,
 } from './questChains.ts'
+import {
+  collectDueEventRequest,
+  prepareWorldEventsForDay,
+  resolveWorldEventsForDay,
+} from './worldEvents.ts'
 import type {
   CampaignParty,
   CampaignProgressionEvent,
@@ -75,6 +80,7 @@ import type {
   CampaignRelationshipEvent,
   TavernCampaignState,
   TavernDayRecord,
+  WorldEventEvent,
 } from './types.ts'
 import type {
   CampaignPartyEvent,
@@ -123,6 +129,7 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
     ),
     upgrades,
     questChains: [],
+    worldEvents: [],
   }
 }
 
@@ -322,6 +329,34 @@ export function resolveCampaignDay(
     })
   nextCampaign.questChains = nextQuestChains
 
+  // World Event response runs after Quest Chain transition — the two
+  // systems never mutate each other's state, only read the same day's
+  // results independently (see resolveWorldEventsForDay's own docs).
+  // A 'started' event, if the active World Event began today, was already
+  // decided by prepareWorldEventsForDay during the DAY-1 -> DAY transition
+  // (advanceCampaignDay); it belongs on THIS day's record, so it is
+  // reconstructed here from the already-frozen startedDay rather than
+  // recomputed, since WorldEventState.startedDay is set exactly once.
+  const startedWorldEventEvents: WorldEventEvent[] = nextCampaign.worldEvents
+    .filter((e) => e.startedDay === dayNumber)
+    .map((e) => ({
+      type: 'started',
+      eventId: e.id,
+      definitionId: e.definitionId,
+      dayNumber,
+    }))
+  const { worldEvents: nextWorldEvents, events: worldEventResponseEvents } =
+    resolveWorldEventsForDay({
+      dayNumber,
+      worldEvents: nextCampaign.worldEvents,
+      results: resultsWithSettlement,
+    })
+  nextCampaign.worldEvents = nextWorldEvents
+  const worldEventEvents = [
+    ...startedWorldEventEvents,
+    ...worldEventResponseEvents,
+  ]
+
   const resolveCandidates = deriveResolveCandidates(
     nextCampaign,
     relationshipEvents,
@@ -343,6 +378,7 @@ export function resolveCampaignDay(
     progressionEvents,
     relationshipEvents,
     questChainEvents,
+    worldEventEvents,
   }
   nextCampaign.history.push(dayRecord)
 
@@ -515,6 +551,19 @@ export function advanceCampaignDay(
   // generated content uses the Tavern Rank derived from the latest resolved
   // peak reputation, never a mid-day recomputation.
   const tavernRank = deriveTavernRank(nextCampaign.reputation.peakScore)
+
+  // World Event start decision runs at the DAY N -> DAY N+1 transition,
+  // right after Tavern Rank is settled for the new day and before request
+  // generation, so a freshly-started event's request can appear on this
+  // same new day's board — see prepareWorldEventsForDay's own docs.
+  const { worldEvents: nextWorldEvents } = prepareWorldEventsForDay({
+    campaignSeed: nextCampaign.seed,
+    dayNumber: nextDayNumber,
+    worldEvents: nextCampaign.worldEvents,
+    tavernRank,
+  })
+  nextCampaign.worldEvents = nextWorldEvents
+
   // New party names must never collide with ANY known persistent party —
   // not just those currently staying, but every party ever encountered
   // (away or retired) — so a name is never reused within the Visitor
@@ -582,23 +631,36 @@ export function advanceCampaignDay(
     .map((p) => p.party.rank)
   const requestCount = 3 + getDailyRequestBonus(nextCampaign.upgrades)
 
-  // Quest Chain follow-ups occupy board slots — they never add to the
-  // day's total request count. Due chain requests are already fully
-  // generated (Step request, reward terms, rank — all frozen) by
-  // resolveQuestChainsForDay when the chain started/advanced; only the
-  // remaining slots are filled by the existing normal request generator.
+  // Quest Chain follow-ups and the active World Event's request occupy
+  // board slots in priority order — neither ever adds to the day's total
+  // request count (Phase 9.3's Quest Board sizing is unchanged). Both are
+  // already fully generated (frozen rank/objective/reward) by the pure
+  // reducers above; only the remaining slots are filled by the existing
+  // normal request generator.
   const dueChainRequests = collectDueChainRequests(
     nextCampaign.questChains,
     nextDayNumber,
   )
-  const normalRequestCount = Math.max(0, requestCount - dueChainRequests.length)
+  const dueEventRequests = collectDueEventRequest(
+    nextCampaign.worldEvents,
+    nextDayNumber,
+  )
+  if (dueChainRequests.length + dueEventRequests.length > requestCount) {
+    throw new Error(
+      `Board slot invariant violated: ${dueChainRequests.length} chain + ${dueEventRequests.length} event requests due on day ${nextDayNumber} (only ${requestCount} board slots)`,
+    )
+  }
+  const normalRequestCount = Math.max(
+    0,
+    requestCount - dueChainRequests.length - dueEventRequests.length,
+  )
   const normalRequests = generateTavernRequestsForDay(
     daySeed,
     tavernRank,
     availablePartyRanks,
     normalRequestCount,
   )
-  const requests = [...dueChainRequests, ...normalRequests]
+  const requests = [...dueChainRequests, ...dueEventRequests, ...normalRequests]
   const currentDay = buildTavernDay(daySeed, requests, remaining, nextDayNumber)
   currentDay.partyEvents = [...preEvents, ...(currentDay.partyEvents ?? [])]
 

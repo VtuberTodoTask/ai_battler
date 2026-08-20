@@ -2,6 +2,10 @@ import { getOfferErrors } from '../../../core/tavern/brokerage.ts'
 import { deriveTavernRank } from '../../../core/tavern/campaign/reputation.ts'
 import { getQuestChainDefinition } from '../../../core/tavern/campaign/questChains.ts'
 import {
+  WORLD_EVENT_CONFIG,
+  getWorldEventDefinition,
+} from '../../../core/tavern/campaign/worldEvents.ts'
+import {
   computeSuccessCommission,
   formatCurrencyAmount,
   formatSignedCurrencyAmount,
@@ -10,6 +14,7 @@ import type {
   QuestChainState,
   TavernCampaignState,
   TavernRank,
+  WorldEventState,
 } from '../../../core/tavern/campaign/types.ts'
 import type {
   TavernDayState,
@@ -42,6 +47,7 @@ export interface TavernHeaderViewModel {
   canResolveDay: boolean
   advanceDayDisabledReason?: string
   statusMessage?: UiActionMessage
+  worldEventBanner?: TavernWorldEventBannerViewModel
   unreadReportCount: number
 }
 
@@ -102,6 +108,15 @@ export interface TavernQuestChainInfoViewModel {
   previousResultLabel?: string
 }
 
+/** Phase 9.7: present only for a World Event-linked request. Never
+ * exposes the raw eventId/definitionId — only player-facing labels. */
+export interface TavernWorldEventInfoViewModel {
+  badgeLabel: string
+  eventTitle?: string
+  noteText: string
+  progressLabel?: string
+}
+
 export interface TavernQuestListItemViewModel {
   id: string
   title: string
@@ -116,6 +131,7 @@ export interface TavernQuestListItemViewModel {
   assignable: boolean
   disabledReason?: string
   chainBadgeLabel?: string
+  worldEventBadgeLabel?: string
 }
 
 export interface TavernQuestDetailViewModel {
@@ -131,6 +147,15 @@ export interface TavernQuestDetailViewModel {
   promisedRewardLabel: string
   successCommissionLabel: string
   chain?: TavernQuestChainInfoViewModel
+  worldEvent?: TavernWorldEventInfoViewModel
+}
+
+/** Phase 9.7: small "世界情勢" banner shown on the Tavern Main screen while
+ * an event is active. Undefined (no banner) when there is none. */
+export interface TavernWorldEventBannerViewModel {
+  eventTitle: string
+  statusProgressLabel: string
+  remainingDaysLabel: string
 }
 
 export interface TavernDecisionViewModel {
@@ -399,12 +424,60 @@ function buildQuestChainInfo(
   }
 }
 
+/** Phase 9.7: player-facing World Event badge/detail for an Event-linked
+ * request. Returns undefined for a non-Event request (no `.worldEvent`) or
+ * if the referenced event can't be found — never falls back to showing
+ * the raw eventId/definitionId. */
+function buildWorldEventInfo(
+  request: TavernRequestOffer,
+  worldEvents: readonly WorldEventState[],
+): TavernWorldEventInfoViewModel | undefined {
+  if (!request.worldEvent) return undefined
+  const badgeLabel = '情勢依頼'
+
+  const event = worldEvents.find((e) => e.id === request.worldEvent!.eventId)
+  if (!event) {
+    return { badgeLabel, noteText: '世界情勢（詳細を確認できません）' }
+  }
+
+  const eventTitle = getWorldEventDefinition(event.definitionId)?.title
+  const progressLabel = `現在 ${event.responsePoints} / ${WORLD_EVENT_CONFIG.responseTarget}`
+
+  return {
+    badgeLabel,
+    eventTitle,
+    noteText:
+      'この情勢の影響によって発生した依頼です。\n対応すると世界情勢の収束に寄与します。',
+    progressLabel,
+  }
+}
+
+/** Phase 9.7: the small Tavern Main banner for the currently active World
+ * Event, or undefined when there is none. */
+function buildWorldEventBanner(
+  worldEvents: readonly WorldEventState[],
+  dayNumber: number,
+): TavernWorldEventBannerViewModel | undefined {
+  const active = worldEvents.find((e) => e.status === 'active')
+  if (!active) return undefined
+  const eventTitle =
+    getWorldEventDefinition(active.definitionId)?.title ??
+    '世界情勢（詳細を確認できません）'
+  const remainingDays = Math.max(0, active.plannedEndDay - dayNumber + 1)
+  return {
+    eventTitle,
+    statusProgressLabel: `対応状況 ${active.responsePoints} / ${WORLD_EVENT_CONFIG.responseTarget}`,
+    remainingDaysLabel: `残り ${remainingDays}日`,
+  }
+}
+
 function buildQuestListItem(
   request: TavernRequestOffer,
   day: TavernDayState,
   selectedPartyId: string | null,
   selected: boolean,
   questChains: readonly QuestChainState[],
+  worldEvents: readonly WorldEventState[],
 ): TavernQuestListItemViewModel {
   let assignable = false
   let disabledReason: string | undefined
@@ -433,6 +506,7 @@ function buildQuestListItem(
     assignable,
     disabledReason,
     chainBadgeLabel: buildQuestChainInfo(request, questChains)?.badgeLabel,
+    worldEventBadgeLabel: buildWorldEventInfo(request, worldEvents)?.badgeLabel,
   }
 }
 
@@ -441,6 +515,7 @@ function buildQuestDetail(
   day: TavernDayState,
   selectedPartyId: string | null,
   questChains: readonly QuestChainState[],
+  worldEvents: readonly WorldEventState[],
 ): TavernQuestDetailViewModel {
   const promisedReward = formatCurrencyAmount(
     request.rewardTerms.promisedReward,
@@ -462,6 +537,7 @@ function buildQuestDetail(
     promisedRewardLabel: `依頼報酬 ${promisedReward}`,
     successCommissionLabel: `成功時手数料 ${successCommission}`,
     chain: buildQuestChainInfo(request, questChains),
+    worldEvent: buildWorldEventInfo(request, worldEvents),
   }
 }
 
@@ -472,6 +548,7 @@ function buildDecision(
   dayNumber: number,
   history: TavernCampaignState['history'],
   questChains: readonly QuestChainState[],
+  worldEvents: readonly WorldEventState[],
 ): TavernDecisionViewModel {
   const partySummary = selectedParty
     ? buildPartySummary(
@@ -488,6 +565,7 @@ function buildDecision(
         day,
         selectedParty?.id ?? null,
         questChains,
+        worldEvents,
       )
     : undefined
 
@@ -545,6 +623,10 @@ export function buildTavernScreenViewModel(
         : undefined,
     statusMessage: uiState.actionMessage,
     unreadReportCount,
+    worldEventBanner: buildWorldEventBanner(
+      campaign.worldEvents,
+      campaign.dayNumber,
+    ),
   }
 
   const parties = day.parties.map((p) =>
@@ -558,6 +640,7 @@ export function buildTavernScreenViewModel(
       uiState.selectedPartyId,
       r.id === uiState.selectedQuestId,
       campaign.questChains,
+      campaign.worldEvents,
     ),
   )
 
@@ -575,6 +658,7 @@ export function buildTavernScreenViewModel(
     campaign.dayNumber,
     campaign.history,
     campaign.questChains,
+    campaign.worldEvents,
   )
 
   return {

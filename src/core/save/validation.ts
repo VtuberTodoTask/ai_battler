@@ -33,6 +33,11 @@ import {
   collectDueChainRequests,
   resolveQuestChainsForDay,
 } from '../tavern/campaign/questChains.ts'
+import {
+  collectDueEventRequest,
+  prepareWorldEventsForDay,
+  resolveWorldEventsForDay,
+} from '../tavern/campaign/worldEvents.ts'
 import type {
   AdventurerRank,
   AdventurerRole,
@@ -47,6 +52,7 @@ import type {
   QuestChainState,
   TavernRank,
   TavernUpgradeId,
+  WorldEventState,
 } from '../tavern/campaign/types.ts'
 import type { GameSaveData, SaveMetadata } from './types.ts'
 import { SaveValidationErrorClass, type SaveValidationError } from './types.ts'
@@ -1814,6 +1820,221 @@ function validateQuestChains(
   }
 }
 
+/**
+ * Phase 9.7 World Event causal-integrity validation. Mirrors
+ * validateQuestChains's design exactly: `campaign.worldEvents` and every
+ * `history[].worldEventEvents` must be exactly what
+ * prepareWorldEventsForDay + resolveWorldEventsForDay — the SAME pure
+ * reducers the runtime uses — produce when replayed day-by-day from real
+ * Day Facts, not merely an internally well-formed World Event graph. A
+ * single deep-equality check against the replay's final state subsumes
+ * nearly every structural requirement (known definition/unique id/valid
+ * status/startedDay/plannedEndDay/responsePoints bounds/no-overlap/
+ * cooldown/no-immediate-repeat — the reducers only ever construct a state
+ * that already satisfies all of them), so this function's own explicit
+ * checks are limited to what a pure day-by-day replay cannot express on
+ * its own: the historical Event-linked request's frozen-snapshot
+ * integrity (Phase 9.6.1's approach, applied here from the start) and the
+ * active event / currentDay.requests linkage (a "now" snapshot).
+ */
+function validateWorldEvents(
+  campaign: Record<string, unknown>,
+  history: readonly unknown[],
+  currentDay: Record<string, unknown>,
+): void {
+  if (!Array.isArray(campaign.worldEvents)) {
+    throw new SaveValidationErrorClass(
+      '世界情勢データが壊れています',
+      'corrupted-data',
+    )
+  }
+  const campaignSeed = campaign.seed as string
+
+  let replayedWorldEvents: WorldEventState[] = []
+
+  for (let i = 0; i < history.length; i++) {
+    const record = history[i]
+    assertPlainObject(record, '履歴レコードの形式が不正です')
+    const dayNumber = i + 1
+
+    if (!Array.isArray(record.worldEventEvents)) {
+      throw new SaveValidationErrorClass(
+        '世界情勢イベント一覧がありません',
+        'corrupted-data',
+      )
+    }
+    if (!Array.isArray(record.results)) {
+      throw new SaveValidationErrorClass(
+        '依頼結果一覧の形式が不正です',
+        'corrupted-data',
+      )
+    }
+    assertPlainObject(record.reputationSummary, '評判サマリーの形式が不正です')
+    if (typeof record.reputationSummary.beforeRank !== 'number') {
+      throw new SaveValidationErrorClass(
+        '評判サマリーの酒場ランクが不正です',
+        'corrupted-data',
+      )
+    }
+    const startOfDayTavernRank = record.reputationSummary
+      .beforeRank as TavernRank
+
+    const { worldEvents: afterPrepare, events: prepareEvents } =
+      prepareWorldEventsForDay({
+        campaignSeed,
+        dayNumber,
+        worldEvents: replayedWorldEvents,
+        tavernRank: startOfDayTavernRank,
+      })
+
+    // Historical Event-linked Result <-> Frozen Event Request linkage —
+    // same frozen-snapshot approach as Phase 9.6.1's Quest Chain fix,
+    // applied from the start here: prove each day's stored result for the
+    // active event is exactly the request that was actually generated for
+    // that day, not a retroactively-edited one kept internally consistent.
+    const expectedDueRequestById = new Map(
+      collectDueEventRequest(afterPrepare, dayNumber).map((r) => [r.id, r]),
+    )
+    const seenDueEventRequestIdsToday = new Set<string>()
+    for (const rawResult of record.results) {
+      if (
+        !isPlainObject(rawResult) ||
+        typeof rawResult.requestId !== 'string'
+      ) {
+        continue
+      }
+      const requestId = rawResult.requestId
+      const rawRequest = isPlainObject(rawResult.request)
+        ? rawResult.request
+        : undefined
+      const requestWorldEvent = rawRequest ? rawRequest.worldEvent : undefined
+      const expectedRequest = expectedDueRequestById.get(requestId)
+
+      if (expectedRequest) {
+        if (seenDueEventRequestIdsToday.has(requestId)) {
+          throw new SaveValidationErrorClass(
+            `情勢依頼の依頼結果が重複しています (DAY ${dayNumber})`,
+            'corrupted-data',
+          )
+        }
+        seenDueEventRequestIdsToday.add(requestId)
+
+        if (!deepEqualPlain(rawRequest, expectedRequest)) {
+          throw new SaveValidationErrorClass(
+            `情勢依頼の依頼内容が掲示時点の内容と一致しません (DAY ${dayNumber})`,
+            'corrupted-data',
+          )
+        }
+      } else if (isPlainObject(requestWorldEvent)) {
+        throw new SaveValidationErrorClass(
+          `対応する予定のない情勢依頼の依頼結果があります (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+    }
+    for (const id of expectedDueRequestById.keys()) {
+      if (!seenDueEventRequestIdsToday.has(id)) {
+        throw new SaveValidationErrorClass(
+          `予定されていた情勢依頼の依頼結果が見つかりません (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+    }
+
+    const { worldEvents: afterResolve, events: resolveEvents } =
+      resolveWorldEventsForDay({
+        dayNumber,
+        worldEvents: afterPrepare,
+        results: record.results as unknown as ResolvedDispatch[],
+      })
+
+    const expectedEvents = [...prepareEvents, ...resolveEvents]
+    if (!deepEqualPlain(expectedEvents, record.worldEventEvents)) {
+      throw new SaveValidationErrorClass(
+        `世界情勢イベントが実際の日次結果の再計算結果と一致しません (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+
+    replayedWorldEvents = afterResolve
+  }
+
+  // The current (still-planning) day's World Event start decision was
+  // already made by the runtime's advanceCampaignDay — replay it once
+  // more here so campaign.worldEvents is checked against the SAME
+  // prepareWorldEventsForDay call the runtime used, not just the state
+  // left over at the end of history.
+  const currentDayNumber = campaign.dayNumber as number
+  const lastRecord =
+    history.length > 0
+      ? (history[history.length - 1] as Record<string, unknown>)
+      : undefined
+  const currentTavernRank =
+    lastRecord && isPlainObject(lastRecord.reputationSummary)
+      ? (lastRecord.reputationSummary.afterRank as TavernRank)
+      : deriveTavernRank(0)
+
+  const { worldEvents: expectedCurrentWorldEvents } = prepareWorldEventsForDay({
+    campaignSeed,
+    dayNumber: currentDayNumber,
+    worldEvents: replayedWorldEvents,
+    tavernRank: currentTavernRank,
+  })
+
+  if (!deepEqualPlain(expectedCurrentWorldEvents, campaign.worldEvents)) {
+    throw new SaveValidationErrorClass(
+      '世界情勢の状態が履歴の再計算結果と一致しません',
+      'corrupted-data',
+    )
+  }
+
+  // --- Active event <-> currentDay.requests linkage (a "now" snapshot,
+  // not expressible by the historical replay above) ---
+  if (!Array.isArray(currentDay.requests)) {
+    throw new SaveValidationErrorClass(
+      '本日の依頼一覧の形式が不正です',
+      'corrupted-data',
+    )
+  }
+
+  const expectedEventRequestById = new Map<string, unknown>()
+  for (const request of collectDueEventRequest(
+    expectedCurrentWorldEvents,
+    currentDayNumber,
+  )) {
+    expectedEventRequestById.set(request.id, request)
+  }
+
+  const seenEventRequestIds = new Set<string>()
+  for (const raw of currentDay.requests) {
+    if (!isPlainObject(raw) || typeof raw.id !== 'string') continue
+    if (!isPlainObject(raw.worldEvent)) continue
+    const expected = expectedEventRequestById.get(raw.id)
+    if (!expected) {
+      throw new SaveValidationErrorClass(
+        '対応する進行中の世界情勢が存在しない依頼があります',
+        'corrupted-data',
+      )
+    }
+    if (!deepEqualPlain(raw, expected)) {
+      throw new SaveValidationErrorClass(
+        '本日の情勢依頼の内容が世界情勢の状態と一致しません',
+        'corrupted-data',
+      )
+    }
+    seenEventRequestIds.add(raw.id)
+  }
+
+  for (const id of expectedEventRequestById.keys()) {
+    if (!seenEventRequestIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '進行中の世界情勢の依頼が本日の依頼一覧にありません',
+        'corrupted-data',
+      )
+    }
+  }
+}
+
 interface ValidatedProgressionFields {
   growthXp: number
   totalGrowthXp: number
@@ -3221,6 +3442,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   validateCurrentDayRosterIntegrity(campaign, currentDay)
 
   validateQuestChains(campaign, campaign.history as unknown[], currentDay)
+
+  validateWorldEvents(campaign, campaign.history as unknown[], currentDay)
 
   if (
     !isPlainObject(raw.randomState) ||

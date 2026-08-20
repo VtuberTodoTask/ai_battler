@@ -28,6 +28,7 @@ import type { WorldEncyclopediaSceneInput } from '../../viewModel/worldEncyclope
 import type { TavernLedgerSceneInput } from '../../viewModel/tavernLedgerViewModel.ts'
 import type { VisitorRegistrySceneInput } from '../../viewModel/visitorRegistryViewModel.ts'
 import type { QuestChainLogSceneInput } from '../../viewModel/questChainLogViewModel.ts'
+import type { WorldEventLogSceneInput } from '../../viewModel/worldEventLogViewModel.ts'
 import type { TavernUpgradeSceneInput } from '../../viewModel/tavernUpgradeViewModel.ts'
 import type {
   SoundNovelSceneInput,
@@ -288,6 +289,7 @@ export class TavernScene implements GameScene {
       onOpenUpgrade: () => this.openTavernUpgrade(),
       onOpenVisitorRegistry: () => this.openVisitorRegistry(),
       onOpenQuestChainLog: () => this.openQuestChainLog(),
+      onOpenWorldEventLog: () => this.openWorldEventLog(),
     })
     this._header.x = 0
     this._header.y = 0
@@ -496,6 +498,19 @@ export class TavernScene implements GameScene {
       },
     }
     this._context.canvasGame.sceneManager?.push('questChainLog', input)
+  }
+
+  private openWorldEventLog(): void {
+    if (!this._context) return
+
+    const input: WorldEventLogSceneInput = {
+      returnTarget: {
+        sceneId: 'tavern',
+        selectedPartyId: this._uiState.selectedPartyId ?? undefined,
+        selectedQuestId: this._uiState.selectedQuestId ?? undefined,
+      },
+    }
+    this._context.canvasGame.sceneManager?.push('worldEventLog', input)
   }
 
   private setActionMessage(

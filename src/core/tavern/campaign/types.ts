@@ -279,6 +279,54 @@ export type QuestChainEvent =
       dayNumber: number
     }
 
+/**
+ * Phase 9.7 World Event. A regional, fixed-duration situation that adds
+ * one Event-linked Request to the board each active day — persistent
+ * Context, never a hidden Simulation modifier (no combat/reward/success
+ * rate special-casing anywhere in this system).
+ */
+export type WorldEventDefinitionId =
+  'monster_migration' | 'flooded_routes' | 'exposed_ruins' | 'missing_caravans'
+
+export type WorldEventStatus = 'active' | 'contained' | 'unresolved'
+
+export interface WorldEventState {
+  id: string
+  definitionId: WorldEventDefinitionId
+  status: WorldEventStatus
+  startedDay: number
+  plannedEndDay: number
+  endedDay?: number
+  requestRank: AdventurerRank
+  responsePoints: number
+}
+
+export type WorldEventEvent =
+  | {
+      type: 'started'
+      eventId: string
+      definitionId: WorldEventDefinitionId
+      dayNumber: number
+    }
+  | {
+      type: 'response'
+      eventId: string
+      requestId: string
+      dayNumber: number
+      delta: number
+      responsePointsAfter: number
+    }
+  | {
+      type: 'contained'
+      eventId: string
+      dayNumber: number
+    }
+  | {
+      type: 'unresolved'
+      eventId: string
+      dayNumber: number
+    }
+
 export interface TavernDayRecord {
   dayNumber: number
   daySeed: string
@@ -288,6 +336,7 @@ export interface TavernDayRecord {
   progressionEvents: CampaignProgressionEvent[]
   relationshipEvents: CampaignRelationshipEvent[]
   questChainEvents: QuestChainEvent[]
+  worldEventEvents: WorldEventEvent[]
 }
 
 export interface TavernCampaignState {
@@ -306,4 +355,5 @@ export interface TavernCampaignState {
   finance: TavernFinanceState
   upgrades: TavernUpgradeState
   questChains: QuestChainState[]
+  worldEvents: WorldEventState[]
 }
