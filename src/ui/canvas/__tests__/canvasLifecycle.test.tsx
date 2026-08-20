@@ -4,6 +4,8 @@ import { render, cleanup, waitFor } from '@testing-library/react'
 import { createTavernCampaign } from '../../../core/tavern/campaign/campaign.ts'
 import GameCanvasHost from '../GameCanvasHost.tsx'
 import type { GameUiActions } from '../types.ts'
+import type { NarrativeCandidate } from '../../../core/narrative/types.ts'
+import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
 
 const mockInit = vi.fn().mockResolvedValue(undefined)
 const mockSetCampaign = vi.fn()
@@ -161,6 +163,201 @@ describe('GameCanvasHost lifecycle', () => {
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: false, message: '資金が足りません。' })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() =>
+      expect(mockSetCampaign).toHaveBeenLastCalledWith(nextCampaign, {
+        preserveCurrentScene: false,
+      }),
+    )
+
+    cleanup()
+  })
+
+  function withCandidate(
+    campaign: TavernCampaignState,
+    candidate: NarrativeCandidate,
+  ): TavernCampaignState {
+    return { ...campaign, narrativeCandidates: [candidate] }
+  }
+
+  function pendingCandidate(id: string): NarrativeCandidate {
+    return {
+      id,
+      state: 'available',
+    } as unknown as NarrativeCandidate
+  }
+
+  function generatedCandidate(id: string): NarrativeCandidate {
+    return {
+      id,
+      state: 'generated',
+    } as unknown as NarrativeCandidate
+  }
+
+  it('requests preserveCurrentScene on the campaign sync following a first-time narrative generation (Hotfix: Narrative Generation Scene Preservation)', async () => {
+    const campaign = withCandidate(
+      createTavernCampaign('lifecycle-narrative-001'),
+      pendingCandidate('candidate-1'),
+    )
+    const nextCampaign = createTavernCampaign('lifecycle-narrative-002')
+    const onOpenExpeditionNarrative = vi
+      .fn()
+      .mockResolvedValue({ ok: true, data: '生成された物語' })
+
+    const { rerender } = render(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onOpenExpeditionNarrative={onOpenExpeditionNarrative}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() => expect(latestActions).not.toBeNull())
+    const result = await latestActions!.openExpeditionNarrative!('candidate-1')
+    expect(result.ok).toBe(true)
+
+    rerender(
+      <GameCanvasHost
+        campaign={nextCampaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onOpenExpeditionNarrative={onOpenExpeditionNarrative}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() =>
+      expect(mockSetCampaign).toHaveBeenLastCalledWith(nextCampaign, {
+        preserveCurrentScene: true,
+      }),
+    )
+
+    cleanup()
+  })
+
+  it('does not request preserveCurrentScene when narrative generation fails, and does not leak into the following sync', async () => {
+    const campaign = withCandidate(
+      createTavernCampaign('lifecycle-narrative-fail-001'),
+      pendingCandidate('candidate-1'),
+    )
+    const nextCampaign = createTavernCampaign('lifecycle-narrative-fail-002')
+    const afterNextCampaign = createTavernCampaign(
+      'lifecycle-narrative-fail-003',
+    )
+    const onOpenExpeditionNarrative = vi
+      .fn()
+      .mockResolvedValue({ ok: false, message: 'AI生成に失敗しました' })
+
+    const { rerender } = render(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onOpenExpeditionNarrative={onOpenExpeditionNarrative}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() => expect(latestActions).not.toBeNull())
+    const result = await latestActions!.openExpeditionNarrative!('candidate-1')
+    expect(result.ok).toBe(false)
+
+    // Generation failed, so no Campaign mutation happened for it — but a
+    // later, unrelated Campaign sync (e.g. a normal day advance) must not
+    // inherit a stale preserve flag from the failed attempt.
+    rerender(
+      <GameCanvasHost
+        campaign={nextCampaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onOpenExpeditionNarrative={onOpenExpeditionNarrative}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() =>
+      expect(mockSetCampaign).toHaveBeenLastCalledWith(nextCampaign, {
+        preserveCurrentScene: false,
+      }),
+    )
+
+    rerender(
+      <GameCanvasHost
+        campaign={afterNextCampaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onOpenExpeditionNarrative={onOpenExpeditionNarrative}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() =>
+      expect(mockSetCampaign).toHaveBeenLastCalledWith(afterNextCampaign, {
+        preserveCurrentScene: false,
+      }),
+    )
+
+    cleanup()
+  })
+
+  it('does not request preserveCurrentScene when opening an already-generated narrative (no Campaign mutation expected)', async () => {
+    const campaign = withCandidate(
+      createTavernCampaign('lifecycle-narrative-existing-001'),
+      generatedCandidate('candidate-1'),
+    )
+    const nextCampaign = createTavernCampaign(
+      'lifecycle-narrative-existing-002',
+    )
+    const onOpenExpeditionNarrative = vi
+      .fn()
+      .mockResolvedValue({ ok: true, data: '既存の物語' })
+
+    const { rerender } = render(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onOpenExpeditionNarrative={onOpenExpeditionNarrative}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() => expect(latestActions).not.toBeNull())
+    const result = await latestActions!.openExpeditionNarrative!('candidate-1')
+    expect(result.ok).toBe(true)
+
+    rerender(
+      <GameCanvasHost
+        campaign={nextCampaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onOpenExpeditionNarrative={onOpenExpeditionNarrative}
         onSwitchToLegacy={() => {}}
       />,
     )
