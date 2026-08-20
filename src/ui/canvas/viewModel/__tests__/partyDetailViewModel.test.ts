@@ -269,6 +269,7 @@ describe('partyDetailViewModel', () => {
         ],
         relationshipEvents: [],
         questChainEvents: [],
+        worldEventEvents: [],
       },
     ]
 
@@ -323,6 +324,7 @@ describe('partyDetailViewModel', () => {
         progressionEvents: [],
         relationshipEvents: [],
         questChainEvents: [],
+        worldEventEvents: [],
       },
     ]
 
@@ -443,6 +445,7 @@ describe('partyDetailViewModel', () => {
         ],
         relationshipEvents: [],
         questChainEvents: [],
+        worldEventEvents: [],
       },
     ]
 

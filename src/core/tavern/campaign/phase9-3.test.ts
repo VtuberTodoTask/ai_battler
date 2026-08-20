@@ -93,6 +93,17 @@ describe('Phase 9.3 tavern upgrades smoke', () => {
       deriveTavernRank(campaign.reputation.peakScore),
     ).toBeGreaterThanOrEqual(2)
 
+    // A few extra days build a funds cushion before purchasing — this test
+    // only cares that a purchase's effect is immediate, not that it happens
+    // on the exact day rank 2 was first reached (income is not guaranteed
+    // to already cover the upgrade's cost the instant the rank threshold
+    // is crossed, e.g. on a day a World Event's request occupied a normal
+    // quest's board slot).
+    for (let day = 0; day < 10; day++) {
+      campaign = resolveCampaignDay(acceptAllPossible(campaign))
+      campaign = advanceCampaignDay(campaign)
+    }
+
     expect(getEffectiveSampleCount(500, campaign.upgrades)).toBe(500)
 
     const purchase = purchaseTavernUpgrade(campaign, 'intel_archive')

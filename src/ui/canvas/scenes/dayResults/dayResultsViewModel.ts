@@ -6,6 +6,7 @@ import type {
   QuestChainEvent,
   TavernCampaignState,
   TavernDayRecord,
+  WorldEventEvent,
 } from '../../../../core/tavern/campaign/types.ts'
 import type { NarrativeCandidate } from '../../../../core/narrative/types.ts'
 import {
@@ -24,6 +25,10 @@ import {
   tavernRankLabel,
 } from '../../../../core/tavern/campaign/reputation.ts'
 import { getQuestChainDefinition } from '../../../../core/tavern/campaign/questChains.ts'
+import {
+  WORLD_EVENT_CONFIG,
+  getWorldEventDefinition,
+} from '../../../../core/tavern/campaign/worldEvents.ts'
 import { skillLabel } from '../../viewModel/characterLabels.ts'
 
 export type DayResultsStep = 'important_events' | 'expedition_results'
@@ -43,6 +48,7 @@ export interface DayResultEventViewModel {
     | 'progression'
     | 'tavernRankUp'
     | 'questChain'
+    | 'worldEvent'
   title: string
   summary: string
   importance: DayResultEventImportance
@@ -373,6 +379,95 @@ function buildQuestChainEvent(
   }
 }
 
+/**
+ * Phase 9.7 World Event feedback for a single day's worldEventEvents. A
+ * `response` event is paired with the `contained`/`unresolved` event that
+ * immediately follows it (same eventId) into ONE combined DayResults item
+ * rather than two, per spec — the player sees "対応が進み、収束しました"
+ * as a single beat, not "対応が進みました" followed immediately by a
+ * second "収束しました" notice. A bare `started` event is not
+ * re-notified here (the Tavern header already shows the active event as
+ * soon as it appears); it is still recorded to history unconditionally by
+ * the runtime. Never falls back to a raw eventId/definitionId.
+ */
+function buildWorldEventDayEvents(
+  events: readonly WorldEventEvent[],
+  campaign: TavernCampaignState,
+): DayResultEventViewModel[] {
+  const results: DayResultEventViewModel[] = []
+
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i]
+    if (event.type !== 'response') continue
+
+    const worldEvent = campaign.worldEvents.find((e) => e.id === event.eventId)
+    const definitionTitle = worldEvent
+      ? getWorldEventDefinition(worldEvent.definitionId)?.title
+      : undefined
+    const before = event.responsePointsAfter - event.delta
+    const after = event.responsePointsAfter
+
+    const next = events[i + 1]
+    if (
+      next &&
+      next.eventId === event.eventId &&
+      (next.type === 'contained' || next.type === 'unresolved')
+    ) {
+      if (next.type === 'contained') {
+        results.push({
+          id: `world-event-event:${event.dayNumber}:contained:${event.eventId}`,
+          kind: 'worldEvent',
+          title: definitionTitle
+            ? `「${definitionTitle}」が収束しました。`
+            : '世界情勢が収束しました。',
+          summary: `対応状況 ${after} / ${WORLD_EVENT_CONFIG.responseTarget}`,
+          importance: 'high',
+        })
+      } else {
+        results.push({
+          id: `world-event-event:${event.dayNumber}:unresolved:${event.eventId}`,
+          kind: 'worldEvent',
+          title: '世界情勢への対応期間が終了しました',
+          summary: [
+            definitionTitle ? `「${definitionTitle}」` : undefined,
+            `対応状況 ${after} / ${WORLD_EVENT_CONFIG.responseTarget}`,
+          ]
+            .filter((line): line is string => Boolean(line))
+            .join('\n'),
+          importance: 'normal',
+        })
+      }
+      i++
+      continue
+    }
+
+    if (event.delta > 0) {
+      results.push({
+        id: `world-event-event:${event.dayNumber}:response:${event.eventId}`,
+        kind: 'worldEvent',
+        title: '世界情勢への対応',
+        summary: [
+          definitionTitle ? `「${definitionTitle}」` : undefined,
+          `対応状況 ${before} → ${after}`,
+        ]
+          .filter((line): line is string => Boolean(line))
+          .join('\n'),
+        importance: 'normal',
+      })
+    } else {
+      results.push({
+        id: `world-event-event:${event.dayNumber}:response:${event.eventId}`,
+        kind: 'worldEvent',
+        title: '世界情勢',
+        summary: '対応状況に変化はありませんでした。',
+        importance: 'low',
+      })
+    }
+  }
+
+  return results
+}
+
 function buildRelationshipEvent(
   event: CampaignRelationshipEvent,
   campaign: TavernCampaignState,
@@ -508,6 +603,9 @@ function buildImportantEvents(
       const vm = buildQuestChainEvent(event, campaign)
       if (vm) events.push(vm)
     }
+    events.push(
+      ...buildWorldEventDayEvents(dayRecord.worldEventEvents ?? [], campaign),
+    )
     events.push(
       ...buildAggregatedSkillGrowthEvents(
         dayRecord.progressionEvents ?? [],

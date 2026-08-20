@@ -18,6 +18,7 @@ import { TavernLedgerScene } from './scenes/tavernLedger/TavernLedgerScene.ts'
 import { TavernUpgradeScene } from './scenes/tavernUpgrade/TavernUpgradeScene.ts'
 import { VisitorRegistryScene } from './scenes/visitorRegistry/VisitorRegistryScene.ts'
 import { QuestChainLogScene } from './scenes/questChainLog/QuestChainLogScene.ts'
+import { WorldEventLogScene } from './scenes/worldEventLog/WorldEventLogScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -129,6 +130,7 @@ export class CanvasGame {
     this._sceneManager.register(new TavernUpgradeScene())
     this._sceneManager.register(new VisitorRegistryScene())
     this._sceneManager.register(new QuestChainLogScene())
+    this._sceneManager.register(new WorldEventLogScene())
 
     app.ticker.add(this.handleTick)
 

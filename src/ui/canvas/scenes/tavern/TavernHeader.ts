@@ -15,7 +15,6 @@ import type { TavernHeaderViewModel } from '../../viewModel/tavernScreenViewMode
 export interface TavernHeaderOptions {
   theme: GameUiTheme
   width: number
-  height: number
   onAdvance?: () => void
   onOpenSettings?: () => void
   onOpenSave?: () => void
@@ -24,19 +23,42 @@ export interface TavernHeaderOptions {
   onOpenUpgrade?: () => void
   onOpenVisitorRegistry?: () => void
   onOpenQuestChainLog?: () => void
+  onOpenWorldEventLog?: () => void
 }
 
 const SETTINGS_ICON_URL = '/settings-icon.png'
 const GEAR_SIZE = 44
+const BUTTON_HEIGHT = 44
+
+/**
+ * Three-row layout (Phase 9.7.1) — replaces the earlier single 64px-tall
+ * row, which had grown to eight buttons plus the day/reputation/money/
+ * status readouts and could no longer fit them without overlap:
+ *   Row A (y=8):  DAY / Tavern Rank & reputation / funds
+ *   Row B (y=34): status message (left) and, only while a World Event is
+ *                 active, a compact clickable banner (right) — never both
+ *                 competing for the same horizontal space as Row A's
+ *                 always-on readouts.
+ *   Row C (y=62): every navigation button, left-aligned, plus the day
+ *                 advance button and settings gear at the end. Widths are
+ *                 summed programmatically (not by hand-chained arithmetic
+ *                 per button, which is exactly what silently drifted out
+ *                 of sync in Phase 9.6) so adding a button can never
+ *                 leave a later one mispositioned.
+ */
+const ROW_A_Y = 8
+const ROW_B_Y = 36
+const ROW_C_Y = 64
+export const TAVERN_HEADER_HEIGHT = ROW_C_Y + BUTTON_HEIGHT + 8
 
 export class TavernHeader extends Container {
   private readonly _theme: GameUiTheme
   private readonly _width: number
-  private readonly _height: number
   private readonly _dayLabel: GameLabel
   private readonly _reputationLabel: GameLabel
   private readonly _moneyLabel: GameLabel
   private readonly _statusLabel: GameLabel
+  private readonly _worldEventBanner: GameLabel
   private readonly _actionButton: GameButton
   private readonly _onAdvance?: () => void
   private readonly _onOpenSettings?: () => void
@@ -46,13 +68,13 @@ export class TavernHeader extends Container {
   private readonly _onOpenUpgrade?: () => void
   private readonly _onOpenVisitorRegistry?: () => void
   private readonly _onOpenQuestChainLog?: () => void
+  private readonly _onOpenWorldEventLog?: () => void
 
   constructor(options: TavernHeaderOptions) {
     super()
 
     this._theme = options.theme
     this._width = options.width
-    this._height = options.height
     this._onAdvance = options.onAdvance
     this._onOpenSettings = options.onOpenSettings
     this._onOpenSave = options.onOpenSave
@@ -61,10 +83,11 @@ export class TavernHeader extends Container {
     this._onOpenUpgrade = options.onOpenUpgrade
     this._onOpenVisitorRegistry = options.onOpenVisitorRegistry
     this._onOpenQuestChainLog = options.onOpenQuestChainLog
+    this._onOpenWorldEventLog = options.onOpenWorldEventLog
 
     const panel = new GamePanel({
       width: this._width,
-      height: this._height,
+      height: TAVERN_HEADER_HEIGHT,
       theme: this._theme,
       color: this._theme.colors.panelTitle,
       borderColor: this._theme.colors.panelBorder,
@@ -73,207 +96,105 @@ export class TavernHeader extends Container {
     })
     this.addChild(panel)
 
+    // --- Row A: always-on readouts ---
     this._dayLabel = new GameLabel('', this._theme, 'heading')
     this._dayLabel.x = this._theme.spacing.s16
-    this._dayLabel.y = 16
+    this._dayLabel.y = ROW_A_Y
     this.addChild(this._dayLabel)
 
     this._reputationLabel = new GameLabel('', this._theme, 'body')
     this._reputationLabel.x = 180
-    this._reputationLabel.y = 20
+    this._reputationLabel.y = ROW_A_Y + 4
     this.addChild(this._reputationLabel)
 
     this._moneyLabel = new GameLabel('', this._theme, 'body')
     this._moneyLabel.x = 500
-    this._moneyLabel.y = 20
+    this._moneyLabel.y = ROW_A_Y + 4
     this.addChild(this._moneyLabel)
 
+    // --- Row B: status message (left) / World Event banner (right) ---
     this._statusLabel = new GameLabel('', this._theme, 'caption', {
-      maxWidth: this._width - 420,
+      maxWidth: 660,
     })
     this._statusLabel.x = this._theme.spacing.s16
-    this._statusLabel.y = 42
+    this._statusLabel.y = ROW_B_Y
     this.addChild(this._statusLabel)
 
-    const rightMargin = this._theme.spacing.s16
-    const actionButtonWidth = 140
-    const saveButtonWidth = 100
-    const libraryButtonWidth = 100
-    const ledgerButtonWidth = 100
-    const upgradeButtonWidth = 100
-    const registryButtonWidth = 140
-    const chainLogButtonWidth = 140
-    const gearSize = GEAR_SIZE
+    this._worldEventBanner = new GameLabel('', this._theme, 'caption', {
+      maxWidth: this._width - 720,
+    })
+    this._worldEventBanner.x = 700
+    this._worldEventBanner.y = ROW_B_Y
+    this._worldEventBanner.eventMode = 'static'
+    this._worldEventBanner.cursor = 'pointer'
+    this._worldEventBanner.on('pointertap', () => {
+      this._onOpenWorldEventLog?.()
+    })
+    this._worldEventBanner.visible = false
+    this.addChild(this._worldEventBanner)
+
+    // --- Row C: navigation buttons, then advance + gear ---
     const gap = this._theme.spacing.s8
-    const rightClusterWidth =
-      saveButtonWidth +
-      gap +
-      libraryButtonWidth +
-      gap +
-      ledgerButtonWidth +
-      gap +
-      upgradeButtonWidth +
-      gap +
-      registryButtonWidth +
-      gap +
-      chainLogButtonWidth +
-      gap +
-      actionButtonWidth +
-      gap +
-      gearSize
-    const startX = this._width - rightMargin - rightClusterWidth
+    const navButtons: {
+      width: number
+      label: string
+      onActivate?: () => void
+    }[] = [
+      { width: 100, label: 'セーブ', onActivate: this._onOpenSave },
+      { width: 100, label: '資料室', onActivate: this._onOpenLibrary },
+      { width: 100, label: '帳簿', onActivate: this._onOpenLedger },
+      { width: 100, label: '設備', onActivate: this._onOpenUpgrade },
+      {
+        width: 140,
+        label: '来訪者台帳',
+        onActivate: this._onOpenVisitorRegistry,
+      },
+      {
+        width: 140,
+        label: '依頼記録',
+        onActivate: this._onOpenQuestChainLog,
+      },
+      {
+        width: 140,
+        label: '世界情勢',
+        onActivate: this._onOpenWorldEventLog,
+      },
+    ]
 
-    const saveButton = new GameButton({
-      width: saveButtonWidth,
-      height: 44,
-      theme: this._theme,
-      label: 'セーブ',
-    })
-    saveButton.x = startX
-    saveButton.y = 10
-    saveButton.onActivate = () => {
-      this._onOpenSave?.()
+    let cursorX = this._theme.spacing.s16
+    for (const spec of navButtons) {
+      const button = new GameButton({
+        width: spec.width,
+        height: BUTTON_HEIGHT,
+        theme: this._theme,
+        label: spec.label,
+      })
+      button.x = cursorX
+      button.y = ROW_C_Y
+      button.onActivate = () => spec.onActivate?.()
+      this.addChild(button)
+      cursorX += spec.width + gap
     }
-    this.addChild(saveButton)
 
-    const libraryButton = new GameButton({
-      width: libraryButtonWidth,
-      height: 44,
-      theme: this._theme,
-      label: '資料室',
-    })
-    libraryButton.x = startX + saveButtonWidth + gap
-    libraryButton.y = 10
-    libraryButton.onActivate = () => {
-      this._onOpenLibrary?.()
-    }
-    this.addChild(libraryButton)
-
-    const ledgerButton = new GameButton({
-      width: ledgerButtonWidth,
-      height: 44,
-      theme: this._theme,
-      label: '帳簿',
-    })
-    ledgerButton.x = startX + saveButtonWidth + gap + libraryButtonWidth + gap
-    ledgerButton.y = 10
-    ledgerButton.onActivate = () => {
-      this._onOpenLedger?.()
-    }
-    this.addChild(ledgerButton)
-
-    const upgradeButton = new GameButton({
-      width: upgradeButtonWidth,
-      height: 44,
-      theme: this._theme,
-      label: '設備',
-    })
-    upgradeButton.x =
-      startX +
-      saveButtonWidth +
-      gap +
-      libraryButtonWidth +
-      gap +
-      ledgerButtonWidth +
-      gap
-    upgradeButton.y = 10
-    upgradeButton.onActivate = () => {
-      this._onOpenUpgrade?.()
-    }
-    this.addChild(upgradeButton)
-
-    const registryButton = new GameButton({
-      width: registryButtonWidth,
-      height: 44,
-      theme: this._theme,
-      label: '来訪者台帳',
-    })
-    registryButton.x =
-      startX +
-      saveButtonWidth +
-      gap +
-      libraryButtonWidth +
-      gap +
-      ledgerButtonWidth +
-      gap +
-      upgradeButtonWidth +
-      gap
-    registryButton.y = 10
-    registryButton.onActivate = () => {
-      this._onOpenVisitorRegistry?.()
-    }
-    this.addChild(registryButton)
-
-    const chainLogButton = new GameButton({
-      width: chainLogButtonWidth,
-      height: 44,
-      theme: this._theme,
-      label: '依頼記録',
-    })
-    chainLogButton.x =
-      startX +
-      saveButtonWidth +
-      gap +
-      libraryButtonWidth +
-      gap +
-      ledgerButtonWidth +
-      gap +
-      upgradeButtonWidth +
-      gap +
-      registryButtonWidth +
-      gap
-    chainLogButton.y = 10
-    chainLogButton.onActivate = () => {
-      this._onOpenQuestChainLog?.()
-    }
-    this.addChild(chainLogButton)
-
+    const actionButtonWidth = 140
     this._actionButton = new GameButton({
       width: actionButtonWidth,
-      height: 44,
+      height: BUTTON_HEIGHT,
       theme: this._theme,
       label: '翌日へ',
       disabled: true,
     })
-    this._actionButton.x =
-      startX +
-      saveButtonWidth +
-      gap +
-      libraryButtonWidth +
-      gap +
-      ledgerButtonWidth +
-      gap +
-      upgradeButtonWidth +
-      gap +
-      registryButtonWidth +
-      gap +
-      chainLogButtonWidth +
-      gap
-    this._actionButton.y = 10
+    this._actionButton.x = cursorX
+    this._actionButton.y = ROW_C_Y
     this._actionButton.onActivate = () => {
       if (this._actionButton.state === 'disabled') return
       this._onAdvance?.()
     }
     this.addChild(this._actionButton)
+    cursorX += actionButtonWidth + gap
 
-    const gearX =
-      startX +
-      saveButtonWidth +
-      gap +
-      libraryButtonWidth +
-      gap +
-      ledgerButtonWidth +
-      gap +
-      upgradeButtonWidth +
-      gap +
-      registryButtonWidth +
-      gap +
-      chainLogButtonWidth +
-      gap +
-      actionButtonWidth +
-      gap
-    const gearY = (this._height - gearSize) / 2
-    this._setupSettingsIcon(gearX, gearY)
+    const gearY = ROW_C_Y + (BUTTON_HEIGHT - GEAR_SIZE) / 2
+    this._setupSettingsIcon(cursorX, gearY)
   }
 
   private _setupSettingsIcon(x: number, y: number): void {
@@ -319,9 +240,33 @@ export class TavernHeader extends Container {
 
     const canAdvance = viewModel.canResolveDay || viewModel.canAdvanceDay
     this._actionButton.setEnabled(canAdvance)
+
+    // Phase 9.7.1: the active World Event's title / response progress /
+    // remaining days are rendered directly on the Tavern Main header —
+    // not just implied by a button label — and stay hidden entirely when
+    // no event is active. Clicking it opens the full World Event Log,
+    // same destination as the permanent "世界情勢" nav button.
+    if (viewModel.worldEventBanner) {
+      const banner = viewModel.worldEventBanner
+      this._worldEventBanner.text = `世界情勢：${banner.eventTitle} / ${banner.statusProgressLabel} / ${banner.remainingDaysLabel}`
+      this._worldEventBanner.visible = true
+    } else {
+      this._worldEventBanner.text = ''
+      this._worldEventBanner.visible = false
+    }
   }
 
   setActionEnabled(enabled: boolean): void {
     this._actionButton.setEnabled(enabled)
+  }
+
+  /** Test-only accessor for the World Event banner's current presentation
+   * state — avoids pixel-position assertions while still proving the
+   * banner becomes render-visible with the right content when active. */
+  getWorldEventBannerStateForTest(): { visible: boolean; text: string } {
+    return {
+      visible: this._worldEventBanner.visible,
+      text: this._worldEventBanner.text,
+    }
   }
 }

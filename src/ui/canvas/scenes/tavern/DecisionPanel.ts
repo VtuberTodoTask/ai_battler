@@ -294,6 +294,25 @@ export class DecisionPanel extends Container {
       y += chainInfo.textHeight + 12
     }
 
+    if (quest.worldEvent) {
+      const worldEventLines = [
+        `世界情勢${quest.worldEvent.eventTitle ? ` 「${quest.worldEvent.eventTitle}」` : ''}`,
+        quest.worldEvent.noteText,
+      ]
+      if (quest.worldEvent.progressLabel) {
+        worldEventLines.push(quest.worldEvent.progressLabel)
+      }
+      const worldEventInfo = new GameLabel(
+        worldEventLines.join('\n'),
+        this._theme,
+        'caption',
+        { maxWidth, breakWords: true },
+      )
+      worldEventInfo.y = y
+      container.addChild(worldEventInfo)
+      y += worldEventInfo.textHeight + 12
+    }
+
     const rank = new GameLabel(quest.rankLabel, this._theme, 'body', {
       maxWidth,
       breakWords: true,
