@@ -29,7 +29,10 @@ import {
 } from '../tavern/campaign/progression.ts'
 import { MAX_SKILL_NORMAL, MAX_SKILL_S } from '../balance/constants.ts'
 import { ROLE_MAP } from '../../data/roles.ts'
-import { resolveQuestChainsForDay } from '../tavern/campaign/questChains.ts'
+import {
+  collectDueChainRequests,
+  resolveQuestChainsForDay,
+} from '../tavern/campaign/questChains.ts'
 import type {
   AdventurerRank,
   AdventurerRole,
@@ -918,6 +921,17 @@ function validateResolvedDispatch(
     `依頼 ${resolved.requestId as string} のデータ`,
   )
 
+  // Invariant across every ResolvedDispatch (chain follow-ups and normal
+  // requests alike): the outer requestId and the inner request's own id
+  // must always agree — otherwise a save could point requestId at a real,
+  // scheduled request while smuggling a different (tampered) request body.
+  if ((resolved.request as Record<string, unknown>).id !== resolved.requestId) {
+    throw new SaveValidationErrorClass(
+      '依頼結果のIDと依頼データのIDが一致しません',
+      'corrupted-data',
+    )
+  }
+
   if (!Array.isArray(resolved.memberIds)) {
     throw new SaveValidationErrorClass(
       '依頼結果のメンバー一覧が不正です',
@@ -1170,8 +1184,17 @@ function validateDayRequests(value: unknown): void {
       'corrupted-data',
     )
   }
+  const seenIds = new Set<string>()
   for (const request of value) {
     validateRequest(request, '依頼データ')
+    const id = (request as Record<string, unknown>).id as string
+    if (seenIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '本日の依頼IDが重複しています',
+        'corrupted-data',
+      )
+    }
+    seenIds.add(id)
   }
 }
 
@@ -1647,6 +1670,63 @@ function validateQuestChains(
         )
       }
       seenChainRequestIdsGlobally.add(rawResult.requestId)
+    }
+
+    // Historical Follow-up Result <-> Frozen Chain Request linkage. The
+    // reducer's own final-state replay (below) trusts each day's real
+    // results as-is; it cannot by itself detect a history record whose
+    // stored `results[].request` was retroactively edited (reward/rank/
+    // objective/chain metadata) while keeping that day's internal
+    // settlement/reputation math self-consistent. So before feeding this
+    // day's results into the reducer, prove each is exactly the request
+    // that was actually scheduled/frozen at the start of this day.
+    const expectedDueRequestById = new Map(
+      collectDueChainRequests(replayedChains, dayNumber).map((r) => [r.id, r]),
+    )
+    const seenDueChainRequestIdsToday = new Set<string>()
+    for (const rawResult of record.results) {
+      if (
+        !isPlainObject(rawResult) ||
+        typeof rawResult.requestId !== 'string'
+      ) {
+        continue
+      }
+      const requestId = rawResult.requestId
+      const rawRequest = isPlainObject(rawResult.request)
+        ? rawResult.request
+        : undefined
+      const requestChain = rawRequest ? rawRequest.chain : undefined
+      const expectedRequest = expectedDueRequestById.get(requestId)
+
+      if (expectedRequest) {
+        if (seenDueChainRequestIdsToday.has(requestId)) {
+          throw new SaveValidationErrorClass(
+            `連続依頼の依頼結果が重複しています (DAY ${dayNumber})`,
+            'corrupted-data',
+          )
+        }
+        seenDueChainRequestIdsToday.add(requestId)
+
+        if (!deepEqualPlain(rawRequest, expectedRequest)) {
+          throw new SaveValidationErrorClass(
+            `連続依頼の依頼内容が掲示時点の内容と一致しません (DAY ${dayNumber})`,
+            'corrupted-data',
+          )
+        }
+      } else if (isPlainObject(requestChain)) {
+        throw new SaveValidationErrorClass(
+          `対応する予定のない連続依頼の依頼結果があります (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+    }
+    for (const id of expectedDueRequestById.keys()) {
+      if (!seenDueChainRequestIdsToday.has(id)) {
+        throw new SaveValidationErrorClass(
+          `予定されていた連続依頼の依頼結果が見つかりません (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
     }
 
     const { chains: nextChains, events: expectedEvents } =

@@ -4,7 +4,10 @@ import type {
   QuestChainStepState,
   TavernCampaignState,
 } from '../../../core/tavern/campaign/types.ts'
-import { getQuestChainDefinition } from '../../../core/tavern/campaign/questChains.ts'
+import {
+  QUEST_CHAIN_CONFIG,
+  getQuestChainDefinition,
+} from '../../../core/tavern/campaign/questChains.ts'
 import { OUTCOME_LABELS } from '../../expedition/labels.ts'
 
 export interface QuestChainLogReturnTarget {
@@ -60,7 +63,12 @@ function buildStepRow(
   const dayLabel = `DAY ${step.scheduledDay}`
 
   if (step.status === 'scheduled') {
-    return { progressLabel, dayLabel, title: '', statusLabel: '掲示中' }
+    return {
+      progressLabel,
+      dayLabel,
+      title: step.request.title,
+      statusLabel: '掲示中',
+    }
   }
   if (step.status === 'notBrokered') {
     return {
@@ -86,18 +94,18 @@ function buildRow(
   const resolvedSteps = chain.steps.filter(
     (s) => s.status !== 'scheduled',
   ).length
-  const totalSteps =
-    chain.steps.length > 0 ? chain.steps[chain.steps.length - 1].stepNumber : 0
+  // Always shown against the fixed total (Phase 9.6.1) — a chain still on
+  // Step 2 is "1 / 3", never "1 / 2", regardless of how many steps have
+  // been generated so far.
+  const totalSteps = QUEST_CHAIN_CONFIG.totalSteps
 
   return {
     rowId: `chain-row-${index}`,
     definitionTitle: definition?.title ?? FALLBACK_DEFINITION_TITLE,
     statusLabel: questChainStatusLabel(chain.status),
     startedDayLabel: `DAY ${chain.startedDay}`,
-    progressLabel: `${resolvedSteps} / ${Math.max(totalSteps, resolvedSteps)}`,
-    steps: chain.steps.map((s) =>
-      buildStepRow(s, Math.max(totalSteps, s.stepNumber)),
-    ),
+    progressLabel: `${resolvedSteps} / ${totalSteps}`,
+    steps: chain.steps.map((s) => buildStepRow(s, totalSteps)),
   }
 }
 
