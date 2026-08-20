@@ -54,6 +54,18 @@ export interface TavernDayState {
   partyEvents?: CampaignPartyEvent[]
 }
 
+/**
+ * Phase 9.6 Quest Chain follow-up reference. Present only on Step 2/3
+ * follow-up requests — Step 1 is an ordinary standalone request at the
+ * time it is generated (the chain origin is tracked on QuestChainState
+ * instead, not on the request itself).
+ */
+export interface TavernQuestChainRef {
+  chainId: string
+  stepNumber: 2 | 3
+  totalSteps: 3
+}
+
 export interface TavernRequestOffer {
   id: string
   title: string
@@ -65,6 +77,7 @@ export interface TavernRequestOffer {
   recommendedPartySize: number
   expeditionRequest: ExpeditionRequest
   rewardTerms: QuestRewardTerms
+  chain?: TavernQuestChainRef
 }
 
 export interface PublicRequestProfile {

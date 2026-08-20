@@ -7,6 +7,7 @@ import {
 import { offerRequestToParty } from '../tavern/brokerage.ts'
 import { deriveTavernRank } from '../tavern/campaign/reputation.ts'
 import { purchaseTavernUpgrade } from '../tavern/campaign/upgrades.ts'
+import { applyReturn } from '../tavern/campaign/lifecycle.ts'
 import {
   EXPEDITION_GROWTH_XP,
   TRAINING_GROWTH_XP,
@@ -196,18 +197,32 @@ function forceImmediateDeparture(
   return next
 }
 
-function advanceUntilReturned(
+/** Moves an away party back onto the staying roster via the exact same
+ * applyReturn the runtime uses on a winning RNG return roll — deterministic
+ * regardless of how often a vacancy + a winning roll happen to align for
+ * this specific party (see phase9-5.test.ts test G for the same pattern).
+ * Must be called on a 'resolved'-status campaign (i.e. right before
+ * advanceCampaignDay, mirroring exactly where the real return happens),
+ * so buildTavernDay's own arrivalDay-based 'arrived' PartyEvent detection
+ * picks it up naturally on the very next advance — a return applied any
+ * other way never gets that event, which the causal replay requires
+ * before it will treat the party as trainable again. Caller must free a
+ * roster slot first (e.g. scheduling another staying party's real
+ * departure via forceImmediateDeparture before resolving) since
+ * advanceCampaignDay always keeps the roster exactly at capacity. */
+function returnAwayPartyBeforeAdvance(
   campaign: TavernCampaignState,
   partyId: string,
-  maxDays: number,
 ): TavernCampaignState {
-  let c = campaign
-  for (let i = 0; i < maxDays; i++) {
-    c = resolveCampaignDay(c)
-    c = advanceCampaignDay(c)
-    if (c.parties.some((p) => p.id === partyId)) return c
+  const next = clone(campaign)
+  const idx = next.awayParties.findIndex((p) => p.id === partyId)
+  if (idx === -1) {
+    throw new Error(`party ${partyId} is not in awayParties`)
   }
-  throw new Error(`party ${partyId} never returned within ${maxDays} days`)
+  const [party] = next.awayParties.splice(idx, 1)
+  applyReturn(party, next.seed, next.dayNumber + 1)
+  next.parties.push(party)
+  return next
 }
 
 function campaignWithTrainingYardLevel(seed: string, level: 1 | 2) {
@@ -432,15 +447,12 @@ describe('save validation: growth progression & skills (Phase 9.5)', () => {
 
   it('accepts a genuinely-generated save exercising Expedition Growth, Idle Training, Training Yard Lv1/Lv2, Milestone Skill Growth, Recovery, and Departure/Return together', () => {
     let campaign = createTavernCampaign('growth-full-integration')
-    let grownId: string | undefined
-    for (let i = 0; i < 20 && !grownId; i++) {
+    for (let i = 0; i < 20; i++) {
       campaign = advanceDaysWithoutQuests(campaign, 1)
-      grownId = campaign.parties.find(
-        (p) => p.progression.growthMilestones >= 1,
-      )?.id
+      if (campaign.parties.some((p) => p.progression.growthMilestones >= 1)) {
+        break
+      }
     }
-    expect(grownId).toBeDefined()
-    if (!grownId) return
 
     for (let day = 0; day < 80; day++) {
       campaign = resolveCampaignDay(acceptAllPossible(campaign))
@@ -458,11 +470,45 @@ describe('save validation: growth progression & skills (Phase 9.5)', () => {
     expect(lv1.ok).toBe(true)
     campaign = lv1.campaign
 
+    // Re-select a currently-staying, non-recovering party right before
+    // forcing its departure — Quest Chains (Phase 9.6) can now shift
+    // exactly which parties get dispatched (and thus injured) on any
+    // given day over an 80-day grind, so the party captured 80 days ago
+    // is not guaranteed to still be staying, and forceImmediateDeparture
+    // clears recoveringThroughDay without a matching finishedRecovery
+    // event — fine for a healthy party, but it would desync a currently-
+    // recovering one from the causal replay. Growth itself doesn't need
+    // to be re-verified on this specific party — 80 days of idle
+    // training/expeditions has already exercised it extensively above.
+    const grownId =
+      campaign.parties.find(
+        (p) =>
+          p.progression.growthMilestones >= 1 &&
+          p.recoveringThroughDay === undefined,
+      )?.id ??
+      campaign.parties.find((p) => p.recoveringThroughDay === undefined)?.id
+    expect(grownId).toBeDefined()
+    if (!grownId) return
+
     campaign = forceImmediateDeparture(campaign, grownId)
     campaign = resolveCampaignDay(campaign)
     campaign = advanceCampaignDay(campaign)
     expect(campaign.awayParties.some((p) => p.id === grownId)).toBe(true)
-    campaign = advanceUntilReturned(campaign, grownId, 200)
+
+    // Deterministically bring grownId back instead of depending on how
+    // often a vacancy + a winning RNG return roll happen to align for
+    // this specific party over a long, Quest-Chain-affected horizon:
+    // schedule another staying party's real departure (freeing the
+    // roster slot advanceCampaignDay will otherwise fill with a new
+    // arrival), then splice grownId back in right before that same
+    // advance so its return is indistinguishable from a natural one.
+    const fillerPartyId = campaign.parties.find(
+      (p) => p.id !== grownId && p.recoveringThroughDay === undefined,
+    )!.id
+    campaign = forceImmediateDeparture(campaign, fillerPartyId)
+    campaign = resolveCampaignDay(campaign)
+    campaign = returnAwayPartyBeforeAdvance(campaign, grownId)
+    campaign = advanceCampaignDay(campaign)
     expect(campaign.parties.some((p) => p.id === grownId)).toBe(true)
 
     const save = clone(serializeGameSave({ campaign }))

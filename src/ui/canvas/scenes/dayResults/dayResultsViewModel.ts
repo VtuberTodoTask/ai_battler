@@ -3,6 +3,7 @@ import type {
   CampaignProgressionEvent,
   CampaignRelationshipEvent,
   DayReputationSummary,
+  QuestChainEvent,
   TavernCampaignState,
   TavernDayRecord,
 } from '../../../../core/tavern/campaign/types.ts'
@@ -22,6 +23,7 @@ import {
   questRankUnlockLabel,
   tavernRankLabel,
 } from '../../../../core/tavern/campaign/reputation.ts'
+import { getQuestChainDefinition } from '../../../../core/tavern/campaign/questChains.ts'
 import { skillLabel } from '../../viewModel/characterLabels.ts'
 
 export type DayResultsStep = 'important_events' | 'expedition_results'
@@ -40,6 +42,7 @@ export interface DayResultEventViewModel {
     | 'relationshipChange'
     | 'progression'
     | 'tavernRankUp'
+    | 'questChain'
   title: string
   summary: string
   importance: DayResultEventImportance
@@ -303,6 +306,73 @@ function buildPartyEvent(
   }
 }
 
+/**
+ * Phase 9.6 Quest Chain status-change feedback — deliberately status-only
+ * (started/advanced/completed/failed/abandoned). A chain step's ordinary
+ * Reward/Reputation/Growth are already surfaced by the existing expedition
+ * result and progression feedback; duplicating them here would just be
+ * notification noise. Never falls back to a raw chainId/definitionId.
+ */
+function buildQuestChainEvent(
+  event: QuestChainEvent,
+  campaign: TavernCampaignState,
+): DayResultEventViewModel | null {
+  const chain = campaign.questChains.find((c) => c.id === event.chainId)
+  const definitionTitle = chain
+    ? getQuestChainDefinition(chain.definitionId)?.title
+    : undefined
+
+  switch (event.type) {
+    case 'started':
+      return {
+        id: `quest-chain-event:${event.dayNumber}:started:${event.chainId}`,
+        kind: 'questChain',
+        title: '新たな連続依頼が発生しました',
+        summary: [
+          definitionTitle ? `「${definitionTitle}」` : undefined,
+          '明日、新しい依頼が掲示されます。',
+        ]
+          .filter((line): line is string => Boolean(line))
+          .join('\n'),
+        importance: 'high',
+      }
+    case 'advanced':
+      return {
+        id: `quest-chain-event:${event.dayNumber}:advanced:${event.chainId}`,
+        kind: 'questChain',
+        title: '連続依頼が続きます',
+        summary: '次の依頼が明日掲示されます。',
+        importance: 'normal',
+      }
+    case 'completed':
+      return {
+        id: `quest-chain-event:${event.dayNumber}:completed:${event.chainId}`,
+        kind: 'questChain',
+        title: '連続依頼を完了しました',
+        summary: definitionTitle ? `「${definitionTitle}」` : '',
+        importance: 'high',
+      }
+    case 'failed':
+      return {
+        id: `quest-chain-event:${event.dayNumber}:failed:${event.chainId}`,
+        kind: 'questChain',
+        title: '連続依頼はここで終了しました',
+        summary: '依頼達成に至らなかったため、この一連の依頼は終了しました。',
+        importance: 'normal',
+      }
+    case 'abandoned':
+      return {
+        id: `quest-chain-event:${event.dayNumber}:abandoned:${event.chainId}`,
+        kind: 'questChain',
+        title: '連続依頼を見送りました',
+        summary: '',
+        importance: 'low',
+      }
+    default:
+      return null
+  }
+}
+
 function buildRelationshipEvent(
   event: CampaignRelationshipEvent,
   campaign: TavernCampaignState,
@@ -432,6 +502,10 @@ function buildImportantEvents(
     }
     for (const event of dayRecord.relationshipEvents ?? []) {
       const vm = buildRelationshipEvent(event, campaign)
+      if (vm) events.push(vm)
+    }
+    for (const event of dayRecord.questChainEvents ?? []) {
+      const vm = buildQuestChainEvent(event, campaign)
       if (vm) events.push(vm)
     }
     events.push(

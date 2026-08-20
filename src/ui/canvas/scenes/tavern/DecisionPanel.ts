@@ -274,6 +274,26 @@ export class DecisionPanel extends Container {
     container.addChild(title)
     y += title.textHeight + 8
 
+    if (quest.chain) {
+      const chainLines = [quest.chain.badgeLabel]
+      if (quest.chain.definitionTitle) {
+        chainLines.push(`「${quest.chain.definitionTitle}」`)
+      }
+      chainLines.push(quest.chain.noteText)
+      if (quest.chain.previousResultLabel) {
+        chainLines.push(quest.chain.previousResultLabel)
+      }
+      const chainInfo = new GameLabel(
+        chainLines.join('\n'),
+        this._theme,
+        'caption',
+        { maxWidth, breakWords: true },
+      )
+      chainInfo.y = y
+      container.addChild(chainInfo)
+      y += chainInfo.textHeight + 12
+    }
+
     const rank = new GameLabel(quest.rankLabel, this._theme, 'body', {
       maxWidth,
       breakWords: true,

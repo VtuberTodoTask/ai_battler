@@ -229,29 +229,50 @@ export function planRequestRanksForDay(
   }
 }
 
-function generateRequestForCampaign(
-  index: number,
-  daySeed: string,
+/**
+ * Pure request builder shared by the day's normal request generation and
+ * Quest Chain follow-up scheduling (Phase 9.6): picks a template for the
+ * given objective, rolls battle-enablement, and builds the offer — all
+ * from the caller-supplied `seed` alone, so a caller can pass any
+ * collision-free seed namespace (a day seed + request index for normal
+ * requests, a chain-scoped seed for follow-ups) without touching Campaign
+ * RNG or any other generator's seed stream.
+ */
+export function buildRequestOfferForObjective(
+  requestId: string,
+  seed: string,
   objectiveType: ObjectiveType,
   rank: AdventurerRank,
 ): TavernRequestOffer {
-  const selectionRng = new SeededRng(`${daySeed}:request:${index}:selection`)
+  const selectionRng = new SeededRng(`${seed}:selection`)
   const templates = TEMPLATES_BY_OBJECTIVE_TYPE[objectiveType]
   const template = selectionRng.pick(templates)
 
   const battleEnabled =
     template.battleChance >= 100 || selectionRng.chance(template.battleChance)
 
-  const requestSeed = `${daySeed}:request:${index}:expedition`
-  const requestId = `tavern-request-${index}-${daySeed}`
+  const requestSeed = `${seed}:expedition`
 
-  const offer = template.build({
+  return template.build({
     requestId,
     seed: requestSeed,
     rank,
     battleEnabled,
   })
-  return offer
+}
+
+function generateRequestForCampaign(
+  index: number,
+  daySeed: string,
+  objectiveType: ObjectiveType,
+  rank: AdventurerRank,
+): TavernRequestOffer {
+  return buildRequestOfferForObjective(
+    `tavern-request-${index}-${daySeed}`,
+    `${daySeed}:request:${index}`,
+    objectiveType,
+    rank,
+  )
 }
 
 const BASE_REQUEST_COUNT = 3
