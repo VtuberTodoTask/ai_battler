@@ -199,16 +199,43 @@ export default function GameCanvasHost({
         }
       },
       openExpeditionNarrative: async (candidateId) => {
+        const currentCampaign = prevCampaignRef.current
+        const candidate = currentCampaign?.narrativeCandidates.find(
+          (c) => c.id === candidateId,
+        )
+        // A candidate that isn't 'generated' yet will trigger a Campaign
+        // mutation (the generated text gets saved onto the candidate/
+        // narrativeGenerations), which re-syncs the campaign prop and would
+        // otherwise reset the canvas back to the tavern scene. Already-
+        // generated candidates return existing text with no Campaign write,
+        // so no sync — and no preserve flag — happens for them.
+        const expectsCampaignSync =
+          candidate !== undefined && candidate.state !== 'generated'
+
+        if (expectsCampaignSync) {
+          preserveSceneOnNextSyncRef.current = true
+        }
+
         try {
           const handler = onOpenExpeditionNarrativeRef.current
           if (!handler) {
+            if (expectsCampaignSync) {
+              preserveSceneOnNextSyncRef.current = false
+            }
             return {
               ok: false,
               message: 'AI provider not connected',
             }
           }
-          return await handler(candidateId)
+          const result = await handler(candidateId)
+          if (!result.ok && expectsCampaignSync) {
+            preserveSceneOnNextSyncRef.current = false
+          }
+          return result
         } catch (e) {
+          if (expectsCampaignSync) {
+            preserveSceneOnNextSyncRef.current = false
+          }
           return {
             ok: false,
             message:
