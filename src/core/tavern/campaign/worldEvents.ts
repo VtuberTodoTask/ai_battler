@@ -103,7 +103,7 @@ export const WORLD_EVENT_DEFINITIONS: readonly WorldEventDefinition[] = [
         objective: 'investigation',
         templateIds: ['investigation-missing-caravans'],
       },
-      { objective: 'rescue', templateIds: ['rescue-missing-researcher'] },
+      { objective: 'rescue', templateIds: ['rescue-caravan-survivors'] },
       { objective: 'escort', templateIds: ['escort-merchant'] },
     ],
   },

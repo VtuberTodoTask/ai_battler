@@ -10,6 +10,7 @@ import type {
   TavernDayState,
   TavernParty,
   TavernRequestOffer,
+  TavernRequestTemplate,
 } from '../types.ts'
 import { getPartyRankWeights, getRequestRankWeights } from './rankWeights.ts'
 import { createInitialRelationship } from './relationship.ts'
@@ -238,6 +239,28 @@ export function planRequestRanksForDay(
  * requests, a chain-scoped seed for follow-ups) without touching Campaign
  * RNG or any other generator's seed stream.
  */
+/**
+ * The Template pool a given (objective, allowedTemplateIds) selection would
+ * draw from — pulled out of buildRequestOfferForObjective so its scoping
+ * rule (below) can be verified directly by Template id, not only by
+ * reverse-matching a built offer's title back to a Template (Phase 9.7.2).
+ *
+ * With no explicit allowedTemplateIds (normal generation, Quest Chain
+ * follow-ups), World-Event-only Templates are never eligible — their
+ * title/briefing assume a World Event's Context. A caller that DOES pass
+ * allowedTemplateIds (World Events) selects by id only, so it can name a
+ * worldEventOnly Template (or reuse an ordinary one) freely.
+ */
+export function eligibleTemplatesForObjective(
+  objectiveType: ObjectiveType,
+  allowedTemplateIds?: readonly string[],
+): TavernRequestTemplate[] {
+  const allTemplates = TEMPLATES_BY_OBJECTIVE_TYPE[objectiveType]
+  return allowedTemplateIds
+    ? allTemplates.filter((t) => allowedTemplateIds.includes(t.id))
+    : allTemplates.filter((t) => !t.worldEventOnly)
+}
+
 export function buildRequestOfferForObjective(
   requestId: string,
   seed: string,
@@ -246,10 +269,10 @@ export function buildRequestOfferForObjective(
   allowedTemplateIds?: readonly string[],
 ): TavernRequestOffer {
   const selectionRng = new SeededRng(`${seed}:selection`)
-  const allTemplates = TEMPLATES_BY_OBJECTIVE_TYPE[objectiveType]
-  const templates = allowedTemplateIds
-    ? allTemplates.filter((t) => allowedTemplateIds.includes(t.id))
-    : allTemplates
+  const templates = eligibleTemplatesForObjective(
+    objectiveType,
+    allowedTemplateIds,
+  )
   if (templates.length === 0) {
     throw new Error(
       `No templates match objective "${objectiveType}" with allowed ids [${(allowedTemplateIds ?? []).join(', ')}]`,

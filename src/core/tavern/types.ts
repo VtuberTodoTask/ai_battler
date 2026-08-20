@@ -364,6 +364,15 @@ export interface TavernRequestTemplate {
   features: ExpeditionFeature[]
   publicTags: string[]
   battleChance: number
+  /**
+   * Phase 9.7.2: when true, this Template assumes a World Event's Context
+   * (its title/briefing only make sense as that event's follow-up) and
+   * must never be picked by the default (no `allowedTemplateIds`) pool
+   * used by normal request generation or Quest Chain follow-ups — only by
+   * a World Event Definition that names it explicitly. Omitted/false for
+   * every ordinary Template.
+   */
+  worldEventOnly?: boolean
   build(context: {
     requestId: string
     seed: string

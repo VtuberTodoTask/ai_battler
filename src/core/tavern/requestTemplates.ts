@@ -596,6 +596,7 @@ export const TAVERN_REQUEST_TEMPLATES: TavernRequestTemplate[] = [
     features: ['limitedSupplies', 'unstableTerrain'],
     publicTags: ['測量', '街道', '増水'],
     battleChance: 15,
+    worldEventOnly: true,
     build({ requestId, seed, rank, battleEnabled }) {
       const request: ExpeditionRequest = {
         ...baseRequest(
@@ -659,6 +660,7 @@ export const TAVERN_REQUEST_TEMPLATES: TavernRequestTemplate[] = [
     features: ['limitedSupplies', 'poorVisibility'],
     publicTags: ['救出', '街道', '増水'],
     battleChance: 25,
+    worldEventOnly: true,
     build({ requestId, seed, rank, battleEnabled }) {
       const request: ExpeditionRequest = {
         ...baseRequest(
@@ -710,6 +712,7 @@ export const TAVERN_REQUEST_TEMPLATES: TavernRequestTemplate[] = [
     features: ['longDuration', 'unstableTerrain'],
     publicTags: ['護衛', '街道', '迂回路'],
     battleChance: 45,
+    worldEventOnly: true,
     build({ requestId, seed, rank, battleEnabled }) {
       const request: ExpeditionRequest = {
         ...baseRequest(
@@ -767,6 +770,7 @@ export const TAVERN_REQUEST_TEMPLATES: TavernRequestTemplate[] = [
     features: ['unstableTerrain', 'traps'],
     publicTags: ['測量', '遺跡', '崩落'],
     battleChance: 20,
+    worldEventOnly: true,
     build({ requestId, seed, rank, battleEnabled }) {
       const request: ExpeditionRequest = {
         ...baseRequest(
@@ -830,6 +834,7 @@ export const TAVERN_REQUEST_TEMPLATES: TavernRequestTemplate[] = [
     features: ['ambushRisk', 'poorVisibility'],
     publicTags: ['調査', '街道', '隊商'],
     battleChance: 25,
+    worldEventOnly: true,
     build({ requestId, seed, rank, battleEnabled }) {
       const request: ExpeditionRequest = {
         ...baseRequest(
@@ -869,6 +874,58 @@ export const TAVERN_REQUEST_TEMPLATES: TavernRequestTemplate[] = [
         seed,
         rank,
         'investigation',
+        this.title,
+        this.environment,
+        this.briefing,
+        this.features,
+        this.publicTags,
+        request,
+      )
+    },
+  },
+  {
+    id: 'rescue-caravan-survivors',
+    objectiveType: 'rescue',
+    title: '途絶えた隊商の生存者救出',
+    environment: 'plains',
+    briefing: '街道から外れた場所で発見された隊商の生存者を救出する。',
+    features: ['limitedSupplies', 'poorVisibility'],
+    publicTags: ['救出', '街道', '隊商'],
+    battleChance: 30,
+    worldEventOnly: true,
+    build({ requestId, seed, rank, battleEnabled }) {
+      const request: ExpeditionRequest = {
+        ...baseRequest(
+          seed,
+          requestId,
+          rank,
+          'rescue',
+          this.environment,
+          this.features,
+          [],
+        ),
+        battle: battleConfig(seed, undefined, battleEnabled),
+        rescue: {
+          target: {
+            id: 'target-1',
+            name: '隊商の生存者',
+            maxHp: 35,
+            initialHp: 22,
+            mobility: 'assisted',
+            initialStatusEffects: [],
+            locationKnown: false,
+            discoveryDifficulty: 15,
+            accessDifficulty: 15,
+            stabilizationDifficulty: 15,
+            evacuationDifficulty: 15,
+          },
+        },
+      }
+      return buildOffer(
+        requestId,
+        seed,
+        rank,
+        'rescue',
         this.title,
         this.environment,
         this.briefing,
