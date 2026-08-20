@@ -243,9 +243,18 @@ export function buildRequestOfferForObjective(
   seed: string,
   objectiveType: ObjectiveType,
   rank: AdventurerRank,
+  allowedTemplateIds?: readonly string[],
 ): TavernRequestOffer {
   const selectionRng = new SeededRng(`${seed}:selection`)
-  const templates = TEMPLATES_BY_OBJECTIVE_TYPE[objectiveType]
+  const allTemplates = TEMPLATES_BY_OBJECTIVE_TYPE[objectiveType]
+  const templates = allowedTemplateIds
+    ? allTemplates.filter((t) => allowedTemplateIds.includes(t.id))
+    : allTemplates
+  if (templates.length === 0) {
+    throw new Error(
+      `No templates match objective "${objectiveType}" with allowed ids [${(allowedTemplateIds ?? []).join(', ')}]`,
+    )
+  }
   const template = selectionRng.pick(templates)
 
   const battleEnabled =

@@ -42,12 +42,12 @@ import { ActivityPanel } from './ActivityPanel.ts'
 import { DecisionPanel } from './DecisionPanel.ts'
 import { PartyListPanel } from './PartyListPanel.ts'
 import { QuestListPanel } from './QuestListPanel.ts'
-import { TavernHeader } from './TavernHeader.ts'
+import { TAVERN_HEADER_HEIGHT, TavernHeader } from './TavernHeader.ts'
 import { EXPEDITION_PREDICTION_SAMPLES } from '../../../../core/tavern/prediction/types.ts'
 import { getEffectiveSampleCount } from '../../../../core/tavern/campaign/upgrades.ts'
 
 const MARGIN = 16
-const TOP_BAR_HEIGHT = 64
+const TOP_BAR_HEIGHT = TAVERN_HEADER_HEIGHT
 const BOTTOM_PANEL_HEIGHT = 200
 const LEFT_WIDTH = 360
 const RIGHT_WIDTH = 360
@@ -280,7 +280,6 @@ export class TavernScene implements GameScene {
     this._header = new TavernHeader({
       theme,
       width: VIRTUAL_WIDTH,
-      height: TOP_BAR_HEIGHT,
       onAdvance: () => this.handleAdvance(),
       onOpenSettings: () => this._context!.actions.openSettings(),
       onOpenSave: () => this._context!.actions.openSaveLoad?.('save'),

@@ -276,6 +276,77 @@ describe('Phase 9.7 buildWorldEventRequestForDay / collectDueEventRequest (unit)
   })
 })
 
+describe('Phase 9.7.1 Event Request <-> Definition contextual alignment', () => {
+  it('every Definition/day produces a request whose objective matches the Definition', () => {
+    for (const definition of WORLD_EVENT_DEFINITIONS) {
+      const event = buildActiveEvent({ definitionId: definition.id })
+      for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+        const dayNumber = event.startedDay + dayOffset
+        const request = buildWorldEventRequestForDay(event, dayNumber)
+        expect(request.objectiveType).toBe(
+          definition.requests[dayOffset].objective,
+        )
+      }
+    }
+  })
+
+  it('flooded_routes never produces a cave/mine Survey (the exact bug this phase fixes)', () => {
+    const event = buildActiveEvent({ definitionId: 'flooded_routes' })
+    const day1 = buildWorldEventRequestForDay(event, event.startedDay)
+    expect(day1.objectiveType).toBe('survey')
+    expect(day1.environment).not.toBe('cave')
+    expect(day1.environment).not.toBe('mountain')
+    expect(day1.title).not.toContain('坑道')
+    expect(day1.title).not.toContain('洞窟')
+  })
+
+  it('flooded_routes requests are contextually about flooding/roads across all 3 days', () => {
+    const event = buildActiveEvent({ definitionId: 'flooded_routes' })
+    for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+      const request = buildWorldEventRequestForDay(
+        event,
+        event.startedDay + dayOffset,
+      )
+      expect(request.environment).not.toBe('cave')
+      expect(request.environment).not.toBe('mountain')
+    }
+  })
+
+  it('exposed_ruins requests use the ruins environment across all 3 days', () => {
+    const event = buildActiveEvent({ definitionId: 'exposed_ruins' })
+    for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+      const request = buildWorldEventRequestForDay(
+        event,
+        event.startedDay + dayOffset,
+      )
+      expect(request.environment).toBe('ruins')
+    }
+  })
+
+  it('missing_caravans requests never mention monsters/ruins in the title (stays about caravans)', () => {
+    const event = buildActiveEvent({ definitionId: 'missing_caravans' })
+    for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+      const request = buildWorldEventRequestForDay(
+        event,
+        event.startedDay + dayOffset,
+      )
+      expect(request.environment).not.toBe('ruins')
+    }
+  })
+
+  it('template selection stays deterministic per (event, day) across every Definition', () => {
+    for (const definition of WORLD_EVENT_DEFINITIONS) {
+      const event = buildActiveEvent({ definitionId: definition.id })
+      for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+        const dayNumber = event.startedDay + dayOffset
+        const a = buildWorldEventRequestForDay(event, dayNumber)
+        const b = buildWorldEventRequestForDay(event, dayNumber)
+        expect(a).toEqual(b)
+      }
+    }
+  })
+})
+
 describe('Phase 9.7 resolveWorldEventsForDay (unit)', () => {
   it('response points: completeSuccess/success=2, partialSuccess=1, failure=0, notBrokered=0', () => {
     expect(WORLD_EVENT_RESPONSE_POINTS.completeSuccess).toBe(2)

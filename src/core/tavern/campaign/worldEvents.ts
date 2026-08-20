@@ -31,11 +31,29 @@ export const WORLD_EVENT_CONFIG = {
   maxEventRequestsPerDay: 1,
 } as const
 
+/**
+ * Phase 9.7.1: each day's request is no longer picked from every Template
+ * registered for its Objective — it is pinned to a small, explicit set of
+ * Templates chosen for semantic fit with the Definition (e.g. a flood
+ * event's Survey day must never land on a cave/mine Template). Still an
+ * ordinary deterministic selection among existing Templates via
+ * buildRequestOfferForObjective's allowedTemplateIds — no new Expedition
+ * generator, no new Objective.
+ */
+export interface WorldEventRequestSpec {
+  objective: ObjectiveType
+  templateIds: readonly string[]
+}
+
 export interface WorldEventDefinition {
   id: WorldEventDefinitionId
   title: string
   description: string
-  objectives: readonly [ObjectiveType, ObjectiveType, ObjectiveType]
+  requests: readonly [
+    WorldEventRequestSpec,
+    WorldEventRequestSpec,
+    WorldEventRequestSpec,
+  ]
 }
 
 export const WORLD_EVENT_DEFINITIONS: readonly WorldEventDefinition[] = [
@@ -44,28 +62,50 @@ export const WORLD_EVENT_DEFINITIONS: readonly WorldEventDefinition[] = [
     title: '魔獣群の移動',
     description:
       '周辺で魔獣の大規模な移動が確認されています。\n調査や討伐、取り残された人々の救助依頼が増えています。',
-    objectives: ['investigation', 'elimination', 'rescue'],
+    requests: [
+      {
+        objective: 'investigation',
+        templateIds: ['investigation-monster-signs'],
+      },
+      { objective: 'elimination', templateIds: ['elimination-road-bandits'] },
+      { objective: 'rescue', templateIds: ['rescue-injured'] },
+    ],
   },
   {
     id: 'flooded_routes',
     title: '増水する街道',
     description:
       '長雨と増水によって周辺の街道が寸断されています。\n被害状況の確認や救助、移動支援が必要になっています。',
-    objectives: ['survey', 'rescue', 'escort'],
+    requests: [
+      { objective: 'survey', templateIds: ['survey-flooded-road-damage'] },
+      { objective: 'rescue', templateIds: ['rescue-stranded-travelers'] },
+      { objective: 'escort', templateIds: ['escort-flood-detour-caravan'] },
+    ],
   },
   {
     id: 'exposed_ruins',
     title: '崩落で現れた遺構',
     description:
       '地盤の崩落によって未知の遺構が露出しました。\n安全確認と調査、発見物の回収依頼が相次いでいます。',
-    objectives: ['survey', 'investigation', 'retrieval'],
+    requests: [
+      { objective: 'survey', templateIds: ['survey-exposed-ruins'] },
+      { objective: 'investigation', templateIds: ['investigation-ruins'] },
+      { objective: 'retrieval', templateIds: ['retrieval-ancient-core'] },
+    ],
   },
   {
     id: 'missing_caravans',
     title: '途絶する隊商',
     description:
       '周辺の交易路で複数の隊商が予定どおり到着していません。\n原因調査と救助、護送の必要性が高まっています。',
-    objectives: ['investigation', 'rescue', 'escort'],
+    requests: [
+      {
+        objective: 'investigation',
+        templateIds: ['investigation-missing-caravans'],
+      },
+      { objective: 'rescue', templateIds: ['rescue-missing-researcher'] },
+      { objective: 'escort', templateIds: ['escort-merchant'] },
+    ],
   },
 ] as const
 
@@ -237,14 +277,15 @@ export function buildWorldEventRequestForDay(
     throw new Error(`Unknown world event definition: ${event.definitionId}`)
   }
   const dayIndex0 = dayNumber - event.startedDay
-  const objectiveType = definition.objectives[dayIndex0]
+  const spec = definition.requests[dayIndex0]
   const requestId = buildWorldEventRequestId(event.id, dayNumber)
   const seed = `${event.id}:day:${dayNumber}:request`
   const offer = buildRequestOfferForObjective(
     requestId,
     seed,
-    objectiveType,
+    spec.objective,
     event.requestRank,
+    spec.templateIds,
   )
   return {
     ...offer,

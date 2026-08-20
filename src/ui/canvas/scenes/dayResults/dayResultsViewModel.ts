@@ -428,7 +428,12 @@ function buildWorldEventDayEvents(
           id: `world-event-event:${event.dayNumber}:unresolved:${event.eventId}`,
           kind: 'worldEvent',
           title: '世界情勢への対応期間が終了しました',
-          summary: definitionTitle ? `「${definitionTitle}」` : '',
+          summary: [
+            definitionTitle ? `「${definitionTitle}」` : undefined,
+            `対応状況 ${after} / ${WORLD_EVENT_CONFIG.responseTarget}`,
+          ]
+            .filter((line): line is string => Boolean(line))
+            .join('\n'),
           importance: 'normal',
         })
       }
