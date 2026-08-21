@@ -151,6 +151,7 @@ function buildContinuousPlanningSave(seed: string, dayNumber: number) {
       progressionEvents: [],
       questChainEvents: [],
       worldEventEvents: [],
+      mainQuestEvents: [],
       reputationSummary: {
         beforeScore: 0,
         delta: 0,
@@ -517,6 +518,7 @@ describe('save economy validation', () => {
       progressionEvents: [],
       questChainEvents: [],
       worldEventEvents: [],
+      mainQuestEvents: [],
     } as never)
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })
@@ -531,6 +533,7 @@ describe('save economy validation', () => {
       progressionEvents: [],
       questChainEvents: [],
       worldEventEvents: [],
+      mainQuestEvents: [],
     } as never)
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })

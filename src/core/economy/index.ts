@@ -1,5 +1,6 @@
 export type {
   CurrencyAmount,
+  MainQuestPaymentLedgerEntry,
   QuestRewardTerms,
   QuestSettlement,
   SettlementReason,
@@ -14,6 +15,8 @@ export {
   buildDailyOperatingCostEntryId,
   buildDailyOperatingCostTransaction,
   buildLedgerEntryId,
+  buildMainQuestPaymentEntryId,
+  buildMainQuestPaymentTransaction,
   buildOpeningBalanceTransaction,
   buildQuestCommissionTransaction,
   buildUpgradePurchaseEntryId,

@@ -50,6 +50,9 @@ export function getOfferErrors(
     if (party.acceptedRequestId) {
       errors.push('このパーティは既に依頼を受諾しています')
     }
+    if (party.mainQuestAttemptId) {
+      errors.push('このパーティは本日、主依頼へ同行しています')
+    }
   }
 
   const alreadyAttempted = state.offers.some(

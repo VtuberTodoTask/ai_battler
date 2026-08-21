@@ -140,6 +140,15 @@ export interface TavernParty {
   id: string
   party: AdventurerParty
   acceptedRequestId?: string
+  /**
+   * Phase 9.8 Main Quest. Set for the whole day once this Party is
+   * dispatched to accompany the tavern owner on a Main Quest — excludes it
+   * from normal brokerage (see `getOfferErrors` in `brokerage.ts`), Quest
+   * Chain follow-ups, World Event requests, and the idle/training pass in
+   * `resolveCampaignDay`, same as `acceptedRequestId` does for a normal
+   * Request but through an entirely separate flow (no Quest Board slot).
+   */
+  mainQuestAttemptId?: string
   availability?: 'available' | 'recovering'
   recoveryDaysRemaining?: number
   arrivalDay?: number

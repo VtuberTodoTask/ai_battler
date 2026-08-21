@@ -25,6 +25,7 @@ import type {
   StayExtensionReason,
 } from '../../narrative/types.ts'
 import type { TavernFinanceState } from '../../economy/types.ts'
+import type { MainQuestEvent, MainQuestState } from '../../mainQuest/types.ts'
 
 export type TavernRank = 1 | 2 | 3 | 4 | 5
 
@@ -337,6 +338,7 @@ export interface TavernDayRecord {
   relationshipEvents: CampaignRelationshipEvent[]
   questChainEvents: QuestChainEvent[]
   worldEventEvents: WorldEventEvent[]
+  mainQuestEvents: MainQuestEvent[]
 }
 
 export interface TavernCampaignState {
@@ -356,4 +358,5 @@ export interface TavernCampaignState {
   upgrades: TavernUpgradeState
   questChains: QuestChainState[]
   worldEvents: WorldEventState[]
+  mainQuest: MainQuestState
 }

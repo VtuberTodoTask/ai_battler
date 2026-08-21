@@ -8,6 +8,8 @@ import {
   type TavernLedgerEntry,
 } from '../../../core/economy/index.ts'
 import { tavernUpgradeLabel } from '../../../core/tavern/campaign/upgrades.ts'
+import { MAIN_QUEST_THREAT_DEFINITION_MAP } from '../../../core/mainQuest/threats.ts'
+import type { MainQuestThreatId } from '../../../core/mainQuest/types.ts'
 
 export interface TavernLedgerRowViewModel {
   id: string
@@ -97,6 +99,19 @@ function buildRow(
         day: entry.day,
         title: `設備購入：${label} Lv${entry.source.targetLevel}`,
         subtitle: `DAY ${entry.day} / 設備投資`,
+        amountLabel: formatLedgerAmount(entry.amount),
+      }
+    }
+    case 'main_quest_payment': {
+      const definition =
+        MAIN_QUEST_THREAT_DEFINITION_MAP[
+          entry.source.threatId as MainQuestThreatId
+        ]
+      return {
+        id: entry.id,
+        day: entry.day,
+        title: `主依頼：${definition?.title ?? '名称不明の脅威'}`,
+        subtitle: `DAY ${entry.day} / 主依頼への依頼金`,
         amountLabel: formatLedgerAmount(entry.amount),
       }
     }

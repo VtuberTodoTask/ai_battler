@@ -22,6 +22,15 @@ import type {
   TavernUpgradeId,
 } from '../../core/tavern/campaign/types.ts'
 import { purchaseTavernUpgrade } from '../../core/tavern/campaign/upgrades.ts'
+import { dispatchMainQuest } from '../../core/mainQuest/dispatch.ts'
+import { generateMainQuestNarrative } from '../../core/mainQuest/narrative.ts'
+import {
+  applyMainQuestNarrative,
+  completeMainQuestPresentation,
+  startMainQuestPresentation,
+} from '../../core/mainQuest/presentation.ts'
+import { MAIN_QUEST_THREAT_DEFINITION_MAP } from '../../core/mainQuest/threats.ts'
+import type { MainQuestThreatId } from '../../core/mainQuest/types.ts'
 import { tavernUpgradeBlockReasonText } from '../canvas/viewModel/tavernUpgradeViewModel.ts'
 import { acceptanceReasonText } from '../../core/tavern/acceptance.ts'
 import { generateCampaignSeed } from '../../core/save/seed.ts'
@@ -534,6 +543,97 @@ export function TavernSimulator() {
     [campaign, narrativeProvider],
   )
 
+  const handleDispatchMainQuest = useCallback(
+    (threatId: MainQuestThreatId, partyId: string): UiActionResult => {
+      if (!campaign) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      try {
+        const result = dispatchMainQuest(campaign, threatId, partyId)
+        if (!result.ok) {
+          return { ok: false, message: '主依頼の条件を満たしていません' }
+        }
+        setCampaign(result.campaign)
+        setError(null)
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : '主依頼の依頼に失敗しました'
+        setError(message)
+        return { ok: false, message }
+      }
+    },
+    [campaign],
+  )
+
+  const handleGenerateMainQuestNarrative = useCallback(
+    async (attemptId: string): Promise<UiActionResult> => {
+      if (!campaign) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      const attempt = campaign.mainQuest.attempts.find(
+        (a) => a.id === attemptId,
+      )
+      if (!attempt) {
+        return { ok: false, message: '主依頼の試行が見つかりません' }
+      }
+      if (attempt.narrative) {
+        return { ok: true }
+      }
+      if (!narrativeProvider) {
+        return { ok: false, message: 'AI provider not connected' }
+      }
+      const definition = MAIN_QUEST_THREAT_DEFINITION_MAP[attempt.threatId]
+      const campaignParty = campaign.parties.find(
+        (p) => p.id === attempt.partyId,
+      )
+      if (!campaignParty) {
+        return { ok: false, message: 'パーティが見つかりません' }
+      }
+
+      try {
+        const { script } = await generateMainQuestNarrative(
+          definition,
+          attempt,
+          campaignParty,
+          narrativeProvider,
+        )
+        setCampaign((current) => {
+          if (!current) return current
+          return applyMainQuestNarrative(current, attemptId, script)
+        })
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : '物語の生成に失敗しました'
+        return { ok: false, message }
+      }
+    },
+    [campaign, narrativeProvider],
+  )
+
+  const handleStartMainQuestPresentation = useCallback(
+    (attemptId: string): UiActionResult => {
+      if (!campaign) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      setCampaign(startMainQuestPresentation(campaign, attemptId))
+      return { ok: true }
+    },
+    [campaign],
+  )
+
+  const handleCompleteMainQuestPresentation = useCallback(
+    (attemptId: string): UiActionResult => {
+      if (!campaign) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      setCampaign(completeMainQuestPresentation(campaign, attemptId))
+      return { ok: true }
+    },
+    [campaign],
+  )
+
   const handleUpdateCampaign = useCallback(
     (updater: (c: TavernCampaignState) => TavernCampaignState) => {
       setCampaign((prev) => (prev ? updater(prev) : prev))
@@ -609,6 +709,12 @@ export function TavernSimulator() {
             onPurchaseUpgrade={handlePurchaseUpgrade}
             onOpenActivity={handleOpenActivity}
             onOpenExpeditionNarrative={handleOpenExpeditionNarrative}
+            onDispatchMainQuest={handleDispatchMainQuest}
+            onGenerateMainQuestNarrative={handleGenerateMainQuestNarrative}
+            onStartMainQuestPresentation={handleStartMainQuestPresentation}
+            onCompleteMainQuestPresentation={
+              handleCompleteMainQuestPresentation
+            }
             onOpenSettings={handleOpenCanvasSettings}
             onSwitchToLegacy={() => setUiMode('legacy')}
             onNewGame={handleNewGame}

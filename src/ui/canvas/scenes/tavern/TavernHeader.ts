@@ -24,6 +24,7 @@ export interface TavernHeaderOptions {
   onOpenVisitorRegistry?: () => void
   onOpenQuestChainLog?: () => void
   onOpenWorldEventLog?: () => void
+  onOpenMainQuest?: () => void
 }
 
 const SETTINGS_ICON_URL = '/settings-icon.png'
@@ -69,6 +70,7 @@ export class TavernHeader extends Container {
   private readonly _onOpenVisitorRegistry?: () => void
   private readonly _onOpenQuestChainLog?: () => void
   private readonly _onOpenWorldEventLog?: () => void
+  private readonly _onOpenMainQuest?: () => void
 
   constructor(options: TavernHeaderOptions) {
     super()
@@ -84,6 +86,7 @@ export class TavernHeader extends Container {
     this._onOpenVisitorRegistry = options.onOpenVisitorRegistry
     this._onOpenQuestChainLog = options.onOpenQuestChainLog
     this._onOpenWorldEventLog = options.onOpenWorldEventLog
+    this._onOpenMainQuest = options.onOpenMainQuest
 
     const panel = new GamePanel({
       width: this._width,
@@ -158,6 +161,11 @@ export class TavernHeader extends Container {
         width: 140,
         label: '世界情勢',
         onActivate: this._onOpenWorldEventLog,
+      },
+      {
+        width: 100,
+        label: '主依頼',
+        onActivate: this._onOpenMainQuest,
       },
     ]
 

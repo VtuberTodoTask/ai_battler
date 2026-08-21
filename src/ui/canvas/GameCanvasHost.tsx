@@ -11,6 +11,7 @@ import type {
   TavernCampaignState,
   TavernUpgradeId,
 } from '../../core/tavern/campaign/types.ts'
+import type { MainQuestThreatId } from '../../core/mainQuest/types.ts'
 
 export interface GameCanvasHostProps {
   campaign: TavernCampaignState | null
@@ -28,6 +29,13 @@ export interface GameCanvasHostProps {
   onOpenExpeditionNarrative?: (
     candidateId: string,
   ) => Promise<UiActionResult<string>>
+  onDispatchMainQuest?: (
+    threatId: MainQuestThreatId,
+    partyId: string,
+  ) => UiActionResult
+  onGenerateMainQuestNarrative?: (attemptId: string) => Promise<UiActionResult>
+  onStartMainQuestPresentation?: (attemptId: string) => UiActionResult
+  onCompleteMainQuestPresentation?: (attemptId: string) => UiActionResult
   onOpenSettings?: () => void
   onSwitchToLegacy: () => void
   onNewGame?: () => UiActionResult
@@ -45,6 +53,10 @@ export default function GameCanvasHost({
   onPurchaseUpgrade,
   onOpenActivity,
   onOpenExpeditionNarrative,
+  onDispatchMainQuest,
+  onGenerateMainQuestNarrative,
+  onStartMainQuestPresentation,
+  onCompleteMainQuestPresentation,
   onOpenSettings,
   onSwitchToLegacy,
   onNewGame,
@@ -65,6 +77,12 @@ export default function GameCanvasHost({
   const onPurchaseUpgradeRef = useRef(onPurchaseUpgrade)
   const onOpenActivityRef = useRef(onOpenActivity)
   const onOpenExpeditionNarrativeRef = useRef(onOpenExpeditionNarrative)
+  const onDispatchMainQuestRef = useRef(onDispatchMainQuest)
+  const onGenerateMainQuestNarrativeRef = useRef(onGenerateMainQuestNarrative)
+  const onStartMainQuestPresentationRef = useRef(onStartMainQuestPresentation)
+  const onCompleteMainQuestPresentationRef = useRef(
+    onCompleteMainQuestPresentation,
+  )
   const onOpenSettingsRef = useRef(onOpenSettings)
   const onSwitchRef = useRef(onSwitchToLegacy)
   const onNewGameRef = useRef(onNewGame)
@@ -80,6 +98,10 @@ export default function GameCanvasHost({
     onPurchaseUpgradeRef.current = onPurchaseUpgrade
     onOpenActivityRef.current = onOpenActivity
     onOpenExpeditionNarrativeRef.current = onOpenExpeditionNarrative
+    onDispatchMainQuestRef.current = onDispatchMainQuest
+    onGenerateMainQuestNarrativeRef.current = onGenerateMainQuestNarrative
+    onStartMainQuestPresentationRef.current = onStartMainQuestPresentation
+    onCompleteMainQuestPresentationRef.current = onCompleteMainQuestPresentation
     onOpenSettingsRef.current = onOpenSettings
     onSwitchRef.current = onSwitchToLegacy
     onNewGameRef.current = onNewGame
@@ -94,6 +116,10 @@ export default function GameCanvasHost({
     onPurchaseUpgrade,
     onOpenActivity,
     onOpenExpeditionNarrative,
+    onDispatchMainQuest,
+    onGenerateMainQuestNarrative,
+    onStartMainQuestPresentation,
+    onCompleteMainQuestPresentation,
     onOpenSettings,
     onSwitchToLegacy,
     onNewGame,
@@ -240,6 +266,110 @@ export default function GameCanvasHost({
             ok: false,
             message:
               e instanceof Error ? e.message : '物語の生成に失敗しました',
+          }
+        }
+      },
+      dispatchMainQuest: (threatId, partyId) => {
+        try {
+          const handler = onDispatchMainQuestRef.current
+          if (!handler) {
+            return { ok: false, message: 'Main Quest dispatch not connected' }
+          }
+          const result = handler(threatId, partyId)
+          if (result.ok) {
+            // A successful Dispatch re-syncs the campaign prop (Ledger
+            // payment + reserved Party + new Attempt), but the Player
+            // should stay on MainQuestScene, not bounce back to the
+            // Tavern — same fix as Phase 9.3.1's upgrade purchase.
+            preserveSceneOnNextSyncRef.current = true
+          }
+          return result
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '主依頼の依頼に失敗しました',
+          }
+        }
+      },
+      generateMainQuestNarrative: async (attemptId) => {
+        const currentCampaign = prevCampaignRef.current
+        const attempt = currentCampaign?.mainQuest.attempts.find(
+          (a) => a.id === attemptId,
+        )
+        // Mirrors openExpeditionNarrative's fix: only an Attempt that
+        // doesn't have its Narrative yet will trigger a Campaign write
+        // (and thus a re-sync that would otherwise reset the canvas back
+        // to the Tavern scene mid-Presentation).
+        const expectsCampaignSync =
+          attempt !== undefined && attempt.narrative === undefined
+
+        if (expectsCampaignSync) {
+          preserveSceneOnNextSyncRef.current = true
+        }
+
+        try {
+          const handler = onGenerateMainQuestNarrativeRef.current
+          if (!handler) {
+            if (expectsCampaignSync) {
+              preserveSceneOnNextSyncRef.current = false
+            }
+            return {
+              ok: false,
+              message: 'AI provider not connected',
+            }
+          }
+          const result = await handler(attemptId)
+          if (!result.ok && expectsCampaignSync) {
+            preserveSceneOnNextSyncRef.current = false
+          }
+          return result
+        } catch (e) {
+          if (expectsCampaignSync) {
+            preserveSceneOnNextSyncRef.current = false
+          }
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '物語の生成に失敗しました',
+          }
+        }
+      },
+      startMainQuestPresentation: (attemptId) => {
+        try {
+          const handler = onStartMainQuestPresentationRef.current
+          if (!handler) {
+            return { ok: false, message: 'Main Quest not connected' }
+          }
+          const result = handler(attemptId)
+          if (result.ok) {
+            preserveSceneOnNextSyncRef.current = true
+          }
+          return result
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '主依頼の進行に失敗しました',
+          }
+        }
+      },
+      completeMainQuestPresentation: (attemptId) => {
+        try {
+          const handler = onCompleteMainQuestPresentationRef.current
+          if (!handler) {
+            return { ok: false, message: 'Main Quest not connected' }
+          }
+          const result = handler(attemptId)
+          if (result.ok) {
+            preserveSceneOnNextSyncRef.current = true
+          }
+          return result
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '主依頼の進行に失敗しました',
           }
         }
       },

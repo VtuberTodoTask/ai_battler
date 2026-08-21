@@ -3,6 +3,7 @@ import type {
   TavernCampaignState,
   TavernUpgradeId,
 } from '../../core/tavern/campaign/types.ts'
+import type { MainQuestThreatId } from '../../core/mainQuest/types.ts'
 import type { CanvasGame } from './CanvasGame.ts'
 import type { GameAssetManager } from './assets/GameAssetManager.ts'
 import type { OverlayManager } from './overlays/OverlayManager.ts'
@@ -66,6 +67,14 @@ export interface GameUiActions {
   openExpeditionNarrative?: (
     candidateId: string,
   ) => Promise<UiActionResult<string>>
+  /** Phase 9.8 Main Quest. */
+  dispatchMainQuest?: (
+    threatId: MainQuestThreatId,
+    partyId: string,
+  ) => UiActionResult
+  generateMainQuestNarrative?: (attemptId: string) => Promise<UiActionResult>
+  startMainQuestPresentation?: (attemptId: string) => UiActionResult
+  completeMainQuestPresentation?: (attemptId: string) => UiActionResult
   openSettings: () => void
   closeModal: () => void
   switchToLegacy: () => void

@@ -100,6 +100,30 @@ export function buildUpgradePurchaseTransaction(
   }
 }
 
+export function buildMainQuestPaymentEntryId(
+  threatId: string,
+  attemptId: string,
+): string {
+  return `main-quest-payment:${threatId}:${attemptId}`
+}
+
+export function buildMainQuestPaymentTransaction(
+  day: number,
+  threatId: string,
+  attemptId: string,
+  partyId: string,
+  fee: CurrencyAmount,
+): TavernLedgerEntry {
+  validateCurrencyAmount(fee)
+  return {
+    id: buildMainQuestPaymentEntryId(threatId, attemptId),
+    day,
+    kind: 'main_quest_payment',
+    amount: -fee,
+    source: { type: 'main_quest', threatId, attemptId, partyId },
+  }
+}
+
 export function applyLedgerTransaction(
   finance: TavernFinanceState,
   entry: TavernLedgerEntry,

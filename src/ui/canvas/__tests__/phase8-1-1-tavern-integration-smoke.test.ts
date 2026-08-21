@@ -273,6 +273,7 @@ describe('Phase 8.1.1 Tavern Integration Smoke', () => {
       progressionEvents: [],
       questChainEvents: [],
       worldEventEvents: [],
+      mainQuestEvents: [],
       relationshipEvents: [stayEvent],
     })
 

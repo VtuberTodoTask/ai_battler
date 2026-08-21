@@ -73,6 +73,12 @@ import {
   prepareWorldEventsForDay,
   resolveWorldEventsForDay,
 } from './worldEvents.ts'
+import {
+  applyMainQuestResultToCampaignParty,
+  mapMainQuestOutcomeToExpeditionOutcome,
+  resolveMainQuestForDay,
+} from '../../mainQuest/simulation.ts'
+import { createInitialMainQuestState } from '../../mainQuest/threats.ts'
 import type {
   CampaignParty,
   CampaignProgressionEvent,
@@ -130,6 +136,7 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
     upgrades,
     questChains: [],
     worldEvents: [],
+    mainQuest: createInitialMainQuestState(),
   }
 }
 
@@ -261,11 +268,97 @@ export function resolveCampaignDay(
     }
   }
 
-  const dispatchedPartyIds = new Set(
-    results
+  // Main Quest Simulation runs after normal Settlement/Party updates, at
+  // Day Resolution, per the Core Doctrine's required ordering (Simulation
+  // decides truth exactly once, before Narrative/Presentation ever runs —
+  // see resolveMainQuestForDay's own docs). A Main-Quest-dispatched Party
+  // never appears in `results` (it was never matched via brokerage — no
+  // Quest Board slot), so it needs its own settlement-equivalent pass here.
+  const mainQuestPartyIds = new Set(
+    nextCampaign.currentDay.parties
+      .filter((p) => p.mainQuestAttemptId)
+      .map((p) => p.id),
+  )
+  const mainQuestPartyMembersById = new Map(
+    nextCampaign.parties
+      .filter((p) => mainQuestPartyIds.has(p.id))
+      .map((p) => [p.id, p.party.members] as const),
+  )
+  const { mainQuestState: nextMainQuestState, events: mainQuestEvents } =
+    resolveMainQuestForDay({
+      campaignSeed: nextCampaign.seed,
+      dayNumber,
+      mainQuestState: nextCampaign.mainQuest,
+      partyMembersById: mainQuestPartyMembersById,
+    })
+  nextCampaign.mainQuest = nextMainQuestState
+
+  for (const partyId of mainQuestPartyIds) {
+    const attempt = nextMainQuestState.attempts.find(
+      (a) => a.partyId === partyId && a.dayNumber === dayNumber,
+    )
+    const party = nextCampaign.parties.find((p) => p.id === partyId)
+    if (!attempt?.result || !party) continue
+
+    const outcome = mapMainQuestOutcomeToExpeditionOutcome(attempt.result)
+    applyMainQuestResultToCampaignParty(party, attempt.id, attempt.result)
+    updateCampaignPartyStats(party, outcome)
+
+    relationshipEvents.push(applyAffinityFromOutcome(party, outcome, dayNumber))
+    relationshipEvents.push(
+      applyFinancialPressureFromOutcome(party, outcome, dayNumber),
+    )
+
+    if (party.departingCasualty) {
+      postEvents.push({
+        type: 'departedCasualty',
+        partyId: party.id,
+        partyName: party.party.name,
+        dayNumber,
+      })
+      progressionEvents.push(
+        ...awardPartyGrowthXp(nextCampaign.seed, party, 0, {
+          source: 'forcedRetreat',
+          dayNumber,
+        }),
+      )
+      continue
+    }
+
+    const progressionSource: CampaignProgressionSource =
+      outcome === 'lostExpedition' ? 'forcedRetreat' : outcome
+    const xpAmount = EXPEDITION_GROWTH_XP[outcome]
+    if (xpAmount > 0) {
+      progressionEvents.push(
+        ...awardPartyGrowthXp(nextCampaign.seed, party, xpAmount, {
+          source: progressionSource,
+          dayNumber,
+        }),
+      )
+    }
+
+    const baseRecoveryDays = calculateRecoveryDays(party)
+    if (baseRecoveryDays > 0) {
+      const recoveryDays = applyRecoveryRoomModifier(
+        baseRecoveryDays,
+        nextCampaign.upgrades,
+      )
+      party.recoveringThroughDay = dayNumber + recoveryDays
+      postEvents.push({
+        type: 'startedRecovery',
+        partyId: party.id,
+        partyName: party.party.name,
+        dayNumber,
+      })
+    }
+  }
+
+  const dispatchedPartyIds = new Set([
+    ...results
       .filter((r) => r.status === 'resolved' && r.partyId)
       .map((r) => r.partyId!),
-  )
+    ...mainQuestPartyIds,
+  ])
 
   // Resolve downtime events for parties not on expedition.
   resolveDowntimeForCampaign(nextCampaign, dispatchedPartyIds)
@@ -379,6 +472,7 @@ export function resolveCampaignDay(
     relationshipEvents,
     questChainEvents,
     worldEventEvents,
+    mainQuestEvents,
   }
   nextCampaign.history.push(dayRecord)
 
