@@ -1,4 +1,5 @@
 import { generateEnemy } from '../generators/enemyGenerator.ts'
+import { ABILITY_MAP } from '../../data/enemyData.ts'
 import type { Enemy } from '../models/types.ts'
 import type {
   MainQuestState,
@@ -6,6 +7,47 @@ import type {
   MainQuestThreatId,
   UniqueMonsterProfile,
 } from './types.ts'
+
+/**
+ * Ability ids known to add a brand-new combat participant mid-battle (a
+ * summon/spawn/clone/reinforcement mechanic) — audited against the full
+ * `ABILITIES` pool in `../../data/enemyData.ts` (Phase 9.8.2 item 3). Main
+ * Quest Battle Trace/Replay/Presentation model a fixed roster plus exactly
+ * one boss; supporting a roster that changes mid-battle is explicitly
+ * deferred to Phase 10+, so a Unique Monster must never carry one of these
+ * — see `assertMainQuestBattleCompatibleEnemy` below.
+ */
+const DYNAMIC_PARTICIPANT_ABILITY_IDS = new Set(['summon'])
+
+function isDynamicParticipantAbility(abilityId: string): boolean {
+  if (DYNAMIC_PARTICIPANT_ABILITY_IDS.has(abilityId)) return true
+  const def = ABILITY_MAP[abilityId]
+  return typeof def?.effects.summonCount === 'number'
+}
+
+/**
+ * Invariant guard (Phase 9.8.2 item 3): throws — never silently drops or
+ * no-ops — if `enemy` carries any dynamic-participant-creating ability.
+ * Called both at boss-generation time (`buildUniqueMonsterEnemy`, as a
+ * regression-proofing assertion after the forbidden-ability filter below)
+ * and directly by tests against all 8 real Threat bosses plus a
+ * deliberately-violating fixture.
+ */
+export function assertMainQuestBattleCompatibleEnemy(enemy: Enemy): void {
+  const offending = enemy.abilities?.find((a) =>
+    isDynamicParticipantAbility(a.abilityId),
+  )
+  if (offending) {
+    throw new Error(
+      `Main Quest Unique Monster "${enemy.name}" (${enemy.id}) has a ` +
+        `dynamic-participant-creating ability "${offending.abilityId}" — ` +
+        `Main Quest Battle Trace/Replay/Presentation do not support ` +
+        `mid-battle roster changes (deferred to Phase 10+). This ability ` +
+        `must be excluded at boss-generation time, never executed as a ` +
+        `silent no-op.`,
+    )
+  }
+}
 
 /**
  * Every Unique Monster's combat stat block is a fixed, hand-selected
@@ -26,7 +68,20 @@ function buildUniqueMonsterEnemy(
     tier: 'boss',
     ...overrides,
   })
-  return { ...enemy, id: `mainquest:${threatId}`, name }
+  // Excluded here, not merely never-triggered: a dynamic-participant
+  // ability must simply never be present on a Main Quest boss (item 3) —
+  // never "rolled but executed as a no-op".
+  const compatibleAbilities = (enemy.abilities ?? []).filter(
+    (a) => !isDynamicParticipantAbility(a.abilityId),
+  )
+  const result: Enemy = {
+    ...enemy,
+    id: `mainquest:${threatId}`,
+    name,
+    abilities: compatibleAbilities,
+  }
+  assertMainQuestBattleCompatibleEnemy(result)
+  return result
 }
 
 const ALDEN_PROFILE: UniqueMonsterProfile = {

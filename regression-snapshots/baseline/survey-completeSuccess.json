@@ -233,7 +233,20 @@
               "phase": "combat",
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "mpConsumed",
@@ -464,7 +477,20 @@
               "phase": "combat",
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "magic",
@@ -583,7 +609,20 @@
               "phase": "combat",
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "magic",
@@ -734,7 +773,20 @@
               "phase": "combat",
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "mpConsumed",
@@ -881,7 +933,20 @@
               "phase": "combat",
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "magic",
@@ -1088,7 +1153,20 @@
               "phase": "combat",
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 6,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーは自らも身構えた。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "ranged",
@@ -1221,7 +1299,20 @@
               "phase": "combat",
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 7,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-support-s49-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ アイヴィーは自らも身構えた。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "magic",

@@ -14,6 +14,11 @@ import {
   type MainQuestBattleSceneInput,
   type MainQuestBattleViewModel,
 } from '../../viewModel/mainQuestViewModel.ts'
+import {
+  resolveUniqueMonsterAnimationProfile,
+  type MonsterPresentationPlan,
+} from '../../../../core/mainQuest/presentationProfile.ts'
+import { resolveStatusLabel } from '../../../../core/battle/statusLabels.ts'
 
 const MONSTER_X = VIRTUAL_WIDTH / 2
 const MONSTER_BASE_Y = 240
@@ -121,6 +126,16 @@ interface MutableMemberState {
   maxMp: number
   mp: number
   alive: boolean
+  statuses: string[]
+}
+
+interface MonsterAttackAnimState {
+  phase: 'anticipation' | 'strike' | 'recovery'
+  elapsedMs: number
+}
+
+interface MonsterHitAnimState {
+  elapsedMs: number
 }
 
 interface PartyRowRefs {
@@ -178,6 +193,10 @@ export class MainQuestBattleScene implements GameScene {
   private _monsterHp = 0
   private _monsterMaxHp = 0
   private _monsterName = ''
+  private _monsterStatuses: string[] = []
+  private _monsterPresentationPlan: MonsterPresentationPlan | null = null
+  private _monsterAttackAnim: MonsterAttackAnimState | null = null
+  private _monsterHitAnim: MonsterHitAnimState | null = null
   private _members = new Map<string, MutableMemberState>()
   private _memberOrder: string[] = []
   private _log: string[] = []
@@ -189,7 +208,6 @@ export class MainQuestBattleScene implements GameScene {
   private _idleTimeMs = 0
   private _shakeTimeMs = 0
   private _shakeMagnitude = 0
-  private _monsterPulse = 0
   private _monsterFlash = 0
   private _monsterDefeatFade = false
   private _memberFlash = new Map<string, number>()
@@ -203,6 +221,7 @@ export class MainQuestBattleScene implements GameScene {
   private _monsterHpBarBg: Graphics | null = null
   private _monsterHpBarFg: Graphics | null = null
   private _monsterHpLabel: GameLabel | null = null
+  private _monsterStatusLabel: GameLabel | null = null
   private _partyRows = new Map<string, PartyRowRefs>()
   private _logLabels: GameLabel[] = []
   private _logPanelWidth = 0
@@ -263,6 +282,16 @@ export class MainQuestBattleScene implements GameScene {
     this.updateShake(dt)
     this.updatePopups(dt)
     this.updateFlashes(dt)
+    // Boss attack/hit-reaction sequences are driven by elapsed animation
+    // time, distinct from idle motion (which `applyCameraOffsets` derives
+    // from `_idleTimeMs`, incremented unconditionally above): a large
+    // attack sequence must not advance while paused on a Dialogue Cue, but
+    // idle motion may keep going (item 2). Speed (1x/2x) applies here too,
+    // matching `_beatTimer`/`_dialogueAutoTimer` below.
+    if (this._phase !== 'dialogue') {
+      this.updateMonsterAttackAnim(dt * this._speed)
+      this.updateMonsterHitAnim(dt * this._speed)
+    }
     this.applyCameraOffsets(dt)
 
     if (this._phase === 'finished') return
@@ -293,8 +322,17 @@ export class MainQuestBattleScene implements GameScene {
     this._monsterHp = vm.monsterHp
     this._monsterMaxHp = vm.monsterMaxHp
     this._monsterName = vm.monsterName
+    this._monsterStatuses = [...vm.monsterStatuses]
+    this._monsterPresentationPlan = resolveUniqueMonsterAnimationProfile(
+      vm.monsterVisualProfile,
+    )
+    this._monsterAttackAnim = null
+    this._monsterHitAnim = null
     this._members = new Map(
-      vm.partyMembers.map((m) => [m.id, { ...m } satisfies MutableMemberState]),
+      vm.partyMembers.map((m) => [
+        m.id,
+        { ...m, statuses: [...m.statuses] } satisfies MutableMemberState,
+      ]),
     )
     this._memberOrder = vm.partyMembers.map((m) => m.id)
     this._log = []
@@ -391,7 +429,25 @@ export class MainQuestBattleScene implements GameScene {
     this._cameraLayer.addChild(hpLabel)
     this._monsterHpLabel = hpLabel
 
+    const statusLabel = new GameLabel('', theme, 'caption')
+    statusLabel.anchor.set(0.5, 0)
+    statusLabel.x = MONSTER_X
+    statusLabel.y = barY + HP_BAR_HEIGHT + 26
+    this._cameraLayer.addChild(statusLabel)
+    this._monsterStatusLabel = statusLabel
+
     this.redrawMonsterHpBar(barX, barY)
+  }
+
+  /** The monster's HP bar's fixed screen position — its radius (and so this
+   * position) depends only on `visualProfile.scale`, never on live Battle
+   * state, so it is safe to recompute at any call site. */
+  private monsterBarPosition(): { barX: number; barY: number } {
+    const radius = 90 * (this._viewModel?.monsterVisualProfile.scale ?? 1)
+    return {
+      barX: MONSTER_X - MONSTER_HP_BAR_WIDTH / 2,
+      barY: MONSTER_BASE_Y + radius + 20,
+    }
   }
 
   private redrawMonsterHpBar(barX: number, barY: number): void {
@@ -407,6 +463,16 @@ export class MainQuestBattleScene implements GameScene {
         .fill({ color: 0xb8462e })
     }
     this._monsterHpLabel.text = `HP ${this._monsterHp} / ${this._monsterMaxHp}`
+    if (this._monsterStatusLabel) {
+      this._monsterStatusLabel.text = this.formatStatusLine(
+        this._monsterStatuses,
+      )
+    }
+  }
+
+  private formatStatusLine(statuses: readonly string[]): string {
+    if (statuses.length === 0) return ''
+    return statuses.map((s) => `[${resolveStatusLabel(s)}]`).join('')
   }
 
   private buildPartyUi(
@@ -516,6 +582,8 @@ export class MainQuestBattleScene implements GameScene {
       ? member.name
       : `${member.name}（戦闘不能）`
     refs.container.alpha = member.alive ? 1 : 0.5
+
+    refs.statusLabel.text = this.formatStatusLine(member.statuses)
   }
 
   private buildLogPanel(theme: GameUiTheme): void {
@@ -620,6 +688,9 @@ export class MainQuestBattleScene implements GameScene {
     this._monsterHpBarBg = null
     this._monsterHpBarFg = null
     this._monsterHpLabel = null
+    this._monsterStatusLabel = null
+    this._monsterAttackAnim = null
+    this._monsterHitAnim = null
     this._dialogueContainer = null
     this._dialogueSpeakerLabel = null
     this._dialogueTextLabel = null
@@ -688,16 +759,32 @@ export class MainQuestBattleScene implements GameScene {
       case 'roundStarted':
         this.pushLog(`--- 第${event.round}ラウンド ---`)
         return 250
-      case 'actionStarted':
+      case 'actionStarted': {
         this.pushLog(`${this.nameFor(event.actorId)}の${event.actionType}`)
         this.playAnticipation(event.actorId)
-        return 400
-      case 'hit':
+        const plan = this.isMonsterId(event.actorId)
+          ? this._monsterPresentationPlan?.attack
+          : undefined
+        return plan ? plan.anticipationMs : 400
+      }
+      case 'hit': {
         this.pushLog(
           `${this.nameFor(event.actorId)}の攻撃が${this.nameFor(event.targetId)}に命中${event.critical ? '(会心の一撃)' : ''}`,
         )
         this.playHitReaction(event.targetId, event.critical)
+        const attackPlan = this.isMonsterId(event.actorId)
+          ? this._monsterPresentationPlan?.attack
+          : undefined
+        if (attackPlan) {
+          this.shake(attackPlan.screenShakeMagnitude, attackPlan.screenShakeMs)
+          if (this._monsterAttackAnim) {
+            this._monsterAttackAnim.phase = 'strike'
+            this._monsterAttackAnim.elapsedMs = 0
+          }
+          return attackPlan.strikeMs + attackPlan.recoveryMs
+        }
         return 450
+      }
       case 'miss':
         this.pushLog(
           `${this.nameFor(event.actorId)}の攻撃を${this.nameFor(event.targetId)}が回避`,
@@ -735,15 +822,15 @@ export class MainQuestBattleScene implements GameScene {
       }
       case 'statusApplied':
         this.pushLog(
-          `${this.nameFor(event.targetId)}は${event.status}状態になった`,
+          `${this.nameFor(event.targetId)}は${resolveStatusLabel(event.status)}状態になった`,
         )
-        this.updateStatusLabel(event.targetId)
+        this.applyStatusApplied(event.targetId, event.status)
         return 400
       case 'statusRemoved':
         this.pushLog(
-          `${this.nameFor(event.targetId)}の${event.status}状態が解けた`,
+          `${this.nameFor(event.targetId)}の${resolveStatusLabel(event.status)}状態が解けた`,
         )
-        this.updateStatusLabel(event.targetId)
+        this.applyStatusRemoved(event.targetId, event.status)
         return 350
       case 'incapacitated': {
         const member = this._members.get(event.memberId)
@@ -763,18 +850,15 @@ export class MainQuestBattleScene implements GameScene {
         this.pushLog('パーティは撤退した')
         this.showBanner('撤退')
         return 900
-      case 'monsterDefeated':
+      case 'monsterDefeated': {
         this._monsterHp = 0
-        this.redrawMonsterHpBar(
-          MONSTER_X - MONSTER_HP_BAR_WIDTH / 2,
-          MONSTER_BASE_Y +
-            90 * (this._viewModel?.monsterVisualProfile.scale ?? 1) +
-            20,
-        )
+        const pos = this.monsterBarPosition()
+        this.redrawMonsterHpBar(pos.barX, pos.barY)
         this.pushLog(`${this._monsterName}を討伐した！`)
         this.showBanner('撃破！')
         this._monsterDefeatFade = true
         return 1400
+      }
       case 'battleEnded':
         this.pushLog(
           event.outcome === 'victory' ? '勝利した' : '戦いは終わった',
@@ -796,14 +880,14 @@ export class MainQuestBattleScene implements GameScene {
   private applyDamageEvent(targetId: string, amount: number): void {
     if (this.isMonsterId(targetId)) {
       this._monsterHp = Math.max(0, this._monsterHp - amount)
-      this.redrawMonsterHpBar(
-        MONSTER_X - MONSTER_HP_BAR_WIDTH / 2,
-        MONSTER_BASE_Y +
-          90 * (this._viewModel?.monsterVisualProfile.scale ?? 1) +
-          20,
-      )
-      this._monsterFlash = 1
-      this.shake(6, 220)
+      const pos = this.monsterBarPosition()
+      this.redrawMonsterHpBar(pos.barX, pos.barY)
+      // A modest generic reaction, in case this damage is periodic
+      // (poison/bleed/ambush — no preceding 'hit' event). A preceding
+      // `playHitReaction`'s boss-specific (possibly larger) flash/shake for
+      // an actual attack is never reduced here — both use `Math.max`.
+      this._monsterFlash = Math.max(this._monsterFlash, 0.5)
+      this.shake(4, 150)
     } else {
       const member = this._members.get(targetId)
       if (member) {
@@ -819,12 +903,8 @@ export class MainQuestBattleScene implements GameScene {
   private applyHealingEvent(targetId: string, amount: number): void {
     if (this.isMonsterId(targetId)) {
       this._monsterHp = Math.min(this._monsterMaxHp, this._monsterHp + amount)
-      this.redrawMonsterHpBar(
-        MONSTER_X - MONSTER_HP_BAR_WIDTH / 2,
-        MONSTER_BASE_Y +
-          90 * (this._viewModel?.monsterVisualProfile.scale ?? 1) +
-          20,
-      )
+      const pos = this.monsterBarPosition()
+      this.redrawMonsterHpBar(pos.barX, pos.barY)
     } else {
       const member = this._members.get(targetId)
       if (member) {
@@ -836,18 +916,44 @@ export class MainQuestBattleScene implements GameScene {
     this.pushLog(`${this.nameFor(targetId)}のHPが${amount}回復`)
   }
 
-  private updateStatusLabel(targetId: string): void {
-    const refs = this._partyRows.get(targetId)
-    if (!refs) return
-    // Status text is intentionally not tracked in detail here — the
-    // authoritative status list lives on the Trace events themselves; the
-    // row simply flashes to draw attention to the change (item 12).
-    refs.flash.alpha = 0.5
+  private applyStatusApplied(targetId: string, status: string): void {
+    if (this.isMonsterId(targetId)) {
+      if (!this._monsterStatuses.includes(status)) {
+        this._monsterStatuses.push(status)
+      }
+      const pos = this.monsterBarPosition()
+      this.redrawMonsterHpBar(pos.barX, pos.barY)
+      this._monsterFlash = Math.max(this._monsterFlash, 0.5)
+    } else {
+      const member = this._members.get(targetId)
+      if (member && !member.statuses.includes(status)) {
+        member.statuses.push(status)
+      }
+      this.redrawMemberBars(targetId)
+      this._memberFlash.set(
+        targetId,
+        Math.max(this._memberFlash.get(targetId) ?? 0, 0.5),
+      )
+    }
+  }
+
+  private applyStatusRemoved(targetId: string, status: string): void {
+    if (this.isMonsterId(targetId)) {
+      this._monsterStatuses = this._monsterStatuses.filter((s) => s !== status)
+      const pos = this.monsterBarPosition()
+      this.redrawMonsterHpBar(pos.barX, pos.barY)
+    } else {
+      const member = this._members.get(targetId)
+      if (member) {
+        member.statuses = member.statuses.filter((s) => s !== status)
+      }
+      this.redrawMemberBars(targetId)
+    }
   }
 
   private playAnticipation(actorId: string): void {
     if (this.isMonsterId(actorId)) {
-      this._monsterPulse = 1
+      this._monsterAttackAnim = { phase: 'anticipation', elapsedMs: 0 }
     } else {
       this._memberFlash.set(
         actorId,
@@ -858,12 +964,90 @@ export class MainQuestBattleScene implements GameScene {
 
   private playHitReaction(targetId: string, critical: boolean): void {
     if (this.isMonsterId(targetId)) {
-      this._monsterFlash = 1
-      this.shake(critical ? 10 : 5, critical ? 300 : 180)
+      const plan = this._monsterPresentationPlan?.hitReaction
+      this._monsterHitAnim = { elapsedMs: 0 }
+      this._monsterFlash = Math.max(
+        this._monsterFlash,
+        (plan?.flashIntensity ?? 0.7) + (critical ? 0.2 : 0),
+      )
+      if (plan) {
+        this.shake(
+          plan.recoilDistance * (critical ? 1.3 : 1),
+          plan.recoilMs + (critical ? 100 : 0),
+        )
+      }
     } else {
       this._memberFlash.set(targetId, 1)
       if (critical) this.shake(4, 150)
     }
+  }
+
+  // --- Boss-specific attack/hit-reaction animation (Phase 9.8.2 item 2) --
+
+  private updateMonsterAttackAnim(dt: number): void {
+    const anim = this._monsterAttackAnim
+    const plan = this._monsterPresentationPlan?.attack
+    if (!anim || !plan) return
+    anim.elapsedMs += dt
+    if (
+      anim.phase === 'anticipation' &&
+      anim.elapsedMs >= plan.anticipationMs
+    ) {
+      anim.phase = 'strike'
+      anim.elapsedMs = 0
+    } else if (anim.phase === 'strike' && anim.elapsedMs >= plan.strikeMs) {
+      anim.phase = 'recovery'
+      anim.elapsedMs = 0
+    } else if (anim.phase === 'recovery' && anim.elapsedMs >= plan.recoveryMs) {
+      this._monsterAttackAnim = null
+    }
+  }
+
+  private updateMonsterHitAnim(dt: number): void {
+    const anim = this._monsterHitAnim
+    const plan = this._monsterPresentationPlan?.hitReaction
+    if (!anim || !plan) return
+    anim.elapsedMs += dt
+    if (anim.elapsedMs >= plan.recoilMs) {
+      this._monsterHitAnim = null
+    }
+  }
+
+  /** Forward lunge/alpha for the current attack-anim phase (0/1 when no
+   * attack is in progress) — a pure read of current animation state, never
+   * mutated here. */
+  private computeMonsterAttackOffset(): { lunge: number; alpha: number } {
+    const anim = this._monsterAttackAnim
+    const plan = this._monsterPresentationPlan?.attack
+    if (!anim || !plan) return { lunge: 0, alpha: 1 }
+    const fadeTo = plan.alphaFadeTo
+    if (anim.phase === 'anticipation') {
+      const t =
+        plan.anticipationMs > 0
+          ? Math.min(1, anim.elapsedMs / plan.anticipationMs)
+          : 1
+      const alpha = fadeTo !== undefined ? 1 - (1 - fadeTo) * t : 1
+      return { lunge: -t * plan.lungeDistance * 0.2, alpha }
+    }
+    if (anim.phase === 'strike') {
+      const t =
+        plan.strikeMs > 0 ? Math.min(1, anim.elapsedMs / plan.strikeMs) : 1
+      const alpha = fadeTo !== undefined ? fadeTo + (1 - fadeTo) * t : 1
+      return { lunge: t * plan.lungeDistance, alpha }
+    }
+    const t =
+      plan.recoveryMs > 0 ? Math.min(1, anim.elapsedMs / plan.recoveryMs) : 1
+    return { lunge: plan.lungeDistance * (1 - t), alpha: 1 }
+  }
+
+  /** A brief recoil-and-return hump (0 -> -recoilDistance -> 0) over the
+   * hitReaction plan's `recoilMs`; `0` once the reaction has finished. */
+  private computeMonsterHitRecoil(): number {
+    const anim = this._monsterHitAnim
+    const plan = this._monsterPresentationPlan?.hitReaction
+    if (!anim || !plan || plan.recoilMs <= 0) return 0
+    const t = Math.min(1, anim.elapsedMs / plan.recoilMs)
+    return -plan.recoilDistance * Math.sin(Math.PI * t)
   }
 
   private showBanner(text: string): void {
@@ -959,17 +1143,33 @@ export class MainQuestBattleScene implements GameScene {
     this._cameraLayer.x = shakeX
     this._cameraLayer.y = shakeY
 
-    if (this._monsterContainer) {
-      const bob = Math.sin(this._idleTimeMs / 500) * 6
-      this._monsterPulse = Math.max(0, this._monsterPulse - dt / 400)
-      const lunge = this._monsterPulse * 18
+    if (this._monsterContainer && this._monsterPresentationPlan) {
+      const idle = this._monsterPresentationPlan.idle
+      const bobPhase =
+        idle.bobPeriodMs > 0
+          ? Math.sin((this._idleTimeMs / idle.bobPeriodMs) * Math.PI * 2)
+          : 0
+      const bob = bobPhase * idle.bobAmplitude
+      const pulsePhase =
+        idle.pulsePeriodMs > 0
+          ? Math.sin((this._idleTimeMs / idle.pulsePeriodMs) * Math.PI * 2)
+          : 0
+      const idleScale = 1 + pulsePhase * idle.pulseAmplitude
+
+      const { lunge, alpha } = this.computeMonsterAttackOffset()
+      const recoil = this.computeMonsterHitRecoil()
+
       this._monsterContainer.y = MONSTER_BASE_Y + bob
-      this._monsterContainer.x = MONSTER_X + lunge
+      this._monsterContainer.x = MONSTER_X + lunge + recoil
+      this._monsterContainer.scale.set(idleScale)
+
       if (this._monsterDefeatFade) {
         this._monsterContainer.alpha = Math.max(
           0.15,
           this._monsterContainer.alpha - dt / 1400,
         )
+      } else {
+        this._monsterContainer.alpha = alpha
       }
     }
     if (this._monsterFlashOverlay) {

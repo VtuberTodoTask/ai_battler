@@ -232,6 +232,9 @@ export interface MainQuestBattlePartyMemberSnapshot {
   maxMp: number
   mp: number
   alive: boolean
+  /** Status effect types present at Battle start (Initial Snapshot) — a
+   * Party member is not guaranteed to depart status-clean (item 1). */
+  statuses: readonly string[]
 }
 
 export interface MainQuestBattleViewModel {
@@ -240,6 +243,7 @@ export interface MainQuestBattleViewModel {
   monsterName: string
   monsterMaxHp: number
   monsterHp: number
+  monsterStatuses: readonly string[]
   monsterVisualProfile: UniqueMonsterVisualProfile
   partyMembers: MainQuestBattlePartyMemberSnapshot[]
   plan: MainQuestBattlePlaybackPlan
@@ -276,6 +280,7 @@ export function buildMainQuestBattleViewModel(
         maxMp: snapshot.maxMp,
         mp: snapshot.currentMp,
         alive: snapshot.currentHp > 0,
+        statuses: snapshot.statuses,
       }
     })
 
@@ -290,6 +295,7 @@ export function buildMainQuestBattleViewModel(
     monsterName: definition.uniqueMonster.name,
     monsterMaxHp: initialSnapshot.monster.maxHp,
     monsterHp: initialSnapshot.monster.currentHp,
+    monsterStatuses: initialSnapshot.monster.statuses,
     monsterVisualProfile: definition.uniqueMonster.visualProfile,
     partyMembers,
     plan,

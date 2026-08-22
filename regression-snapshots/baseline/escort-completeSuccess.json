@@ -383,7 +383,20 @@
               "phase": "combat",
               "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s17-guardian-1"]
             },
             {
               "actionType": "ranged",
@@ -479,7 +492,20 @@
               "phase": "combat",
               "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s17-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -623,7 +649,20 @@
               "phase": "combat",
               "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s17-guardian-1"]
             },
             {
               "actionType": "ranged",
@@ -743,7 +782,20 @@
               "phase": "combat",
               "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s17-guardian-1"]
             },
             {
               "actionType": "ranged",
@@ -843,7 +895,20 @@
               "phase": "combat",
               "result": "グスタフ ジェムがロイド スカイを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-healer-s17-healer-3"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s17-guardian-1"]
             },
             {
               "actionType": "statusExpired",
@@ -958,7 +1023,20 @@
               "phase": "combat",
               "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
               "round": 6,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムは自らも身構えた。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s17-guardian-1"]
             },
             {
               "actionType": "retreat",
@@ -1045,7 +1123,20 @@
               "phase": "combat",
               "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
               "round": 7,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムは自らも身構えた。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s17-guardian-1"]
             },
             {
               "actionType": "ranged",
@@ -1122,7 +1213,20 @@
               "phase": "combat",
               "result": "グスタフ ジェムがアリス ドラグナーを防護した。",
               "round": 8,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s17-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "グスタフ ジェムは自らも身構えた。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s17-guardian-1"]
             },
             {
               "actionType": "retreat",

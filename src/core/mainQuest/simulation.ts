@@ -459,6 +459,44 @@ export function buildMainQuestBattleTrace(params: {
       }
       continue
     }
+
+    // Generic catch-all for any remaining Status-only fact (guard/self-guard,
+    // support, healBlock, contact-phase stun/stealth-start, stealth consumed
+    // by attacking, a stunned unit's skipped turn, ...) that isn't already
+    // covered by a more specific branch above (every branch above always
+    // `continue`s, so this is only ever reached by an entry none of them
+    // matched) — authoritative via `statusApplied`/`statusRemoved`, never
+    // guessed from `actionType`/`result` text.
+    if (
+      entry.targetIds !== undefined &&
+      entry.targetIds.length > 0 &&
+      ((entry.statusApplied && entry.statusApplied.length > 0) ||
+        (entry.statusRemoved && entry.statusRemoved.length > 0))
+    ) {
+      for (const targetId of entry.targetIds) {
+        if (entry.statusApplied) {
+          for (const status of entry.statusApplied) {
+            events.push({
+              type: 'statusApplied',
+              round: currentRound,
+              targetId,
+              status,
+            })
+          }
+        }
+        if (entry.statusRemoved) {
+          for (const status of entry.statusRemoved) {
+            events.push({
+              type: 'statusRemoved',
+              round: currentRound,
+              targetId,
+              status,
+            })
+          }
+        }
+      }
+      continue
+    }
   }
 
   const outcome = battleResult.defeatedEnemies.includes(monster.id)

@@ -62,6 +62,10 @@ function assertFinalStateParity(
     expect(member.currentMp).toBe(finalState.currentMp)
     expect(member.incapacitated).toBe(finalState.incapacitated)
     expect(member.dead).toBe(finalState.dead)
+
+    const storedStatuses = new Set(finalState.statusEffects.map((s) => s.type))
+    const replayedStatuses = new Set(member.statuses)
+    expect(replayedStatuses).toEqual(storedStatuses)
   }
 }
 
@@ -93,6 +97,8 @@ describe('Phase 9.8.1 replayMainQuestBattleTrace parity', () => {
     let sawNonVictory = false
     let sawIncapacitation = false
     let sawDeath = false
+    let sawStatusApplied = false
+    let sawStatusRemoved = false
 
     for (const threatId of threats) {
       for (let s = 0; s < 12; s++) {
@@ -110,12 +116,18 @@ describe('Phase 9.8.1 replayMainQuestBattleTrace parity', () => {
         else sawNonVictory = true
         if (result.incapacitatedMemberIds.length > 0) sawIncapacitation = true
         if (result.deadMemberIds.length > 0) sawDeath = true
+        if (battleTrace.events.some((e) => e.type === 'statusApplied'))
+          sawStatusApplied = true
+        if (battleTrace.events.some((e) => e.type === 'statusRemoved'))
+          sawStatusRemoved = true
       }
     }
 
     // Best-effort coverage signal, not a hard requirement — the sweep above
     // should be wide enough to hit each of these at least once.
     expect(sawVictory || sawNonVictory).toBe(true)
+    expect(sawStatusApplied).toBe(true)
+    expect(sawStatusRemoved).toBe(true)
     void sawIncapacitation
     void sawDeath
   })

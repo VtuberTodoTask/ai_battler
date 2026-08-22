@@ -46,6 +46,7 @@ import {
 import { mapMainQuestOutcomeToExpeditionOutcome } from '../mainQuest/simulation.ts'
 import { replayMainQuestBattleTrace } from '../mainQuest/replay.ts'
 import { MAIN_QUEST_BATTLE_ANCHOR_IDS } from '../mainQuest/types.ts'
+import { isKnownStatusEffectType } from '../battle/statusLabels.ts'
 import type {
   MainQuestBattleInitialSnapshot,
   MainQuestBattleTrace,
@@ -2248,6 +2249,72 @@ function validateMainQuestInitialSnapshot(
 }
 
 /**
+ * Sequential structural consistency of every `statusApplied`/`statusRemoved`
+ * fact in a Battle Trace (Phase 9.8.2 item 1) — independent of, and run
+ * before, the full-state replay: a `statusRemoved` for a status the target
+ * did not actually carry at that point (per the Trace itself, seeded from
+ * the Initial Snapshot) is rejected outright. The real Battle Engine never
+ * produces this pattern — every `removeStatus` call site that reaches a
+ * `BattleLogEntry` first confirms the status is actually present via
+ * `hasStatus`/an explicit pre-clear snapshot (audited in `../battle/
+ * battle.ts`/`actions.ts`) — so this is a genuine tamper signal, not a
+ * false positive on legitimate engine behavior.
+ */
+function validateMainQuestStatusTraceConsistency(
+  initialSnapshot: Record<string, unknown>,
+  events: Record<string, unknown>[],
+  monsterId: string,
+  dayNumber: number,
+): void {
+  const presence = new Map<string, Set<string>>()
+
+  function seed(targetId: string, statuses: unknown): void {
+    const set = new Set<string>()
+    if (Array.isArray(statuses)) {
+      for (const s of statuses) {
+        if (typeof s === 'string') set.add(s)
+      }
+    }
+    presence.set(targetId, set)
+  }
+
+  const partyMembers = initialSnapshot.partyMembers
+  if (Array.isArray(partyMembers)) {
+    for (const raw of partyMembers) {
+      if (isPlainObject(raw) && typeof raw.characterId === 'string') {
+        seed(raw.characterId, raw.statuses)
+      }
+    }
+  }
+  if (isPlainObject(initialSnapshot.monster)) {
+    seed(monsterId, initialSnapshot.monster.statuses)
+  }
+
+  for (const event of events) {
+    if (event.type !== 'statusApplied' && event.type !== 'statusRemoved') {
+      continue
+    }
+    const targetId = event.targetId
+    const status = event.status
+    if (typeof targetId !== 'string' || typeof status !== 'string') continue
+    const set = presence.get(targetId) ?? new Set<string>()
+    presence.set(targetId, set)
+
+    if (event.type === 'statusApplied') {
+      set.add(status)
+    } else {
+      if (!set.has(status)) {
+        throw new SaveValidationErrorClass(
+          `Battle Traceが付与されていない状態異常の解除を記録しています (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+      set.delete(status)
+    }
+  }
+}
+
+/**
  * Structural + causal integrity of one Attempt's stored `battleTrace`
  * against its `result` (Phase 9.8.1 items 81-84) — never re-runs
  * `runBattle` (nothing else in this validator re-executes combat
@@ -2320,6 +2387,17 @@ function validateMainQuestBattleTrace(
       )
     }
 
+    if (
+      (event.type === 'statusApplied' || event.type === 'statusRemoved') &&
+      (typeof event.status !== 'string' ||
+        !isKnownStatusEffectType(event.status))
+    ) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceに未知の状態異常があります (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+
     const validIds = new Set([...(rosterIds ?? []), monsterId])
     for (const key of ['actorId', 'targetId', 'memberId'] as const) {
       const value = event[key]
@@ -2345,6 +2423,12 @@ function validateMainQuestBattleTrace(
   validateMainQuestInitialSnapshot(
     trace.initialSnapshot as Record<string, unknown>,
     rosterIds,
+    dayNumber,
+  )
+  validateMainQuestStatusTraceConsistency(
+    trace.initialSnapshot as Record<string, unknown>,
+    events as Record<string, unknown>[],
+    monsterId,
     dayNumber,
   )
 
@@ -2385,6 +2469,24 @@ function validateMainQuestBattleTrace(
     ) {
       throw new SaveValidationErrorClass(
         `Battle Traceの再生結果がSimulation Resultの最終状態と一致しません (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+
+    const storedStatuses = Array.isArray(finalState.statusEffects)
+      ? new Set(
+          finalState.statusEffects
+            .map((s) => (isPlainObject(s) ? s.type : undefined))
+            .filter((t): t is string => typeof t === 'string'),
+        )
+      : new Set<string>()
+    const replayedStatuses = new Set(member.statuses)
+    const statusesMatch =
+      storedStatuses.size === replayedStatuses.size &&
+      [...storedStatuses].every((s) => replayedStatuses.has(s))
+    if (!statusesMatch) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの再生結果の状態異常がSimulation Resultの最終状態と一致しません (DAY ${dayNumber})`,
         'corrupted-data',
       )
     }

@@ -279,7 +279,20 @@
               "phase": "combat",
               "result": "マルチナ スカイがドラン オーシャンを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s1-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "マルチナ スカイは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-support-s1-support-3"]
             },
             {
               "actionType": "melee",
@@ -387,7 +400,20 @@
               "phase": "combat",
               "result": "マルチナ スカイがドラン オーシャンを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s1-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "マルチナ スカイは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-support-s1-support-3"]
             },
             {
               "actionType": "ranged",
@@ -546,7 +572,20 @@
               "phase": "combat",
               "result": "マルチナ スカイがドラン オーシャンを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s1-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "マルチナ スカイは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-support-s1-support-3"]
             },
             {
               "actionType": "melee",
@@ -761,7 +800,20 @@
               "phase": "combat",
               "result": "マルチナ スカイがフェイ アイヴィーを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s1-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "マルチナ スカイは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-support-s1-support-3"]
             },
             {
               "actionType": "melee",

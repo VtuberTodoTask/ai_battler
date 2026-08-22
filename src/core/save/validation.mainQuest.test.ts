@@ -152,3 +152,98 @@ describe('Phase 9.8 Main Quest Save Validation', () => {
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })
 })
+
+describe('Phase 9.8.2 Status Battle Trace Save Validation', () => {
+  it('rejects a statusApplied event carrying an unknown status name', () => {
+    const { save } = dispatchedAndResolvedSave('mainquest-status-001')
+    const attempt = save.campaign.mainQuest.attempts[0]
+    const memberId =
+      attempt.battleTrace!.initialSnapshot.partyMembers[0].characterId
+    attempt.battleTrace!.events.push({
+      type: 'statusApplied',
+      round: 1,
+      targetId: memberId,
+      status: 'not-a-real-status',
+    })
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a statusRemoved event for a status that was never applied (and is not in the Initial Snapshot)', () => {
+    const { save } = dispatchedAndResolvedSave('mainquest-status-002')
+    const attempt = save.campaign.mainQuest.attempts[0]
+    const memberId =
+      attempt.battleTrace!.initialSnapshot.partyMembers[0].characterId
+    // 'guarded' is never present on this member in the Initial Snapshot for
+    // a fresh Attempt, and no prior statusApplied for it precedes this.
+    attempt.battleTrace!.events.push({
+      type: 'statusRemoved',
+      round: 1,
+      targetId: memberId,
+      status: 'guarded',
+    })
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects an injected statusApplied event with no matching status in the final member state', () => {
+    const { save } = dispatchedAndResolvedSave('mainquest-status-003')
+    const attempt = save.campaign.mainQuest.attempts[0]
+    const memberId =
+      attempt.battleTrace!.initialSnapshot.partyMembers[0].characterId
+    attempt.battleTrace!.events.push({
+      type: 'statusApplied',
+      round: 1,
+      targetId: memberId,
+      status: 'weakened',
+    })
+    // finalMemberStates is left untouched, so the replayed final status
+    // (now including 'weakened') disagrees with the stored Result.
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a final member state carrying a status the Battle Trace never applied', () => {
+    const { save } = dispatchedAndResolvedSave('mainquest-status-004')
+    const attempt = save.campaign.mainQuest.attempts[0]
+    const finalState = attempt.result!.finalMemberStates[0]
+    finalState.statusEffects = [
+      ...finalState.statusEffects,
+      { type: 'poisoned', duration: 3, value: 3, sourceId: 'tamper' },
+    ]
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('accepts a Battle Trace where a status is legitimately applied then removed and reflected in the final state', () => {
+    const { save } = dispatchedAndResolvedSave('mainquest-status-005')
+    const attempt = save.campaign.mainQuest.attempts[0]
+    const memberId =
+      attempt.battleTrace!.initialSnapshot.partyMembers[0].characterId
+    const events = attempt.battleTrace!.events
+    // Insert immediately before the trailing `battleEnded` event, at that
+    // same final round, so round-monotonicity holds regardless of how many
+    // rounds this particular seeded Attempt actually ran.
+    const finalRound = (events[events.length - 1] as { round: number }).round
+    events.splice(
+      events.length - 1,
+      0,
+      {
+        type: 'statusApplied',
+        round: finalRound,
+        targetId: memberId,
+        status: 'weakened',
+      },
+      {
+        type: 'statusRemoved',
+        round: finalRound,
+        targetId: memberId,
+        status: 'weakened',
+      },
+    )
+    // Applied then removed nets to no lingering status, so the stored final
+    // state (untouched) still matches replay.
+
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
+})

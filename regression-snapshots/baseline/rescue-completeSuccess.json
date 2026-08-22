@@ -200,7 +200,20 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -388,7 +401,20 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -574,7 +600,20 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -690,7 +729,20 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -808,7 +860,20 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1007,7 +1072,20 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 6,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1097,7 +1175,20 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 7,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1177,7 +1268,20 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 8,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",

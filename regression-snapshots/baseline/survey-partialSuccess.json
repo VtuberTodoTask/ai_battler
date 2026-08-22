@@ -263,7 +263,20 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",
@@ -394,7 +407,20 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",
@@ -587,7 +613,20 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",
@@ -769,7 +808,20 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",
@@ -914,7 +966,20 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",

@@ -199,7 +199,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -441,7 +454,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -508,7 +534,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "mpConsumed",
@@ -767,7 +806,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -915,7 +967,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -966,7 +1031,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 6,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "mpConsumed",
@@ -1113,7 +1191,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 7,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1254,7 +1345,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 8,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1383,7 +1487,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 9,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 9,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1485,7 +1602,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 10,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 10,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1516,7 +1646,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 11,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 11,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1619,7 +1762,20 @@
               "phase": "combat",
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 12,
+              "statusApplied": ["guarded"],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "S-guardian-s37-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ヴァン エルウィンは自らも身構えた。",
+              "round": 12,
+              "statusApplied": ["guarded"],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",

@@ -273,7 +273,20 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "ranged",
@@ -383,7 +396,20 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "mpConsumed",
@@ -649,7 +675,20 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "ranged",
@@ -702,7 +741,20 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "ranged",
@@ -897,7 +949,20 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "ranged",
@@ -999,7 +1064,20 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 6,
+              "statusApplied": ["guarded"],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "mpConsumed",

@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  assertMainQuestBattleCompatibleEnemy,
+  buildMainQuestEnemy,
   createInitialMainQuestState,
   isNosferatuUnlocked,
   MAIN_QUEST_THREAT_DEFINITIONS,
   NATIONAL_THREAT_IDS,
 } from './threats.ts'
+import type { Enemy } from '../models/types.ts'
 
 describe('Phase 9.8 Main Quest Threats', () => {
   it('defines exactly the 7 national Threats plus Nosferatu, with stable ids', () => {
@@ -78,5 +81,39 @@ describe('Phase 9.8 Main Quest Threats', () => {
       (d) => d.id === 'nosferatu',
     )!
     expect(nosferatu.nationId).toBeUndefined()
+  })
+})
+
+describe('Phase 9.8.2 Dynamic Participant Guard', () => {
+  it('every real Threat boss (all 8, including Nosferatu) passes assertMainQuestBattleCompatibleEnemy', () => {
+    for (const definition of MAIN_QUEST_THREAT_DEFINITIONS) {
+      const enemy = buildMainQuestEnemy(definition.id)
+      expect(() => assertMainQuestBattleCompatibleEnemy(enemy)).not.toThrow()
+    }
+  })
+
+  it('no real Threat boss ever carries a summon-type ability (never present, not merely inert)', () => {
+    for (const definition of MAIN_QUEST_THREAT_DEFINITIONS) {
+      const enemy = buildMainQuestEnemy(definition.id)
+      const abilityIds = enemy.abilities?.map((a) => a.abilityId) ?? []
+      expect(abilityIds).not.toContain('summon')
+    }
+  })
+
+  it('rejects a deliberately-constructed Enemy carrying a summon ability', () => {
+    const real = buildMainQuestEnemy('alden')
+    const withSummon: Enemy = {
+      ...real,
+      abilities: [
+        ...(real.abilities ?? []),
+        { abilityId: 'summon', name: '召喚' },
+      ],
+    }
+    expect(() => assertMainQuestBattleCompatibleEnemy(withSummon)).toThrow()
+  })
+
+  it('does not reject an Enemy with only non-dynamic-participant abilities', () => {
+    const real = buildMainQuestEnemy('kared')
+    expect(() => assertMainQuestBattleCompatibleEnemy(real)).not.toThrow()
   })
 })

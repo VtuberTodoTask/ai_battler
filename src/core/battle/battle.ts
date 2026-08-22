@@ -288,9 +288,13 @@ function resolveContact(
     effects.firstRoundHitBonus = 10
     effects.initiativeBonus = 5
     const stunCount = Math.min(2, enemies.length)
+    const stunnedTargets: BattleUnit[] = []
     for (let i = 0; i < stunCount; i++) {
       const target = enemies[i]
-      if (target) addStatus(target, 'stunned', 1, 0, 'contact')
+      if (target) {
+        addStatus(target, 'stunned', 1, 0, 'contact')
+        stunnedTargets.push(target)
+      }
     }
     effects.stunnedEnemies = stunCount
     log(
@@ -301,6 +305,11 @@ function resolveContact(
       {
         roll,
         successChance,
+        targetIds:
+          stunnedTargets.length > 0
+            ? stunnedTargets.map((t) => t.id)
+            : undefined,
+        statusApplied: stunnedTargets.length > 0 ? ['stunned'] : undefined,
         metadata: {
           contactType: type,
           topScoutRole: topScout?.role,
@@ -403,6 +412,13 @@ function applyStealthStart(state: BattleState): void {
   for (const enemy of state.enemies) {
     if (hasAbility(enemy, 'stealthStart')) {
       addStatus(enemy, 'stealthed', 1, 0, 'stealthStart')
+      log(
+        state,
+        'contact',
+        'stealthStart',
+        `${enemy.name}が気配を隠して戦闘に臨んだ。`,
+        { targetIds: [enemy.id], statusApplied: ['stealthed'] },
+      )
     }
   }
 }
@@ -545,6 +561,7 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
+        statusApplied: ['guarded'],
         metadata: {
           guardPotency: 5,
           guardSourceRole: unit.role,
@@ -552,6 +569,14 @@ function resolveAction(
         },
       },
     )
+    if (unit.id !== action.target.id) {
+      log(state, 'combat', 'guardSelf', `${unit.name}は自らも身構えた。`, {
+        actorId: unit.id,
+        targetIds: [unit.id],
+        statusApplied: ['guarded'],
+        metadata: { guardPotency: 3 },
+      })
+    }
     return
   }
 
@@ -569,6 +594,7 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
+        statusApplied: ['guarded'],
         metadata: {
           requestedMorale: 10,
           actualMoraleGained,
@@ -592,6 +618,7 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
+        statusApplied: ['healBlocked'],
         metadata: { abilityId: action.abilityId },
       },
     )
@@ -606,6 +633,7 @@ function resolveAction(
         (state.abilityUsage[action.abilityId] ?? 0) + 1
     }
     const heal = getAbilityNumeric(unit, 'reviveHeal', 10)
+    const clearedStatuses = action.target.statusEffects.map((e) => e.type)
     action.target.isAlive = true
     action.target.hp = clamp(heal, 1, action.target.maxHp)
     action.target.statusEffects = []
@@ -620,6 +648,7 @@ function resolveAction(
         targetIds: [action.target.id],
         metadata: { abilityId: action.abilityId },
         healAmount: action.target.hp,
+        statusRemoved: clearedStatuses.length > 0 ? clearedStatuses : undefined,
       },
     )
     return
@@ -870,7 +899,20 @@ function resolveAttack(
     }
   }
 
-  if (hasStatus(attacker, 'stealthed')) removeStatus(attacker, 'stealthed')
+  if (hasStatus(attacker, 'stealthed')) {
+    removeStatus(attacker, 'stealthed')
+    log(
+      state,
+      'combat',
+      'stealthConsumed',
+      `${attacker.name}の気配が露見した。`,
+      {
+        actorId: attacker.id,
+        targetIds: [attacker.id],
+        statusRemoved: ['stealthed'],
+      },
+    )
+  }
 }
 
 function buildRetreatDiagnostic(
@@ -1497,6 +1539,17 @@ export function runBattle(
       if (!unit.isAlive || unit.escaped) continue
       if (hasStatus(unit, 'stunned')) {
         removeStatus(unit, 'stunned')
+        log(
+          state,
+          'combat',
+          'stunnedSkip',
+          `${unit.name}は行動不能で動けなかった。`,
+          {
+            actorId: unit.id,
+            targetIds: [unit.id],
+            statusRemoved: ['stunned'],
+          },
+        )
         continue
       }
       if (isMinion(unit) && state.minionActionsRemaining <= 0) {
