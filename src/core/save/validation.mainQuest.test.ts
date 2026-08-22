@@ -9,6 +9,7 @@ import { MAIN_QUEST_THREAT_DEFINITION_MAP } from '../mainQuest/threats.ts'
 import { TAVERN_ECONOMY_CONFIG } from '../economy/economyConfig.ts'
 import { serializeGameSave } from './serializer.ts'
 import { SaveValidationErrorClass, validateGameSave } from './validation.ts'
+import type { StatusEffect } from '../models/types.ts'
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
@@ -153,8 +154,8 @@ describe('Phase 9.8 Main Quest Save Validation', () => {
   })
 })
 
-describe('Phase 9.8.2 Status Battle Trace Save Validation', () => {
-  it('rejects a statusApplied event carrying an unknown status name', () => {
+describe('Phase 9.8.2/9.8.3 Status Battle Trace Save Validation', () => {
+  it('rejects a statusApplied event carrying an unknown status type', () => {
     const { save } = dispatchedAndResolvedSave('mainquest-status-001')
     const attempt = save.campaign.mainQuest.attempts[0]
     const memberId =
@@ -163,7 +164,12 @@ describe('Phase 9.8.2 Status Battle Trace Save Validation', () => {
       type: 'statusApplied',
       round: 1,
       targetId: memberId,
-      status: 'not-a-real-status',
+      effect: {
+        type: 'not-a-real-status' as unknown as StatusEffect['type'],
+        duration: 2,
+        value: 5,
+        sourceId: memberId,
+      },
     })
 
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
@@ -195,7 +201,7 @@ describe('Phase 9.8.2 Status Battle Trace Save Validation', () => {
       type: 'statusApplied',
       round: 1,
       targetId: memberId,
-      status: 'weakened',
+      effect: { type: 'weakened', duration: 2, value: 5, sourceId: memberId },
     })
     // finalMemberStates is left untouched, so the replayed final status
     // (now including 'weakened') disagrees with the stored Result.
@@ -232,7 +238,7 @@ describe('Phase 9.8.2 Status Battle Trace Save Validation', () => {
         type: 'statusApplied',
         round: finalRound,
         targetId: memberId,
-        status: 'weakened',
+        effect: { type: 'weakened', duration: 2, value: 5, sourceId: memberId },
       },
       {
         type: 'statusRemoved',
@@ -245,5 +251,96 @@ describe('Phase 9.8.2 Status Battle Trace Save Validation', () => {
     // state (untouched) still matches replay.
 
     expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  /**
+   * Builds a save where `weakened` (duration 2 / value 5 / sourceId
+   * `memberId`) is legitimately applied at the final round and survives to
+   * the end of Battle — both the Trace event and the stored final state
+   * agree, so this passes validation as-is. Each Phase 9.8.3 field-tamper
+   * test starts from this baseline and corrupts exactly one field.
+   */
+  function saveWithSurvivingStatus(seed: string) {
+    const { save } = dispatchedAndResolvedSave(seed)
+    const attempt = save.campaign.mainQuest.attempts[0]
+    const memberId =
+      attempt.battleTrace!.initialSnapshot.partyMembers[0].characterId
+    const effect = {
+      type: 'weakened' as const,
+      duration: 2,
+      value: 5,
+      sourceId: memberId,
+    }
+    const events = attempt.battleTrace!.events
+    const finalRound = (events[events.length - 1] as { round: number }).round
+    const injectedEvent = {
+      type: 'statusApplied' as const,
+      round: finalRound,
+      targetId: memberId,
+      effect: { ...effect },
+    }
+    events.splice(events.length - 1, 0, injectedEvent)
+    const finalState = attempt.result!.finalMemberStates.find(
+      (s) => s.id === memberId,
+    )!
+    finalState.statusEffects = [...finalState.statusEffects, { ...effect }]
+    // Return the exact injected event's own `effect` object — the Trace
+    // may already carry OTHER, naturally-occurring `statusApplied` events
+    // from the real battle, so each tamper test must mutate precisely this
+    // one, never whichever `statusApplied` a `.find()` happens to hit first.
+    return { save, injectedEffect: injectedEvent.effect, memberId }
+  }
+
+  it('accepts the surviving-status baseline fixture unmodified', () => {
+    const { save } = saveWithSurvivingStatus('mainquest-status-baseline')
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  it('rejects a tampered Trace statusApplied duration (2 -> 99)', () => {
+    const { save, injectedEffect } = saveWithSurvivingStatus(
+      'mainquest-status-006',
+    )
+    injectedEffect.duration = 99
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a tampered Trace statusApplied value (5 -> 500)', () => {
+    const { save, injectedEffect } = saveWithSurvivingStatus(
+      'mainquest-status-007',
+    )
+    injectedEffect.value = 500
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a tampered Trace statusApplied sourceId (member-A -> a different member)', () => {
+    const { save, injectedEffect, memberId } = saveWithSurvivingStatus(
+      'mainquest-status-008',
+    )
+    const attempt = save.campaign.mainQuest.attempts[0]
+    const otherMemberId =
+      attempt.battleTrace!.initialSnapshot.partyMembers.find(
+        (m) => m.characterId !== memberId,
+      )?.characterId
+    if (!otherMemberId) return
+    injectedEffect.sourceId = otherMemberId
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a tampered Initial Snapshot status (an unaccounted-for status added at Battle start)', () => {
+    const { save } = dispatchedAndResolvedSave('mainquest-status-009')
+    const attempt = save.campaign.mainQuest.attempts[0]
+    const member = attempt.battleTrace!.initialSnapshot.partyMembers[0]
+    member.statusEffects = [
+      ...member.statusEffects,
+      { type: 'poisoned', duration: 3, value: 3, sourceId: 'system' },
+    ]
+    // No Trace event ever removes it and finalMemberStates is left
+    // untouched, so the replayed final state (now poisoned) disagrees with
+    // the stored Result.
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })
 })

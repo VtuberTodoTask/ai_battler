@@ -291,6 +291,14 @@
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
@@ -303,6 +311,14 @@
               "result": "オルム アイヴィーは自らも身構えた。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
@@ -358,6 +374,38 @@
               "round": 1,
               "successChance": 5,
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -462,6 +510,14 @@
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
@@ -474,6 +530,14 @@
               "result": "オルム アイヴィーは自らも身構えた。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
@@ -529,6 +593,38 @@
               "round": 2,
               "successChance": 5,
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -659,6 +755,14 @@
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
@@ -671,6 +775,14 @@
               "result": "オルム アイヴィーは自らも身構えた。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
@@ -690,6 +802,38 @@
               "round": 3,
               "successChance": 5,
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -772,6 +916,14 @@
               "result": "オルム アイヴィーがフェイ アイヴィーを防護した。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-mage-s1-mage-2"]
             },
             {
@@ -784,6 +936,14 @@
               "result": "オルム アイヴィーは自らも身構えた。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
@@ -842,6 +1002,38 @@
               "round": 4,
               "statusRemoved": ["guarded"],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "フェイ アイヴィーの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-mage-s1-mage-2"]
             },
             {
               "actionType": "ranged",
@@ -975,6 +1167,14 @@
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
@@ -987,6 +1187,46 @@
               "result": "オルム アイヴィーは自らも身構えた。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
@@ -1097,6 +1337,14 @@
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
@@ -1109,6 +1357,14 @@
               "result": "オルム アイヴィーは自らも身構えた。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
@@ -1128,6 +1384,38 @@
               "round": 6,
               "successChance": 5,
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "retreat",
@@ -1220,6 +1508,14 @@
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
@@ -1232,6 +1528,14 @@
               "result": "オルム アイヴィーは自らも身構えた。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
@@ -1251,6 +1555,38 @@
               "round": 7,
               "successChance": 5,
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "retreat",

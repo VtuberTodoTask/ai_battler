@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { resolveUniqueMonsterAnimationProfile } from './presentationProfile.ts'
+import {
+  resolveMotifRuntimeElements,
+  resolveUniqueMonsterAnimationProfile,
+} from './presentationProfile.ts'
 import { MAIN_QUEST_THREAT_DEFINITIONS } from './threats.ts'
 
 describe('Phase 9.8.2 resolveUniqueMonsterAnimationProfile', () => {
@@ -106,5 +109,69 @@ describe('Phase 9.8.2 resolveUniqueMonsterAnimationProfile', () => {
     expect(plan.attack.category).toBe('generic')
     expect(plan.hitReaction.category).toBe('generic')
     expect(plan.motifTokens).toEqual(['ambient'])
+  })
+})
+
+describe('Phase 9.8.3 resolveMotifRuntimeElements', () => {
+  it('is pure/deterministic: identical motifTokens always yields an identical element list', () => {
+    const first = resolveMotifRuntimeElements(['sparks', 'forge_glow'])
+    const second = resolveMotifRuntimeElements(['sparks', 'forge_glow'])
+    expect(second).toEqual(first)
+  })
+
+  it("黒炉の巨獣 (Kared)'s motifTokens produce sparks and forge_glow runtime elements", () => {
+    const kared = MAIN_QUEST_THREAT_DEFINITIONS.find((d) => d.id === 'kared')!
+    const plan = resolveUniqueMonsterAnimationProfile(
+      kared.uniqueMonster.visualProfile,
+    )
+    const elements = resolveMotifRuntimeElements(plan.motifTokens)
+    const kinds = new Set(elements.map((e) => e.kind))
+    expect(kinds.has('sparks')).toBe(true)
+    expect(kinds.has('forge_glow')).toBe(true)
+  })
+
+  it("Nosferatu's motifTokens produce shadow and red_glow runtime elements", () => {
+    const nosferatu = MAIN_QUEST_THREAT_DEFINITIONS.find(
+      (d) => d.id === 'nosferatu',
+    )!
+    const plan = resolveUniqueMonsterAnimationProfile(
+      nosferatu.uniqueMonster.visualProfile,
+    )
+    const elements = resolveMotifRuntimeElements(plan.motifTokens)
+    const kinds = new Set(elements.map((e) => e.kind))
+    expect(kinds.has('shadow')).toBe(true)
+    expect(kinds.has('red_glow')).toBe(true)
+  })
+
+  it('every real Threat boss resolves at least one runtime element (never silently empty)', () => {
+    for (const definition of MAIN_QUEST_THREAT_DEFINITIONS) {
+      const plan = resolveUniqueMonsterAnimationProfile(
+        definition.uniqueMonster.visualProfile,
+      )
+      const elements = resolveMotifRuntimeElements(plan.motifTokens)
+      expect(elements.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('stays lightweight: never more than a few elements per runtime kind, deduplicated across repeated tokens', () => {
+    const elements = resolveMotifRuntimeElements([
+      'sparks',
+      'sparks',
+      'forge_glow',
+      'sparks',
+    ])
+    const sparkElements = elements.filter((e) => e.kind === 'sparks')
+    const forgeElements = elements.filter((e) => e.kind === 'forge_glow')
+    expect(sparkElements.length).toBeGreaterThan(0)
+    expect(sparkElements.length).toBeLessThanOrEqual(6)
+    expect(forgeElements.length).toBe(1)
+    // Deduped: repeating 'sparks' 3x in the input must not triple its count.
+    expect(elements.length).toBe(sparkElements.length + forgeElements.length)
+  })
+
+  it('falls back to the ambient kind for an unrecognized token, never throwing or producing nothing', () => {
+    const elements = resolveMotifRuntimeElements(['totally-unknown-token'])
+    expect(elements.length).toBeGreaterThan(0)
+    expect(elements.every((e) => e.kind === 'ambient')).toBe(true)
   })
 })

@@ -27,6 +27,7 @@ import {
 import {
   addStatus,
   calculateWeaponDamage,
+  collectStatusEffects,
   getAbilityNumeric,
   hasAbility,
   hasStatus,
@@ -310,6 +311,10 @@ function resolveContact(
             ? stunnedTargets.map((t) => t.id)
             : undefined,
         statusApplied: stunnedTargets.length > 0 ? ['stunned'] : undefined,
+        statusEffectsApplied:
+          stunnedTargets.length > 0
+            ? collectStatusEffects(stunnedTargets[0], ['stunned'])
+            : undefined,
         metadata: {
           contactType: type,
           topScoutRole: topScout?.role,
@@ -359,6 +364,7 @@ function resolveContact(
             damage: dmg,
             hit: true,
             statusApplied: ['weakened'],
+            statusEffectsApplied: collectStatusEffects(target, ['weakened']),
           },
         )
       }
@@ -417,7 +423,11 @@ function applyStealthStart(state: BattleState): void {
         'contact',
         'stealthStart',
         `${enemy.name}が気配を隠して戦闘に臨んだ。`,
-        { targetIds: [enemy.id], statusApplied: ['stealthed'] },
+        {
+          targetIds: [enemy.id],
+          statusApplied: ['stealthed'],
+          statusEffectsApplied: collectStatusEffects(enemy, ['stealthed']),
+        },
       )
     }
   }
@@ -562,6 +572,7 @@ function resolveAction(
         actorId: unit.id,
         targetIds: [action.target.id],
         statusApplied: ['guarded'],
+        statusEffectsApplied: collectStatusEffects(action.target, ['guarded']),
         metadata: {
           guardPotency: 5,
           guardSourceRole: unit.role,
@@ -574,6 +585,7 @@ function resolveAction(
         actorId: unit.id,
         targetIds: [unit.id],
         statusApplied: ['guarded'],
+        statusEffectsApplied: collectStatusEffects(unit, ['guarded']),
         metadata: { guardPotency: 3 },
       })
     }
@@ -595,6 +607,7 @@ function resolveAction(
         actorId: unit.id,
         targetIds: [action.target.id],
         statusApplied: ['guarded'],
+        statusEffectsApplied: collectStatusEffects(action.target, ['guarded']),
         metadata: {
           requestedMorale: 10,
           actualMoraleGained,
@@ -619,6 +632,9 @@ function resolveAction(
         actorId: unit.id,
         targetIds: [action.target.id],
         statusApplied: ['healBlocked'],
+        statusEffectsApplied: collectStatusEffects(action.target, [
+          'healBlocked',
+        ]),
         metadata: { abilityId: action.abilityId },
       },
     )
@@ -811,6 +827,7 @@ function resolveAttack(
     successChance: result.successChance,
     damage: result.damageDealt,
     statusApplied: result.statusApplied,
+    statusEffectsApplied: result.statusEffectsApplied,
     hit: result.hit,
     critical: result.critical,
     metadata: attackMetadata,
@@ -1381,12 +1398,26 @@ function processEndOfRound(state: BattleState): void {
       ...e,
       duration: e.duration - 1,
     }))
-    const expired = ticked.filter((e) => e.duration <= 0).map((e) => e.type)
-    u.statusEffects = ticked.filter((e) => e.duration > 0)
+    const expired = ticked.filter((e) => e.duration <= 0)
+    const survived = ticked.filter((e) => e.duration > 0)
+    u.statusEffects = survived
     if (expired.length > 0) {
       log(state, 'combat', 'statusExpired', `${u.name}の状態異常が解けた。`, {
         targetIds: [u.id],
-        statusRemoved: expired,
+        statusRemoved: expired.map((e) => e.type),
+      })
+    }
+    // Every surviving status's `duration` just changed — a Gameplay Fact,
+    // not just its `type` (Phase 9.8.3) — so this is recorded as an
+    // ordinary `statusApplied`-family fact (full post-tick snapshot),
+    // exactly as a genuine reapplication/refresh would be. This is the ONE
+    // point where duration ticks; Replay never has to re-derive the tick
+    // itself, only replace its held snapshot with this authoritative one.
+    if (survived.length > 0) {
+      log(state, 'combat', 'statusTicked', `${u.name}の状態異常が経過した。`, {
+        targetIds: [u.id],
+        statusApplied: survived.map((e) => e.type),
+        statusEffectsApplied: deepClone(survived),
       })
     }
   })

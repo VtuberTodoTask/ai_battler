@@ -200,6 +200,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -212,6 +220,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -357,6 +373,38 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
+            },
+            {
               "actionType": "mpConsumed",
               "actorId": "S-mage-s37-mage-2",
               "mpDelta": -5,
@@ -455,6 +503,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -467,6 +523,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -524,6 +588,38 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
+            },
+            {
               "actionType": "guard",
               "actorId": "S-guardian-s37-guardian-1",
               "metadata": {
@@ -535,6 +631,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -547,6 +651,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -697,6 +809,38 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
               "critical": false,
@@ -807,6 +951,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -819,6 +971,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -856,6 +1016,38 @@
               "round": 4,
               "successChance": 14,
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -968,6 +1160,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -980,6 +1180,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -999,6 +1207,38 @@
               "round": 5,
               "successChance": 13,
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1032,6 +1272,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -1044,6 +1292,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -1132,6 +1388,38 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
+            },
+            {
               "actionType": "mpConsumed",
               "actorId": "S-mage-s37-mage-2",
               "mpDelta": -5,
@@ -1192,6 +1480,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -1204,6 +1500,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -1262,6 +1566,38 @@
               "round": 7,
               "successChance": 13,
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "mpConsumed",
@@ -1346,6 +1682,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 8,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -1358,6 +1702,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 8,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -1395,6 +1747,38 @@
               "round": 8,
               "successChance": 13,
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1488,6 +1872,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 9,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -1500,6 +1892,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 9,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -1519,6 +1919,38 @@
               "round": 9,
               "successChance": 13,
               "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 9,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 9,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
               "actionType": "mpConsumed",
@@ -1603,6 +2035,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 10,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -1615,6 +2055,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 10,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -1636,6 +2084,38 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 10,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 10,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
+            },
+            {
               "actionType": "guard",
               "actorId": "S-guardian-s37-guardian-1",
               "metadata": {
@@ -1647,6 +2127,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 11,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -1659,6 +2147,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 11,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {
@@ -1752,6 +2248,38 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール ジェムの状態異常が経過した。",
+              "round": 11,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-vanguard-s37-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン エルウィンの状態異常が経過した。",
+              "round": 11,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-guardian-s37-guardian-1"]
+            },
+            {
               "actionType": "guard",
               "actorId": "S-guardian-s37-guardian-1",
               "metadata": {
@@ -1763,6 +2291,14 @@
               "result": "ヴァン エルウィンがトール ジェムを防護した。",
               "round": 12,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
@@ -1775,6 +2311,14 @@
               "result": "ヴァン エルウィンは自らも身構えた。",
               "round": 12,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-guardian-s37-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-guardian-s37-guardian-1"]
             },
             {

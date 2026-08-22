@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createTavernCampaign } from '../tavern/campaign/campaign.ts'
 import { dispatchMainQuest } from './dispatch.ts'
 import { simulateMainQuestAttempt } from './simulation.ts'
-import { replayMainQuestBattleTrace } from './replay.ts'
+import { replayMainQuestBattleTrace, statusEffectsEqual } from './replay.ts'
 import { MAIN_QUEST_THREAT_DEFINITION_MAP } from './threats.ts'
 import type { MainQuestSimulationResult } from './types.ts'
 import type { TavernCampaignState } from '../tavern/campaign/types.ts'
@@ -63,9 +63,9 @@ function assertFinalStateParity(
     expect(member.incapacitated).toBe(finalState.incapacitated)
     expect(member.dead).toBe(finalState.dead)
 
-    const storedStatuses = new Set(finalState.statusEffects.map((s) => s.type))
-    const replayedStatuses = new Set(member.statuses)
-    expect(replayedStatuses).toEqual(storedStatuses)
+    expect(
+      statusEffectsEqual(member.statusEffects, finalState.statusEffects),
+    ).toBe(true)
   }
 }
 
@@ -176,5 +176,135 @@ describe('Phase 9.8.1 replayMainQuestBattleTrace parity', () => {
     )
     expect(second).toEqual(first)
     expect(secondTrace).toEqual(firstTrace)
+  })
+})
+
+describe('Phase 9.8.3 full StatusEffect object replay', () => {
+  const initialSnapshot = {
+    partyMembers: [
+      {
+        characterId: 'p1',
+        currentHp: 50,
+        maxHp: 50,
+        currentMp: 20,
+        maxMp: 20,
+        statusEffects: [],
+      },
+    ],
+    monster: { currentHp: 100, maxHp: 100, statusEffects: [] },
+  }
+
+  function traceWithEvents(
+    events: import('./types.ts').MainQuestBattleEvent[],
+  ): import('./types.ts').MainQuestBattleTrace {
+    return {
+      seed: 'x',
+      monsterId: 'alden',
+      initialSnapshot,
+      events,
+      occurredAnchors: [],
+    }
+  }
+
+  it('a reapplication/refresh wholesale-replaces the held effect with the new authoritative snapshot (never merges independently)', () => {
+    const trace = traceWithEvents([
+      {
+        type: 'statusApplied',
+        round: 1,
+        targetId: 'p1',
+        effect: { type: 'guarded', duration: 1, value: 3, sourceId: 'p1' },
+      },
+      // Mirrors what the real Battle Engine's `addStatus` would have
+      // already computed for a reapply (`duration: Math.max(1, 2) = 2`,
+      // `value` overwritten, `sourceId` sticky) — Replay never re-derives
+      // this merge itself, it only holds whatever `effect` the event says.
+      {
+        type: 'statusApplied',
+        round: 2,
+        targetId: 'p1',
+        effect: { type: 'guarded', duration: 2, value: 5, sourceId: 'p1' },
+      },
+    ])
+    const replay = replayMainQuestBattleTrace(initialSnapshot, trace)
+    const member = replay.members.find((m) => m.characterId === 'p1')!
+    expect(member.statusEffects).toEqual([
+      { type: 'guarded', duration: 2, value: 5, sourceId: 'p1' },
+    ])
+  })
+
+  it('a duration-tick statusApplied event updates duration without disturbing other fields', () => {
+    const trace = traceWithEvents([
+      {
+        type: 'statusApplied',
+        round: 1,
+        targetId: 'p1',
+        effect: { type: 'weakened', duration: 3, value: 5, sourceId: 'p1' },
+      },
+      {
+        type: 'statusApplied',
+        round: 1,
+        targetId: 'p1',
+        effect: { type: 'weakened', duration: 2, value: 5, sourceId: 'p1' },
+      },
+      {
+        type: 'statusApplied',
+        round: 2,
+        targetId: 'p1',
+        effect: { type: 'weakened', duration: 1, value: 5, sourceId: 'p1' },
+      },
+    ])
+    const replay = replayMainQuestBattleTrace(initialSnapshot, trace)
+    const member = replay.members.find((m) => m.characterId === 'p1')!
+    expect(member.statusEffects).toEqual([
+      { type: 'weakened', duration: 1, value: 5, sourceId: 'p1' },
+    ])
+  })
+
+  it('a status present in the Initial Snapshot survives to final state if never removed', () => {
+    const snapshotWithPreexisting = {
+      ...initialSnapshot,
+      partyMembers: [
+        {
+          ...initialSnapshot.partyMembers[0],
+          statusEffects: [
+            { type: 'poisoned' as const, duration: 2, value: 3, sourceId: 'x' },
+          ],
+        },
+      ],
+    }
+    const trace = traceWithEvents([])
+    const replay = replayMainQuestBattleTrace(snapshotWithPreexisting, trace)
+    const member = replay.members.find((m) => m.characterId === 'p1')!
+    expect(member.statusEffects).toEqual([
+      { type: 'poisoned', duration: 2, value: 3, sourceId: 'x' },
+    ])
+  })
+
+  it('a status removed after being present in the Initial Snapshot is absent from final state', () => {
+    const snapshotWithPreexisting = {
+      ...initialSnapshot,
+      partyMembers: [
+        {
+          ...initialSnapshot.partyMembers[0],
+          statusEffects: [
+            { type: 'poisoned' as const, duration: 2, value: 3, sourceId: 'x' },
+          ],
+        },
+      ],
+    }
+    const trace = traceWithEvents([
+      { type: 'statusRemoved', round: 1, targetId: 'p1', status: 'poisoned' },
+    ])
+    const replay = replayMainQuestBattleTrace(snapshotWithPreexisting, trace)
+    const member = replay.members.find((m) => m.characterId === 'p1')!
+    expect(member.statusEffects).toEqual([])
+  })
+
+  it('a battle with no status activity at all replays cleanly with empty statusEffects', () => {
+    const trace = traceWithEvents([])
+    const replay = replayMainQuestBattleTrace(initialSnapshot, trace)
+    const member = replay.members.find((m) => m.characterId === 'p1')!
+    expect(member.statusEffects).toEqual([])
+    expect(replay.monster.statusEffects).toEqual([])
   })
 })

@@ -365,3 +365,101 @@ export function resolveUniqueMonsterAnimationProfile(
     motifTokens: deriveMotifTokens(visualProfile.presentationMotifs),
   }
 }
+
+// --- Motif Runtime (Phase 9.8.3 item 42): connects the already-derived
+// `motifTokens` to a small, fixed set of lightweight Presentation-only
+// runtime element specs — the Battle Scene builds real Pixi Graphics from
+// these once and only ever mutates position/alpha/scale per frame, never
+// recreating them. Pure and deterministic: the same `motifTokens` array
+// always yields the same element list, in the same order, zero RNG.
+
+export type MotifRuntimeKind =
+  | 'sparks'
+  | 'forge_glow'
+  | 'mist'
+  | 'water_drops'
+  | 'leaves'
+  | 'shadow'
+  | 'red_glow'
+  | 'wind'
+  | 'debris'
+  | 'ambient'
+
+export interface MotifElementSpec {
+  kind: MotifRuntimeKind
+  /** This element's 0-based index among other elements of the same `kind`
+   * — used only to phase-shift multiple elements of one kind (e.g. 4
+   * `sparks` staggered in time/position), never randomness. */
+  index: number
+}
+
+/**
+ * Not every raw token gets its own dedicated visual — several reuse the
+ * closest existing runtime kind (item 57: "似たeffectを共用してもよい"),
+ * e.g. a flying boss's `wings` token reuses the `wind` sweep, an ancient
+ * boss's `ancient_stone`/`roots` reuse the slow `shadow` pulse. Every token
+ * `deriveMotifTokens` can actually produce is covered here, so no token
+ * ever silently falls through to nothing.
+ */
+const MOTIF_TOKEN_TO_RUNTIME_KIND: Record<string, MotifRuntimeKind> = {
+  sparks: 'sparks',
+  forge_glow: 'forge_glow',
+  mist: 'mist',
+  water_drops: 'water_drops',
+  leaves: 'leaves',
+  shadow: 'shadow',
+  red_glow: 'red_glow',
+  wind: 'wind',
+  debris: 'debris',
+  dust: 'debris',
+  scales: 'sparks',
+  wings: 'wind',
+  ancient_stone: 'shadow',
+  roots: 'leaves',
+  presence: 'shadow',
+  ambient: 'ambient',
+}
+
+/** Element counts per runtime kind — deliberately small (item 59: "数個〜
+ * 十数個程度の軽量Graphics"), never scaling with anything but the fixed
+ * kind itself. */
+const MOTIF_ELEMENT_COUNTS: Record<MotifRuntimeKind, number> = {
+  sparks: 4,
+  forge_glow: 1,
+  mist: 2,
+  water_drops: 3,
+  leaves: 3,
+  shadow: 1,
+  red_glow: 1,
+  wind: 2,
+  debris: 3,
+  ambient: 1,
+}
+
+export function resolveMotifRuntimeKind(token: string): MotifRuntimeKind {
+  return MOTIF_TOKEN_TO_RUNTIME_KIND[token] ?? 'ambient'
+}
+
+/**
+ * Expands a boss's `motifTokens` into the concrete (small, fixed-count)
+ * list of runtime elements the Battle Scene should build once. Token order
+ * decides runtime-kind order (first appearance wins); duplicate tokens
+ * mapping to the same kind only ever produce that kind's elements once.
+ */
+export function resolveMotifRuntimeElements(
+  motifTokens: readonly string[],
+): MotifElementSpec[] {
+  const kinds: MotifRuntimeKind[] = []
+  for (const token of motifTokens) {
+    const kind = resolveMotifRuntimeKind(token)
+    if (!kinds.includes(kind)) kinds.push(kind)
+  }
+  const elements: MotifElementSpec[] = []
+  for (const kind of kinds) {
+    const count = MOTIF_ELEMENT_COUNTS[kind]
+    for (let index = 0; index < count; index++) {
+      elements.push({ kind, index })
+    }
+  }
+  return elements
+}

@@ -428,6 +428,13 @@ export interface BattleLogEntry {
    * heal clearing poison/bleeding) — distinct from a status naturally
    * expiring, which uses `actionType: 'statusExpired'`. */
   statusRemoved?: string[]
+  /** Full authoritative `StatusEffect` object for each type listed in
+   * `statusApplied`, captured immediately after the mutation resolved
+   * (`../battle/actions.ts` `collectStatusEffects`) — `duration`/`value`/
+   * `sourceId` are Gameplay Facts too, not just `type` (Phase 9.8.3).
+   * Additive alongside `statusApplied`, which stays a bare type list for
+   * existing consumers. */
+  statusEffectsApplied?: StatusEffect[]
 }
 
 export interface InjuryResult {

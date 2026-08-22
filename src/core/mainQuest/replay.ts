@@ -1,3 +1,4 @@
+import type { StatusEffect } from '../models/types.ts'
 import type {
   MainQuestBattleInitialSnapshot,
   MainQuestBattleTrace,
@@ -10,7 +11,7 @@ export interface MainQuestBattleReplayMemberState {
   maxHp: number
   currentMp: number
   maxMp: number
-  statuses: string[]
+  statusEffects: StatusEffect[]
   incapacitated: boolean
   dead: boolean
 }
@@ -18,7 +19,7 @@ export interface MainQuestBattleReplayMemberState {
 export interface MainQuestBattleReplayMonsterState {
   currentHp: number
   maxHp: number
-  statuses: string[]
+  statusEffects: StatusEffect[]
   defeated: boolean
 }
 
@@ -39,6 +40,13 @@ export interface MainQuestBattleReplayResult {
  * `MainQuestSimulationResult`) use — never two independently-maintained
  * implementations of "what does applying this Trace mean" (Phase 9.8.1
  * item 83/16).
+ *
+ * `StatusEffect`s are held and compared as full objects, never just
+ * `type` (Phase 9.8.3) — a `statusApplied` event's `effect` always
+ * *replaces* whatever this replay currently holds for that `type` wholesale
+ * (the Battle Engine's own `addStatus` refresh/merge semantics, and its
+ * end-of-round duration tick, already happened once — in the engine — by
+ * the time that event was recorded; this never re-derives them).
  */
 export function replayMainQuestBattleTrace(
   initialSnapshot: MainQuestBattleInitialSnapshot,
@@ -53,7 +61,7 @@ export function replayMainQuestBattleTrace(
         maxHp: m.maxHp,
         currentMp: m.currentMp,
         maxMp: m.maxMp,
-        statuses: [...m.statuses],
+        statusEffects: m.statusEffects.map((e) => ({ ...e })),
         incapacitated: m.currentHp <= 0,
         dead: false,
       },
@@ -62,7 +70,9 @@ export function replayMainQuestBattleTrace(
   const monster: MainQuestBattleReplayMonsterState = {
     currentHp: initialSnapshot.monster.currentHp,
     maxHp: initialSnapshot.monster.maxHp,
-    statuses: [...initialSnapshot.monster.statuses],
+    statusEffects: initialSnapshot.monster.statusEffects.map((e) => ({
+      ...e,
+    })),
     defeated: initialSnapshot.monster.currentHp <= 0,
   }
 
@@ -76,12 +86,16 @@ export function replayMainQuestBattleTrace(
   type Target =
     MainQuestBattleReplayMemberState | MainQuestBattleReplayMonsterState
 
-  function addStatus(target: Target, status: string): void {
-    if (!target.statuses.includes(status)) target.statuses.push(status)
+  function setStatusEffect(target: Target, effect: StatusEffect): void {
+    const idx = target.statusEffects.findIndex((e) => e.type === effect.type)
+    if (idx >= 0) target.statusEffects[idx] = { ...effect }
+    else target.statusEffects.push({ ...effect })
   }
 
-  function removeStatus(target: Target, status: string): void {
-    target.statuses = target.statuses.filter((s) => s !== status)
+  function removeStatusEffect(target: Target, statusType: string): void {
+    target.statusEffects = target.statusEffects.filter(
+      (e) => e.type !== statusType,
+    )
   }
 
   function applyDamage(targetId: string, amount: number): void {
@@ -122,14 +136,14 @@ export function replayMainQuestBattleTrace(
         const target = isMonster(event.targetId)
           ? monster
           : members.get(event.targetId)
-        if (target) addStatus(target, event.status)
+        if (target) setStatusEffect(target, event.effect)
         break
       }
       case 'statusRemoved': {
         const target = isMonster(event.targetId)
           ? monster
           : members.get(event.targetId)
-        if (target) removeStatus(target, event.status)
+        if (target) removeStatusEffect(target, event.status)
         break
       }
       case 'mpChanged': {
@@ -176,4 +190,45 @@ export function replayMainQuestBattleTrace(
     outcome,
     retreated,
   }
+}
+
+/**
+ * A stable canonical ordering for a set of `StatusEffect`s — order itself
+ * is not a Gameplay Fact, so both the Save Validator and tests compare
+ * status-effect sets via this sort rather than depending on array order
+ * (Phase 9.8.3 item 25). One shared implementation, not two.
+ */
+export function sortStatusEffectsCanonically(
+  effects: readonly StatusEffect[],
+): StatusEffect[] {
+  return [...effects].sort(
+    (a, b) =>
+      a.type.localeCompare(b.type) ||
+      a.sourceId.localeCompare(b.sourceId) ||
+      a.duration - b.duration ||
+      (a.value ?? 0) - (b.value ?? 0),
+  )
+}
+
+/**
+ * Full-object equality of two status-effect sets (`type`/`duration`/
+ * `value`/`sourceId` all significant, order-independent) — never a
+ * `type`-only `Set` comparison (Phase 9.8.3 item 26).
+ */
+export function statusEffectsEqual(
+  a: readonly StatusEffect[],
+  b: readonly StatusEffect[],
+): boolean {
+  if (a.length !== b.length) return false
+  const sortedA = sortStatusEffectsCanonically(a)
+  const sortedB = sortStatusEffectsCanonically(b)
+  return sortedA.every((effect, i) => {
+    const other = sortedB[i]
+    return (
+      effect.type === other.type &&
+      effect.duration === other.duration &&
+      effect.value === other.value &&
+      effect.sourceId === other.sourceId
+    )
+  })
 }

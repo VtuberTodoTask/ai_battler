@@ -250,6 +250,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -262,6 +270,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -373,6 +389,38 @@
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
               "critical": false,
@@ -405,6 +453,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -417,6 +473,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -545,6 +609,38 @@
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
               "critical": false,
@@ -598,6 +694,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -610,6 +714,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -720,6 +832,38 @@
               "round": 3,
               "successChance": 37,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -835,6 +979,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -847,6 +999,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -884,6 +1044,38 @@
               "round": 4,
               "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -959,6 +1151,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -971,6 +1171,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -1032,6 +1240,38 @@
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
               "critical": false,
@@ -1064,6 +1304,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1076,6 +1324,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -1178,6 +1434,38 @@
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
               "critical": false,
@@ -1259,6 +1547,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1271,6 +1567,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -1314,6 +1618,38 @@
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
+            },
+            {
               "actionType": "guard",
               "actorId": "C-guardian-s325-guardian-1",
               "metadata": {
@@ -1325,6 +1661,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 8,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1337,6 +1681,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 8,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -1450,6 +1802,38 @@
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
               "critical": true,
@@ -1523,6 +1907,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 9,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1535,6 +1927,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 9,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -1572,6 +1972,38 @@
               "round": 9,
               "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 9,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 9,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -1615,6 +2047,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 10,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1627,6 +2067,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 10,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -1694,6 +2142,38 @@
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 10,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 10,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
               "critical": false,
@@ -1726,6 +2206,14 @@
               "result": "ベル ヴァレスがマルチナ サンドを防護した。",
               "round": 11,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
@@ -1738,6 +2226,14 @@
               "result": "ベル ヴァレスは自らも身構えた。",
               "round": 11,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
@@ -1798,6 +2294,38 @@
               "round": 11,
               "successChance": 29,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ サンドの状態異常が経過した。",
+              "round": 11,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s325-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル ヴァレスの状態異常が経過した。",
+              "round": 11,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s325-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s325-guardian-1"]
             },
             {
               "actionType": "melee",

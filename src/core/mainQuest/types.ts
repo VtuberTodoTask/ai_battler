@@ -3,6 +3,7 @@ import type {
   BattleOutcome,
   BattleParticipantFinalState,
   InjuryResult,
+  StatusEffect,
 } from '../models/types.ts'
 import type { CountryId } from '../identity/types.ts'
 import type { EnvironmentType } from '../expedition/types.ts'
@@ -194,11 +195,25 @@ export interface MainQuestHealingEvent {
   amount: number
 }
 
+/**
+ * Fires whenever a status is newly applied OR refreshed/re-applied/ticked
+ * on an existing status of the same `type` — `effect` is always the full,
+ * authoritative `StatusEffect` (`type`/`duration`/`value`/`sourceId`)
+ * immediately after the Battle Engine's own `addStatus` (or its end-of-
+ * round duration tick) resolved, never a bare type name (Phase 9.8.3: "a
+ * status is not the same status just because its `type` matches" —
+ * `duration`/`value`/`sourceId` are Gameplay Facts too). Replay always
+ * *replaces* whatever it currently holds for this `type` with `effect`
+ * wholesale — the merge/refresh semantics (e.g. `addStatus`'s
+ * `duration = Math.max(existing, new)`) already happened once, in the
+ * engine, by the time this event was recorded; Replay never re-derives
+ * them independently.
+ */
 export interface MainQuestStatusAppliedEvent {
   type: 'statusApplied'
   round: number
   targetId: string
-  status: string
+  effect: StatusEffect
 }
 
 export interface MainQuestStatusRemovedEvent {
@@ -352,13 +367,16 @@ export interface MainQuestBattleMemberSnapshot {
   maxHp: number
   currentMp: number
   maxMp: number
-  statuses: readonly string[]
+  /** Full authoritative `StatusEffect` objects present the instant Battle
+   * began — a deep, immutable copy of the Adventurer's own pre-Battle
+   * state, never a bare list of type names (Phase 9.8.3). */
+  statusEffects: readonly StatusEffect[]
 }
 
 export interface MainQuestBattleMonsterSnapshot {
   currentHp: number
   maxHp: number
-  statuses: readonly string[]
+  statusEffects: readonly StatusEffect[]
 }
 
 export interface MainQuestBattleInitialSnapshot {

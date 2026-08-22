@@ -280,7 +280,10 @@ export function buildMainQuestBattleViewModel(
         maxMp: snapshot.maxMp,
         mp: snapshot.currentMp,
         alive: snapshot.currentHp > 0,
-        statuses: snapshot.statuses,
+        // Player-facing UI only ever needs the type name for its `[毒]`-
+        // style label (Phase 9.8.3 item 37) — never the full StatusEffect
+        // object (duration/value/sourceId are internal Gameplay Facts).
+        statuses: snapshot.statusEffects.map((e) => e.type),
       }
     })
 
@@ -295,7 +298,7 @@ export function buildMainQuestBattleViewModel(
     monsterName: definition.uniqueMonster.name,
     monsterMaxHp: initialSnapshot.monster.maxHp,
     monsterHp: initialSnapshot.monster.currentHp,
-    monsterStatuses: initialSnapshot.monster.statuses,
+    monsterStatuses: initialSnapshot.monster.statusEffects.map((e) => e.type),
     monsterVisualProfile: definition.uniqueMonster.visualProfile,
     partyMembers,
     plan,

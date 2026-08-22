@@ -5,6 +5,7 @@ import type {
   BattleLogEntry,
   BattleResult,
   Enemy,
+  StatusEffect,
 } from '../models/types.ts'
 import type { ExpeditionOutcome } from '../expedition/types.ts'
 import type { CampaignParty } from '../tavern/campaign/types.ts'
@@ -36,6 +37,21 @@ function retreatSucceeded(entry: BattleLogEntry): boolean {
   )
 }
 
+/**
+ * Looks up the full authoritative `StatusEffect` snapshot for `status`
+ * (a bare type name from `entry.statusApplied`) on `entry.statusEffectsApplied`
+ * — the array `collectStatusEffects` (`../battle/actions.ts`) populated at
+ * the exact moment the mutation resolved (Phase 9.8.3). A `statusApplied`
+ * entry with no matching effect here indicates a Battle Engine call site
+ * that forgot to attach one — never silently invented from `status` alone.
+ */
+function findAppliedEffect(
+  entry: BattleLogEntry,
+  status: string,
+): StatusEffect | undefined {
+  return entry.statusEffectsApplied?.find((e) => e.type === status)
+}
+
 function buildInitialSnapshot(
   monster: Enemy,
   partyMembers: Adventurer[],
@@ -47,12 +63,19 @@ function buildInitialSnapshot(
       maxHp: m.maxHp,
       currentMp: m.currentMp ?? m.maxMp,
       maxMp: m.maxMp,
-      statuses: m.statusEffects.map((s) => s.type),
+      // Deep copy: the Simulation's own BattleUnit state is created from
+      // (but never the same reference as) this Adventurer, and duration
+      // ticks mutate a StatusEffect in place — this snapshot must never
+      // reflect any Battle-time mutation that happens after it's taken
+      // (Phase 9.8.3).
+      statusEffects: deepClone(m.statusEffects),
     })),
     monster: {
       currentHp: monster.currentHp ?? monster.maxHp,
       maxHp: monster.maxHp,
-      statuses: [],
+      // A freshly-generated boss Enemy never carries a pre-existing status
+      // (`createEnemyUnit` always starts `statusEffects: []`).
+      statusEffects: [],
     },
   }
 }
@@ -232,12 +255,15 @@ export function buildMainQuestBattleTrace(params: {
         }
         if (entry.statusApplied && entry.statusApplied.length > 0) {
           for (const status of entry.statusApplied) {
-            events.push({
-              type: 'statusApplied',
-              round: currentRound,
-              targetId,
-              status,
-            })
+            const effect = findAppliedEffect(entry, status)
+            if (effect) {
+              events.push({
+                type: 'statusApplied',
+                round: currentRound,
+                targetId,
+                effect,
+              })
+            }
           }
         }
       }
@@ -366,12 +392,15 @@ export function buildMainQuestBattleTrace(params: {
       }
       if (entry.statusApplied && entry.statusApplied.length > 0) {
         for (const status of entry.statusApplied) {
-          events.push({
-            type: 'statusApplied',
-            round: currentRound,
-            targetId,
-            status,
-          })
+          const effect = findAppliedEffect(entry, status)
+          if (effect) {
+            events.push({
+              type: 'statusApplied',
+              round: currentRound,
+              targetId,
+              effect,
+            })
+          }
         }
       }
       continue
@@ -476,12 +505,15 @@ export function buildMainQuestBattleTrace(params: {
       for (const targetId of entry.targetIds) {
         if (entry.statusApplied) {
           for (const status of entry.statusApplied) {
-            events.push({
-              type: 'statusApplied',
-              round: currentRound,
-              targetId,
-              status,
-            })
+            const effect = findAppliedEffect(entry, status)
+            if (effect) {
+              events.push({
+                type: 'statusApplied',
+                round: currentRound,
+                targetId,
+                effect,
+              })
+            }
           }
         }
         if (entry.statusRemoved) {

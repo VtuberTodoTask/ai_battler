@@ -329,6 +329,60 @@ describe('MainQuestBattleScene lifecycle', () => {
     expect(pop).toHaveBeenCalled()
   })
 
+  it('builds real motif runtime elements from the boss visualProfile.presentationMotifs (Phase 9.8.3 item 72)', async () => {
+    const scene = new MainQuestBattleScene()
+    const { context } = createSceneContext()
+    const { campaign, attemptId } = await resolvedAttemptFixture(
+      'mqbs-motif-001',
+      false,
+    )
+    const input: MainQuestBattleSceneInput = {
+      attemptId,
+      returnTarget: { sceneId: 'mainQuest' },
+    }
+
+    scene.mount(context, input)
+    scene.setCampaign(campaign, {
+      selectedPartyId: null,
+      selectedQuestId: null,
+      openCharacterId: null,
+      modalOpen: false,
+    })
+
+    // root -> cameraLayer -> [bg, monsterContainer, ...] -> monsterContainer's
+    // first child is the motif layer (added before the boss silhouette so it
+    // renders behind it) — it must actually hold built Graphics elements,
+    // not just have `motifTokens` computed and left unconsumed.
+    const root = context.layers.content.children[0] as Container
+    const cameraLayer = root.children[0] as Container
+    const monsterContainer = cameraLayer.children[1] as Container
+    const motifLayer = monsterContainer.children[0] as Container
+    expect(motifLayer.children.length).toBeGreaterThan(0)
+
+    // Motif animation must not throw, and the element should actually
+    // change over (real, unscaled) time — confirming the runtime elements
+    // are live-updated per frame, not static decorations. Alden's motif
+    // (a `shadow` element) only animates `alpha` (a slow pulse), not
+    // position, so both are checked.
+    const firstElement = motifLayer.children[0] as unknown as {
+      x: number
+      y: number
+      alpha: number
+    }
+    const before = {
+      x: firstElement.x,
+      y: firstElement.y,
+      alpha: firstElement.alpha,
+    }
+    for (let i = 0; i < 40; i++) scene.update(50)
+    const after = {
+      x: firstElement.x,
+      y: firstElement.y,
+      alpha: firstElement.alpha,
+    }
+    expect(before).not.toEqual(after)
+  })
+
   it('never mutates the Campaign it is given (Battle Playback has zero Campaign mutation)', async () => {
     const scene = new MainQuestBattleScene()
     const { context } = createSceneContext()

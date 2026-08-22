@@ -63,10 +63,10 @@ describe('Phase 9.8 Main Quest Battle Playback Plan', () => {
             maxHp: 50,
             currentMp: 20,
             maxMp: 20,
-            statuses: [],
+            statusEffects: [],
           },
         ],
-        monster: { currentHp: 100, maxHp: 100, statuses: [] },
+        monster: { currentHp: 100, maxHp: 100, statusEffects: [] },
       },
       events: [
         {

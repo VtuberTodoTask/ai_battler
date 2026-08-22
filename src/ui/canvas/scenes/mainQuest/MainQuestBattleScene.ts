@@ -15,8 +15,10 @@ import {
   type MainQuestBattleViewModel,
 } from '../../viewModel/mainQuestViewModel.ts'
 import {
+  resolveMotifRuntimeElements,
   resolveUniqueMonsterAnimationProfile,
   type MonsterPresentationPlan,
+  type MotifElementSpec,
 } from '../../../../core/mainQuest/presentationProfile.ts'
 import { resolveStatusLabel } from '../../../../core/battle/statusLabels.ts'
 
@@ -138,6 +140,11 @@ interface MonsterHitAnimState {
   elapsedMs: number
 }
 
+interface MotifRuntimeElementRef {
+  spec: MotifElementSpec
+  graphics: Graphics
+}
+
 interface PartyRowRefs {
   container: Container
   nameLabel: GameLabel
@@ -215,6 +222,9 @@ export class MainQuestBattleScene implements GameScene {
 
   // Persistent display objects.
   private _monsterContainer: Container | null = null
+  private _motifLayer: Container | null = null
+  private _motifElements: MotifRuntimeElementRef[] = []
+  private _motifRadius = 90
   private _monsterShapeGraphics: Graphics | null = null
   private _monsterFlashOverlay: Graphics | null = null
   private _monsterNameLabel: GameLabel | null = null
@@ -391,6 +401,11 @@ export class MainQuestBattleScene implements GameScene {
 
     const { shape, color } = pickSilhouette(vm.monsterVisualProfile.assetKey)
     const radius = 90 * vm.monsterVisualProfile.scale
+
+    // Motif layer added first (bottom of paint order) so it renders behind
+    // or around the boss silhouette, never in front of it (item 44).
+    this.buildMotifLayer(container, radius)
+
     const shapeGraphics = new Graphics()
     drawSilhouette(shapeGraphics, shape, color, radius)
     container.addChild(shapeGraphics)
@@ -437,6 +452,169 @@ export class MainQuestBattleScene implements GameScene {
     this._monsterStatusLabel = statusLabel
 
     this.redrawMonsterHpBar(barX, barY)
+  }
+
+  // --- Motif Runtime (Phase 9.8.3 item 42) ------------------------------
+  // Connects the boss's already-derived `motifTokens` to lightweight Pixi
+  // Graphics — built ONCE here from `resolveMotifRuntimeElements` (pure,
+  // deterministic), never recreated; only position/alpha/scale/rotation
+  // are mutated per frame in `updateMotifLayer`. Zero Campaign/Simulation
+  // mutation, zero AI calls, zero RNG (every position is a closed-form
+  // function of elapsed time + the element's own fixed index).
+
+  private buildMotifLayer(parent: Container, radius: number): void {
+    if (!this._monsterPresentationPlan) return
+    const layer = new Container()
+    parent.addChild(layer)
+    this._motifLayer = layer
+    this._motifRadius = radius
+
+    const specs = resolveMotifRuntimeElements(
+      this._monsterPresentationPlan.motifTokens,
+    )
+    this._motifElements = specs.map((spec) => {
+      const graphics = new Graphics()
+      this.drawMotifShape(graphics, spec.kind)
+      layer.addChild(graphics)
+      return { spec, graphics }
+    })
+  }
+
+  private drawMotifShape(g: Graphics, kind: MotifElementSpec['kind']): void {
+    g.clear()
+    switch (kind) {
+      case 'sparks':
+        g.circle(0, 0, 3).fill({ color: 0xffcf6b })
+        break
+      case 'forge_glow':
+        g.circle(0, 0, 70).fill({ color: 0xff8a3d })
+        break
+      case 'mist':
+        g.ellipse(0, 0, 60, 18).fill({ color: 0xcfe8ff })
+        break
+      case 'water_drops':
+        g.circle(0, 0, 3).fill({ color: 0x7fd0ff })
+        break
+      case 'leaves':
+        g.moveTo(0, -5)
+          .lineTo(4, 0)
+          .lineTo(0, 5)
+          .lineTo(-4, 0)
+          .closePath()
+          .fill({ color: 0x6fae4a })
+        break
+      case 'shadow':
+        g.ellipse(0, 0, 70, 20).fill({ color: 0x000000 })
+        break
+      case 'red_glow':
+        g.circle(0, 0, 6).fill({ color: 0xc0203a })
+        break
+      case 'wind':
+        g.roundRect(-40, -1, 80, 2, 1).fill({ color: 0xdfeeff })
+        break
+      case 'debris':
+        g.rect(-3, -3, 6, 6).fill({ color: 0x8a7a63 })
+        break
+      case 'ambient':
+      default:
+        g.circle(0, 0, 4).fill({ color: 0xffffff })
+        break
+    }
+  }
+
+  /** `elapsedMs` is always real (unscaled) time — ambient/idle motif motion
+   * runs at real speed regardless of the 1x/2x Combat-animation-speed
+   * toggle, and keeps animating during a Dialogue pause (only large Combat
+   * attack sequences freeze there — items 62-63). */
+  private updateMotifLayer(elapsedMs: number): void {
+    if (!this._motifLayer) return
+    const radius = this._motifRadius
+    for (const { spec, graphics } of this._motifElements) {
+      const t = elapsedMs
+      const phase = spec.index * 400
+      switch (spec.kind) {
+        case 'sparks': {
+          const cycle = 1200
+          const local = ((t + phase) % cycle) / cycle
+          const angle = spec.index * 1.4
+          graphics.x = Math.cos(angle) * radius * 0.5
+          graphics.y = radius * 0.6 - local * radius * 1.1
+          graphics.alpha = 1 - local
+          break
+        }
+        case 'forge_glow': {
+          const pulse = 0.6 + 0.4 * Math.sin(t / 900)
+          graphics.x = 0
+          graphics.y = radius * 0.1
+          graphics.alpha = 0.18 + 0.12 * pulse
+          graphics.scale.set(0.9 + 0.1 * pulse)
+          break
+        }
+        case 'mist': {
+          graphics.x = Math.sin((t + phase) / 2600) * radius * 0.9
+          graphics.y = radius * 0.5 + spec.index * 14
+          graphics.alpha = 0.16
+          break
+        }
+        case 'water_drops': {
+          const cycle = 1800
+          const local = ((t + phase) % cycle) / cycle
+          graphics.x = (spec.index - 1) * radius * 0.4
+          graphics.y = -radius * 0.6 + local * radius * 1.6
+          graphics.alpha =
+            local < 0.85 ? 0.8 : 0.8 * (1 - (local - 0.85) / 0.15)
+          break
+        }
+        case 'leaves': {
+          const cycle = 3200
+          const local = ((t + phase) % cycle) / cycle
+          graphics.x = -radius * 0.8 + local * radius * 1.6
+          graphics.y =
+            -radius * 0.6 +
+            Math.sin(local * Math.PI * 2 + spec.index) * radius * 0.3
+          graphics.rotation = local * Math.PI * 2
+          graphics.alpha = 0.7
+          break
+        }
+        case 'shadow': {
+          graphics.x = 0
+          graphics.y = radius * 0.85
+          graphics.alpha = 0.22 + 0.08 * Math.sin(t / 1400)
+          break
+        }
+        case 'red_glow': {
+          graphics.x = radius * 0.25
+          graphics.y = -radius * 0.5
+          // Slow, subtle pulse — Nosferatu is never flashy (item 70).
+          graphics.alpha = 0.5 + 0.25 * Math.sin(t / 2400)
+          break
+        }
+        case 'wind': {
+          const cycle = 2200
+          const local = ((t + phase) % cycle) / cycle
+          graphics.x = -radius * 1.2 + local * radius * 2.4
+          graphics.y = -radius * 0.2 + spec.index * 24
+          graphics.alpha = local < 0.5 ? local * 0.7 : (1 - local) * 0.7
+          break
+        }
+        case 'debris': {
+          const cycle = 2600
+          const local = ((t + phase) % cycle) / cycle
+          const angle = local * Math.PI * 2
+          graphics.x = Math.cos(angle + spec.index) * radius * 0.7
+          graphics.y = Math.sin(angle + spec.index) * radius * 0.35
+          graphics.alpha = 0.5
+          break
+        }
+        case 'ambient':
+        default: {
+          graphics.x = 0
+          graphics.y = 0
+          graphics.alpha = 0.15 + 0.05 * Math.sin(t / 1600)
+          break
+        }
+      }
+    }
   }
 
   /** The monster's HP bar's fixed screen position — its radius (and so this
@@ -682,6 +860,8 @@ export class MainQuestBattleScene implements GameScene {
     this._logLabels = []
     this._popups = []
     this._monsterContainer = null
+    this._motifLayer = null
+    this._motifElements = []
     this._monsterShapeGraphics = null
     this._monsterFlashOverlay = null
     this._monsterNameLabel = null
@@ -820,12 +1000,18 @@ export class MainQuestBattleScene implements GameScene {
         }
         return 120
       }
-      case 'statusApplied':
-        this.pushLog(
-          `${this.nameFor(event.targetId)}は${resolveStatusLabel(event.status)}状態になった`,
-        )
-        this.applyStatusApplied(event.targetId, event.status)
-        return 400
+      case 'statusApplied': {
+        const isNew = this.applyStatusApplied(event.targetId, event.effect.type)
+        // A refresh/duration-tick on an already-present status re-syncs
+        // silently (no log spam every round) — only a genuinely new status
+        // gets an announcement line.
+        if (isNew) {
+          this.pushLog(
+            `${this.nameFor(event.targetId)}は${resolveStatusLabel(event.effect.type)}状態になった`,
+          )
+        }
+        return isNew ? 400 : 80
+      }
       case 'statusRemoved':
         this.pushLog(
           `${this.nameFor(event.targetId)}の${resolveStatusLabel(event.status)}状態が解けた`,
@@ -916,25 +1102,35 @@ export class MainQuestBattleScene implements GameScene {
     this.pushLog(`${this.nameFor(targetId)}のHPが${amount}回復`)
   }
 
-  private applyStatusApplied(targetId: string, status: string): void {
+  /**
+   * Returns `true` only when `status` newly appeared (wasn't already
+   * tracked) — a `statusApplied` event also fires for an ordinary duration
+   * tick on an already-present status (Phase 9.8.3), and re-logging/
+   * re-flashing every single round for an ongoing status would be noisy.
+   * The type-name-only `_monsterStatuses`/`member.statuses` lists here are
+   * exactly what the Player-facing `[毒]`-style label needs — never the
+   * full `StatusEffect` object (duration/value/sourceId stay internal).
+   */
+  private applyStatusApplied(targetId: string, status: string): boolean {
     if (this.isMonsterId(targetId)) {
-      if (!this._monsterStatuses.includes(status)) {
-        this._monsterStatuses.push(status)
-      }
+      const isNew = !this._monsterStatuses.includes(status)
+      if (isNew) this._monsterStatuses.push(status)
       const pos = this.monsterBarPosition()
       this.redrawMonsterHpBar(pos.barX, pos.barY)
-      this._monsterFlash = Math.max(this._monsterFlash, 0.5)
-    } else {
-      const member = this._members.get(targetId)
-      if (member && !member.statuses.includes(status)) {
-        member.statuses.push(status)
-      }
-      this.redrawMemberBars(targetId)
+      if (isNew) this._monsterFlash = Math.max(this._monsterFlash, 0.5)
+      return isNew
+    }
+    const member = this._members.get(targetId)
+    const isNew = !!member && !member.statuses.includes(status)
+    if (member && isNew) member.statuses.push(status)
+    this.redrawMemberBars(targetId)
+    if (isNew) {
       this._memberFlash.set(
         targetId,
         Math.max(this._memberFlash.get(targetId) ?? 0, 0.5),
       )
     }
+    return isNew
   }
 
   private applyStatusRemoved(targetId: string, status: string): void {
@@ -1172,6 +1368,10 @@ export class MainQuestBattleScene implements GameScene {
         this._monsterContainer.alpha = alpha
       }
     }
+    // Real (unscaled) time, unconditionally — ambient motifs keep drifting
+    // even during a Dialogue pause (item 63), independent of the 1x/2x
+    // Combat-animation-speed toggle (item 62).
+    this.updateMotifLayer(this._idleTimeMs)
     if (this._monsterFlashOverlay) {
       this._monsterFlash = Math.max(0, this._monsterFlash - dt / 250)
       this._monsterFlashOverlay.alpha = this._monsterFlash

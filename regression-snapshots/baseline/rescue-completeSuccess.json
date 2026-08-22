@@ -201,6 +201,14 @@
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
@@ -213,6 +221,14 @@
               "result": "ジーク ハインドは自らも身構えた。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
@@ -361,6 +377,38 @@
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
               "critical": true,
@@ -402,6 +450,14 @@
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
@@ -414,6 +470,14 @@
               "result": "ジーク ハインドは自らも身構えた。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
@@ -520,6 +584,38 @@
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
               "critical": false,
@@ -601,6 +697,14 @@
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
@@ -613,6 +717,14 @@
               "result": "ジーク ハインドは自らも身構えた。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
@@ -668,6 +780,38 @@
               "round": 3,
               "successChance": 5,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
@@ -730,6 +874,14 @@
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
@@ -742,6 +894,14 @@
               "result": "ジーク ハインドは自らも身構えた。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
@@ -811,6 +971,38 @@
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
+            },
+            {
               "actionType": "retreat",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
               "phase": "retreat",
@@ -861,6 +1053,14 @@
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
@@ -873,6 +1073,14 @@
               "result": "ジーク ハインドは自らも身構えた。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
@@ -960,6 +1168,38 @@
               "round": 5,
               "successChance": 7,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "retreat",
@@ -1073,6 +1313,14 @@
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
@@ -1085,6 +1333,14 @@
               "result": "ジーク ハインドは自らも身構えた。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
@@ -1104,6 +1360,38 @@
               "round": 6,
               "successChance": 7,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "retreat",
@@ -1176,6 +1464,14 @@
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
@@ -1188,6 +1484,14 @@
               "result": "ジーク ハインドは自らも身構えた。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
@@ -1227,6 +1531,38 @@
               "targetIds": [
                 "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2"
               ]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "retreat",
@@ -1269,6 +1605,14 @@
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 8,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
@@ -1281,6 +1625,14 @@
               "result": "ジーク ハインドは自らも身構えた。",
               "round": 8,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
@@ -1350,6 +1702,38 @@
               "round": 8,
               "successChance": 7,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "retreat",

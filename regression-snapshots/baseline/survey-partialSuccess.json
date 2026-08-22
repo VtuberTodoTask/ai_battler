@@ -264,6 +264,14 @@
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
@@ -276,6 +284,14 @@
               "result": "リナ リーフは自らも身構えた。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-support-s109-support-3"]
             },
             {
@@ -355,6 +371,38 @@
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "C-ranger-s109-ranger-1",
               "critical": false,
@@ -408,6 +456,14 @@
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
@@ -420,6 +476,14 @@
               "result": "リナ リーフは自らも身構えた。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-support-s109-support-3"]
             },
             {
@@ -532,6 +596,38 @@
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "C-ranger-s109-ranger-1",
               "critical": false,
@@ -614,6 +710,14 @@
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
@@ -626,6 +730,14 @@
               "result": "リナ リーフは自らも身構えた。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-support-s109-support-3"]
             },
             {
@@ -707,6 +819,38 @@
               "round": 3,
               "successChance": 47,
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "ranged",
@@ -809,6 +953,14 @@
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
@@ -821,6 +973,14 @@
               "result": "リナ リーフは自らも身構えた。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-support-s109-support-3"]
             },
             {
@@ -866,6 +1026,38 @@
               "statusApplied": [],
               "successChance": 46,
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "retreat",
@@ -967,6 +1159,14 @@
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
@@ -979,6 +1179,14 @@
               "result": "リナ リーフは自らも身構えた。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-support-s109-support-3"]
             },
             {
@@ -998,6 +1206,38 @@
               "round": 5,
               "successChance": 46,
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "retreat",

@@ -280,6 +280,14 @@
               "result": "マルチナ スカイがドラン オーシャンを防護した。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
@@ -292,6 +300,14 @@
               "result": "マルチナ スカイは自らも身構えた。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-support-s1-support-3"]
             },
             {
@@ -349,6 +365,38 @@
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ドラン オーシャンの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ スカイの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s1-support-3"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "C-ranger-s1-ranger-1",
               "critical": false,
@@ -401,6 +449,14 @@
               "result": "マルチナ スカイがドラン オーシャンを防護した。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
@@ -413,6 +469,14 @@
               "result": "マルチナ スカイは自らも身構えた。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-support-s1-support-3"]
             },
             {
@@ -522,6 +586,38 @@
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ドラン オーシャンの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ スカイの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s1-support-3"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "C-ranger-s1-ranger-1",
               "critical": false,
@@ -573,6 +669,14 @@
               "result": "マルチナ スカイがドラン オーシャンを防護した。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s1-scout-0"]
             },
             {
@@ -585,6 +689,14 @@
               "result": "マルチナ スカイは自らも身構えた。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-support-s1-support-3"]
             },
             {
@@ -690,6 +802,38 @@
               "round": 3,
               "successChance": 28,
               "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ドラン オーシャンの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ スカイの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s1-support-3"]
             },
             {
               "actionType": "melee",
@@ -801,6 +945,14 @@
               "result": "マルチナ スカイがフェイ アイヴィーを防護した。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-mage-s1-mage-2"]
             },
             {
@@ -813,6 +965,14 @@
               "result": "マルチナ スカイは自らも身構えた。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["C-support-s1-support-3"]
             },
             {
@@ -866,6 +1026,38 @@
               "round": 4,
               "statusRemoved": ["guarded"],
               "targetIds": ["C-scout-s1-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "フェイ アイヴィーの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "マルチナ スカイの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s1-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s1-support-3"]
             },
             {
               "actionType": "retreat",

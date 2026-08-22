@@ -44,7 +44,10 @@ import {
   NATIONAL_THREAT_IDS,
 } from '../mainQuest/threats.ts'
 import { mapMainQuestOutcomeToExpeditionOutcome } from '../mainQuest/simulation.ts'
-import { replayMainQuestBattleTrace } from '../mainQuest/replay.ts'
+import {
+  replayMainQuestBattleTrace,
+  statusEffectsEqual,
+} from '../mainQuest/replay.ts'
 import { MAIN_QUEST_BATTLE_ANCHOR_IDS } from '../mainQuest/types.ts'
 import { isKnownStatusEffectType } from '../battle/statusLabels.ts'
 import type {
@@ -58,6 +61,7 @@ import type {
   AdventurerRole,
   SkillName,
   SkillSet,
+  StatusEffect,
 } from '../models/types.ts'
 import type { ExpeditionOutcome } from '../expedition/types.ts'
 import type { ResolvedDispatch } from '../tavern/types.ts'
@@ -2127,18 +2131,104 @@ function validateWorldEvents(
 const MAIN_QUEST_ANCHOR_SET = new Set<string>(MAIN_QUEST_BATTLE_ANCHOR_IDS)
 
 /**
+ * `sourceId` values the real Battle Engine actually produces for a
+ * non-participant-attributed status (audited against every `addStatus`
+ * call site in `../battle/battle.ts`/`actions.ts`, Phase 9.8.3 item 13):
+ * `'contact'` (Contact-phase stun/weakened), `'stealthStart'` (the
+ * `stealthStart` ability), and `addStatus`'s own `sourceId ?? 'system'`
+ * fallback. A real participant id (party member or the boss) is the other
+ * legal case — this set is deliberately not Party/Boss-limited on its own.
+ */
+const KNOWN_SYSTEM_STATUS_SOURCES = new Set([
+  'contact',
+  'stealthStart',
+  'system',
+])
+
+/**
+ * Generous sanity bounds, not a new Main Quest balance rule (item 15) —
+ * every real `addStatus` call site uses `duration` in `[1, 3]` and `value`
+ * in `[0, 8]` or so; these bounds exist only to catch obviously-corrupted
+ * data (e.g. a tampered `duration: 99` or `value: 500`).
+ */
+const STATUS_DURATION_MAX = 20
+const STATUS_VALUE_ABS_MAX = 200
+
+/**
+ * Structural validity of one full `StatusEffect` object — `type` from the
+ * known whitelist, `duration` a non-negative integer within sanity bounds,
+ * `value` (if present) a finite number within sanity bounds, `sourceId` a
+ * known participant id or a known system source (Phase 9.8.3 items 12-15).
+ * Shared by Initial Snapshot validation, per-event structural validation,
+ * and (indirectly, via presence tracking) sequential consistency — never a
+ * `type`-only check.
+ */
+function validateStatusEffectObject(
+  raw: unknown,
+  validParticipantIds: Set<string>,
+  dayNumber: number,
+): void {
+  assertPlainObject(
+    raw,
+    `Battle Traceの状態異常オブジェクトが壊れています (DAY ${dayNumber})`,
+  )
+  if (typeof raw.type !== 'string' || !isKnownStatusEffectType(raw.type)) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceに未知の状態異常があります (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (
+    typeof raw.duration !== 'number' ||
+    !Number.isInteger(raw.duration) ||
+    raw.duration < 0 ||
+    raw.duration > STATUS_DURATION_MAX
+  ) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの状態異常durationが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (
+    raw.value !== undefined &&
+    (typeof raw.value !== 'number' ||
+      !Number.isFinite(raw.value) ||
+      Math.abs(raw.value) > STATUS_VALUE_ABS_MAX)
+  ) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの状態異常valueが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (
+    typeof raw.sourceId !== 'string' ||
+    raw.sourceId.length === 0 ||
+    (!validParticipantIds.has(raw.sourceId) &&
+      !KNOWN_SYSTEM_STATUS_SOURCES.has(raw.sourceId))
+  ) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの状態異常sourceIdが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+}
+
+/**
  * Structural integrity of one Attempt's stored `battleTrace.initialSnapshot`
  * (Phase 9.8.1 item 81) — every roster member has exactly one snapshot
- * entry, HP/MP are integers within `[0, max]`, and `statuses` is a string
- * array. Never assumes full HP/MP (item 7): a Main Quest Party is not
- * guaranteed to depart at full health, so this only bounds-checks, it does
- * not require `currentHp === maxHp`.
+ * entry, HP/MP are integers within `[0, max]`, and `statusEffects` is a
+ * full, valid `StatusEffect` array (Phase 9.8.3 — never just type names).
+ * Never assumes full HP/MP (item 7): a Main Quest Party is not guaranteed
+ * to depart at full health, so this only bounds-checks, it does not
+ * require `currentHp === maxHp`.
  */
 function validateMainQuestInitialSnapshot(
   snapshot: Record<string, unknown>,
   rosterIds: Set<string>,
+  monsterId: string,
   dayNumber: number,
 ): void {
+  const validParticipantIds = new Set([...rosterIds, monsterId])
   if (!Array.isArray(snapshot.partyMembers)) {
     throw new SaveValidationErrorClass(
       `Battle Traceの初期状態が不正です (DAY ${dayNumber})`,
@@ -2200,14 +2290,14 @@ function validateMainQuestInitialSnapshot(
         'corrupted-data',
       )
     }
-    if (
-      !Array.isArray(raw.statuses) ||
-      raw.statuses.some((s) => typeof s !== 'string')
-    ) {
+    if (!Array.isArray(raw.statusEffects)) {
       throw new SaveValidationErrorClass(
         `Battle Traceの初期状態異常一覧が不正です (DAY ${dayNumber})`,
         'corrupted-data',
       )
+    }
+    for (const effect of raw.statusEffects) {
+      validateStatusEffectObject(effect, validParticipantIds, dayNumber)
     }
   }
   for (const id of rosterIds) {
@@ -2240,11 +2330,14 @@ function validateMainQuestInitialSnapshot(
       'corrupted-data',
     )
   }
-  if (!Array.isArray(monster.statuses)) {
+  if (!Array.isArray(monster.statusEffects)) {
     throw new SaveValidationErrorClass(
       `Battle Traceのモンスター初期状態異常一覧が不正です (DAY ${dayNumber})`,
       'corrupted-data',
     )
+  }
+  for (const effect of monster.statusEffects) {
+    validateStatusEffectObject(effect, validParticipantIds, dayNumber)
   }
 }
 
@@ -2266,13 +2359,19 @@ function validateMainQuestStatusTraceConsistency(
   monsterId: string,
   dayNumber: number,
 ): void {
+  // targetId -> type -> present (the effect's other fields are checked by
+  // `validateStatusEffectObject` at the point each event/snapshot entry is
+  // structurally validated; this map only needs to know WHICH types are
+  // currently present, to catch an illegal removal — full-object final-
+  // state parity is `validateMainQuestBattleTrace`'s separate job, via the
+  // shared `replayMainQuestBattleTrace`/`statusEffectsEqual`).
   const presence = new Map<string, Set<string>>()
 
-  function seed(targetId: string, statuses: unknown): void {
+  function seed(targetId: string, statusEffects: unknown): void {
     const set = new Set<string>()
-    if (Array.isArray(statuses)) {
-      for (const s of statuses) {
-        if (typeof s === 'string') set.add(s)
+    if (Array.isArray(statusEffects)) {
+      for (const e of statusEffects) {
+        if (isPlainObject(e) && typeof e.type === 'string') set.add(e.type)
       }
     }
     presence.set(targetId, set)
@@ -2282,12 +2381,12 @@ function validateMainQuestStatusTraceConsistency(
   if (Array.isArray(partyMembers)) {
     for (const raw of partyMembers) {
       if (isPlainObject(raw) && typeof raw.characterId === 'string') {
-        seed(raw.characterId, raw.statuses)
+        seed(raw.characterId, raw.statusEffects)
       }
     }
   }
   if (isPlainObject(initialSnapshot.monster)) {
-    seed(monsterId, initialSnapshot.monster.statuses)
+    seed(monsterId, initialSnapshot.monster.statusEffects)
   }
 
   for (const event of events) {
@@ -2295,14 +2394,18 @@ function validateMainQuestStatusTraceConsistency(
       continue
     }
     const targetId = event.targetId
-    const status = event.status
-    if (typeof targetId !== 'string' || typeof status !== 'string') continue
+    if (typeof targetId !== 'string') continue
     const set = presence.get(targetId) ?? new Set<string>()
     presence.set(targetId, set)
 
     if (event.type === 'statusApplied') {
-      set.add(status)
+      const effect = event.effect
+      if (isPlainObject(effect) && typeof effect.type === 'string') {
+        set.add(effect.type)
+      }
     } else {
+      const status = event.status
+      if (typeof status !== 'string') continue
       if (!set.has(status)) {
         throw new SaveValidationErrorClass(
           `Battle Traceが付与されていない状態異常の解除を記録しています (DAY ${dayNumber})`,
@@ -2387,18 +2490,23 @@ function validateMainQuestBattleTrace(
       )
     }
 
-    if (
-      (event.type === 'statusApplied' || event.type === 'statusRemoved') &&
-      (typeof event.status !== 'string' ||
-        !isKnownStatusEffectType(event.status))
-    ) {
-      throw new SaveValidationErrorClass(
-        `Battle Traceに未知の状態異常があります (DAY ${dayNumber})`,
-        'corrupted-data',
-      )
+    const validIds = new Set([...(rosterIds ?? []), monsterId])
+
+    if (event.type === 'statusRemoved') {
+      if (
+        typeof event.status !== 'string' ||
+        !isKnownStatusEffectType(event.status)
+      ) {
+        throw new SaveValidationErrorClass(
+          `Battle Traceに未知の状態異常があります (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+    }
+    if (event.type === 'statusApplied') {
+      validateStatusEffectObject(event.effect, validIds, dayNumber)
     }
 
-    const validIds = new Set([...(rosterIds ?? []), monsterId])
     for (const key of ['actorId', 'targetId', 'memberId'] as const) {
       const value = event[key]
       if (typeof value === 'string' && !validIds.has(value)) {
@@ -2423,6 +2531,7 @@ function validateMainQuestBattleTrace(
   validateMainQuestInitialSnapshot(
     trace.initialSnapshot as Record<string, unknown>,
     rosterIds,
+    monsterId,
     dayNumber,
   )
   validateMainQuestStatusTraceConsistency(
@@ -2473,18 +2582,30 @@ function validateMainQuestBattleTrace(
       )
     }
 
-    const storedStatuses = Array.isArray(finalState.statusEffects)
-      ? new Set(
-          finalState.statusEffects
-            .map((s) => (isPlainObject(s) ? s.type : undefined))
-            .filter((t): t is string => typeof t === 'string'),
-        )
-      : new Set<string>()
-    const replayedStatuses = new Set(member.statuses)
-    const statusesMatch =
-      storedStatuses.size === replayedStatuses.size &&
-      [...storedStatuses].every((s) => replayedStatuses.has(s))
-    if (!statusesMatch) {
+    // Full-object comparison (type/duration/value/sourceId), never a
+    // `type`-only `Set` (Phase 9.8.3 item 26/27) — a tampered `duration`/
+    // `value`/`sourceId` on the stored final state, with the Trace itself
+    // left untouched, disagrees with what the Trace independently replays
+    // to and is rejected here exactly like any other final-state mismatch.
+    const storedEffects: StatusEffect[] = Array.isArray(
+      finalState.statusEffects,
+    )
+      ? finalState.statusEffects
+          .filter(isPlainObject)
+          .filter(
+            (e) =>
+              typeof e.type === 'string' &&
+              typeof e.duration === 'number' &&
+              typeof e.sourceId === 'string',
+          )
+          .map((e) => ({
+            type: e.type as StatusEffect['type'],
+            duration: e.duration as number,
+            value: e.value as number | undefined,
+            sourceId: e.sourceId as string,
+          }))
+      : []
+    if (!statusEffectsEqual(member.statusEffects, storedEffects)) {
       throw new SaveValidationErrorClass(
         `Battle Traceの再生結果の状態異常がSimulation Resultの最終状態と一致しません (DAY ${dayNumber})`,
         'corrupted-data',

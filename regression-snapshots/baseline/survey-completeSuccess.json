@@ -234,6 +234,14 @@
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -246,6 +254,14 @@
               "result": "グスタフ アイヴィーは自らも身構えた。",
               "round": 1,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-support-s49-support-3"]
             },
             {
@@ -356,6 +372,38 @@
               "round": 1,
               "successChance": 26,
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル エルウィンの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "グスタフ アイヴィーの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "melee",
@@ -478,6 +526,14 @@
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -490,6 +546,14 @@
               "result": "グスタフ アイヴィーは自らも身構えた。",
               "round": 2,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-support-s49-support-3"]
             },
             {
@@ -527,6 +591,38 @@
               "round": 2,
               "successChance": 26,
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル エルウィンの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "グスタフ アイヴィーの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "ranged",
@@ -610,6 +706,14 @@
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -622,6 +726,14 @@
               "result": "グスタフ アイヴィーは自らも身構えた。",
               "round": 3,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-support-s49-support-3"]
             },
             {
@@ -701,6 +813,38 @@
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル エルウィンの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "グスタフ アイヴィーの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-support-s49-support-3"]
+            },
+            {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
               "critical": false,
@@ -774,6 +918,14 @@
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -786,6 +938,14 @@
               "result": "グスタフ アイヴィーは自らも身構えた。",
               "round": 4,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-support-s49-support-3"]
             },
             {
@@ -872,6 +1032,38 @@
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル エルウィンの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "グスタフ アイヴィーの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-support-s49-support-3"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
               "critical": false,
@@ -934,6 +1126,14 @@
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -946,6 +1146,14 @@
               "result": "グスタフ アイヴィーは自らも身構えた。",
               "round": 5,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-support-s49-support-3"]
             },
             {
@@ -1054,6 +1262,38 @@
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル エルウィンの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "グスタフ アイヴィーの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-support-s49-support-3"]
+            },
+            {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
               "critical": false,
@@ -1154,6 +1394,14 @@
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -1166,6 +1414,14 @@
               "result": "グスタフ アイヴィーは自らも身構えた。",
               "round": 6,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-support-s49-support-3"]
             },
             {
@@ -1207,6 +1463,38 @@
               "round": 6,
               "successChance": 26,
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル エルウィンの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "グスタフ アイヴィーの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "ranged",
@@ -1300,6 +1588,14 @@
               "result": "グスタフ アイヴィーがベル エルウィンを防護した。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
@@ -1312,6 +1608,14 @@
               "result": "グスタフ アイヴィーは自らも身構えた。",
               "round": 7,
               "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
               "targetIds": ["S-support-s49-support-3"]
             },
             {
@@ -1375,6 +1679,38 @@
               "round": 7,
               "successChance": 40,
               "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ベル エルウィンの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["S-scout-s49-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "グスタフ アイヴィーの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "S-support-s49-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["S-support-s49-support-3"]
             },
             {
               "actionType": "retreat",
