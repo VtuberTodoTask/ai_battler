@@ -196,7 +196,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 4,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -211,9 +213,19 @@
               "targetIds": ["C-mage-s9-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s9-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ヴァレスの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s9-mage-2",
+              "critical": true,
               "damage": 17,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -232,7 +244,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s9-vanguard-0",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -259,12 +273,43 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -281,7 +326,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -297,7 +344,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -313,7 +362,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s9-healer-3",
+              "critical": true,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -330,9 +381,43 @@
               ]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン ピークの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ スカイの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s9-vanguard-0",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -359,12 +444,51 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
+            },
+            {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s9-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ヴァレスの魔力が減少した。",
+              "round": 2
             },
             {
               "actionType": "magic",
               "actorId": "C-mage-s9-mage-2",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -383,7 +507,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -400,7 +526,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -417,7 +545,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -434,7 +564,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:1",
+              "critical": true,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -451,18 +583,54 @@
             {
               "actionType": "heal",
               "actorId": "C-healer-s9-healer-3",
+              "healAmount": 40,
               "metadata": {
                 "actualHealAmount": 40
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "シエラ ピークがフェイ ヴァレスを回復させた。+40 HP",
               "round": 2,
               "targetIds": ["C-mage-s9-mage-2"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン ピークの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ スカイの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -478,7 +646,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s9-vanguard-0",
+              "critical": true,
               "damage": 23,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -506,7 +676,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -523,7 +695,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -537,9 +711,19 @@
               "targetIds": ["C-mage-s9-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s9-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ヴァレスの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s9-mage-2",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -558,7 +742,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s9-healer-3",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -585,12 +771,75 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン ピークの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ スカイの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -607,7 +856,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s9-vanguard-0",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -634,12 +885,43 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -655,7 +937,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -669,9 +953,19 @@
               "targetIds": ["C-mage-s9-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s9-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ヴァレスの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s9-mage-2",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -690,7 +984,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s9-healer-3",
+              "critical": false,
               "damage": 16,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -707,9 +1003,43 @@
               ]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン ピークの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ スカイの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -726,7 +1056,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s9-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -744,7 +1076,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -759,9 +1093,19 @@
               "targetIds": ["C-mage-s9-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s9-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ヴァレスの魔力が減少した。",
+              "round": 5
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s9-mage-2",
+              "critical": true,
               "damage": 23,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -797,12 +1141,43 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:3",
+              "critical": true,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -819,13 +1194,47 @@
             {
               "actionType": "heal",
               "actorId": "C-healer-s9-healer-3",
+              "healAmount": 33,
               "metadata": {
                 "actualHealAmount": 33
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "シエラ ピークがフェイ ヴァレスを回復させた。+33 HP",
               "round": 5,
               "targetIds": ["C-mage-s9-mage-2"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン ピークの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ スカイの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "retreat",
@@ -848,7 +1257,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s9-vanguard-0",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -867,7 +1278,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -891,12 +1304,51 @@
               "phase": "combat",
               "result": "リナ スカイがヴァン ピークを防護した。",
               "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s9-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ スカイは自らも身構えた。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
+            },
+            {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s9-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ヴァレスの魔力が減少した。",
+              "round": 6
             },
             {
               "actionType": "magic",
               "actorId": "C-mage-s9-mage-2",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -915,7 +1367,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s9-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -929,6 +1383,38 @@
               "targetIds": [
                 "D-beast-ambusher-elite-s9:battle:0:encounter:enemy:3"
               ]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン ピークの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s9-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ スカイの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s9-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s9-guardian-1"]
             },
             {
               "actionType": "retreat",

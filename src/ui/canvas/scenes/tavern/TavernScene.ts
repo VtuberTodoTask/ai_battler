@@ -29,6 +29,10 @@ import type { TavernLedgerSceneInput } from '../../viewModel/tavernLedgerViewMod
 import type { VisitorRegistrySceneInput } from '../../viewModel/visitorRegistryViewModel.ts'
 import type { QuestChainLogSceneInput } from '../../viewModel/questChainLogViewModel.ts'
 import type { WorldEventLogSceneInput } from '../../viewModel/worldEventLogViewModel.ts'
+import {
+  createMainQuestSceneInput,
+  type MainQuestSceneInput,
+} from '../../viewModel/mainQuestViewModel.ts'
 import type { TavernUpgradeSceneInput } from '../../viewModel/tavernUpgradeViewModel.ts'
 import type {
   SoundNovelSceneInput,
@@ -155,6 +159,27 @@ export class TavernScene implements GameScene {
     this._campaign = campaign
     this._uiState = { ...uiState }
     this._previousPartyCount = campaign.parties.length
+
+    // Main Quest Presentation is mandatory before any further normal play
+    // (item 72 — "通常UIでskip不可"): whenever the Tavern would otherwise
+    // render, redirect to MainQuestScene first if a resolved Attempt's
+    // Presentation has not been watched through yet. This takes priority
+    // over the day-advance -> DayResults redirect below, and applies
+    // whether the Player just advanced or merely returned/reloaded into
+    // this state — MainQuestScene itself drives generation-then-viewing.
+    const pendingAttemptId = campaign.mainQuest.pendingPresentationAttemptId
+    if (pendingAttemptId) {
+      const pendingAttempt = campaign.mainQuest.attempts.find(
+        (a) => a.id === pendingAttemptId,
+      )
+      if (pendingAttempt && pendingAttempt.presentationStatus !== 'completed') {
+        const input: MainQuestSceneInput = createMainQuestSceneInput({
+          sceneId: 'tavern',
+        })
+        this._context!.canvasGame.sceneManager?.push('mainQuest', input)
+        return
+      }
+    }
 
     const dayAdvanced =
       previousDayNumber > 0 && campaign.dayNumber > previousDayNumber
@@ -289,6 +314,7 @@ export class TavernScene implements GameScene {
       onOpenVisitorRegistry: () => this.openVisitorRegistry(),
       onOpenQuestChainLog: () => this.openQuestChainLog(),
       onOpenWorldEventLog: () => this.openWorldEventLog(),
+      onOpenMainQuest: () => this.openMainQuest(),
     })
     this._header.x = 0
     this._header.y = 0
@@ -510,6 +536,17 @@ export class TavernScene implements GameScene {
       },
     }
     this._context.canvasGame.sceneManager?.push('worldEventLog', input)
+  }
+
+  private openMainQuest(): void {
+    if (!this._context) return
+
+    const input = createMainQuestSceneInput({
+      sceneId: 'tavern',
+      selectedPartyId: this._uiState.selectedPartyId ?? undefined,
+      selectedQuestId: this._uiState.selectedQuestId ?? undefined,
+    })
+    this._context.canvasGame.sceneManager?.push('mainQuest', input)
   }
 
   private setActionMessage(

@@ -200,12 +200,43 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "C-healer-s23-healer-3",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -224,7 +255,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -244,7 +277,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -258,9 +293,19 @@
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s23-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ジーク アイヴィーの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -280,7 +325,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -296,7 +343,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -312,7 +361,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -326,9 +377,43 @@
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
+              "critical": true,
               "damage": 17,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -364,12 +449,43 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -383,9 +499,19 @@
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s23-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ジーク アイヴィーの魔力が減少した。",
+              "round": 2
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -404,7 +530,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s23-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -422,7 +550,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -438,7 +568,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -452,9 +584,43 @@
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -471,9 +637,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s23-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ジーク アイヴィーの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -492,7 +668,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s23-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -518,12 +696,43 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -539,7 +748,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -555,7 +766,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -569,9 +782,43 @@
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -587,9 +834,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s23-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ジーク アイヴィーの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -616,12 +873,43 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "C-healer-s23-healer-3",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -649,7 +937,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -665,7 +955,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -677,6 +969,38 @@
               "round": 4,
               "successChance": 7,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "retreat",
@@ -699,7 +1023,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -726,12 +1052,43 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "C-healer-s23-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -747,9 +1104,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s23-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ジーク アイヴィーの魔力が減少した。",
+              "round": 5
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -769,7 +1136,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -785,7 +1154,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -797,6 +1168,38 @@
               "round": 5,
               "successChance": 7,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "retreat",
@@ -819,7 +1222,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s23-healer-3",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -838,7 +1243,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -856,9 +1263,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s23-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ジーク アイヴィーの魔力が減少した。",
+              "round": 6
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -895,12 +1312,43 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -914,6 +1362,38 @@
               "targetIds": ["C-vanguard-s23-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
+            },
+            {
               "actionType": "retreat",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
               "phase": "retreat",
@@ -925,7 +1405,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -942,9 +1424,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s23-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ジーク アイヴィーの魔力が減少した。",
+              "round": 7
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -971,12 +1463,43 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -992,7 +1515,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s23-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1008,6 +1533,38 @@
               ]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
+            },
+            {
               "actionType": "retreat",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
               "phase": "retreat",
@@ -1019,7 +1576,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s23-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -1045,12 +1604,43 @@
               "phase": "combat",
               "result": "ジーク ハインドがヴァン リーフを防護した。",
               "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s23-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "ジーク ハインドは自らも身構えた。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "C-healer-s23-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1066,9 +1656,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s23-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ジーク アイヴィーの魔力が減少した。",
+              "round": 8
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s23-mage-2",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -1088,7 +1688,9 @@
             {
               "actionType": "melee",
               "actorId": "D-beast-swarm-standard-s23:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1100,6 +1702,38 @@
               "round": 8,
               "successChance": 7,
               "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ヴァン リーフの状態異常が経過した。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s23-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "ジーク ハインドの状態異常が経過した。",
+              "round": 8,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s23-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s23-guardian-1"]
             },
             {
               "actionType": "retreat",

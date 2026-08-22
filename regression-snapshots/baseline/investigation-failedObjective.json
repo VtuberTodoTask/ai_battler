@@ -178,7 +178,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 4,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -195,7 +197,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -213,7 +217,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
+              "critical": true,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -230,7 +236,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -247,7 +255,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -262,9 +272,19 @@
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド クレストの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "critical": true,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -283,9 +303,11 @@
             {
               "actionType": "heal",
               "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "healAmount": 34,
               "metadata": {
                 "actualHealAmount": 34
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "レオ クレストがガルド クレストを回復させた。+34 HP",
               "round": 1,
@@ -294,7 +316,9 @@
             {
               "actionType": "melee",
               "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -312,7 +336,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -329,7 +355,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -346,7 +374,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -365,7 +395,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -382,7 +414,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 4,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -399,7 +433,9 @@
             {
               "actionType": "melee",
               "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -417,18 +453,30 @@
             {
               "actionType": "heal",
               "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "healAmount": 29,
               "metadata": {
                 "actualHealAmount": 29
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "レオ クレストがガルド クレストを回復させた。+29 HP",
               "round": 2,
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド クレストの魔力が減少した。",
+              "round": 2
+            },
+            {
               "actionType": "magic",
               "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -447,7 +495,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -464,7 +514,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 4,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -481,7 +533,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -500,7 +554,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "critical": true,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -517,7 +573,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "critical": true,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -534,7 +592,9 @@
             {
               "actionType": "melee",
               "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -553,18 +613,30 @@
             {
               "actionType": "heal",
               "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "healAmount": 26,
               "metadata": {
                 "actualHealAmount": 26
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "レオ クレストがガルド クレストを回復させた。+26 HP",
               "round": 3,
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド クレストの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "critical": true,
               "damage": 17,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -592,7 +664,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -609,7 +683,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -626,7 +702,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -643,7 +721,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -662,7 +742,9 @@
             {
               "actionType": "melee",
               "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -678,9 +760,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド クレストの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -699,7 +791,9 @@
             {
               "actionType": "melee",
               "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -717,7 +811,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -734,7 +830,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -751,7 +849,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -768,7 +868,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -784,9 +886,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド クレストの魔力が減少した。",
+              "round": 5
+            },
+            {
               "actionType": "magic",
               "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -805,7 +917,9 @@
             {
               "actionType": "melee",
               "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -824,9 +938,11 @@
             {
               "actionType": "heal",
               "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "healAmount": 39,
               "metadata": {
                 "actualHealAmount": 39
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "レオ クレストがガルド クレストを回復させた。+39 HP",
               "round": 5,
@@ -835,7 +951,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 4,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -852,7 +970,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -869,7 +989,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -887,7 +1009,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 4,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -904,7 +1028,9 @@
             {
               "actionType": "melee",
               "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -923,7 +1049,9 @@
             {
               "actionType": "melee",
               "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -940,9 +1068,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド クレストの魔力が減少した。",
+              "round": 6
+            },
+            {
               "actionType": "magic",
               "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -989,7 +1127,9 @@
             {
               "actionType": "melee",
               "actorId": "D-scout-phase3-1-b-12-scout-0",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -1008,7 +1148,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -1027,7 +1169,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1042,9 +1186,19 @@
               "targetIds": ["D-mage-phase3-1-b-12-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド クレストの魔力が減少した。",
+              "round": 7
+            },
+            {
               "actionType": "magic",
               "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1063,9 +1217,11 @@
             {
               "actionType": "heal",
               "actorId": "D-healer-phase3-1-b-12-healer-3",
+              "healAmount": 27,
               "metadata": {
                 "actualHealAmount": 27
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "レオ クレストがガルド クレストを回復させた。+27 HP",
               "round": 7,
@@ -1083,7 +1239,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-phase3-1-b-12:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1100,7 +1258,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-ranger-phase3-1-b-12-ranger-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -1118,7 +1278,9 @@
             {
               "actionType": "magic",
               "actorId": "D-mage-phase3-1-b-12-mage-2",
+              "critical": true,
               "damage": 20,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,

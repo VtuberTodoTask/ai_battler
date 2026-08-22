@@ -3,6 +3,7 @@ import {
   TAVERN_ECONOMY_CONFIG,
   buildDailyOperatingCostEntryId,
   buildLedgerEntryId,
+  buildMainQuestPaymentEntryId,
   buildUpgradePurchaseEntryId,
 } from '../economy/index.ts'
 import { computeQuestSettlement } from '../economy/questReward.ts'
@@ -38,11 +39,29 @@ import {
   prepareWorldEventsForDay,
   resolveWorldEventsForDay,
 } from '../tavern/campaign/worldEvents.ts'
+import {
+  MAIN_QUEST_THREAT_DEFINITION_MAP,
+  NATIONAL_THREAT_IDS,
+} from '../mainQuest/threats.ts'
+import { mapMainQuestOutcomeToExpeditionOutcome } from '../mainQuest/simulation.ts'
+import {
+  replayMainQuestBattleTrace,
+  statusEffectsEqual,
+} from '../mainQuest/replay.ts'
+import { MAIN_QUEST_BATTLE_ANCHOR_IDS } from '../mainQuest/types.ts'
+import { isKnownStatusEffectType } from '../battle/statusLabels.ts'
+import type {
+  MainQuestBattleInitialSnapshot,
+  MainQuestBattleTrace,
+  MainQuestSimulationResult,
+  MainQuestThreatId,
+} from '../mainQuest/types.ts'
 import type {
   AdventurerRank,
   AdventurerRole,
   SkillName,
   SkillSet,
+  StatusEffect,
 } from '../models/types.ts'
 import type { ExpeditionOutcome } from '../expedition/types.ts'
 import type { ResolvedDispatch } from '../tavern/types.ts'
@@ -79,6 +98,7 @@ const ALLOWED_LEDGER_KINDS = [
   'quest_commission',
   'daily_operating_cost',
   'upgrade_purchase',
+  'main_quest_payment',
 ] as const
 
 const ALLOWED_RANKS = ['E', 'D', 'C', 'B', 'A', 'S'] as const
@@ -318,6 +338,15 @@ type LedgerValidationRecord =
       upgradeId: string
       targetLevel: number
     }
+  | {
+      kind: 'main_quest_payment'
+      day: number
+      amount: number
+      id: string
+      threatId: string
+      attemptId: string
+      partyId: string
+    }
 
 function validateLedgerEntry(
   value: unknown,
@@ -552,6 +581,64 @@ function validateLedgerEntry(
         )
       }
       return { kind, day, amount, id, upgradeId, targetLevel }
+    }
+    case 'main_quest_payment': {
+      if (day < 1) {
+        throw new SaveValidationErrorClass(
+          '主依頼支払いエントリの日数が不正です',
+          'corrupted-data',
+        )
+      }
+      if (amount >= 0) {
+        throw new SaveValidationErrorClass(
+          '主依頼支払いエントリの金額が不正です',
+          'corrupted-data',
+        )
+      }
+      if (source.type !== 'main_quest') {
+        throw new SaveValidationErrorClass(
+          '主依頼支払いエントリのソース種別が不正です',
+          'corrupted-data',
+        )
+      }
+      if (
+        !hasString(source, 'threatId') ||
+        (source.threatId as string).length === 0
+      ) {
+        throw new SaveValidationErrorClass(
+          '主依頼支払いエントリの脅威IDがありません',
+          'corrupted-data',
+        )
+      }
+      if (
+        !hasString(source, 'attemptId') ||
+        (source.attemptId as string).length === 0
+      ) {
+        throw new SaveValidationErrorClass(
+          '主依頼支払いエントリの試行IDがありません',
+          'corrupted-data',
+        )
+      }
+      if (
+        !hasString(source, 'partyId') ||
+        (source.partyId as string).length === 0
+      ) {
+        throw new SaveValidationErrorClass(
+          '主依頼支払いエントリのパーティIDがありません',
+          'corrupted-data',
+        )
+      }
+      const threatId = source.threatId as string
+      const attemptId = source.attemptId as string
+      const partyId = source.partyId as string
+      const expectedId = buildMainQuestPaymentEntryId(threatId, attemptId)
+      if (id !== expectedId) {
+        throw new SaveValidationErrorClass(
+          '主依頼支払いエントリIDが計算値と一致しません',
+          'corrupted-data',
+        )
+      }
+      return { kind, day, amount, id, threatId, attemptId, partyId }
     }
   }
 }
@@ -802,14 +889,16 @@ function validateUpgradeState(value: unknown): Record<TavernUpgradeId, number> {
 }
 
 /**
- * Proves that every upgrade purchase was affordable at the moment it
- * happened, using the funds available at the *start* of its day (day 0's
- * opening balance through the end of the prior day) — never that day's
- * later income (quest commissions) and never the ledger array's insertion
- * order, since same-day purchases are aggregated rather than treated as a
- * sequence. Negative funds are otherwise legal (Phase 9.1+), so this checks
- * affordability at purchase time rather than requiring non-negative final
- * funds.
+ * Proves that every upgrade purchase AND Main Quest Dispatch payment
+ * (Phase 9.8, item 137 — the same "afford-at-the-time" replay Phase 9.3.1
+ * established for upgrades) was affordable at the moment it happened,
+ * using the funds available at the *start* of its day (day 0's opening
+ * balance through the end of the prior day) — never that day's later
+ * income (quest commissions) and never the ledger array's insertion
+ * order, since same-day purchases/payments are aggregated rather than
+ * treated as a sequence. Negative funds are otherwise legal (Phase 9.1+),
+ * so this checks affordability at purchase time rather than requiring
+ * non-negative final funds.
  */
 function validateUpgradePurchaseAffordability(
   ledgerById: Map<string, LedgerValidationRecord>,
@@ -831,12 +920,16 @@ function validateUpgradePurchaseAffordability(
     const fundsAtStartOfDay = runningFunds
 
     const upgradeSpendForDay = dayEntries
-      .filter((entry) => entry.kind === 'upgrade_purchase')
+      .filter(
+        (entry) =>
+          entry.kind === 'upgrade_purchase' ||
+          entry.kind === 'main_quest_payment',
+      )
       .reduce((sum, entry) => sum - entry.amount, 0)
 
     if (upgradeSpendForDay > 0 && upgradeSpendForDay > fundsAtStartOfDay) {
       throw new SaveValidationErrorClass(
-        '設備購入エントリの時点で資金が不足しています',
+        '設備購入・主依頼支払いエントリの時点で資金が不足しています',
         'corrupted-data',
       )
     }
@@ -2035,6 +2128,906 @@ function validateWorldEvents(
   }
 }
 
+const MAIN_QUEST_ANCHOR_SET = new Set<string>(MAIN_QUEST_BATTLE_ANCHOR_IDS)
+
+/**
+ * `sourceId` values the real Battle Engine actually produces for a
+ * non-participant-attributed status (audited against every `addStatus`
+ * call site in `../battle/battle.ts`/`actions.ts`, Phase 9.8.3 item 13):
+ * `'contact'` (Contact-phase stun/weakened), `'stealthStart'` (the
+ * `stealthStart` ability), and `addStatus`'s own `sourceId ?? 'system'`
+ * fallback. A real participant id (party member or the boss) is the other
+ * legal case — this set is deliberately not Party/Boss-limited on its own.
+ */
+const KNOWN_SYSTEM_STATUS_SOURCES = new Set([
+  'contact',
+  'stealthStart',
+  'system',
+])
+
+/**
+ * Generous sanity bounds, not a new Main Quest balance rule (item 15) —
+ * every real `addStatus` call site uses `duration` in `[1, 3]` and `value`
+ * in `[0, 8]` or so; these bounds exist only to catch obviously-corrupted
+ * data (e.g. a tampered `duration: 99` or `value: 500`).
+ */
+const STATUS_DURATION_MAX = 20
+const STATUS_VALUE_ABS_MAX = 200
+
+/**
+ * Structural validity of one full `StatusEffect` object — `type` from the
+ * known whitelist, `duration` a non-negative integer within sanity bounds,
+ * `value` (if present) a finite number within sanity bounds, `sourceId` a
+ * known participant id or a known system source (Phase 9.8.3 items 12-15).
+ * Shared by Initial Snapshot validation, per-event structural validation,
+ * and (indirectly, via presence tracking) sequential consistency — never a
+ * `type`-only check.
+ */
+function validateStatusEffectObject(
+  raw: unknown,
+  validParticipantIds: Set<string>,
+  dayNumber: number,
+): void {
+  assertPlainObject(
+    raw,
+    `Battle Traceの状態異常オブジェクトが壊れています (DAY ${dayNumber})`,
+  )
+  if (typeof raw.type !== 'string' || !isKnownStatusEffectType(raw.type)) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceに未知の状態異常があります (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (
+    typeof raw.duration !== 'number' ||
+    !Number.isInteger(raw.duration) ||
+    raw.duration < 0 ||
+    raw.duration > STATUS_DURATION_MAX
+  ) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの状態異常durationが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (
+    raw.value !== undefined &&
+    (typeof raw.value !== 'number' ||
+      !Number.isFinite(raw.value) ||
+      Math.abs(raw.value) > STATUS_VALUE_ABS_MAX)
+  ) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの状態異常valueが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (
+    typeof raw.sourceId !== 'string' ||
+    raw.sourceId.length === 0 ||
+    (!validParticipantIds.has(raw.sourceId) &&
+      !KNOWN_SYSTEM_STATUS_SOURCES.has(raw.sourceId))
+  ) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの状態異常sourceIdが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+}
+
+/**
+ * Structural integrity of one Attempt's stored `battleTrace.initialSnapshot`
+ * (Phase 9.8.1 item 81) — every roster member has exactly one snapshot
+ * entry, HP/MP are integers within `[0, max]`, and `statusEffects` is a
+ * full, valid `StatusEffect` array (Phase 9.8.3 — never just type names).
+ * Never assumes full HP/MP (item 7): a Main Quest Party is not guaranteed
+ * to depart at full health, so this only bounds-checks, it does not
+ * require `currentHp === maxHp`.
+ */
+function validateMainQuestInitialSnapshot(
+  snapshot: Record<string, unknown>,
+  rosterIds: Set<string>,
+  monsterId: string,
+  dayNumber: number,
+): void {
+  const validParticipantIds = new Set([...rosterIds, monsterId])
+  if (!Array.isArray(snapshot.partyMembers)) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの初期状態が不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  const seen = new Set<string>()
+  for (const raw of snapshot.partyMembers) {
+    assertPlainObject(
+      raw,
+      `Battle Traceの初期パーティ状態が壊れています (DAY ${dayNumber})`,
+    )
+    if (
+      typeof raw.characterId !== 'string' ||
+      !rosterIds.has(raw.characterId)
+    ) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期状態に未知のパーティIDがあります (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (seen.has(raw.characterId)) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期状態にパーティIDの重複があります (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    seen.add(raw.characterId)
+
+    if (typeof raw.maxHp !== 'number' || raw.maxHp <= 0) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期最大HPが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (
+      typeof raw.currentHp !== 'number' ||
+      raw.currentHp < 0 ||
+      raw.currentHp > raw.maxHp
+    ) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期HPが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (typeof raw.maxMp !== 'number' || raw.maxMp < 0) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期最大MPが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (
+      typeof raw.currentMp !== 'number' ||
+      raw.currentMp < 0 ||
+      raw.currentMp > raw.maxMp
+    ) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期MPが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (!Array.isArray(raw.statusEffects)) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期状態異常一覧が不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    for (const effect of raw.statusEffects) {
+      validateStatusEffectObject(effect, validParticipantIds, dayNumber)
+    }
+  }
+  for (const id of rosterIds) {
+    if (!seen.has(id)) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期状態に不足しているパーティメンバーがいます (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+  }
+
+  assertPlainObject(
+    snapshot.monster,
+    `Battle Traceの初期モンスター状態が壊れています (DAY ${dayNumber})`,
+  )
+  const monster = snapshot.monster
+  if (typeof monster.maxHp !== 'number' || monster.maxHp <= 0) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceのモンスター初期最大HPが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (
+    typeof monster.currentHp !== 'number' ||
+    monster.currentHp < 0 ||
+    monster.currentHp > monster.maxHp
+  ) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceのモンスター初期HPが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (!Array.isArray(monster.statusEffects)) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceのモンスター初期状態異常一覧が不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  for (const effect of monster.statusEffects) {
+    validateStatusEffectObject(effect, validParticipantIds, dayNumber)
+  }
+}
+
+/**
+ * Sequential structural consistency of every `statusApplied`/`statusRemoved`
+ * fact in a Battle Trace (Phase 9.8.2 item 1) — independent of, and run
+ * before, the full-state replay: a `statusRemoved` for a status the target
+ * did not actually carry at that point (per the Trace itself, seeded from
+ * the Initial Snapshot) is rejected outright. The real Battle Engine never
+ * produces this pattern — every `removeStatus` call site that reaches a
+ * `BattleLogEntry` first confirms the status is actually present via
+ * `hasStatus`/an explicit pre-clear snapshot (audited in `../battle/
+ * battle.ts`/`actions.ts`) — so this is a genuine tamper signal, not a
+ * false positive on legitimate engine behavior.
+ */
+function validateMainQuestStatusTraceConsistency(
+  initialSnapshot: Record<string, unknown>,
+  events: Record<string, unknown>[],
+  monsterId: string,
+  dayNumber: number,
+): void {
+  // targetId -> type -> present (the effect's other fields are checked by
+  // `validateStatusEffectObject` at the point each event/snapshot entry is
+  // structurally validated; this map only needs to know WHICH types are
+  // currently present, to catch an illegal removal — full-object final-
+  // state parity is `validateMainQuestBattleTrace`'s separate job, via the
+  // shared `replayMainQuestBattleTrace`/`statusEffectsEqual`).
+  const presence = new Map<string, Set<string>>()
+
+  function seed(targetId: string, statusEffects: unknown): void {
+    const set = new Set<string>()
+    if (Array.isArray(statusEffects)) {
+      for (const e of statusEffects) {
+        if (isPlainObject(e) && typeof e.type === 'string') set.add(e.type)
+      }
+    }
+    presence.set(targetId, set)
+  }
+
+  const partyMembers = initialSnapshot.partyMembers
+  if (Array.isArray(partyMembers)) {
+    for (const raw of partyMembers) {
+      if (isPlainObject(raw) && typeof raw.characterId === 'string') {
+        seed(raw.characterId, raw.statusEffects)
+      }
+    }
+  }
+  if (isPlainObject(initialSnapshot.monster)) {
+    seed(monsterId, initialSnapshot.monster.statusEffects)
+  }
+
+  for (const event of events) {
+    if (event.type !== 'statusApplied' && event.type !== 'statusRemoved') {
+      continue
+    }
+    const targetId = event.targetId
+    if (typeof targetId !== 'string') continue
+    const set = presence.get(targetId) ?? new Set<string>()
+    presence.set(targetId, set)
+
+    if (event.type === 'statusApplied') {
+      const effect = event.effect
+      if (isPlainObject(effect) && typeof effect.type === 'string') {
+        set.add(effect.type)
+      }
+    } else {
+      const status = event.status
+      if (typeof status !== 'string') continue
+      if (!set.has(status)) {
+        throw new SaveValidationErrorClass(
+          `Battle Traceが付与されていない状態異常の解除を記録しています (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+      set.delete(status)
+    }
+  }
+}
+
+/**
+ * Structural + causal integrity of one Attempt's stored `battleTrace`
+ * against its `result` (Phase 9.8.1 items 81-84) — never re-runs
+ * `runBattle` (nothing else in this validator re-executes combat
+ * simulations either; see `validateMainQuest`'s own docs for why). Checks
+ * per-event structure (ids/round-order/non-negative amounts), the Initial
+ * Snapshot (`validateMainQuestInitialSnapshot`), every `occurredAnchor` is
+ * from the fixed vocabulary — and, critically, replays the Trace via the
+ * SAME `replayMainQuestBattleTrace` pure helper the runtime/Presentation
+ * layer uses (item 83: never a second, independently-drifting algorithm)
+ * to prove the replayed final HP/MP/incapacitated/dead/monsterDefeated/
+ * outcome match the stored `result` exactly (item 84).
+ */
+function validateMainQuestBattleTrace(
+  trace: Record<string, unknown>,
+  result: Record<string, unknown>,
+  threatId: string,
+  dayNumber: number,
+): void {
+  if (!Array.isArray(trace.occurredAnchors)) {
+    throw new SaveValidationErrorClass(
+      `主依頼試行のBattle Traceが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  for (const anchor of trace.occurredAnchors) {
+    if (typeof anchor !== 'string' || !MAIN_QUEST_ANCHOR_SET.has(anchor)) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceに未知のanchorがあります (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+  }
+
+  const events = trace.events as unknown[]
+  const monsterId = `mainquest:${threatId}`
+  let rosterIds: Set<string> | undefined
+  let lastRound = -Infinity
+
+  for (const rawEvent of events) {
+    assertPlainObject(
+      rawEvent,
+      `主依頼試行のBattle Traceイベントが壊れています (DAY ${dayNumber})`,
+    )
+    const event = rawEvent as Record<string, unknown>
+
+    if (event.type === 'battleStarted') {
+      if (!Array.isArray(event.partyMemberIds)) {
+        throw new SaveValidationErrorClass(
+          `Battle Traceの参加者一覧が不正です (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+      rosterIds = new Set(event.partyMemberIds as string[])
+    }
+
+    if (typeof event.round === 'number') {
+      if (event.round < lastRound) {
+        throw new SaveValidationErrorClass(
+          `Battle Traceのround順序が不正です (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+      lastRound = event.round
+    }
+
+    if (typeof event.amount === 'number' && event.amount < 0) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceのdamage/heal量が負の値です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+
+    const validIds = new Set([...(rosterIds ?? []), monsterId])
+
+    if (event.type === 'statusRemoved') {
+      if (
+        typeof event.status !== 'string' ||
+        !isKnownStatusEffectType(event.status)
+      ) {
+        throw new SaveValidationErrorClass(
+          `Battle Traceに未知の状態異常があります (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+    }
+    if (event.type === 'statusApplied') {
+      validateStatusEffectObject(event.effect, validIds, dayNumber)
+    }
+
+    for (const key of ['actorId', 'targetId', 'memberId'] as const) {
+      const value = event[key]
+      if (typeof value === 'string' && !validIds.has(value)) {
+        throw new SaveValidationErrorClass(
+          `Battle Traceに未知の参加者IDがあります (DAY ${dayNumber})`,
+          'corrupted-data',
+        )
+      }
+    }
+  }
+
+  if (!rosterIds) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceに戦闘開始イベントがありません (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  assertPlainObject(
+    trace.initialSnapshot,
+    `Battle Traceの初期状態がありません (DAY ${dayNumber})`,
+  )
+  validateMainQuestInitialSnapshot(
+    trace.initialSnapshot as Record<string, unknown>,
+    rosterIds,
+    monsterId,
+    dayNumber,
+  )
+  validateMainQuestStatusTraceConsistency(
+    trace.initialSnapshot as Record<string, unknown>,
+    events as Record<string, unknown>[],
+    monsterId,
+    dayNumber,
+  )
+
+  const replay = replayMainQuestBattleTrace(
+    trace.initialSnapshot as unknown as MainQuestBattleInitialSnapshot,
+    trace as unknown as MainQuestBattleTrace,
+  )
+
+  if (replay.monster.defeated !== (result.monsterDefeated === true)) {
+    throw new SaveValidationErrorClass(
+      `Battle TraceのBoss撃破とSimulation Resultが一致しません (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (replay.outcome !== null && replay.outcome !== result.outcome) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの結果とSimulation Resultが一致しません (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+
+  const finalStateById = new Map<string, Record<string, unknown>>()
+  if (Array.isArray(result.finalMemberStates)) {
+    for (const raw of result.finalMemberStates) {
+      if (isPlainObject(raw) && typeof raw.id === 'string') {
+        finalStateById.set(raw.id, raw)
+      }
+    }
+  }
+  for (const member of replay.members) {
+    const finalState = finalStateById.get(member.characterId)
+    if (!finalState) continue
+    if (
+      finalState.currentHp !== member.currentHp ||
+      finalState.currentMp !== member.currentMp ||
+      finalState.incapacitated !== member.incapacitated ||
+      finalState.dead !== member.dead
+    ) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの再生結果がSimulation Resultの最終状態と一致しません (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+
+    // Full-object comparison (type/duration/value/sourceId), never a
+    // `type`-only `Set` (Phase 9.8.3 item 26/27) — a tampered `duration`/
+    // `value`/`sourceId` on the stored final state, with the Trace itself
+    // left untouched, disagrees with what the Trace independently replays
+    // to and is rejected here exactly like any other final-state mismatch.
+    const storedEffects: StatusEffect[] = Array.isArray(
+      finalState.statusEffects,
+    )
+      ? finalState.statusEffects
+          .filter(isPlainObject)
+          .filter(
+            (e) =>
+              typeof e.type === 'string' &&
+              typeof e.duration === 'number' &&
+              typeof e.sourceId === 'string',
+          )
+          .map((e) => ({
+            type: e.type as StatusEffect['type'],
+            duration: e.duration as number,
+            value: e.value as number | undefined,
+            sourceId: e.sourceId as string,
+          }))
+      : []
+    if (!statusEffectsEqual(member.statusEffects, storedEffects)) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの再生結果の状態異常がSimulation Resultの最終状態と一致しません (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+  }
+}
+
+/**
+ * Phase 9.8 Main Quest. Unlike Quest Chains/World Events, a Main Quest
+ * Attempt originates from a free Player choice (Dispatch), not a
+ * deterministic per-day schedule, so there is no "expected request" to
+ * replay it against. What IS validated here: every Attempt's frozen
+ * `request` still matches its (fixed, static) Threat Definition exactly;
+ * a matching `main_quest_payment` Ledger entry exists for every Attempt
+ * and vice versa (no orphans); at most one Attempt per day; Battle Trace
+ * structural integrity (`validateMainQuestBattleTrace`); and — most
+ * importantly — Threat/curse *causality*: a Threat can only be `defeated`,
+ * Nosferatu can only be unlocked/attempted, and the curse can only be
+ * `lifted`, if a real winning Attempt actually exists to justify it
+ * (items 139-143). This never re-runs `runBattle` — see
+ * `validateMainQuestBattleTrace`'s docs for why that is consistent with
+ * the rest of this validator.
+ */
+/**
+ * Minimal structural validation of a stored `MainQuestNarrativeScript` —
+ * only the fields the Presentation runtime directly reads
+ * (`MainQuestScene`'s SoundNovel push for `preBattle`/`postBattle`,
+ * `buildMainQuestBattlePlaybackPlan`'s `battleInterludes` lookup). This is
+ * deliberately NOT semantic validation of the AI-authored prose itself —
+ * only enough to guarantee a corrupted save can never throw a runtime
+ * exception mid-Presentation.
+ */
+function validateMainQuestNarrativeScript(
+  value: unknown,
+  dayNumber: number,
+): void {
+  assertPlainObject(
+    value,
+    `主依頼試行の顛末データが壊れています (DAY ${dayNumber})`,
+  )
+  if (
+    typeof value.preBattle !== 'string' ||
+    typeof value.postBattle !== 'string'
+  ) {
+    throw new SaveValidationErrorClass(
+      `主依頼試行の顛末テキストが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (!Array.isArray(value.battleInterludes)) {
+    throw new SaveValidationErrorClass(
+      `主依頼試行の戦闘中セリフが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  for (const cue of value.battleInterludes) {
+    if (
+      !isPlainObject(cue) ||
+      typeof cue.anchorId !== 'string' ||
+      typeof cue.speakerId !== 'string' ||
+      typeof cue.text !== 'string'
+    ) {
+      throw new SaveValidationErrorClass(
+        `主依頼試行の戦闘中セリフが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+  }
+}
+
+function validateMainQuest(
+  campaign: Record<string, unknown>,
+  ledgerById: Map<string, LedgerValidationRecord>,
+  currentDayNumber: number,
+): void {
+  assertPlainObject(campaign.mainQuest, '主依頼データが壊れています')
+  const mainQuest = campaign.mainQuest as Record<string, unknown>
+
+  assertPlainObject(mainQuest.threats, '主依頼の脅威一覧が壊れています')
+  const threats = mainQuest.threats as Record<string, unknown>
+  const allThreatIds = Object.keys(
+    MAIN_QUEST_THREAT_DEFINITION_MAP,
+  ) as MainQuestThreatId[]
+
+  for (const threatId of allThreatIds) {
+    assertPlainObject(
+      threats[threatId],
+      `主依頼の脅威データが壊れています: ${threatId}`,
+    )
+    const state = threats[threatId] as Record<string, unknown>
+    if (
+      state.status !== 'locked' &&
+      state.status !== 'available' &&
+      state.status !== 'defeated'
+    ) {
+      throw new SaveValidationErrorClass(
+        '主依頼の脅威状態が不正です',
+        'corrupted-data',
+      )
+    }
+    if (state.id !== threatId) {
+      throw new SaveValidationErrorClass(
+        '主依頼の脅威IDが一致しません',
+        'corrupted-data',
+      )
+    }
+  }
+
+  if (
+    mainQuest.playerCurseStatus !== 'active' &&
+    mainQuest.playerCurseStatus !== 'lifted'
+  ) {
+    throw new SaveValidationErrorClass(
+      '主人公の呪い状態が不正です',
+      'corrupted-data',
+    )
+  }
+
+  if (!Array.isArray(mainQuest.attempts)) {
+    throw new SaveValidationErrorClass(
+      '主依頼の試行一覧が壊れています',
+      'corrupted-data',
+    )
+  }
+
+  const seenAttemptIds = new Set<string>()
+  const seenDayNumbers = new Set<number>()
+  const victoryThreatIds = new Set<MainQuestThreatId>()
+  const expectedPaymentIds = new Set<string>()
+
+  for (const rawAttempt of mainQuest.attempts) {
+    assertPlainObject(rawAttempt, '主依頼の試行データが壊れています')
+
+    if (
+      !hasString(rawAttempt, 'id') ||
+      (rawAttempt.id as string).length === 0
+    ) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行のIDがありません',
+        'corrupted-data',
+      )
+    }
+    const attemptId = rawAttempt.id as string
+    if (seenAttemptIds.has(attemptId)) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行IDが重複しています',
+        'corrupted-data',
+      )
+    }
+    seenAttemptIds.add(attemptId)
+
+    if (
+      typeof rawAttempt.threatId !== 'string' ||
+      !allThreatIds.includes(rawAttempt.threatId as MainQuestThreatId)
+    ) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行の脅威IDが不明です',
+        'corrupted-data',
+      )
+    }
+    const threatId = rawAttempt.threatId as MainQuestThreatId
+    const definition = MAIN_QUEST_THREAT_DEFINITION_MAP[threatId]
+
+    if (
+      typeof rawAttempt.dayNumber !== 'number' ||
+      !Number.isInteger(rawAttempt.dayNumber) ||
+      rawAttempt.dayNumber < 1 ||
+      rawAttempt.dayNumber > currentDayNumber
+    ) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行の日数が不正です',
+        'corrupted-data',
+      )
+    }
+    const dayNumber = rawAttempt.dayNumber as number
+    if (seenDayNumbers.has(dayNumber)) {
+      throw new SaveValidationErrorClass(
+        '同じ日に複数の主依頼が存在します',
+        'corrupted-data',
+      )
+    }
+    seenDayNumbers.add(dayNumber)
+
+    if (
+      !hasString(rawAttempt, 'partyId') ||
+      (rawAttempt.partyId as string).length === 0
+    ) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行のパーティIDがありません',
+        'corrupted-data',
+      )
+    }
+    const partyId = rawAttempt.partyId as string
+
+    if (rawAttempt.fee !== definition.fee) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行の依頼金が脅威定義と一致しません',
+        'corrupted-data',
+      )
+    }
+
+    assertPlainObject(rawAttempt.request, '主依頼試行のRequestが壊れています')
+    const request = rawAttempt.request as Record<string, unknown>
+    if (
+      request.threatId !== threatId ||
+      request.dayNumber !== dayNumber ||
+      request.partyId !== partyId ||
+      request.fee !== definition.fee ||
+      request.requiredPartyRank !== definition.requiredPartyRank ||
+      request.requiredAffinity !== definition.requiredAffinity
+    ) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行のRequestが脅威定義と一致しません',
+        'corrupted-data',
+      )
+    }
+
+    const paymentId = buildMainQuestPaymentEntryId(threatId, attemptId)
+    expectedPaymentIds.add(paymentId)
+    const paymentEntry = ledgerById.get(paymentId)
+    if (
+      !paymentEntry ||
+      paymentEntry.kind !== 'main_quest_payment' ||
+      paymentEntry.threatId !== threatId ||
+      paymentEntry.attemptId !== attemptId ||
+      paymentEntry.partyId !== partyId ||
+      paymentEntry.amount !== -definition.fee ||
+      paymentEntry.day !== dayNumber
+    ) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行に対応する支払いエントリがありません',
+        'corrupted-data',
+      )
+    }
+
+    const hasResult = rawAttempt.result !== undefined
+    const hasTrace = rawAttempt.battleTrace !== undefined
+    if (hasResult !== hasTrace) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行のResultとBattle Traceが揃っていません',
+        'corrupted-data',
+      )
+    }
+
+    if (hasResult) {
+      assertPlainObject(rawAttempt.result, '主依頼試行のResultが壊れています')
+      const result = rawAttempt.result as Record<string, unknown>
+      if (typeof result.monsterDefeated !== 'boolean') {
+        throw new SaveValidationErrorClass(
+          '主依頼試行のResultが不正です',
+          'corrupted-data',
+        )
+      }
+      if (result.monsterDefeated) {
+        victoryThreatIds.add(threatId)
+      }
+
+      assertPlainObject(
+        rawAttempt.battleTrace,
+        '主依頼試行のBattle Traceが壊れています',
+      )
+      validateMainQuestBattleTrace(
+        rawAttempt.battleTrace as Record<string, unknown>,
+        result,
+        threatId,
+        dayNumber,
+      )
+    }
+
+    if (
+      rawAttempt.presentationStatus !== 'narrative_pending' &&
+      rawAttempt.presentationStatus !== 'ready' &&
+      rawAttempt.presentationStatus !== 'viewing' &&
+      rawAttempt.presentationStatus !== 'completed'
+    ) {
+      throw new SaveValidationErrorClass(
+        '主依頼試行の演出状態が不正です',
+        'corrupted-data',
+      )
+    }
+    const presentationStatus = rawAttempt.presentationStatus as
+      'narrative_pending' | 'ready' | 'viewing' | 'completed'
+
+    const hasNarrative = rawAttempt.narrative !== undefined
+    if (hasNarrative) {
+      validateMainQuestNarrativeScript(rawAttempt.narrative, dayNumber)
+    }
+    const isPendingTarget = mainQuest.pendingPresentationAttemptId === attemptId
+
+    // Presentation-status causality (item 7): each `presentationStatus`
+    // admits exactly one combination of result/narrative presence and
+    // `pendingPresentationAttemptId` reference — never derivable any other
+    // way, same philosophy as the Threat/Curse causality checks above.
+    if (presentationStatus === 'narrative_pending') {
+      if (hasNarrative) {
+        throw new SaveValidationErrorClass(
+          '演出状態が顛末生成待ちなのに顛末データが存在します',
+          'corrupted-data',
+        )
+      }
+      if (hasResult) {
+        if (!isPendingTarget) {
+          throw new SaveValidationErrorClass(
+            '解決済みで顛末生成待ちの試行が保留中の演出として参照されていません',
+            'corrupted-data',
+          )
+        }
+      } else if (isPendingTarget) {
+        throw new SaveValidationErrorClass(
+          '未解決の試行が保留中の演出として参照されています',
+          'corrupted-data',
+        )
+      }
+    } else if (
+      presentationStatus === 'ready' ||
+      presentationStatus === 'viewing'
+    ) {
+      if (!hasResult || !hasNarrative) {
+        throw new SaveValidationErrorClass(
+          '演出状態に対して戦闘結果または顛末データが不足しています',
+          'corrupted-data',
+        )
+      }
+      if (!isPendingTarget) {
+        throw new SaveValidationErrorClass(
+          '演出進行中の試行が保留中の演出として参照されていません',
+          'corrupted-data',
+        )
+      }
+    } else {
+      // completed
+      if (!hasResult || !hasNarrative) {
+        throw new SaveValidationErrorClass(
+          '完了済みの試行に戦闘結果または顛末データが不足しています',
+          'corrupted-data',
+        )
+      }
+      if (isPendingTarget) {
+        throw new SaveValidationErrorClass(
+          '完了済みの試行が保留中の演出として参照されています',
+          'corrupted-data',
+        )
+      }
+    }
+  }
+
+  for (const [id, entry] of ledgerById) {
+    if (entry.kind !== 'main_quest_payment') continue
+    if (!expectedPaymentIds.has(id)) {
+      throw new SaveValidationErrorClass(
+        '孤立した主依頼支払いエントリがあります',
+        'corrupted-data',
+      )
+    }
+  }
+
+  // Threat causality (items 139-141): defeated <=> a real winning Attempt
+  // exists. Never derivable the other way around ("fake defeat").
+  for (const threatId of allThreatIds) {
+    const state = threats[threatId] as Record<string, unknown>
+    const hasVictory = victoryThreatIds.has(threatId)
+    if (state.status === 'defeated' && !hasVictory) {
+      throw new SaveValidationErrorClass(
+        `脅威が撃破済みとされていますが、対応する勝利した試行がありません: ${threatId}`,
+        'corrupted-data',
+      )
+    }
+    if (state.status !== 'defeated' && hasVictory) {
+      throw new SaveValidationErrorClass(
+        `勝利した試行があるのに脅威が撃破済みになっていません: ${threatId}`,
+        'corrupted-data',
+      )
+    }
+  }
+
+  // Nosferatu unlock causality (item 142): locked <=> 7/7 not yet defeated.
+  const allNationalDefeated = NATIONAL_THREAT_IDS.every(
+    (id) => (threats[id] as Record<string, unknown>).status === 'defeated',
+  )
+  const nosferatuState = threats.nosferatu as Record<string, unknown>
+  const hasNosferatuAttempt = (mainQuest.attempts as unknown[]).some(
+    (a) => isPlainObject(a) && a.threatId === 'nosferatu',
+  )
+  if (
+    !allNationalDefeated &&
+    (nosferatuState.status !== 'locked' || hasNosferatuAttempt)
+  ) {
+    throw new SaveValidationErrorClass(
+      '七国の脅威を全て撃破する前にNosferatuへ挑戦しています',
+      'corrupted-data',
+    )
+  }
+
+  // Curse causality (item 143): lifted <=> a real Nosferatu victory exists.
+  const nosferatuVictory = victoryThreatIds.has('nosferatu')
+  if (mainQuest.playerCurseStatus === 'lifted' && !nosferatuVictory) {
+    throw new SaveValidationErrorClass(
+      'Nosferatuを撃破していないのに呪いが解けています',
+      'corrupted-data',
+    )
+  }
+  if (nosferatuVictory && mainQuest.playerCurseStatus !== 'lifted') {
+    throw new SaveValidationErrorClass(
+      'Nosferatuを撃破しているのに呪いが解けていません',
+      'corrupted-data',
+    )
+  }
+
+  if (mainQuest.pendingPresentationAttemptId !== undefined) {
+    if (
+      typeof mainQuest.pendingPresentationAttemptId !== 'string' ||
+      !seenAttemptIds.has(mainQuest.pendingPresentationAttemptId)
+    ) {
+      throw new SaveValidationErrorClass(
+        '保留中の演出試行IDが不正です',
+        'corrupted-data',
+      )
+    }
+  }
+}
+
 interface ValidatedProgressionFields {
   growthXp: number
   totalGrowthXp: number
@@ -2357,6 +3350,10 @@ function validatePartyProgressionAndSkills(
   let trainingYardPurchaseIndex = 0
   let trainingYardLevel = 0
 
+  const mainQuestAttempts = isPlainObject(campaign.mainQuest)
+    ? campaign.mainQuest.attempts
+    : undefined
+
   type PartyEventLike = Record<string, unknown>
 
   function readPartyEvents(record: Record<string, unknown>): PartyEventLike[] {
@@ -2419,6 +3416,30 @@ function validatePartyProgressionAndSkills(
         typeof raw.result.outcome === 'string'
       ) {
         dispatchedOutcomeByParty.set(raw.partyId, raw.result.outcome)
+      }
+    }
+
+    // A Main-Quest-dispatched Party never appears in `record.results` (no
+    // Quest Board slot — see `resolveMainQuestForDay`'s own docs), but is
+    // just as much "not idle" today, and its growth XP is driven by the
+    // SAME mapped-outcome table via `mapMainQuestOutcomeToExpeditionOutcome`
+    // (`../mainQuest/simulation.ts`) that produced its actual
+    // progressionEvent — reused here rather than reimplemented, so this
+    // expectation can never silently drift from what the runtime does.
+    if (Array.isArray(mainQuestAttempts)) {
+      for (const raw of mainQuestAttempts) {
+        if (!isPlainObject(raw)) continue
+        if (
+          raw.dayNumber !== dayNumber ||
+          typeof raw.partyId !== 'string' ||
+          !isPlainObject(raw.result)
+        ) {
+          continue
+        }
+        const outcome = mapMainQuestOutcomeToExpeditionOutcome(
+          raw.result as unknown as MainQuestSimulationResult,
+        )
+        dispatchedOutcomeByParty.set(raw.partyId, outcome)
       }
     }
 
@@ -3306,9 +4327,14 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   }
 
   for (const [id, entry] of ledgerById) {
-    if (entry.kind === 'opening_balance' || entry.kind === 'upgrade_purchase') {
-      // upgrade_purchase entries are cross-checked separately below,
-      // against upgrade level state rather than a per-day expected map.
+    if (
+      entry.kind === 'opening_balance' ||
+      entry.kind === 'upgrade_purchase' ||
+      entry.kind === 'main_quest_payment'
+    ) {
+      // upgrade_purchase/main_quest_payment entries are cross-checked
+      // separately, against upgrade level state / Main Quest Attempts
+      // respectively, rather than a per-day expected map.
       continue
     }
     if (!expectedLedgerById.has(id)) {
@@ -3444,6 +4470,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   validateQuestChains(campaign, campaign.history as unknown[], currentDay)
 
   validateWorldEvents(campaign, campaign.history as unknown[], currentDay)
+
+  validateMainQuest(campaign, ledgerById, campaign.dayNumber as number)
 
   if (
     !isPlainObject(raw.randomState) ||

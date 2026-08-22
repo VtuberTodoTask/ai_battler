@@ -22,6 +22,14 @@ import type {
   TavernUpgradeId,
 } from '../../core/tavern/campaign/types.ts'
 import { purchaseTavernUpgrade } from '../../core/tavern/campaign/upgrades.ts'
+import { dispatchMainQuest } from '../../core/mainQuest/dispatch.ts'
+import {
+  completeMainQuestPresentation,
+  startMainQuestPresentation,
+} from '../../core/mainQuest/presentation.ts'
+import type { MainQuestThreatId } from '../../core/mainQuest/types.ts'
+import { runMainQuestNarrativeGeneration } from './mainQuestNarrativeGeneration.ts'
+import { resolveFinishDayTransition } from './finishDayTransition.ts'
 import { tavernUpgradeBlockReasonText } from '../canvas/viewModel/tavernUpgradeViewModel.ts'
 import { acceptanceReasonText } from '../../core/tavern/acceptance.ts'
 import { generateCampaignSeed } from '../../core/save/seed.ts'
@@ -86,6 +94,26 @@ export function TavernSimulator() {
   )
   const [canvasSettingsOpen, setCanvasSettingsOpen] = useState(false)
 
+  // Lets async handlers (spanning an `await`) read the LATEST Campaign once
+  // they resume, instead of the stale snapshot closed over at call start.
+  // The `useEffect` below keeps it in lockstep with `campaign` state for
+  // every OTHER `setCampaign` call site, but that sync only lands on the
+  // NEXT commit/effect pass — there's a real window between `setCampaign`
+  // and the effect running where state and ref would disagree. Any replace
+  // that an async handler's post-`await` validity check depends on
+  // (New Game, Load Game, Main Quest Narrative apply) MUST go through
+  // `commitCampaign` below instead, which updates both synchronously in the
+  // same call, so that window never opens for those paths.
+  const campaignRef = useRef<TavernCampaignState | null>(campaign)
+  useEffect(() => {
+    campaignRef.current = campaign
+  }, [campaign])
+
+  const commitCampaign = useCallback((next: TavernCampaignState) => {
+    campaignRef.current = next
+    setCampaign(next)
+  }, [])
+
   const saveRepositoryRef = useRef<SaveRepository | null>(null)
 
   useEffect(() => {
@@ -126,16 +154,19 @@ export function TavernSimulator() {
     [getSaveRepository],
   )
 
-  const startCampaign = useCallback((seed: string) => {
-    const next = createTavernCampaign(seed)
-    setCampaign(next)
-    setSeedInput(seed)
-    setSelectedRequestId(next.currentDay.requests[0]?.id ?? null)
-    setSelectedPartyId(null)
-    setSelectedResultId(null)
-    setError(null)
-    return next
-  }, [])
+  const startCampaign = useCallback(
+    (seed: string) => {
+      const next = createTavernCampaign(seed)
+      commitCampaign(next)
+      setSeedInput(seed)
+      setSelectedRequestId(next.currentDay.requests[0]?.id ?? null)
+      setSelectedPartyId(null)
+      setSelectedResultId(null)
+      setError(null)
+      return next
+    },
+    [commitCampaign],
+  )
 
   const handleNewGame = useCallback((): UiActionResult => {
     try {
@@ -156,7 +187,7 @@ export function TavernSimulator() {
       try {
         const data = await loadFromSlot(getSaveRepository(), slotId)
         const next = data.campaign
-        setCampaign(next)
+        commitCampaign(next)
         setSelectedRequestId(next.currentDay.requests[0]?.id ?? null)
         setSelectedPartyId(null)
         setSelectedResultId(null)
@@ -168,7 +199,7 @@ export function TavernSimulator() {
         return { ok: false, message }
       }
     },
-    [getSaveRepository],
+    [getSaveRepository, commitCampaign],
   )
 
   const handleSaveGame = useCallback(
@@ -415,7 +446,13 @@ export function TavernSimulator() {
     }
     try {
       const next = resolveCampaignDay(campaign)
-      setCampaign(next)
+      // `resolveCampaignDay` can move a Main Quest Attempt straight to
+      // 'resolved' (result/battleTrace populated, pending Presentation
+      // set) — the Canvas UI can react to that same-turn (redirect into
+      // MainQuestScene -> maybeRequestNarrative()), which reads
+      // `campaignRef.current` before this component's own `campaign`-state
+      // sync effect would have run. `commitCampaign` closes that window.
+      commitCampaign(next)
       const firstResolved = next.currentDay.results.find(
         (r) => r.status === 'resolved',
       )
@@ -431,7 +468,7 @@ export function TavernSimulator() {
       setError(message)
       return { ok: false, message }
     }
-  }, [campaign])
+  }, [campaign, commitCampaign])
 
   const handleAdvance = useCallback((): UiActionResult => {
     if (!campaign) {
@@ -464,19 +501,29 @@ export function TavernSimulator() {
     }
     finishingRef.current = true
     try {
-      let next = campaign
-      if (next.currentDay.status === 'planning') {
-        next = resolveCampaignDay(next)
-      }
-      if (next.currentDay.status === 'resolved') {
-        next = advanceCampaignDay(next)
-      }
-      setCampaign(next)
+      const next = resolveFinishDayTransition(campaign)
+      // A Main Quest resolve here can leave `next` 'resolved' with a
+      // pending Presentation — the Canvas UI reacts to that same-turn
+      // (redirect into MainQuestScene -> maybeRequestNarrative()), which
+      // reads `campaignRef.current` before this component's own
+      // `campaign`-state sync effect would have run. `commitCampaign`
+      // closes that window so the first automatic generation always sees
+      // the resolved Attempt (result/battleTrace populated), never the
+      // pre-resolve one.
+      commitCampaign(next)
       setSelectedRequestId(next.currentDay.requests[0]?.id ?? null)
       setSelectedPartyId(null)
       setSelectedResultId(null)
       setError(null)
-      void autosave(next)
+      // The Save contract only ever accepts a 'planning' day
+      // (`saveToSlot`/`validateGameSave` both hard-reject anything else) —
+      // a Main Quest Presentation left pending above means `next` is still
+      // 'resolved', so autosaving it here would always fail. Persistence
+      // resumes once Presentation completes and this handler runs again
+      // with a freshly-advanced 'planning' day.
+      if (next.currentDay.status === 'planning') {
+        void autosave(next)
+      }
       return { ok: true }
     } catch (e) {
       const message = e instanceof Error ? e.message : '日次処理に失敗しました'
@@ -485,7 +532,7 @@ export function TavernSimulator() {
     } finally {
       finishingRef.current = false
     }
-  }, [campaign, autosave])
+  }, [campaign, autosave, commitCampaign])
 
   const handleOpenExpeditionNarrative = useCallback(
     async (candidateId: string): Promise<UiActionResult<string>> => {
@@ -532,6 +579,76 @@ export function TavernSimulator() {
       return { ok: true, data: record.generatedText }
     },
     [campaign, narrativeProvider],
+  )
+
+  const handleDispatchMainQuest = useCallback(
+    (threatId: MainQuestThreatId, partyId: string): UiActionResult => {
+      if (!campaign) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      try {
+        const result = dispatchMainQuest(campaign, threatId, partyId)
+        if (!result.ok) {
+          return { ok: false, message: '主依頼の条件を満たしていません' }
+        }
+        setCampaign(result.campaign)
+        setError(null)
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : '主依頼の依頼に失敗しました'
+        setError(message)
+        return { ok: false, message }
+      }
+    },
+    [campaign],
+  )
+
+  const handleGenerateMainQuestNarrative = useCallback(
+    (attemptId: string): Promise<UiActionResult> =>
+      runMainQuestNarrativeGeneration({
+        campaignRef,
+        commitCampaign,
+        narrativeProvider,
+        attemptId,
+      }),
+    [narrativeProvider, commitCampaign],
+  )
+
+  const handleStartMainQuestPresentation = useCallback(
+    (attemptId: string): UiActionResult => {
+      if (!campaign) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      try {
+        const next = startMainQuestPresentation(campaign, attemptId)
+        setCampaign(next)
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : '演出の開始に失敗しました'
+        return { ok: false, message }
+      }
+    },
+    [campaign],
+  )
+
+  const handleCompleteMainQuestPresentation = useCallback(
+    (attemptId: string): UiActionResult => {
+      if (!campaign) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      try {
+        const next = completeMainQuestPresentation(campaign, attemptId)
+        setCampaign(next)
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : '演出の完了に失敗しました'
+        return { ok: false, message }
+      }
+    },
+    [campaign],
   )
 
   const handleUpdateCampaign = useCallback(
@@ -609,6 +726,12 @@ export function TavernSimulator() {
             onPurchaseUpgrade={handlePurchaseUpgrade}
             onOpenActivity={handleOpenActivity}
             onOpenExpeditionNarrative={handleOpenExpeditionNarrative}
+            onDispatchMainQuest={handleDispatchMainQuest}
+            onGenerateMainQuestNarrative={handleGenerateMainQuestNarrative}
+            onStartMainQuestPresentation={handleStartMainQuestPresentation}
+            onCompleteMainQuestPresentation={
+              handleCompleteMainQuestPresentation
+            }
             onOpenSettings={handleOpenCanvasSettings}
             onSwitchToLegacy={() => setUiMode('legacy')}
             onNewGame={handleNewGame}

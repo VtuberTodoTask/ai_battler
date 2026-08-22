@@ -587,6 +587,7 @@ describe('Phase 8.2 Game Feedback & Expedition Reports Smoke', () => {
         progressionEvents: [],
         questChainEvents: [],
         worldEventEvents: [],
+        mainQuestEvents: [],
         relationshipEvents: [stayEvent],
       },
     ]

@@ -175,9 +175,19 @@
               "round": 0
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -196,7 +206,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s45-healer-3",
+              "critical": true,
               "damage": 32,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -215,7 +227,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -234,7 +248,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -252,7 +268,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -269,7 +287,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -285,7 +305,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -301,7 +323,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -318,7 +342,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -336,7 +362,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s45-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -352,9 +380,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 2
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -374,7 +412,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -392,7 +432,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -409,7 +451,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -425,7 +469,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -441,7 +487,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -455,9 +503,19 @@
               "targetIds": ["S-vanguard-s45-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -475,7 +533,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s45-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -493,7 +553,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -512,7 +574,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -530,7 +594,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -547,7 +613,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -563,7 +631,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+              "critical": true,
               "damage": 17,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -580,7 +650,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -597,7 +669,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 23,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -614,9 +688,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -635,9 +719,11 @@
             {
               "actionType": "heal",
               "actorId": "S-healer-s45-healer-3",
+              "healAmount": 47,
               "metadata": {
                 "actualHealAmount": 47
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "グスタフ ハインドがベル ジェムを回復させた。+47 HP",
               "round": 4,
@@ -646,7 +732,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": true,
               "damage": 25,
+              "hit": true,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -665,7 +753,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -681,7 +771,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -697,7 +789,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -713,7 +807,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -729,7 +825,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s45-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -747,7 +845,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -766,7 +866,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": false,
               "damage": 23,
+              "hit": true,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -783,9 +885,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 5
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -804,7 +916,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -820,7 +934,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -836,7 +952,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -853,7 +971,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -869,7 +989,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": false,
               "damage": 17,
+              "hit": true,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -888,7 +1010,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -904,9 +1028,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 6
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -934,7 +1068,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s45-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -952,7 +1088,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -968,7 +1106,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -984,7 +1124,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1001,7 +1143,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 21,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -1018,9 +1162,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 7
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": true,
               "damage": 18,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1039,7 +1193,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s45-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1057,7 +1213,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": true,
               "damage": 29,
+              "hit": true,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -1076,7 +1234,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1092,7 +1252,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1108,7 +1270,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1125,7 +1289,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 21,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -1144,9 +1310,11 @@
             {
               "actionType": "heal",
               "actorId": "S-healer-s45-healer-3",
+              "healAmount": 47,
               "metadata": {
                 "actualHealAmount": 47
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "グスタフ ハインドがベル ジェムを回復させた。+47 HP",
               "round": 8,
@@ -1155,7 +1323,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -1171,9 +1341,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 8
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1191,7 +1371,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1207,7 +1389,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1224,7 +1408,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1241,7 +1427,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 26,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -1260,7 +1448,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s45-healer-3",
+              "critical": true,
               "damage": 32,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1286,9 +1476,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 9
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": true,
               "damage": 23,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1307,7 +1507,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": false,
               "damage": 18,
+              "hit": true,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -1326,7 +1528,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1343,7 +1547,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1360,7 +1566,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s45-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1378,7 +1586,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 20,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -1398,7 +1608,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": true,
               "damage": 25,
+              "hit": true,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -1415,9 +1627,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 10
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": false,
               "damage": 16,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -1437,7 +1659,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1453,7 +1677,9 @@
             {
               "actionType": "melee",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1469,7 +1695,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s45-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -1487,7 +1715,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s45-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1503,9 +1733,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s45-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "カイン フォレストの魔力が減少した。",
+              "round": 11
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s45-mage-2",
+              "critical": false,
               "damage": 16,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -1534,7 +1774,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": false,
               "damage": 18,
+              "hit": true,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,
@@ -1553,7 +1795,9 @@
             {
               "actionType": "magic",
               "actorId": "A-construct-tank-standard-s45:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1569,7 +1813,9 @@
             {
               "actionType": "melee",
               "actorId": "S-guardian-s45-guardian-1",
+              "critical": false,
               "damage": 18,
+              "hit": true,
               "metadata": {
                 "attackerRole": "guardian",
                 "isCounter": false,

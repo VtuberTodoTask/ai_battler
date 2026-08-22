@@ -1,10 +1,11 @@
 import { SeededRng } from '../rng/seededRng.ts'
-import { clamp } from '../util.ts'
+import { clamp, deepClone } from '../util.ts'
 import { BattleUnit } from './battleState.ts'
 import { ABILITY_MAP, WEAKNESS_MAP } from '../../data/enemyData.ts'
 import { MAX_HIT_CHANCE, MIN_HIT_CHANCE } from '../balance/constants.ts'
 import {
   BattleContext,
+  StatusEffect,
   StatusEffectType,
   WeaknessInstance,
 } from '../models/types.ts'
@@ -19,6 +20,11 @@ export interface ActionResult {
   damageDealt: number
   damageDealtWithoutGuard?: number
   statusApplied?: string[]
+  /** Full authoritative `StatusEffect` snapshot for each type listed in
+   * `statusApplied`, taken immediately after `addStatus` resolved (Phase
+   * 9.8.3) — additive alongside `statusApplied`, which stays a bare type
+   * list for existing (non-Main-Quest) consumers. */
+  statusEffectsApplied?: StatusEffect[]
   message: string
 }
 
@@ -59,6 +65,31 @@ export function addStatus(
     value,
     sourceId: sourceId ?? 'system',
   })
+}
+
+/**
+ * Reads back the full, authoritative `StatusEffect` object for each of
+ * `types` from `unit`'s CURRENT `statusEffects` — always called immediately
+ * after the `addStatus` call(s) that produced them, so this is exactly the
+ * post-application/refresh state, never a re-derivation. Deep-cloned since
+ * `unit.statusEffects` entries are mutated in place later (duration ticks,
+ * further refreshes) — a caller holding this snapshot (e.g. a Battle Log
+ * entry) must never see those later mutations reflected retroactively.
+ */
+export function collectStatusEffects(
+  unit: BattleUnit,
+  types: readonly string[] | undefined,
+): StatusEffect[] | undefined {
+  if (!types || types.length === 0) return undefined
+  const seen = new Set<string>()
+  const result: StatusEffect[] = []
+  for (const type of types) {
+    if (seen.has(type)) continue
+    seen.add(type)
+    const found = unit.statusEffects.find((e) => e.type === type)
+    if (found) result.push(deepClone(found))
+  }
+  return result.length > 0 ? result : undefined
 }
 
 export function getSkill(
@@ -412,6 +443,7 @@ export function rollAttack(
     damageDealt: final,
     damageDealtWithoutGuard: finalWithoutGuard,
     statusApplied: appliedStatuses,
+    statusEffectsApplied: collectStatusEffects(defender, appliedStatuses),
     message: `${attacker.name} hit ${defender.name} for ${final} damage`,
   }
 }

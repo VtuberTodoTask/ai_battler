@@ -27,6 +27,7 @@ import {
 import {
   addStatus,
   calculateWeaponDamage,
+  collectStatusEffects,
   getAbilityNumeric,
   hasAbility,
   hasStatus,
@@ -288,9 +289,13 @@ function resolveContact(
     effects.firstRoundHitBonus = 10
     effects.initiativeBonus = 5
     const stunCount = Math.min(2, enemies.length)
+    const stunnedTargets: BattleUnit[] = []
     for (let i = 0; i < stunCount; i++) {
       const target = enemies[i]
-      if (target) addStatus(target, 'stunned', 1, 0, 'contact')
+      if (target) {
+        addStatus(target, 'stunned', 1, 0, 'contact')
+        stunnedTargets.push(target)
+      }
     }
     effects.stunnedEnemies = stunCount
     log(
@@ -301,6 +306,15 @@ function resolveContact(
       {
         roll,
         successChance,
+        targetIds:
+          stunnedTargets.length > 0
+            ? stunnedTargets.map((t) => t.id)
+            : undefined,
+        statusApplied: stunnedTargets.length > 0 ? ['stunned'] : undefined,
+        statusEffectsApplied:
+          stunnedTargets.length > 0
+            ? collectStatusEffects(stunnedTargets[0], ['stunned'])
+            : undefined,
         metadata: {
           contactType: type,
           topScoutRole: topScout?.role,
@@ -340,6 +354,19 @@ function resolveContact(
         target.hp -= dmg
         state.enemyDamageDealt += dmg
         addStatus(target, 'weakened', 3, 5, 'contact')
+        log(
+          state,
+          'contact',
+          'ambushDamage',
+          `${target.name}が奇襲で${dmg}ダメージを受けた。`,
+          {
+            targetIds: [target.id],
+            damage: dmg,
+            hit: true,
+            statusApplied: ['weakened'],
+            statusEffectsApplied: collectStatusEffects(target, ['weakened']),
+          },
+        )
       }
     }
     effects.initialDamage = damageCount
@@ -391,6 +418,17 @@ function applyStealthStart(state: BattleState): void {
   for (const enemy of state.enemies) {
     if (hasAbility(enemy, 'stealthStart')) {
       addStatus(enemy, 'stealthed', 1, 0, 'stealthStart')
+      log(
+        state,
+        'contact',
+        'stealthStart',
+        `${enemy.name}が気配を隠して戦闘に臨んだ。`,
+        {
+          targetIds: [enemy.id],
+          statusApplied: ['stealthed'],
+          statusEffectsApplied: collectStatusEffects(enemy, ['stealthed']),
+        },
+      )
     }
   }
 }
@@ -499,6 +537,9 @@ function resolveAction(
       return
     }
     const power = unit.skills.healing / 3 + unit.stats.int / 6
+    const clearedDot = (['poisoned', 'bleeding'] as const).filter((type) =>
+      hasStatus(action.target!, type),
+    )
     const amount = healUnit(unit, action.target, power)
     unit.mp -= 3
     log(
@@ -510,6 +551,9 @@ function resolveAction(
         actorId: unit.id,
         targetIds: [action.target.id],
         metadata: { actualHealAmount: amount },
+        healAmount: amount,
+        mpDelta: -3,
+        statusRemoved: clearedDot.length > 0 ? clearedDot : undefined,
       },
     )
     return
@@ -527,6 +571,8 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
+        statusApplied: ['guarded'],
+        statusEffectsApplied: collectStatusEffects(action.target, ['guarded']),
         metadata: {
           guardPotency: 5,
           guardSourceRole: unit.role,
@@ -534,6 +580,15 @@ function resolveAction(
         },
       },
     )
+    if (unit.id !== action.target.id) {
+      log(state, 'combat', 'guardSelf', `${unit.name}は自らも身構えた。`, {
+        actorId: unit.id,
+        targetIds: [unit.id],
+        statusApplied: ['guarded'],
+        statusEffectsApplied: collectStatusEffects(unit, ['guarded']),
+        metadata: { guardPotency: 3 },
+      })
+    }
     return
   }
 
@@ -551,6 +606,8 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
+        statusApplied: ['guarded'],
+        statusEffectsApplied: collectStatusEffects(action.target, ['guarded']),
         metadata: {
           requestedMorale: 10,
           actualMoraleGained,
@@ -574,6 +631,10 @@ function resolveAction(
       {
         actorId: unit.id,
         targetIds: [action.target.id],
+        statusApplied: ['healBlocked'],
+        statusEffectsApplied: collectStatusEffects(action.target, [
+          'healBlocked',
+        ]),
         metadata: { abilityId: action.abilityId },
       },
     )
@@ -588,6 +649,7 @@ function resolveAction(
         (state.abilityUsage[action.abilityId] ?? 0) + 1
     }
     const heal = getAbilityNumeric(unit, 'reviveHeal', 10)
+    const clearedStatuses = action.target.statusEffects.map((e) => e.type)
     action.target.isAlive = true
     action.target.hp = clamp(heal, 1, action.target.maxHp)
     action.target.statusEffects = []
@@ -601,6 +663,8 @@ function resolveAction(
         actorId: unit.id,
         targetIds: [action.target.id],
         metadata: { abilityId: action.abilityId },
+        healAmount: action.target.hp,
+        statusRemoved: clearedStatuses.length > 0 ? clearedStatuses : undefined,
       },
     )
     return
@@ -617,7 +681,13 @@ function resolveAction(
       if (fallback) resolveAttack(state, unit, fallback)
       return
     }
-    if (unit.isAdventurer) unit.mp -= 5
+    if (unit.isAdventurer) {
+      unit.mp -= 5
+      log(state, 'combat', 'mpConsumed', `${unit.name}の魔力が減少した。`, {
+        actorId: unit.id,
+        mpDelta: -5,
+      })
+    }
     const target = action.target ?? getAliveEnemies(state)[0]
     if (!target) return
     resolveAttack(state, unit, target, 'magic')
@@ -757,6 +827,9 @@ function resolveAttack(
     successChance: result.successChance,
     damage: result.damageDealt,
     statusApplied: result.statusApplied,
+    statusEffectsApplied: result.statusEffectsApplied,
+    hit: result.hit,
+    critical: result.critical,
     metadata: attackMetadata,
   })
 
@@ -783,6 +856,8 @@ function resolveAttack(
           actorId: attacker.id,
           targetIds: [extra.id],
           damage: areaDamage,
+          hit: true,
+          critical: false,
         },
       )
       if (extra.hp <= 0 && extra.isAlive) handleUnitDeath(state, extra)
@@ -811,7 +886,13 @@ function resolveAttack(
           'combat',
           'corpseExplosion',
           `${defender.name}の死体が爆発し、${u.name}に${explosionDamage}ダメージ。`,
-          { actorId: defender.id, targetIds: [u.id], damage: explosionDamage },
+          {
+            actorId: defender.id,
+            targetIds: [u.id],
+            damage: explosionDamage,
+            hit: true,
+            critical: false,
+          },
         )
         if (u.hp <= 0 && u.isAlive) handleUnitDeath(state, u)
       }
@@ -835,7 +916,20 @@ function resolveAttack(
     }
   }
 
-  if (hasStatus(attacker, 'stealthed')) removeStatus(attacker, 'stealthed')
+  if (hasStatus(attacker, 'stealthed')) {
+    removeStatus(attacker, 'stealthed')
+    log(
+      state,
+      'combat',
+      'stealthConsumed',
+      `${attacker.name}の気配が露見した。`,
+      {
+        actorId: attacker.id,
+        targetIds: [attacker.id],
+        statusRemoved: ['stealthed'],
+      },
+    )
+  }
 }
 
 function buildRetreatDiagnostic(
@@ -1289,18 +1383,43 @@ function processEndOfRound(state: BattleState): void {
   for (const u of getAllAlive(state)) {
     const regen = getAbilityNumeric(u, 'regenPerRound', 0)
     if (regen > 0 && u.hp < u.maxHp) {
-      const heal = regen
-      u.hp = clamp(u.hp + heal, 0, u.maxHp)
-      log(state, 'combat', 'regen', `${u.name}が再生した。+${heal} HP`, {
+      const hpBefore = u.hp
+      u.hp = clamp(u.hp + regen, 0, u.maxHp)
+      const actualHeal = u.hp - hpBefore
+      log(state, 'combat', 'regen', `${u.name}が再生した。+${actualHeal} HP`, {
         targetIds: [u.id],
+        healAmount: actualHeal,
       })
     }
   }
 
   getAllAlive(state).forEach((u) => {
-    u.statusEffects = u.statusEffects
-      .map((e) => ({ ...e, duration: e.duration - 1 }))
-      .filter((e) => e.duration > 0)
+    const ticked = u.statusEffects.map((e) => ({
+      ...e,
+      duration: e.duration - 1,
+    }))
+    const expired = ticked.filter((e) => e.duration <= 0)
+    const survived = ticked.filter((e) => e.duration > 0)
+    u.statusEffects = survived
+    if (expired.length > 0) {
+      log(state, 'combat', 'statusExpired', `${u.name}の状態異常が解けた。`, {
+        targetIds: [u.id],
+        statusRemoved: expired.map((e) => e.type),
+      })
+    }
+    // Every surviving status's `duration` just changed — a Gameplay Fact,
+    // not just its `type` (Phase 9.8.3) — so this is recorded as an
+    // ordinary `statusApplied`-family fact (full post-tick snapshot),
+    // exactly as a genuine reapplication/refresh would be. This is the ONE
+    // point where duration ticks; Replay never has to re-derive the tick
+    // itself, only replace its held snapshot with this authoritative one.
+    if (survived.length > 0) {
+      log(state, 'combat', 'statusTicked', `${u.name}の状態異常が経過した。`, {
+        targetIds: [u.id],
+        statusApplied: survived.map((e) => e.type),
+        statusEffectsApplied: deepClone(survived),
+      })
+    }
   })
 }
 
@@ -1451,6 +1570,17 @@ export function runBattle(
       if (!unit.isAlive || unit.escaped) continue
       if (hasStatus(unit, 'stunned')) {
         removeStatus(unit, 'stunned')
+        log(
+          state,
+          'combat',
+          'stunnedSkip',
+          `${unit.name}は行動不能で動けなかった。`,
+          {
+            actorId: unit.id,
+            targetIds: [unit.id],
+            statusRemoved: ['stunned'],
+          },
+        )
         continue
       }
       if (isMinion(unit) && state.minionActionsRemaining <= 0) {

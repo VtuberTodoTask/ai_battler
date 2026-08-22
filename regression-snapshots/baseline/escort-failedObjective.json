@@ -192,7 +192,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -209,7 +211,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -226,9 +230,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -247,7 +261,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -274,12 +290,43 @@
               "phase": "combat",
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -295,7 +342,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -311,7 +360,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -325,9 +376,43 @@
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -346,7 +431,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -363,7 +450,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -380,9 +469,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 2
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -410,12 +509,43 @@
               "phase": "combat",
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -431,7 +561,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -447,7 +579,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -461,9 +595,43 @@
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -491,7 +659,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -506,9 +676,19 @@
               "targetIds": ["C-mage-s1-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -527,7 +707,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -546,7 +728,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -570,12 +754,43 @@
               "phase": "combat",
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -589,9 +804,43 @@
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -608,9 +857,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -629,7 +888,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -654,14 +915,45 @@
               "phase": "combat",
               "result": "オルム アイヴィーがフェイ アイヴィーを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "heal",
               "actorId": "C-healer-s1-healer-3",
+              "healAmount": 30,
               "metadata": {
                 "actualHealAmount": 30
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "レイラ ノースがフェイ アイヴィーを回復させた。+30 HP",
               "round": 4,
@@ -670,7 +962,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -686,7 +980,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -700,9 +996,51 @@
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
+              "actionType": "statusExpired",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が解けた。",
+              "round": 4,
+              "statusRemoved": ["guarded"],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "フェイ アイヴィーの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-mage-s1-mage-2"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-elite-s1:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 3,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s1-guardian-1",
@@ -722,7 +1060,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -740,7 +1080,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -767,9 +1109,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 5
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -788,7 +1140,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -812,7 +1166,76 @@
               "phase": "combat",
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
+              "actionType": "statusExpired",
+              "phase": "combat",
+              "result": "フェイ アイヴィーの状態異常が解けた。",
+              "round": 5,
+              "statusRemoved": ["guarded"],
+              "targetIds": ["C-mage-s1-mage-2"]
             },
             {
               "actionType": "retreat",
@@ -835,7 +1258,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -854,7 +1279,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -870,9 +1297,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 6
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -899,12 +1336,43 @@
               "phase": "combat",
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーは自らも身構えた。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -918,6 +1386,38 @@
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 6,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
               "actionType": "retreat",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
               "phase": "retreat",
@@ -927,9 +1427,19 @@
               "successChance": 11
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 7
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -948,7 +1458,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -967,7 +1479,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -993,12 +1507,43 @@
               "phase": "combat",
               "result": "オルム アイヴィーがトール スカイを防護した。",
               "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-guardian-s1-guardian-1",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "オルム アイヴィーは自らも身構えた。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1012,6 +1557,38 @@
               "targetIds": ["C-vanguard-s1-vanguard-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "トール スカイの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-vanguard-s1-vanguard-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "オルム アイヴィーの状態異常が経過した。",
+              "round": 7,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-guardian-s1-guardian-1",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-guardian-s1-guardian-1"]
+            },
+            {
               "actionType": "retreat",
               "actorId": "D-insect-swarm-elite-s1:battle:0:encounter:enemy:1",
               "phase": "retreat",
@@ -1023,7 +1600,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -1040,9 +1619,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 8
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,

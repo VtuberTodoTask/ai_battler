@@ -163,6 +163,7 @@ describe('TavernFeedbackViewModel', () => {
         progressionEvents: [],
         questChainEvents: [],
         worldEventEvents: [],
+        mainQuestEvents: [],
         relationshipEvents: [stayEvent],
       },
     ]
@@ -412,6 +413,7 @@ describe('TavernFeedbackViewModel', () => {
         progressionEvents: [],
         questChainEvents: [],
         worldEventEvents: [],
+        mainQuestEvents: [],
         relationshipEvents: [stayEvent],
       },
     ]
@@ -561,6 +563,7 @@ describe('TavernFeedbackViewModel', () => {
           progressionEvents: [],
           questChainEvents: [],
           worldEventEvents: [],
+          mainQuestEvents: [],
           relationshipEvents: [],
         })),
       }
@@ -643,6 +646,7 @@ describe('TavernFeedbackViewModel', () => {
             progressionEvents: [],
             questChainEvents: [],
             worldEventEvents: [],
+            mainQuestEvents: [],
             relationshipEvents: [],
           },
         ],

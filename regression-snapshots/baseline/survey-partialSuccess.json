@@ -185,7 +185,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-ranger-s109-ranger-1",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -204,7 +206,9 @@
             {
               "actionType": "melee",
               "actorId": "C-scout-s109-scout-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -220,9 +224,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s109-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド サンドの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s109-mage-2",
+              "critical": true,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -249,12 +263,43 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 1,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 3,
                 "guardSourceId": "C-support-s109-support-3",
@@ -274,7 +319,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -290,7 +337,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -306,7 +355,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -320,9 +371,43 @@
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 1,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "C-ranger-s109-ranger-1",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -341,7 +426,9 @@
             {
               "actionType": "melee",
               "actorId": "C-scout-s109-scout-0",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -368,12 +455,43 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -387,9 +505,19 @@
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s109-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド サンドの魔力が減少した。",
+              "round": 2
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s109-mage-2",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -408,7 +536,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -424,7 +554,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 1,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-support-s109-support-3",
@@ -444,7 +576,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 3,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-support-s109-support-3",
@@ -462,9 +596,43 @@
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 2,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "C-ranger-s109-ranger-1",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -483,7 +651,9 @@
             {
               "actionType": "melee",
               "actorId": "C-scout-s109-scout-0",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -500,9 +670,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s109-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド サンドの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s109-mage-2",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -529,12 +709,43 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 2,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-support-s109-support-3",
@@ -554,7 +765,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -570,7 +783,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 1,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-support-s109-support-3",
@@ -590,7 +805,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -604,9 +821,43 @@
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 3,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "C-ranger-s109-ranger-1",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -634,7 +885,9 @@
             {
               "actionType": "melee",
               "actorId": "C-scout-s109-scout-0",
+              "critical": true,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -660,9 +913,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s109-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド サンドの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s109-mage-2",
+              "critical": true,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -689,12 +952,43 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:2",
+              "critical": true,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 8,
                 "guardSourceId": "C-support-s109-support-3",
@@ -714,7 +1008,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 2,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-support-s109-support-3",
@@ -730,6 +1026,38 @@
               "statusApplied": [],
               "successChance": 46,
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 4,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "retreat",
@@ -752,7 +1080,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-ranger-s109-ranger-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -768,9 +1098,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s109-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ガルド サンドの魔力が減少した。",
+              "round": 5
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s109-mage-2",
+              "critical": true,
               "damage": 18,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -789,7 +1129,9 @@
             {
               "actionType": "melee",
               "actorId": "C-scout-s109-scout-0",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -816,12 +1158,43 @@
               "phase": "combat",
               "result": "リナ リーフがアリス スカイを防護した。",
               "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
               "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "guardSelf",
+              "actorId": "C-support-s109-support-3",
+              "metadata": {
+                "guardPotency": 3
+              },
+              "phase": "combat",
+              "result": "リナ リーフは自らも身構えた。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 2,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
             },
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -835,6 +1208,38 @@
               "targetIds": ["C-scout-s109-scout-0"]
             },
             {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "アリス スカイの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 5
+                }
+              ],
+              "targetIds": ["C-scout-s109-scout-0"]
+            },
+            {
+              "actionType": "statusTicked",
+              "phase": "combat",
+              "result": "リナ リーフの状態異常が経過した。",
+              "round": 5,
+              "statusApplied": ["guarded"],
+              "statusEffectsApplied": [
+                {
+                  "duration": 1,
+                  "sourceId": "C-support-s109-support-3",
+                  "type": "guarded",
+                  "value": 3
+                }
+              ],
+              "targetIds": ["C-support-s109-support-3"]
+            },
+            {
               "actionType": "retreat",
               "actorId": "D-insect-swarm-standard-s109:battle:0:encounter:enemy:1",
               "phase": "retreat",
@@ -846,7 +1251,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-ranger-s109-ranger-1",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,

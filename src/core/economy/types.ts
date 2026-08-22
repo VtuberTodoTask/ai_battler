@@ -51,11 +51,28 @@ export interface TavernUpgradePurchaseLedgerEntry extends TavernLedgerBase {
   }
 }
 
+/**
+ * Phase 9.8 Main Quest. Unlike a Quest Commission (paid TO the tavern by
+ * an outside requester's settlement), this is the tavern owner personally
+ * paying a familiar Party's fee to accompany them — a negative Ledger
+ * entry charged at Dispatch confirmation time, not at day settlement.
+ */
+export interface MainQuestPaymentLedgerEntry extends TavernLedgerBase {
+  kind: 'main_quest_payment'
+  source: {
+    type: 'main_quest'
+    threatId: string
+    attemptId: string
+    partyId: string
+  }
+}
+
 export type TavernLedgerEntry =
   | OpeningBalanceLedgerEntry
   | QuestCommissionLedgerEntry
   | DailyOperatingCostLedgerEntry
   | TavernUpgradePurchaseLedgerEntry
+  | MainQuestPaymentLedgerEntry
 
 export interface TavernFinanceState {
   funds: SignedCurrencyAmount

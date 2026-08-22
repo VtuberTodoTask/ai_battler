@@ -43,6 +43,11 @@ export class GameLabel extends Container {
     this._text.text = value
   }
 
+  /** Overrides this label's fill color, independent of its typography kind. */
+  setColor(color: number): void {
+    this._text.style = { ...this._text.style, fill: color }
+  }
+
   get text(): string {
     return this._text.text as string
   }
