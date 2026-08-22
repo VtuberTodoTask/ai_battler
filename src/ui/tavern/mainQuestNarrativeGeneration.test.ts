@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   runMainQuestNarrativeGeneration,
   type MainQuestNarrativeGenerationDeps,
-} from './TavernSimulator.tsx'
+} from './mainQuestNarrativeGeneration.ts'
 import {
   createTavernCampaign,
   resolveCampaignDay,
@@ -37,12 +37,15 @@ function fakeProvider(): NarrativeProvider {
 /** A resolved Campaign with one Main Quest Attempt sitting at
  * `narrative_pending` (Simulation done, no Narrative generated yet) — the
  * exact state `runMainQuestNarrativeGeneration` is meant to act on. */
-function buildPendingCampaign(seed: string): {
+function buildPendingCampaign(
+  seed: string,
+  threatId: 'alden' | 'velga' = 'alden',
+): {
   campaign: TavernCampaignState
   attemptId: string
 } {
   const campaign = createTavernCampaign(seed)
-  const definition = MAIN_QUEST_THREAT_DEFINITION_MAP.alden
+  const definition = MAIN_QUEST_THREAT_DEFINITION_MAP[threatId]
   const party = campaign.parties[0]
   party.party.rank = definition.requiredPartyRank
   party.relationship.affinity = definition.requiredAffinity
@@ -51,7 +54,7 @@ function buildPendingCampaign(seed: string): {
       ? { ...p, party: { ...p.party, rank: definition.requiredPartyRank } }
       : p,
   )
-  const dispatch = dispatchMainQuest(campaign, 'alden', party.id)
+  const dispatch = dispatchMainQuest(campaign, threatId, party.id)
   if (!dispatch.ok || !dispatch.attemptId) {
     throw new Error('test setup: dispatch failed')
   }
@@ -59,98 +62,154 @@ function buildPendingCampaign(seed: string): {
   return { campaign: resolved, attemptId: dispatch.attemptId }
 }
 
-function makeDeps(
-  campaign: TavernCampaignState,
-  attemptId: string,
-  narrativeProvider: NarrativeProvider,
-  setCampaign: MainQuestNarrativeGenerationDeps['setCampaign'],
-): MainQuestNarrativeGenerationDeps {
-  return {
-    campaignRef: { current: campaign },
-    setCampaign,
-    narrativeProvider,
-    attemptId,
+/**
+ * Mirrors `TavernSimulator`'s real `commitCampaign`: `campaignRef.current`
+ * and the "rendered" Campaign state are updated in the exact same
+ * synchronous call, with every commit recorded — so a test can assert not
+ * just the final state, but that a stale write was never committed as a
+ * step in between, exactly like the production atomic-commit path.
+ */
+function makeCommitHarness(initial: TavernCampaignState): {
+  campaignRef: { current: TavernCampaignState | null }
+  commitCampaign: (next: TavernCampaignState) => void
+  committedHistory: TavernCampaignState[]
+} {
+  const campaignRef: { current: TavernCampaignState | null } = {
+    current: initial,
   }
+  const committedHistory: TavernCampaignState[] = []
+  const commitCampaign = (next: TavernCampaignState) => {
+    campaignRef.current = next
+    committedHistory.push(next)
+  }
+  return { campaignRef, commitCampaign, committedHistory }
 }
 
 describe('runMainQuestNarrativeGeneration', () => {
-  it('applies the generated Narrative to the latest Campaign and commits it via campaignRef + setCampaign', async () => {
+  it('applies the generated Narrative to the latest Campaign and commits it via the atomic commit path', async () => {
     const { campaign, attemptId } = buildPendingCampaign('narrative-async-001')
-    let committed: TavernCampaignState | null = null
-    const deps = makeDeps(campaign, attemptId, fakeProvider(), (next) => {
-      committed = next
-    })
+    const { campaignRef, commitCampaign, committedHistory } =
+      makeCommitHarness(campaign)
+    const deps: MainQuestNarrativeGenerationDeps = {
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: fakeProvider(),
+      attemptId,
+    }
 
     const result = await runMainQuestNarrativeGeneration(deps)
 
     expect(result.ok).toBe(true)
-    expect(committed).not.toBeNull()
-    const attempt = committed!.mainQuest.attempts.find(
+    expect(committedHistory).toHaveLength(1)
+    const attempt = committedHistory[0].mainQuest.attempts.find(
       (a) => a.id === attemptId,
     )!
     expect(attempt.presentationStatus).toBe('ready')
     expect(attempt.narrative).toBeDefined()
-    // campaignRef is updated synchronously alongside the state commit, so a
-    // second call issued right after would see the already-applied result.
-    expect(deps.campaignRef.current).toBe(committed)
+    expect(campaignRef.current).toBe(committedHistory[0])
   })
 
-  it('never applies a stale AI response once the Campaign was replaced during the await (e.g. New Game)', async () => {
+  it('never applies a stale AI response once a New Game was started (committed via the real commitCampaign path) while the AI call was in flight', async () => {
     const { campaign, attemptId } = buildPendingCampaign('narrative-async-002')
-    const deps = makeDeps(
-      campaign,
-      attemptId,
-      // The provider's `generate()` runs during the `await` in production —
-      // swapping the ref here simulates the Campaign moving on to a fresh
-      // game while the AI call was still in flight.
-      {
-        id: 'fake-new-game-mid-flight',
-        async generate() {
-          deps.campaignRef.current = createTavernCampaign(
-            'narrative-async-002-new-game',
-          )
-          return { text: FAKE_NARRATIVE_TEXT }
-        },
-      },
-      vi.fn(),
-    )
+    const { campaignRef, commitCampaign, committedHistory } =
+      makeCommitHarness(campaign)
 
-    const result = await runMainQuestNarrativeGeneration(deps)
+    const provider: NarrativeProvider = {
+      id: 'fake-new-game-mid-flight',
+      async generate() {
+        // Reproduces `TavernSimulator.startCampaign()`'s real commit path
+        // (`commitCampaign`) firing mid-`await`, the same abstraction
+        // `handleNewGame` uses — not a raw `campaignRef.current` poke.
+        commitCampaign(createTavernCampaign('narrative-async-002-new-game'))
+        return { text: FAKE_NARRATIVE_TEXT }
+      },
+    }
+
+    const result = await runMainQuestNarrativeGeneration({
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: provider,
+      attemptId,
+    })
 
     expect(result.ok).toBe(false)
-    expect(deps.setCampaign).not.toHaveBeenCalled()
-    // The swapped-in Campaign (with no Main Quest activity at all) is
-    // untouched — the stale script was never written anywhere.
-    expect(deps.campaignRef.current!.mainQuest.attempts.length).toBe(0)
+    // Only the New Game's own commit ever landed — a second, stale commit
+    // from the narrative apply would show up here as a 2nd entry.
+    expect(committedHistory).toHaveLength(1)
+    expect(committedHistory[0].mainQuest.attempts.length).toBe(0)
+    expect(campaignRef.current).toBe(committedHistory[0])
   })
 
-  it('never applies a stale AI response when the pending Attempt reference is invalidated mid-flight', async () => {
-    const { campaign, attemptId } = buildPendingCampaign('narrative-async-003')
-    const deps = makeDeps(
-      campaign,
-      attemptId,
-      {
-        id: 'fake-invalidated-pending-mid-flight',
-        async generate() {
-          const current = deps.campaignRef.current!
-          deps.campaignRef.current = {
-            ...current,
-            mainQuest: {
-              ...current.mainQuest,
-              pendingPresentationAttemptId: undefined,
-            },
-          }
-          return { text: FAKE_NARRATIVE_TEXT }
-        },
-      },
-      vi.fn(),
+  it('never lets a stale AI response overwrite a Loaded Campaign committed (via the real commitCampaign path) while the AI call was in flight', async () => {
+    const { campaign, attemptId } = buildPendingCampaign('narrative-async-006')
+    const { campaignRef, commitCampaign, committedHistory } =
+      makeCommitHarness(campaign)
+
+    // A different, unrelated save being loaded mid-flight — its own Main
+    // Quest Attempt (if any) must be what survives, not the in-flight one.
+    const { campaign: loadedCampaign } = buildPendingCampaign(
+      'narrative-async-006-loaded',
+      'velga',
     )
 
-    const result = await runMainQuestNarrativeGeneration(deps)
+    const provider: NarrativeProvider = {
+      id: 'fake-load-mid-flight',
+      async generate() {
+        // Reproduces `TavernSimulator.handleLoadGame()`'s real commit path.
+        commitCampaign(loadedCampaign)
+        return { text: FAKE_NARRATIVE_TEXT }
+      },
+    }
+
+    const result = await runMainQuestNarrativeGeneration({
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: provider,
+      attemptId,
+    })
 
     expect(result.ok).toBe(false)
-    expect(deps.setCampaign).not.toHaveBeenCalled()
-    const attempt = deps.campaignRef.current!.mainQuest.attempts.find(
+    // Only the Load's own commit ever landed.
+    expect(committedHistory).toHaveLength(1)
+    expect(committedHistory[0]).toBe(loadedCampaign)
+    expect(campaignRef.current).toBe(loadedCampaign)
+    // The Loaded Campaign's own (different) Attempt is completely
+    // untouched by the stale response generated for the old Attempt.
+    const loadedAttempt = campaignRef.current!.mainQuest.attempts[0]
+    expect(loadedAttempt.narrative).toBeUndefined()
+    expect(loadedAttempt.presentationStatus).toBe('narrative_pending')
+  })
+
+  it('never applies a stale AI response when the pending Attempt reference is invalidated mid-flight by another commit', async () => {
+    const { campaign, attemptId } = buildPendingCampaign('narrative-async-003')
+    const { campaignRef, commitCampaign, committedHistory } =
+      makeCommitHarness(campaign)
+
+    const provider: NarrativeProvider = {
+      id: 'fake-invalidated-pending-mid-flight',
+      async generate() {
+        const current = campaignRef.current!
+        commitCampaign({
+          ...current,
+          mainQuest: {
+            ...current.mainQuest,
+            pendingPresentationAttemptId: undefined,
+          },
+        })
+        return { text: FAKE_NARRATIVE_TEXT }
+      },
+    }
+
+    const result = await runMainQuestNarrativeGeneration({
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: provider,
+      attemptId,
+    })
+
+    expect(result.ok).toBe(false)
+    expect(committedHistory).toHaveLength(1)
+    const attempt = campaignRef.current!.mainQuest.attempts.find(
       (a) => a.id === attemptId,
     )!
     expect(attempt.narrative).toBeUndefined()
@@ -159,57 +218,55 @@ describe('runMainQuestNarrativeGeneration', () => {
 
   it('retries successfully after a failed apply, once the Campaign is valid again', async () => {
     const { campaign, attemptId } = buildPendingCampaign('narrative-async-004')
-    let committed: TavernCampaignState | null = null
-    const commitSpy = vi.fn((next: TavernCampaignState) => {
-      committed = next
-    })
+    const { campaignRef, commitCampaign, committedHistory } =
+      makeCommitHarness(campaign)
 
-    const failingDeps = makeDeps(
-      campaign,
-      attemptId,
-      {
-        id: 'fake-fail-then-retry',
-        async generate() {
-          const current = failingDeps.campaignRef.current!
-          failingDeps.campaignRef.current = {
-            ...current,
-            mainQuest: {
-              ...current.mainQuest,
-              pendingPresentationAttemptId: undefined,
-            },
-          }
-          return { text: FAKE_NARRATIVE_TEXT }
-        },
+    const failingProvider: NarrativeProvider = {
+      id: 'fake-fail-then-retry',
+      async generate() {
+        const current = campaignRef.current!
+        commitCampaign({
+          ...current,
+          mainQuest: {
+            ...current.mainQuest,
+            pendingPresentationAttemptId: undefined,
+          },
+        })
+        return { text: FAKE_NARRATIVE_TEXT }
       },
-      commitSpy,
-    )
-    const failed = await runMainQuestNarrativeGeneration(failingDeps)
+    }
+    const failed = await runMainQuestNarrativeGeneration({
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: failingProvider,
+      attemptId,
+    })
     expect(failed.ok).toBe(false)
-    expect(committed).toBeNull()
-    expect(commitSpy).not.toHaveBeenCalled()
+    expect(committedHistory).toHaveLength(1)
 
     // The redirect back into MainQuestScene re-arms the pending reference —
     // retrying afterwards must succeed exactly like a first attempt would.
-    const restored = failingDeps.campaignRef.current!
-    const retryCampaign: TavernCampaignState = {
+    const restored = campaignRef.current!
+    commitCampaign({
       ...restored,
       mainQuest: {
         ...restored.mainQuest,
         pendingPresentationAttemptId: attemptId,
       },
-    }
-    const retryDeps = makeDeps(
-      retryCampaign,
+    })
+    expect(committedHistory).toHaveLength(2)
+
+    const retried = await runMainQuestNarrativeGeneration({
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: fakeProvider(),
       attemptId,
-      fakeProvider(),
-      commitSpy,
-    )
-    const retried = await runMainQuestNarrativeGeneration(retryDeps)
+    })
 
     expect(retried.ok).toBe(true)
-    expect(committed).not.toBeNull()
+    expect(committedHistory).toHaveLength(3)
     expect(
-      committed!.mainQuest.attempts.find((a) => a.id === attemptId)!
+      committedHistory[2].mainQuest.attempts.find((a) => a.id === attemptId)!
         .presentationStatus,
     ).toBe('ready')
   })
@@ -237,15 +294,15 @@ describe('runMainQuestNarrativeGeneration', () => {
         ),
       },
     }
+    const { campaignRef, commitCampaign } = makeCommitHarness(withNarrative)
     const generateSpy = vi.fn()
-    const deps = makeDeps(
-      withNarrative,
-      attemptId,
-      { id: 'unused', generate: generateSpy },
-      vi.fn(),
-    )
 
-    const result = await runMainQuestNarrativeGeneration(deps)
+    const result = await runMainQuestNarrativeGeneration({
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: { id: 'unused', generate: generateSpy },
+      attemptId,
+    })
 
     expect(result.ok).toBe(true)
     expect(generateSpy).not.toHaveBeenCalled()
