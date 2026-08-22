@@ -18,8 +18,10 @@ import {
 } from '../../mainQuest/threats.ts'
 import {
   deserializeGameSave,
+  saveToSlot,
   serializeGameSave,
 } from '../../save/serializer.ts'
+import { InMemorySaveRepository } from '../../save/inMemorySaveRepository.ts'
 import { validateGameSave } from '../../save/validation.ts'
 import { TAVERN_ECONOMY_CONFIG } from '../../economy/economyConfig.ts'
 import type { NarrativeProvider } from '../../../ai/narrative/types.ts'
@@ -348,5 +350,88 @@ describe('Phase 9.8 Main Quest end-to-end smoke', () => {
     expect(() =>
       validateGameSave(serializeGameSave({ campaign })),
     ).not.toThrow()
+  })
+})
+
+// `TavernSimulator.handleFinishDay()` only autosaves once
+// `next.currentDay.status === 'planning'` — `saveToSlot` itself hard-rejects
+// anything else, and a resolved-but-pending Main Quest Presentation means
+// the day never reaches 'planning' inside that same call. These tests
+// reproduce handleFinishDay's exact resolve/advance sequence against the
+// real `saveToSlot` to prove the autosave gate matches what the Save
+// contract actually accepts, for all three points in the day/Presentation
+// cycle it can be invoked from.
+describe('Phase 9.8 final re-review: planning-only autosave contract', () => {
+  it('a normal day (no Main Quest) reaches planning within one handleFinishDay call, and autosave succeeds', async () => {
+    const campaign = createTavernCampaign('mainquest-autosave-normal')
+    let next = campaign
+    if (next.currentDay.status === 'planning') {
+      next = resolveCampaignDay(next)
+    }
+    if (
+      next.currentDay.status === 'resolved' &&
+      next.mainQuest.pendingPresentationAttemptId === undefined
+    ) {
+      next = advanceCampaignDay(next)
+    }
+    expect(next.currentDay.status).toBe('planning')
+
+    const repo = new InMemorySaveRepository()
+    await expect(
+      saveToSlot(repo, 'autosave', { campaign: next }),
+    ).resolves.toBeUndefined()
+  })
+
+  it('a Main Quest day stays resolved (pending Presentation) within one handleFinishDay call, and would be rejected by saveToSlot', async () => {
+    const campaign = createTavernCampaign('mainquest-autosave-pending')
+    const { campaign: dispatched } = dispatchEligibleParty(campaign, 'alden')
+    let next = dispatched
+    if (next.currentDay.status === 'planning') {
+      next = resolveCampaignDay(next)
+    }
+    if (
+      next.currentDay.status === 'resolved' &&
+      next.mainQuest.pendingPresentationAttemptId === undefined
+    ) {
+      next = advanceCampaignDay(next)
+    }
+    // This is exactly the state handleFinishDay's autosave gate must skip —
+    // still 'resolved', with a Presentation pending.
+    expect(next.currentDay.status).toBe('resolved')
+    expect(next.mainQuest.pendingPresentationAttemptId).toBeDefined()
+
+    const repo = new InMemorySaveRepository()
+    await expect(
+      saveToSlot(repo, 'autosave', { campaign: next }),
+    ).rejects.toThrow('保存できません。翌日へ進んでから保存してください')
+  })
+
+  it('once Presentation completes, the next handleFinishDay call reaches planning, and autosave succeeds', async () => {
+    const { campaign: completed } = await runFullLifecycle(
+      'mainquest-autosave-completed',
+      'velga',
+    )
+    // Presentation is already 'completed' and pendingPresentationAttemptId
+    // cleared, but the day itself is still 'resolved' — mirrors calling
+    // handleFinishDay again after the redirect back from MainQuestScene.
+    expect(completed.currentDay.status).toBe('resolved')
+    expect(completed.mainQuest.pendingPresentationAttemptId).toBeUndefined()
+
+    let next = completed
+    if (next.currentDay.status === 'planning') {
+      next = resolveCampaignDay(next)
+    }
+    if (
+      next.currentDay.status === 'resolved' &&
+      next.mainQuest.pendingPresentationAttemptId === undefined
+    ) {
+      next = advanceCampaignDay(next)
+    }
+    expect(next.currentDay.status).toBe('planning')
+
+    const repo = new InMemorySaveRepository()
+    await expect(
+      saveToSlot(repo, 'autosave', { campaign: next }),
+    ).resolves.toBeUndefined()
   })
 })

@@ -68,6 +68,90 @@ function createInitialCampaign(): TavernCampaignState | null {
     : null
 }
 
+export interface MainQuestNarrativeGenerationDeps {
+  /** Always read AFTER the `await` below, never the value captured at call
+   * start — this is what lets a stale AI response be detected instead of
+   * silently applied to whatever Campaign happens to be current later. */
+  campaignRef: { current: TavernCampaignState | null }
+  setCampaign: (next: TavernCampaignState) => void
+  narrativeProvider: NarrativeProvider | null
+  attemptId: string
+}
+
+/**
+ * The async Main Quest Narrative generation flow, factored out of
+ * `TavernSimulator` so it can be exercised directly (stale-response and
+ * retry behavior included) without rendering the whole Canvas UI tree.
+ * Deliberately takes explicit deps instead of closing over component state:
+ * a `setCampaign((current) => ...)` state-updater must never be the place
+ * an async result's success/failure is decided (the updater can re-run,
+ * e.g. under Strict Mode, and its timing is not `await`-ordered relative to
+ * the calling code) — this reads the latest Campaign via `campaignRef`
+ * AFTER the `await`, applies the Core transition synchronously, and commits
+ * the outcome directly, so `UiActionResult` always reflects exactly what
+ * was (or was not) written.
+ */
+export async function runMainQuestNarrativeGeneration(
+  deps: MainQuestNarrativeGenerationDeps,
+): Promise<UiActionResult> {
+  const { campaignRef, setCampaign, narrativeProvider, attemptId } = deps
+  const startCampaign = campaignRef.current
+  if (!startCampaign) {
+    return { ok: false, message: 'キャンペーンが開始されていません' }
+  }
+  const attempt = startCampaign.mainQuest.attempts.find(
+    (a) => a.id === attemptId,
+  )
+  if (!attempt) {
+    return { ok: false, message: '主依頼の試行が見つかりません' }
+  }
+  if (attempt.narrative) {
+    return { ok: true }
+  }
+  if (!narrativeProvider) {
+    return { ok: false, message: 'AI provider not connected' }
+  }
+  const definition = MAIN_QUEST_THREAT_DEFINITION_MAP[attempt.threatId]
+  const campaignParty = startCampaign.parties.find(
+    (p) => p.id === attempt.partyId,
+  )
+  if (!campaignParty) {
+    return { ok: false, message: 'パーティが見つかりません' }
+  }
+
+  try {
+    const previousAttempts = startCampaign.mainQuest.attempts.filter(
+      (a) => a.partyId === campaignParty.id && a.id !== attempt.id,
+    )
+    const { script } = await generateMainQuestNarrative(
+      definition,
+      attempt,
+      campaignParty,
+      narrativeProvider,
+      previousAttempts,
+    )
+
+    // The Campaign may have moved on while awaiting the AI response (a
+    // new/loaded game, or the pending Attempt/Presentation state changed)
+    // — always re-validate against the LATEST Campaign via
+    // `applyMainQuestNarrative`'s own Core invariants (never the snapshot
+    // captured before the `await`), synchronously, outside any
+    // state-updater. A stale response is never written to a Campaign it
+    // was not generated against.
+    const latestCampaign = campaignRef.current
+    if (!latestCampaign) {
+      return { ok: false, message: 'キャンペーンが開始されていません' }
+    }
+    const next = applyMainQuestNarrative(latestCampaign, attemptId, script)
+    campaignRef.current = next
+    setCampaign(next)
+    return { ok: true }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : '物語の生成に失敗しました'
+    return { ok: false, message }
+  }
+}
+
 export function TavernSimulator() {
   const [campaign, setCampaign] = useState<TavernCampaignState | null>(() =>
     createInitialCampaign(),
@@ -94,6 +178,16 @@ export function TavernSimulator() {
     import.meta.env.MODE === 'test' ? 'legacy' : 'canvas',
   )
   const [canvasSettingsOpen, setCanvasSettingsOpen] = useState(false)
+
+  // Lets async handlers (spanning an `await`) read the LATEST Campaign once
+  // they resume, instead of the stale snapshot closed over at call start —
+  // kept in lockstep with `campaign` state via the effect below, never
+  // written to independently, so it never points at a different Campaign
+  // than what's rendered.
+  const campaignRef = useRef<TavernCampaignState | null>(campaign)
+  useEffect(() => {
+    campaignRef.current = campaign
+  }, [campaign])
 
   const saveRepositoryRef = useRef<SaveRepository | null>(null)
 
@@ -493,7 +587,15 @@ export function TavernSimulator() {
       setSelectedPartyId(null)
       setSelectedResultId(null)
       setError(null)
-      void autosave(next)
+      // The Save contract only ever accepts a 'planning' day
+      // (`saveToSlot`/`validateGameSave` both hard-reject anything else) —
+      // a Main Quest Presentation left pending above means `next` is still
+      // 'resolved', so autosaving it here would always fail. Persistence
+      // resumes once Presentation completes and this handler runs again
+      // with a freshly-advanced 'planning' day.
+      if (next.currentDay.status === 'planning') {
+        void autosave(next)
+      }
       return { ok: true }
     } catch (e) {
       const message = e instanceof Error ? e.message : '日次処理に失敗しました'
@@ -575,67 +677,14 @@ export function TavernSimulator() {
   )
 
   const handleGenerateMainQuestNarrative = useCallback(
-    async (attemptId: string): Promise<UiActionResult> => {
-      if (!campaign) {
-        return { ok: false, message: 'キャンペーンが開始されていません' }
-      }
-      const attempt = campaign.mainQuest.attempts.find(
-        (a) => a.id === attemptId,
-      )
-      if (!attempt) {
-        return { ok: false, message: '主依頼の試行が見つかりません' }
-      }
-      if (attempt.narrative) {
-        return { ok: true }
-      }
-      if (!narrativeProvider) {
-        return { ok: false, message: 'AI provider not connected' }
-      }
-      const definition = MAIN_QUEST_THREAT_DEFINITION_MAP[attempt.threatId]
-      const campaignParty = campaign.parties.find(
-        (p) => p.id === attempt.partyId,
-      )
-      if (!campaignParty) {
-        return { ok: false, message: 'パーティが見つかりません' }
-      }
-
-      try {
-        const previousAttempts = campaign.mainQuest.attempts.filter(
-          (a) => a.partyId === campaignParty.id && a.id !== attempt.id,
-        )
-        const { script } = await generateMainQuestNarrative(
-          definition,
-          attempt,
-          campaignParty,
-          narrativeProvider,
-          previousAttempts,
-        )
-        // `applyMainQuestNarrative` can throw on a violated Presentation
-        // precondition; that must never escape a React state-updater (it
-        // would hit an Error Boundary instead of the caller), so the
-        // outcome is captured via this closure variable instead.
-        let applyOutcome: UiActionResult = { ok: true }
-        setCampaign((current) => {
-          if (!current) return current
-          try {
-            return applyMainQuestNarrative(current, attemptId, script)
-          } catch (e) {
-            applyOutcome = {
-              ok: false,
-              message:
-                e instanceof Error ? e.message : '顛末の記録に失敗しました',
-            }
-            return current
-          }
-        })
-        return applyOutcome
-      } catch (e) {
-        const message =
-          e instanceof Error ? e.message : '物語の生成に失敗しました'
-        return { ok: false, message }
-      }
-    },
-    [campaign, narrativeProvider],
+    (attemptId: string): Promise<UiActionResult> =>
+      runMainQuestNarrativeGeneration({
+        campaignRef,
+        setCampaign,
+        narrativeProvider,
+        attemptId,
+      }),
+    [narrativeProvider],
   )
 
   const handleStartMainQuestPresentation = useCallback(
