@@ -1,5 +1,5 @@
 export type SoundNovelSource =
-  'expedition' | 'downtime' | 'stay_extension' | 'main_quest'
+  'expedition' | 'downtime' | 'stay_extension' | 'main_quest' | 'ending'
 
 export type SoundNovelBackgroundId =
   | 'tavern'

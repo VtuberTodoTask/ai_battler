@@ -79,6 +79,8 @@ import {
   resolveMainQuestForDay,
 } from '../../mainQuest/simulation.ts'
 import { createInitialMainQuestState } from '../../mainQuest/threats.ts'
+import { createInitialCampaignEndingState } from '../../ending/types.ts'
+import { isCampaignVictoryAchieved } from '../../ending/victory.ts'
 import type {
   CampaignParty,
   CampaignProgressionEvent,
@@ -137,6 +139,7 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
     questChains: [],
     worldEvents: [],
     mainQuest: createInitialMainQuestState(),
+    ending: createInitialCampaignEndingState(),
   }
 }
 
@@ -533,6 +536,19 @@ export function advanceCampaignDay(
   }
   if (campaign.mainQuest.pendingPresentationAttemptId !== undefined) {
     throw new Error('主依頼の顛末確認が完了していないため翌日へ進めません')
+  }
+  // Phase 9.9: once the Ending has begun (or Victory itself is already a
+  // fact of `mainQuest` state), there is no next day — Post Game is out of
+  // scope for this phase. The `isCampaignVictoryAchieved` check is
+  // defensive-in-depth on top of the `ending.status` check: normally the
+  // two always agree (Ending only ever starts once Victory is achieved),
+  // but this guarantees a tampered/corrupted `ending` field can never
+  // reopen day progression after Victory.
+  if (campaign.ending.status !== 'locked') {
+    throw new Error('物語が完結しているため翌日へ進めません')
+  }
+  if (isCampaignVictoryAchieved(campaign)) {
+    throw new Error('物語が完結しているため翌日へ進めません')
   }
 
   const nextCampaign = deepClone(campaign)

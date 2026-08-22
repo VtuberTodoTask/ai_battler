@@ -78,6 +78,16 @@ export class MainQuestScene implements GameScene {
     this._campaign = campaign
     this._uiState = { ...uiState }
     if (this._context) {
+      // Phase 9.9: completing the final Main Quest Presentation (the
+      // Nosferatu victory) can start the Ending in the SAME Campaign
+      // update that completes this Presentation — the Canvas bridge
+      // preserves the current scene on that sync (same as any other
+      // successful Presentation step), so this scene itself must notice
+      // and hand off to EndingScene rather than re-rendering its own hub.
+      if (campaign.ending.status !== 'locked') {
+        this._context.canvasGame.sceneManager?.push('ending')
+        return
+      }
       this.updateViewModel()
       this.maybeRequestNarrative()
       this.render(this._context)

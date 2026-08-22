@@ -36,6 +36,9 @@ export interface GameCanvasHostProps {
   onGenerateMainQuestNarrative?: (attemptId: string) => Promise<UiActionResult>
   onStartMainQuestPresentation?: (attemptId: string) => UiActionResult
   onCompleteMainQuestPresentation?: (attemptId: string) => UiActionResult
+  onGenerateEndingNarrative?: () => Promise<UiActionResult>
+  onStartEndingPresentation?: () => UiActionResult
+  onCompleteEndingPresentation?: () => UiActionResult
   onOpenSettings?: () => void
   onSwitchToLegacy: () => void
   onNewGame?: () => UiActionResult
@@ -57,6 +60,9 @@ export default function GameCanvasHost({
   onGenerateMainQuestNarrative,
   onStartMainQuestPresentation,
   onCompleteMainQuestPresentation,
+  onGenerateEndingNarrative,
+  onStartEndingPresentation,
+  onCompleteEndingPresentation,
   onOpenSettings,
   onSwitchToLegacy,
   onNewGame,
@@ -83,6 +89,9 @@ export default function GameCanvasHost({
   const onCompleteMainQuestPresentationRef = useRef(
     onCompleteMainQuestPresentation,
   )
+  const onGenerateEndingNarrativeRef = useRef(onGenerateEndingNarrative)
+  const onStartEndingPresentationRef = useRef(onStartEndingPresentation)
+  const onCompleteEndingPresentationRef = useRef(onCompleteEndingPresentation)
   const onOpenSettingsRef = useRef(onOpenSettings)
   const onSwitchRef = useRef(onSwitchToLegacy)
   const onNewGameRef = useRef(onNewGame)
@@ -102,6 +111,9 @@ export default function GameCanvasHost({
     onGenerateMainQuestNarrativeRef.current = onGenerateMainQuestNarrative
     onStartMainQuestPresentationRef.current = onStartMainQuestPresentation
     onCompleteMainQuestPresentationRef.current = onCompleteMainQuestPresentation
+    onGenerateEndingNarrativeRef.current = onGenerateEndingNarrative
+    onStartEndingPresentationRef.current = onStartEndingPresentation
+    onCompleteEndingPresentationRef.current = onCompleteEndingPresentation
     onOpenSettingsRef.current = onOpenSettings
     onSwitchRef.current = onSwitchToLegacy
     onNewGameRef.current = onNewGame
@@ -120,6 +132,9 @@ export default function GameCanvasHost({
     onGenerateMainQuestNarrative,
     onStartMainQuestPresentation,
     onCompleteMainQuestPresentation,
+    onGenerateEndingNarrative,
+    onStartEndingPresentation,
+    onCompleteEndingPresentation,
     onOpenSettings,
     onSwitchToLegacy,
     onNewGame,
@@ -368,6 +383,84 @@ export default function GameCanvasHost({
             ok: false,
             message:
               e instanceof Error ? e.message : '主依頼の進行に失敗しました',
+          }
+        }
+      },
+      generateEndingNarrative: async () => {
+        const currentCampaign = prevCampaignRef.current
+        // Mirrors generateMainQuestNarrative's fix: only when there is no
+        // Narrative yet will the handler trigger a Campaign write (and
+        // thus a re-sync that would otherwise reset the canvas back to
+        // the Tavern scene mid-Presentation).
+        const expectsCampaignSync =
+          currentCampaign?.ending.narrative === undefined
+
+        if (expectsCampaignSync) {
+          preserveSceneOnNextSyncRef.current = true
+        }
+
+        try {
+          const handler = onGenerateEndingNarrativeRef.current
+          if (!handler) {
+            if (expectsCampaignSync) {
+              preserveSceneOnNextSyncRef.current = false
+            }
+            return {
+              ok: false,
+              message: 'AI provider not connected',
+            }
+          }
+          const result = await handler()
+          if (!result.ok && expectsCampaignSync) {
+            preserveSceneOnNextSyncRef.current = false
+          }
+          return result
+        } catch (e) {
+          if (expectsCampaignSync) {
+            preserveSceneOnNextSyncRef.current = false
+          }
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : '物語の生成に失敗しました',
+          }
+        }
+      },
+      startEndingPresentation: () => {
+        try {
+          const handler = onStartEndingPresentationRef.current
+          if (!handler) {
+            return { ok: false, message: 'Ending not connected' }
+          }
+          const result = handler()
+          if (result.ok) {
+            preserveSceneOnNextSyncRef.current = true
+          }
+          return result
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : 'エピローグの進行に失敗しました',
+          }
+        }
+      },
+      completeEndingPresentation: () => {
+        try {
+          const handler = onCompleteEndingPresentationRef.current
+          if (!handler) {
+            return { ok: false, message: 'Ending not connected' }
+          }
+          const result = handler()
+          if (result.ok) {
+            preserveSceneOnNextSyncRef.current = true
+          }
+          return result
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error ? e.message : 'エピローグの進行に失敗しました',
           }
         }
       },
