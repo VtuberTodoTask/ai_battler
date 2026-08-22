@@ -97,7 +97,7 @@ describe('Phase 9.7 world event smoke', () => {
       (e) => e.id === startedEvent.eventId,
     )
     expect(event).toBeDefined()
-    expect(event!.status === 'active' || event!.status !== undefined).toBe(true)
+    expect(event!.status).toBe('active')
     expect(event!.startedDay).toBe(startedRecord.dayNumber)
     expect(event!.plannedEndDay).toBe(
       startedRecord.dayNumber + WORLD_EVENT_CONFIG.durationDays - 1,
@@ -127,14 +127,13 @@ describe('Phase 9.7 world event smoke', () => {
     const campaign = findCampaignWithStartedWorldEvent('phase9-7-d', 30, 30)
     const active = campaign.worldEvents.find((e) => e.status === 'active')!
     const due = collectDueEventRequest([active], campaign.dayNumber)
-    if (due.length > 0) {
-      const boardRequest = campaign.currentDay.requests.find(
-        (r) => r.id === due[0].id,
-      )
-      expect(boardRequest).toBeDefined()
-      expect(boardRequest?.worldEvent?.eventId).toBe(active.id)
-      expect(boardRequest?.chain).toBeUndefined()
-    }
+    expect(due).toHaveLength(1)
+    const boardRequest = campaign.currentDay.requests.find(
+      (r) => r.id === due[0].id,
+    )
+    expect(boardRequest).toBeDefined()
+    expect(boardRequest?.worldEvent?.eventId).toBe(active.id)
+    expect(boardRequest?.chain).toBeUndefined()
     expect(campaign.currentDay.requests.length).toBeLessThanOrEqual(3)
   })
 
@@ -164,7 +163,8 @@ describe('Phase 9.7 world event smoke', () => {
   })
 
   it('F: an event that never reaches target becomes unresolved at plannedEndDay', () => {
-    for (let s = 0; s < 60; s++) {
+    let found = false
+    for (let s = 0; s < 60 && !found; s++) {
       let campaign = createTavernCampaign(`phase9-7-f-${s}`)
       let unresolvedEventId: string | undefined
       for (let day = 0; day < 20 && !unresolvedEventId; day++) {
@@ -183,9 +183,10 @@ describe('Phase 9.7 world event smoke', () => {
         expect(event.responsePoints).toBeLessThan(
           WORLD_EVENT_CONFIG.responseTarget,
         )
-        return
+        found = true
       }
     }
+    expect(found).toBe(true)
   })
 
   it('G: save/load preserves an active world event exactly', () => {
@@ -212,7 +213,8 @@ describe('Phase 9.7 world event smoke', () => {
   })
 
   it('J: a successful Event-linked request can become a Quest Chain origin, and both persist independently', () => {
-    for (let s = 0; s < 80; s++) {
+    let found = false
+    for (let s = 0; s < 80 && !found; s++) {
       let campaign = createTavernCampaign(`phase9-7-j-${s}`)
       let sawBoth = false
       for (let day = 0; day < 30 && !sawBoth; day++) {
@@ -242,9 +244,10 @@ describe('Phase 9.7 world event smoke', () => {
         expect(() =>
           validateGameSave(serializeGameSave({ campaign })),
         ).not.toThrow()
-        return
+        found = true
       }
     }
+    expect(found).toBe(true)
   })
 
   it('long-run smoke: 60 days never violate core World Event invariants (with Quest Chains active too)', () => {

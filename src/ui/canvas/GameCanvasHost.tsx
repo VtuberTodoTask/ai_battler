@@ -147,8 +147,7 @@ export default function GameCanvasHost({
     const actions: GameUiActions = {
       advanceDay: () => {
         try {
-          onAdvanceRef.current()
-          return { ok: true }
+          return onAdvanceRef.current()
         } catch (e) {
           return {
             ok: false,
@@ -159,8 +158,7 @@ export default function GameCanvasHost({
       },
       resolveDay: () => {
         try {
-          onResolveRef.current()
-          return { ok: true }
+          return onResolveRef.current()
         } catch (e) {
           return {
             ok: false,

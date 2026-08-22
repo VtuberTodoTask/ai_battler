@@ -176,6 +176,116 @@ describe('GameCanvasHost lifecycle', () => {
     cleanup()
   })
 
+  it('advanceDay propagates a failure UiActionResult from the callback unchanged, and a success one too', async () => {
+    const campaign = createTavernCampaign('lifecycle-advance-001')
+
+    const { rerender } = render(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => ({ ok: false, message: 'advance failed' })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() => expect(latestActions).not.toBeNull())
+    const failure = latestActions!.advanceDay()
+    expect(failure.ok).toBe(false)
+    expect(failure.message).toBe('advance failed')
+
+    rerender(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+    const success = latestActions!.advanceDay()
+    expect(success.ok).toBe(true)
+
+    cleanup()
+  })
+
+  it('resolveDay propagates a failure UiActionResult from the callback unchanged, and a success one too', async () => {
+    const campaign = createTavernCampaign('lifecycle-resolve-001')
+
+    const { rerender } = render(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: false, message: 'resolve failed' })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() => expect(latestActions).not.toBeNull())
+    const failure = latestActions!.resolveDay()
+    expect(failure.ok).toBe(false)
+    expect(failure.message).toBe('resolve failed')
+
+    rerender(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+    const success = latestActions!.resolveDay()
+    expect(success.ok).toBe(true)
+
+    cleanup()
+  })
+
+  it('advanceDay/resolveDay convert a thrown callback error into { ok: false, message } instead of letting it escape the bridge', async () => {
+    const campaign = createTavernCampaign('lifecycle-throw-001')
+
+    render(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => {
+          throw new Error('boom')
+        }}
+        onResolveDay={() => {
+          throw new Error('boom')
+        }}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+      />,
+    )
+
+    await waitFor(() => expect(latestActions).not.toBeNull())
+
+    let advanceResult: ReturnType<GameUiActions['advanceDay']> | undefined
+    expect(() => {
+      advanceResult = latestActions!.advanceDay()
+    }).not.toThrow()
+    expect(advanceResult).toEqual({ ok: false, message: 'boom' })
+
+    let resolveResult: ReturnType<GameUiActions['resolveDay']> | undefined
+    expect(() => {
+      resolveResult = latestActions!.resolveDay()
+    }).not.toThrow()
+    expect(resolveResult).toEqual({ ok: false, message: 'boom' })
+
+    cleanup()
+  })
+
   function withCandidate(
     campaign: TavernCampaignState,
     candidate: NarrativeCandidate,
