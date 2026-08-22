@@ -5,11 +5,18 @@ import {
   resolveCampaignDay,
 } from '../tavern/campaign/campaign.ts'
 import { dispatchMainQuest } from '../mainQuest/dispatch.ts'
+import {
+  applyMainQuestNarrative,
+  completeMainQuestPresentation,
+  startMainQuestPresentation,
+} from '../mainQuest/presentation.ts'
 import { MAIN_QUEST_THREAT_DEFINITION_MAP } from '../mainQuest/threats.ts'
 import { TAVERN_ECONOMY_CONFIG } from '../economy/economyConfig.ts'
 import { serializeGameSave } from './serializer.ts'
 import { SaveValidationErrorClass, validateGameSave } from './validation.ts'
 import type { StatusEffect } from '../models/types.ts'
+import type { TavernCampaignState } from '../tavern/campaign/types.ts'
+import type { MainQuestNarrativeScript } from '../mainQuest/types.ts'
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
@@ -24,7 +31,10 @@ function clone<T>(value: T): T {
 // only (Vitest isolates each test file's module graph).
 ;(TAVERN_ECONOMY_CONFIG as { initialFunds: number }).initialFunds = 100000
 
-function dispatchedAndResolvedSave(seed: string) {
+function dispatchedResolvedCampaign(seed: string): {
+  campaign: TavernCampaignState
+  attemptId: string
+} {
   const campaign = createTavernCampaign(seed)
   const definition = MAIN_QUEST_THREAT_DEFINITION_MAP.alden
   const party = campaign.parties[0]
@@ -40,13 +50,75 @@ function dispatchedAndResolvedSave(seed: string) {
     throw new Error('test setup: dispatch failed')
   }
   const resolved = resolveCampaignDay(dispatch.campaign)
-  // A save is only ever taken while the current day is 'planning' — advance
-  // past the day the Attempt resolved on, same as any other real save point.
-  const advanced = advanceCampaignDay(resolved)
-  return {
-    save: clone(serializeGameSave({ campaign: advanced })),
-    attemptId: dispatch.attemptId,
+  return { campaign: resolved, attemptId: dispatch.attemptId }
+}
+
+// A save is only ever taken while the current day is 'planning', but
+// `advanceCampaignDay` now refuses to run while a Main Quest Presentation is
+// pending (the very invariant this file's causal checks exist to enforce) —
+// so a resolved-but-not-yet-fully-presented Attempt can never be the product
+// of a real `advanceCampaignDay` call. This forces `currentDay.status` back
+// to 'planning' directly, purely to satisfy the unrelated (pre-existing) "a
+// save is only ever taken on a planning day" structural check, so this file
+// can isolate and test the Presentation-causality checks themselves.
+function forcePlanningSave(campaign: TavernCampaignState) {
+  const forcedPlanning = {
+    ...campaign,
+    // `resolveCampaignDay` already appended this day's record to `history`,
+    // so `dayNumber` must move forward to keep the (unrelated, pre-existing)
+    // `history.length === dayNumber - 1` structural check satisfied.
+    dayNumber: campaign.dayNumber + 1,
+    currentDay: {
+      ...campaign.currentDay,
+      status: 'planning' as const,
+      results: [],
+    },
   }
+  return clone(serializeGameSave({ campaign: forcedPlanning }))
+}
+
+function dispatchedAndResolvedSave(seed: string) {
+  const { campaign, attemptId } = dispatchedResolvedCampaign(seed)
+  return { save: forcePlanningSave(campaign), attemptId }
+}
+
+function fakeNarrativeScript(): MainQuestNarrativeScript {
+  return {
+    preBattle: '出発前の物語。',
+    battleInterludes: [],
+    postBattle: '戦いの後の物語。',
+    promptVersion: 'test-v1',
+    providerId: 'fake-test-provider',
+    createdAt: new Date(0).toISOString(),
+  }
+}
+
+/**
+ * Builds a save whose Main Quest Attempt sits at exactly the given
+ * `presentationStatus`. `completed` goes through the real
+ * `advanceCampaignDay` (legitimately reachable, since the Core guard only
+ * blocks it while still pending); `ready`/`viewing` are not reachable by any
+ * real call path once presentation is pending, so they use the same
+ * `forcePlanningSave` isolation hack as `dispatchedAndResolvedSave`.
+ */
+function saveAtPresentationStatus(
+  seed: string,
+  target: 'ready' | 'viewing' | 'completed',
+): { save: ReturnType<typeof serializeGameSave>; attemptId: string } {
+  const { campaign, attemptId } = dispatchedResolvedCampaign(seed)
+  let next = applyMainQuestNarrative(campaign, attemptId, fakeNarrativeScript())
+  if (target !== 'ready') {
+    next = startMainQuestPresentation(next, attemptId)
+  }
+  if (target === 'completed') {
+    next = completeMainQuestPresentation(next, attemptId)
+    const advanced = advanceCampaignDay(next)
+    return {
+      save: clone(serializeGameSave({ campaign: advanced })),
+      attemptId,
+    }
+  }
+  return { save: forcePlanningSave(next), attemptId }
 }
 
 describe('Phase 9.8 Main Quest Save Validation', () => {
@@ -323,8 +395,8 @@ describe('Phase 9.8.2/9.8.3 Status Battle Trace Save Validation', () => {
       attempt.battleTrace!.initialSnapshot.partyMembers.find(
         (m) => m.characterId !== memberId,
       )?.characterId
-    if (!otherMemberId) return
-    injectedEffect.sourceId = otherMemberId
+    expect(otherMemberId).toBeDefined()
+    injectedEffect.sourceId = otherMemberId!
 
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })
@@ -340,6 +412,108 @@ describe('Phase 9.8.2/9.8.3 Status Battle Trace Save Validation', () => {
     // No Trace event ever removes it and finalMemberStates is left
     // untouched, so the replayed final state (now poisoned) disagrees with
     // the stored Result.
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+})
+
+describe('Phase 9.8 re-review: Presentation state causality', () => {
+  it('accepts a save whose Attempt is ready (result + battleTrace + narrative present, pending)', () => {
+    const { save } = saveAtPresentationStatus('mainquest-pres-001', 'ready')
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  it('accepts a save whose Attempt is viewing (result + battleTrace + narrative present, pending)', () => {
+    const { save } = saveAtPresentationStatus('mainquest-pres-002', 'viewing')
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  it('accepts a save whose Attempt is completed (result + battleTrace + narrative present, no longer pending)', () => {
+    const { save } = saveAtPresentationStatus('mainquest-pres-003', 'completed')
+    expect(() => validateGameSave(save)).not.toThrow()
+  })
+
+  it('rejects a completed Attempt with no narrative', () => {
+    const { save, attemptId } = saveAtPresentationStatus(
+      'mainquest-pres-004',
+      'completed',
+    )
+    const attempt = save.campaign.mainQuest.attempts.find(
+      (a) => a.id === attemptId,
+    )!
+    attempt.narrative = undefined
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a ready Attempt with no narrative', () => {
+    const { save, attemptId } = saveAtPresentationStatus(
+      'mainquest-pres-005',
+      'ready',
+    )
+    const attempt = save.campaign.mainQuest.attempts.find(
+      (a) => a.id === attemptId,
+    )!
+    attempt.narrative = undefined
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a viewing Attempt with no narrative', () => {
+    const { save, attemptId } = saveAtPresentationStatus(
+      'mainquest-pres-006',
+      'viewing',
+    )
+    const attempt = save.campaign.mainQuest.attempts.find(
+      (a) => a.id === attemptId,
+    )!
+    attempt.narrative = undefined
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects pendingPresentationAttemptId pointing at a completed Attempt', () => {
+    const { save, attemptId } = saveAtPresentationStatus(
+      'mainquest-pres-007',
+      'completed',
+    )
+    save.campaign.mainQuest.pendingPresentationAttemptId = attemptId
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects an unresolved (never-simulated) Attempt referenced by pendingPresentationAttemptId', () => {
+    const campaign = createTavernCampaign('mainquest-pres-008')
+    const definition = MAIN_QUEST_THREAT_DEFINITION_MAP.alden
+    const party = campaign.parties[0]
+    party.party.rank = definition.requiredPartyRank
+    party.relationship.affinity = definition.requiredAffinity
+    campaign.currentDay.parties = campaign.currentDay.parties.map((p) =>
+      p.id === party.id
+        ? { ...p, party: { ...p.party, rank: definition.requiredPartyRank } }
+        : p,
+    )
+    const dispatch = dispatchMainQuest(campaign, 'alden', party.id)
+    if (!dispatch.ok || !dispatch.attemptId) {
+      throw new Error('test setup: dispatch failed')
+    }
+    // Still 'planning' — the Attempt was never resolved (no result/trace).
+    const save = clone(serializeGameSave({ campaign: dispatch.campaign }))
+    save.campaign.mainQuest.pendingPresentationAttemptId = dispatch.attemptId
+
+    expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a narrative_pending Attempt with no result that is still treated as the pending target', () => {
+    const { save, attemptId } = dispatchedAndResolvedSave('mainquest-pres-009')
+    const attempt = save.campaign.mainQuest.attempts.find(
+      (a) => a.id === attemptId,
+    )!
+    // The attempt legitimately started as the pending target (resolved,
+    // narrative_pending) — corrupt it by stripping the Result/Trace while
+    // leaving `presentationStatus`/`pendingPresentationAttemptId` untouched.
+    attempt.result = undefined
+    attempt.battleTrace = undefined
 
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)
   })

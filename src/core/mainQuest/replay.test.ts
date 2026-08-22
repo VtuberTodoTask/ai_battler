@@ -147,7 +147,8 @@ describe('Phase 9.8.1 replayMainQuestBattleTrace parity', () => {
   })
 
   it('a healing event actually increases replayed HP by the authoritative amount', () => {
-    for (let s = 0; s < 20; s++) {
+    let found = false
+    for (let s = 0; s < 20 && !found; s++) {
       const { battleTrace } = simulate(`mainquest-replay-heal-${s}`, 'kared')
       const healingEvents = battleTrace.events.filter(
         (e) => e.type === 'healing' || e.type === 'periodicHealing',
@@ -161,8 +162,9 @@ describe('Phase 9.8.1 replayMainQuestBattleTrace parity', () => {
         battleTrace,
       )
       expect(replay.members.length).toBeGreaterThan(0)
-      return
+      found = true
     }
+    expect(found).toBe(true)
   })
 
   it('trace generation consumes zero additional Campaign RNG (determinism across repeated Simulation calls)', () => {

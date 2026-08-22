@@ -135,6 +135,55 @@ describe('Phase 9.8 Main Quest end-to-end smoke', () => {
     expect(advanced.mainQuest.pendingPresentationAttemptId).toBeUndefined()
   })
 
+  it('C2: a day with no Main Quest attempt advances normally with resolveCampaignDay -> advanceCampaignDay', () => {
+    const campaign = createTavernCampaign('mainquest-e2e-c2')
+    const resolved = resolveCampaignDay(campaign)
+    expect(resolved.mainQuest.pendingPresentationAttemptId).toBeUndefined()
+    const advanced = advanceCampaignDay(resolved)
+    expect(advanced.dayNumber).toBe(campaign.dayNumber + 1)
+  })
+
+  it('C3: resolving a day with a Main Quest dispatch leaves the day number unchanged and marks the Attempt pending', () => {
+    const campaign = createTavernCampaign('mainquest-e2e-c3')
+    const { campaign: dispatched } = dispatchEligibleParty(campaign, 'alden')
+    const resolved = resolveCampaignDay(dispatched)
+    expect(resolved.dayNumber).toBe(campaign.dayNumber)
+    expect(resolved.mainQuest.pendingPresentationAttemptId).toBeDefined()
+  })
+
+  it('C4: advanceCampaignDay is rejected while a Main Quest Presentation is pending, and succeeds once it completes', async () => {
+    const campaign = createTavernCampaign('mainquest-e2e-c4')
+    const { campaign: dispatched, attemptId } = dispatchEligibleParty(
+      campaign,
+      'alden',
+    )
+    const resolved = resolveCampaignDay(dispatched)
+    expect(resolved.mainQuest.pendingPresentationAttemptId).toBe(attemptId)
+    expect(() => advanceCampaignDay(resolved)).toThrow()
+
+    const attempt = resolved.mainQuest.attempts.find((a) => a.id === attemptId)!
+    const definition = MAIN_QUEST_THREAT_DEFINITION_MAP.alden
+    const campaignParty = resolved.parties.find(
+      (p) => p.id === attempt.partyId,
+    )!
+    const { script } = await generateMainQuestNarrative(
+      definition,
+      attempt,
+      campaignParty,
+      fakeProvider(FAKE_NARRATIVE_TEXT),
+    )
+    let completed = applyMainQuestNarrative(resolved, attemptId, script)
+    // Still pending after narrative/viewing — advance must keep rejecting.
+    expect(() => advanceCampaignDay(completed)).toThrow()
+    completed = startMainQuestPresentation(completed, attemptId)
+    expect(() => advanceCampaignDay(completed)).toThrow()
+    completed = completeMainQuestPresentation(completed, attemptId)
+    expect(completed.mainQuest.pendingPresentationAttemptId).toBeUndefined()
+
+    const advanced = advanceCampaignDay(completed)
+    expect(advanced.dayNumber).toBe(campaign.dayNumber + 1)
+  })
+
   it('D: a victorious Attempt marks its Threat defeated with the dispatching Party recorded', async () => {
     for (let s = 0; s < 30; s++) {
       const { campaign, attemptId } = await runFullLifecycle(
@@ -152,6 +201,7 @@ describe('Phase 9.8 Main Quest end-to-end smoke', () => {
         return
       }
     }
+    throw new Error('no Threat victory found within 30 seeds')
   })
 
   it('E: defeating all 7 national Threats unlocks Nosferatu (status becomes available)', () => {

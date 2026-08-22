@@ -167,6 +167,39 @@ describe('Phase 9.8 Main Quest eligibility + dispatch', () => {
     expect(attempt.battleTrace).toBeUndefined()
   })
 
+  it('is eligible while the day is still in planning', () => {
+    const campaign = createTavernCampaign('mainquest-dispatch-010')
+    const partyId = eligiblePartyId(campaign)
+    campaign.finance.funds = MAIN_QUEST_THREAT_DEFINITION_MAP.alden.fee
+
+    const evaluation = evaluateMainQuestDispatch(campaign, 'alden', partyId)
+    expect(evaluation.dayPlanning).toBe(true)
+    expect(evaluation.eligible).toBe(true)
+
+    const result = dispatchMainQuest(campaign, 'alden', partyId)
+    expect(result.ok).toBe(true)
+  })
+
+  it('rejects with zero mutation once the day has been resolved, even for an otherwise-eligible Party', () => {
+    const campaign = createTavernCampaign('mainquest-dispatch-011')
+    const partyId = eligiblePartyId(campaign)
+    campaign.finance.funds = MAIN_QUEST_THREAT_DEFINITION_MAP.alden.fee
+    campaign.currentDay = { ...campaign.currentDay, status: 'resolved' }
+    const fundsBefore = campaign.finance.funds
+    const attemptCountBefore = campaign.mainQuest.attempts.length
+    const before = JSON.parse(JSON.stringify(campaign))
+
+    const evaluation = evaluateMainQuestDispatch(campaign, 'alden', partyId)
+    expect(evaluation.dayPlanning).toBe(false)
+    expect(evaluation.eligible).toBe(false)
+
+    const result = dispatchMainQuest(campaign, 'alden', partyId)
+    expect(result.ok).toBe(false)
+    expect(result.campaign.finance.funds).toBe(fundsBefore)
+    expect(result.campaign.mainQuest.attempts.length).toBe(attemptCountBefore)
+    expect(JSON.parse(JSON.stringify(campaign))).toEqual(before)
+  })
+
   it('rejects a second Main Quest dispatch on the same day with zero mutation (one per day)', () => {
     const campaign = createTavernCampaign('mainquest-dispatch-009')
     const partyId = eligiblePartyId(campaign)

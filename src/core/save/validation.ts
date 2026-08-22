@@ -2630,6 +2630,53 @@ function validateMainQuestBattleTrace(
  * `validateMainQuestBattleTrace`'s docs for why that is consistent with
  * the rest of this validator.
  */
+/**
+ * Minimal structural validation of a stored `MainQuestNarrativeScript` —
+ * only the fields the Presentation runtime directly reads
+ * (`MainQuestScene`'s SoundNovel push for `preBattle`/`postBattle`,
+ * `buildMainQuestBattlePlaybackPlan`'s `battleInterludes` lookup). This is
+ * deliberately NOT semantic validation of the AI-authored prose itself —
+ * only enough to guarantee a corrupted save can never throw a runtime
+ * exception mid-Presentation.
+ */
+function validateMainQuestNarrativeScript(
+  value: unknown,
+  dayNumber: number,
+): void {
+  assertPlainObject(
+    value,
+    `主依頼試行の顛末データが壊れています (DAY ${dayNumber})`,
+  )
+  if (
+    typeof value.preBattle !== 'string' ||
+    typeof value.postBattle !== 'string'
+  ) {
+    throw new SaveValidationErrorClass(
+      `主依頼試行の顛末テキストが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (!Array.isArray(value.battleInterludes)) {
+    throw new SaveValidationErrorClass(
+      `主依頼試行の戦闘中セリフが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  for (const cue of value.battleInterludes) {
+    if (
+      !isPlainObject(cue) ||
+      typeof cue.anchorId !== 'string' ||
+      typeof cue.speakerId !== 'string' ||
+      typeof cue.text !== 'string'
+    ) {
+      throw new SaveValidationErrorClass(
+        `主依頼試行の戦闘中セリフが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+  }
+}
+
 function validateMainQuest(
   campaign: Record<string, unknown>,
   ledgerById: Map<string, LedgerValidationRecord>,
@@ -2839,6 +2886,70 @@ function validateMainQuest(
         '主依頼試行の演出状態が不正です',
         'corrupted-data',
       )
+    }
+    const presentationStatus = rawAttempt.presentationStatus as
+      'narrative_pending' | 'ready' | 'viewing' | 'completed'
+
+    const hasNarrative = rawAttempt.narrative !== undefined
+    if (hasNarrative) {
+      validateMainQuestNarrativeScript(rawAttempt.narrative, dayNumber)
+    }
+    const isPendingTarget = mainQuest.pendingPresentationAttemptId === attemptId
+
+    // Presentation-status causality (item 7): each `presentationStatus`
+    // admits exactly one combination of result/narrative presence and
+    // `pendingPresentationAttemptId` reference — never derivable any other
+    // way, same philosophy as the Threat/Curse causality checks above.
+    if (presentationStatus === 'narrative_pending') {
+      if (hasNarrative) {
+        throw new SaveValidationErrorClass(
+          '演出状態が顛末生成待ちなのに顛末データが存在します',
+          'corrupted-data',
+        )
+      }
+      if (hasResult) {
+        if (!isPendingTarget) {
+          throw new SaveValidationErrorClass(
+            '解決済みで顛末生成待ちの試行が保留中の演出として参照されていません',
+            'corrupted-data',
+          )
+        }
+      } else if (isPendingTarget) {
+        throw new SaveValidationErrorClass(
+          '未解決の試行が保留中の演出として参照されています',
+          'corrupted-data',
+        )
+      }
+    } else if (
+      presentationStatus === 'ready' ||
+      presentationStatus === 'viewing'
+    ) {
+      if (!hasResult || !hasNarrative) {
+        throw new SaveValidationErrorClass(
+          '演出状態に対して戦闘結果または顛末データが不足しています',
+          'corrupted-data',
+        )
+      }
+      if (!isPendingTarget) {
+        throw new SaveValidationErrorClass(
+          '演出進行中の試行が保留中の演出として参照されていません',
+          'corrupted-data',
+        )
+      }
+    } else {
+      // completed
+      if (!hasResult || !hasNarrative) {
+        throw new SaveValidationErrorClass(
+          '完了済みの試行に戦闘結果または顛末データが不足しています',
+          'corrupted-data',
+        )
+      }
+      if (isPendingTarget) {
+        throw new SaveValidationErrorClass(
+          '完了済みの試行が保留中の演出として参照されています',
+          'corrupted-data',
+        )
+      }
     }
   }
 

@@ -377,15 +377,58 @@ export class MainQuestScene implements GameScene {
       .then((result) => {
         if (!result.ok && this._context) {
           this._narrativeRequestedFor = null
-          this._context.overlayManager.openModal(
-            '主依頼',
-            result.message ?? '顛末の生成に失敗しました。',
-          )
+          this.showNarrativeFailure(result.message)
         }
       })
       .catch(() => {
         this._narrativeRequestedFor = null
       })
+  }
+
+  /**
+   * Narrative generation stays mandatory — there is no skip button, ever —
+   * but "return to tavern (mandatory redirect back here)" must not be the
+   * only recovery path on failure, so this offers an explicit retry and a
+   * shortcut into AI settings (e.g. an unconfigured/invalid provider).
+   */
+  private showNarrativeFailure(message?: string): void {
+    if (!this._context) return
+    const theme = this._context.theme
+    const content = new GameLabel(
+      message ?? '顛末の生成に失敗しました。',
+      theme,
+      'body',
+      { maxWidth: 480 },
+    )
+    const footer = new Container()
+    const retryButton = new GameButton({
+      width: 140,
+      height: 40,
+      theme,
+      label: '再試行',
+    })
+    retryButton.x = 0
+    retryButton.y = 0
+    retryButton.onActivate = () => {
+      this._context?.overlayManager.closeModal()
+      this.maybeRequestNarrative()
+    }
+
+    const settingsButton = new GameButton({
+      width: 140,
+      height: 40,
+      theme,
+      label: 'AI設定',
+    })
+    settingsButton.x = 160
+    settingsButton.y = 0
+    settingsButton.onActivate = () => {
+      this._context?.overlayManager.closeModal()
+      this._context?.actions.openSettings()
+    }
+
+    footer.addChild(retryButton, settingsButton)
+    this._context.overlayManager.openModal('主依頼', content, footer)
   }
 
   private beginPresentation(attemptId: string): void {
@@ -399,7 +442,14 @@ export class MainQuestScene implements GameScene {
       attempt.presentationStatus === 'ready' &&
       this._context.actions.startMainQuestPresentation
     ) {
-      this._context.actions.startMainQuestPresentation(attemptId)
+      const result = this._context.actions.startMainQuestPresentation(attemptId)
+      if (!result.ok) {
+        this._context.overlayManager.openModal(
+          '主依頼',
+          result.message ?? '演出を開始できませんでした。',
+        )
+        return
+      }
     }
 
     this._input.presentationStep = 'preBattle'
@@ -426,8 +476,16 @@ export class MainQuestScene implements GameScene {
       return
     }
     if (step === 'postBattle') {
+      const result =
+        this._context.actions.completeMainQuestPresentation?.(attemptId)
+      if (result && !result.ok) {
+        this._context.overlayManager.openModal(
+          '主依頼',
+          result.message ?? '演出を完了できませんでした。',
+        )
+        return
+      }
       this._input.presentationStep = undefined
-      this._context.actions.completeMainQuestPresentation?.(attemptId)
       this._narrativeRequestedFor = null
       this.updateViewModel()
       this.render(this._context)

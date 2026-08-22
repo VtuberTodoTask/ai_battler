@@ -531,6 +531,9 @@ export function advanceCampaignDay(
   if (campaign.currentDay.status !== 'resolved') {
     throw new Error('本日を確定していないため翌日へ進めません')
   }
+  if (campaign.mainQuest.pendingPresentationAttemptId !== undefined) {
+    throw new Error('主依頼の顛末確認が完了していないため翌日へ進めません')
+  }
 
   const nextCampaign = deepClone(campaign)
   const resolvedDay = nextCampaign.dayNumber

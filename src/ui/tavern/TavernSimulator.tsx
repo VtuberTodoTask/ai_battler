@@ -477,7 +477,15 @@ export function TavernSimulator() {
       if (next.currentDay.status === 'planning') {
         next = resolveCampaignDay(next)
       }
-      if (next.currentDay.status === 'resolved') {
+      // A pending Main Quest Presentation is a Core invariant
+      // (`advanceCampaignDay` itself throws if called with one still
+      // pending) — stop here and let the redirect to MainQuestScene
+      // happen; the day only actually advances once Presentation
+      // completes and this handler (or the Canvas flow) is invoked again.
+      if (
+        next.currentDay.status === 'resolved' &&
+        next.mainQuest.pendingPresentationAttemptId === undefined
+      ) {
         next = advanceCampaignDay(next)
       }
       setCampaign(next)
@@ -602,11 +610,25 @@ export function TavernSimulator() {
           narrativeProvider,
           previousAttempts,
         )
+        // `applyMainQuestNarrative` can throw on a violated Presentation
+        // precondition; that must never escape a React state-updater (it
+        // would hit an Error Boundary instead of the caller), so the
+        // outcome is captured via this closure variable instead.
+        let applyOutcome: UiActionResult = { ok: true }
         setCampaign((current) => {
           if (!current) return current
-          return applyMainQuestNarrative(current, attemptId, script)
+          try {
+            return applyMainQuestNarrative(current, attemptId, script)
+          } catch (e) {
+            applyOutcome = {
+              ok: false,
+              message:
+                e instanceof Error ? e.message : '顛末の記録に失敗しました',
+            }
+            return current
+          }
         })
-        return { ok: true }
+        return applyOutcome
       } catch (e) {
         const message =
           e instanceof Error ? e.message : '物語の生成に失敗しました'
@@ -621,8 +643,15 @@ export function TavernSimulator() {
       if (!campaign) {
         return { ok: false, message: 'キャンペーンが開始されていません' }
       }
-      setCampaign(startMainQuestPresentation(campaign, attemptId))
-      return { ok: true }
+      try {
+        const next = startMainQuestPresentation(campaign, attemptId)
+        setCampaign(next)
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : '演出の開始に失敗しました'
+        return { ok: false, message }
+      }
     },
     [campaign],
   )
@@ -632,8 +661,15 @@ export function TavernSimulator() {
       if (!campaign) {
         return { ok: false, message: 'キャンペーンが開始されていません' }
       }
-      setCampaign(completeMainQuestPresentation(campaign, attemptId))
-      return { ok: true }
+      try {
+        const next = completeMainQuestPresentation(campaign, attemptId)
+        setCampaign(next)
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : '演出の完了に失敗しました'
+        return { ok: false, message }
+      }
     },
     [campaign],
   )

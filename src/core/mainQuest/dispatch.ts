@@ -24,6 +24,7 @@ export interface MainQuestEligibilityCheck {
   notAcceptedNormalRequest: boolean
   notAlreadyOnMainQuestToday: boolean
   noMainQuestDispatchedToday: boolean
+  dayPlanning: boolean
   rankSufficient: boolean
   affinitySufficient: boolean
   fundsSufficient: boolean
@@ -66,6 +67,7 @@ export function evaluateMainQuestDispatch(
   const noMainQuestDispatchedToday = !campaign.mainQuest.attempts.some(
     (a) => a.dayNumber === campaign.dayNumber,
   )
+  const dayPlanning = campaign.currentDay.status === 'planning'
   const rankSufficient =
     rankIndex(partyRank) >= rankIndex(definition.requiredPartyRank)
   const affinitySufficient = partyAffinity >= definition.requiredAffinity
@@ -79,6 +81,7 @@ export function evaluateMainQuestDispatch(
     notAcceptedNormalRequest &&
     notAlreadyOnMainQuestToday &&
     noMainQuestDispatchedToday &&
+    dayPlanning &&
     rankSufficient &&
     affinitySufficient &&
     fundsSufficient
@@ -93,6 +96,7 @@ export function evaluateMainQuestDispatch(
     notAcceptedNormalRequest,
     notAlreadyOnMainQuestToday,
     noMainQuestDispatchedToday,
+    dayPlanning,
     rankSufficient,
     affinitySufficient,
     fundsSufficient,

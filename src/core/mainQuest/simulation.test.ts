@@ -5,13 +5,30 @@ import {
   resolveCampaignDay,
 } from '../tavern/campaign/campaign.ts'
 import { dispatchMainQuest } from './dispatch.ts'
+import {
+  applyMainQuestNarrative,
+  completeMainQuestPresentation,
+  startMainQuestPresentation,
+} from './presentation.ts'
 import { simulateMainQuestAttempt } from './simulation.ts'
 import {
   MAIN_QUEST_BATTLE_ANCHOR_IDS,
+  type MainQuestNarrativeScript,
   type MainQuestThreatId,
 } from './types.ts'
 import { MAIN_QUEST_THREAT_DEFINITION_MAP } from './threats.ts'
 import type { TavernCampaignState } from '../tavern/campaign/types.ts'
+
+function fakeNarrativeScript(): MainQuestNarrativeScript {
+  return {
+    preBattle: '出発前の物語。',
+    battleInterludes: [],
+    postBattle: '戦いの後の物語。',
+    promptVersion: 'test-v1',
+    providerId: 'fake-test-provider',
+    createdAt: new Date(0).toISOString(),
+  }
+}
 
 function dispatchEligibleParty(
   campaign: TavernCampaignState,
@@ -184,6 +201,13 @@ describe('Phase 9.8 Main Quest deterministic Simulation + Battle Trace', () => {
       JSON.stringify(resolvedAttempt.battleTrace),
     )
 
+    campaign = applyMainQuestNarrative(
+      campaign,
+      attemptId,
+      fakeNarrativeScript(),
+    )
+    campaign = startMainQuestPresentation(campaign, attemptId)
+    campaign = completeMainQuestPresentation(campaign, attemptId)
     campaign = advanceCampaignDay(campaign)
 
     const stillThere = campaign.mainQuest.attempts.find(

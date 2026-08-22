@@ -144,6 +144,8 @@ export function buildMainQuestViewModel(
         blockReasons.push('本日は既に主依頼へ同行しています')
       if (!evaluation.noMainQuestDispatchedToday)
         blockReasons.push('本日は既に別のパーティが主依頼へ同行しています')
+      if (!evaluation.dayPlanning)
+        blockReasons.push('本日の営業はすでに確定しています')
 
       eligibility.push({
         partyId: tavernParty.id,
