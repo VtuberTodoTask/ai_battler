@@ -8,6 +8,7 @@ import {
   createTavernCampaign,
   resolveCampaignDay,
 } from '../../core/tavern/campaign/campaign.ts'
+import { resolveFinishDayTransition } from './finishDayTransition.ts'
 import { dispatchMainQuest } from '../../core/mainQuest/dispatch.ts'
 import { MAIN_QUEST_THREAT_DEFINITION_MAP } from '../../core/mainQuest/threats.ts'
 import { TAVERN_ECONOMY_CONFIG } from '../../core/economy/economyConfig.ts'
@@ -34,10 +35,10 @@ function fakeProvider(): NarrativeProvider {
   }
 }
 
-/** A resolved Campaign with one Main Quest Attempt sitting at
- * `narrative_pending` (Simulation done, no Narrative generated yet) — the
- * exact state `runMainQuestNarrativeGeneration` is meant to act on. */
-function buildPendingCampaign(
+/** A Campaign with one Main Quest Attempt just dispatched (day still
+ * 'planning', Attempt not yet simulated) — the state right before
+ * `resolveCampaignDay`/`resolveFinishDayTransition` runs. */
+function buildDispatchedCampaign(
   seed: string,
   threatId: 'alden' | 'velga' = 'alden',
 ): {
@@ -58,8 +59,21 @@ function buildPendingCampaign(
   if (!dispatch.ok || !dispatch.attemptId) {
     throw new Error('test setup: dispatch failed')
   }
-  const resolved = resolveCampaignDay(dispatch.campaign)
-  return { campaign: resolved, attemptId: dispatch.attemptId }
+  return { campaign: dispatch.campaign, attemptId: dispatch.attemptId }
+}
+
+/** A resolved Campaign with one Main Quest Attempt sitting at
+ * `narrative_pending` (Simulation done, no Narrative generated yet) — the
+ * exact state `runMainQuestNarrativeGeneration` is meant to act on. */
+function buildPendingCampaign(
+  seed: string,
+  threatId: 'alden' | 'velga' = 'alden',
+): {
+  campaign: TavernCampaignState
+  attemptId: string
+} {
+  const { campaign, attemptId } = buildDispatchedCampaign(seed, threatId)
+  return { campaign: resolveCampaignDay(campaign), attemptId }
 }
 
 /**
@@ -306,5 +320,80 @@ describe('runMainQuestNarrativeGeneration', () => {
 
     expect(result.ok).toBe(true)
     expect(generateSpy).not.toHaveBeenCalled()
+  })
+
+  it('a same-turn commitCampaign of a resolved Main Quest day (handleFinishDay-equivalent) lets the first automatic Narrative generation succeed, no retry needed', async () => {
+    const { campaign: dispatched, attemptId } = buildDispatchedCampaign(
+      'narrative-async-007',
+    )
+    const { campaignRef, commitCampaign } = makeCommitHarness(dispatched)
+
+    // Mirrors `TavernSimulator.handleFinishDay()` exactly: compute the
+    // resolved Campaign, then `commitCampaign` it in the same synchronous
+    // call — no `useEffect`-based ref sync in between, matching how the
+    // Canvas UI can react (redirect -> maybeRequestNarrative()) before any
+    // effect would have run.
+    const resolved = resolveFinishDayTransition(dispatched)
+    commitCampaign(resolved)
+
+    expect(resolved.currentDay.status).toBe('resolved')
+    expect(resolved.mainQuest.pendingPresentationAttemptId).toBe(attemptId)
+    const resolvedAttempt = campaignRef.current!.mainQuest.attempts.find(
+      (a) => a.id === attemptId,
+    )!
+    expect(resolvedAttempt.result).toBeDefined()
+    expect(resolvedAttempt.battleTrace).toBeDefined()
+
+    const generateSpy = vi.fn(async () => ({ text: FAKE_NARRATIVE_TEXT }))
+    const result = await runMainQuestNarrativeGeneration({
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: { id: 'fake-same-turn', generate: generateSpy },
+      attemptId,
+    })
+
+    expect(result.ok).toBe(true)
+    expect(generateSpy).toHaveBeenCalledTimes(1)
+    const finalAttempt = campaignRef.current!.mainQuest.attempts.find(
+      (a) => a.id === attemptId,
+    )!
+    expect(finalAttempt.presentationStatus).toBe('ready')
+  })
+
+  it('a same-turn commitCampaign of a resolved Main Quest day (handleResolve-equivalent) lets the first automatic Narrative generation succeed, no retry needed', async () => {
+    const { campaign: dispatched, attemptId } = buildDispatchedCampaign(
+      'narrative-async-008',
+    )
+    const { campaignRef, commitCampaign } = makeCommitHarness(dispatched)
+
+    // Mirrors `TavernSimulator.handleResolve()`: `resolveCampaignDay` then
+    // `commitCampaign`, same synchronous call.
+    const resolved = resolveCampaignDay(dispatched)
+    commitCampaign(resolved)
+
+    expect(resolved.mainQuest.pendingPresentationAttemptId).toBe(attemptId)
+    const resolvedAttempt = campaignRef.current!.mainQuest.attempts.find(
+      (a) => a.id === attemptId,
+    )!
+    expect(resolvedAttempt.result).toBeDefined()
+    expect(resolvedAttempt.battleTrace).toBeDefined()
+
+    const generateSpy = vi.fn(async () => ({ text: FAKE_NARRATIVE_TEXT }))
+    const result = await runMainQuestNarrativeGeneration({
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: {
+        id: 'fake-same-turn-resolve',
+        generate: generateSpy,
+      },
+      attemptId,
+    })
+
+    expect(result.ok).toBe(true)
+    expect(generateSpy).toHaveBeenCalledTimes(1)
+    const finalAttempt = campaignRef.current!.mainQuest.attempts.find(
+      (a) => a.id === attemptId,
+    )!
+    expect(finalAttempt.presentationStatus).toBe('ready')
   })
 })

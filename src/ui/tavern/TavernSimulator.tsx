@@ -446,7 +446,13 @@ export function TavernSimulator() {
     }
     try {
       const next = resolveCampaignDay(campaign)
-      setCampaign(next)
+      // `resolveCampaignDay` can move a Main Quest Attempt straight to
+      // 'resolved' (result/battleTrace populated, pending Presentation
+      // set) — the Canvas UI can react to that same-turn (redirect into
+      // MainQuestScene -> maybeRequestNarrative()), which reads
+      // `campaignRef.current` before this component's own `campaign`-state
+      // sync effect would have run. `commitCampaign` closes that window.
+      commitCampaign(next)
       const firstResolved = next.currentDay.results.find(
         (r) => r.status === 'resolved',
       )
@@ -462,7 +468,7 @@ export function TavernSimulator() {
       setError(message)
       return { ok: false, message }
     }
-  }, [campaign])
+  }, [campaign, commitCampaign])
 
   const handleAdvance = useCallback((): UiActionResult => {
     if (!campaign) {
@@ -496,7 +502,15 @@ export function TavernSimulator() {
     finishingRef.current = true
     try {
       const next = resolveFinishDayTransition(campaign)
-      setCampaign(next)
+      // A Main Quest resolve here can leave `next` 'resolved' with a
+      // pending Presentation — the Canvas UI reacts to that same-turn
+      // (redirect into MainQuestScene -> maybeRequestNarrative()), which
+      // reads `campaignRef.current` before this component's own
+      // `campaign`-state sync effect would have run. `commitCampaign`
+      // closes that window so the first automatic generation always sees
+      // the resolved Attempt (result/battleTrace populated), never the
+      // pre-resolve one.
+      commitCampaign(next)
       setSelectedRequestId(next.currentDay.requests[0]?.id ?? null)
       setSelectedPartyId(null)
       setSelectedResultId(null)
@@ -518,7 +532,7 @@ export function TavernSimulator() {
     } finally {
       finishingRef.current = false
     }
-  }, [campaign, autosave])
+  }, [campaign, autosave, commitCampaign])
 
   const handleOpenExpeditionNarrative = useCallback(
     async (candidateId: string): Promise<UiActionResult<string>> => {
