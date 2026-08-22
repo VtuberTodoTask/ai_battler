@@ -24,7 +24,11 @@ import {
 } from '../ending/presentation.ts'
 import { TAVERN_ECONOMY_CONFIG } from '../economy/economyConfig.ts'
 import { serializeGameSave } from './serializer.ts'
-import { SaveValidationErrorClass, validateGameSave } from './validation.ts'
+import {
+  SaveValidationErrorClass,
+  validateEnding,
+  validateGameSave,
+} from './validation.ts'
 import type { NarrativeProvider } from '../../ai/narrative/types.ts'
 import type { TavernCampaignState } from '../tavern/campaign/types.ts'
 import type { MainQuestThreatId } from '../mainQuest/types.ts'
@@ -413,4 +417,159 @@ describe('Phase 9.9 Ending Save Validation', () => {
     },
     20000,
   )
+})
+
+/**
+ * `validateEnding`'s non-`locked` branch — where `triggeredDay` and
+ * `completedDay` causality actually lives — is unreachable through
+ * `validateGameSave` for any real or tampered save (proven by the `it.each`
+ * block above: the pre-existing "save only on a planning day" gate always
+ * fires first). These tests call `validateEnding` directly instead, with
+ * the Campaign's own real `currentDay.status` (never forced to 'planning'),
+ * to reach and isolate those causal checks — the same fallback this PR's
+ * review instructions call for when the save-policy gate blocks the public
+ * entry point.
+ */
+describe('Phase 9.9 Ending Save Validation — triggeredDay/completedDay causality (validateEnding direct)', () => {
+  it('rejects a locked Ending that carries a leftover triggeredDay', () => {
+    const campaign = createTavernCampaign(
+      'ending-validation-locked-triggered-day',
+    )
+    const endingMut = campaign.ending as unknown as Record<string, unknown>
+    endingMut.triggeredDay = 10
+
+    expect(() =>
+      validateEnding(
+        campaign as unknown as Record<string, unknown>,
+        campaign.currentDay.status,
+      ),
+    ).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a narrative_pending Ending with triggeredDay missing', async () => {
+    const campaign = await buildEndingCampaignAtStatus(
+      'ending-validation-triggered-day-missing',
+      'narrative_pending',
+    )
+    const endingMut = campaign.ending as unknown as Record<string, unknown>
+    delete endingMut.triggeredDay
+
+    expect(() =>
+      validateEnding(
+        campaign as unknown as Record<string, unknown>,
+        campaign.currentDay.status,
+      ),
+    ).toThrow(SaveValidationErrorClass)
+  })
+
+  it.each([0, -1, 1.5, NaN, Infinity])(
+    'rejects an invalid triggeredDay value: %s',
+    async (badValue) => {
+      const campaign = await buildEndingCampaignAtStatus(
+        `ending-validation-triggered-day-invalid-${badValue}`,
+        'narrative_pending',
+      )
+      const endingMut = campaign.ending as unknown as Record<string, unknown>
+      endingMut.triggeredDay = badValue
+
+      expect(() =>
+        validateEnding(
+          campaign as unknown as Record<string, unknown>,
+          campaign.currentDay.status,
+        ),
+      ).toThrow(SaveValidationErrorClass)
+    },
+  )
+
+  it('rejects triggeredDay that disagrees with the trigger Attempt.dayNumber', async () => {
+    const campaign = await buildEndingCampaignAtStatus(
+      'ending-validation-triggered-day-mismatch-z9',
+      'narrative_pending',
+    )
+    const attempt = campaign.mainQuest.attempts.find(
+      (a) => a.id === campaign.ending.triggerAttemptId,
+    )!
+    expect(campaign.ending.triggeredDay).toBe(attempt.dayNumber)
+    const endingMut = campaign.ending as unknown as Record<string, unknown>
+    endingMut.triggeredDay = attempt.dayNumber - 1
+
+    expect(() =>
+      validateEnding(
+        campaign as unknown as Record<string, unknown>,
+        campaign.currentDay.status,
+      ),
+    ).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects triggeredDay that disagrees with facts.clearDay', async () => {
+    const campaign = await buildEndingCampaignAtStatus(
+      'ending-validation-triggered-day-vs-clear-day',
+      'narrative_pending',
+    )
+    expect(campaign.ending.facts!.clearDay).toBe(campaign.ending.triggeredDay)
+    const factsMut = campaign.ending.facts as unknown as Record<string, unknown>
+    factsMut.clearDay = campaign.ending.triggeredDay! - 1
+
+    expect(() =>
+      validateEnding(
+        campaign as unknown as Record<string, unknown>,
+        campaign.currentDay.status,
+      ),
+    ).toThrow(SaveValidationErrorClass)
+  })
+
+  it.each([0, -1, 1.5])(
+    'rejects an invalid completedDay value: %s',
+    async (badValue) => {
+      const campaign = await buildEndingCampaignAtStatus(
+        `ending-validation-completed-day-invalid-${badValue}`,
+        'completed',
+      )
+      const endingMut = campaign.ending as unknown as Record<string, unknown>
+      endingMut.completedDay = badValue
+
+      expect(() =>
+        validateEnding(
+          campaign as unknown as Record<string, unknown>,
+          campaign.currentDay.status,
+        ),
+      ).toThrow(SaveValidationErrorClass)
+    },
+  )
+
+  it('rejects completedDay before triggeredDay', async () => {
+    const campaign = await buildEndingCampaignAtStatus(
+      'ending-validation-completed-before-triggered',
+      'completed',
+    )
+    const endingMut = campaign.ending as unknown as Record<string, unknown>
+    endingMut.completedDay = campaign.ending.triggeredDay! - 1
+
+    expect(() =>
+      validateEnding(
+        campaign as unknown as Record<string, unknown>,
+        campaign.currentDay.status,
+      ),
+    ).toThrow(SaveValidationErrorClass)
+  })
+
+  it('accepts a genuinely valid completed Ending (triggeredDay === clearDay === Attempt.dayNumber === completedDay)', async () => {
+    const campaign = await buildEndingCampaignAtStatus(
+      'ending-validation-valid-completed-x',
+      'completed',
+    )
+    const attempt = campaign.mainQuest.attempts.find(
+      (a) => a.id === campaign.ending.triggerAttemptId,
+    )!
+    expect(campaign.ending.triggeredDay).toBe(attempt.dayNumber)
+    expect(campaign.ending.facts!.clearDay).toBe(attempt.dayNumber)
+    expect(campaign.ending.completedDay).toBe(attempt.dayNumber)
+
+    expect(() =>
+      validateEnding(
+        campaign as unknown as Record<string, unknown>,
+        campaign.currentDay.status,
+      ),
+    ).not.toThrow()
+  })
 })

@@ -80,7 +80,7 @@ import type {
 import type { GameSaveData, SaveMetadata } from './types.ts'
 import { SaveValidationErrorClass, type SaveValidationError } from './types.ts'
 
-export { SaveValidationErrorClass, type SaveValidationError }
+export { SaveValidationErrorClass, type SaveValidationError, validateEnding }
 
 const ALLOWED_OUTCOMES = [
   'completeSuccess',
@@ -3073,6 +3073,13 @@ const VALID_ENDING_STATUSES = [
  * `currentDayStatus === 'planning'` can never legitimately coexist with
  * Victory (item 35) — `advanceCampaignDay` itself refuses to run once
  * Victory is achieved, so no real save reaches a 'planning' day afterward.
+ *
+ * Exported (unlike every other validator in this file) purely so tests can
+ * reach the non-`locked` branch's causal checks directly: the invariant
+ * above means `validateGameSave`'s own unconditional "save only on a
+ * planning day" gate makes that branch unreachable through the public
+ * entry point for ANY real or tampered save, by construction — there is no
+ * way to reach it except by calling this function directly.
  */
 function validateEnding(
   campaign: Record<string, unknown>,
@@ -3095,10 +3102,17 @@ function validateEnding(
   const hasFacts = ending.facts !== undefined
   const hasNarrative = ending.narrative !== undefined
   const hasTriggerAttemptId = ending.triggerAttemptId !== undefined
+  const hasTriggeredDay = ending.triggeredDay !== undefined
   const hasCompletedDay = ending.completedDay !== undefined
 
   if (status === 'locked') {
-    if (hasFacts || hasNarrative || hasTriggerAttemptId || hasCompletedDay) {
+    if (
+      hasFacts ||
+      hasNarrative ||
+      hasTriggerAttemptId ||
+      hasTriggeredDay ||
+      hasCompletedDay
+    ) {
       throw new SaveValidationErrorClass(
         'Endingがlockedなのに関連データが存在します',
         'corrupted-data',
@@ -3121,14 +3135,26 @@ function validateEnding(
   }
 
   if (status === 'narrative_pending') {
-    if (!hasFacts || hasNarrative || !hasTriggerAttemptId) {
+    if (
+      !hasFacts ||
+      hasNarrative ||
+      !hasTriggerAttemptId ||
+      !hasTriggeredDay ||
+      hasCompletedDay
+    ) {
       throw new SaveValidationErrorClass(
         'Endingのデータが演出状態(narrative_pending)と一致しません',
         'corrupted-data',
       )
     }
   } else if (status === 'ready' || status === 'viewing') {
-    if (!hasFacts || !hasNarrative || !hasTriggerAttemptId) {
+    if (
+      !hasFacts ||
+      !hasNarrative ||
+      !hasTriggerAttemptId ||
+      !hasTriggeredDay ||
+      hasCompletedDay
+    ) {
       throw new SaveValidationErrorClass(
         `Endingのデータが演出状態(${status})と一致しません`,
         'corrupted-data',
@@ -3139,6 +3165,7 @@ function validateEnding(
       !hasFacts ||
       !hasNarrative ||
       !hasTriggerAttemptId ||
+      !hasTriggeredDay ||
       !hasCompletedDay
     ) {
       throw new SaveValidationErrorClass(
@@ -3194,7 +3221,34 @@ function validateEnding(
     )
   }
 
+  if (
+    typeof ending.triggeredDay !== 'number' ||
+    !Number.isInteger(ending.triggeredDay) ||
+    ending.triggeredDay < 1
+  ) {
+    throw new SaveValidationErrorClass(
+      'EndingのtriggeredDayが不正です',
+      'corrupted-data',
+    )
+  }
+  if (ending.triggeredDay !== triggerAttemptRaw.dayNumber) {
+    throw new SaveValidationErrorClass(
+      'EndingのtriggeredDayが起点となる試行の日付と一致しません',
+      'corrupted-data',
+    )
+  }
+
   if (hasFacts) {
+    const factsClearDay = isPlainObject(ending.facts)
+      ? ending.facts.clearDay
+      : undefined
+    if (factsClearDay !== ending.triggeredDay) {
+      throw new SaveValidationErrorClass(
+        'Ending FactsのclearDayがtriggeredDayと一致しません',
+        'corrupted-data',
+      )
+    }
+
     let expectedFacts: unknown
     try {
       expectedFacts = buildCampaignEndingFacts(
@@ -3210,6 +3264,25 @@ function validateEnding(
     if (!deepEqualPlain(expectedFacts, ending.facts)) {
       throw new SaveValidationErrorClass(
         'Ending Factsがcanonical dataと一致しません',
+        'corrupted-data',
+      )
+    }
+  }
+
+  if (hasCompletedDay) {
+    if (
+      typeof ending.completedDay !== 'number' ||
+      !Number.isInteger(ending.completedDay) ||
+      ending.completedDay < 1
+    ) {
+      throw new SaveValidationErrorClass(
+        'EndingのcompletedDayが不正です',
+        'corrupted-data',
+      )
+    }
+    if (ending.completedDay < ending.triggeredDay) {
+      throw new SaveValidationErrorClass(
+        'EndingのcompletedDayがtriggeredDayより前です',
         'corrupted-data',
       )
     }

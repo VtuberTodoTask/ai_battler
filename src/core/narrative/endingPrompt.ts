@@ -86,7 +86,7 @@ ${facts.finalParty.memberIds.map((id) => formatMemberLine(finalCampaignParty, id
 死亡: ${facts.finalBattle.deadMemberIds.join(', ') || 'なし'}`)
 
   sections.push(
-    `=== 七国の脅威 撃破履歴(事実) ===\n${facts.threats
+    `=== 脅威 撃破履歴(七国+Nosferatu / 事実) ===\n${facts.threats
       .map((t) => `- ${t.threatId}: DAY ${t.defeatedDay}`)
       .join('\n')}`,
   )
