@@ -13,6 +13,7 @@ import type {
   MainQuestAttemptRecord,
   MainQuestBattleAnchorId,
   MainQuestBattleEvent,
+  MainQuestBattleInitialSnapshot,
   MainQuestBattleTrace,
   MainQuestEvent,
   MainQuestSimulationResult,
@@ -20,42 +21,61 @@ import type {
   MainQuestThreatId,
 } from './types.ts'
 
-const NON_ATTACK_ACTION_TYPES = new Set([
-  'incapacitate',
-  'guard',
-  'support',
-  'healBlock',
-  'revive',
-  'heal',
-  'retreat',
-  'requestPartyRetreat',
-  'individualEscape',
-  'contact',
-  'weaknessDiscovery',
-  'monsterKnowledge',
-  'summon',
-  'injury',
-  'poison',
-  'bleed',
-  'regen',
-])
+/**
+ * A retreat attempt (`requestPartyRetreat` / `individualEscape` / the
+ * enemy-escape `retreat` entries) always logs its own `roll`/`successChance`
+ * regardless of outcome — this re-derives the same pass/fail the engine
+ * itself branched on, from those already-authoritative typed fields, rather
+ * than string-matching "撤退した"/"撤退に失敗した" out of `entry.result`.
+ */
+function retreatSucceeded(entry: BattleLogEntry): boolean {
+  return (
+    entry.roll !== undefined &&
+    entry.successChance !== undefined &&
+    entry.roll <= entry.successChance
+  )
+}
 
-const RETREAT_ACTION_TYPES = new Set([
-  'retreat',
-  'requestPartyRetreat',
-  'individualEscape',
-])
+function buildInitialSnapshot(
+  monster: Enemy,
+  partyMembers: Adventurer[],
+): MainQuestBattleInitialSnapshot {
+  return {
+    partyMembers: partyMembers.map((m) => ({
+      characterId: m.id,
+      currentHp: m.currentHp ?? m.maxHp,
+      maxHp: m.maxHp,
+      currentMp: m.currentMp ?? m.maxMp,
+      maxMp: m.maxMp,
+      statuses: m.statusEffects.map((s) => s.type),
+    })),
+    monster: {
+      currentHp: monster.currentHp ?? monster.maxHp,
+      maxHp: monster.maxHp,
+      statuses: [],
+    },
+  }
+}
 
 /**
  * Derives a granular, replayable `MainQuestBattleTrace` purely from
- * `BattleResult` — never re-simulates, never touches RNG (item 80/81).
- * Hit/miss is read structurally from whether `BattleLogEntry.damage` is a
- * number (never string-matched from `.result`, which is locale-specific
- * prose). HP-threshold/critical anchors are reconstructed by tracking
- * cumulative damage against the monster's and each member's own maxHp —
- * itself derived data, not a new mechanical effect. Incapacitation/death
- * facts come from `BattleResult`'s own authoritative final-state arrays,
- * never inferred from log text.
+ * `BattleResult`'s own authoritative structured facts — never re-simulates,
+ * never touches RNG, never infers hit/miss/heal-amount/timing from message
+ * text or heuristics (Phase 9.8.1 item 3/4/5/10). `BattleLogEntry.hit`/
+ * `.critical`/`.healAmount`/`.mpDelta`/`.statusRemoved` (`../battle/
+ * battle.ts`) are the source of truth for the facts they cover; every
+ * event below reads one of those, or `BattleResult`'s own final-state
+ * arrays (`injuries`), never anything derived.
+ *
+ * Incapacitation and Death are deliberately modeled as two independent,
+ * separately-timed facts, matching the underlying Battle Engine's own
+ * semantics (audited in `handleUnitDeath`/`resolveAftermath`,
+ * `../battle/battle.ts`): a unit reaching 0 HP becomes `incapacitated` at
+ * the exact Combat round it happened (from the engine's own `incapacitate`
+ * log entry); whether an incapacitated Adventurer ultimately `dies` is only
+ * decided afterwards, in the post-Battle Injury/survival roll — so `death`
+ * events are always placed at that aftermath determination, never at a
+ * guessed mid-Combat round.
  */
 export function buildMainQuestBattleTrace(params: {
   seed: string
@@ -66,7 +86,13 @@ export function buildMainQuestBattleTrace(params: {
 }): MainQuestBattleTrace {
   const { seed, threatId, monster, partyMembers, battleResult } = params
   const partyMemberIds = partyMembers.map((m) => m.id)
-  const memberMaxHp = new Map(partyMembers.map((m) => [m.id, m.maxHp]))
+  const memberIds = new Set(partyMemberIds)
+  const initialSnapshot = buildInitialSnapshot(monster, partyMembers)
+  const deadMemberIds = new Set(
+    battleResult.injuries
+      .filter((i) => i.category === 'dead')
+      .map((i) => i.adventurerId),
+  )
 
   const events: MainQuestBattleEvent[] = []
   const occurredAnchors: MainQuestBattleAnchorId[] = []
@@ -88,15 +114,25 @@ export function buildMainQuestBattleTrace(params: {
   fireAnchor(0, 'battle_start')
 
   let currentRound = 0
-  let monsterHp = monster.maxHp
-  const memberHp = new Map(memberMaxHp)
+  let monsterHp = initialSnapshot.monster.currentHp
+  const memberHp = new Map(
+    initialSnapshot.partyMembers.map((m) => [m.characterId, m.currentHp]),
+  )
+  const memberMaxHp = new Map(
+    initialSnapshot.partyMembers.map((m) => [m.characterId, m.maxHp]),
+  )
   let monsterFirstActionFired = false
   const monsterThresholdsFired = { 75: false, 50: false, 25: false }
   let monsterCriticalFired = false
   let partyCriticalFired = false
+  let incapacitatedAnchorFired = false
+  let deathAnchorFired = false
 
   function checkMonsterThresholds(round: number): void {
-    const ratio = monster.maxHp > 0 ? monsterHp / monster.maxHp : 0
+    const ratio =
+      initialSnapshot.monster.maxHp > 0
+        ? monsterHp / initialSnapshot.monster.maxHp
+        : 0
     if (ratio <= 0.75 && !monsterThresholdsFired[75]) {
       monsterThresholdsFired[75] = true
       fireAnchor(round, 'monster_hp_threshold_75')
@@ -126,15 +162,6 @@ export function buildMainQuestBattleTrace(params: {
     }
   }
 
-  function isAttackLike(entry: BattleLogEntry): boolean {
-    return (
-      entry.actorId !== undefined &&
-      entry.targetIds !== undefined &&
-      entry.targetIds.length > 0 &&
-      !NON_ATTACK_ACTION_TYPES.has(entry.actionType)
-    )
-  }
-
   for (const entry of battleResult.logs) {
     if (entry.round !== currentRound) {
       currentRound = entry.round
@@ -150,58 +177,37 @@ export function buildMainQuestBattleTrace(params: {
       fireAnchor(currentRound, 'monster_first_action')
     }
 
+    // Attack resolution: authoritative via `hit`/`critical`, populated only
+    // by `resolveAttack`'s own log call — never present on a non-attack
+    // entry, so this check alone (not an action-type allow/deny list)
+    // decides whether an entry is attack-like.
     if (
-      entry.actionType === 'heal' &&
+      entry.hit !== undefined &&
       entry.actorId !== undefined &&
-      entry.targetIds &&
+      entry.targetIds !== undefined &&
       entry.targetIds.length > 0
     ) {
-      const amount = entry.damage ?? 0
-      for (const targetId of entry.targetIds) {
-        events.push({
-          type: 'healing',
-          round: currentRound,
-          actorId: entry.actorId,
-          targetId,
-          amount,
-        })
-        const maxHp = memberMaxHp.get(targetId)
-        const currentHp = memberHp.get(targetId)
-        if (maxHp !== undefined && currentHp !== undefined) {
-          memberHp.set(targetId, Math.min(maxHp, currentHp + amount))
-        }
-      }
-      continue
-    }
-
-    if (RETREAT_ACTION_TYPES.has(entry.actionType)) {
-      events.push({ type: 'retreat', round: currentRound })
-      fireAnchor(currentRound, 'retreat_triggered')
-      continue
-    }
-
-    if (isAttackLike(entry)) {
       events.push({
         type: 'actionStarted',
         round: currentRound,
-        actorId: entry.actorId!,
+        actorId: entry.actorId,
         actionType: entry.actionType,
       })
-      const isHit = typeof entry.damage === 'number'
-      for (const targetId of entry.targetIds!) {
-        if (isHit) {
+      for (const targetId of entry.targetIds) {
+        if (entry.hit) {
           events.push({
             type: 'hit',
             round: currentRound,
-            actorId: entry.actorId!,
+            actorId: entry.actorId,
             targetId,
             actionType: entry.actionType,
+            critical: entry.critical ?? false,
           })
-          const amount = entry.damage!
+          const amount = entry.damage ?? 0
           events.push({
             type: 'damage',
             round: currentRound,
-            actorId: entry.actorId!,
+            actorId: entry.actorId,
             targetId,
             amount,
           })
@@ -219,7 +225,7 @@ export function buildMainQuestBattleTrace(params: {
           events.push({
             type: 'miss',
             round: currentRound,
-            actorId: entry.actorId!,
+            actorId: entry.actorId,
             targetId,
             actionType: entry.actionType,
           })
@@ -235,47 +241,232 @@ export function buildMainQuestBattleTrace(params: {
           }
         }
       }
+      continue
+    }
+
+    // Deliberate heal-like actions (heal/revive) — authoritative via
+    // `healAmount`, distinct from a periodic (regen) tick below.
+    if (
+      entry.healAmount !== undefined &&
+      entry.actorId !== undefined &&
+      entry.targetIds !== undefined &&
+      entry.targetIds.length > 0 &&
+      entry.actionType !== 'regen'
+    ) {
+      const targetId = entry.targetIds[0]
+      events.push({
+        type: 'healing',
+        round: currentRound,
+        actorId: entry.actorId,
+        targetId,
+        amount: entry.healAmount,
+      })
+      const maxHp = memberMaxHp.get(targetId)
+      const currentHp = memberHp.get(targetId)
+      if (maxHp !== undefined && currentHp !== undefined) {
+        memberHp.set(targetId, Math.min(maxHp, currentHp + entry.healAmount))
+      }
+      if (entry.statusRemoved && entry.statusRemoved.length > 0) {
+        for (const status of entry.statusRemoved) {
+          events.push({
+            type: 'statusRemoved',
+            round: currentRound,
+            targetId,
+            status,
+          })
+        }
+      }
+      if (entry.mpDelta !== undefined) {
+        events.push({
+          type: 'mpChanged',
+          round: currentRound,
+          targetId: entry.actorId,
+          delta: entry.mpDelta,
+        })
+      }
+      continue
+    }
+
+    // Periodic regen tick — no actor, authoritative via `healAmount`.
+    if (
+      entry.actionType === 'regen' &&
+      entry.healAmount !== undefined &&
+      entry.targetIds !== undefined &&
+      entry.targetIds.length > 0
+    ) {
+      const targetId = entry.targetIds[0]
+      events.push({
+        type: 'periodicHealing',
+        round: currentRound,
+        targetId,
+        source: 'regen',
+        amount: entry.healAmount,
+      })
+      const maxHp = memberMaxHp.get(targetId)
+      const currentHp = memberHp.get(targetId)
+      if (maxHp !== undefined && currentHp !== undefined) {
+        memberHp.set(targetId, Math.min(maxHp, currentHp + entry.healAmount))
+      }
+      continue
+    }
+
+    // Periodic poison/bleed tick — no actor, authoritative via `damage`.
+    if (
+      (entry.actionType === 'poison' || entry.actionType === 'bleed') &&
+      entry.damage !== undefined &&
+      entry.targetIds !== undefined &&
+      entry.targetIds.length > 0
+    ) {
+      const targetId = entry.targetIds[0]
+      events.push({
+        type: 'periodicDamage',
+        round: currentRound,
+        targetId,
+        source: entry.actionType,
+        amount: entry.damage,
+      })
+      if (targetId === monster.id) {
+        monsterHp = Math.max(0, monsterHp - entry.damage)
+        checkMonsterThresholds(currentRound)
+      } else if (memberHp.has(targetId)) {
+        memberHp.set(
+          targetId,
+          Math.max(0, memberHp.get(targetId)! - entry.damage),
+        )
+        checkPartyCritical(currentRound, targetId)
+      }
+      continue
+    }
+
+    // A "great failure" ambush at Contact resolution — forced pre-battle
+    // damage with no attacking unit, authoritative via `damage`/
+    // `statusApplied` on the engine's own `ambushDamage` entry (never the
+    // old aggregate contact-summary log, which carries no per-target
+    // breakdown).
+    if (
+      entry.actionType === 'ambushDamage' &&
+      entry.damage !== undefined &&
+      entry.targetIds !== undefined &&
+      entry.targetIds.length > 0
+    ) {
+      const targetId = entry.targetIds[0]
+      events.push({
+        type: 'periodicDamage',
+        round: currentRound,
+        targetId,
+        source: 'ambush',
+        amount: entry.damage,
+      })
+      if (memberHp.has(targetId)) {
+        memberHp.set(
+          targetId,
+          Math.max(0, memberHp.get(targetId)! - entry.damage),
+        )
+        checkPartyCritical(currentRound, targetId)
+      }
+      if (entry.statusApplied && entry.statusApplied.length > 0) {
+        for (const status of entry.statusApplied) {
+          events.push({
+            type: 'statusApplied',
+            round: currentRound,
+            targetId,
+            status,
+          })
+        }
+      }
+      continue
+    }
+
+    if (
+      entry.actionType === 'mpConsumed' &&
+      entry.mpDelta !== undefined &&
+      entry.actorId !== undefined
+    ) {
+      events.push({
+        type: 'mpChanged',
+        round: currentRound,
+        targetId: entry.actorId,
+        delta: entry.mpDelta,
+      })
+      continue
+    }
+
+    if (
+      entry.actionType === 'statusExpired' &&
+      entry.statusRemoved &&
+      entry.targetIds !== undefined &&
+      entry.targetIds.length > 0
+    ) {
+      const targetId = entry.targetIds[0]
+      for (const status of entry.statusRemoved) {
+        events.push({
+          type: 'statusRemoved',
+          round: currentRound,
+          targetId,
+          status,
+        })
+      }
+      continue
+    }
+
+    if (
+      (entry.actionType === 'retreat' ||
+        entry.actionType === 'requestPartyRetreat' ||
+        entry.actionType === 'individualEscape') &&
+      retreatSucceeded(entry)
+    ) {
+      events.push({ type: 'retreat', round: currentRound })
+      fireAnchor(currentRound, 'retreat_triggered')
+      continue
+    }
+
+    if (
+      entry.actionType === 'incapacitate' &&
+      entry.targetIds !== undefined &&
+      entry.targetIds.length > 0
+    ) {
+      const targetId = entry.targetIds[0]
+      if (targetId === monster.id) {
+        events.push({ type: 'monsterDefeated', round: currentRound })
+        fireAnchor(currentRound, 'monster_defeated')
+      } else if (memberIds.has(targetId)) {
+        events.push({
+          type: 'incapacitated',
+          round: currentRound,
+          memberId: targetId,
+        })
+        if (!incapacitatedAnchorFired) {
+          incapacitatedAnchorFired = true
+          fireAnchor(currentRound, 'party_member_incapacitated')
+        }
+      }
+      continue
+    }
+
+    if (
+      entry.phase === 'aftermath' &&
+      entry.actionType === 'injury' &&
+      entry.targetIds !== undefined &&
+      entry.targetIds.length > 0
+    ) {
+      const targetId = entry.targetIds[0]
+      if (deadMemberIds.has(targetId)) {
+        events.push({ type: 'death', round: currentRound, memberId: targetId })
+        if (!deathAnchorFired) {
+          deathAnchorFired = true
+          fireAnchor(currentRound, 'party_member_death')
+        }
+      }
+      continue
     }
   }
 
-  function lastRoundAffecting(memberId: string): number {
-    for (let i = battleResult.logs.length - 1; i >= 0; i--) {
-      const entry = battleResult.logs[i]
-      if (entry.targetIds?.includes(memberId)) return entry.round
-    }
-    return battleResult.rounds
-  }
-
-  let incapacitatedAnchorFired = false
-  for (const memberId of battleResult.incapacitatedAdventurers) {
-    const round = lastRoundAffecting(memberId)
-    events.push({ type: 'incapacitated', round, memberId })
-    if (!incapacitatedAnchorFired) {
-      incapacitatedAnchorFired = true
-      fireAnchor(round, 'party_member_incapacitated')
-    }
-  }
-
-  let deathAnchorFired = false
-  for (const memberId of battleResult.deadAdventurers) {
-    const round = lastRoundAffecting(memberId)
-    events.push({ type: 'death', round, memberId })
-    if (!deathAnchorFired) {
-      deathAnchorFired = true
-      fireAnchor(round, 'party_member_death')
-    }
-  }
-
-  const monsterDefeated = battleResult.defeatedEnemies.includes(monster.id)
-  if (monsterDefeated) {
-    events.push({ type: 'monsterDefeated', round: battleResult.rounds })
-    fireAnchor(battleResult.rounds, 'monster_defeated')
-  }
-
-  const outcome = monsterDefeated ? 'victory' : 'failure'
+  const outcome = battleResult.defeatedEnemies.includes(monster.id)
+    ? 'victory'
+    : 'failure'
   events.push({ type: 'battleEnded', round: battleResult.rounds, outcome })
 
-  return { seed, monsterId: threatId, events, occurredAnchors }
+  return { seed, monsterId: threatId, initialSnapshot, events, occurredAnchors }
 }
 
 /**

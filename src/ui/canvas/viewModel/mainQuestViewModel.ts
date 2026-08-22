@@ -4,6 +4,7 @@ import {
   buildMainQuestBattlePlaybackPlan,
   type MainQuestBattlePlaybackPlan,
 } from '../../../core/mainQuest/playback.ts'
+import { resolveMainQuestSpeakerName } from '../../../core/mainQuest/narrative.ts'
 import {
   MAIN_QUEST_THREAT_DEFINITIONS,
   MAIN_QUEST_THREAT_DEFINITION_MAP,
@@ -13,6 +14,7 @@ import type {
   MainQuestAttemptRecord,
   MainQuestThreatId,
   MainQuestThreatStatus,
+  UniqueMonsterVisualProfile,
 } from '../../../core/mainQuest/types.ts'
 
 export interface MainQuestReturnTarget {
@@ -212,13 +214,10 @@ export function buildMainQuestViewModel(
   }
 }
 
-// --- Battle Scene (Phase 9.8 items 86-107): a pure snapshot + Playback
-// Plan for MainQuestBattleScene. HP/MP are presented starting at max — the
-// exact pre-battle HP isn't stored anywhere in the Save (only the
-// authoritative final state is), so the Presentation layer approximates
-// full-health combatants at Battle start. This is a Presentation-layer
-// simplification only: the Simulation itself already used each member's
-// true HP internally, and the approximation never feeds back into it.
+// --- Battle Scene (Phase 9.8.1 items 6-9, 28-30, 87): a pure snapshot +
+// Playback Plan for MainQuestBattleScene. HP/MP start from the Battle
+// Trace's own authoritative `initialSnapshot` (never assumed full — item 7:
+// a Main Quest Party is not guaranteed to depart at full health).
 
 export interface MainQuestBattleSceneInput {
   attemptId: string
@@ -239,10 +238,15 @@ export interface MainQuestBattleViewModel {
   attemptId: string
   threatId: MainQuestThreatId
   monsterName: string
-  monsterAssetKey: string
+  monsterMaxHp: number
+  monsterHp: number
+  monsterVisualProfile: UniqueMonsterVisualProfile
   partyMembers: MainQuestBattlePartyMemberSnapshot[]
   plan: MainQuestBattlePlaybackPlan
   returnTarget: MainQuestReturnTarget
+  /** Canonical display-name resolver for a Battle Dialogue Cue's
+   * `speakerId` — never display a raw id (items 45-49). */
+  resolveSpeakerName: (speakerId: string) => string
 }
 
 export function buildMainQuestBattleViewModel(
@@ -258,17 +262,22 @@ export function buildMainQuestBattleViewModel(
     campaign.parties.find((p) => p.id === attempt.partyId) ??
     campaign.awayParties.find((p) => p.id === attempt.partyId) ??
     campaign.retiredParties.find((p) => p.id === attempt.partyId)
+  const roster = campaignParty?.party.members ?? []
 
+  const { initialSnapshot } = attempt.battleTrace
   const partyMembers: MainQuestBattlePartyMemberSnapshot[] =
-    campaignParty?.party.members.map((member) => ({
-      id: member.id,
-      name: member.name,
-      maxHp: member.maxHp,
-      hp: member.maxHp,
-      maxMp: member.maxMp,
-      mp: member.maxMp,
-      alive: true,
-    })) ?? []
+    initialSnapshot.partyMembers.map((snapshot) => {
+      const member = roster.find((m) => m.id === snapshot.characterId)
+      return {
+        id: snapshot.characterId,
+        name: member?.name ?? '???',
+        maxHp: snapshot.maxHp,
+        hp: snapshot.currentHp,
+        maxMp: snapshot.maxMp,
+        mp: snapshot.currentMp,
+        alive: snapshot.currentHp > 0,
+      }
+    })
 
   const plan = buildMainQuestBattlePlaybackPlan(
     attempt.battleTrace,
@@ -279,9 +288,13 @@ export function buildMainQuestBattleViewModel(
     attemptId: attempt.id,
     threatId: attempt.threatId,
     monsterName: definition.uniqueMonster.name,
-    monsterAssetKey: definition.uniqueMonster.visualProfile.assetKey,
+    monsterMaxHp: initialSnapshot.monster.maxHp,
+    monsterHp: initialSnapshot.monster.currentHp,
+    monsterVisualProfile: definition.uniqueMonster.visualProfile,
     partyMembers,
     plan,
     returnTarget,
+    resolveSpeakerName: (speakerId) =>
+      resolveMainQuestSpeakerName(speakerId, definition.uniqueMonster, roster),
   }
 }

@@ -405,6 +405,29 @@ export interface BattleLogEntry {
   damage?: number
   statusApplied?: string[]
   metadata?: Record<string, unknown>
+  /**
+   * Authoritative structured facts, additive to the loosely-typed fields
+   * above — consumers that need certainty (e.g. Presentation projections)
+   * should read these instead of inferring from `damage`/`result`/message
+   * text. Populated only where the acting code already has the fact on
+   * hand; absent (not false/0) when not applicable to this entry's
+   * `actionType`.
+   */
+  /** Whether an attack-like action actually connected. Never infer this
+   * from `typeof damage === 'number'` — a miss also carries `damage: 0`. */
+  hit?: boolean
+  /** Whether an attack-like action landed as a critical hit. */
+  critical?: boolean
+  /** Actual HP restored by a heal/regen/revive action, post-clamp to the
+   * target's missing HP — never the same value space as `damage`. */
+  healAmount?: number
+  /** Signed change to the actor's MP caused by this action (negative for
+   * consumption, positive for recovery). */
+  mpDelta?: number
+  /** Status effect types that were actively removed by this action (e.g. a
+   * heal clearing poison/bleeding) — distinct from a status naturally
+   * expiring, which uses `actionType: 'statusExpired'`. */
+  statusRemoved?: string[]
 }
 
 export interface InjuryResult {

@@ -44,8 +44,11 @@ import {
   NATIONAL_THREAT_IDS,
 } from '../mainQuest/threats.ts'
 import { mapMainQuestOutcomeToExpeditionOutcome } from '../mainQuest/simulation.ts'
+import { replayMainQuestBattleTrace } from '../mainQuest/replay.ts'
 import { MAIN_QUEST_BATTLE_ANCHOR_IDS } from '../mainQuest/types.ts'
 import type {
+  MainQuestBattleInitialSnapshot,
+  MainQuestBattleTrace,
   MainQuestSimulationResult,
   MainQuestThreatId,
 } from '../mainQuest/types.ts'
@@ -2123,16 +2126,139 @@ function validateWorldEvents(
 const MAIN_QUEST_ANCHOR_SET = new Set<string>(MAIN_QUEST_BATTLE_ANCHOR_IDS)
 
 /**
- * Structural integrity of one Attempt's stored `battleTrace` against its
- * `result` (item 145's minimum set) — never re-runs `runBattle` (nothing
- * else in this validator re-executes combat simulations either; see
- * `validateMainQuest`'s own docs for why). Checks: every actor/target/
- * member id is either the fixed monster id or a Party member that was
- * actually in the roster (`battleStarted.partyMemberIds`), damage is
- * never negative, round numbers never regress, every occurredAnchor is
- * from the fixed vocabulary, a Trace `death` implies membership in
- * `result.deadMemberIds`, and a Trace `monsterDefeated` event exists if
- * and only if `result.monsterDefeated` is true.
+ * Structural integrity of one Attempt's stored `battleTrace.initialSnapshot`
+ * (Phase 9.8.1 item 81) — every roster member has exactly one snapshot
+ * entry, HP/MP are integers within `[0, max]`, and `statuses` is a string
+ * array. Never assumes full HP/MP (item 7): a Main Quest Party is not
+ * guaranteed to depart at full health, so this only bounds-checks, it does
+ * not require `currentHp === maxHp`.
+ */
+function validateMainQuestInitialSnapshot(
+  snapshot: Record<string, unknown>,
+  rosterIds: Set<string>,
+  dayNumber: number,
+): void {
+  if (!Array.isArray(snapshot.partyMembers)) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの初期状態が不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  const seen = new Set<string>()
+  for (const raw of snapshot.partyMembers) {
+    assertPlainObject(
+      raw,
+      `Battle Traceの初期パーティ状態が壊れています (DAY ${dayNumber})`,
+    )
+    if (
+      typeof raw.characterId !== 'string' ||
+      !rosterIds.has(raw.characterId)
+    ) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期状態に未知のパーティIDがあります (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (seen.has(raw.characterId)) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期状態にパーティIDの重複があります (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    seen.add(raw.characterId)
+
+    if (typeof raw.maxHp !== 'number' || raw.maxHp <= 0) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期最大HPが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (
+      typeof raw.currentHp !== 'number' ||
+      raw.currentHp < 0 ||
+      raw.currentHp > raw.maxHp
+    ) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期HPが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (typeof raw.maxMp !== 'number' || raw.maxMp < 0) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期最大MPが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (
+      typeof raw.currentMp !== 'number' ||
+      raw.currentMp < 0 ||
+      raw.currentMp > raw.maxMp
+    ) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期MPが不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+    if (
+      !Array.isArray(raw.statuses) ||
+      raw.statuses.some((s) => typeof s !== 'string')
+    ) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期状態異常一覧が不正です (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+  }
+  for (const id of rosterIds) {
+    if (!seen.has(id)) {
+      throw new SaveValidationErrorClass(
+        `Battle Traceの初期状態に不足しているパーティメンバーがいます (DAY ${dayNumber})`,
+        'corrupted-data',
+      )
+    }
+  }
+
+  assertPlainObject(
+    snapshot.monster,
+    `Battle Traceの初期モンスター状態が壊れています (DAY ${dayNumber})`,
+  )
+  const monster = snapshot.monster
+  if (typeof monster.maxHp !== 'number' || monster.maxHp <= 0) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceのモンスター初期最大HPが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (
+    typeof monster.currentHp !== 'number' ||
+    monster.currentHp < 0 ||
+    monster.currentHp > monster.maxHp
+  ) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceのモンスター初期HPが不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  if (!Array.isArray(monster.statuses)) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceのモンスター初期状態異常一覧が不正です (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+}
+
+/**
+ * Structural + causal integrity of one Attempt's stored `battleTrace`
+ * against its `result` (Phase 9.8.1 items 81-84) — never re-runs
+ * `runBattle` (nothing else in this validator re-executes combat
+ * simulations either; see `validateMainQuest`'s own docs for why). Checks
+ * per-event structure (ids/round-order/non-negative amounts), the Initial
+ * Snapshot (`validateMainQuestInitialSnapshot`), every `occurredAnchor` is
+ * from the fixed vocabulary — and, critically, replays the Trace via the
+ * SAME `replayMainQuestBattleTrace` pure helper the runtime/Presentation
+ * layer uses (item 83: never a second, independently-drifting algorithm)
+ * to prove the replayed final HP/MP/incapacitated/dead/monsterDefeated/
+ * outcome match the stored `result` exactly (item 84).
  */
 function validateMainQuestBattleTrace(
   trace: Record<string, unknown>,
@@ -2159,8 +2285,6 @@ function validateMainQuestBattleTrace(
   const monsterId = `mainquest:${threatId}`
   let rosterIds: Set<string> | undefined
   let lastRound = -Infinity
-  let sawMonsterDefeated = false
-  const deadInTrace = new Set<string>()
 
   for (const rawEvent of events) {
     assertPlainObject(
@@ -2206,33 +2330,61 @@ function validateMainQuestBattleTrace(
         )
       }
     }
-
-    if (event.type === 'death' && typeof event.memberId === 'string') {
-      deadInTrace.add(event.memberId)
-    }
-    if (event.type === 'monsterDefeated') {
-      sawMonsterDefeated = true
-    }
   }
 
-  if (sawMonsterDefeated !== (result.monsterDefeated === true)) {
+  if (!rosterIds) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceに戦闘開始イベントがありません (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
+  assertPlainObject(
+    trace.initialSnapshot,
+    `Battle Traceの初期状態がありません (DAY ${dayNumber})`,
+  )
+  validateMainQuestInitialSnapshot(
+    trace.initialSnapshot as Record<string, unknown>,
+    rosterIds,
+    dayNumber,
+  )
+
+  const replay = replayMainQuestBattleTrace(
+    trace.initialSnapshot as unknown as MainQuestBattleInitialSnapshot,
+    trace as unknown as MainQuestBattleTrace,
+  )
+
+  if (replay.monster.defeated !== (result.monsterDefeated === true)) {
     throw new SaveValidationErrorClass(
       `Battle TraceのBoss撃破とSimulation Resultが一致しません (DAY ${dayNumber})`,
       'corrupted-data',
     )
   }
+  if (replay.outcome !== null && replay.outcome !== result.outcome) {
+    throw new SaveValidationErrorClass(
+      `Battle Traceの結果とSimulation Resultが一致しません (DAY ${dayNumber})`,
+      'corrupted-data',
+    )
+  }
 
-  const deadMemberIds = new Set(
-    Array.isArray(result.deadMemberIds)
-      ? (result.deadMemberIds as unknown[]).filter(
-          (v): v is string => typeof v === 'string',
-        )
-      : [],
-  )
-  for (const id of deadInTrace) {
-    if (!deadMemberIds.has(id)) {
+  const finalStateById = new Map<string, Record<string, unknown>>()
+  if (Array.isArray(result.finalMemberStates)) {
+    for (const raw of result.finalMemberStates) {
+      if (isPlainObject(raw) && typeof raw.id === 'string') {
+        finalStateById.set(raw.id, raw)
+      }
+    }
+  }
+  for (const member of replay.members) {
+    const finalState = finalStateById.get(member.characterId)
+    if (!finalState) continue
+    if (
+      finalState.currentHp !== member.currentHp ||
+      finalState.currentMp !== member.currentMp ||
+      finalState.incapacitated !== member.incapacitated ||
+      finalState.dead !== member.dead
+    ) {
       throw new SaveValidationErrorClass(
-        `Battle Traceの死亡がSimulation Resultと一致しません (DAY ${dayNumber})`,
+        `Battle Traceの再生結果がSimulation Resultの最終状態と一致しません (DAY ${dayNumber})`,
         'corrupted-data',
       )
     }

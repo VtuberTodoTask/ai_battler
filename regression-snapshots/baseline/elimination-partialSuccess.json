@@ -192,7 +192,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-s1:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -209,7 +211,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -226,9 +230,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -247,7 +261,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -266,7 +282,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s1:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -282,7 +300,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-swarm-standard-s1:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -311,7 +331,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -327,7 +349,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-s1:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -344,7 +368,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": true,
               "damage": 21,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -372,7 +398,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-swarm-standard-s1:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -388,7 +416,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -404,9 +434,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 2
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -426,7 +466,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -455,7 +497,9 @@
             {
               "actionType": "ranged",
               "actorId": "D-insect-ambusher-standard-s1:battle:0:encounter:enemy:2",
+              "critical": true,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -470,9 +514,19 @@
               "targetIds": ["C-mage-s1-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -491,7 +545,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 18,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -532,7 +588,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -551,7 +609,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -583,9 +643,19 @@
               "successChance": 93
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s1-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ アイヴィーの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s1-mage-2",
+              "critical": true,
               "damage": 21,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -604,7 +674,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s1-healer-3",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -623,7 +695,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s1-vanguard-0",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -643,7 +717,9 @@
             {
               "actionType": "melee",
               "actorId": "D-insect-swarm-standard-s1:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,

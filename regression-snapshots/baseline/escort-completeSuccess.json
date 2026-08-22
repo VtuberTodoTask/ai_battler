@@ -232,7 +232,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "critical": true,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -249,7 +251,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -266,7 +270,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -283,7 +289,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:4",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -297,9 +305,19 @@
               "targetIds": ["C-mage-s17-mage-2"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s17-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "レイラ スカイの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s17-mage-2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -317,7 +335,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s17-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -335,7 +355,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s17-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -366,7 +388,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -383,7 +407,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:3",
+              "critical": true,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -400,7 +426,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:1",
+              "critical": true,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -424,7 +452,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -454,7 +484,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s17-vanguard-0",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -473,7 +505,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s17-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -491,7 +525,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -507,7 +543,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -524,7 +562,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:4",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -541,9 +581,11 @@
             {
               "actionType": "heal",
               "actorId": "C-healer-s17-healer-3",
+              "healAmount": 32,
               "metadata": {
                 "actualHealAmount": 32
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "ロイド スカイがロイド スカイを回復させた。+32 HP",
               "round": 3,
@@ -552,7 +594,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s17-vanguard-0",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -584,7 +628,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -601,7 +647,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -618,7 +666,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:4",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -634,7 +684,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s17-vanguard-0",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -653,7 +705,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s17-healer-3",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -694,7 +748,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -711,7 +767,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:5",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -728,7 +786,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "critical": true,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -745,7 +805,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s17-vanguard-0",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -784,9 +846,19 @@
               "targetIds": ["C-healer-s17-healer-3"]
             },
             {
+              "actionType": "statusExpired",
+              "phase": "combat",
+              "result": "アリス ドラグナーの状態異常が解けた。",
+              "round": 5,
+              "statusRemoved": ["guarded"],
+              "targetIds": ["C-vanguard-s17-vanguard-0"]
+            },
+            {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 3,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s17-guardian-1",
@@ -806,7 +878,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 2,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s17-guardian-1",
@@ -826,7 +900,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "critical": true,
               "damage": 2,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 7,
                 "guardSourceId": "C-guardian-s17-guardian-1",
@@ -853,7 +929,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s17-vanguard-0",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -894,7 +972,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 2,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s17-guardian-1",
@@ -914,7 +994,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 1,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s17-guardian-1",
@@ -934,7 +1016,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s17-vanguard-0",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -966,7 +1050,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 2,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s17-guardian-1",
@@ -986,7 +1072,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-aberration-ambusher-minion-s17:battle:0:encounter:enemy:2",
+              "critical": true,
               "damage": 3,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 8,
                 "guardSourceId": "C-guardian-s17-guardian-1",
@@ -1006,7 +1094,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s17-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,

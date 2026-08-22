@@ -185,7 +185,9 @@
             {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -203,7 +205,9 @@
             {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -232,9 +236,19 @@
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s49-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ ムーンの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s49-mage-2",
+              "critical": false,
               "damage": 4,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -253,7 +267,9 @@
             {
               "actionType": "magic",
               "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 4,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -273,7 +289,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "critical": false,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 3,
                 "guardSourceId": "S-support-s49-support-3",
@@ -293,7 +311,9 @@
             {
               "actionType": "melee",
               "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -309,7 +329,9 @@
             {
               "actionType": "magic",
               "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -325,7 +347,9 @@
             {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -343,7 +367,9 @@
             {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -361,7 +387,9 @@
             {
               "actionType": "magic",
               "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -379,9 +407,19 @@
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s49-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ ムーンの魔力が減少した。",
+              "round": 2
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s49-mage-2",
+              "critical": true,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -400,7 +438,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -429,7 +469,9 @@
             {
               "actionType": "magic",
               "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -445,7 +487,9 @@
             {
               "actionType": "magic",
               "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -461,7 +505,9 @@
             {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -479,7 +525,9 @@
             {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
+              "critical": false,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -496,9 +544,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s49-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ ムーンの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s49-mage-2",
+              "critical": true,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -530,7 +588,9 @@
             {
               "actionType": "magic",
               "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -546,7 +606,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -562,7 +624,9 @@
             {
               "actionType": "magic",
               "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -578,7 +642,9 @@
             {
               "actionType": "melee",
               "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "critical": false,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -598,7 +664,9 @@
             {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -616,7 +684,9 @@
             {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -634,7 +704,9 @@
             {
               "actionType": "magic",
               "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -665,9 +737,19 @@
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s49-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ ムーンの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s49-mage-2",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -686,7 +768,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -702,7 +786,9 @@
             {
               "actionType": "magic",
               "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -718,7 +804,9 @@
             {
               "actionType": "melee",
               "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -734,7 +822,9 @@
             {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -753,7 +843,9 @@
             {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -794,7 +886,9 @@
             {
               "actionType": "magic",
               "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -808,9 +902,19 @@
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s49-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ ムーンの魔力が減少した。",
+              "round": 5
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s49-mage-2",
+              "critical": false,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -829,7 +933,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -845,7 +951,9 @@
             {
               "actionType": "magic",
               "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -865,7 +973,9 @@
             {
               "actionType": "melee",
               "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -881,7 +991,9 @@
             {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -900,7 +1012,9 @@
             {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -919,7 +1033,9 @@
             {
               "actionType": "magic",
               "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -933,9 +1049,19 @@
               "targetIds": ["S-scout-s49-scout-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s49-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ ムーンの魔力が減少した。",
+              "round": 6
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s49-mage-2",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -967,7 +1093,9 @@
             {
               "actionType": "ranged",
               "actorId": "C-humanoid-skirmisher-minion-s49:battle:0:encounter:enemy:6",
+              "critical": false,
               "damage": 1,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -987,7 +1115,9 @@
             {
               "actionType": "magic",
               "actorId": "C-humanoid-tank-minion-s49:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1003,7 +1133,9 @@
             {
               "actionType": "ranged",
               "actorId": "S-ranger-s49-ranger-1",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "ranger",
                 "isCounter": false,
@@ -1031,7 +1163,9 @@
             {
               "actionType": "melee",
               "actorId": "S-scout-s49-scout-0",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "attackerRole": "scout",
                 "isCounter": false,
@@ -1048,9 +1182,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s49-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ ムーンの魔力が減少した。",
+              "round": 7
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s49-mage-2",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1082,7 +1226,9 @@
             {
               "actionType": "magic",
               "actorId": "S-humanoid-tank-minion-s49:battle:0:encounter:enemy:0",
+              "critical": true,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 8,
                 "guardSourceId": "S-support-s49-support-3",
@@ -1102,7 +1248,9 @@
             {
               "actionType": "magic",
               "actorId": "B-humanoid-tank-minion-s49:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-support-s49-support-3",
@@ -1122,7 +1270,9 @@
             {
               "actionType": "melee",
               "actorId": "B-beast-swarm-minion-s49:battle:0:encounter:enemy:5",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,

@@ -592,11 +592,15 @@ export function TavernSimulator() {
       }
 
       try {
+        const previousAttempts = campaign.mainQuest.attempts.filter(
+          (a) => a.partyId === campaignParty.id && a.id !== attempt.id,
+        )
         const { script } = await generateMainQuestNarrative(
           definition,
           attempt,
           campaignParty,
           narrativeProvider,
+          previousAttempts,
         )
         setCampaign((current) => {
           if (!current) return current

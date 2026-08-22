@@ -191,7 +191,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 21,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -208,9 +210,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s325-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ジェムの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": true,
               "damage": 20,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -242,7 +254,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -260,7 +274,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -280,7 +296,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -300,7 +318,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -320,7 +340,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 3,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -340,7 +362,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 20,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -370,9 +394,19 @@
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s325-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ジェムの魔力が減少した。",
+              "round": 2
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -391,7 +425,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -409,7 +445,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -429,7 +467,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -445,7 +485,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -461,7 +503,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -477,7 +521,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 20,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -496,7 +542,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 17,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -528,7 +576,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -542,9 +592,19 @@
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s325-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ジェムの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -563,7 +623,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -583,7 +645,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": true,
               "damage": 6,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 8,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -603,7 +667,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -619,7 +685,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 20,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -647,7 +715,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -663,9 +733,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s325-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ジェムの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -685,7 +765,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 4,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -718,7 +800,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -734,7 +818,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -750,7 +836,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -768,18 +856,30 @@
             {
               "actionType": "heal",
               "actorId": "C-healer-s325-healer-3",
+              "healAmount": 40,
               "metadata": {
                 "actualHealAmount": 40
               },
+              "mpDelta": -3,
               "phase": "combat",
               "result": "チェルシー クォーツがマルチナ サンドを回復させた。+40 HP",
               "round": 5,
               "targetIds": ["C-vanguard-s325-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s325-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ジェムの魔力が減少した。",
+              "round": 5
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -811,7 +911,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -827,7 +929,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -843,7 +947,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:0",
+              "critical": true,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 7,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -863,7 +969,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 17,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -895,7 +1003,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -911,9 +1021,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s325-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ジェムの魔力が減少した。",
+              "round": 6
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -942,7 +1062,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 5,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -962,7 +1084,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -978,7 +1102,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 23,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -997,7 +1123,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1013,9 +1141,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s325-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ジェムの魔力が減少した。",
+              "round": 7
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": false,
               "damage": 12,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1047,7 +1185,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 7,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -1067,7 +1207,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1096,7 +1238,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1114,7 +1258,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -1131,9 +1277,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "C-mage-s325-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "フェイ ジェムの魔力が減少した。",
+              "round": 8
+            },
+            {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1152,7 +1308,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1168,7 +1326,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": true,
               "damage": 8,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 7,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -1188,7 +1348,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": true,
               "damage": 34,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -1207,7 +1369,9 @@
             {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1226,7 +1390,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1257,7 +1423,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1273,7 +1441,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1289,7 +1459,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 23,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -1330,7 +1502,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1348,7 +1522,9 @@
             {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -1368,7 +1544,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": true,
               "damage": 9,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 8,
                 "guardSourceId": "C-guardian-s325-guardian-1",
@@ -1388,7 +1566,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 21,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -1420,7 +1600,9 @@
             {
               "actionType": "magic",
               "actorId": "C-mage-s325-mage-2",
+              "critical": true,
               "damage": 23,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1439,7 +1621,9 @@
             {
               "actionType": "melee",
               "actorId": "C-healer-s325-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1457,7 +1641,9 @@
             {
               "actionType": "melee",
               "actorId": "D-construct-assault-standard-s325:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1473,7 +1659,9 @@
             {
               "actionType": "melee",
               "actorId": "C-vanguard-s325-vanguard-0",
+              "critical": false,
               "damage": 18,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,

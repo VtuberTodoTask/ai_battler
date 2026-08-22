@@ -55,6 +55,19 @@ describe('Phase 9.8 Main Quest Battle Playback Plan', () => {
     const trace: MainQuestBattleTrace = {
       seed: 'x',
       monsterId: 'alden',
+      initialSnapshot: {
+        partyMembers: [
+          {
+            characterId: 'a',
+            currentHp: 50,
+            maxHp: 50,
+            currentMp: 20,
+            maxMp: 20,
+            statuses: [],
+          },
+        ],
+        monster: { currentHp: 100, maxHp: 100, statuses: [] },
+      },
       events: [
         {
           type: 'battleStarted',
@@ -74,14 +87,12 @@ describe('Phase 9.8 Main Quest Battle Playback Plan', () => {
         {
           anchorId: 'battle_start',
           speakerId: 'monster',
-          speakerName: 'X',
           text: 'hello',
         },
         {
           // Not in occurredAnchors — must never appear in the plan.
           anchorId: 'monster_defeated',
           speakerId: 'monster',
-          speakerName: 'X',
           text: 'should not appear',
         },
       ],

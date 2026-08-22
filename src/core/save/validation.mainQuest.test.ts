@@ -136,6 +136,7 @@ describe('Phase 9.8 Main Quest Save Validation', () => {
       actorId: 'not-a-real-participant',
       targetId: 'also-not-real',
       actionType: 'melee',
+      critical: false,
     })
 
     expect(() => validateGameSave(save)).toThrow(SaveValidationErrorClass)

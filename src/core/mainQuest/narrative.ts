@@ -1,15 +1,46 @@
 import type { NarrativeProvider } from '../../ai/narrative/types.ts'
 import type { Adventurer } from '../models/types.ts'
 import type { CampaignParty } from '../tavern/campaign/types.ts'
+import { buildNarrativePartySnapshot } from '../narrative/context.ts'
+import { projectMemoriesForNarrative } from '../narrative/memory.ts'
+import { projectArcSignalsForNarrative } from '../narrative/arcSignals.ts'
+import { projectRelationshipMilestonesForNarrative } from '../narrative/milestones.ts'
+import type { NarrativeRequestInfo } from '../narrative/types.ts'
 import type {
   MainQuestAttemptRecord,
   MainQuestBattleAnchorId,
   MainQuestBattleDialogueCue,
   MainQuestNarrativeScript,
   MainQuestThreatDefinition,
+  UniqueMonsterProfile,
 } from './types.ts'
 
-export const MAIN_QUEST_NARRATIVE_PROMPT_VERSION = 'v1'
+/** Canonical Player-facing label for Battle Dialogue — the tavern owner
+ * has no other stable display name in this codebase (item 46). */
+export const MAIN_QUEST_PLAYER_DISPLAY_NAME = '店主'
+
+/**
+ * The ONLY place a `MainQuestBattleDialogueCue.speakerId` is turned into a
+ * display name — never trust an AI-authored name, never fall back to the
+ * raw id (Phase 9.8.1 items 45-49). `speakerId` is one of: the fixed
+ * `'monster'` sentinel, a real roster member id, or (defensively, though
+ * `parseMainQuestNarrativeScript`'s whitelist never currently emits it)
+ * `'player'`. Anything else can only reach this function via a corrupted
+ * Save, so it resolves to a neutral placeholder rather than echoing the
+ * raw id.
+ */
+export function resolveMainQuestSpeakerName(
+  speakerId: string,
+  monster: UniqueMonsterProfile,
+  roster: readonly Adventurer[],
+): string {
+  if (speakerId === 'monster') return monster.name
+  if (speakerId === 'player') return MAIN_QUEST_PLAYER_DISPLAY_NAME
+  const member = roster.find((m) => m.id === speakerId)
+  return member?.name ?? '???'
+}
+
+export const MAIN_QUEST_NARRATIVE_PROMPT_VERSION = 'v2'
 
 /**
  * Player Main Story Facts (item 29) — always injected verbatim, never
@@ -42,6 +73,11 @@ ${PLAYER_STORY_FACTS}
 これは汎用的なBoss戦ではありません。対峙する敵は、明確な世界観・人格・動機を持つ特定のUnique Monsterです。
 その人格・動機・話し方が、この場面を実質的に形作らなければなりません。「怪物は怒り狂った」のような没個性的な描写だけで済ませてはいけません。
 
+【同行するPartyについて】
+このPartyは「依頼だから仕方なく」同行しているのではなく、主人公との間に十分な信頼関係が積み重なっているからこそ、この直接依頼を引き受けています。
+与えられるPartyの関係性・記憶・関係の節目・傾向データは、実際にこれまで積み重なってきた事実です。関連性があれば、戦闘前後の会話や描写へ自然に反映してください。
+ただし、そこにない過去の冒険・出来事・約束を新たに作り出してはいけません。特に、信頼関係の度合いを表す数値をそのまま台詞や地の文に出してはいけません(「信頼度63」のような表現は禁止)。数値は「長年培われた信頼関係がある」という意味としてのみ扱ってください。
+
 【出力形式(厳守)】
 以下のマーカーを、この順序で、指定どおりの書式で出力してください。マーカー行以外に説明文などを含めないでください。
 
@@ -61,10 +97,32 @@ export interface MainQuestNarrativePromptContext {
   attempt: MainQuestAttemptRecord
   campaignParty: CampaignParty
   isNosferatu: boolean
+  /** Every OTHER resolved Main Quest Attempt this same Party has already
+   * been on (item 52's "Previous Main Quest participation") — optional
+   * since not every call site tracks sibling Attempts; omitted rather than
+   * guessed when unavailable. */
+  previousAttempts?: MainQuestAttemptRecord[]
 }
 
 function formatCharacterLine(member: Adventurer): string {
-  return `- id=${member.id} 名前=${member.name} 役割=${member.role} 階級=${member.rank}`
+  const profile = member.narrativeProfile
+  const parts = [
+    `- id=${member.id} 名前=${member.name} 役割=${member.role} 階級=${member.rank}`,
+  ]
+  if (profile) {
+    const traits = [
+      profile.temperament,
+      profile.socialStyle,
+      profile.speechStyle,
+    ]
+      .filter((v): v is string => Boolean(v))
+      .join(' / ')
+    if (traits) parts.push(`  気質・話し方: ${traits}`)
+    if (profile.values && profile.values.length > 0) {
+      parts.push(`  価値観: ${profile.values.join(' / ')}`)
+    }
+  }
+  return parts.join('\n')
 }
 
 const NOSFERATU_CONTEXT = [
@@ -79,12 +137,58 @@ const NOSFERATU_CONTEXT = [
 export function buildMainQuestNarrativePrompt(
   context: MainQuestNarrativePromptContext,
 ): { system: string; user: string } {
-  const { definition, attempt, campaignParty, isNosferatu } = context
+  const {
+    definition,
+    attempt,
+    campaignParty,
+    isNosferatu,
+    previousAttempts = [],
+  } = context
   const monster = definition.uniqueMonster
   const result = attempt.result!
   const trace = attempt.battleTrace!
 
   const sections: string[] = []
+
+  // Reuses the SAME read-only Narrative Data projections a normal
+  // Expedition Narrative prompt would (`../narrative/context.ts` and
+  // friends) — never a new Character/Relationship system (item 51). The
+  // Threat's own title/briefing stands in for an Expedition's "focus" /
+  // "request" so relevance-scoring within those projections works exactly
+  // as it does elsewhere; nothing here mutates Party state.
+  const partySnapshot = buildNarrativePartySnapshot(campaignParty)
+  const sceneCharacterIds = campaignParty.party.members.map((m) => m.id)
+  const narrativeRequest: NarrativeRequestInfo = {
+    id: attempt.id,
+    title: definition.title,
+    briefing: definition.scenarioRules.briefing,
+    rank: definition.requiredPartyRank,
+    objectiveType: 'elimination',
+    environment: definition.scenarioRules.environment,
+    publicTags: [],
+  }
+  const focus = `${definition.name} ${definition.scenarioRules.briefing}`
+  const memoryContext = projectMemoriesForNarrative(
+    campaignParty,
+    focus,
+    narrativeRequest,
+    sceneCharacterIds,
+    attempt.dayNumber,
+  )
+  const arcSignals = projectArcSignalsForNarrative(
+    campaignParty,
+    focus,
+    narrativeRequest,
+    sceneCharacterIds,
+    attempt.dayNumber,
+  )
+  const milestones = projectRelationshipMilestonesForNarrative(
+    campaignParty,
+    focus,
+    narrativeRequest,
+    sceneCharacterIds,
+    attempt.dayNumber,
+  )
 
   sections.push(`=== THREAT ===
 名称: ${definition.name}
@@ -115,6 +219,70 @@ export function buildMainQuestNarrativePrompt(
       .map(formatCharacterLine)
       .join('\n')}`,
   )
+
+  sections.push(`=== PARTY と主人公の関係 ===
+このPartyが主人公との信頼関係にもとづきこの依頼を引き受けたという事実(数値そのものは台詞に出さないこと):
+現在の信頼関係の水準: ${partySnapshot.affinity}
+求められた最低水準: ${definition.requiredAffinity}`)
+
+  if ((partySnapshot.characterRelationships ?? []).length > 0) {
+    sections.push(
+      `=== PARTY内の関係性(参考、無理に触れなくてよい) ===\n${(
+        partySnapshot.characterRelationships ?? []
+      )
+        .map(
+          (r) =>
+            `- ${r.sourceName}→${r.targetName}: 信頼${r.trust} 敬意${r.respect} 緊張${r.tension}${r.tags && r.tags.length > 0 ? ` (${r.tags.join(', ')})` : ''}`,
+        )
+        .join('\n')}`,
+    )
+  }
+
+  const memorySummaries = Object.entries(memoryContext.characterMemories)
+    .flatMap(([memberId, memories]) => {
+      const name =
+        campaignParty.party.members.find((m) => m.id === memberId)?.name ??
+        memberId
+      return memories.map((m) => `- ${name}: ${m.summary}`)
+    })
+    .concat(
+      Object.values(memoryContext.relationshipMemories).flatMap((memories) =>
+        memories.map((m) => `- ${m.summary}`),
+      ),
+    )
+  if (memorySummaries.length > 0) {
+    sections.push(
+      `=== 関連する過去の記憶(事実、活かせるなら反映してよい) ===\n${memorySummaries.join('\n')}`,
+    )
+  }
+
+  if (arcSignals.length > 0) {
+    sections.push(
+      `=== 現在の関係の傾向(参考) ===\n${arcSignals.map((s) => `- ${s.summary}`).join('\n')}`,
+    )
+  }
+
+  if (milestones.length > 0) {
+    sections.push(
+      `=== 関係の節目(事実) ===\n${milestones.map((m) => `- ${m.summary}`).join('\n')}`,
+    )
+  }
+
+  if (previousAttempts.length > 0) {
+    const priorSummaries = previousAttempts.map((a) => {
+      const priorDefinition = a.threatId === definition.id ? definition : null
+      const label = priorDefinition ? priorDefinition.name : a.threatId
+      const outcome = a.result
+        ? a.result.monsterDefeated
+          ? '勝利'
+          : '敗北/撤退'
+        : '結果未確定'
+      return `- DAY ${a.dayNumber}: ${label} (${outcome})`
+    })
+    sections.push(
+      `=== このPartyの過去の主依頼参加歴(事実) ===\n${priorSummaries.join('\n')}`,
+    )
+  }
 
   sections.push(`=== SIMULATION OUTCOME (絶対に矛盾させないこと) ===
 結果: ${result.monsterDefeated ? '勝利(Monster討伐)' : '敗北/撤退(Monsterは生存)'}
@@ -182,7 +350,6 @@ export function parseMainQuestNarrativeScript(
       battleInterludes.push({
         anchorId: currentCueAnchor as MainQuestBattleAnchorId,
         speakerId: currentCueSpeaker,
-        speakerName: currentCueSpeaker,
         text: cueText,
       })
     }
@@ -244,6 +411,7 @@ export async function generateMainQuestNarrative(
   attempt: MainQuestAttemptRecord,
   campaignParty: CampaignParty,
   provider: NarrativeProvider,
+  previousAttempts: MainQuestAttemptRecord[] = [],
 ): Promise<GenerateMainQuestNarrativeResult> {
   if (!attempt.result || !attempt.battleTrace) {
     throw new Error(
@@ -257,6 +425,7 @@ export async function generateMainQuestNarrative(
     attempt,
     campaignParty,
     isNosferatu,
+    previousAttempts,
   })
 
   const response = await provider.generate({

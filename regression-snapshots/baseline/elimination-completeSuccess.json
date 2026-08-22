@@ -204,7 +204,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -223,7 +225,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -239,9 +243,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 1
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -260,7 +274,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -276,7 +292,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -292,7 +310,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -308,7 +328,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -322,9 +344,19 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 2
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -342,7 +374,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -360,7 +394,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -376,7 +412,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -408,7 +446,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -424,7 +464,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -440,7 +482,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -467,9 +511,19 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 3
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": false,
               "damage": 17,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -488,7 +542,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -504,7 +560,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -523,7 +581,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 11,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -542,7 +602,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -558,7 +620,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:2",
+              "critical": false,
               "damage": 1,
+              "hit": true,
               "metadata": {
                 "guardPrevented": 5,
                 "guardSourceId": "S-guardian-s37-guardian-1",
@@ -578,7 +642,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -594,7 +660,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -613,7 +681,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -640,9 +710,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 4
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": false,
               "damage": 18,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -661,7 +741,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -690,7 +772,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -706,7 +790,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -722,7 +808,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -741,7 +829,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 10,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -758,9 +848,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 5
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": true,
               "damage": 25,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -789,7 +889,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -818,7 +920,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -834,7 +938,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "isCounter": false,
@@ -863,9 +969,19 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 6
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": true,
               "damage": 24,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -884,7 +1000,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -902,7 +1020,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -918,7 +1038,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -932,9 +1054,19 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 7
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": false,
               "damage": 16,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -953,7 +1085,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -984,7 +1118,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -1003,7 +1139,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1019,7 +1157,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1033,9 +1173,19 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 8
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1054,7 +1204,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1072,7 +1224,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -1105,7 +1259,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:1",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1121,7 +1277,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1137,7 +1295,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1155,7 +1315,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 16,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -1182,9 +1344,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 9
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": true,
               "damage": 21,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1216,7 +1388,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1230,9 +1404,19 @@
               "targetIds": ["S-vanguard-s37-vanguard-0"]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 10
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "isCounter": false,
@@ -1251,7 +1435,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1269,7 +1455,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -1302,7 +1490,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1331,7 +1521,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,
@@ -1349,7 +1541,9 @@
             {
               "actionType": "melee",
               "actorId": "S-vanguard-s37-vanguard-0",
+              "critical": false,
               "damage": 15,
+              "hit": true,
               "metadata": {
                 "attackerRole": "vanguard",
                 "followedLeaderTarget": true,
@@ -1367,9 +1561,19 @@
               ]
             },
             {
+              "actionType": "mpConsumed",
+              "actorId": "S-mage-s37-mage-2",
+              "mpDelta": -5,
+              "phase": "combat",
+              "result": "ユリ サンドの魔力が減少した。",
+              "round": 11
+            },
+            {
               "actionType": "magic",
               "actorId": "S-mage-s37-mage-2",
+              "critical": false,
               "damage": 14,
+              "hit": true,
               "metadata": {
                 "attackerRole": "mage",
                 "followedLeaderTarget": true,
@@ -1389,7 +1593,9 @@
             {
               "actionType": "melee",
               "actorId": "A-undead-swarm-standard-s37:battle:0:encounter:enemy:3",
+              "critical": false,
               "damage": 0,
+              "hit": false,
               "metadata": {
                 "isCounter": false,
                 "isFlank": false,
@@ -1418,7 +1624,9 @@
             {
               "actionType": "melee",
               "actorId": "S-healer-s37-healer-3",
+              "critical": false,
               "damage": 13,
+              "hit": true,
               "metadata": {
                 "attackerRole": "healer",
                 "isCounter": false,

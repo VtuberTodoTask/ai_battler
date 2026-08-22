@@ -166,6 +166,8 @@ export interface MainQuestHitEvent {
   actorId: string
   targetId: string
   actionType: string
+  /** Authoritative from `ActionResult.critical` (`../battle/actions.ts`) — never re-derived. */
+  critical: boolean
 }
 
 export interface MainQuestMissEvent {
@@ -206,12 +208,62 @@ export interface MainQuestStatusRemovedEvent {
   status: string
 }
 
+/**
+ * Periodic (damage-over-time) HP loss ticked at End of Round — e.g. poison,
+ * bleed — authoritatively distinct from an `actionType`-driven `damage`
+ * event: there is no acting unit, only a `source` (the status type causing
+ * it), read straight off `BattleLogEntry.damage` for the `poison`/`bleed`
+ * entries `processEndOfRound` already emits.
+ */
+export interface MainQuestPeriodicDamageEvent {
+  type: 'periodicDamage'
+  round: number
+  targetId: string
+  source: string
+  amount: number
+}
+
+/** Periodic (regen) HP recovery ticked at End of Round — mirrors
+ * `MainQuestPeriodicDamageEvent`, sourced from `BattleLogEntry.healAmount`
+ * on `regen` entries. */
+export interface MainQuestPeriodicHealingEvent {
+  type: 'periodicHealing'
+  round: number
+  targetId: string
+  source: string
+  amount: number
+}
+
+/** A Skill's MP cost/refund, sourced from `BattleLogEntry.mpDelta`. */
+export interface MainQuestMpChangedEvent {
+  type: 'mpChanged'
+  round: number
+  targetId: string
+  delta: number
+}
+
+/**
+ * Fires the instant a unit's HP reaches 0 during Combat — sourced from the
+ * engine's own `handleUnitDeath` log entry (`actionType: 'incapacitate'`),
+ * which is round-accurate. This is a distinct fact from `death`: whether an
+ * incapacitated Adventurer ultimately survives or dies is only decided
+ * afterwards, in the post-battle Injury/survival roll (`resolveAftermath`)
+ * — see `MainQuestDeathEvent`.
+ */
 export interface MainQuestIncapacitatedEvent {
   type: 'incapacitated'
   round: number
   memberId: string
 }
 
+/**
+ * Fires from the post-battle Injury resolution (`BattleLogEntry` with
+ * `phase: 'aftermath'`, `actionType: 'injury'`, cross-referenced against
+ * `BattleResult.injuries` for `category === 'dead'`) — never placed at a
+ * guessed mid-combat round. The engine itself only decides survival after
+ * Combat ends, so this event's `round` is always the Battle's final round,
+ * honestly reflecting when the fact was actually determined.
+ */
 export interface MainQuestDeathEvent {
   type: 'death'
   round: number
@@ -258,6 +310,9 @@ export type MainQuestBattleEvent =
   | MainQuestHealingEvent
   | MainQuestStatusAppliedEvent
   | MainQuestStatusRemovedEvent
+  | MainQuestPeriodicDamageEvent
+  | MainQuestPeriodicHealingEvent
+  | MainQuestMpChangedEvent
   | MainQuestIncapacitatedEvent
   | MainQuestDeathEvent
   | MainQuestMonsterReactionAnchorEvent
@@ -282,9 +337,43 @@ export const MAIN_QUEST_BATTLE_ANCHOR_IDS = [
 export type MainQuestBattleAnchorId =
   (typeof MAIN_QUEST_BATTLE_ANCHOR_IDS)[number]
 
+/**
+ * Presentation-facing snapshot of every combatant's state the instant
+ * Battle Simulation began — authoritative, read straight off the same
+ * `Adventurer`/`Enemy` records `runBattle` itself initialized its internal
+ * `BattleUnit`s from (`createAdventurerUnit`/`createEnemyUnit`,
+ * `../battle/battleState.ts`: `hp = currentHp ?? maxHp`). Presentation must
+ * never assume combatants start at full HP/MP — a Main Quest Party is not
+ * guaranteed to depart at full health (item 7/8).
+ */
+export interface MainQuestBattleMemberSnapshot {
+  characterId: string
+  currentHp: number
+  maxHp: number
+  currentMp: number
+  maxMp: number
+  statuses: readonly string[]
+}
+
+export interface MainQuestBattleMonsterSnapshot {
+  currentHp: number
+  maxHp: number
+  statuses: readonly string[]
+}
+
+export interface MainQuestBattleInitialSnapshot {
+  partyMembers: MainQuestBattleMemberSnapshot[]
+  monster: MainQuestBattleMonsterSnapshot
+}
+
 export interface MainQuestBattleTrace {
   seed: string
   monsterId: MainQuestThreatId
+  /** Authoritative combatant state at Battle start — see
+   * `MainQuestBattleInitialSnapshot`'s own docs. Combined with `events`,
+   * replaying this in order reaches exactly `MainQuestSimulationResult`'s
+   * final state (see `replayMainQuestBattleTrace` in `./replay.ts`). */
+  initialSnapshot: MainQuestBattleInitialSnapshot
   events: MainQuestBattleEvent[]
   /** The subset of MAIN_QUEST_BATTLE_ANCHOR_IDS that actually occurred, in order. Narrative may only cue dialogue against these. */
   occurredAnchors: MainQuestBattleAnchorId[]
@@ -292,10 +381,19 @@ export interface MainQuestBattleTrace {
 
 // --- Narrative Layer (structured, forced-generation, monster-specific).
 
+/**
+ * Deliberately carries only `speakerId`, never a display name — the AI
+ * chooses WHO speaks (`speakerId`, validated against a whitelist at parse
+ * time — see `parseMainQuestNarrativeScript`) and WHAT they say (`text`),
+ * never how their name is displayed. Canonical display names are resolved
+ * at presentation time from authoritative sources only (`resolveMainQuest
+ * SpeakerName`, `./narrative.ts`) — this keeps a stray/hallucinated raw ID
+ * from the AI response from ever being persisted, let alone shown
+ * (Phase 9.8.1 items 45-49).
+ */
 export interface MainQuestBattleDialogueCue {
   anchorId: MainQuestBattleAnchorId
   speakerId: string
-  speakerName: string
   text: string
 }
 

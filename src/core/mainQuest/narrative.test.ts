@@ -6,9 +6,11 @@ import {
 import { dispatchMainQuest } from './dispatch.ts'
 import {
   MAIN_QUEST_NARRATIVE_PROMPT_VERSION,
+  MAIN_QUEST_PLAYER_DISPLAY_NAME,
   buildMainQuestNarrativePrompt,
   generateMainQuestNarrative,
   parseMainQuestNarrativeScript,
+  resolveMainQuestSpeakerName,
 } from './narrative.ts'
 import { MAIN_QUEST_THREAT_DEFINITION_MAP } from './threats.ts'
 import type { NarrativeProvider } from '../../ai/narrative/types.ts'
@@ -76,6 +78,71 @@ describe('Phase 9.8 Main Quest Narrative Prompt', () => {
     expect(user).toContain(attempt.result!.monsterDefeated ? '勝利' : '敗北')
   })
 
+  it('injects Affinity context (current + required) and instructs the AI not to speak the raw number', () => {
+    const { definition, attempt, campaignParty } = resolvedFixture(
+      'alden',
+      'mainquest-narrative-prompt-005',
+    )
+    const { system, user } = buildMainQuestNarrativePrompt({
+      definition,
+      attempt,
+      campaignParty,
+      isNosferatu: false,
+    })
+    expect(user).toContain(String(campaignParty.relationship.affinity))
+    expect(user).toContain(String(definition.requiredAffinity))
+    expect(system).toContain('数値をそのまま')
+  })
+
+  it("injects each Party member's narrative profile (temperament/values) when present", () => {
+    const { definition, attempt, campaignParty } = resolvedFixture(
+      'alden',
+      'mainquest-narrative-prompt-006',
+    )
+    const { user } = buildMainQuestNarrativePrompt({
+      definition,
+      attempt,
+      campaignParty,
+      isNosferatu: false,
+    })
+    for (const member of campaignParty.party.members) {
+      expect(user).toContain(member.name)
+      const profile = member.narrativeProfile
+      if (profile?.values && profile.values.length > 0) {
+        expect(user).toContain(profile.values[0])
+      }
+    }
+  })
+
+  it('includes a Previous Main Quest Participation section only when previousAttempts is non-empty', () => {
+    const { definition, attempt, campaignParty } = resolvedFixture(
+      'alden',
+      'mainquest-narrative-prompt-007',
+    )
+    const { user: withoutHistory } = buildMainQuestNarrativePrompt({
+      definition,
+      attempt,
+      campaignParty,
+      isNosferatu: false,
+    })
+    expect(withoutHistory).not.toContain('過去の主依頼参加歴')
+
+    const priorAttempt: MainQuestAttemptRecord = {
+      ...attempt,
+      id: 'prior-attempt',
+      dayNumber: attempt.dayNumber - 5,
+    }
+    const { user: withHistory } = buildMainQuestNarrativePrompt({
+      definition,
+      attempt,
+      campaignParty,
+      isNosferatu: false,
+      previousAttempts: [priorAttempt],
+    })
+    expect(withHistory).toContain('過去の主依頼参加歴')
+    expect(withHistory).toContain(String(priorAttempt.dayNumber))
+  })
+
   it('injects Nosferatu-specific context (former hero, curse, hero ideology, relationship to player) only for the Nosferatu Attempt', () => {
     const { definition, attempt, campaignParty } = resolvedFixture(
       'nosferatu',
@@ -140,7 +207,6 @@ describe('Phase 9.8 Main Quest Narrative parser', () => {
       {
         anchorId: 'battle_start',
         speakerId: 'monster',
-        speakerName: 'monster',
         text: '「来るがいい」',
       },
     ])
@@ -277,5 +343,62 @@ describe('Phase 9.8 generateMainQuestNarrative', () => {
         fakeProvider('just some prose with no markers at all'),
       ),
     ).rejects.toThrow()
+  })
+})
+
+describe('Phase 9.8.1 resolveMainQuestSpeakerName', () => {
+  it('resolves "monster" to the Unique Monster Profile name, never the raw id', () => {
+    const { definition, campaignParty } = resolvedFixture(
+      'alden',
+      'mainquest-speaker-001',
+    )
+    const name = resolveMainQuestSpeakerName(
+      'monster',
+      definition.uniqueMonster,
+      campaignParty.party.members,
+    )
+    expect(name).toBe(definition.uniqueMonster.name)
+    expect(name).not.toBe('monster')
+  })
+
+  it("resolves a roster member id to that Character's canonical name, never the raw id", () => {
+    const { definition, campaignParty } = resolvedFixture(
+      'alden',
+      'mainquest-speaker-002',
+    )
+    const member = campaignParty.party.members[0]
+    const name = resolveMainQuestSpeakerName(
+      member.id,
+      definition.uniqueMonster,
+      campaignParty.party.members,
+    )
+    expect(name).toBe(member.name)
+    expect(name).not.toBe(member.id)
+  })
+
+  it('resolves "player" to the fixed Player-facing label', () => {
+    const { definition, campaignParty } = resolvedFixture(
+      'alden',
+      'mainquest-speaker-003',
+    )
+    const name = resolveMainQuestSpeakerName(
+      'player',
+      definition.uniqueMonster,
+      campaignParty.party.members,
+    )
+    expect(name).toBe(MAIN_QUEST_PLAYER_DISPLAY_NAME)
+  })
+
+  it('never echoes an unknown raw id back as a display name', () => {
+    const { definition, campaignParty } = resolvedFixture(
+      'alden',
+      'mainquest-speaker-004',
+    )
+    const name = resolveMainQuestSpeakerName(
+      'not-a-real-participant-id',
+      definition.uniqueMonster,
+      campaignParty.party.members,
+    )
+    expect(name).not.toBe('not-a-real-participant-id')
   })
 })

@@ -340,6 +340,18 @@ function resolveContact(
         target.hp -= dmg
         state.enemyDamageDealt += dmg
         addStatus(target, 'weakened', 3, 5, 'contact')
+        log(
+          state,
+          'contact',
+          'ambushDamage',
+          `${target.name}が奇襲で${dmg}ダメージを受けた。`,
+          {
+            targetIds: [target.id],
+            damage: dmg,
+            hit: true,
+            statusApplied: ['weakened'],
+          },
+        )
       }
     }
     effects.initialDamage = damageCount
@@ -499,6 +511,9 @@ function resolveAction(
       return
     }
     const power = unit.skills.healing / 3 + unit.stats.int / 6
+    const clearedDot = (['poisoned', 'bleeding'] as const).filter((type) =>
+      hasStatus(action.target!, type),
+    )
     const amount = healUnit(unit, action.target, power)
     unit.mp -= 3
     log(
@@ -510,6 +525,9 @@ function resolveAction(
         actorId: unit.id,
         targetIds: [action.target.id],
         metadata: { actualHealAmount: amount },
+        healAmount: amount,
+        mpDelta: -3,
+        statusRemoved: clearedDot.length > 0 ? clearedDot : undefined,
       },
     )
     return
@@ -601,6 +619,7 @@ function resolveAction(
         actorId: unit.id,
         targetIds: [action.target.id],
         metadata: { abilityId: action.abilityId },
+        healAmount: action.target.hp,
       },
     )
     return
@@ -617,7 +636,13 @@ function resolveAction(
       if (fallback) resolveAttack(state, unit, fallback)
       return
     }
-    if (unit.isAdventurer) unit.mp -= 5
+    if (unit.isAdventurer) {
+      unit.mp -= 5
+      log(state, 'combat', 'mpConsumed', `${unit.name}の魔力が減少した。`, {
+        actorId: unit.id,
+        mpDelta: -5,
+      })
+    }
     const target = action.target ?? getAliveEnemies(state)[0]
     if (!target) return
     resolveAttack(state, unit, target, 'magic')
@@ -757,6 +782,8 @@ function resolveAttack(
     successChance: result.successChance,
     damage: result.damageDealt,
     statusApplied: result.statusApplied,
+    hit: result.hit,
+    critical: result.critical,
     metadata: attackMetadata,
   })
 
@@ -783,6 +810,8 @@ function resolveAttack(
           actorId: attacker.id,
           targetIds: [extra.id],
           damage: areaDamage,
+          hit: true,
+          critical: false,
         },
       )
       if (extra.hp <= 0 && extra.isAlive) handleUnitDeath(state, extra)
@@ -811,7 +840,13 @@ function resolveAttack(
           'combat',
           'corpseExplosion',
           `${defender.name}の死体が爆発し、${u.name}に${explosionDamage}ダメージ。`,
-          { actorId: defender.id, targetIds: [u.id], damage: explosionDamage },
+          {
+            actorId: defender.id,
+            targetIds: [u.id],
+            damage: explosionDamage,
+            hit: true,
+            critical: false,
+          },
         )
         if (u.hp <= 0 && u.isAlive) handleUnitDeath(state, u)
       }
@@ -1289,18 +1324,29 @@ function processEndOfRound(state: BattleState): void {
   for (const u of getAllAlive(state)) {
     const regen = getAbilityNumeric(u, 'regenPerRound', 0)
     if (regen > 0 && u.hp < u.maxHp) {
-      const heal = regen
-      u.hp = clamp(u.hp + heal, 0, u.maxHp)
-      log(state, 'combat', 'regen', `${u.name}が再生した。+${heal} HP`, {
+      const hpBefore = u.hp
+      u.hp = clamp(u.hp + regen, 0, u.maxHp)
+      const actualHeal = u.hp - hpBefore
+      log(state, 'combat', 'regen', `${u.name}が再生した。+${actualHeal} HP`, {
         targetIds: [u.id],
+        healAmount: actualHeal,
       })
     }
   }
 
   getAllAlive(state).forEach((u) => {
-    u.statusEffects = u.statusEffects
-      .map((e) => ({ ...e, duration: e.duration - 1 }))
-      .filter((e) => e.duration > 0)
+    const ticked = u.statusEffects.map((e) => ({
+      ...e,
+      duration: e.duration - 1,
+    }))
+    const expired = ticked.filter((e) => e.duration <= 0).map((e) => e.type)
+    u.statusEffects = ticked.filter((e) => e.duration > 0)
+    if (expired.length > 0) {
+      log(state, 'combat', 'statusExpired', `${u.name}の状態異常が解けた。`, {
+        targetIds: [u.id],
+        statusRemoved: expired,
+      })
+    }
   })
 }
 
