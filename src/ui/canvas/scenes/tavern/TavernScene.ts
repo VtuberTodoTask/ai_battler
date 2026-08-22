@@ -181,6 +181,18 @@ export class TavernScene implements GameScene {
       }
     }
 
+    // Phase 9.9: once the Ending has begun (or reached GAME CLEAR), there
+    // is no normal Tavern gameplay to return to — redirect unconditionally.
+    // This never actually races with the Main Quest check above in real
+    // play (the Ending only ever starts once the final Main Quest
+    // Presentation is already completed), but the priority order still
+    // follows the spec exactly: unwatched Main Quest Presentation first,
+    // then Ending, then normal Tavern.
+    if (campaign.ending.status !== 'locked') {
+      this._context!.canvasGame.sceneManager?.push('ending')
+      return
+    }
+
     const dayAdvanced =
       previousDayNumber > 0 && campaign.dayNumber > previousDayNumber
     if (dayAdvanced) {

@@ -23,12 +23,15 @@ import type {
 } from '../../core/tavern/campaign/types.ts'
 import { purchaseTavernUpgrade } from '../../core/tavern/campaign/upgrades.ts'
 import { dispatchMainQuest } from '../../core/mainQuest/dispatch.ts'
+import { startMainQuestPresentation } from '../../core/mainQuest/presentation.ts'
+import { completeMainQuestPresentationForCampaign } from '../../core/ending/transition.ts'
 import {
-  completeMainQuestPresentation,
-  startMainQuestPresentation,
-} from '../../core/mainQuest/presentation.ts'
+  completeEndingPresentation,
+  startEndingPresentation,
+} from '../../core/ending/presentation.ts'
 import type { MainQuestThreatId } from '../../core/mainQuest/types.ts'
 import { runMainQuestNarrativeGeneration } from './mainQuestNarrativeGeneration.ts'
+import { runEndingNarrativeGeneration } from './endingNarrativeGeneration.ts'
 import { resolveFinishDayTransition } from './finishDayTransition.ts'
 import { tavernUpgradeBlockReasonText } from '../canvas/viewModel/tavernUpgradeViewModel.ts'
 import { acceptanceReasonText } from '../../core/tavern/acceptance.ts'
@@ -622,7 +625,7 @@ export function TavernSimulator() {
       }
       try {
         const next = startMainQuestPresentation(campaign, attemptId)
-        setCampaign(next)
+        commitCampaign(next)
         return { ok: true }
       } catch (e) {
         const message =
@@ -630,7 +633,7 @@ export function TavernSimulator() {
         return { ok: false, message }
       }
     },
-    [campaign],
+    [campaign, commitCampaign],
   )
 
   const handleCompleteMainQuestPresentation = useCallback(
@@ -639,8 +642,16 @@ export function TavernSimulator() {
         return { ok: false, message: 'キャンペーンが開始されていません' }
       }
       try {
-        const next = completeMainQuestPresentation(campaign, attemptId)
-        setCampaign(next)
+        // This can be the exact moment the Ending begins (the Nosferatu
+        // victory's Presentation completing) — `commitCampaign` (not raw
+        // `setCampaign`) keeps `campaignRef` synchronously in step, so
+        // EndingScene's own first automatic Narrative-generation kickoff
+        // never races a stale ref the same way Main Quest resolve once did.
+        const next = completeMainQuestPresentationForCampaign(
+          campaign,
+          attemptId,
+        )
+        commitCampaign(next)
         return { ok: true }
       } catch (e) {
         const message =
@@ -648,8 +659,48 @@ export function TavernSimulator() {
         return { ok: false, message }
       }
     },
-    [campaign],
+    [campaign, commitCampaign],
   )
+
+  const handleGenerateEndingNarrative = useCallback(
+    (): Promise<UiActionResult> =>
+      runEndingNarrativeGeneration({
+        campaignRef,
+        commitCampaign,
+        narrativeProvider,
+      }),
+    [narrativeProvider, commitCampaign],
+  )
+
+  const handleStartEndingPresentation = useCallback((): UiActionResult => {
+    if (!campaign) {
+      return { ok: false, message: 'キャンペーンが開始されていません' }
+    }
+    try {
+      const next = startEndingPresentation(campaign)
+      commitCampaign(next)
+      return { ok: true }
+    } catch (e) {
+      const message =
+        e instanceof Error ? e.message : '演出の開始に失敗しました'
+      return { ok: false, message }
+    }
+  }, [campaign, commitCampaign])
+
+  const handleCompleteEndingPresentation = useCallback((): UiActionResult => {
+    if (!campaign) {
+      return { ok: false, message: 'キャンペーンが開始されていません' }
+    }
+    try {
+      const next = completeEndingPresentation(campaign)
+      commitCampaign(next)
+      return { ok: true }
+    } catch (e) {
+      const message =
+        e instanceof Error ? e.message : '演出の完了に失敗しました'
+      return { ok: false, message }
+    }
+  }, [campaign, commitCampaign])
 
   const handleUpdateCampaign = useCallback(
     (updater: (c: TavernCampaignState) => TavernCampaignState) => {
@@ -732,6 +783,9 @@ export function TavernSimulator() {
             onCompleteMainQuestPresentation={
               handleCompleteMainQuestPresentation
             }
+            onGenerateEndingNarrative={handleGenerateEndingNarrative}
+            onStartEndingPresentation={handleStartEndingPresentation}
+            onCompleteEndingPresentation={handleCompleteEndingPresentation}
             onOpenSettings={handleOpenCanvasSettings}
             onSwitchToLegacy={() => setUiMode('legacy')}
             onNewGame={handleNewGame}
