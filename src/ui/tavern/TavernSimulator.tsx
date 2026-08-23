@@ -32,6 +32,8 @@ import {
 import type { MainQuestThreatId } from '../../core/mainQuest/types.ts'
 import { runMainQuestNarrativeGeneration } from './mainQuestNarrativeGeneration.ts'
 import { runEndingNarrativeGeneration } from './endingNarrativeGeneration.ts'
+import { runBondConversationGeneration } from './bondConversationGeneration.ts'
+import { isBondConversationEventType } from '../../core/narrative/bondConversation.ts'
 import { resolveFinishDayTransition } from './finishDayTransition.ts'
 import { tavernUpgradeBlockReasonText } from '../canvas/viewModel/tavernUpgradeViewModel.ts'
 import { acceptanceReasonText } from '../../core/tavern/acceptance.ts'
@@ -549,6 +551,19 @@ export function TavernSimulator() {
         return { ok: false, message: '物語の候補が見つかりません' }
       }
 
+      // Bond Conversation traffic never goes through the legacy
+      // `setCampaign`-state-updater path below — it uses its own dedicated
+      // prompt and the atomic `campaignRef`/`commitCampaign` commit
+      // discipline established for Main Quest / Ending narrative (item 34).
+      if (isBondConversationEventType(candidate.eventType)) {
+        return runBondConversationGeneration({
+          campaignRef,
+          commitCampaign,
+          narrativeProvider,
+          candidateId,
+        })
+      }
+
       if (candidate.state === 'generated' && candidate.activeGenerationId) {
         const record = campaign.narrativeGenerations.find(
           (g) => g.id === candidate.activeGenerationId,
@@ -581,7 +596,7 @@ export function TavernSimulator() {
 
       return { ok: true, data: record.generatedText }
     },
-    [campaign, narrativeProvider],
+    [campaign, narrativeProvider, commitCampaign],
   )
 
   const handleDispatchMainQuest = useCallback(

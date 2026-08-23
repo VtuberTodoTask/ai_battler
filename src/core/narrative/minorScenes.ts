@@ -1,5 +1,6 @@
 import { SeededRng } from '../rng/seededRng.ts'
 import type { CampaignParty } from '../tavern/campaign/types.ts'
+import { selectWeightedFocalCharacter } from './focalCharacter.ts'
 import type {
   MinorNarrativeFingerprint,
   MinorSceneEndingStyle,
@@ -271,29 +272,15 @@ function selectFocalCharacter(
   fingerprints: MinorNarrativeFingerprint[],
 ): string {
   const members = party.party.members
-  const leader = members.find((m) => m.id === party.party.leaderId)
-
-  let weights = members.map((m) => {
-    let w = 10
-    if (m.id === leader?.id) w += 5
-    return w
-  })
-
   const recentFocals = fingerprints
     .slice(-FINGERPRINT_MEMORY_WINDOW)
     .map((fp) => fp.focalCharacterId)
-  for (let i = 0; i < members.length; i++) {
-    const count = recentFocals.filter((id) => id === members[i]!.id).length
-    if (count > 0) weights[i] *= Math.pow(0.4, count)
-  }
-
-  if (weights.every((w) => w <= 0)) {
-    weights = members.map(() => 1)
-  }
-
-  return rng.weightedPick(
+    .filter((id): id is string => id !== undefined)
+  return selectWeightedFocalCharacter(
+    rng,
     members.map((m) => m.id),
-    weights,
+    party.party.leaderId,
+    recentFocals,
   )
 }
 

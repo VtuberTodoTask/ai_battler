@@ -30,6 +30,11 @@ import {
   getWorldEventDefinition,
 } from '../../../../core/tavern/campaign/worldEvents.ts'
 import { skillLabel } from '../../viewModel/characterLabels.ts'
+import {
+  BOND_CONVERSATION_EVENT_TYPE,
+  BOND_CONVERSATION_UI_LABELS,
+  deriveBondMilestoneCrossings,
+} from '../../../../core/narrative/bondConversation.ts'
 
 export type DayResultsStep = 'important_events' | 'expedition_results'
 
@@ -45,6 +50,7 @@ export interface DayResultEventViewModel {
     | 'casualtyDeparture'
     | 'startedRecovery'
     | 'relationshipChange'
+    | 'bondConversation'
     | 'progression'
     | 'tavernRankUp'
     | 'questChain'
@@ -488,14 +494,42 @@ function buildRelationshipEvent(
       partyId: event.partyId,
     }
   }
-  if (event.type === 'affinityChanged' && Math.abs(event.delta) >= 10) {
-    return {
-      id: `relationship-event:${event.dayNumber}:affinity:${event.partyId}`,
-      kind: 'relationshipChange',
-      title: 'パーティの士気が大きく変動しました',
-      summary: `${event.partyName}（信頼度 ${event.before} → ${event.after}）`,
-      importance: 'normal',
-      partyId: event.partyId,
+  if (event.type === 'affinityChanged') {
+    // A Bond Conversation Milestone crossing takes priority over the
+    // generic "affinity swung a lot" notice below — it is strictly more
+    // informative, and a matching `NarrativeCandidate` only exists here
+    // when this exact crossing actually produced one today (never a
+    // second time for the same milestone, per `hasBondMilestoneOccurred`;
+    // and never when a higher-priority same-day Character Event, e.g. a
+    // casualtyDeparture, took the primary candidate slot instead).
+    const crossings = deriveBondMilestoneCrossings(event.before, event.after)
+    for (const milestone of crossings) {
+      const narrativeTarget = findCharacterEventCandidate(
+        campaign,
+        BOND_CONVERSATION_EVENT_TYPE[milestone],
+        event.partyId,
+      )
+      if (narrativeTarget) {
+        return {
+          id: `relationship-event:${event.dayNumber}:bond:${milestone}:${event.partyId}`,
+          kind: 'bondConversation',
+          title: BOND_CONVERSATION_UI_LABELS[milestone],
+          summary: event.partyName,
+          importance: 'high',
+          narrativeTargetId: narrativeTarget.id,
+          partyId: event.partyId,
+        }
+      }
+    }
+    if (Math.abs(event.delta) >= 10) {
+      return {
+        id: `relationship-event:${event.dayNumber}:affinity:${event.partyId}`,
+        kind: 'relationshipChange',
+        title: 'パーティの士気が大きく変動しました',
+        summary: `${event.partyName}（信頼度 ${event.before} → ${event.after}）`,
+        importance: 'normal',
+        partyId: event.partyId,
+      }
     }
   }
   if (

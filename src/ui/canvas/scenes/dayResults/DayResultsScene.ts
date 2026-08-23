@@ -845,11 +845,16 @@ export class DayResultsScene implements GameScene {
         ? '滞在延長の物語'
         : event.kind === 'partyArrival'
           ? '新しい仲間の物語'
-          : '出来事の物語'
+          : event.kind === 'bondConversation'
+            ? event.title
+            : '出来事の物語'
 
     const input: SoundNovelSceneInput = {
       narrativeId: event.narrativeTargetId ?? event.id,
-      source: 'stay_extension',
+      source:
+        event.kind === 'bondConversation'
+          ? 'bond_conversation'
+          : 'stay_extension',
       title,
       text,
       visualContext,

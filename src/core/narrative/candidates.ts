@@ -17,12 +17,21 @@ import type {
 } from './types.ts'
 import type { BrokerageOfferAttempt } from '../tavern/types.ts'
 import { getMissionSpecializationMatch } from '../tavern/specialization.ts'
+import {
+  BOND_CONVERSATION_EVENT_TYPE,
+  BOND_CONVERSATION_MILESTONE_LABELS,
+  deriveBondMilestoneCrossings,
+  hasBondMilestoneOccurred,
+  selectBondConversationFocalCharacter,
+} from './bondConversation.ts'
 
 const EVENT_PRIORITY: Record<CharacterNarrativeEventType, number> = {
   casualtyDeparture: 100,
   farewell: 90,
   becameFavorite: 80,
   becameRegular: 70,
+  becameTrusted: 65,
+  becameFamiliar: 62,
   stayExtended: 60,
   recoveryFinished: 50,
   weakObjectiveSuccess: 40,
@@ -270,40 +279,40 @@ export function deriveResolveCandidates(
   for (const event of relationshipEvents) {
     if (event.type !== 'affinityChanged') continue
 
-    const beforeTier = affinityTier(event.before)
-    const afterTier = affinityTier(event.after)
+    const party = campaign.parties.find((p) => p.id === event.partyId)
+    if (!party) continue
 
-    if (beforeTier < 80 && afterTier >= 80) {
-      const party = campaign.parties.find((p) => p.id === event.partyId)
-      if (party) {
-        addPotential(party, {
-          eventType: 'becameFavorite',
-          title: `贔屓になった：${party.party.name}`,
-          facts: {
-            before: event.before,
-            after: event.after,
-            outcome: event.outcome,
-          },
-          priority: EVENT_PRIORITY.becameFavorite,
-        })
-      }
-      continue
-    }
+    // Item 9: a single day's Affinity jump can (rarely) cross more than one
+    // threshold; each un-fired milestone becomes its own potential event so
+    // `finalizeCharacterEvents` can pick the highest-priority one as primary
+    // and record the rest as secondary triggers, exactly like any other
+    // same-day multi-event Party.
+    const crossings = deriveBondMilestoneCrossings(event.before, event.after)
+    for (const milestone of crossings) {
+      // Item 10/11: a milestone fires at most once per Party ever, even
+      // across Affinity drops and re-rises.
+      if (hasBondMilestoneOccurred(campaign, party.id, milestone)) continue
 
-    if (beforeTier < 60 && afterTier >= 60) {
-      const party = campaign.parties.find((p) => p.id === event.partyId)
-      if (party) {
-        addPotential(party, {
-          eventType: 'becameRegular',
-          title: `常連になった：${party.party.name}`,
-          facts: {
-            before: event.before,
-            after: event.after,
-            outcome: event.outcome,
-          },
-          priority: EVENT_PRIORITY.becameRegular,
-        })
-      }
+      const focalCharacterId = selectBondConversationFocalCharacter(
+        campaign,
+        party,
+        dayNumber,
+        milestone,
+      )
+      const eventType = BOND_CONVERSATION_EVENT_TYPE[milestone]
+
+      addPotential(party, {
+        eventType,
+        title: `${BOND_CONVERSATION_MILESTONE_LABELS[milestone]}になった：${party.party.name}`,
+        facts: {
+          before: event.before,
+          after: event.after,
+          outcome: event.outcome,
+          milestone,
+          focalCharacterId,
+        },
+        priority: EVENT_PRIORITY[eventType],
+      })
     }
   }
 
@@ -425,12 +434,6 @@ export function deriveAdvanceCandidates(
     potentialsByParty,
     campaign.history,
   )
-}
-
-function affinityTier(affinity: number): number {
-  if (affinity < 60) return 0
-  if (affinity < 80) return 60
-  return 80
 }
 
 export function mergeCandidates(

@@ -22,6 +22,7 @@ import { WorldEventLogScene } from './scenes/worldEventLog/WorldEventLogScene.ts
 import { MainQuestScene } from './scenes/mainQuest/MainQuestScene.ts'
 import { MainQuestBattleScene } from './scenes/mainQuest/MainQuestBattleScene.ts'
 import { EndingScene } from './scenes/ending/EndingScene.ts'
+import { OpeningScene } from './scenes/opening/OpeningScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -137,6 +138,7 @@ export class CanvasGame {
     this._sceneManager.register(new MainQuestScene())
     this._sceneManager.register(new MainQuestBattleScene())
     this._sceneManager.register(new EndingScene())
+    this._sceneManager.register(new OpeningScene())
 
     app.ticker.add(this.handleTick)
 
@@ -181,12 +183,21 @@ export class CanvasGame {
 
   setCampaign(
     campaign: TavernCampaignState,
-    options?: { preserveCurrentScene?: boolean },
+    options?: { preserveCurrentScene?: boolean; initialSceneId?: string },
   ): void {
     this._currentCampaign = campaign
     const currentId = this._sceneManager?.current?.id
-    if (currentId && currentId !== 'tavern' && !options?.preserveCurrentScene) {
-      this._sceneManager?.show('tavern')
+    // `initialSceneId` exists solely for New Game -> Opening (item 41):
+    // when unset this resolves to the same hardcoded 'tavern' target as
+    // before, so Load Game and every other `setCampaign` caller keep their
+    // exact existing behavior.
+    const targetSceneId = options?.initialSceneId ?? 'tavern'
+    if (
+      currentId &&
+      currentId !== targetSceneId &&
+      !options?.preserveCurrentScene
+    ) {
+      this._sceneManager?.show(targetSceneId)
     }
     const current = this._sceneManager?.current
     current?.setCampaign?.(campaign, { ...this._uiState })

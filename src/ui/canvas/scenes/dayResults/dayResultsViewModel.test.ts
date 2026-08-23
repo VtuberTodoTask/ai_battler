@@ -6,6 +6,16 @@ import {
 } from '../../../../core/tavern/campaign/campaign.ts'
 import { offerRequestToParty } from '../../../../core/tavern/brokerage.ts'
 import { buildDayResultsSceneViewModel } from './dayResultsViewModel.ts'
+import {
+  deriveResolveCandidates,
+  mergeCandidates,
+} from '../../../../core/narrative/candidates.ts'
+import { BOND_CONVERSATION_UI_LABELS } from '../../../../core/narrative/bondConversation.ts'
+import { deriveTavernRank } from '../../../../core/tavern/campaign/reputation.ts'
+import type {
+  CampaignRelationshipEvent,
+  TavernDayRecord,
+} from '../../../../core/tavern/campaign/types.ts'
 
 function findAcceptingOffers(
   campaign: ReturnType<typeof createTavernCampaign>,
@@ -273,5 +283,148 @@ describe('buildDayResultsSceneViewModel', () => {
     }
 
     expect(advanced).not.toBeNull()
+  })
+})
+
+describe('Bond Conversation DayResults row (Phase 9.10)', () => {
+  it('surfaces a bondConversation row with the correct label and narrativeTargetId when a Milestone candidate exists for that day', () => {
+    const campaign = createTavernCampaign('vm-bond-001')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 59
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 59,
+      delta: 8,
+      after: 67,
+    }
+    const derived = deriveResolveCandidates(
+      {
+        ...campaign,
+        currentDay: { ...campaign.currentDay, status: 'resolved', results: [] },
+      },
+      [event],
+    )
+    const bondCandidate = derived.find(
+      (c) => c.eventType === 'becameRegular' && c.partyId === party.id,
+    )!
+
+    const rank = deriveTavernRank(campaign.reputation.peakScore)
+    const dayRecord: TavernDayRecord = {
+      dayNumber: campaign.dayNumber,
+      daySeed: campaign.currentDay.seed,
+      reputationSummary: {
+        beforeScore: campaign.reputation.score,
+        delta: 0,
+        afterScore: campaign.reputation.score,
+        beforeRank: rank,
+        afterRank: rank,
+        promoted: false,
+      },
+      results: [],
+      partyEvents: [],
+      progressionEvents: [],
+      relationshipEvents: [event],
+      questChainEvents: [],
+      worldEventEvents: [],
+      mainQuestEvents: [],
+    }
+
+    const campaignWithHistory = {
+      ...campaign,
+      narrativeCandidates: mergeCandidates(
+        campaign.narrativeCandidates,
+        derived,
+      ),
+      history: [...campaign.history, dayRecord],
+    }
+
+    const vm = buildDayResultsSceneViewModel(
+      {
+        campaign: campaignWithHistory,
+        resolvedDay: dayRecord.dayNumber,
+        nextDay: campaignWithHistory.dayNumber,
+      },
+      [],
+    )
+
+    const bondRow = vm.importantEvents.find(
+      (e) => e.kind === 'bondConversation',
+    )
+    expect(bondRow).toBeDefined()
+    expect(bondRow?.title).toBe(BOND_CONVERSATION_UI_LABELS.regular)
+    expect(bondRow?.narrativeTargetId).toBe(bondCandidate.id)
+    expect(bondRow?.partyId).toBe(party.id)
+
+    // The generic "affinity swung a lot" row must not ALSO appear for the
+    // same event once the Bond Conversation row has claimed it.
+    const relationshipChangeRow = vm.importantEvents.find(
+      (e) => e.kind === 'relationshipChange' && e.partyId === party.id,
+    )
+    expect(relationshipChangeRow).toBeUndefined()
+  })
+
+  it('does not surface a bondConversation row when no Milestone is crossed', () => {
+    const campaign = createTavernCampaign('vm-bond-002')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 61
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 61,
+      delta: 12,
+      after: 73,
+    }
+
+    const rank = deriveTavernRank(campaign.reputation.peakScore)
+    const dayRecord: TavernDayRecord = {
+      dayNumber: campaign.dayNumber,
+      daySeed: campaign.currentDay.seed,
+      reputationSummary: {
+        beforeScore: campaign.reputation.score,
+        delta: 0,
+        afterScore: campaign.reputation.score,
+        beforeRank: rank,
+        afterRank: rank,
+        promoted: false,
+      },
+      results: [],
+      partyEvents: [],
+      progressionEvents: [],
+      relationshipEvents: [event],
+      questChainEvents: [],
+      worldEventEvents: [],
+      mainQuestEvents: [],
+    }
+
+    const campaignWithHistory = {
+      ...campaign,
+      history: [...campaign.history, dayRecord],
+    }
+
+    const vm = buildDayResultsSceneViewModel(
+      {
+        campaign: campaignWithHistory,
+        resolvedDay: dayRecord.dayNumber,
+        nextDay: campaignWithHistory.dayNumber,
+      },
+      [],
+    )
+
+    expect(
+      vm.importantEvents.find((e) => e.kind === 'bondConversation'),
+    ).toBeUndefined()
+    // No Milestone crossed, but the delta is still >= 10, so the ordinary
+    // relationshipChange notice must still appear.
+    const relationshipChangeRow = vm.importantEvents.find(
+      (e) => e.kind === 'relationshipChange' && e.partyId === party.id,
+    )
+    expect(relationshipChangeRow).toBeDefined()
   })
 })
