@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { CanvasGame } from './CanvasGame.ts'
+import { createOpeningSoundNovelInput } from './scenes/opening/createOpeningSoundNovelInput.ts'
 import type {
   GameUiActions,
   GameUiState,
@@ -80,10 +81,12 @@ export default function GameCanvasHost({
    * consumed once by the `campaign`-prop sync effect below, exactly like
    * `preserveSceneOnNextSyncRef`. Left `undefined` by every other action
    * (including `loadGame`), so `setCampaign` keeps its existing hardcoded
-   * 'tavern' target for every path except a genuine New Game (item 41) —
-   * Load Game skips Opening entirely by construction, not by a special
-   * case here. */
-  const initialSceneOnNextSyncRef = useRef<string | undefined>(undefined)
+   * 'tavern' target for every path except a genuine New Game — Load Game
+   * skips the Opening SoundNovel entirely by construction, not by a
+   * special case here. */
+  const initialSceneOnNextSyncRef = useRef<
+    { sceneId: string; input?: unknown } | undefined
+  >(undefined)
 
   const onAdvanceRef = useRef(onAdvanceDay)
   const onResolveRef = useRef(onResolveDay)
@@ -489,7 +492,10 @@ export default function GameCanvasHost({
           if (!handler) return { ok: false, message: 'newGame not connected' }
           const result = handler()
           if (result.ok) {
-            initialSceneOnNextSyncRef.current = 'opening'
+            initialSceneOnNextSyncRef.current = {
+              sceneId: 'soundNovel',
+              input: createOpeningSoundNovelInput(),
+            }
           }
           return result
         } catch (e) {
@@ -589,9 +595,9 @@ export default function GameCanvasHost({
     if (campaign === prevCampaignRef.current) return
     const preserveCurrentScene = preserveSceneOnNextSyncRef.current
     preserveSceneOnNextSyncRef.current = false
-    const initialSceneId = initialSceneOnNextSyncRef.current
+    const initialScene = initialSceneOnNextSyncRef.current
     initialSceneOnNextSyncRef.current = undefined
-    cg.setCampaign(campaign, { preserveCurrentScene, initialSceneId })
+    cg.setCampaign(campaign, { preserveCurrentScene, initialScene })
     prevCampaignRef.current = campaign
   }, [campaign])
 

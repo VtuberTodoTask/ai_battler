@@ -26,7 +26,7 @@ export class GameSceneManager {
     this._scenes.set(scene.id, scene)
   }
 
-  show(sceneId: string): GameScene | null {
+  show(sceneId: string, input?: unknown): GameScene | null {
     const next = this._scenes.get(sceneId) ?? null
     if (!next || next === this._current) return this._current
 
@@ -39,10 +39,18 @@ export class GameSceneManager {
     }
 
     this._current = next
-    this._currentInput = undefined
+    this._currentInput = input
     this._stack.push(next)
 
-    next.mount(this._context)
+    // Only forward a second argument to `mount()` when the caller actually
+    // gave one — existing callers that call `show(sceneId)` with no input
+    // must keep calling `mount(context)` with the exact same single-arg
+    // shape as before (item 6's "既存callerの挙動は変えない").
+    if (input === undefined) {
+      next.mount(this._context)
+    } else {
+      next.mount(this._context, input)
+    }
     this._onMount?.(next)
 
     if (old) {

@@ -48,7 +48,7 @@ export class SoundNovelScene implements GameScene {
   private _indicator: GameLabel | null = null
   private _autoButton: GameButton | null = null
   private _logButton: GameButton | null = null
-  private _returnButton: GameButton | null = null
+  private _exitButton: GameButton | null = null
   private _backlogPanel: Container | null = null
 
   private _labelMap = new Map<string, GameLabel>()
@@ -57,6 +57,16 @@ export class SoundNovelScene implements GameScene {
   private _lastVisibleCount = -1
   private _keydownHandler: ((e: KeyboardEvent) => void) | null = null
 
+  /** The Scene input this mount was given — kept around (beyond the local
+   * `sceneInput` in `mount()`) so Escape/control handlers and the
+   * finished-playback check can tell `source === 'opening'` apart from
+   * every other caller without threading it through every method. */
+  private _input: SoundNovelSceneInput | null = null
+  /** Guards against triggering the Opening -> Tavern transition twice —
+   * `syncToPlayer()` runs on every `update()` tick once `finished`, and a
+   * player could also tap スキップ in the same frame. */
+  private _openingExitTriggered = false
+
   mount(context: GameSceneContext, input?: unknown): void {
     const sceneInput = input as SoundNovelSceneInput | undefined
     if (!sceneInput) {
@@ -64,6 +74,8 @@ export class SoundNovelScene implements GameScene {
       return
     }
 
+    this._input = sceneInput
+    this._openingExitTriggered = false
     this._context = context
     this._root = new Container()
     this._root.eventMode = 'static'
@@ -163,6 +175,7 @@ export class SoundNovelScene implements GameScene {
       this._root = null
     }
 
+    this._input = null
     this._context = null
   }
 
@@ -228,18 +241,20 @@ export class SoundNovelScene implements GameScene {
     })
     this._logButton.onActivate = () => this.openLog()
 
-    this._returnButton = new GameButton({
+    const isOpening = this._input?.source === 'opening'
+    this._exitButton = new GameButton({
       width: 120,
       height: 44,
       theme,
-      label: '戻る',
+      label: isOpening ? 'スキップ' : '戻る',
     })
-    this._returnButton.onActivate = () => this.returnToPrevious()
+    this._exitButton.onActivate = () =>
+      isOpening ? this.finishOpening() : this.returnToPrevious()
 
     const totalWidth =
       this._autoButton.width +
       this._logButton.width +
-      this._returnButton.width +
+      this._exitButton.width +
       spacing * 2
     const startX = (VIRTUAL_WIDTH - totalWidth) / 2
 
@@ -247,13 +262,13 @@ export class SoundNovelScene implements GameScene {
     this._autoButton.y = CONTROL_Y
     this._logButton.x = startX + this._autoButton.width + spacing
     this._logButton.y = CONTROL_Y
-    this._returnButton.x =
+    this._exitButton.x =
       startX + this._autoButton.width + this._logButton.width + spacing * 2
-    this._returnButton.y = CONTROL_Y
+    this._exitButton.y = CONTROL_Y
 
     this._controlsLayer.addChild(this._autoButton)
     this._controlsLayer.addChild(this._logButton)
-    this._controlsLayer.addChild(this._returnButton)
+    this._controlsLayer.addChild(this._exitButton)
   }
 
   private handleRootTap = (): void => {
@@ -264,6 +279,8 @@ export class SoundNovelScene implements GameScene {
     if (e.key === 'Escape') {
       if (this._player?.logOpen) {
         this.closeLog()
+      } else if (this._input?.source === 'opening') {
+        this.finishOpening()
       } else {
         this.returnToPrevious()
       }
@@ -283,6 +300,19 @@ export class SoundNovelScene implements GameScene {
   private syncToPlayer(): void {
     const player = this._player
     if (!player || !this._textLayer) return
+
+    // Opening only (item 14): once the script finishes, leave for the
+    // Tavern with no extra button press. `update()` calls this every
+    // frame, so `finishOpening()`'s own guard is what prevents repeat
+    // navigation while this stays `finished`.
+    if (
+      this._input?.source === 'opening' &&
+      player.state.playbackState === 'finished' &&
+      !this._openingExitTriggered
+    ) {
+      this.finishOpening()
+      return
+    }
 
     this._autoButton?.setLabel(player.state.autoMode ? 'AUTO:ON' : 'AUTO')
 
@@ -461,5 +491,19 @@ export class SoundNovelScene implements GameScene {
 
   private returnToPrevious(): void {
     this._context?.canvasGame.sceneManager?.pop()
+  }
+
+  /**
+   * The Opening's only exit, whether reached by finishing the script,
+   * pressing スキップ, or Escape. Deliberately `show('tavern')`, never
+   * `pop()` — there is no Opening entry on the scene stack to return to
+   * (New Game shows this Scene directly as the initial Scene), and
+   * `show()` clears the stack outright, so nothing can navigate back into
+   * the Opening afterward.
+   */
+  private finishOpening(): void {
+    if (this._openingExitTriggered) return
+    this._openingExitTriggered = true
+    this._context?.canvasGame.sceneManager?.show('tavern')
   }
 }
