@@ -48,7 +48,15 @@ import { PartyListPanel } from './PartyListPanel.ts'
 import { QuestListPanel } from './QuestListPanel.ts'
 import { TAVERN_HEADER_HEIGHT, TavernHeader } from './TavernHeader.ts'
 import { EXPEDITION_PREDICTION_SAMPLES } from '../../../../core/tavern/prediction/types.ts'
+import type { ExpeditionPrediction } from '../../../../core/tavern/prediction/types.ts'
 import { getEffectiveSampleCount } from '../../../../core/tavern/campaign/upgrades.ts'
+import { shouldSuppressAutoSelectParty } from '../../../../core/tavern/campaign/tutorial.ts'
+import { TutorialRuntime } from '../../tutorial/tutorialRuntime.ts'
+import { TutorialOverlay } from '../../tutorial/TutorialOverlay.ts'
+import type {
+  TutorialTarget,
+  TutorialTargetBounds,
+} from '../../tutorial/types.ts'
 
 const MARGIN = 16
 const TOP_BAR_HEIGHT = TAVERN_HEADER_HEIGHT
@@ -89,6 +97,8 @@ export class TavernScene implements GameScene {
   private _advancing = false
   private _previousPartyCount = 0
   private _modalTrack: BgmTrackId | null = null
+  private _tutorialRuntime: TutorialRuntime | null = null
+  private _tutorialOverlay: TutorialOverlay | null = null
 
   mount(context: GameSceneContext): void {
     this._context = context
@@ -101,6 +111,13 @@ export class TavernScene implements GameScene {
 
     this.drawBackground(context)
     this.createPanels(context)
+
+    this._tutorialOverlay = new TutorialOverlay({
+      theme: context.theme,
+      onAdvance: () => this.handleTutorialAdvance(),
+      onChoice: (optionId) => this.handleTutorialChoice(optionId),
+    })
+    context.layers.overlay.addChild(this._tutorialOverlay)
 
     context.overlayManager.onClose(() => this.handleModalClose())
     AudioController.playBgm('tavern')
@@ -121,6 +138,12 @@ export class TavernScene implements GameScene {
       this._uiRoot.destroy({ children: true })
       this._uiRoot = null
     }
+    if (this._tutorialOverlay) {
+      this._tutorialOverlay.parent?.removeChild(this._tutorialOverlay)
+      this._tutorialOverlay.destroy({ children: true })
+      this._tutorialOverlay = null
+    }
+    this._tutorialRuntime = null
     this._header = null
     this._partyList = null
     this._decisionPanel = null
@@ -222,6 +245,27 @@ export class TavernScene implements GameScene {
       }
     }
 
+    // Phase 10.1 Tutorial Runtime: recreated only when a genuinely
+    // different Campaign has been loaded onto an already-mounted Tavern
+    // Scene (identified by `seed`, which no Core transition ever
+    // mutates) — a bare resync of the SAME Campaign (including the
+    // Runtime's own `setTutorialMode`/`completeTutorial` commits) must
+    // never reset Consent or restart the active step sequence.
+    if (
+      !this._tutorialRuntime ||
+      this._tutorialRuntime.campaignSeed !== campaign.seed
+    ) {
+      this._tutorialRuntime = new TutorialRuntime(campaign, {
+        onCommitCampaign: (next) =>
+          this._context!.canvasGame.setCampaign(next, {
+            preserveCurrentScene: true,
+          }),
+        onChange: () => this.renderTutorial(),
+      })
+    } else {
+      this._tutorialRuntime.syncCampaign(campaign)
+    }
+
     const partyIds = new Set(campaign.currentDay.parties.map((p) => p.id))
     const requestIds = new Set(campaign.currentDay.requests.map((r) => r.id))
 
@@ -241,8 +285,19 @@ export class TavernScene implements GameScene {
       reconciled = true
     }
 
+    // Phase 10.1 Tutorial: never auto-select a Party while Consent is
+    // pending or the Basic Tutorial has not yet run its own deliberate
+    // Party-selection step — the Player must make that first pick
+    // themselves. `_autoSelectPending` is deliberately left untouched
+    // while suppressed, so it fires exactly once as soon as suppression
+    // lifts (declining Consent) rather than never firing at all; once the
+    // Tutorial completes normally, `selectedPartyId` is already set, so
+    // this block naturally no-ops on the next pass instead of re-running.
+    const suppressAutoSelect = shouldSuppressAutoSelectParty(campaign)
+
     if (
       this._autoSelectPending &&
+      !suppressAutoSelect &&
       !this._uiState.selectedPartyId &&
       campaign.currentDay.parties.length > 0
     ) {
@@ -258,7 +313,9 @@ export class TavernScene implements GameScene {
       }
     }
 
-    this._autoSelectPending = false
+    if (!suppressAutoSelect) {
+      this._autoSelectPending = false
+    }
 
     if (reconciled && this._context) {
       this._context.canvasGame.setUiState({ ...this._uiState })
@@ -336,7 +393,7 @@ export class TavernScene implements GameScene {
       theme,
       width: LEFT_WIDTH - MARGIN,
       height: MAIN_HEIGHT,
-      onSelectParty: (id) => context.actions.selectParty(id),
+      onSelectParty: (id) => this.handleSelectParty(id),
     })
     this._partyList.x = MARGIN
     this._partyList.y = MAIN_Y
@@ -364,6 +421,12 @@ export class TavernScene implements GameScene {
               this._campaign.upgrades,
             )
           : EXPEDITION_PREDICTION_SAMPLES,
+      onPredictionReady: (prediction: ExpeditionPrediction) =>
+        this._tutorialRuntime?.dispatch({
+          type: 'prediction_ready',
+          prediction,
+        }),
+      onPredictionError: () => this._tutorialRuntime?.handlePredictionError(),
     })
     this._decisionPanel.x = LEFT_WIDTH + MARGIN
     this._decisionPanel.y = MAIN_Y
@@ -373,7 +436,7 @@ export class TavernScene implements GameScene {
       theme,
       width: RIGHT_WIDTH - MARGIN,
       height: MAIN_HEIGHT,
-      onSelectQuest: (id) => context.actions.selectQuest(id),
+      onSelectQuest: (id) => this.handleSelectQuest(id),
     })
     this._questList.x = VIRTUAL_WIDTH - RIGHT_WIDTH - MARGIN
     this._questList.y = MAIN_Y
@@ -398,6 +461,65 @@ export class TavernScene implements GameScene {
     this._decisionPanel?.update(this._viewModel.decision)
     this._questList?.update(this._viewModel.quests)
     this._activityPanel?.update(this._viewModel.activities)
+    this.renderTutorial()
+  }
+
+  private renderTutorial(): void {
+    if (!this._tutorialRuntime || !this._tutorialOverlay) return
+    const snapshot = this._tutorialRuntime.getSnapshot()
+    const target = this._tutorialRuntime.currentTarget
+    this._tutorialOverlay.update(snapshot, this.getTutorialTargetBounds(target))
+  }
+
+  private getTutorialTargetBounds(
+    target: TutorialTarget,
+  ): TutorialTargetBounds | null {
+    switch (target) {
+      case 'quest_list':
+        return {
+          x: VIRTUAL_WIDTH - RIGHT_WIDTH - MARGIN,
+          y: MAIN_Y,
+          width: RIGHT_WIDTH - MARGIN,
+          height: MAIN_HEIGHT,
+        }
+      case 'party_list':
+        return {
+          x: MARGIN,
+          y: MAIN_Y,
+          width: LEFT_WIDTH - MARGIN,
+          height: MAIN_HEIGHT,
+        }
+      case 'assign_button': {
+        if (!this._decisionPanel) return null
+        const local = this._decisionPanel.getAssignButtonLocalBounds()
+        return {
+          x: this._decisionPanel.x + local.x,
+          y: this._decisionPanel.y + local.y,
+          width: local.width,
+          height: local.height,
+        }
+      }
+      default:
+        return null
+    }
+  }
+
+  private handleTutorialAdvance(): void {
+    this._tutorialRuntime?.advanceMessage()
+  }
+
+  private handleTutorialChoice(optionId: string): void {
+    this._tutorialRuntime?.selectChoice(optionId)
+  }
+
+  private handleSelectParty(id: string): void {
+    this._context!.actions.selectParty(id)
+    this._tutorialRuntime?.dispatch({ type: 'party_selected', partyId: id })
+  }
+
+  private handleSelectQuest(id: string): void {
+    this._context!.actions.selectQuest(id)
+    this._tutorialRuntime?.dispatch({ type: 'quest_selected', questId: id })
   }
 
   private handleAdvance(): void {
@@ -424,6 +546,11 @@ export class TavernScene implements GameScene {
     const questId = this._uiState.selectedQuestId
     if (!partyId || !questId) return
     const party = this._viewModel?.parties.find((p) => p.id === partyId)
+    // Captured before the offer: dispatching to the Runtime below can
+    // itself advance past the `assign_button` wait step, so this must be
+    // read while it is still true rather than after.
+    const tutorialWaitingForOffer =
+      this._tutorialRuntime?.currentTarget === 'assign_button'
     const result = this._context!.actions.offerRequest(partyId, questId)
     if (!result.ok) {
       this.setActionMessage(
@@ -446,8 +573,24 @@ export class TavernScene implements GameScene {
         const body = result.data.reasonText
           ? result.data.reasonText
           : '依頼を断りました。'
-        this.openActivityModal(`${partyName}は依頼を断りました`, body)
+        // During the Tutorial's own `WAIT request_offered` step, the
+        // normal decline Modal would visually conflict with the Tutorial
+        // Overlay — use the existing actionMessage instead, and let the
+        // Tutorial's own declined-branch line carry the explanation.
+        // Outside the Tutorial, the traditional Modal is unaffected.
+        if (tutorialWaitingForOffer) {
+          this.setActionMessage(
+            'info',
+            `${partyName}は依頼を断りました\n${body}`,
+          )
+        } else {
+          this.openActivityModal(`${partyName}は依頼を断りました`, body)
+        }
       }
+      this._tutorialRuntime?.dispatch({
+        type: 'request_offered',
+        decision: result.data.decision,
+      })
     }
   }
 

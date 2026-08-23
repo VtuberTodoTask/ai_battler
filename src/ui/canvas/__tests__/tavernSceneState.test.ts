@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Container } from 'pixi.js'
 import { createTavernCampaign } from '../../../core/tavern/campaign/campaign.ts'
+import { setTutorialMode } from '../../../core/tavern/campaign/tutorial.ts'
 import { TavernScene } from '../scenes/tavern/TavernScene.ts'
 import { GameAssetManager } from '../assets/GameAssetManager.ts'
 import { GameViewport } from '../GameViewport.ts'
@@ -152,8 +153,11 @@ function createSceneContext(uiStateRef?: {
 }
 
 describe('TavernScene state management', () => {
-  it('auto-selects the first available party on mount', () => {
-    const campaign = createTavernCampaign('scene-auto-001')
+  it('auto-selects the first available party on mount (outside Tutorial)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('scene-auto-001'),
+      'disabled',
+    )
     const scene = new TavernScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(uiStateRef)

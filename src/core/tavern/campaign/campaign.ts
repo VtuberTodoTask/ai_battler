@@ -81,6 +81,7 @@ import {
 import { createInitialMainQuestState } from '../../mainQuest/threats.ts'
 import { createInitialCampaignEndingState } from '../../ending/types.ts'
 import { isCampaignVictoryAchieved } from '../../ending/victory.ts'
+import { createInitialTutorialState } from './tutorial.ts'
 import type {
   CampaignParty,
   CampaignProgressionEvent,
@@ -140,6 +141,7 @@ export function createTavernCampaign(seed: string): TavernCampaignState {
     worldEvents: [],
     mainQuest: createInitialMainQuestState(),
     ending: createInitialCampaignEndingState(),
+    tutorial: createInitialTutorialState(),
   }
 }
 

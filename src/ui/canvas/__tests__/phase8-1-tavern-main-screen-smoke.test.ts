@@ -7,6 +7,7 @@ import {
   resolveCampaignDay,
 } from '../../../core/tavern/campaign/campaign.ts'
 import { offerRequestToParty } from '../../../core/tavern/brokerage.ts'
+import { setTutorialMode } from '../../../core/tavern/campaign/tutorial.ts'
 import type { DowntimeEvent } from '../../../core/narrative/types.ts'
 import { TavernScene } from '../scenes/tavern/TavernScene.ts'
 import { GameAssetManager } from '../assets/GameAssetManager.ts'
@@ -204,7 +205,10 @@ describe('Phase 8.1 Tavern Main Screen Smoke', () => {
     const scene = new TavernScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(scene, uiStateRef)
-    const campaign = createTavernCampaign('phase8-1-party')
+    const campaign = setTutorialMode(
+      createTavernCampaign('phase8-1-party'),
+      'disabled',
+    )
     const party = campaign.currentDay.parties[0]!
 
     scene.mount(context)
@@ -317,7 +321,10 @@ describe('Phase 8.1 Tavern Main Screen Smoke', () => {
     const scene = new TavernScene()
     const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
     const context = createSceneContext(scene, uiStateRef)
-    const campaign = createTavernCampaign('phase8-1-rest')
+    const campaign = setTutorialMode(
+      createTavernCampaign('phase8-1-rest'),
+      'disabled',
+    )
     const party = campaign.currentDay.parties[0]!
     party.availability = 'recovering'
     party.recoveryDaysRemaining = 2

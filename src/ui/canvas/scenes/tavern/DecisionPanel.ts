@@ -27,9 +27,20 @@ export interface DecisionPanelOptions {
   onOpenBreakdown: () => void
   /** Effective prediction sample count, derived from intel_archive level. */
   getSampleCount?: () => number
+  /** Phase 10.1 Tutorial: fires once per successful prediction fetch for
+   * the CURRENT Party+Quest selection (reuses the existing `_sequence`
+   * stale-response guard — never for a resolved-but-superseded fetch). */
+  onPredictionReady?: (prediction: ExpeditionPrediction) => void
+  /** Phase 10.1 Tutorial: fires when the prediction fetch fails for the
+   * current selection, so the Tutorial Runtime can recover instead of
+   * waiting forever. */
+  onPredictionError?: () => void
 }
 
 type PredictionStatus = 'idle' | 'loading' | 'error'
+
+const ASSIGN_BUTTON_WIDTH = 200
+const ASSIGN_BUTTON_HEIGHT = 44
 
 export class DecisionPanel extends Container {
   private readonly _theme: GameUiTheme
@@ -41,6 +52,10 @@ export class DecisionPanel extends Container {
   private readonly _getSelectedQuest: () => TavernRequestOffer | undefined
   private readonly _onOpenBreakdown: () => void
   private readonly _getSampleCount?: () => number
+  private readonly _onPredictionReady?: (
+    prediction: ExpeditionPrediction,
+  ) => void
+  private readonly _onPredictionError?: () => void
   private readonly _panel: GamePanel
   private readonly _scroll: GameScrollView
   private readonly _scrollWidth: number
@@ -69,6 +84,8 @@ export class DecisionPanel extends Container {
     this._getSelectedQuest = options.getSelectedQuest
     this._onOpenBreakdown = options.onOpenBreakdown
     this._getSampleCount = options.getSampleCount
+    this._onPredictionReady = options.onPredictionReady
+    this._onPredictionError = options.onPredictionError
 
     this._panel = new GamePanel({
       width: this._width,
@@ -100,8 +117,8 @@ export class DecisionPanel extends Container {
     this.addChild(this._bottomBar)
 
     this._assignButton = new GameButton({
-      width: 200,
-      height: 44,
+      width: ASSIGN_BUTTON_WIDTH,
+      height: ASSIGN_BUTTON_HEIGHT,
       theme: this._theme,
       label: 'この依頼を紹介する',
       disabled: true,
@@ -118,7 +135,7 @@ export class DecisionPanel extends Container {
       label: 'パーティ詳細',
       disabled: true,
     })
-    this._partyDetailButton.x = margin + 200 + gap
+    this._partyDetailButton.x = margin + ASSIGN_BUTTON_WIDTH + gap
     this._partyDetailButton.y = (bottomBarHeight - 44) / 2
     this._partyDetailButton.onActivate = () => this._onOpenPartyDetail()
     this._bottomBar.addChild(this._partyDetailButton)
@@ -129,6 +146,25 @@ export class DecisionPanel extends Container {
 
   get currentPrediction(): ExpeditionPrediction | undefined {
     return this._prediction
+  }
+
+  /** Phase 10.1 Tutorial: the assign button's bounds relative to this
+   * Panel's own (x, y) origin, for the `assign_button` input-gating
+   * cutout. Plain arithmetic from the same layout values the constructor
+   * already used to position it — deliberately not `getBounds()`, which
+   * this codebase's test-time Pixi stand-ins do not implement. */
+  getAssignButtonLocalBounds(): {
+    x: number
+    y: number
+    width: number
+    height: number
+  } {
+    return {
+      x: this._assignButton.x,
+      y: this._bottomBar.y + this._assignButton.y,
+      width: ASSIGN_BUTTON_WIDTH,
+      height: ASSIGN_BUTTON_HEIGHT,
+    }
   }
 
   update(viewModel?: TavernDecisionViewModel): void {
@@ -173,11 +209,13 @@ export class DecisionPanel extends Container {
         this._prediction = prediction
         this._predictionStatus = 'idle'
         this.draw()
+        this._onPredictionReady?.(prediction)
       })
       .catch(() => {
         if (seq !== this._sequence) return
         this._predictionStatus = 'error'
         this.draw()
+        this._onPredictionError?.()
       })
   }
 

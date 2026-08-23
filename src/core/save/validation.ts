@@ -3293,6 +3293,78 @@ function validateEnding(
   }
 }
 
+const VALID_TUTORIAL_MODES = ['pending', 'enabled', 'disabled']
+
+const VALID_TUTORIAL_IDS = [
+  'basic_request_assignment',
+  'day_advance',
+  'day_results',
+  'party_detail',
+  'recovery',
+  'affinity',
+  'bond_conversation',
+  'tavern_upgrade',
+  'quest_chain',
+  'world_event',
+  'main_quest',
+]
+
+/**
+ * Phase 10.1 Tutorial Runtime persistent state. Active step progress
+ * (which step, which wait target, choice results) is deliberately never
+ * persisted — only `mode` and `completedTutorialIds` survive Save/Load —
+ * so this validator's job is narrow: the mode is one of the three known
+ * values, `completedTutorialIds` is an array of known, non-duplicate
+ * ids, and the causally-invalid combination of a still-`pending` Tutorial
+ * (Consent never yet answered) already having completions recorded can
+ * never occur.
+ */
+function validateTutorial(campaign: Record<string, unknown>): void {
+  assertPlainObject(campaign.tutorial, 'Tutorialデータが壊れています')
+  const tutorial = campaign.tutorial as Record<string, unknown>
+
+  if (
+    typeof tutorial.mode !== 'string' ||
+    !VALID_TUTORIAL_MODES.includes(tutorial.mode)
+  ) {
+    throw new SaveValidationErrorClass(
+      'Tutorialのmodeが不正です',
+      'corrupted-data',
+    )
+  }
+
+  if (!Array.isArray(tutorial.completedTutorialIds)) {
+    throw new SaveValidationErrorClass(
+      'Tutorialの完了済みID一覧が壊れています',
+      'corrupted-data',
+    )
+  }
+
+  const seen = new Set<string>()
+  for (const id of tutorial.completedTutorialIds) {
+    if (typeof id !== 'string' || !VALID_TUTORIAL_IDS.includes(id)) {
+      throw new SaveValidationErrorClass(
+        '未知のTutorial IDが含まれています',
+        'corrupted-data',
+      )
+    }
+    if (seen.has(id)) {
+      throw new SaveValidationErrorClass(
+        '重複したTutorial IDが含まれています',
+        'corrupted-data',
+      )
+    }
+    seen.add(id)
+  }
+
+  if (tutorial.mode === 'pending' && tutorial.completedTutorialIds.length > 0) {
+    throw new SaveValidationErrorClass(
+      'Tutorialがpendingなのに完了済みIDが存在します',
+      'corrupted-data',
+    )
+  }
+}
+
 interface ValidatedProgressionFields {
   growthXp: number
   totalGrowthXp: number
@@ -4739,6 +4811,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   validateMainQuest(campaign, ledgerById, campaign.dayNumber as number)
 
   validateEnding(campaign, currentDayStatus)
+
+  validateTutorial(campaign)
 
   if (
     !isPlainObject(raw.randomState) ||

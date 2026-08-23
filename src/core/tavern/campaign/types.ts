@@ -27,6 +27,7 @@ import type {
 import type { TavernFinanceState } from '../../economy/types.ts'
 import type { MainQuestEvent, MainQuestState } from '../../mainQuest/types.ts'
 import type { CampaignEndingState } from '../../ending/types.ts'
+import type { CampaignTutorialState } from './tutorial.ts'
 
 export type TavernRank = 1 | 2 | 3 | 4 | 5
 
@@ -361,4 +362,5 @@ export interface TavernCampaignState {
   worldEvents: WorldEventState[]
   mainQuest: MainQuestState
   ending: CampaignEndingState
+  tutorial: CampaignTutorialState
 }
