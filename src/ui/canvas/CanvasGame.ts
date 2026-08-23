@@ -21,6 +21,7 @@ import { QuestChainLogScene } from './scenes/questChainLog/QuestChainLogScene.ts
 import { WorldEventLogScene } from './scenes/worldEventLog/WorldEventLogScene.ts'
 import { MainQuestScene } from './scenes/mainQuest/MainQuestScene.ts'
 import { MainQuestBattleScene } from './scenes/mainQuest/MainQuestBattleScene.ts'
+import { EndingScene } from './scenes/ending/EndingScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -135,6 +136,7 @@ export class CanvasGame {
     this._sceneManager.register(new WorldEventLogScene())
     this._sceneManager.register(new MainQuestScene())
     this._sceneManager.register(new MainQuestBattleScene())
+    this._sceneManager.register(new EndingScene())
 
     app.ticker.add(this.handleTick)
 

@@ -44,6 +44,8 @@ import {
   NATIONAL_THREAT_IDS,
 } from '../mainQuest/threats.ts'
 import { mapMainQuestOutcomeToExpeditionOutcome } from '../mainQuest/simulation.ts'
+import { buildCampaignEndingFacts } from '../ending/facts.ts'
+import { isCampaignVictoryAchieved } from '../ending/victory.ts'
 import {
   replayMainQuestBattleTrace,
   statusEffectsEqual,
@@ -51,6 +53,7 @@ import {
 import { MAIN_QUEST_BATTLE_ANCHOR_IDS } from '../mainQuest/types.ts'
 import { isKnownStatusEffectType } from '../battle/statusLabels.ts'
 import type {
+  MainQuestAttemptRecord,
   MainQuestBattleInitialSnapshot,
   MainQuestBattleTrace,
   MainQuestSimulationResult,
@@ -69,6 +72,7 @@ import type {
   CampaignProgressionSource,
   PartyLifecycleStatus,
   QuestChainState,
+  TavernCampaignState,
   TavernRank,
   TavernUpgradeId,
   WorldEventState,
@@ -76,7 +80,7 @@ import type {
 import type { GameSaveData, SaveMetadata } from './types.ts'
 import { SaveValidationErrorClass, type SaveValidationError } from './types.ts'
 
-export { SaveValidationErrorClass, type SaveValidationError }
+export { SaveValidationErrorClass, type SaveValidationError, validateEnding }
 
 const ALLOWED_OUTCOMES = [
   'completeSuccess',
@@ -3028,6 +3032,267 @@ function validateMainQuest(
   }
 }
 
+/**
+ * Minimal structural validation of a stored `CampaignEndingNarrativeScript`
+ * — only enough to guarantee a corrupted save can never throw a runtime
+ * exception mid-Presentation, mirroring `validateMainQuestNarrativeScript`
+ * exactly (never excessive semantic validation of the AI-authored prose).
+ */
+function validateCampaignEndingNarrativeScript(value: unknown): void {
+  assertPlainObject(value, 'Endingの顛末データが壊れています')
+  if (
+    typeof value.aftermath !== 'string' ||
+    typeof value.tavernReturn !== 'string' ||
+    typeof value.closing !== 'string'
+  ) {
+    throw new SaveValidationErrorClass(
+      'Endingの顛末テキストが不正です',
+      'corrupted-data',
+    )
+  }
+}
+
+const VALID_ENDING_STATUSES = [
+  'locked',
+  'narrative_pending',
+  'ready',
+  'viewing',
+  'completed',
+]
+
+/**
+ * Phase 9.9 Ending state validation. `ending.status` gates exactly which
+ * fields must (and must not) be present (item 38); any non-`locked` status
+ * requires the Ending's `triggerAttemptId` to reference a real, victorious,
+ * fully-presented Nosferatu Attempt AND `isCampaignVictoryAchieved` to hold
+ * (item 36) — the same Core selector Presentation/UI use, never a
+ * re-derived approximation. Stored `facts`, when present, are re-derived
+ * via the SAME `buildCampaignEndingFacts` the runtime itself uses (never a
+ * second, independently-drifting reimplementation — item 10/37) and must
+ * match byte-for-byte; the AI Narrative is never treated as a Fact source.
+ * `currentDayStatus === 'planning'` can never legitimately coexist with
+ * Victory (item 35) — `advanceCampaignDay` itself refuses to run once
+ * Victory is achieved, so no real save reaches a 'planning' day afterward.
+ *
+ * Exported (unlike every other validator in this file) purely so tests can
+ * reach the non-`locked` branch's causal checks directly: the invariant
+ * above means `validateGameSave`'s own unconditional "save only on a
+ * planning day" gate makes that branch unreachable through the public
+ * entry point for ANY real or tampered save, by construction — there is no
+ * way to reach it except by calling this function directly.
+ */
+function validateEnding(
+  campaign: Record<string, unknown>,
+  currentDayStatus: unknown,
+): void {
+  assertPlainObject(campaign.ending, 'Endingデータが壊れています')
+  const ending = campaign.ending as Record<string, unknown>
+
+  if (
+    typeof ending.status !== 'string' ||
+    !VALID_ENDING_STATUSES.includes(ending.status)
+  ) {
+    throw new SaveValidationErrorClass(
+      'Endingの状態が不正です',
+      'corrupted-data',
+    )
+  }
+  const status = ending.status
+
+  const hasFacts = ending.facts !== undefined
+  const hasNarrative = ending.narrative !== undefined
+  const hasTriggerAttemptId = ending.triggerAttemptId !== undefined
+  const hasTriggeredDay = ending.triggeredDay !== undefined
+  const hasCompletedDay = ending.completedDay !== undefined
+
+  if (status === 'locked') {
+    if (
+      hasFacts ||
+      hasNarrative ||
+      hasTriggerAttemptId ||
+      hasTriggeredDay ||
+      hasCompletedDay
+    ) {
+      throw new SaveValidationErrorClass(
+        'Endingがlockedなのに関連データが存在します',
+        'corrupted-data',
+      )
+    }
+    if (isCampaignVictoryAchieved(campaign as unknown as TavernCampaignState)) {
+      throw new SaveValidationErrorClass(
+        '勝利条件を満たしているのにEndingがlockedのままです',
+        'corrupted-data',
+      )
+    }
+    return
+  }
+
+  if (currentDayStatus === 'planning') {
+    throw new SaveValidationErrorClass(
+      '本日がplanning状態なのにEndingが進行しています',
+      'corrupted-data',
+    )
+  }
+
+  if (status === 'narrative_pending') {
+    if (
+      !hasFacts ||
+      hasNarrative ||
+      !hasTriggerAttemptId ||
+      !hasTriggeredDay ||
+      hasCompletedDay
+    ) {
+      throw new SaveValidationErrorClass(
+        'Endingのデータが演出状態(narrative_pending)と一致しません',
+        'corrupted-data',
+      )
+    }
+  } else if (status === 'ready' || status === 'viewing') {
+    if (
+      !hasFacts ||
+      !hasNarrative ||
+      !hasTriggerAttemptId ||
+      !hasTriggeredDay ||
+      hasCompletedDay
+    ) {
+      throw new SaveValidationErrorClass(
+        `Endingのデータが演出状態(${status})と一致しません`,
+        'corrupted-data',
+      )
+    }
+  } else {
+    if (
+      !hasFacts ||
+      !hasNarrative ||
+      !hasTriggerAttemptId ||
+      !hasTriggeredDay ||
+      !hasCompletedDay
+    ) {
+      throw new SaveValidationErrorClass(
+        '完了済みEndingのデータが不足しています',
+        'corrupted-data',
+      )
+    }
+  }
+
+  if (typeof ending.triggerAttemptId !== 'string') {
+    throw new SaveValidationErrorClass(
+      'Endingの起点となる試行IDが不正です',
+      'corrupted-data',
+    )
+  }
+  const mainQuest = campaign.mainQuest as Record<string, unknown>
+  const attempts = mainQuest.attempts as unknown[]
+  const triggerAttemptRaw = attempts.find(
+    (a) => isPlainObject(a) && a.id === ending.triggerAttemptId,
+  ) as Record<string, unknown> | undefined
+  if (!triggerAttemptRaw) {
+    throw new SaveValidationErrorClass(
+      'Endingの起点となる試行が見つかりません',
+      'corrupted-data',
+    )
+  }
+  if (triggerAttemptRaw.threatId !== 'nosferatu') {
+    throw new SaveValidationErrorClass(
+      'Endingの起点となる試行がNosferatu討伐ではありません',
+      'corrupted-data',
+    )
+  }
+  const triggerResult = isPlainObject(triggerAttemptRaw.result)
+    ? triggerAttemptRaw.result
+    : undefined
+  if (!triggerResult || triggerResult.monsterDefeated !== true) {
+    throw new SaveValidationErrorClass(
+      'Endingの起点となる試行が勝利していません',
+      'corrupted-data',
+    )
+  }
+  if (triggerAttemptRaw.presentationStatus !== 'completed') {
+    throw new SaveValidationErrorClass(
+      'Endingの起点となる試行の演出が完了していません',
+      'corrupted-data',
+    )
+  }
+
+  if (!isCampaignVictoryAchieved(campaign as unknown as TavernCampaignState)) {
+    throw new SaveValidationErrorClass(
+      '勝利条件を満たしていないのにEndingが進行しています',
+      'corrupted-data',
+    )
+  }
+
+  if (
+    typeof ending.triggeredDay !== 'number' ||
+    !Number.isInteger(ending.triggeredDay) ||
+    ending.triggeredDay < 1
+  ) {
+    throw new SaveValidationErrorClass(
+      'EndingのtriggeredDayが不正です',
+      'corrupted-data',
+    )
+  }
+  if (ending.triggeredDay !== triggerAttemptRaw.dayNumber) {
+    throw new SaveValidationErrorClass(
+      'EndingのtriggeredDayが起点となる試行の日付と一致しません',
+      'corrupted-data',
+    )
+  }
+
+  if (hasFacts) {
+    const factsClearDay = isPlainObject(ending.facts)
+      ? ending.facts.clearDay
+      : undefined
+    if (factsClearDay !== ending.triggeredDay) {
+      throw new SaveValidationErrorClass(
+        'Ending FactsのclearDayがtriggeredDayと一致しません',
+        'corrupted-data',
+      )
+    }
+
+    let expectedFacts: unknown
+    try {
+      expectedFacts = buildCampaignEndingFacts(
+        campaign as unknown as TavernCampaignState,
+        triggerAttemptRaw as unknown as MainQuestAttemptRecord,
+      )
+    } catch {
+      throw new SaveValidationErrorClass(
+        'Ending Factsを再構築できません',
+        'corrupted-data',
+      )
+    }
+    if (!deepEqualPlain(expectedFacts, ending.facts)) {
+      throw new SaveValidationErrorClass(
+        'Ending Factsがcanonical dataと一致しません',
+        'corrupted-data',
+      )
+    }
+  }
+
+  if (hasCompletedDay) {
+    if (
+      typeof ending.completedDay !== 'number' ||
+      !Number.isInteger(ending.completedDay) ||
+      ending.completedDay < 1
+    ) {
+      throw new SaveValidationErrorClass(
+        'EndingのcompletedDayが不正です',
+        'corrupted-data',
+      )
+    }
+    if (ending.completedDay < ending.triggeredDay) {
+      throw new SaveValidationErrorClass(
+        'EndingのcompletedDayがtriggeredDayより前です',
+        'corrupted-data',
+      )
+    }
+  }
+
+  if (hasNarrative) {
+    validateCampaignEndingNarrativeScript(ending.narrative)
+  }
+}
+
 interface ValidatedProgressionFields {
   growthXp: number
   totalGrowthXp: number
@@ -4472,6 +4737,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   validateWorldEvents(campaign, campaign.history as unknown[], currentDay)
 
   validateMainQuest(campaign, ledgerById, campaign.dayNumber as number)
+
+  validateEnding(campaign, currentDayStatus)
 
   if (
     !isPlainObject(raw.randomState) ||

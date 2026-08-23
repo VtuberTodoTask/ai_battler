@@ -75,6 +75,10 @@ export interface GameUiActions {
   generateMainQuestNarrative?: (attemptId: string) => Promise<UiActionResult>
   startMainQuestPresentation?: (attemptId: string) => UiActionResult
   completeMainQuestPresentation?: (attemptId: string) => UiActionResult
+  /** Phase 9.9 Ending. */
+  generateEndingNarrative?: () => Promise<UiActionResult>
+  startEndingPresentation?: () => UiActionResult
+  completeEndingPresentation?: () => UiActionResult
   openSettings: () => void
   closeModal: () => void
   switchToLegacy: () => void

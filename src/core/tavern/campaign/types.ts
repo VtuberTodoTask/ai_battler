@@ -26,6 +26,7 @@ import type {
 } from '../../narrative/types.ts'
 import type { TavernFinanceState } from '../../economy/types.ts'
 import type { MainQuestEvent, MainQuestState } from '../../mainQuest/types.ts'
+import type { CampaignEndingState } from '../../ending/types.ts'
 
 export type TavernRank = 1 | 2 | 3 | 4 | 5
 
@@ -359,4 +360,5 @@ export interface TavernCampaignState {
   questChains: QuestChainState[]
   worldEvents: WorldEventState[]
   mainQuest: MainQuestState
+  ending: CampaignEndingState
 }
