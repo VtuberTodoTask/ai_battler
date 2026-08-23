@@ -299,6 +299,12 @@ export function deriveResolveCandidates(
         dayNumber,
         milestone,
       )
+      // `selectBondConversationFocalCharacter` returns `undefined` only
+      // when every member of the Party is deceased — there is no one left
+      // to center a Bond Conversation on, so no candidate is created at
+      // all (PR #60 review item 5/6), not merely one with a missing focal.
+      if (!focalCharacterId) continue
+
       const eventType = BOND_CONVERSATION_EVENT_TYPE[milestone]
 
       addPotential(party, {

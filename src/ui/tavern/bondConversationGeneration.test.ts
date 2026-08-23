@@ -189,6 +189,46 @@ describe('runBondConversationGeneration', () => {
     expect(committedHistory).toHaveLength(1)
   })
 
+  it('rejects a stale AI response once the candidate has been dismissed while the AI call was in flight, without reviving it (PR #60 review item 7/8/9)', async () => {
+    const { campaign, candidateId } =
+      campaignWithPendingBondCandidate('bond-ui-gen-007')
+    const { campaignRef, commitCampaign, committedHistory } =
+      makeCommitHarness(campaign)
+
+    const provider: NarrativeProvider = {
+      id: 'fake-dismissed-mid-flight',
+      async generate() {
+        // Simulate the player dismissing this candidate while the AI call
+        // is pending, before the response resolves.
+        const current = campaignRef.current!
+        commitCampaign({
+          ...current,
+          narrativeCandidates: current.narrativeCandidates.map((c) =>
+            c.id === candidateId ? { ...c, state: 'dismissed' as const } : c,
+          ),
+        })
+        return { text: 'stale text that must never be applied' }
+      },
+    }
+
+    const result = await runBondConversationGeneration({
+      campaignRef,
+      commitCampaign,
+      narrativeProvider: provider,
+      candidateId,
+    })
+
+    expect(result.ok).toBe(false)
+    // Only the dismiss commit landed — the stale response was never applied.
+    expect(committedHistory).toHaveLength(1)
+    const finalCandidate = campaignRef.current!.narrativeCandidates.find(
+      (c) => c.id === candidateId,
+    )
+    expect(finalCandidate?.state).toBe('dismissed')
+    expect(finalCandidate?.activeGenerationId).toBeUndefined()
+    expect(campaignRef.current!.narrativeGenerations).toHaveLength(0)
+  })
+
   it('returns ok:false when no AI provider is connected', async () => {
     const { campaign, candidateId } =
       campaignWithPendingBondCandidate('bond-ui-gen-005')

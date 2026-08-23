@@ -152,6 +152,18 @@ export async function runBondConversationGeneration(
       )
       if (existing) return { ok: true, data: existing.generatedText }
     }
+    // PR #60 review item 7/8: the candidate may have been dismissed while
+    // this AI call was in flight. Only an 'available' candidate may accept
+    // this response — a 'dismissed' one (or any other non-'available'
+    // state reached via a path this function doesn't otherwise recognize)
+    // must reject it as stale rather than reviving it into 'generated'.
+    if (latestCandidate.state !== 'available') {
+      return {
+        ok: false,
+        message:
+          'Bond Conversationの生成対象が変更されたため結果を破棄しました',
+      }
+    }
 
     const next: TavernCampaignState = {
       ...latestCampaign,

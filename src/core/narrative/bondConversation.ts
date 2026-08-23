@@ -96,6 +96,15 @@ export function deriveBondMilestoneCrossings(
  * `campaign.narrativeCandidates`, so this persists for the life of the
  * Campaign — a dropped-then-re-crossed Affinity never refires the same
  * milestone, and a dismissed Conversation is still "occurred" (item 11).
+ *
+ * A milestone counts as occurred whether it was the day's PRIMARY
+ * candidate (`eventType`) or one of that day's SECONDARY triggers
+ * (`context.secondaryTriggers`) — a single large Affinity jump that
+ * crosses several thresholds at once (PR #60 review item 10/11) only ever
+ * surfaces one Conversation candidate (the highest-priority milestone),
+ * but every threshold it crossed is consumed by that jump, not just the
+ * primary one. Without this, a lower milestone folded into that day's
+ * secondaryTriggers could still refire later on its own.
  */
 export function hasBondMilestoneOccurred(
   campaign: TavernCampaignState,
@@ -103,12 +112,16 @@ export function hasBondMilestoneOccurred(
   milestone: BondConversationMilestone,
 ): boolean {
   const eventType = BOND_CONVERSATION_EVENT_TYPE[milestone]
-  return campaign.narrativeCandidates.some(
-    (c) =>
-      c.category === 'characterEvent' &&
-      c.eventType === eventType &&
-      c.partyId === partyId,
-  )
+  return campaign.narrativeCandidates.some((c) => {
+    if (c.category !== 'characterEvent' || c.partyId !== partyId) {
+      return false
+    }
+    if (c.eventType === eventType) return true
+    return (
+      c.context.kind === 'characterEvent' &&
+      c.context.secondaryTriggers.includes(eventType)
+    )
+  })
 }
 
 export type BondConversationEventType =
