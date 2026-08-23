@@ -30,6 +30,11 @@ import {
   getWorldEventDefinition,
 } from '../../../../core/tavern/campaign/worldEvents.ts'
 import { skillLabel } from '../../viewModel/characterLabels.ts'
+import {
+  BOND_CONVERSATION_EVENT_TYPE,
+  BOND_CONVERSATION_UI_LABELS,
+  deriveBondMilestoneCrossings,
+} from '../../../../core/narrative/bondConversation.ts'
 
 export type DayResultsStep = 'important_events' | 'expedition_results'
 
@@ -45,6 +50,7 @@ export interface DayResultEventViewModel {
     | 'casualtyDeparture'
     | 'startedRecovery'
     | 'relationshipChange'
+    | 'bondConversation'
     | 'progression'
     | 'tavernRankUp'
     | 'questChain'
@@ -157,16 +163,29 @@ export function buildSummaryLines(report: ExpeditionReportViewModel): string[] {
   return lines
 }
 
+/**
+ * Finds the Narrative Candidate that corresponds to THIS Gameplay Event —
+ * day-scoped (PR #60 final review item 1), not merely
+ * category/eventType/partyId-scoped. Without `dayNumber`, a Party whose
+ * Affinity drops and later re-crosses the same Bond Conversation Milestone
+ * (which Core correctly refuses to regenerate a candidate for) could have
+ * this helper reach back and reattach an old day's candidate to today's
+ * event, resurfacing a stale Conversation as if it were new. The same risk
+ * applies to any other same-eventType/partyId Character Event candidate
+ * from a different day, so every caller passes the day it is building for.
+ */
 function findCharacterEventCandidate(
   campaign: TavernCampaignState,
   eventType: string,
   partyId: string,
+  dayNumber: number,
 ): NarrativeCandidate | undefined {
   return campaign.narrativeCandidates.find(
     (c) =>
       c.category === 'characterEvent' &&
       c.eventType === eventType &&
-      c.partyId === partyId,
+      c.partyId === partyId &&
+      c.dayNumber === dayNumber,
   )
 }
 
@@ -239,6 +258,7 @@ function buildPartyEvent(
         campaign,
         'partyArrival',
         event.partyId,
+        event.dayNumber,
       )
       return {
         id: `party-event:${event.dayNumber}:arrived:${event.partyId}`,
@@ -255,6 +275,7 @@ function buildPartyEvent(
         campaign,
         'farewell',
         event.partyId,
+        event.dayNumber,
       )
       return {
         id: `party-event:${event.dayNumber}:departed:${event.partyId}`,
@@ -271,6 +292,7 @@ function buildPartyEvent(
         campaign,
         'casualtyDeparture',
         event.partyId,
+        event.dayNumber,
       )
       return {
         id: `party-event:${event.dayNumber}:casualty:${event.partyId}`,
@@ -296,6 +318,7 @@ function buildPartyEvent(
         campaign,
         'recoveryFinished',
         event.partyId,
+        event.dayNumber,
       )
       return {
         id: `party-event:${event.dayNumber}:recovery-finish:${event.partyId}`,
@@ -477,6 +500,7 @@ function buildRelationshipEvent(
       campaign,
       'stayExtended',
       event.partyId,
+      event.dayNumber,
     )
     return {
       id: `relationship-event:${event.dayNumber}:stay:${event.partyId}`,
@@ -488,14 +512,43 @@ function buildRelationshipEvent(
       partyId: event.partyId,
     }
   }
-  if (event.type === 'affinityChanged' && Math.abs(event.delta) >= 10) {
-    return {
-      id: `relationship-event:${event.dayNumber}:affinity:${event.partyId}`,
-      kind: 'relationshipChange',
-      title: 'パーティの士気が大きく変動しました',
-      summary: `${event.partyName}（信頼度 ${event.before} → ${event.after}）`,
-      importance: 'normal',
-      partyId: event.partyId,
+  if (event.type === 'affinityChanged') {
+    // A Bond Conversation Milestone crossing takes priority over the
+    // generic "affinity swung a lot" notice below — it is strictly more
+    // informative, and a matching `NarrativeCandidate` only exists here
+    // when this exact crossing actually produced one today (never a
+    // second time for the same milestone, per `hasBondMilestoneOccurred`;
+    // and never when a higher-priority same-day Character Event, e.g. a
+    // casualtyDeparture, took the primary candidate slot instead).
+    const crossings = deriveBondMilestoneCrossings(event.before, event.after)
+    for (const milestone of crossings) {
+      const narrativeTarget = findCharacterEventCandidate(
+        campaign,
+        BOND_CONVERSATION_EVENT_TYPE[milestone],
+        event.partyId,
+        event.dayNumber,
+      )
+      if (narrativeTarget) {
+        return {
+          id: `relationship-event:${event.dayNumber}:bond:${milestone}:${event.partyId}`,
+          kind: 'bondConversation',
+          title: BOND_CONVERSATION_UI_LABELS[milestone],
+          summary: event.partyName,
+          importance: 'high',
+          narrativeTargetId: narrativeTarget.id,
+          partyId: event.partyId,
+        }
+      }
+    }
+    if (Math.abs(event.delta) >= 10) {
+      return {
+        id: `relationship-event:${event.dayNumber}:affinity:${event.partyId}`,
+        kind: 'relationshipChange',
+        title: 'パーティの士気が大きく変動しました',
+        summary: `${event.partyName}（信頼度 ${event.before} → ${event.after}）`,
+        importance: 'normal',
+        partyId: event.partyId,
+      }
     }
   }
   if (

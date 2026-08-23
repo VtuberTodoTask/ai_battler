@@ -336,4 +336,38 @@ describe('CanvasGame lifecycle', () => {
 
     cg.destroy()
   })
+
+  it('redirects to a given initialSceneId instead of tavern (Phase 9.10 New Game -> Opening)', async () => {
+    const { CanvasGame } = await import('../CanvasGame.ts')
+    const cg = new CanvasGame()
+    const host = document.createElement('div')
+    const campaign = createTavernCampaign('initial-scene-id-opening-001')
+
+    await cg.init(host)
+    expect(cg.sceneManager?.current?.id).toBe('boot')
+
+    cg.setCampaign(campaign, { initialSceneId: 'opening' })
+
+    expect(cg.sceneManager?.current?.id).toBe('opening')
+
+    cg.destroy()
+  })
+
+  it('a later setCampaign without initialSceneId still redirects to tavern as usual (Load Game skips Opening)', async () => {
+    const { CanvasGame } = await import('../CanvasGame.ts')
+    const cg = new CanvasGame()
+    const host = document.createElement('div')
+    const openingCampaign = createTavernCampaign('initial-scene-id-opening-002')
+    const loadedCampaign = createTavernCampaign('initial-scene-id-opening-003')
+
+    await cg.init(host)
+    cg.setCampaign(openingCampaign, { initialSceneId: 'opening' })
+    expect(cg.sceneManager?.current?.id).toBe('opening')
+
+    cg.setCampaign(loadedCampaign)
+
+    expect(cg.sceneManager?.current?.id).toBe('tavern')
+
+    cg.destroy()
+  })
 })

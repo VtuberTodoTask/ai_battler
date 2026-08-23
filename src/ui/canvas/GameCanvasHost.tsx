@@ -76,6 +76,14 @@ export default function GameCanvasHost({
   const [error, setError] = useState<string | null>(null)
   const prevCampaignRef = useRef<TavernCampaignState | null>(null)
   const preserveSceneOnNextSyncRef = useRef(false)
+  /** Set by `newGame`'s action wrapper right before it hands control back —
+   * consumed once by the `campaign`-prop sync effect below, exactly like
+   * `preserveSceneOnNextSyncRef`. Left `undefined` by every other action
+   * (including `loadGame`), so `setCampaign` keeps its existing hardcoded
+   * 'tavern' target for every path except a genuine New Game (item 41) —
+   * Load Game skips Opening entirely by construction, not by a special
+   * case here. */
+  const initialSceneOnNextSyncRef = useRef<string | undefined>(undefined)
 
   const onAdvanceRef = useRef(onAdvanceDay)
   const onResolveRef = useRef(onResolveDay)
@@ -479,7 +487,11 @@ export default function GameCanvasHost({
         try {
           const handler = onNewGameRef.current
           if (!handler) return { ok: false, message: 'newGame not connected' }
-          return handler()
+          const result = handler()
+          if (result.ok) {
+            initialSceneOnNextSyncRef.current = 'opening'
+          }
+          return result
         } catch (e) {
           return {
             ok: false,
@@ -577,7 +589,9 @@ export default function GameCanvasHost({
     if (campaign === prevCampaignRef.current) return
     const preserveCurrentScene = preserveSceneOnNextSyncRef.current
     preserveSceneOnNextSyncRef.current = false
-    cg.setCampaign(campaign, { preserveCurrentScene })
+    const initialSceneId = initialSceneOnNextSyncRef.current
+    initialSceneOnNextSyncRef.current = undefined
+    cg.setCampaign(campaign, { preserveCurrentScene, initialSceneId })
     prevCampaignRef.current = campaign
   }, [campaign])
 

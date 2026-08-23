@@ -32,6 +32,8 @@ export type CharacterNarrativeEventType =
   | 'weakObjectiveSuccess'
   | 'recoveryFinished'
   | 'stayExtended'
+  | 'becameFamiliar'
+  | 'becameTrusted'
   | 'becameRegular'
   | 'becameFavorite'
   | 'farewell'

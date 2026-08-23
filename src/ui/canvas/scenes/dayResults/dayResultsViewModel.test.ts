@@ -6,6 +6,19 @@ import {
 } from '../../../../core/tavern/campaign/campaign.ts'
 import { offerRequestToParty } from '../../../../core/tavern/brokerage.ts'
 import { buildDayResultsSceneViewModel } from './dayResultsViewModel.ts'
+import {
+  deriveResolveCandidates,
+  mergeCandidates,
+} from '../../../../core/narrative/candidates.ts'
+import { BOND_CONVERSATION_UI_LABELS } from '../../../../core/narrative/bondConversation.ts'
+import { deriveTavernRank } from '../../../../core/tavern/campaign/reputation.ts'
+import { buildNarrativePartySnapshot } from '../../../../core/narrative/context.ts'
+import type {
+  CampaignRelationshipEvent,
+  TavernDayRecord,
+} from '../../../../core/tavern/campaign/types.ts'
+import type { CampaignPartyEvent } from '../../../../core/tavern/types.ts'
+import type { NarrativeCandidate } from '../../../../core/narrative/types.ts'
 
 function findAcceptingOffers(
   campaign: ReturnType<typeof createTavernCampaign>,
@@ -273,5 +286,430 @@ describe('buildDayResultsSceneViewModel', () => {
     }
 
     expect(advanced).not.toBeNull()
+  })
+})
+
+describe('Bond Conversation DayResults row (Phase 9.10)', () => {
+  it('surfaces a bondConversation row with the correct label and narrativeTargetId when a Milestone candidate exists for that day', () => {
+    const campaign = createTavernCampaign('vm-bond-001')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 59
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 59,
+      delta: 8,
+      after: 67,
+    }
+    const derived = deriveResolveCandidates(
+      {
+        ...campaign,
+        currentDay: { ...campaign.currentDay, status: 'resolved', results: [] },
+      },
+      [event],
+    )
+    const bondCandidate = derived.find(
+      (c) => c.eventType === 'becameRegular' && c.partyId === party.id,
+    )!
+
+    const rank = deriveTavernRank(campaign.reputation.peakScore)
+    const dayRecord: TavernDayRecord = {
+      dayNumber: campaign.dayNumber,
+      daySeed: campaign.currentDay.seed,
+      reputationSummary: {
+        beforeScore: campaign.reputation.score,
+        delta: 0,
+        afterScore: campaign.reputation.score,
+        beforeRank: rank,
+        afterRank: rank,
+        promoted: false,
+      },
+      results: [],
+      partyEvents: [],
+      progressionEvents: [],
+      relationshipEvents: [event],
+      questChainEvents: [],
+      worldEventEvents: [],
+      mainQuestEvents: [],
+    }
+
+    const campaignWithHistory = {
+      ...campaign,
+      narrativeCandidates: mergeCandidates(
+        campaign.narrativeCandidates,
+        derived,
+      ),
+      history: [...campaign.history, dayRecord],
+    }
+
+    const vm = buildDayResultsSceneViewModel(
+      {
+        campaign: campaignWithHistory,
+        resolvedDay: dayRecord.dayNumber,
+        nextDay: campaignWithHistory.dayNumber,
+      },
+      [],
+    )
+
+    const bondRow = vm.importantEvents.find(
+      (e) => e.kind === 'bondConversation',
+    )
+    expect(bondRow).toBeDefined()
+    expect(bondRow?.title).toBe(BOND_CONVERSATION_UI_LABELS.regular)
+    expect(bondRow?.narrativeTargetId).toBe(bondCandidate.id)
+    expect(bondRow?.partyId).toBe(party.id)
+
+    // The generic "affinity swung a lot" row must not ALSO appear for the
+    // same event once the Bond Conversation row has claimed it.
+    const relationshipChangeRow = vm.importantEvents.find(
+      (e) => e.kind === 'relationshipChange' && e.partyId === party.id,
+    )
+    expect(relationshipChangeRow).toBeUndefined()
+  })
+
+  it('does not surface a bondConversation row when no Milestone is crossed', () => {
+    const campaign = createTavernCampaign('vm-bond-002')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 61
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 61,
+      delta: 12,
+      after: 73,
+    }
+
+    const rank = deriveTavernRank(campaign.reputation.peakScore)
+    const dayRecord: TavernDayRecord = {
+      dayNumber: campaign.dayNumber,
+      daySeed: campaign.currentDay.seed,
+      reputationSummary: {
+        beforeScore: campaign.reputation.score,
+        delta: 0,
+        afterScore: campaign.reputation.score,
+        beforeRank: rank,
+        afterRank: rank,
+        promoted: false,
+      },
+      results: [],
+      partyEvents: [],
+      progressionEvents: [],
+      relationshipEvents: [event],
+      questChainEvents: [],
+      worldEventEvents: [],
+      mainQuestEvents: [],
+    }
+
+    const campaignWithHistory = {
+      ...campaign,
+      history: [...campaign.history, dayRecord],
+    }
+
+    const vm = buildDayResultsSceneViewModel(
+      {
+        campaign: campaignWithHistory,
+        resolvedDay: dayRecord.dayNumber,
+        nextDay: campaignWithHistory.dayNumber,
+      },
+      [],
+    )
+
+    expect(
+      vm.importantEvents.find((e) => e.kind === 'bondConversation'),
+    ).toBeUndefined()
+    // No Milestone crossed, but the delta is still >= 10, so the ordinary
+    // relationshipChange notice must still appear.
+    const relationshipChangeRow = vm.importantEvents.find(
+      (e) => e.kind === 'relationshipChange' && e.partyId === party.id,
+    )
+    expect(relationshipChangeRow).toBeDefined()
+  })
+})
+
+describe('DayResults Character Event candidate day-scoping (PR #60 final review)', () => {
+  function makeDayRecord(
+    campaign: ReturnType<typeof createTavernCampaign>,
+    dayNumber: number,
+    overrides: Partial<TavernDayRecord> = {},
+  ): TavernDayRecord {
+    const rank = deriveTavernRank(campaign.reputation.peakScore)
+    return {
+      dayNumber,
+      daySeed: campaign.currentDay.seed,
+      reputationSummary: {
+        beforeScore: campaign.reputation.score,
+        delta: 0,
+        afterScore: campaign.reputation.score,
+        beforeRank: rank,
+        afterRank: rank,
+        promoted: false,
+      },
+      results: [],
+      partyEvents: [],
+      progressionEvents: [],
+      relationshipEvents: [],
+      questChainEvents: [],
+      worldEventEvents: [],
+      mainQuestEvents: [],
+      ...overrides,
+    }
+  }
+
+  it('Regression A: does not resurface an old day’s Bond Conversation candidate when the same milestone is re-crossed on a later day', () => {
+    const campaign = createTavernCampaign('vm-bond-day-scope-a')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 59
+
+    const day10Event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: 10,
+      outcome: 'success',
+      before: 59,
+      delta: 6,
+      after: 65,
+    }
+    const day10Derived = deriveResolveCandidates(
+      { ...campaign, dayNumber: 10 },
+      [day10Event],
+    )
+    const day10Candidate = day10Derived.find(
+      (c) => c.eventType === 'becameRegular' && c.partyId === party.id,
+    )!
+    expect(day10Candidate).toBeDefined()
+
+    const campaignAfterDay10 = {
+      ...campaign,
+      dayNumber: 20,
+      narrativeCandidates: mergeCandidates(
+        campaign.narrativeCandidates,
+        day10Derived,
+      ),
+    }
+
+    const day20Event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: 20,
+      outcome: 'success',
+      before: 55,
+      delta: 10,
+      after: 65,
+    }
+    // Core sanity check: no new candidate for the re-crossed milestone.
+    const day20Derived = deriveResolveCandidates(campaignAfterDay10, [
+      day20Event,
+    ])
+    expect(
+      day20Derived.filter(
+        (c) => c.eventType === 'becameRegular' && c.partyId === party.id,
+      ),
+    ).toHaveLength(0)
+
+    const campaignWithHistory = {
+      ...campaignAfterDay10,
+      history: [
+        ...campaign.history,
+        makeDayRecord(campaign, 20, { relationshipEvents: [day20Event] }),
+      ],
+    }
+
+    const vm = buildDayResultsSceneViewModel(
+      { campaign: campaignWithHistory, resolvedDay: 20, nextDay: 21 },
+      [],
+    )
+
+    expect(
+      vm.importantEvents.find((e) => e.kind === 'bondConversation'),
+    ).toBeUndefined()
+    // The stale Day 10 candidate id must never be reused as today's target.
+    expect(
+      vm.importantEvents.some((e) => e.narrativeTargetId === day10Candidate.id),
+    ).toBe(false)
+  })
+
+  it('Regression B: a fresh first-time Bond crossing still surfaces, with narrativeTargetId pointing at that same day’s own candidate', () => {
+    const campaign = createTavernCampaign('vm-bond-day-scope-b')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 59
+
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: 10,
+      outcome: 'success',
+      before: 59,
+      delta: 6,
+      after: 65,
+    }
+    const derived = deriveResolveCandidates({ ...campaign, dayNumber: 10 }, [
+      event,
+    ])
+    const candidate = derived.find(
+      (c) => c.eventType === 'becameRegular' && c.partyId === party.id,
+    )!
+    expect(candidate).toBeDefined()
+
+    const campaignWithHistory = {
+      ...campaign,
+      dayNumber: 11,
+      narrativeCandidates: mergeCandidates(
+        campaign.narrativeCandidates,
+        derived,
+      ),
+      history: [
+        ...campaign.history,
+        makeDayRecord(campaign, 10, { relationshipEvents: [event] }),
+      ],
+    }
+
+    const vm = buildDayResultsSceneViewModel(
+      { campaign: campaignWithHistory, resolvedDay: 10, nextDay: 11 },
+      [],
+    )
+
+    const bondRow = vm.importantEvents.find(
+      (e) => e.kind === 'bondConversation',
+    )
+    expect(bondRow).toBeDefined()
+    expect(bondRow?.title).toBe(BOND_CONVERSATION_UI_LABELS.regular)
+    expect(bondRow?.narrativeTargetId).toBe(candidate.id)
+  })
+
+  it('Regression C: milestones consumed as secondaryTriggers by a multi-threshold jump never resurface on a later re-cross', () => {
+    const campaign = createTavernCampaign('vm-bond-day-scope-c')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 10
+
+    const jumpEvent: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: 10,
+      outcome: 'success',
+      before: 10,
+      delta: 75,
+      after: 85,
+    }
+    const jumpDerived = deriveResolveCandidates(
+      { ...campaign, dayNumber: 10 },
+      [jumpEvent],
+    )
+    const favoriteCandidate = jumpDerived.find(
+      (c) => c.eventType === 'becameFavorite' && c.partyId === party.id,
+    )!
+    expect(favoriteCandidate).toBeDefined()
+
+    const campaignAfterDay10 = {
+      ...campaign,
+      dayNumber: 20,
+      narrativeCandidates: mergeCandidates(
+        campaign.narrativeCandidates,
+        jumpDerived,
+      ),
+    }
+
+    const day20Event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: 20,
+      outcome: 'success',
+      before: 55,
+      delta: 10,
+      after: 65,
+    }
+    expect(
+      deriveResolveCandidates(campaignAfterDay10, [day20Event]).filter(
+        (c) => c.eventType === 'becameRegular' && c.partyId === party.id,
+      ),
+    ).toHaveLength(0)
+
+    const campaignWithHistory = {
+      ...campaignAfterDay10,
+      history: [
+        ...campaign.history,
+        makeDayRecord(campaign, 20, { relationshipEvents: [day20Event] }),
+      ],
+    }
+
+    const vm = buildDayResultsSceneViewModel(
+      { campaign: campaignWithHistory, resolvedDay: 20, nextDay: 21 },
+      [],
+    )
+
+    expect(
+      vm.importantEvents.find((e) => e.kind === 'bondConversation'),
+    ).toBeUndefined()
+    expect(
+      vm.importantEvents.some(
+        (e) => e.narrativeTargetId === favoriteCandidate.id,
+      ),
+    ).toBe(false)
+  })
+
+  it('Regression D: a partyArrival candidate from one day is not attached to a different day’s arrival event for the same Party', () => {
+    const campaign = createTavernCampaign('vm-bond-day-scope-d')
+    const party = campaign.parties[0]
+
+    const day5ArrivalCandidate: NarrativeCandidate = {
+      id: `narrative:v1:5:characterEvent:partyArrival:${party.id}`,
+      version: 1,
+      category: 'characterEvent',
+      eventType: 'partyArrival',
+      dayNumber: 5,
+      partyId: party.id,
+      partyName: party.party.name,
+      priority: 10,
+      title: 'day5 arrival',
+      context: {
+        kind: 'characterEvent',
+        eventType: 'partyArrival',
+        secondaryTriggers: [],
+        party: buildNarrativePartySnapshot(party),
+        eventFacts: {},
+        recentHighlights: [],
+      },
+      state: 'available',
+    }
+
+    const day15ArrivalEvent: CampaignPartyEvent = {
+      type: 'arrived',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: 15,
+    }
+
+    const campaignWithHistory = {
+      ...campaign,
+      narrativeCandidates: [
+        ...campaign.narrativeCandidates,
+        day5ArrivalCandidate,
+      ],
+      history: [
+        ...campaign.history,
+        makeDayRecord(campaign, 15, { partyEvents: [day15ArrivalEvent] }),
+      ],
+    }
+
+    const vm = buildDayResultsSceneViewModel(
+      { campaign: campaignWithHistory, resolvedDay: 15, nextDay: 16 },
+      [],
+    )
+
+    const arrivalRow = vm.importantEvents.find(
+      (e) => e.kind === 'partyArrival' && e.partyId === party.id,
+    )
+    expect(arrivalRow).toBeDefined()
+    expect(arrivalRow?.narrativeTargetId).toBeUndefined()
   })
 })

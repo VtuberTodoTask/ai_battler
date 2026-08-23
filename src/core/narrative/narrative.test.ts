@@ -247,6 +247,262 @@ describe('Narrative candidate derivation', () => {
     expect(regular).toBeUndefined()
   })
 
+  it('creates becameFamiliar when affinity crosses 19 to 20', () => {
+    const campaign = createTavernCampaign('narrative-familiar-001')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 19
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 19,
+      delta: 5,
+      after: 24,
+    }
+    const candidates = deriveResolveCandidates(withResults(campaign, []), [
+      event,
+    ])
+    const familiar = candidates.find(
+      (c) => c.eventType === 'becameFamiliar' && c.partyId === party.id,
+    )
+    expect(familiar).toBeDefined()
+    expect(familiar!.context.kind).toBe('characterEvent')
+    const ctx = familiar!.context as CharacterEventNarrativeContext
+    expect(typeof ctx.eventFacts.focalCharacterId).toBe('string')
+    expect(
+      party.party.members.some((m) => m.id === ctx.eventFacts.focalCharacterId),
+    ).toBe(true)
+  })
+
+  it('creates becameTrusted when affinity crosses 39 to 40', () => {
+    const campaign = createTavernCampaign('narrative-trusted-001')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 39
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 39,
+      delta: 5,
+      after: 44,
+    }
+    const candidates = deriveResolveCandidates(withResults(campaign, []), [
+      event,
+    ])
+    const trusted = candidates.find(
+      (c) => c.eventType === 'becameTrusted' && c.partyId === party.id,
+    )
+    expect(trusted).toBeDefined()
+  })
+
+  it('does not create a Bond Conversation candidate when no threshold is crossed', () => {
+    const campaign = createTavernCampaign('narrative-bond-nocross-001')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 61
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 61,
+      delta: 3,
+      after: 64,
+    }
+    const candidates = deriveResolveCandidates(withResults(campaign, []), [
+      event,
+    ])
+    const bondCandidates = candidates.filter(
+      (c) =>
+        c.partyId === party.id &&
+        (c.eventType === 'becameFamiliar' ||
+          c.eventType === 'becameTrusted' ||
+          c.eventType === 'becameRegular' ||
+          c.eventType === 'becameFavorite'),
+    )
+    expect(bondCandidates).toHaveLength(0)
+  })
+
+  it('does not refire the same Bond Conversation milestone after Affinity drops and re-crosses the threshold (59->65 fires, 55->63 does not refire)', () => {
+    const campaign = createTavernCampaign('narrative-regular-dedup-001')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 59
+    const firstEvent: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 59,
+      delta: 6,
+      after: 65,
+    }
+    const firstCandidates = deriveResolveCandidates(withResults(campaign, []), [
+      firstEvent,
+    ])
+    const firstRegular = firstCandidates.find(
+      (c) => c.eventType === 'becameRegular' && c.partyId === party.id,
+    )
+    expect(firstRegular).toBeDefined()
+
+    // Persist Day 1's derived candidates into the Campaign exactly like the
+    // real day-resolution flow does via `mergeCandidates`, so
+    // `hasBondMilestoneOccurred` sees this milestone as already-fired on
+    // the next call — `campaign.narrativeCandidates` is never pruned, so
+    // this persists for the life of the Campaign (item 10/11).
+    const campaignAfterDay1 = {
+      ...campaign,
+      narrativeCandidates: mergeCandidates(
+        campaign.narrativeCandidates,
+        firstCandidates,
+      ),
+    }
+
+    const secondEvent: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaignAfterDay1.dayNumber,
+      outcome: 'success',
+      before: 55,
+      delta: 8,
+      after: 63,
+    }
+    const secondCandidates = deriveResolveCandidates(
+      withResults(campaignAfterDay1, []),
+      [secondEvent],
+    )
+    const secondRegular = secondCandidates.find(
+      (c) => c.eventType === 'becameRegular' && c.partyId === party.id,
+    )
+    expect(secondRegular).toBeUndefined()
+  })
+
+  it('produces no Bond Conversation candidate at all when every Party member is deceased, even across a multi-threshold jump', () => {
+    const campaign = createTavernCampaign('narrative-bond-alldead-001')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 10
+    party.party.members = party.party.members.map((m) => ({
+      ...m,
+      currentHp: 0,
+    }))
+    const event: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 10,
+      delta: 75,
+      after: 85,
+    }
+    const candidates = deriveResolveCandidates(withResults(campaign, []), [
+      event,
+    ])
+    const bondCandidates = candidates.filter(
+      (c) =>
+        c.partyId === party.id &&
+        (c.eventType === 'becameFamiliar' ||
+          c.eventType === 'becameTrusted' ||
+          c.eventType === 'becameRegular' ||
+          c.eventType === 'becameFavorite'),
+    )
+    expect(bondCandidates).toHaveLength(0)
+  })
+
+  it('a single large jump (10->85) produces exactly one Bond Conversation candidate (favorite primary, the rest as secondaryTriggers), and none of the consumed milestones ever refire', () => {
+    const campaign = createTavernCampaign('narrative-bond-multi-001')
+    const party = campaign.parties[0]
+    party.relationship.affinity = 10
+    const jumpEvent: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaign.dayNumber,
+      outcome: 'success',
+      before: 10,
+      delta: 75,
+      after: 85,
+    }
+    const derived = deriveResolveCandidates(withResults(campaign, []), [
+      jumpEvent,
+    ])
+    const bondCandidates = derived.filter(
+      (c) =>
+        c.partyId === party.id &&
+        (c.eventType === 'becameFamiliar' ||
+          c.eventType === 'becameTrusted' ||
+          c.eventType === 'becameRegular' ||
+          c.eventType === 'becameFavorite'),
+    )
+    expect(bondCandidates).toHaveLength(1)
+    expect(bondCandidates[0].eventType).toBe('becameFavorite')
+    const ctx = bondCandidates[0].context as CharacterEventNarrativeContext
+    expect(ctx.secondaryTriggers).toContain('becameRegular')
+    expect(ctx.secondaryTriggers).toContain('becameTrusted')
+    expect(ctx.secondaryTriggers).toContain('becameFamiliar')
+
+    const campaignAfterJump = {
+      ...campaign,
+      narrativeCandidates: mergeCandidates(
+        campaign.narrativeCandidates,
+        derived,
+      ),
+    }
+
+    // A drop never crosses anything.
+    const dropEvent: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: campaignAfterJump.dayNumber,
+      outcome: 'success',
+      before: 85,
+      delta: -80,
+      after: 5,
+    }
+    const afterDrop = {
+      ...campaignAfterJump,
+      narrativeCandidates: mergeCandidates(
+        campaignAfterJump.narrativeCandidates,
+        deriveResolveCandidates(withResults(campaignAfterJump, []), [
+          dropEvent,
+        ]),
+      ),
+    }
+
+    // Re-rising back through familiar/trusted/regular/favorite must not
+    // refire ANY of them — all four were already consumed by the first
+    // jump, whether as the primary candidate or a secondary trigger.
+    const reRiseEvent: CampaignRelationshipEvent = {
+      type: 'affinityChanged',
+      partyId: party.id,
+      partyName: party.party.name,
+      dayNumber: afterDrop.dayNumber,
+      outcome: 'success',
+      before: 5,
+      delta: 80,
+      after: 85,
+    }
+    const reRiseCandidates = deriveResolveCandidates(
+      withResults(afterDrop, []),
+      [reRiseEvent],
+    )
+    const reRiseBondCandidates = reRiseCandidates.filter(
+      (c) =>
+        c.partyId === party.id &&
+        (c.eventType === 'becameFamiliar' ||
+          c.eventType === 'becameTrusted' ||
+          c.eventType === 'becameRegular' ||
+          c.eventType === 'becameFavorite'),
+    )
+    expect(reRiseBondCandidates).toHaveLength(0)
+  })
+
   it('selects highest priority character event and stores secondary triggers', () => {
     const campaign = createTavernCampaign('narrative-priority-001')
     const party = campaign.parties[0]

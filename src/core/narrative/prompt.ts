@@ -613,6 +613,21 @@ MINOR EVENT NARRATIVE RULES:
 - 全員を登場させる必要はない。Speaker/Backgroundに指定されたキャラクターのみを自然に配置する
 - 定型句（「静かな気配」「静かな余韾」「顔を寄せる」「酒場の一角」等）を繰り返さない
 - 同じイベント種別でも、今回のFraming/Opening/Focalを活かして「別の瞬間」を切り取る`,
+    // Phase 9.10: these two are defensive fallbacks only — the four
+    // Bond Conversation milestones (`becameFamiliar`/`becameTrusted`/
+    // `becameRegular`/`becameFavorite`) are always intercepted before
+    // reaching this generic characterEvent path and routed to the
+    // dedicated `bondConversationPrompt.ts` instead (item 27). This
+    // `Record<CharacterNarrativeEventType, string>` must still be
+    // exhaustive for the type to compile.
+    becameFamiliar: `becameFamiliar:
+- Partyが酒場に少し馴染んできたと感じられる、ごく軽い場面
+- まだ深い信頼や込み入った話にはしない
+- 店主を家族同然に思っていた等は禁止`,
+    becameTrusted: `becameTrusted:
+- Partyが店主への信頼を少し深めたと感じられる場面
+- まだ「贔屓」ほどの特別な親密さは描かない
+- 店主側にも同程度の感情があるとは推測しない`,
     becameRegular: `becameRegular:
 - 酒場に馴染み、常連になったと感じられる場面
 - 「いつもの席」程度の一般的描写は可
