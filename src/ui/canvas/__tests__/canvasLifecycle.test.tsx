@@ -94,6 +94,99 @@ describe('GameCanvasHost lifecycle', () => {
     cleanup()
   })
 
+  it('routes the campaign sync following a successful New Game straight to the Opening SoundNovel, with no intermediate Scene (Phase 9.10 PR #60 "Opening Flow & Canonical Script")', async () => {
+    const campaign = createTavernCampaign('lifecycle-newgame-001')
+    const nextCampaign = createTavernCampaign('lifecycle-newgame-002')
+
+    const { rerender } = render(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+        onNewGame={() => ({ ok: true })}
+      />,
+    )
+
+    await waitFor(() => expect(latestActions).not.toBeNull())
+    const result = latestActions!.newGame?.()
+    expect(result?.ok).toBe(true)
+
+    rerender(
+      <GameCanvasHost
+        campaign={nextCampaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+        onNewGame={() => ({ ok: true })}
+      />,
+    )
+
+    await waitFor(() => expect(mockSetCampaign).toHaveBeenCalled())
+
+    const [calledCampaign, options] = mockSetCampaign.mock.calls.at(-1) as [
+      TavernCampaignState,
+      {
+        preserveCurrentScene: boolean
+        initialScene?: { sceneId: string; input?: { source?: string } }
+      },
+    ]
+    expect(calledCampaign).toBe(nextCampaign)
+    expect(options.preserveCurrentScene).toBe(false)
+    expect(options.initialScene?.sceneId).toBe('soundNovel')
+    expect(options.initialScene?.input?.source).toBe('opening')
+
+    cleanup()
+  })
+
+  it('does not route Load Game through the Opening SoundNovel — only a real New Game does', async () => {
+    const campaign = createTavernCampaign('lifecycle-loadgame-001')
+    const loadedCampaign = createTavernCampaign('lifecycle-loadgame-002')
+
+    const { rerender } = render(
+      <GameCanvasHost
+        campaign={campaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+        onLoadGame={() => Promise.resolve({ ok: true })}
+      />,
+    )
+
+    await waitFor(() => expect(latestActions).not.toBeNull())
+    await latestActions!.loadGame?.('slot-1')
+
+    rerender(
+      <GameCanvasHost
+        campaign={loadedCampaign}
+        onAdvanceDay={() => ({ ok: true })}
+        onResolveDay={() => ({ ok: true })}
+        onOfferRequest={() => ({ ok: true })}
+        onPurchaseUpgrade={() => ({ ok: true })}
+        onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
+        onSwitchToLegacy={() => {}}
+        onLoadGame={() => Promise.resolve({ ok: true })}
+      />,
+    )
+
+    await waitFor(() =>
+      expect(mockSetCampaign).toHaveBeenLastCalledWith(loadedCampaign, {
+        preserveCurrentScene: false,
+      }),
+    )
+
+    cleanup()
+  })
+
   it('requests preserveCurrentScene on the campaign sync following a successful upgrade purchase (Phase 9.3.1)', async () => {
     const campaign = createTavernCampaign('lifecycle-purchase-001')
     const nextCampaign = createTavernCampaign('lifecycle-purchase-002')

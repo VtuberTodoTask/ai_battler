@@ -337,32 +337,46 @@ describe('CanvasGame lifecycle', () => {
     cg.destroy()
   })
 
-  it('redirects to a given initialSceneId instead of tavern (Phase 9.10 New Game -> Opening)', async () => {
+  it('redirects to a given initialScene (with input) instead of tavern (Phase 9.10 New Game -> Opening SoundNovel)', async () => {
     const { CanvasGame } = await import('../CanvasGame.ts')
+    const { createOpeningSoundNovelInput } =
+      await import('../scenes/opening/createOpeningSoundNovelInput.ts')
     const cg = new CanvasGame()
     const host = document.createElement('div')
-    const campaign = createTavernCampaign('initial-scene-id-opening-001')
+    const campaign = createTavernCampaign('initial-scene-opening-001')
 
     await cg.init(host)
     expect(cg.sceneManager?.current?.id).toBe('boot')
 
-    cg.setCampaign(campaign, { initialSceneId: 'opening' })
+    cg.setCampaign(campaign, {
+      initialScene: {
+        sceneId: 'soundNovel',
+        input: createOpeningSoundNovelInput(),
+      },
+    })
 
-    expect(cg.sceneManager?.current?.id).toBe('opening')
+    expect(cg.sceneManager?.current?.id).toBe('soundNovel')
 
     cg.destroy()
   })
 
-  it('a later setCampaign without initialSceneId still redirects to tavern as usual (Load Game skips Opening)', async () => {
+  it('a later setCampaign without initialScene still redirects to tavern as usual (Load Game skips Opening)', async () => {
     const { CanvasGame } = await import('../CanvasGame.ts')
+    const { createOpeningSoundNovelInput } =
+      await import('../scenes/opening/createOpeningSoundNovelInput.ts')
     const cg = new CanvasGame()
     const host = document.createElement('div')
-    const openingCampaign = createTavernCampaign('initial-scene-id-opening-002')
-    const loadedCampaign = createTavernCampaign('initial-scene-id-opening-003')
+    const openingCampaign = createTavernCampaign('initial-scene-opening-002')
+    const loadedCampaign = createTavernCampaign('initial-scene-opening-003')
 
     await cg.init(host)
-    cg.setCampaign(openingCampaign, { initialSceneId: 'opening' })
-    expect(cg.sceneManager?.current?.id).toBe('opening')
+    cg.setCampaign(openingCampaign, {
+      initialScene: {
+        sceneId: 'soundNovel',
+        input: createOpeningSoundNovelInput(),
+      },
+    })
+    expect(cg.sceneManager?.current?.id).toBe('soundNovel')
 
     cg.setCampaign(loadedCampaign)
 

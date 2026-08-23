@@ -22,7 +22,6 @@ import { WorldEventLogScene } from './scenes/worldEventLog/WorldEventLogScene.ts
 import { MainQuestScene } from './scenes/mainQuest/MainQuestScene.ts'
 import { MainQuestBattleScene } from './scenes/mainQuest/MainQuestBattleScene.ts'
 import { EndingScene } from './scenes/ending/EndingScene.ts'
-import { OpeningScene } from './scenes/opening/OpeningScene.ts'
 import { GameSceneManager } from './scenes/GameSceneManager.ts'
 import {
   DEFAULT_GAME_UI_STATE,
@@ -138,7 +137,6 @@ export class CanvasGame {
     this._sceneManager.register(new MainQuestScene())
     this._sceneManager.register(new MainQuestBattleScene())
     this._sceneManager.register(new EndingScene())
-    this._sceneManager.register(new OpeningScene())
 
     app.ticker.add(this.handleTick)
 
@@ -183,21 +181,25 @@ export class CanvasGame {
 
   setCampaign(
     campaign: TavernCampaignState,
-    options?: { preserveCurrentScene?: boolean; initialSceneId?: string },
+    options?: {
+      preserveCurrentScene?: boolean
+      /** New Game -> Opening SoundNovel exists solely for this (Phase
+       * 9.10 "Opening Flow & Canonical Script" review): when unset this
+       * resolves to the same hardcoded 'tavern' target as before, so Load
+       * Game and every other `setCampaign` caller keep their exact
+       * existing behavior. */
+      initialScene?: { sceneId: string; input?: unknown }
+    },
   ): void {
     this._currentCampaign = campaign
     const currentId = this._sceneManager?.current?.id
-    // `initialSceneId` exists solely for New Game -> Opening (item 41):
-    // when unset this resolves to the same hardcoded 'tavern' target as
-    // before, so Load Game and every other `setCampaign` caller keep their
-    // exact existing behavior.
-    const targetSceneId = options?.initialSceneId ?? 'tavern'
+    const targetSceneId = options?.initialScene?.sceneId ?? 'tavern'
     if (
       currentId &&
       currentId !== targetSceneId &&
       !options?.preserveCurrentScene
     ) {
-      this._sceneManager?.show(targetSceneId)
+      this._sceneManager?.show(targetSceneId, options?.initialScene?.input)
     }
     const current = this._sceneManager?.current
     current?.setCampaign?.(campaign, { ...this._uiState })
