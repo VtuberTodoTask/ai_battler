@@ -5,6 +5,7 @@ import { DEFAULT_GAME_THEME } from '../theme/gameTheme.ts'
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '../GameViewport.ts'
 import {
   padBounds,
+  subtractRects,
   surroundingRects,
   TUTORIAL_HIGHLIGHT_PADDING,
   TutorialOverlay,
@@ -94,13 +95,17 @@ beforeEach(() => {
 function baseSnapshot(
   overrides: Partial<TutorialPresentationSnapshot> = {},
 ): TutorialPresentationSnapshot {
+  const target = overrides.target ?? 'none'
+  const highlightTarget = overrides.highlightTarget ?? 'none'
   return {
     visible: true,
     speaker: '妖精',
     text: 'テスト',
     showNextButton: true,
-    target: 'none',
-    highlightTarget: 'none',
+    target,
+    targets: target === 'none' ? [] : [target],
+    highlightTarget,
+    highlightTargets: highlightTarget === 'none' ? [] : [highlightTarget],
     ...overrides,
   }
 }
@@ -153,6 +158,68 @@ describe('surroundingRects (pure geometry, item 50)', () => {
   })
 })
 
+describe('subtractRects (pure geometry, Phase 10.2 Multi-target item 13/15/73)', () => {
+  const VIEWPORT = { x: 0, y: 0, width: VIRTUAL_WIDTH, height: VIRTUAL_HEIGHT }
+  const HOLE_A = { x: 100, y: 100, width: 100, height: 80 }
+  const HOLE_B = { x: 800, y: 500, width: 120, height: 90 }
+
+  it('is equivalent to surroundingRects for a single hole', () => {
+    expect(subtractRects(VIEWPORT, [HOLE_A])).toEqual(surroundingRects(HOLE_A))
+  })
+
+  it('with two disjoint holes, never produces a rect overlapping either hole', () => {
+    const rects = subtractRects(VIEWPORT, [HOLE_A, HOLE_B])
+    const overlaps = (
+      r: { x: number; y: number; width: number; height: number },
+      hole: { x: number; y: number; width: number; height: number },
+    ) =>
+      r.x < hole.x + hole.width &&
+      r.x + r.width > hole.x &&
+      r.y < hole.y + hole.height &&
+      r.y + r.height > hole.y
+
+    for (const r of rects) {
+      expect(overlaps(r, HOLE_A)).toBe(false)
+      expect(overlaps(r, HOLE_B)).toBe(false)
+    }
+  })
+
+  it('together with both holes, the remaining rects cover the full viewport area (never a merged bounding box)', () => {
+    const rects = subtractRects(VIEWPORT, [HOLE_A, HOLE_B])
+    const totalArea = rects.reduce((sum, r) => sum + r.width * r.height, 0)
+    const holesArea =
+      HOLE_A.width * HOLE_A.height + HOLE_B.width * HOLE_B.height
+    expect(totalArea + holesArea).toBe(VIRTUAL_WIDTH * VIRTUAL_HEIGHT)
+  })
+
+  it('is order-independent — subtracting the same holes in either order yields the same total remaining area', () => {
+    const forward = subtractRects(VIEWPORT, [HOLE_A, HOLE_B])
+    const backward = subtractRects(VIEWPORT, [HOLE_B, HOLE_A])
+    const area = (rects: readonly { width: number; height: number }[]) =>
+      rects.reduce((sum, r) => sum + r.width * r.height, 0)
+    expect(area(forward)).toBe(area(backward))
+  })
+
+  it('handles overlapping holes without double-subtracting their intersection', () => {
+    const overlapping = { x: 150, y: 120, width: 100, height: 80 }
+    const rects = subtractRects(VIEWPORT, [HOLE_A, overlapping])
+    const totalArea = rects.reduce((sum, r) => sum + r.width * r.height, 0)
+    // The union's area is less than the sum of the two holes' areas, since
+    // they overlap — computed independently of `subtractRects` itself to
+    // avoid a tautological assertion.
+    const unionArea =
+      HOLE_A.width * HOLE_A.height +
+      overlapping.width * overlapping.height -
+      // intersection: x in [150,200], y in [120,180] -> 50 x 60
+      50 * 60
+    expect(totalArea + unionArea).toBe(VIRTUAL_WIDTH * VIRTUAL_HEIGHT)
+  })
+
+  it('returns the full viewport unchanged when there are no holes', () => {
+    expect(subtractRects(VIEWPORT, [])).toEqual([VIEWPORT])
+  })
+})
+
 describe('padBounds (pure geometry, item 13)', () => {
   it('expands every side by TUTORIAL_HIGHLIGHT_PADDING', () => {
     const padded = padBounds(MID_SCREEN_BOUNDS)
@@ -167,10 +234,6 @@ describe('padBounds (pure geometry, item 13)', () => {
   it('clamps to the virtual screen edges instead of going negative/oversized', () => {
     const padded = padBounds({ x: 0, y: 0, width: VIRTUAL_WIDTH, height: 50 })
     expect(padded).toEqual({ x: 0, y: 0, width: VIRTUAL_WIDTH, height: 58 })
-  })
-
-  it('passes null straight through', () => {
-    expect(padBounds(null)).toBeNull()
   })
 })
 
@@ -190,8 +253,8 @@ describe('TutorialOverlay Spotlight rendering (item 50)', () => {
 
     overlay.update(
       baseSnapshot({ target: 'none', highlightTarget: 'none' }),
-      null,
-      null,
+      [],
+      [],
     )
 
     const dim = getPrivate<Graphics>(overlay, '_dim')
@@ -216,8 +279,8 @@ describe('TutorialOverlay Spotlight rendering (item 50)', () => {
 
     overlay.update(
       baseSnapshot({ target: 'none', highlightTarget: 'prediction_rate' }),
-      null,
-      MID_SCREEN_BOUNDS,
+      [],
+      [MID_SCREEN_BOUNDS],
     )
 
     const dim = getPrivate<Graphics>(overlay, '_dim')
@@ -250,8 +313,8 @@ describe('TutorialOverlay Spotlight rendering (item 50)', () => {
 
     overlay.update(
       baseSnapshot({ target: 'none', highlightTarget: 'prediction_rate' }),
-      null,
-      MID_SCREEN_BOUNDS,
+      [],
+      [MID_SCREEN_BOUNDS],
     )
 
     const blockerLayer = getPrivate<Container>(overlay, '_blockerLayer')
@@ -265,8 +328,8 @@ describe('TutorialOverlay Spotlight rendering (item 50)', () => {
 
     overlay.update(
       baseSnapshot({ target: 'party_list', highlightTarget: 'party_list' }),
-      MID_SCREEN_BOUNDS,
-      MID_SCREEN_BOUNDS,
+      [MID_SCREEN_BOUNDS],
+      [MID_SCREEN_BOUNDS],
     )
 
     const blockerLayer = getPrivate<Container>(overlay, '_blockerLayer')
@@ -275,7 +338,58 @@ describe('TutorialOverlay Spotlight rendering (item 50)', () => {
 
   it('hides everything when the snapshot is not visible', () => {
     const overlay = createOverlay()
-    overlay.update(baseSnapshot({ visible: false }), null, null)
+    overlay.update(baseSnapshot({ visible: false }), [], [])
     expect(overlay.visible).toBe(false)
+  })
+
+  it('Phase 10.2 Multi-target: two simultaneous targets carve two independent cutouts, never one merged bounding box', () => {
+    const overlay = createOverlay()
+    const roundRectSpy = vi.spyOn(Graphics.prototype, 'roundRect')
+    const SECOND_BOUNDS: TutorialTargetBounds = {
+      x: 900,
+      y: 50,
+      width: 150,
+      height: 60,
+    }
+
+    overlay.update(
+      baseSnapshot({
+        target: 'none',
+        targets: [
+          'day_results_narrative_button',
+          'day_results_next_day_button',
+        ],
+        highlightTarget: 'none',
+        highlightTargets: [
+          'day_results_narrative_button',
+          'day_results_next_day_button',
+        ],
+      }),
+      [MID_SCREEN_BOUNDS, SECOND_BOUNDS],
+      [MID_SCREEN_BOUNDS, SECOND_BOUNDS],
+    )
+
+    const highlightBorder = getPrivate<Graphics>(overlay, '_highlightBorder')
+    const borderCalls = roundRectSpy.mock.calls.filter(
+      (_, i) => roundRectSpy.mock.instances[i] === highlightBorder,
+    )
+    // One border per target — never a single border spanning both.
+    expect(borderCalls).toHaveLength(2)
+
+    const blockerLayer = getPrivate<Container>(overlay, '_blockerLayer')
+    // Each target's exact bounds is subtracted independently. A merged
+    // bounding box spanning both targets would carve exactly one 4-rect
+    // cutout (like the single-target case above); two genuinely
+    // independent cutouts instead split each other's strips, producing
+    // more pieces — the space between the two targets stays blocked
+    // (Day Results review item 12), which the geometry test above
+    // already verifies precisely via `subtractRects` directly.
+    expect(blockerLayer.children.length).toBeGreaterThan(4)
+    expect(
+      subtractRects(
+        { x: 0, y: 0, width: VIRTUAL_WIDTH, height: VIRTUAL_HEIGHT },
+        [MID_SCREEN_BOUNDS, SECOND_BOUNDS],
+      ),
+    ).toHaveLength(blockerLayer.children.length)
   })
 })
