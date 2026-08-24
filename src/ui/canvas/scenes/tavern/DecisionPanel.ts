@@ -27,9 +27,20 @@ export interface DecisionPanelOptions {
   onOpenBreakdown: () => void
   /** Effective prediction sample count, derived from intel_archive level. */
   getSampleCount?: () => number
+  /** Phase 10.1 Tutorial: fires once per successful prediction fetch for
+   * the CURRENT Party+Quest selection (reuses the existing `_sequence`
+   * stale-response guard — never for a resolved-but-superseded fetch). */
+  onPredictionReady?: (prediction: ExpeditionPrediction) => void
+  /** Phase 10.1 Tutorial: fires when the prediction fetch fails for the
+   * current selection, so the Tutorial Runtime can recover instead of
+   * waiting forever. */
+  onPredictionError?: () => void
 }
 
 type PredictionStatus = 'idle' | 'loading' | 'error'
+
+const ASSIGN_BUTTON_WIDTH = 200
+const ASSIGN_BUTTON_HEIGHT = 44
 
 export class DecisionPanel extends Container {
   private readonly _theme: GameUiTheme
@@ -41,6 +52,10 @@ export class DecisionPanel extends Container {
   private readonly _getSelectedQuest: () => TavernRequestOffer | undefined
   private readonly _onOpenBreakdown: () => void
   private readonly _getSampleCount?: () => number
+  private readonly _onPredictionReady?: (
+    prediction: ExpeditionPrediction,
+  ) => void
+  private readonly _onPredictionError?: () => void
   private readonly _panel: GamePanel
   private readonly _scroll: GameScrollView
   private readonly _scrollWidth: number
@@ -56,6 +71,8 @@ export class DecisionPanel extends Container {
   private _lastPartyId?: string
   private _lastQuestId?: string
   private _lastSampleCount?: number
+  private _predictionContentWidth = 0
+  private _predictionContentHeight = 0
 
   constructor(options: DecisionPanelOptions) {
     super()
@@ -69,6 +86,8 @@ export class DecisionPanel extends Container {
     this._getSelectedQuest = options.getSelectedQuest
     this._onOpenBreakdown = options.onOpenBreakdown
     this._getSampleCount = options.getSampleCount
+    this._onPredictionReady = options.onPredictionReady
+    this._onPredictionError = options.onPredictionError
 
     this._panel = new GamePanel({
       width: this._width,
@@ -100,8 +119,8 @@ export class DecisionPanel extends Container {
     this.addChild(this._bottomBar)
 
     this._assignButton = new GameButton({
-      width: 200,
-      height: 44,
+      width: ASSIGN_BUTTON_WIDTH,
+      height: ASSIGN_BUTTON_HEIGHT,
       theme: this._theme,
       label: 'この依頼を紹介する',
       disabled: true,
@@ -118,7 +137,7 @@ export class DecisionPanel extends Container {
       label: 'パーティ詳細',
       disabled: true,
     })
-    this._partyDetailButton.x = margin + 200 + gap
+    this._partyDetailButton.x = margin + ASSIGN_BUTTON_WIDTH + gap
     this._partyDetailButton.y = (bottomBarHeight - 44) / 2
     this._partyDetailButton.onActivate = () => this._onOpenPartyDetail()
     this._bottomBar.addChild(this._partyDetailButton)
@@ -129,6 +148,61 @@ export class DecisionPanel extends Container {
 
   get currentPrediction(): ExpeditionPrediction | undefined {
     return this._prediction
+  }
+
+  /** Phase 10.1 Tutorial retry fix: clears the "same Party+Quest+sample
+   * count already fetched" cache keys WITHOUT touching `_sequence`, the
+   * current `_prediction`, or its status — so the next `update()` call
+   * (e.g. the Player reselecting the very same Party after a prediction
+   * failure) issues a genuinely new fetch instead of silently doing
+   * nothing because the cache key still matches. Never called
+   * automatically by this Panel itself; only an explicit caller (the
+   * Tutorial Runtime's error-recovery path, via TavernScene) invokes it,
+   * so there is no risk of this turning into an unsolicited retry loop. */
+  resetPredictionForRetry(): void {
+    this._lastPartyId = undefined
+    this._lastQuestId = undefined
+    this._lastSampleCount = undefined
+  }
+
+  /** Phase 10.1 Tutorial: the assign button's bounds relative to this
+   * Panel's own (x, y) origin, for the `assign_button` input-gating
+   * cutout. Plain arithmetic from the same layout values the constructor
+   * already used to position it — deliberately not `getBounds()`, which
+   * this codebase's test-time Pixi stand-ins do not implement. */
+  getAssignButtonLocalBounds(): {
+    x: number
+    y: number
+    width: number
+    height: number
+  } {
+    return {
+      x: this._assignButton.x,
+      y: this._bottomBar.y + this._assignButton.y,
+      width: ASSIGN_BUTTON_WIDTH,
+      height: ASSIGN_BUTTON_HEIGHT,
+    }
+  }
+
+  /** Phase 10.1 Tutorial Spotlight: the predicted-success-rate block's
+   * bounds relative to this Panel's own (x, y) origin, for the
+   * `prediction_rate` highlight target. `_predictionContentWidth/Height`
+   * are tracked by `renderPrediction()` on every draw (the block's own
+   * height varies with which of hint/loading/error/result text is
+   * showing), so this always reflects what's actually on screen right
+   * now — never a value guessed ahead of the real render. */
+  getPredictionAreaLocalBounds(): {
+    x: number
+    y: number
+    width: number
+    height: number
+  } {
+    return {
+      x: this._predictionContent.x,
+      y: this._bottomBar.y + this._predictionContent.y,
+      width: this._predictionContentWidth,
+      height: this._predictionContentHeight,
+    }
   }
 
   update(viewModel?: TavernDecisionViewModel): void {
@@ -173,11 +247,13 @@ export class DecisionPanel extends Container {
         this._prediction = prediction
         this._predictionStatus = 'idle'
         this.draw()
+        this._onPredictionReady?.(prediction)
       })
       .catch(() => {
         if (seq !== this._sequence) return
         this._predictionStatus = 'error'
         this.draw()
+        this._onPredictionError?.()
       })
   }
 
@@ -452,6 +528,7 @@ export class DecisionPanel extends Container {
 
     this._predictionContent.x = margin + leftWidth + gap
     this._predictionContent.y = 0
+    this._predictionContentWidth = rightWidth
 
     if (!vm?.selectedParty || !vm.selectedQuest) {
       const hint = new GameLabel(
@@ -461,6 +538,7 @@ export class DecisionPanel extends Container {
         { maxWidth: rightWidth, align: 'right', breakWords: true },
       )
       this._predictionContent.addChild(hint)
+      this._predictionContentHeight = hint.textHeight
       return
     }
 
@@ -471,6 +549,7 @@ export class DecisionPanel extends Container {
         breakWords: true,
       })
       this._predictionContent.addChild(label)
+      this._predictionContentHeight = label.textHeight
       return
     }
 
@@ -482,10 +561,12 @@ export class DecisionPanel extends Container {
         { maxWidth: rightWidth, align: 'right', breakWords: true },
       )
       this._predictionContent.addChild(label)
+      this._predictionContentHeight = label.textHeight
       return
     }
 
     if (!this._prediction) {
+      this._predictionContentHeight = 0
       return
     }
 
@@ -524,6 +605,7 @@ export class DecisionPanel extends Container {
     danger.y = y
     this._predictionContent.addChild(danger)
     y += danger.textHeight
+    this._predictionContentHeight = y
 
     const bottomBarHeight = this._height - this._bottomBar.y
     this._predictionContent.y = Math.max(0, (bottomBarHeight - y) / 2)

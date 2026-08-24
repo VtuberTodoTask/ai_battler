@@ -30,6 +30,7 @@ export interface TavernHeaderOptions {
 const SETTINGS_ICON_URL = '/settings-icon.png'
 const GEAR_SIZE = 44
 const BUTTON_HEIGHT = 44
+const ACTION_BUTTON_WIDTH = 140
 
 /**
  * Three-row layout (Phase 9.7.1) — replaces the earlier single 64px-tall
@@ -184,9 +185,8 @@ export class TavernHeader extends Container {
       cursorX += spec.width + gap
     }
 
-    const actionButtonWidth = 140
     this._actionButton = new GameButton({
-      width: actionButtonWidth,
+      width: ACTION_BUTTON_WIDTH,
       height: BUTTON_HEIGHT,
       theme: this._theme,
       label: '翌日へ',
@@ -199,7 +199,7 @@ export class TavernHeader extends Container {
       this._onAdvance?.()
     }
     this.addChild(this._actionButton)
-    cursorX += actionButtonWidth + gap
+    cursorX += ACTION_BUTTON_WIDTH + gap
 
     const gearY = ROW_C_Y + (BUTTON_HEIGHT - GEAR_SIZE) / 2
     this._setupSettingsIcon(cursorX, gearY)
@@ -266,6 +266,26 @@ export class TavernHeader extends Container {
 
   setActionEnabled(enabled: boolean): void {
     this._actionButton.setEnabled(enabled)
+  }
+
+  /** Phase 10.1 Tutorial: the "翌日へ" (day advance) button's bounds,
+   * relative to this Header's own (x, y) origin — the Header is always
+   * placed at (0, 0) in `TavernScene`, so these already equal Scene-global
+   * coordinates. Plain arithmetic, matching `DecisionPanel`'s
+   * `getAssignButtonLocalBounds()` — never `getBounds()`, which this
+   * codebase's test-time Pixi stand-ins do not implement. */
+  getActionButtonBounds(): {
+    x: number
+    y: number
+    width: number
+    height: number
+  } {
+    return {
+      x: this._actionButton.x,
+      y: this._actionButton.y,
+      width: ACTION_BUTTON_WIDTH,
+      height: BUTTON_HEIGHT,
+    }
   }
 
   /** Test-only accessor for the World Event banner's current presentation

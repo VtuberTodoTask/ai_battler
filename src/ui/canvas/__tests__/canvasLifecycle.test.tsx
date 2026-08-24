@@ -41,6 +41,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -66,6 +68,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -80,6 +84,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -105,6 +111,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
         onNewGame={() => ({ ok: true })}
@@ -122,6 +130,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
         onNewGame={() => ({ ok: true })}
@@ -156,6 +166,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
         onLoadGame={() => Promise.resolve({ ok: true })}
@@ -172,6 +184,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
         onLoadGame={() => Promise.resolve({ ok: true })}
@@ -198,6 +212,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -214,6 +230,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -239,6 +257,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: false, message: '資金が足りません。' })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -255,6 +275,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: false, message: '資金が足りません。' })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -279,6 +301,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -296,6 +320,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -316,6 +342,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: false, message: 'resolve failed' })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -333,6 +361,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -357,6 +387,8 @@ describe('GameCanvasHost lifecycle', () => {
         }}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onSwitchToLegacy={() => {}}
       />,
@@ -417,6 +449,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onOpenExpeditionNarrative={onOpenExpeditionNarrative}
         onSwitchToLegacy={() => {}}
@@ -434,6 +468,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onOpenExpeditionNarrative={onOpenExpeditionNarrative}
         onSwitchToLegacy={() => {}}
@@ -469,6 +505,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onOpenExpeditionNarrative={onOpenExpeditionNarrative}
         onSwitchToLegacy={() => {}}
@@ -489,6 +527,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onOpenExpeditionNarrative={onOpenExpeditionNarrative}
         onSwitchToLegacy={() => {}}
@@ -508,6 +548,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onOpenExpeditionNarrative={onOpenExpeditionNarrative}
         onSwitchToLegacy={() => {}}
@@ -542,6 +584,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onOpenExpeditionNarrative={onOpenExpeditionNarrative}
         onSwitchToLegacy={() => {}}
@@ -559,6 +603,8 @@ describe('GameCanvasHost lifecycle', () => {
         onResolveDay={() => ({ ok: true })}
         onOfferRequest={() => ({ ok: true })}
         onPurchaseUpgrade={() => ({ ok: true })}
+        onSetTutorialMode={() => ({ ok: true })}
+        onCompleteTutorial={() => ({ ok: true })}
         onOpenActivity={() => Promise.resolve({ ok: true, data: '' })}
         onOpenExpeditionNarrative={onOpenExpeditionNarrative}
         onSwitchToLegacy={() => {}}

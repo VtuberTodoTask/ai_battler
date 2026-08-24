@@ -132,6 +132,8 @@ export function createSceneContext(
       resolveDay: vi.fn(() => ({ ok: true })),
       offerRequest: vi.fn(() => ({ ok: true })),
       purchaseUpgrade: vi.fn(() => ({ ok: true })),
+      setTutorialMode: vi.fn(() => ({ ok: true })),
+      completeTutorial: vi.fn(() => ({ ok: true })),
       selectParty: vi.fn((id) => {
         uiStateRef.current.selectedPartyId = id
       }),

@@ -294,6 +294,8 @@ export class CanvasGame {
       resolveDay: () => ({ ok: true }),
       offerRequest: () => ({ ok: true, data: { decision: 'accepted' } }),
       purchaseUpgrade: () => ({ ok: true }),
+      setTutorialMode: () => ({ ok: true }),
+      completeTutorial: () => ({ ok: true }),
       selectParty: () => {},
       selectQuest: () => {},
       openCharacter: () => {},

@@ -22,6 +22,11 @@ import type {
   TavernUpgradeId,
 } from '../../core/tavern/campaign/types.ts'
 import { purchaseTavernUpgrade } from '../../core/tavern/campaign/upgrades.ts'
+import {
+  completeTutorial,
+  setTutorialMode,
+  type TutorialId,
+} from '../../core/tavern/campaign/tutorial.ts'
 import { dispatchMainQuest } from '../../core/mainQuest/dispatch.ts'
 import { startMainQuestPresentation } from '../../core/mainQuest/presentation.ts'
 import { completeMainQuestPresentationForCampaign } from '../../core/ending/transition.ts'
@@ -370,6 +375,59 @@ export function TavernSimulator() {
       }
     },
     [campaign],
+  )
+
+  // Phase 10.1 Tutorial Runtime commits: deliberately read `campaignRef`
+  // (synchronously fresh — see the doc comment on `campaignRef`/
+  // `commitCampaign` above) rather than the `campaign` closure. The
+  // Tutorial's "day_advanced" completion is dispatched in the SAME
+  // synchronous tick as `handleAdvance`'s own `commitCampaign` call
+  // (TavernScene dispatches it right after `advanceDay()` returns), so a
+  // plain `campaign` closure read here would apply `completeTutorial` to
+  // the Campaign as it stood BEFORE that day advance and then overwrite
+  // it back out via `commitCampaign`, silently reverting the day advance.
+  // Reading `campaignRef.current` instead always sees whatever the latest
+  // synchronous write actually was.
+  const handleSetTutorialMode = useCallback(
+    (mode: 'enabled' | 'disabled'): UiActionResult => {
+      const current = campaignRef.current
+      if (!current) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      try {
+        const next = setTutorialMode(current, mode)
+        commitCampaign(next)
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error
+            ? e.message
+            : 'チュートリアル設定の更新に失敗しました'
+        setError(message)
+        return { ok: false, message }
+      }
+    },
+    [commitCampaign],
+  )
+
+  const handleCompleteTutorial = useCallback(
+    (tutorialId: TutorialId): UiActionResult => {
+      const current = campaignRef.current
+      if (!current) {
+        return { ok: false, message: 'キャンペーンが開始されていません' }
+      }
+      try {
+        const next = completeTutorial(current, tutorialId)
+        commitCampaign(next)
+        return { ok: true }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : 'チュートリアルの完了に失敗しました'
+        setError(message)
+        return { ok: false, message }
+      }
+    },
+    [commitCampaign],
   )
 
   const handleOpenActivity = useCallback(
@@ -790,6 +848,8 @@ export function TavernSimulator() {
             onResolveDay={handleResolve}
             onOfferRequest={handleOfferRequest}
             onPurchaseUpgrade={handlePurchaseUpgrade}
+            onSetTutorialMode={handleSetTutorialMode}
+            onCompleteTutorial={handleCompleteTutorial}
             onOpenActivity={handleOpenActivity}
             onOpenExpeditionNarrative={handleOpenExpeditionNarrative}
             onDispatchMainQuest={handleDispatchMainQuest}

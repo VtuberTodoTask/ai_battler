@@ -62,6 +62,8 @@ function createSceneContext(_scene: WorldEncyclopediaScene): GameSceneContext {
       resolveDay: vi.fn(() => ({ ok: true })),
       offerRequest: vi.fn(() => ({ ok: true })),
       purchaseUpgrade: vi.fn(() => ({ ok: true })),
+      setTutorialMode: vi.fn(() => ({ ok: true })),
+      completeTutorial: vi.fn(() => ({ ok: true })),
       selectParty: vi.fn(),
       selectQuest: vi.fn(),
       openCharacter: vi.fn(),

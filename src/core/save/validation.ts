@@ -21,6 +21,7 @@ import {
   trainingYardXpBonusForLevel,
 } from '../tavern/campaign/upgrades.ts'
 import { PARTY_LIFECYCLE_CONFIG } from '../tavern/campaign/lifecycle.ts'
+import { IMPLEMENTED_TUTORIAL_IDS } from '../tavern/campaign/tutorial.ts'
 import {
   EXPEDITION_GROWTH_XP,
   PARTY_GROWTH_XP_THRESHOLD,
@@ -3293,6 +3294,73 @@ function validateEnding(
   }
 }
 
+const VALID_TUTORIAL_MODES = ['pending', 'enabled', 'disabled']
+
+/**
+ * Phase 10.1 Tutorial Runtime persistent state. Active step progress
+ * (which step, which wait target, choice results) is deliberately never
+ * persisted — only `mode` and `completedTutorialIds` survive Save/Load —
+ * so this validator's job is narrow: the mode is one of the three known
+ * values, `completedTutorialIds` is an array of ids the game can actually
+ * complete (`IMPLEMENTED_TUTORIAL_IDS` — the same single source of truth
+ * `completeTutorial()` itself gates on, so a save can never carry a
+ * completion the runtime could never have produced), non-duplicate, and
+ * the causally-invalid combination of a Tutorial that is not currently
+ * `enabled` (still `pending` — Consent never yet answered — or terminally
+ * `disabled`) already having completions recorded can never occur:
+ * `completeTutorial()` only ever writes while `mode === 'enabled'`.
+ */
+function validateTutorial(campaign: Record<string, unknown>): void {
+  assertPlainObject(campaign.tutorial, 'Tutorialデータが壊れています')
+  const tutorial = campaign.tutorial as Record<string, unknown>
+
+  if (
+    typeof tutorial.mode !== 'string' ||
+    !VALID_TUTORIAL_MODES.includes(tutorial.mode)
+  ) {
+    throw new SaveValidationErrorClass(
+      'Tutorialのmodeが不正です',
+      'corrupted-data',
+    )
+  }
+
+  if (!Array.isArray(tutorial.completedTutorialIds)) {
+    throw new SaveValidationErrorClass(
+      'Tutorialの完了済みID一覧が壊れています',
+      'corrupted-data',
+    )
+  }
+
+  const seen = new Set<string>()
+  for (const id of tutorial.completedTutorialIds) {
+    if (
+      typeof id !== 'string' ||
+      !IMPLEMENTED_TUTORIAL_IDS.includes(
+        id as (typeof IMPLEMENTED_TUTORIAL_IDS)[number],
+      )
+    ) {
+      throw new SaveValidationErrorClass(
+        '未知のTutorial IDが含まれています',
+        'corrupted-data',
+      )
+    }
+    if (seen.has(id)) {
+      throw new SaveValidationErrorClass(
+        '重複したTutorial IDが含まれています',
+        'corrupted-data',
+      )
+    }
+    seen.add(id)
+  }
+
+  if (tutorial.mode !== 'enabled' && tutorial.completedTutorialIds.length > 0) {
+    throw new SaveValidationErrorClass(
+      'Tutorialがenabledでないのに完了済みIDが存在します',
+      'corrupted-data',
+    )
+  }
+}
+
 interface ValidatedProgressionFields {
   growthXp: number
   totalGrowthXp: number
@@ -4739,6 +4807,8 @@ export function validateGameSave(raw: unknown): asserts raw is GameSaveData {
   validateMainQuest(campaign, ledgerById, campaign.dayNumber as number)
 
   validateEnding(campaign, currentDayStatus)
+
+  validateTutorial(campaign)
 
   if (
     !isPlainObject(raw.randomState) ||
