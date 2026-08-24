@@ -255,6 +255,30 @@ function getOverlayVisible(scene: DayResultsScene): boolean {
     ._tutorialOverlay.visible
 }
 
+/** PR #63 review items 36-38: reads the real `TutorialOverlay`'s Dialogue
+ * Panel `y` off the mounted Scene, the same way `phase10-1-tutorial-scene.test.ts`
+ * does for its own regression check. */
+function getDialogueY(scene: DayResultsScene): number {
+  return (
+    scene as unknown as {
+      _tutorialOverlay: { _dialoguePanel: { y: number } }
+    }
+  )._tutorialOverlay._dialoguePanel.y
+}
+
+function getTutorialTargetBounds(
+  scene: DayResultsScene,
+  target: string,
+): { x: number; y: number; width: number; height: number } | null {
+  return (
+    scene as unknown as {
+      getTutorialTargetBounds: (
+        t: string,
+      ) => { x: number; y: number; width: number; height: number } | null
+    }
+  ).getTutorialTargetBounds(target)
+}
+
 interface ScenePrivate {
   goToExpeditionResults: () => void
   goToNextDay: () => void
@@ -529,5 +553,67 @@ describe('Phase 10.2 day_results Tutorial <-> DayResultsScene wiring', () => {
       'day_results_narrative_button',
       'day_results_next_day_button',
     ])
+  })
+
+  it('PR #63 review item 36: the 次へ wait step docks the Dialogue to top, fully clear of the real 次へ bounds', () => {
+    const { campaign, input } = noResultsCampaign('dr-scene-011')
+    const scene = new DayResultsScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const campaignRef: { current: TavernCampaignState | null } = {
+      current: campaign,
+    }
+    const { context } = createSceneContext(scene, uiStateRef, campaignRef)
+    scene.mount(context, input)
+
+    const runtime = getRuntime(scene)
+    while (stepId(runtime) !== 'wait_next') runtime.advanceMessage()
+
+    expect(getDialogueY(scene)).toBe(16)
+    const nextButtonBounds = getTutorialTargetBounds(
+      scene,
+      'day_results_next_button',
+    )
+    expect(nextButtonBounds).not.toBeNull()
+    // The bottom-docked Dialogue would span y 724-884 (item 17) — the
+    // real 次へ button sits inside that range, which is exactly why the
+    // Overlay moved to top (y 16, height 160 -> bottom edge 176, well
+    // clear of the button).
+    expect(nextButtonBounds!.y).toBeGreaterThanOrEqual(724)
+    expect(16 + 160).toBeLessThanOrEqual(nextButtonBounds!.y)
+  })
+
+  it('PR #63 review item 37: the Multi-target Final Choice docks the Dialogue to top', () => {
+    const { campaign, input } = noResultsCampaign('dr-scene-012')
+    const scene = new DayResultsScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const campaignRef: { current: TavernCampaignState | null } = {
+      current: campaign,
+    }
+    const { context } = createSceneContext(scene, uiStateRef, campaignRef)
+    scene.mount(context, { ...input, step: 'expedition_results' })
+
+    const runtime = getRuntime(scene)
+    // `resumeAt` calls the Runtime's own `onChange` callback, which this
+    // Scene wires straight to `renderTutorial()` — no manual re-render
+    // needed to see the placement update.
+    runtime.resumeAt('wait_final_choice')
+
+    expect(getDialogueY(scene)).toBe(16)
+  })
+
+  it('PR #63 review item 38: after_story (Next Day only) still docks the Dialogue to top', () => {
+    const { campaign, input } = noResultsCampaign('dr-scene-013')
+    const scene = new DayResultsScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const campaignRef: { current: TavernCampaignState | null } = {
+      current: campaign,
+    }
+    const { context } = createSceneContext(scene, uiStateRef, campaignRef)
+    scene.mount(context, { ...input, step: 'expedition_results' })
+
+    const runtime = getRuntime(scene)
+    runtime.resumeAt('after_story_1')
+
+    expect(getDialogueY(scene)).toBe(16)
   })
 })

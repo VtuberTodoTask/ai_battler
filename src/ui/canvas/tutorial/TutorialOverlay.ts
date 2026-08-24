@@ -3,6 +3,7 @@ import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '../GameViewport.ts'
 import type { GameUiTheme } from '../theme/gameTheme.ts'
 import { TutorialDialoguePanel } from './TutorialDialoguePanel.ts'
 import type {
+  TutorialDialoguePlacement,
   TutorialPresentationSnapshot,
   TutorialTargetBounds,
 } from './types.ts'
@@ -57,6 +58,16 @@ const VIEWPORT_RECT: TutorialTargetBounds = {
  * single-element array behaves identically to the old single-bounds
  * signature (see `subtractRects`).
  *
+ * PR #63 review items 1-21: the Dialogue Panel itself docks to either
+ * `'bottom'` (default) or `'top'`, decided fresh on every `update()` by
+ * `chooseTutorialDialoguePlacement()` — generically, from whether ANY
+ * current interaction/highlight target would sit under the bottom
+ * docking position, never from a per-Scene/per-step hardcode. This is
+ * what actually fixes a Spotlit Footer button (Day Results' 次へ/翌日へ,
+ * any future bottom-docked UI) being visually and input-wise covered by
+ * the Dialogue itself — the input-blocker cutout alone was already
+ * correct; the Dialogue sitting on top of it defeated it regardless.
+ *
  * The dim layer (`eventMode: 'none'`) and the blocker rectangles
  * (`eventMode: 'static'`, invisible) are deliberately separate Graphics:
  * the dim layer is purely visual and must never intercept a pointer, and
@@ -98,7 +109,7 @@ export class TutorialOverlay extends Container {
       onChoice: options.onChoice,
     })
     this._dialoguePanel.x = DIALOGUE_MARGIN
-    this._dialoguePanel.y = VIRTUAL_HEIGHT - DIALOGUE_HEIGHT - DIALOGUE_MARGIN
+    this._dialoguePanel.y = dialogueY('bottom')
     this.addChild(this._dialoguePanel)
 
     this.visible = false
@@ -123,11 +134,27 @@ export class TutorialOverlay extends Container {
     this.visible = snapshot.visible
     if (!snapshot.visible) return
 
-    this._dialoguePanel.update(snapshot)
+    const compactedInteraction = compactBounds(interactionBounds)
     const paddedHighlights = compactBounds(highlightBounds).map(padBounds)
+
+    // PR #63 review items 1-9: decided BEFORE `_dialoguePanel.update()`
+    // repositions its own internal buttons — the Dialogue must never sit
+    // on top of the very target it's pointing the Player at. Checked
+    // against the raw (unpadded) interaction bounds — the true clickable
+    // extent — union the padded highlight bounds — the true visual
+    // extent of the Spotlight border — never a per-Scene/per-step
+    // hardcode (item 4).
+    this._dialoguePanel.y = dialogueY(
+      chooseTutorialDialoguePlacement([
+        ...compactedInteraction,
+        ...paddedHighlights,
+      ]),
+    )
+
+    this._dialoguePanel.update(snapshot)
     this.drawDim(paddedHighlights)
     this.drawHighlightBorders(paddedHighlights)
-    this.drawBlockers(compactBounds(interactionBounds))
+    this.drawBlockers(compactedInteraction)
   }
 
   private drawDim(highlightHoles: readonly TutorialTargetBounds[]): void {
@@ -263,6 +290,65 @@ export function surroundingRects(
   bounds: TutorialTargetBounds,
 ): TutorialTargetBounds[] {
   return subtractRects(VIEWPORT_RECT, [bounds])
+}
+
+/** The Dialogue Panel's `y` for a given placement — `'top'` sits
+ * `DIALOGUE_MARGIN` below the screen edge (item 7: never flush against
+ * it), `'bottom'` is the original Phase 10.1 position. Width/x and the
+ * Panel's own internal layout are unchanged by placement (item 7). */
+function dialogueY(placement: TutorialDialoguePlacement): number {
+  return placement === 'top'
+    ? DIALOGUE_MARGIN
+    : VIRTUAL_HEIGHT - DIALOGUE_HEIGHT - DIALOGUE_MARGIN
+}
+
+/** The Dialogue's bounds at the `'bottom'` docking position specifically
+ * — used as the fixed reference `chooseTutorialDialoguePlacement` checks
+ * targets against, regardless of where the Panel is ACTUALLY sitting
+ * this frame (item 4's `getBottomDialogueBounds()`). */
+function getBottomDialogueBounds(): TutorialTargetBounds {
+  return {
+    x: DIALOGUE_MARGIN,
+    y: dialogueY('bottom'),
+    width: VIRTUAL_WIDTH - DIALOGUE_MARGIN * 2,
+    height: DIALOGUE_HEIGHT,
+  }
+}
+
+/** Pure axis-aligned-rectangle overlap test (item 16: extracted for direct
+ * unit testing). Edge-touching rectangles (e.g. `a.x + a.width === b.x`)
+ * do NOT count as intersecting — consistent with `subtractRect`'s own
+ * strict `<`/`>` overlap check above. */
+export function rectanglesIntersect(
+  a: TutorialTargetBounds,
+  b: TutorialTargetBounds,
+): boolean {
+  return (
+    a.x < b.x + b.width &&
+    a.x + a.width > b.x &&
+    a.y < b.y + b.height &&
+    a.y + a.height > b.y
+  )
+}
+
+/**
+ * PR #63 review items 3-6: `'top'` whenever ANY of `targets` (the union
+ * of the current interaction and highlight bounds — item 5) would
+ * otherwise sit under the Dialogue's `'bottom'` docking position,
+ * `'bottom'` otherwise. A single `some()` check naturally covers the
+ * Multi-target case (item 6: e.g. Day Results' Narrative-button-or-
+ * Next-Day-button closing choice) — no special-casing needed for one
+ * target vs. several. Exported for direct unit testing without a Pixi
+ * environment (item 16).
+ */
+export function chooseTutorialDialoguePlacement(
+  targets: readonly TutorialTargetBounds[],
+): TutorialDialoguePlacement {
+  const bottomDialogueRect = getBottomDialogueBounds()
+  const overlapsBottomTarget = targets.some((target) =>
+    rectanglesIntersect(bottomDialogueRect, target),
+  )
+  return overlapsBottomTarget ? 'top' : 'bottom'
 }
 
 /** Expands `bounds` by `TUTORIAL_HIGHLIGHT_PADDING` on every side,

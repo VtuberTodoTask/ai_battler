@@ -44,14 +44,14 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'intro_1',
       speaker: SPEAKER,
-      text: 'さて店主さん、一日お疲れ様でした！',
+      text: 'はい、今日も一日お疲れ様でした！',
       next: 'intro_2',
     },
     intro_2: {
       type: 'message',
       id: 'intro_2',
       speaker: SPEAKER,
-      text: 'ここが「デイリザルト」の画面です。今日一日の結果をまとめて確認できますよ',
+      text: '今表示されている「重要な出来事」は、文字通り今日起きた出来事をまとめてくれています',
       next: 'intro_3',
       highlightTarget: 'day_results_important_events',
     },
@@ -59,7 +59,7 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'intro_3',
       speaker: SPEAKER,
-      text: 'まずはこちら、「本日の出来事」の一覧です',
+      text: '色々書かれてますね～。あ、これ全部私が書いたんですよ？　すごいでしょ',
       next: 'intro_4',
       highlightTarget: 'day_results_important_events',
     },
@@ -67,7 +67,7 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'intro_4',
       speaker: SPEAKER,
-      text: '新しいパーティーが訪ねてきたり、療養中のパーティーの滞在が延びたり……酒場にまつわる出来事がここにまとまっています',
+      text: 'パーティーが強くなったり、新しいパーティーが来たり、パーティーが療養したり……その日に起きた色んなことがここに書かれます',
       next: 'intro_5',
       highlightTarget: 'day_results_important_events',
     },
@@ -75,7 +75,7 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'intro_5',
       speaker: SPEAKER,
-      text: '特に大きな出来事がない日は、ここには何も表示されません。それも普通のことですからね',
+      text: '全部細かく覚える必要はありませんよ。気になることがあった時に確認するくらいで大丈夫です！',
       next: 'intro_6',
       highlightTarget: 'day_results_important_events',
     },
@@ -263,11 +263,20 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
     },
 
     // --- 帰還したパーティ一覧・詳細 -----------------------------------
+    // PR #63 review item 22-26: describes the results list/detail area
+    // WITHOUT instructing the Player to actually select a result — this
+    // whole chain is `message` steps, so Game UI interaction stays
+    // blocked throughout (item 23: result-selection is deliberately never
+    // a required Tutorial Action, no `WAIT result_selected` exists).
+    // Telling the Player to "選んでみてください" here would contradict
+    // that blocked state; every line below only ever describes what the
+    // panel shows and how selecting works, in case they naturally look
+    // there once the Tutorial ends.
     results_area_1: {
       type: 'message',
       id: 'results_area_1',
       speaker: SPEAKER,
-      text: 'それでは、下の方にある「帰還したパーティ」の一覧を見てみましょう',
+      text: 'そして、その下には、それぞれのパーティーがどんな結果になったのかが表示されています',
       next: 'results_area_2',
       highlightTarget: 'day_results_results_area',
     },
@@ -275,7 +284,7 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'results_area_2',
       speaker: SPEAKER,
-      text: '左側の一覧から、気になる結果をひとつ選んでみてください。選んだ結果は、右側に詳しく表示されます',
+      text: '左側には、帰ってきたパーティーの結果が並んでいます',
       next: 'results_area_3',
       highlightTarget: 'day_results_results_area',
     },
@@ -283,7 +292,7 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'results_area_3',
       speaker: SPEAKER,
-      text: '右側には、どのパーティーがどんな依頼に向かって、どうなったのか。詳しい内容がまとまっています',
+      text: '確認したい結果を選ぶと、その詳しい内容が右側に表示されますよ',
       next: 'results_area_4',
       highlightTarget: 'day_results_results_area',
     },
@@ -291,7 +300,7 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'results_area_4',
       speaker: SPEAKER,
-      text: '「前の結果」「次の結果」のボタンで、他の結果に切り替えることもできますよ',
+      text: '誰がどの依頼へ行って、成功したのか失敗したのか。それから、どんなことが起きたのかもここで確認できます',
       next: 'results_area_5',
       highlightTarget: 'day_results_results_area',
     },
@@ -299,7 +308,7 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'results_area_5',
       speaker: SPEAKER,
-      text: '未読の結果には目印がついています。すべて見ておくと、酒場の様子がよく分かりますよ',
+      text: '……まあ、その、ぶっちゃけた話',
       next: 'results_area_6',
       highlightTarget: 'day_results_results_area',
     },
@@ -307,8 +316,56 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'results_area_6',
       speaker: SPEAKER,
-      text: 'それと、結果によっては右側の詳細に「物語として読む」というボタンが出てくることがあります',
+      text: '明日の仕事を振り分けるだけなら、ここを全部じっくり読む必要はないんですけどね',
       next: 'results_area_7',
+      highlightTarget: 'day_results_results_area',
+    },
+    results_area_7: {
+      type: 'message',
+      id: 'results_area_7',
+      speaker: SPEAKER,
+      text: 'でも店主さんの目標は、ただ酒場を経営することじゃありません',
+      next: 'results_area_8',
+      highlightTarget: 'day_results_results_area',
+    },
+    results_area_8: {
+      type: 'message',
+      id: 'results_area_8',
+      speaker: SPEAKER,
+      text: '打倒ノスフェラトゥ！',
+      next: 'results_area_9',
+      highlightTarget: 'day_results_results_area',
+    },
+    results_area_9: {
+      type: 'message',
+      id: 'results_area_9',
+      speaker: SPEAKER,
+      text: 'そのためにも、どんな冒険者さんたちがいて、どんな戦いをしているのか知っておくことは大事ですよ',
+      next: 'results_area_10',
+      highlightTarget: 'day_results_results_area',
+    },
+    results_area_10: {
+      type: 'message',
+      id: 'results_area_10',
+      speaker: SPEAKER,
+      text: '「前の結果」「次の結果」のボタンで、他の結果に切り替えることもできますよ',
+      next: 'results_area_11',
+      highlightTarget: 'day_results_results_area',
+    },
+    results_area_11: {
+      type: 'message',
+      id: 'results_area_11',
+      speaker: SPEAKER,
+      text: '未読の結果には目印がついています。すべて見ておくと、酒場の様子がよく分かりますよ',
+      next: 'results_area_12',
+      highlightTarget: 'day_results_results_area',
+    },
+    results_area_12: {
+      type: 'message',
+      id: 'results_area_12',
+      speaker: SPEAKER,
+      text: 'それと、結果によっては右側の詳細に「物語として読む」というボタンが出てくることがあります',
+      next: 'results_area_narrative_check',
       highlightTarget: 'day_results_results_area',
     },
     // No static `next` — `TutorialRuntime.advanceMessage()` special-cases
@@ -319,10 +376,13 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
     // currently-selected result, or to `no_narrative_1` otherwise. The
     // Tutorial never forces the Player to pick a different, Narrative-
     // capable result just to satisfy this step (item 41's explicit escape
-    // hatch).
-    results_area_7: {
+    // hatch). Named descriptively rather than by position in the
+    // `results_area_*` chain, so the chain's own length can change
+    // (as it just did for the PR #63 P2 wording fix) without this
+    // branch's identity ever silently shifting.
+    results_area_narrative_check: {
       type: 'message',
-      id: 'results_area_7',
+      id: 'results_area_narrative_check',
       speaker: SPEAKER,
       text: 'これを押すと、その依頼の顛末を、ちょっとした物語として読むことができます',
       highlightTarget: 'day_results_results_area',
@@ -333,7 +393,7 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'narrative_intro_1',
       speaker: SPEAKER,
-      text: 'ちょうど今選んでいる結果には、その「物語」が用意されているようですね',
+      text: 'そしてここでもうひとつ、私の神の使いパワー！',
       next: 'narrative_intro_2',
       highlightTarget: 'day_results_narrative_button',
     },
@@ -341,13 +401,37 @@ export const DAY_RESULTS_SCRIPT: TutorialScript = {
       type: 'message',
       id: 'narrative_intro_2',
       speaker: SPEAKER,
-      text: '気になるようでしたら、後でゆっくり読んでみてください。読まなくても、店主さんのお仕事に支障はありませんよ',
+      text: '「物語として読む」というボタンがありますね？',
       next: 'narrative_intro_3',
       highlightTarget: 'day_results_narrative_button',
     },
     narrative_intro_3: {
       type: 'message',
       id: 'narrative_intro_3',
+      speaker: SPEAKER,
+      text: 'これを押すと、そのパーティーがお仕事をしていた時の様子を、私の神の使いパワーでお見せできます！',
+      next: 'narrative_intro_4',
+      highlightTarget: 'day_results_narrative_button',
+    },
+    narrative_intro_4: {
+      type: 'message',
+      id: 'narrative_intro_4',
+      speaker: SPEAKER,
+      text: 'どうやって依頼をこなしたのか、どんなことが起きていたのか。気になった時に覗いてみてください！',
+      next: 'narrative_intro_5',
+      highlightTarget: 'day_results_narrative_button',
+    },
+    narrative_intro_5: {
+      type: 'message',
+      id: 'narrative_intro_5',
+      speaker: SPEAKER,
+      text: '読まなくても、店主さんのお仕事に支障はありませんよ',
+      next: 'narrative_intro_6',
+      highlightTarget: 'day_results_narrative_button',
+    },
+    narrative_intro_6: {
+      type: 'message',
+      id: 'narrative_intro_6',
       speaker: SPEAKER,
       text: 'さて、それでは最後に、この画面の締めくくり方をお伝えしますね',
       next: 'final_choice_1',

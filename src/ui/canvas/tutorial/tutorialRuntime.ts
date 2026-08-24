@@ -342,8 +342,8 @@ export class TutorialRuntime {
     if (!step || step.type !== 'message') return
 
     // `recover_2` (basic_request_assignment) and the last Party-results
-    // explanation line (day_results — see `results_area_7` in
-    // `dayResults.ts`) are the two branch points that depend on live
+    // explanation line (day_results — see `results_area_narrative_check`
+    // in `dayResults.ts`) are the two branch points that depend on live
     // Gameplay/Presentation truth rather than a fixed `next`. Both step
     // ids are unique to their own script, so no `tutorialId` guard is
     // needed here.
@@ -351,7 +351,7 @@ export class TutorialRuntime {
       this.goTo(this.hasAcceptedOfferToday() ? 'wrap_1' : 'retry_intro_1')
       return
     }
-    if (step.id === 'results_area_7') {
+    if (step.id === 'results_area_narrative_check') {
       this.goTo(
         this._narrativeAvailable ? 'narrative_intro_1' : 'no_narrative_1',
       )

@@ -240,6 +240,19 @@ function getOverlayVisible(scene: TavernScene): boolean {
     ._tutorialOverlay.visible
 }
 
+/** PR #63 review item 34: Phase 10.1's `next_day_button` Spotlight target
+ * lives in the Header, near the TOP of the screen — reading this off the
+ * real `TutorialOverlay._dialoguePanel.y` (rather than re-deriving bounds
+ * by hand) proves the new Dialogue-placement logic doesn't force it to
+ * `'top'` unnecessarily. */
+function getDialogueY(scene: TavernScene): number {
+  return (
+    scene as unknown as {
+      _tutorialOverlay: { _dialoguePanel: { y: number } }
+    }
+  )._tutorialOverlay._dialoguePanel.y
+}
+
 describe('Phase 10.1 Tutorial <-> TavernScene wiring', () => {
   it('shows the Consent Overlay on the very first Day-1 render', () => {
     const campaign = createTavernCampaign('tut-scene-001')
@@ -455,5 +468,47 @@ describe('Phase 10.1 Tutorial <-> TavernScene wiring', () => {
     ;(scene as unknown as { handleAssign: () => void }).handleAssign()
 
     expect(openModalSpy).toHaveBeenCalled()
+  })
+
+  it('PR #63 review item 34: the next_day_button Spotlight (Header, top of screen) never forces the Dialogue to top', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('tut-scene-007'),
+      'enabled',
+    )
+    const scene = new TavernScene()
+    const uiStateRef = { current: { ...DEFAULT_GAME_UI_STATE } }
+    const campaignRef: { current: TavernCampaignState | null } = {
+      current: null,
+    }
+    const context = createSceneContext(scene, uiStateRef, campaignRef)
+
+    scene.mount(context)
+    scene.setCampaign(campaign, { ...DEFAULT_GAME_UI_STATE })
+    campaignRef.current = campaign
+
+    const runtime = getRuntime(scene)
+    for (let i = 0; i < 7; i++) runtime.advanceMessage()
+    runtime.dispatch({ type: 'quest_selected', questId: 'q' })
+    for (let i = 0; i < 4; i++) runtime.advanceMessage()
+    runtime.dispatch({ type: 'party_selected', partyId: 'p' })
+    runtime.dispatch({ type: 'prediction_ready', prediction: fakePrediction() })
+    for (let i = 0; i < 11; i++) runtime.advanceMessage()
+    runtime.dispatch({ type: 'request_offered', decision: 'accepted' })
+    const withOffer: TavernCampaignState = {
+      ...campaignRef.current!,
+      currentDay: {
+        ...campaignRef.current!.currentDay,
+        offers: [...campaignRef.current!.currentDay.offers, fakeOffer()],
+      },
+    }
+    campaignRef.current = withOffer
+    scene.setCampaign(withOffer, { ...uiStateRef.current })
+    clickThroughMessages(runtime)
+
+    expect(runtime.currentTarget).toBe('next_day_button')
+    // A bottom-docked Dialogue's y is `VIRTUAL_HEIGHT - 160 - 16 = 724`
+    // (item 17's own numbers) — well below the screen's vertical
+    // midpoint, unlike the `top` placement's fixed `16`.
+    expect(getDialogueY(scene)).toBeGreaterThan(400)
   })
 })

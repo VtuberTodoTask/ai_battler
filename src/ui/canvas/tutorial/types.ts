@@ -48,6 +48,16 @@ export interface TutorialTargetBounds {
   height: number
 }
 
+/**
+ * PR #63 review item 3: where `TutorialOverlay` docks its bottom-of-screen
+ * Dialogue Panel for the current frame. `'bottom'` is the default; the
+ * Overlay switches to `'top'` by itself, generically, whenever ANY current
+ * interaction/highlight target would otherwise sit under the Dialogue
+ * (see `chooseTutorialDialoguePlacement` in `TutorialOverlay.ts`) — never
+ * a per-Scene or per-step hardcoded value (item 4's explicit prohibition).
+ */
+export type TutorialDialoguePlacement = 'bottom' | 'top'
+
 /** Gameplay events the Tutorial Runtime can react to. The Runtime never
  * originates any of these itself — every dispatch follows a real Gameplay
  * action that already happened (Observe/Gate/Explain only, never Act). */

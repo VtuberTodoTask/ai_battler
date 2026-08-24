@@ -201,22 +201,22 @@ describe('Phase 10.2 day_results TutorialRuntime', () => {
     expect(stepId(runtime)).toBe('results_area_1')
   })
 
-  it('results_area_7 branches to narrative_intro_1 when a Narrative is available', () => {
+  it('results_area_narrative_check branches to narrative_intro_1 when a Narrative is available', () => {
     const campaign = enabledCampaign('day-results-007')
     const { runtime } = createDayResultsRuntime(campaign)
     pressNext(runtime, 'all_success', true)
-    while (stepId(runtime) !== 'results_area_7') {
+    while (stepId(runtime) !== 'results_area_narrative_check') {
       runtime.advanceMessage()
     }
     runtime.advanceMessage()
     expect(stepId(runtime)).toBe('narrative_intro_1')
   })
 
-  it('results_area_7 branches to no_narrative_1 when no Narrative is available', () => {
+  it('results_area_narrative_check branches to no_narrative_1 when no Narrative is available', () => {
     const campaign = enabledCampaign('day-results-008')
     const { runtime } = createDayResultsRuntime(campaign)
     pressNext(runtime, 'all_success', false)
-    while (stepId(runtime) !== 'results_area_7') {
+    while (stepId(runtime) !== 'results_area_narrative_check') {
       runtime.advanceMessage()
     }
     runtime.advanceMessage()
