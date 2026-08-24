@@ -132,6 +132,41 @@ describe('Phase 10.1 Tutorial save validation', () => {
     expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
   })
 
+  it('rejects mode: disabled combined with a non-empty completedTutorialIds', () => {
+    const save = buildSave(createTavernCampaign('tutorial-save-012'))
+    const bad = {
+      ...save,
+      campaign: {
+        ...save.campaign,
+        tutorial: {
+          mode: 'disabled',
+          completedTutorialIds: ['basic_request_assignment'],
+        },
+      },
+    }
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
+  it('rejects a TutorialId that is a real union member but not yet implemented', () => {
+    const enabled = setTutorialMode(
+      createTavernCampaign('tutorial-save-013'),
+      'enabled',
+    )
+    const save = buildSave(enabled)
+    const bad = {
+      ...save,
+      campaign: {
+        ...save.campaign,
+        // 'tavern_upgrade' is declared on the TutorialId union for a
+        // future Phase but is not in IMPLEMENTED_TUTORIAL_IDS — a save
+        // claiming it completed could never have been produced by this
+        // build and must be rejected the same as a wholly unknown id.
+        tutorial: { mode: 'enabled', completedTutorialIds: ['tavern_upgrade'] },
+      },
+    }
+    expect(() => validateGameSave(bad)).toThrow(SaveValidationErrorClass)
+  })
+
   it('save/load roundtrip preserves Tutorial state exactly', () => {
     const enabled = setTutorialMode(
       createTavernCampaign('tutorial-save-011'),

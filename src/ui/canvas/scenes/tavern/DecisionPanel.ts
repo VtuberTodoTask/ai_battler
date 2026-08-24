@@ -148,6 +148,21 @@ export class DecisionPanel extends Container {
     return this._prediction
   }
 
+  /** Phase 10.1 Tutorial retry fix: clears the "same Party+Quest+sample
+   * count already fetched" cache keys WITHOUT touching `_sequence`, the
+   * current `_prediction`, or its status — so the next `update()` call
+   * (e.g. the Player reselecting the very same Party after a prediction
+   * failure) issues a genuinely new fetch instead of silently doing
+   * nothing because the cache key still matches. Never called
+   * automatically by this Panel itself; only an explicit caller (the
+   * Tutorial Runtime's error-recovery path, via TavernScene) invokes it,
+   * so there is no risk of this turning into an unsolicited retry loop. */
+  resetPredictionForRetry(): void {
+    this._lastPartyId = undefined
+    this._lastQuestId = undefined
+    this._lastSampleCount = undefined
+  }
+
   /** Phase 10.1 Tutorial: the assign button's bounds relative to this
    * Panel's own (x, y) origin, for the `assign_button` input-gating
    * cutout. Plain arithmetic from the same layout values the constructor

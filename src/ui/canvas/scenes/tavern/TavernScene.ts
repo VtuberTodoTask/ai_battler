@@ -256,10 +256,10 @@ export class TavernScene implements GameScene {
       this._tutorialRuntime.campaignSeed !== campaign.seed
     ) {
       this._tutorialRuntime = new TutorialRuntime(campaign, {
-        onCommitCampaign: (next) =>
-          this._context!.canvasGame.setCampaign(next, {
-            preserveCurrentScene: true,
-          }),
+        onSetTutorialMode: (mode) =>
+          this._context!.actions.setTutorialMode(mode),
+        onCompleteTutorial: (tutorialId) =>
+          this._context!.actions.completeTutorial(tutorialId),
         onChange: () => this.renderTutorial(),
       })
     } else {
@@ -426,7 +426,7 @@ export class TavernScene implements GameScene {
           type: 'prediction_ready',
           prediction,
         }),
-      onPredictionError: () => this._tutorialRuntime?.handlePredictionError(),
+      onPredictionError: () => this.handleTutorialPredictionError(),
     })
     this._decisionPanel.x = LEFT_WIDTH + MARGIN
     this._decisionPanel.y = MAIN_Y
@@ -499,6 +499,13 @@ export class TavernScene implements GameScene {
           height: local.height,
         }
       }
+      case 'next_day_button': {
+        if (!this._header) return null
+        // The Header is always placed at (0, 0), so its own bounds
+        // already equal Scene-global coordinates — no offset needed,
+        // unlike DecisionPanel above.
+        return this._header.getActionButtonBounds()
+      }
       default:
         return null
     }
@@ -510,6 +517,19 @@ export class TavernScene implements GameScene {
 
   private handleTutorialChoice(optionId: string): void {
     this._tutorialRuntime?.selectChoice(optionId)
+  }
+
+  /** Integration-layer glue for the P1 retry-deadlock fix: the Tutorial
+   * Runtime never references DecisionPanel directly (it only knows about
+   * abstract wait/target concepts), so resetting DecisionPanel's own
+   * "same Party+Quest already fetched" cache lives here, alongside
+   * telling the Runtime to play its error-recovery line and return to
+   * Party selection. Without the reset, re-selecting the very same Party
+   * after a failed fetch would silently never re-request a prediction,
+   * permanently stalling the Tutorial. */
+  private handleTutorialPredictionError(): void {
+    this._decisionPanel?.resetPredictionForRetry()
+    this._tutorialRuntime?.handlePredictionError()
   }
 
   private handleSelectParty(id: string): void {
@@ -538,6 +558,14 @@ export class TavernScene implements GameScene {
       return
     }
     AudioController.playSe('shopBell')
+    // Dispatched synchronously, right here — never from inside
+    // `applyCampaign()`'s later `dayAdvanced` branch, which immediately
+    // pushes DayResults and unmounts this Scene (and its Tutorial
+    // Runtime) before that async resync would ever land. Completion is
+    // still gated on this real `advanceDay()` call having actually
+    // succeeded (item 13/25 of the review), just confirmed synchronously
+    // rather than by waiting on the campaign prop round-trip.
+    this._tutorialRuntime?.dispatch({ type: 'day_advanced' })
   }
 
   private handleAssign(): void {

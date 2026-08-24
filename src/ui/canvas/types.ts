@@ -4,6 +4,7 @@ import type {
   TavernUpgradeId,
 } from '../../core/tavern/campaign/types.ts'
 import type { MainQuestThreatId } from '../../core/mainQuest/types.ts'
+import type { TutorialId } from '../../core/tavern/campaign/tutorial.ts'
 import type { CanvasGame } from './CanvasGame.ts'
 import type { GameAssetManager } from './assets/GameAssetManager.ts'
 import type { OverlayManager } from './overlays/OverlayManager.ts'
@@ -82,6 +83,19 @@ export interface GameUiActions {
   openSettings: () => void
   closeModal: () => void
   switchToLegacy: () => void
+  /** Phase 10.1 Tutorial Runtime commits. Both read the FRESHEST Campaign
+   * (via `campaignRef`, not the possibly-stale `campaign` prop closure)
+   * before applying the Core transition, so a Tutorial commit issued in
+   * the same synchronous tick as another Campaign-mutating action (e.g.
+   * completing the Tutorial right after `advanceDay()`) never loses that
+   * other action's write — see `TavernSimulator.tsx`'s `commitCampaign`/
+   * `campaignRef` doc comment for why a plain `campaign` closure read
+   * would race here. This is why the Runtime never commits by handing a
+   * pre-computed Campaign object to a generic setter (unlike everything
+   * else in this file) — only the Tutorial id / mode ever crosses this
+   * boundary. */
+  setTutorialMode: (mode: 'enabled' | 'disabled') => UiActionResult
+  completeTutorial: (tutorialId: TutorialId) => UiActionResult
   /** Title / save-load lifecycle actions. */
   newGame?: () => UiActionResult
   loadGame?: (slotId: string) => Promise<UiActionResult>

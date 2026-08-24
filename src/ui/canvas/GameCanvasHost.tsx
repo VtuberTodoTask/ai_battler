@@ -13,6 +13,7 @@ import type {
   TavernUpgradeId,
 } from '../../core/tavern/campaign/types.ts'
 import type { MainQuestThreatId } from '../../core/mainQuest/types.ts'
+import type { TutorialId } from '../../core/tavern/campaign/tutorial.ts'
 
 export interface GameCanvasHostProps {
   campaign: TavernCampaignState | null
@@ -23,6 +24,11 @@ export interface GameCanvasHostProps {
     requestId: string,
   ) => UiActionResult<OfferRequestActionData>
   onPurchaseUpgrade: (upgradeId: TavernUpgradeId) => UiActionResult
+  /** Phase 10.1 Tutorial Runtime commits — see `GameUiActions`'
+   * `setTutorialMode`/`completeTutorial` doc comment for why these read
+   * the freshest Campaign internally rather than accepting one. */
+  onSetTutorialMode: (mode: 'enabled' | 'disabled') => UiActionResult
+  onCompleteTutorial: (tutorialId: TutorialId) => UiActionResult
   onOpenActivity: (
     partyId: string,
     eventId: string,
@@ -55,6 +61,8 @@ export default function GameCanvasHost({
   onResolveDay,
   onOfferRequest,
   onPurchaseUpgrade,
+  onSetTutorialMode,
+  onCompleteTutorial,
   onOpenActivity,
   onOpenExpeditionNarrative,
   onDispatchMainQuest,
@@ -92,6 +100,8 @@ export default function GameCanvasHost({
   const onResolveRef = useRef(onResolveDay)
   const onOfferRef = useRef(onOfferRequest)
   const onPurchaseUpgradeRef = useRef(onPurchaseUpgrade)
+  const onSetTutorialModeRef = useRef(onSetTutorialMode)
+  const onCompleteTutorialRef = useRef(onCompleteTutorial)
   const onOpenActivityRef = useRef(onOpenActivity)
   const onOpenExpeditionNarrativeRef = useRef(onOpenExpeditionNarrative)
   const onDispatchMainQuestRef = useRef(onDispatchMainQuest)
@@ -116,6 +126,8 @@ export default function GameCanvasHost({
     onResolveRef.current = onResolveDay
     onOfferRef.current = onOfferRequest
     onPurchaseUpgradeRef.current = onPurchaseUpgrade
+    onSetTutorialModeRef.current = onSetTutorialMode
+    onCompleteTutorialRef.current = onCompleteTutorial
     onOpenActivityRef.current = onOpenActivity
     onOpenExpeditionNarrativeRef.current = onOpenExpeditionNarrative
     onDispatchMainQuestRef.current = onDispatchMainQuest
@@ -137,6 +149,8 @@ export default function GameCanvasHost({
     onResolveDay,
     onOfferRequest,
     onPurchaseUpgrade,
+    onSetTutorialMode,
+    onCompleteTutorial,
     onOpenActivity,
     onOpenExpeditionNarrative,
     onDispatchMainQuest,
@@ -219,6 +233,40 @@ export default function GameCanvasHost({
             ok: false,
             message:
               e instanceof Error ? e.message : '設備の購入に失敗しました',
+          }
+        }
+      },
+      setTutorialMode: (mode) => {
+        try {
+          const result = onSetTutorialModeRef.current(mode)
+          if (result.ok) {
+            preserveSceneOnNextSyncRef.current = true
+          }
+          return result
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error
+                ? e.message
+                : 'チュートリアル設定の更新に失敗しました',
+          }
+        }
+      },
+      completeTutorial: (tutorialId) => {
+        try {
+          const result = onCompleteTutorialRef.current(tutorialId)
+          if (result.ok) {
+            preserveSceneOnNextSyncRef.current = true
+          }
+          return result
+        } catch (e) {
+          return {
+            ok: false,
+            message:
+              e instanceof Error
+                ? e.message
+                : 'チュートリアルの完了に失敗しました',
           }
         }
       },

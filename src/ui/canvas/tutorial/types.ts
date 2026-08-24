@@ -4,10 +4,10 @@ import type { ExpeditionPrediction } from '../../../core/tavern/prediction/types
  * Regions of the Tavern UI a `wait_for_action` step can leave operable.
  * `'none'` means every Gameplay UI element is blocked (used by `message`/
  * `choice` steps). Extensible for later Tutorials — Phase 10.1 only ever
- * produces `quest_list` / `party_list` / `assign_button`.
+ * produces `quest_list` / `party_list` / `assign_button` / `next_day_button`.
  */
 export type TutorialTarget =
-  'none' | 'quest_list' | 'party_list' | 'assign_button'
+  'none' | 'quest_list' | 'party_list' | 'assign_button' | 'next_day_button'
 
 /** Axis-aligned bounds in the same (virtual) coordinate space as the rest
  * of the Canvas UI, used to carve an input-blocker cutout around the
@@ -27,9 +27,14 @@ export type TutorialAction =
   | { type: 'party_selected'; partyId: string }
   | { type: 'prediction_ready'; prediction: ExpeditionPrediction }
   | { type: 'request_offered'; decision: 'accepted' | 'declined' }
+  | { type: 'day_advanced' }
 
 export type TutorialWaitKind =
-  'quest_selected' | 'party_selected' | 'prediction_ready' | 'request_offered'
+  | 'quest_selected'
+  | 'party_selected'
+  | 'prediction_ready'
+  | 'request_offered'
+  | 'day_advanced'
 
 export interface TutorialMessageStep {
   type: 'message'
@@ -68,6 +73,12 @@ export interface TutorialWaitForActionStep {
    * and declined each get their own single reaction line before the
    * script reconverges. */
   branches?: { accepted: string; declined: string }
+  /** Only meaningful when `wait === 'prediction_ready'` — where to go if
+   * the async fetch fails while waiting here (its own short message step,
+   * whose own `next` returns to the matching Party-selection wait). Each
+   * prediction wait (first attempt vs. retry) points at its own error
+   * step, since they return to different Party-selection steps. */
+  onError?: string
 }
 
 export type TutorialStep =

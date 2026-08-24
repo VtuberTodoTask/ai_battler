@@ -89,11 +89,24 @@ export function shouldSuppressAutoSelectParty(
   )
 }
 
-/** Idempotent: completing an already-completed Tutorial id is a no-op. */
+/**
+ * Idempotent: completing an already-completed Tutorial id is a no-op.
+ * Also a no-op — never throws — when `mode !== 'enabled'` (a Tutorial can
+ * only complete while it is the one actually running; mirrors
+ * `setTutorialMode`'s own silent-no-op-on-invalid-transition convention)
+ * or when `tutorialId` is not in `IMPLEMENTED_TUTORIAL_IDS` (the single
+ * source of truth also used by save validation — nothing should ever
+ * mark a not-yet-built Tutorial complete). These two guards are what
+ * make the causal invariant `completedTutorialIds` is non-empty only
+ * while `mode === 'enabled'` hold for every commit this function ever
+ * produces, not just for well-behaved callers.
+ */
 export function completeTutorial(
   campaign: TavernCampaignState,
   tutorialId: TutorialId,
 ): TavernCampaignState {
+  if (campaign.tutorial.mode !== 'enabled') return campaign
+  if (!IMPLEMENTED_TUTORIAL_IDS.includes(tutorialId)) return campaign
   if (campaign.tutorial.completedTutorialIds.includes(tutorialId)) {
     return campaign
   }

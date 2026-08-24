@@ -3,8 +3,10 @@ import { createTavernCampaign } from '../../../core/tavern/campaign/campaign.ts'
 import {
   completeTutorial,
   setTutorialMode,
+  type TutorialId,
 } from '../../../core/tavern/campaign/tutorial.ts'
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
+import type { BrokerageOfferAttempt } from '../../../core/tavern/types.ts'
 import type { ExpeditionPrediction } from '../../../core/tavern/prediction/types.ts'
 import { TutorialRuntime } from './tutorialRuntime.ts'
 
@@ -34,32 +36,78 @@ function fakePrediction(): ExpeditionPrediction {
   }
 }
 
+function fakeOffer(decision: 'accepted' | 'declined'): BrokerageOfferAttempt {
+  return {
+    id: `offer-${decision}-${Math.random()}`,
+    requestId: 'req-1',
+    partyId: 'party-1',
+    decision,
+    reason: 'appropriate',
+    evaluation: {} as BrokerageOfferAttempt['evaluation'],
+  }
+}
+
+/** Simulates the real app's async Campaign resync landing after a
+ * `context.actions.offerRequest(...)` call — appends one more offer
+ * record to `currentDay.offers`, exactly as `offerRequestToParty` would.
+ * `hasAcceptedOfferToday()` reads this array; the Runtime never tallies
+ * accepted offers itself. */
+function withOneMoreOffer(
+  campaign: TavernCampaignState,
+  decision: 'accepted' | 'declined',
+): TavernCampaignState {
+  return {
+    ...campaign,
+    currentDay: {
+      ...campaign.currentDay,
+      offers: [...campaign.currentDay.offers, fakeOffer(decision)],
+    },
+  }
+}
+
 function createRuntime(campaign: TavernCampaignState) {
-  const committed: TavernCampaignState[] = []
+  const modeCommits: Array<'enabled' | 'disabled'> = []
+  const completedIds: TutorialId[] = []
   const onChange = vi.fn()
   let current = campaign
   const runtime = new TutorialRuntime(campaign, {
-    onCommitCampaign: (next) => {
-      current = next
-      committed.push(next)
-      runtime.syncCampaign(next)
+    onSetTutorialMode: (mode) => {
+      modeCommits.push(mode)
+      current = setTutorialMode(current, mode)
+      runtime.syncCampaign(current)
+    },
+    onCompleteTutorial: (tutorialId) => {
+      completedIds.push(tutorialId)
+      current = completeTutorial(current, tutorialId)
+      runtime.syncCampaign(current)
     },
     onChange,
   })
   return {
     runtime,
-    committed,
+    modeCommits,
+    completedIds,
     onChange,
     getCurrent: () => current,
+    /** Simulates the async Campaign resync that lands after a real
+     * `offerRequest` call, for tests that need `hasAcceptedOfferToday()`
+     * to see it before reaching `recover_2`. */
+    syncOneMoreOffer: (decision: 'accepted' | 'declined') => {
+      current = withOneMoreOffer(current, decision)
+      runtime.syncCampaign(current)
+    },
   }
 }
 
 /** Drives the runtime through the `basic_request_assignment` script's
- * three Gameplay wait points in order, resolving via the given decision. */
+ * three Gameplay wait points in order, resolving via the given decision,
+ * and — like the real app — syncs the resulting offer onto the Campaign
+ * right after dispatching, before any later step reads it. */
 function driveThroughRequestOffer(
-  runtime: TutorialRuntime,
+  ctx: ReturnType<typeof createRuntime>,
   decision: 'accepted' | 'declined',
 ): void {
+  const { runtime } = ctx
   // intro_1..intro_7
   for (let i = 0; i < 7; i++) runtime.advanceMessage()
   runtime.dispatch({ type: 'quest_selected', questId: 'quest-1' })
@@ -67,9 +115,40 @@ function driveThroughRequestOffer(
   for (let i = 0; i < 4; i++) runtime.advanceMessage()
   runtime.dispatch({ type: 'party_selected', partyId: 'party-1' })
   runtime.dispatch({ type: 'prediction_ready', prediction: fakePrediction() })
-  // pred_intro_1..3, pred_explain_1..7
-  for (let i = 0; i < 10; i++) runtime.advanceMessage()
+  // pred_1..pred_11
+  for (let i = 0; i < 11; i++) runtime.advanceMessage()
   runtime.dispatch({ type: 'request_offered', decision })
+  ctx.syncOneMoreOffer(decision)
+}
+
+/** Clicks [次へ] repeatedly for as long as the current step is an
+ * advanceable `message` — i.e. until landing on a `choice`/
+ * `wait_for_action` step (or the Tutorial closes). Avoids hand-counting
+ * every step in a linear chain (including `recover_2`'s conditional
+ * branch, which `advanceMessage()` itself resolves). */
+function clickThroughMessages(runtime: TutorialRuntime, maxClicks = 30): void {
+  let clicks = 0
+  while (runtime.getSnapshot().showNextButton && clicks < maxClicks) {
+    runtime.advanceMessage()
+    clicks++
+  }
+}
+
+/** Drives one retry attempt (quest -> party -> prediction -> offer),
+ * short-form, resolving via the given decision. Assumes the Runtime is
+ * currently sitting at `wait_quest_selected_retry`. */
+function driveThroughRetryOffer(
+  ctx: ReturnType<typeof createRuntime>,
+  decision: 'accepted' | 'declined',
+): void {
+  const { runtime } = ctx
+  runtime.dispatch({ type: 'quest_selected', questId: 'quest-2' })
+  clickThroughMessages(runtime)
+  runtime.dispatch({ type: 'party_selected', partyId: 'party-2' })
+  runtime.dispatch({ type: 'prediction_ready', prediction: fakePrediction() })
+  clickThroughMessages(runtime)
+  runtime.dispatch({ type: 'request_offered', decision })
+  ctx.syncOneMoreOffer(decision)
 }
 
 describe('Phase 10.1 TutorialRuntime', () => {
@@ -84,12 +163,11 @@ describe('Phase 10.1 TutorialRuntime', () => {
 
   it('"はい" commits mode: enabled and starts the Basic Tutorial immediately', () => {
     const campaign = createTavernCampaign('runtime-002')
-    const { runtime, committed } = createRuntime(campaign)
+    const { runtime, modeCommits } = createRuntime(campaign)
 
     runtime.selectChoice('yes')
 
-    expect(committed).toHaveLength(1)
-    expect(committed[0]!.tutorial.mode).toBe('enabled')
+    expect(modeCommits).toEqual(['enabled'])
     const snapshot = runtime.getSnapshot()
     expect(snapshot.visible).toBe(true)
     expect(snapshot.text).toBe('了解です！　では私にお任せください！')
@@ -98,12 +176,10 @@ describe('Phase 10.1 TutorialRuntime', () => {
 
   it('"いいえ" commits mode: disabled, plays 3 closing lines, then closes', () => {
     const campaign = createTavernCampaign('runtime-003')
-    const { runtime, committed } = createRuntime(campaign)
+    const { runtime, modeCommits, completedIds } = createRuntime(campaign)
 
     runtime.selectChoice('no')
-    expect(committed).toHaveLength(1)
-    expect(committed[0]!.tutorial.mode).toBe('disabled')
-    expect(committed[0]!.tutorial.completedTutorialIds).toEqual([])
+    expect(modeCommits).toEqual(['disabled'])
 
     expect(runtime.getSnapshot().text).toBe('おお、自信ありですね！')
     runtime.advanceMessage()
@@ -120,7 +196,7 @@ describe('Phase 10.1 TutorialRuntime', () => {
     expect(runtime.getSnapshot().visible).toBe(false)
     expect(runtime.isBlocking).toBe(false)
     // Declining never completes a Tutorial id.
-    expect(committed).toHaveLength(1)
+    expect(completedIds).toEqual([])
   })
 
   it('ignores an action that does not match the current wait step', () => {
@@ -158,7 +234,7 @@ describe('Phase 10.1 TutorialRuntime', () => {
     expect(runtime.currentTarget).toBe('none')
     runtime.dispatch({ type: 'prediction_ready', prediction: fakePrediction() })
 
-    for (let i = 0; i < 10; i++) runtime.advanceMessage()
+    for (let i = 0; i < 11; i++) runtime.advanceMessage()
     expect(runtime.currentTarget).toBe('assign_button')
   })
 
@@ -181,7 +257,7 @@ describe('Phase 10.1 TutorialRuntime', () => {
 
     // The wait_prediction_ready step should already have been skipped —
     // we should land directly on the prediction-explanation message.
-    expect(runtime.getSnapshot().text).toBe('おお、もう予測が出ていますね')
+    expect(runtime.getSnapshot().text).toBe('さて、どうでしょう？')
   })
 
   it('recovers from a prediction fetch failure without hanging', () => {
@@ -222,9 +298,11 @@ describe('Phase 10.1 TutorialRuntime', () => {
       createTavernCampaign('runtime-009'),
       'enabled',
     )
-    const { runtime } = createRuntime(campaign)
-    driveThroughRequestOffer(runtime, 'accepted')
-    expect(runtime.getSnapshot().text).toBe('やりましたね！')
+    const ctx = createRuntime(campaign)
+    driveThroughRequestOffer(ctx, 'accepted')
+    expect(ctx.runtime.getSnapshot().text).toBe(
+      'やりましたね！　依頼を受諾していただけましたよ！',
+    )
   })
 
   it('branches to the declined line on a declined offer', () => {
@@ -232,40 +310,125 @@ describe('Phase 10.1 TutorialRuntime', () => {
       createTavernCampaign('runtime-010'),
       'enabled',
     )
-    const { runtime } = createRuntime(campaign)
-    driveThroughRequestOffer(runtime, 'declined')
-    expect(runtime.getSnapshot().text).toBe('あちゃー、断られてしまいましたね')
+    const ctx = createRuntime(campaign)
+    driveThroughRequestOffer(ctx, 'declined')
+    expect(ctx.runtime.getSnapshot().text).toBe(
+      'ありゃりゃ。断られちゃいましたね……',
+    )
   })
 
-  it('reconverges both branches onto the same closing script and completes the Tutorial', () => {
+  it('accepted first try: proceeds straight to the day-advance wait (item 19)', () => {
     const campaign = setTutorialMode(
       createTavernCampaign('runtime-011'),
       'enabled',
     )
-    const { runtime, committed, getCurrent } = createRuntime(campaign)
-    driveThroughRequestOffer(runtime, 'accepted')
+    const ctx = createRuntime(campaign)
+    driveThroughRequestOffer(ctx, 'accepted')
 
-    // accepted_1 -> common_1..4 -> recover_1..2 -> wrap_1..5 (11 messages).
-    for (let i = 0; i < 11; i++) {
-      runtime.advanceMessage()
-      expect(runtime.getSnapshot().visible).toBe(true)
-    }
-    expect(runtime.getSnapshot().text).toBe(
-      '無理そうなら見送るのも、立派な店主さんのお仕事です！',
+    clickThroughMessages(ctx.runtime)
+    expect(ctx.runtime.currentTarget).toBe('next_day_button')
+    expect(ctx.runtime.getSnapshot().text).toBe(
+      '冒険者さんたちがどうなったのか、結果を見に行きましょう！',
     )
-    expect(runtime.isBlocking).toBe(true)
+    expect(ctx.completedIds).toEqual([])
 
-    runtime.advanceMessage()
-    expect(runtime.getSnapshot().visible).toBe(false)
-    expect(runtime.isBlocking).toBe(false)
-    expect(committed).toHaveLength(1)
-    expect(getCurrent().tutorial.completedTutorialIds).toEqual([
-      'basic_request_assignment',
-    ])
+    ctx.runtime.dispatch({ type: 'day_advanced' })
+    expect(ctx.completedIds).toEqual(['basic_request_assignment'])
+    expect(ctx.runtime.getSnapshot().visible).toBe(false)
+    expect(ctx.runtime.isBlocking).toBe(false)
+  })
+
+  it('declined first try: cannot reach the day-advance wait, offers a retry instead (item 20)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('runtime-012'),
+      'enabled',
+    )
+    const ctx = createRuntime(campaign)
+    driveThroughRequestOffer(ctx, 'declined')
+
+    clickThroughMessages(ctx.runtime)
+    expect(ctx.runtime.currentTarget).toBe('quest_list')
+    expect(ctx.completedIds).toEqual([])
+  })
+
+  it('declined then accepted on retry: skips the long explanation and reaches day-advance (item 21)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('runtime-013'),
+      'enabled',
+    )
+    const ctx = createRuntime(campaign)
+    driveThroughRequestOffer(ctx, 'declined')
+    clickThroughMessages(ctx.runtime)
+    expect(ctx.runtime.currentTarget).toBe('quest_list')
+
+    driveThroughRetryOffer(ctx, 'accepted')
+    // Accepted on retry skips straight to wrap_1 — no repeat of
+    // common_1..4/recover_1..2.
+    expect(ctx.runtime.getSnapshot().text).toBe(
+      'やりましたね！　依頼を受諾していただけましたよ！',
+    )
+    clickThroughMessages(ctx.runtime)
+    expect(ctx.runtime.currentTarget).toBe('next_day_button')
+
+    ctx.runtime.dispatch({ type: 'day_advanced' })
+    expect(ctx.completedIds).toEqual(['basic_request_assignment'])
+  })
+
+  it('declined repeatedly never stalls the Tutorial (item 22)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('runtime-014'),
+      'enabled',
+    )
+    const ctx = createRuntime(campaign)
+    driveThroughRequestOffer(ctx, 'declined')
+    clickThroughMessages(ctx.runtime)
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      expect(ctx.runtime.currentTarget).toBe('quest_list')
+      driveThroughRetryOffer(ctx, 'declined')
+      expect(ctx.runtime.getSnapshot().text).toBe(
+        'うーん、また断られちゃいましたね……',
+      )
+      clickThroughMessages(ctx.runtime)
+    }
+    expect(ctx.runtime.currentTarget).toBe('quest_list')
+    expect(ctx.completedIds).toEqual([])
+    expect(ctx.runtime.isBlocking).toBe(true)
+  })
+
+  it('never unlocks next_day_button while zero offers are accepted today (item 24)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('runtime-015'),
+      'enabled',
+    )
+    const ctx = createRuntime(campaign)
+    driveThroughRequestOffer(ctx, 'declined')
+    clickThroughMessages(ctx.runtime)
+    expect(ctx.runtime.currentTarget).not.toBe('next_day_button')
+    expect(ctx.runtime.currentTarget).toBe('quest_list')
+  })
+
+  it('completion happens only after day_advanced dispatches, never merely from reading the last line (item 25)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('runtime-016'),
+      'enabled',
+    )
+    const ctx = createRuntime(campaign)
+    driveThroughRequestOffer(ctx, 'accepted')
+    clickThroughMessages(ctx.runtime)
+    expect(ctx.runtime.currentTarget).toBe('next_day_button')
+
+    // Reaching (and even re-reading) the final wait's snapshot does not
+    // complete the Tutorial on its own.
+    expect(ctx.completedIds).toEqual([])
+    expect(ctx.runtime.isBlocking).toBe(true)
+
+    ctx.runtime.dispatch({ type: 'day_advanced' })
+    expect(ctx.completedIds).toEqual(['basic_request_assignment'])
   })
 
   it('a same-seed Campaign resync does not reset Consent or the active step', () => {
-    const campaign = createTavernCampaign('runtime-012')
+    const campaign = createTavernCampaign('runtime-017')
     const { runtime } = createRuntime(campaign)
     runtime.selectChoice('yes')
     runtime.advanceMessage() // -> intro_2
@@ -279,7 +442,7 @@ describe('Phase 10.1 TutorialRuntime', () => {
 
   it('initializes closed (no Overlay) once already enabled and completed', () => {
     const enabled = setTutorialMode(
-      createTavernCampaign('runtime-013'),
+      createTavernCampaign('runtime-018'),
       'enabled',
     )
     const completed = completeTutorial(enabled, 'basic_request_assignment')
@@ -290,7 +453,7 @@ describe('Phase 10.1 TutorialRuntime', () => {
 
   it('initializes closed once disabled', () => {
     const disabled = setTutorialMode(
-      createTavernCampaign('runtime-014'),
+      createTavernCampaign('runtime-019'),
       'disabled',
     )
     const { runtime } = createRuntime(disabled)
@@ -299,8 +462,8 @@ describe('Phase 10.1 TutorialRuntime', () => {
   })
 
   it('exposes the Campaign seed it was built from', () => {
-    const campaign = createTavernCampaign('runtime-015')
+    const campaign = createTavernCampaign('runtime-020')
     const { runtime } = createRuntime(campaign)
-    expect(runtime.campaignSeed).toBe('runtime-015')
+    expect(runtime.campaignSeed).toBe('runtime-020')
   })
 })

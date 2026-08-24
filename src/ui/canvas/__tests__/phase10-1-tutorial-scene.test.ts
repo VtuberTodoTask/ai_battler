@@ -2,9 +2,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Container } from 'pixi.js'
 import { createTavernCampaign } from '../../../core/tavern/campaign/campaign.ts'
-import { setTutorialMode } from '../../../core/tavern/campaign/tutorial.ts'
+import {
+  completeTutorial,
+  setTutorialMode,
+  type TutorialId,
+} from '../../../core/tavern/campaign/tutorial.ts'
 import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts'
 import type { ExpeditionPrediction } from '../../../core/tavern/prediction/types.ts'
+import type { BrokerageOfferAttempt } from '../../../core/tavern/types.ts'
 import { TavernScene } from '../scenes/tavern/TavernScene.ts'
 import type { TutorialRuntime } from '../tutorial/tutorialRuntime.ts'
 import { GameAssetManager } from '../assets/GameAssetManager.ts'
@@ -149,6 +154,22 @@ function createSceneContext(
       resolveDay: vi.fn(),
       offerRequest: vi.fn(),
       purchaseUpgrade: vi.fn(),
+      // Mirrors TavernSimulator's handleSetTutorialMode/handleCompleteTutorial:
+      // apply the Core transition to the freshest known Campaign, then
+      // resync the Scene directly (there is no React state to flow through
+      // in this test harness).
+      setTutorialMode: vi.fn((mode: 'enabled' | 'disabled') => {
+        const next = setTutorialMode(campaignRef.current!, mode)
+        campaignRef.current = next
+        scene.setCampaign(next, { ...uiStateRef.current })
+        return { ok: true }
+      }),
+      completeTutorial: vi.fn((tutorialId: TutorialId) => {
+        const next = completeTutorial(campaignRef.current!, tutorialId)
+        campaignRef.current = next
+        scene.setCampaign(next, { ...uiStateRef.current })
+        return { ok: true }
+      }),
       selectParty: vi.fn(),
       selectQuest: vi.fn(),
       openCharacter: vi.fn(),
@@ -184,6 +205,28 @@ function fakePrediction(): ExpeditionPrediction {
       forcedRetreat: 0.04,
       lostExpedition: 0.01,
     },
+  }
+}
+
+function fakeOffer(): BrokerageOfferAttempt {
+  return {
+    id: `offer-${Math.random()}`,
+    requestId: 'req',
+    partyId: 'party',
+    decision: 'accepted',
+    reason: 'appropriate',
+    evaluation: {} as BrokerageOfferAttempt['evaluation'],
+  }
+}
+
+/** Clicks [次へ] repeatedly for as long as the current step is an
+ * advanceable `message` — avoids hand-counting every step in a linear
+ * chain (including `recover_2`'s conditional branch). */
+function clickThroughMessages(runtime: TutorialRuntime, maxClicks = 30): void {
+  let clicks = 0
+  while (runtime.getSnapshot().showNextButton && clicks < maxClicks) {
+    runtime.advanceMessage()
+    clicks++
   }
 }
 
@@ -229,6 +272,7 @@ describe('Phase 10.1 Tutorial <-> TavernScene wiring', () => {
 
     scene.mount(context)
     scene.setCampaign(campaign, { ...DEFAULT_GAME_UI_STATE })
+    campaignRef.current = campaign
     expect(uiStateRef.current.selectedPartyId).toBeNull()
 
     getRuntime(scene).selectChoice('no')
@@ -253,6 +297,7 @@ describe('Phase 10.1 Tutorial <-> TavernScene wiring', () => {
 
     scene.mount(context)
     scene.setCampaign(campaign, { ...DEFAULT_GAME_UI_STATE })
+    campaignRef.current = campaign
     getRuntime(scene).selectChoice('yes')
     getRuntime(scene).advanceMessage() // -> intro_2
     const runtimeBefore = getRuntime(scene)
@@ -279,6 +324,7 @@ describe('Phase 10.1 Tutorial <-> TavernScene wiring', () => {
 
     scene.mount(context)
     scene.setCampaign(campaign, { ...DEFAULT_GAME_UI_STATE })
+    campaignRef.current = campaign
 
     const runtime = getRuntime(scene)
     for (let i = 0; i < 7; i++) runtime.advanceMessage()
@@ -286,11 +332,25 @@ describe('Phase 10.1 Tutorial <-> TavernScene wiring', () => {
     for (let i = 0; i < 4; i++) runtime.advanceMessage()
     runtime.dispatch({ type: 'party_selected', partyId: 'p' })
     runtime.dispatch({ type: 'prediction_ready', prediction: fakePrediction() })
-    for (let i = 0; i < 10; i++) runtime.advanceMessage()
+    for (let i = 0; i < 11; i++) runtime.advanceMessage()
     runtime.dispatch({ type: 'request_offered', decision: 'accepted' })
-    // accepted_1 -> common_1..4 -> recover_1..2 -> wrap_1..5, then one more
-    // advance off wrap_5 (no `next`) to actually trigger completion.
-    for (let i = 0; i < 12; i++) runtime.advanceMessage()
+    // Mirrors the real app's async post-offer Campaign resync landing
+    // before `recover_2` is reached: `hasAcceptedOfferToday()` reads
+    // straight from `currentDay.offers`, never a Tutorial-side counter.
+    const withOffer: TavernCampaignState = {
+      ...campaignRef.current!,
+      currentDay: {
+        ...campaignRef.current!.currentDay,
+        offers: [...campaignRef.current!.currentDay.offers, fakeOffer()],
+      },
+    }
+    campaignRef.current = withOffer
+    scene.setCampaign(withOffer, { ...uiStateRef.current })
+
+    clickThroughMessages(runtime)
+    expect(runtime.currentTarget).toBe('next_day_button')
+
+    runtime.dispatch({ type: 'day_advanced' })
 
     expect(getOverlayVisible(scene)).toBe(false)
     expect(campaignRef.current?.tutorial.completedTutorialIds).toEqual([
@@ -326,7 +386,7 @@ describe('Phase 10.1 Tutorial <-> TavernScene wiring', () => {
     for (let i = 0; i < 4; i++) runtime.advanceMessage()
     runtime.dispatch({ type: 'party_selected', partyId: party.id })
     runtime.dispatch({ type: 'prediction_ready', prediction: fakePrediction() })
-    for (let i = 0; i < 10; i++) runtime.advanceMessage()
+    for (let i = 0; i < 11; i++) runtime.advanceMessage()
     expect(runtime.currentTarget).toBe('assign_button')
 
     scene.setUiState({
@@ -354,7 +414,9 @@ describe('Phase 10.1 Tutorial <-> TavernScene wiring', () => {
     expect(uiStateRef.current.actionMessage?.text).toContain('危険すぎる')
     // The decision still reaches the Runtime, advancing past the wait.
     expect(runtime.currentTarget).toBe('none')
-    expect(runtime.getSnapshot().text).toBe('あちゃー、断られてしまいましたね')
+    expect(runtime.getSnapshot().text).toBe(
+      'ありゃりゃ。断られちゃいましたね……',
+    )
   })
 
   it('leaves the traditional decline Modal untouched outside the Tutorial', () => {

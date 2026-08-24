@@ -140,6 +140,8 @@ function createSceneContext(uiStateRef?: {
       resolveDay: vi.fn(),
       offerRequest: vi.fn(),
       purchaseUpgrade: vi.fn(),
+      setTutorialMode: vi.fn(() => ({ ok: true })),
+      completeTutorial: vi.fn(() => ({ ok: true })),
       selectParty: vi.fn(),
       selectQuest: vi.fn(),
       openCharacter: vi.fn(),

@@ -1,7 +1,5 @@
 import type { ExpeditionPrediction } from '../../../core/tavern/prediction/types.ts'
 import {
-  completeTutorial,
-  setTutorialMode,
   shouldStartTutorial,
   type TutorialId,
 } from '../../../core/tavern/campaign/tutorial.ts'
@@ -60,11 +58,22 @@ function buildConsentScript(): TutorialScript {
 const CONSENT_SCRIPT = buildConsentScript()
 
 export interface TutorialRuntimeCallbacks {
-  /** Commits a Core Tutorial state transition (mode/completion) back onto
-   * the live Campaign. The Runtime never mutates Gameplay state itself —
-   * this is the only Campaign write it ever performs, and it is always
-   * one of `setTutorialMode`/`completeTutorial`. */
-  onCommitCampaign: (next: TavernCampaignState) => void
+  /** Commits `setTutorialMode` through `GameUiActions.setTutorialMode` —
+   * never a pre-computed Campaign object. That action reads the freshest
+   * Campaign internally (via `campaignRef`, not a possibly-stale React
+   * closure) before applying the Core transition, so a commit issued in
+   * the same synchronous tick as another Campaign-mutating Gameplay
+   * action (see `onCompleteTutorial` below) can never lose that other
+   * action's write. The Runtime never mutates Gameplay state itself —
+   * these two callbacks are the only Campaign writes it ever triggers. */
+  onSetTutorialMode: (mode: 'enabled' | 'disabled') => void
+  /** Commits `completeTutorial` through `GameUiActions.completeTutorial`
+   * for the given Tutorial id — same freshness guarantee as
+   * `onSetTutorialMode`. Critically used right after a real Gameplay
+   * `advanceDay()` call (dispatch of the `day_advanced` action), where a
+   * plain Campaign-object commit would silently revert the day advance —
+   * see `TavernSimulator.tsx`'s `handleCompleteTutorial`. */
+  onCompleteTutorial: (tutorialId: TutorialId) => void
   /** Called whenever the presentation snapshot may have changed, so the
    * owning Scene can re-render the Overlay. */
   onChange: () => void
@@ -83,7 +92,8 @@ export interface TutorialRuntimeCallbacks {
  */
 export class TutorialRuntime {
   private _campaign: TavernCampaignState
-  private readonly _onCommitCampaign: (next: TavernCampaignState) => void
+  private readonly _onSetTutorialMode: (mode: 'enabled' | 'disabled') => void
+  private readonly _onCompleteTutorial: (tutorialId: TutorialId) => void
   private readonly _onChange: () => void
   private _phase: TutorialPhase = 'closed'
   private _activeTutorialId: TutorialId | null = null
@@ -97,7 +107,8 @@ export class TutorialRuntime {
     callbacks: TutorialRuntimeCallbacks,
   ) {
     this._campaign = campaign
-    this._onCommitCampaign = callbacks.onCommitCampaign
+    this._onSetTutorialMode = callbacks.onSetTutorialMode
+    this._onCompleteTutorial = callbacks.onCompleteTutorial
     this._onChange = callbacks.onChange
     this.initializePhase()
   }
@@ -185,14 +196,19 @@ export class TutorialRuntime {
   advanceMessage(): void {
     const step = this.currentStep()
     if (!step || step.type !== 'message') return
+
+    // `recover_2` is the one branch point that depends on live Gameplay
+    // truth rather than a fixed `next` — whether to head into the
+    // day-advance closing chain or ask the Player to retry a declined
+    // offer. Read from the authoritative Campaign, never a Tutorial-side
+    // counter (see `hasAcceptedOfferToday`).
+    if (step.id === 'recover_2') {
+      this.goTo(this.hasAcceptedOfferToday() ? 'wrap_1' : 'retry_intro_1')
+      return
+    }
+
     if (!step.next) {
-      if (this._phase === 'active' && this._activeTutorialId) {
-        this.commit(completeTutorial(this._campaign, this._activeTutorialId))
-      }
-      this._phase = 'closed'
-      this._stepId = null
-      this._activeTutorialId = null
-      this._onChange()
+      this.completeActiveTutorial()
       return
     }
     this.goTo(step.next)
@@ -208,14 +224,14 @@ export class TutorialRuntime {
     if (!option) return
 
     if (optionId === 'yes') {
-      this.commit(setTutorialMode(this._campaign, 'enabled'))
+      this._onSetTutorialMode('enabled')
       this._phase = 'active'
       this._activeTutorialId = 'basic_request_assignment'
       this.goTo(BASIC_REQUEST_ASSIGNMENT_SCRIPT.startStepId)
       return
     }
 
-    this.commit(setTutorialMode(this._campaign, 'disabled'))
+    this._onSetTutorialMode('disabled')
     this.goTo(option.next)
   }
 
@@ -247,16 +263,38 @@ export class TutorialRuntime {
       return
     }
 
+    if (step.wait === 'day_advanced') {
+      // The final wait has no `next` of its own — matching it completes
+      // the Tutorial (Item 13 of the review: completion is gated on the
+      // day-advance actually succeeding, never on merely reading the
+      // last message).
+      this.completeActiveTutorial()
+      return
+    }
+
     if (step.next) this.goTo(step.next)
   }
 
   /** The async prediction fetch failed while waiting on it — never leave
-   * the Tutorial stuck; send the Player back to Party selection instead. */
+   * the Tutorial stuck; send the Player back to Party selection instead,
+   * via whichever error step this specific wait declares (`onError`) —
+   * the first attempt and every retry attempt each return to their own
+   * Party-selection wait. Also drops any cached `_lastPrediction`:
+   * without this, re-selecting the SAME Party (the most natural retry)
+   * would land back on the prediction wait and `goTo`'s auto-skip would
+   * immediately fire using the stale, already-failed-fetch-adjacent
+   * prediction data instead of genuinely waiting for the retried fetch's
+   * own `prediction_ready` dispatch. */
   handlePredictionError(): void {
     if (this._phase !== 'active') return
     const step = this.currentStep()
-    if (step?.type === 'wait_for_action' && step.wait === 'prediction_ready') {
-      this.goTo('pred_error_1')
+    if (
+      step?.type === 'wait_for_action' &&
+      step.wait === 'prediction_ready' &&
+      step.onError
+    ) {
+      this._lastPrediction = undefined
+      this.goTo(step.onError)
     }
   }
 
@@ -278,9 +316,23 @@ export class TutorialRuntime {
     this._stepId = null
   }
 
-  private commit(next: TavernCampaignState): void {
-    this._campaign = next
-    this._onCommitCampaign(next)
+  /** True once at least one Request has actually been accepted today —
+   * read straight from the authoritative Campaign day state, never
+   * tallied independently by the Tutorial itself. */
+  private hasAcceptedOfferToday(): boolean {
+    return this._campaign.currentDay.offers.some(
+      (offer) => offer.decision === 'accepted',
+    )
+  }
+
+  private completeActiveTutorial(): void {
+    if (this._phase === 'active' && this._activeTutorialId) {
+      this._onCompleteTutorial(this._activeTutorialId)
+    }
+    this._phase = 'closed'
+    this._stepId = null
+    this._activeTutorialId = null
+    this._onChange()
   }
 
   private currentScript(): TutorialScript | null {

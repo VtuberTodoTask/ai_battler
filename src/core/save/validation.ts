@@ -21,6 +21,7 @@ import {
   trainingYardXpBonusForLevel,
 } from '../tavern/campaign/upgrades.ts'
 import { PARTY_LIFECYCLE_CONFIG } from '../tavern/campaign/lifecycle.ts'
+import { IMPLEMENTED_TUTORIAL_IDS } from '../tavern/campaign/tutorial.ts'
 import {
   EXPEDITION_GROWTH_XP,
   PARTY_GROWTH_XP_THRESHOLD,
@@ -3295,29 +3296,19 @@ function validateEnding(
 
 const VALID_TUTORIAL_MODES = ['pending', 'enabled', 'disabled']
 
-const VALID_TUTORIAL_IDS = [
-  'basic_request_assignment',
-  'day_advance',
-  'day_results',
-  'party_detail',
-  'recovery',
-  'affinity',
-  'bond_conversation',
-  'tavern_upgrade',
-  'quest_chain',
-  'world_event',
-  'main_quest',
-]
-
 /**
  * Phase 10.1 Tutorial Runtime persistent state. Active step progress
  * (which step, which wait target, choice results) is deliberately never
  * persisted — only `mode` and `completedTutorialIds` survive Save/Load —
  * so this validator's job is narrow: the mode is one of the three known
- * values, `completedTutorialIds` is an array of known, non-duplicate
- * ids, and the causally-invalid combination of a still-`pending` Tutorial
- * (Consent never yet answered) already having completions recorded can
- * never occur.
+ * values, `completedTutorialIds` is an array of ids the game can actually
+ * complete (`IMPLEMENTED_TUTORIAL_IDS` — the same single source of truth
+ * `completeTutorial()` itself gates on, so a save can never carry a
+ * completion the runtime could never have produced), non-duplicate, and
+ * the causally-invalid combination of a Tutorial that is not currently
+ * `enabled` (still `pending` — Consent never yet answered — or terminally
+ * `disabled`) already having completions recorded can never occur:
+ * `completeTutorial()` only ever writes while `mode === 'enabled'`.
  */
 function validateTutorial(campaign: Record<string, unknown>): void {
   assertPlainObject(campaign.tutorial, 'Tutorialデータが壊れています')
@@ -3342,7 +3333,12 @@ function validateTutorial(campaign: Record<string, unknown>): void {
 
   const seen = new Set<string>()
   for (const id of tutorial.completedTutorialIds) {
-    if (typeof id !== 'string' || !VALID_TUTORIAL_IDS.includes(id)) {
+    if (
+      typeof id !== 'string' ||
+      !IMPLEMENTED_TUTORIAL_IDS.includes(
+        id as (typeof IMPLEMENTED_TUTORIAL_IDS)[number],
+      )
+    ) {
       throw new SaveValidationErrorClass(
         '未知のTutorial IDが含まれています',
         'corrupted-data',
@@ -3357,9 +3353,9 @@ function validateTutorial(campaign: Record<string, unknown>): void {
     seen.add(id)
   }
 
-  if (tutorial.mode === 'pending' && tutorial.completedTutorialIds.length > 0) {
+  if (tutorial.mode !== 'enabled' && tutorial.completedTutorialIds.length > 0) {
     throw new SaveValidationErrorClass(
-      'Tutorialがpendingなのに完了済みIDが存在します',
+      'Tutorialがenabledでないのに完了済みIDが存在します',
       'corrupted-data',
     )
   }

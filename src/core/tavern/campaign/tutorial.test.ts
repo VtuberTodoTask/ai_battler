@@ -148,6 +148,36 @@ describe('Phase 10.1 Tutorial Core state', () => {
       completeTutorial(enabled, 'basic_request_assignment')
       expect(enabled.tutorial.completedTutorialIds).toEqual(snapshot)
     })
+
+    it('is a no-op while mode is still pending (Consent never answered)', () => {
+      const pending = createTavernCampaign('tutorial-core-019')
+      const next = completeTutorial(pending, 'basic_request_assignment')
+      expect(next).toBe(pending)
+      expect(next.tutorial.completedTutorialIds).toEqual([])
+    })
+
+    it('is a no-op once mode is disabled', () => {
+      const disabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-020'),
+        'disabled',
+      )
+      const next = completeTutorial(disabled, 'basic_request_assignment')
+      expect(next).toBe(disabled)
+      expect(next.tutorial.completedTutorialIds).toEqual([])
+    })
+
+    it('is a no-op for a TutorialId that is not yet implemented', () => {
+      const enabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-021'),
+        'enabled',
+      )
+      // 'tavern_upgrade' is a real member of the TutorialId union (a
+      // future Phase) but is not in IMPLEMENTED_TUTORIAL_IDS yet — the
+      // runtime must never be able to mark it complete.
+      const next = completeTutorial(enabled, 'tavern_upgrade')
+      expect(next).toBe(enabled)
+      expect(next.tutorial.completedTutorialIds).toEqual([])
+    })
   })
 
   describe('shouldSuppressAutoSelectParty', () => {
