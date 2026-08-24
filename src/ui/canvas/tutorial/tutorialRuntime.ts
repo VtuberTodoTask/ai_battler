@@ -143,6 +143,23 @@ export class TutorialRuntime {
     return 'none'
   }
 
+  /** Spotlight target for the current step — see
+   * `TutorialMessageStep.highlightTarget` / `TutorialWaitForActionStep.
+   * highlightTarget`. Independent of `currentTarget`: a step can
+   * spotlight a region without granting it any interaction (the
+   * Prediction explanation highlights `prediction_rate` while leaving
+   * `currentTarget` at `'none'`), and a `message` step can preview the
+   * NEXT operable region before its own `wait_for_action` step actually
+   * unblocks it. */
+  get currentHighlightTarget(): TutorialTarget {
+    const step = this.currentStep()
+    if (!step) return 'none'
+    if (step.type === 'wait_for_action')
+      return step.highlightTarget ?? step.target
+    if (step.type === 'message') return step.highlightTarget ?? 'none'
+    return 'none'
+  }
+
   getSnapshot(): TutorialPresentationSnapshot {
     if (this._phase === 'closed') {
       return {
@@ -151,6 +168,7 @@ export class TutorialRuntime {
         text: '',
         showNextButton: false,
         target: 'none',
+        highlightTarget: 'none',
       }
     }
     const step = this.currentStep()
@@ -161,6 +179,7 @@ export class TutorialRuntime {
         text: '',
         showNextButton: false,
         target: 'none',
+        highlightTarget: 'none',
       }
     }
     if (step.type === 'message') {
@@ -170,6 +189,7 @@ export class TutorialRuntime {
         text: step.text,
         showNextButton: true,
         target: 'none',
+        highlightTarget: this.currentHighlightTarget,
       }
     }
     if (step.type === 'choice') {
@@ -180,6 +200,7 @@ export class TutorialRuntime {
         choices: step.options.map((o) => ({ id: o.id, label: o.label })),
         showNextButton: false,
         target: 'none',
+        highlightTarget: 'none',
       }
     }
     return {
@@ -188,6 +209,7 @@ export class TutorialRuntime {
       text: this._lastText,
       showNextButton: false,
       target: step.target,
+      highlightTarget: this.currentHighlightTarget,
     }
   }
 

@@ -134,6 +134,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'うーん、予測がうまく取得できませんでした。もう一度パーティーを選び直してみてください',
       next: 'wait_party_selected',
+      highlightTarget: 'party_list',
     },
     pred_1: {
       type: 'message',
@@ -141,6 +142,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'さて、どうでしょう？',
       next: 'pred_2',
+      highlightTarget: 'prediction_rate',
     },
     pred_2: {
       type: 'message',
@@ -148,6 +150,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: '推定依頼達成率、というのが出てきましたね？',
       next: 'pred_3',
+      highlightTarget: 'prediction_rate',
     },
     pred_3: {
       type: 'message',
@@ -155,6 +158,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'これは私が神の使いパワーで、このパーティーがこの依頼を達成できそうな確率をお調べしたものです！',
       next: 'pred_4',
+      highlightTarget: 'prediction_rate',
     },
     pred_4: {
       type: 'message',
@@ -162,6 +166,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: '名前の通り、高いほど依頼を達成しやすいということです',
       next: 'pred_5',
+      highlightTarget: 'prediction_rate',
     },
     pred_5: {
       type: 'message',
@@ -169,6 +174,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'もちろん確率なので、高くても失敗することはありますし、低くても上手くいくことはありますが……',
       next: 'pred_6',
+      highlightTarget: 'prediction_rate',
     },
     pred_6: {
       type: 'message',
@@ -176,6 +182,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'まあ、その時は神の思し召しということで。受け入れましょう',
       next: 'pred_7',
+      highlightTarget: 'prediction_rate',
     },
     pred_7: {
       type: 'message',
@@ -183,6 +190,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: '依頼やパーティーを選び直せば、この数字も変わります',
       next: 'pred_8',
+      highlightTarget: 'prediction_rate',
     },
     pred_8: {
       type: 'message',
@@ -190,6 +198,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: '誰に何を任せるか。店主さんの腕の見せどころですね！',
       next: 'pred_9',
+      highlightTarget: 'prediction_rate',
     },
     pred_9: {
       type: 'message',
@@ -197,13 +206,20 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'さて、それでは依頼してみましょうか',
       next: 'pred_10',
+      highlightTarget: 'prediction_rate',
     },
+    /** From here on the topic shifts to the Assign button — Spotlight
+     * previews it a step ahead of `wait_request_offered` actually
+     * unblocking it (item 9/29 of the Spotlight review: "見せたいが触ら
+     * せたくない"), so the Player already knows where to look before
+     * they're allowed to click. */
     pred_10: {
       type: 'message',
       id: 'pred_10',
       speaker: SPEAKER,
       text: '中央にある『この依頼を紹介する』を押してみてください！',
       next: 'pred_11',
+      highlightTarget: 'assign_button',
     },
     pred_11: {
       type: 'message',
@@ -211,6 +227,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'なーに、当たって砕けろですよ！',
       next: 'wait_request_offered',
+      highlightTarget: 'assign_button',
     },
     wait_request_offered: {
       type: 'wait_for_action',
@@ -321,12 +338,16 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       text: 'それで、今日お願いする依頼の振り分けが終わったら――',
       next: 'wrap_7',
     },
+    /** From here on Spotlight previews the Next Day button a few lines
+     * ahead of `wait_day_advanced` actually unblocking it — same "show,
+     * don't yet unlock" pattern as `pred_10`/`pred_11` above. */
     wrap_7: {
       type: 'message',
       id: 'wrap_7',
       speaker: SPEAKER,
       text: '画面上にある『翌日へ』ボタンを押してみてください',
       next: 'wrap_8',
+      highlightTarget: 'next_day_button',
     },
     wrap_8: {
       type: 'message',
@@ -334,6 +355,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'あとは冒険者さんたちにお任せです！',
       next: 'wrap_9',
+      highlightTarget: 'next_day_button',
     },
     wrap_9: {
       type: 'message',
@@ -341,6 +363,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: '翌日になれば、お願いした依頼がどうなったのか確認できますよ！',
       next: 'wrap_10',
+      highlightTarget: 'next_day_button',
     },
     wrap_10: {
       type: 'message',
@@ -348,6 +371,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: '冒険者さんたちがどうなったのか、結果を見に行きましょう！',
       next: 'wait_day_advanced',
+      highlightTarget: 'next_day_button',
     },
     /** The Tutorial's final wait — matching `dispatch({type:'day_advanced'})`
      * completes `basic_request_assignment` (see `completeActiveTutorial`
@@ -432,6 +456,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'うーん、予測がうまく取得できませんでした。もう一度パーティーを選び直してみてください',
       next: 'wait_party_selected_retry',
+      highlightTarget: 'party_list',
     },
     retry_pred_1: {
       type: 'message',
@@ -439,6 +464,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: '推定依頼達成率も確認しておきましょう',
       next: 'retry_pred_2',
+      highlightTarget: 'prediction_rate',
     },
     retry_pred_2: {
       type: 'message',
@@ -446,6 +472,7 @@ export const BASIC_REQUEST_ASSIGNMENT_SCRIPT: TutorialScript = {
       speaker: SPEAKER,
       text: 'よさそうなら、『この依頼を紹介する』を押してみてください！',
       next: 'wait_request_offered_retry',
+      highlightTarget: 'assign_button',
     },
     wait_request_offered_retry: {
       type: 'wait_for_action',

@@ -427,6 +427,94 @@ describe('Phase 10.1 TutorialRuntime', () => {
     expect(ctx.completedIds).toEqual(['basic_request_assignment'])
   })
 
+  it('currentHighlightTarget tracks the step regardless of interactivity (item 46)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('runtime-018'),
+      'enabled',
+    )
+    const ctx = createRuntime(campaign)
+    const { runtime } = ctx
+
+    for (let i = 0; i < 7; i++) runtime.advanceMessage()
+    expect(runtime.currentHighlightTarget).toBe('quest_list')
+    runtime.dispatch({ type: 'quest_selected', questId: 'quest-1' })
+
+    for (let i = 0; i < 4; i++) runtime.advanceMessage()
+    expect(runtime.currentHighlightTarget).toBe('party_list')
+    runtime.dispatch({ type: 'party_selected', partyId: 'party-1' })
+    runtime.dispatch({ type: 'prediction_ready', prediction: fakePrediction() })
+    expect(runtime.currentHighlightTarget).toBe('prediction_rate')
+
+    for (let i = 0; i < 9; i++) runtime.advanceMessage() // pred_1..pred_9
+    for (let i = 0; i < 2; i++) runtime.advanceMessage() // pred_10..pred_11
+    expect(runtime.currentHighlightTarget).toBe('assign_button')
+    runtime.dispatch({ type: 'request_offered', decision: 'accepted' })
+    ctx.syncOneMoreOffer('accepted')
+
+    clickThroughMessages(runtime)
+    expect(runtime.currentHighlightTarget).toBe('next_day_button')
+  })
+
+  it('highlightTarget vs currentTarget stay independent during the Prediction explanation (item 47)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('runtime-019'),
+      'enabled',
+    )
+    const { runtime } = createRuntime(campaign)
+
+    for (let i = 0; i < 7; i++) runtime.advanceMessage()
+    runtime.dispatch({ type: 'quest_selected', questId: 'quest-1' })
+    for (let i = 0; i < 4; i++) runtime.advanceMessage()
+    runtime.dispatch({ type: 'party_selected', partyId: 'party-1' })
+    runtime.dispatch({ type: 'prediction_ready', prediction: fakePrediction() })
+    runtime.advanceMessage() // pred_1 -> pred_2
+
+    expect(runtime.getSnapshot().text).toBe(
+      '推定依頼達成率、というのが出てきましたね？',
+    )
+    expect(runtime.currentHighlightTarget).toBe('prediction_rate')
+    // Spotlighting the rate never grants interaction with it.
+    expect(runtime.currentTarget).toBe('none')
+  })
+
+  it('declined retry returns Spotlight to quest_list on both target and highlightTarget (item 48)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('runtime-020'),
+      'enabled',
+    )
+    const ctx = createRuntime(campaign)
+    driveThroughRequestOffer(ctx, 'declined')
+    clickThroughMessages(ctx.runtime)
+
+    expect(ctx.runtime.currentTarget).toBe('quest_list')
+    expect(ctx.runtime.currentHighlightTarget).toBe('quest_list')
+  })
+
+  it('a Prediction failure Spotlights party_list immediately, even before the Player clicks through (item 49)', () => {
+    const campaign = setTutorialMode(
+      createTavernCampaign('runtime-021'),
+      'enabled',
+    )
+    const { runtime } = createRuntime(campaign)
+
+    for (let i = 0; i < 7; i++) runtime.advanceMessage()
+    runtime.dispatch({ type: 'quest_selected', questId: 'quest-1' })
+    for (let i = 0; i < 4; i++) runtime.advanceMessage()
+    runtime.dispatch({ type: 'party_selected', partyId: 'party-1' })
+
+    runtime.handlePredictionError()
+    // The interaction target only reopens once the Player clicks through
+    // the error message (unchanged retry logic — see the P1 fix); the
+    // Spotlight, however, can point at party_list right away so the
+    // Player already knows where to look while reading the message.
+    expect(runtime.currentHighlightTarget).toBe('party_list')
+    expect(runtime.currentTarget).toBe('none')
+
+    runtime.advanceMessage()
+    expect(runtime.currentTarget).toBe('party_list')
+    expect(runtime.currentHighlightTarget).toBe('party_list')
+  })
+
   it('a same-seed Campaign resync does not reset Consent or the active step', () => {
     const campaign = createTavernCampaign('runtime-017')
     const { runtime } = createRuntime(campaign)

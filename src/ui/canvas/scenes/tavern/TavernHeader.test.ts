@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
 import { TavernHeader } from './TavernHeader.ts'
 import { DEFAULT_GAME_THEME } from '../../theme/gameTheme.ts'

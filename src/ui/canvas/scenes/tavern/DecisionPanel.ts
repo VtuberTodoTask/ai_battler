@@ -71,6 +71,8 @@ export class DecisionPanel extends Container {
   private _lastPartyId?: string
   private _lastQuestId?: string
   private _lastSampleCount?: number
+  private _predictionContentWidth = 0
+  private _predictionContentHeight = 0
 
   constructor(options: DecisionPanelOptions) {
     super()
@@ -179,6 +181,27 @@ export class DecisionPanel extends Container {
       y: this._bottomBar.y + this._assignButton.y,
       width: ASSIGN_BUTTON_WIDTH,
       height: ASSIGN_BUTTON_HEIGHT,
+    }
+  }
+
+  /** Phase 10.1 Tutorial Spotlight: the predicted-success-rate block's
+   * bounds relative to this Panel's own (x, y) origin, for the
+   * `prediction_rate` highlight target. `_predictionContentWidth/Height`
+   * are tracked by `renderPrediction()` on every draw (the block's own
+   * height varies with which of hint/loading/error/result text is
+   * showing), so this always reflects what's actually on screen right
+   * now — never a value guessed ahead of the real render. */
+  getPredictionAreaLocalBounds(): {
+    x: number
+    y: number
+    width: number
+    height: number
+  } {
+    return {
+      x: this._predictionContent.x,
+      y: this._bottomBar.y + this._predictionContent.y,
+      width: this._predictionContentWidth,
+      height: this._predictionContentHeight,
     }
   }
 
@@ -505,6 +528,7 @@ export class DecisionPanel extends Container {
 
     this._predictionContent.x = margin + leftWidth + gap
     this._predictionContent.y = 0
+    this._predictionContentWidth = rightWidth
 
     if (!vm?.selectedParty || !vm.selectedQuest) {
       const hint = new GameLabel(
@@ -514,6 +538,7 @@ export class DecisionPanel extends Container {
         { maxWidth: rightWidth, align: 'right', breakWords: true },
       )
       this._predictionContent.addChild(hint)
+      this._predictionContentHeight = hint.textHeight
       return
     }
 
@@ -524,6 +549,7 @@ export class DecisionPanel extends Container {
         breakWords: true,
       })
       this._predictionContent.addChild(label)
+      this._predictionContentHeight = label.textHeight
       return
     }
 
@@ -535,10 +561,12 @@ export class DecisionPanel extends Container {
         { maxWidth: rightWidth, align: 'right', breakWords: true },
       )
       this._predictionContent.addChild(label)
+      this._predictionContentHeight = label.textHeight
       return
     }
 
     if (!this._prediction) {
+      this._predictionContentHeight = 0
       return
     }
 
@@ -577,6 +605,7 @@ export class DecisionPanel extends Container {
     danger.y = y
     this._predictionContent.addChild(danger)
     y += danger.textHeight
+    this._predictionContentHeight = y
 
     const bottomBarHeight = this._height - this._bottomBar.y
     this._predictionContent.y = Math.max(0, (bottomBarHeight - y) / 2)

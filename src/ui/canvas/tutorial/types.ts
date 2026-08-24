@@ -1,13 +1,22 @@
 import type { ExpeditionPrediction } from '../../../core/tavern/prediction/types.ts'
 
 /**
- * Regions of the Tavern UI a `wait_for_action` step can leave operable.
- * `'none'` means every Gameplay UI element is blocked (used by `message`/
- * `choice` steps). Extensible for later Tutorials — Phase 10.1 only ever
- * produces `quest_list` / `party_list` / `assign_button` / `next_day_button`.
+ * Regions of the Tavern UI a Tutorial step can point at — either as the
+ * one thing a `wait_for_action` step leaves operable (`target`, aka the
+ * interaction target — see `TutorialWaitForActionStep`), or as the one
+ * thing a step wants the Player to *look at* without necessarily letting
+ * them touch it (`highlightTarget` — see below). `'none'` means "block/
+ * spotlight nothing in particular" for each respectively. Extensible for
+ * later Tutorials — Phase 10.1 only ever produces `quest_list` /
+ * `party_list` / `prediction_rate` / `assign_button` / `next_day_button`.
  */
 export type TutorialTarget =
-  'none' | 'quest_list' | 'party_list' | 'assign_button' | 'next_day_button'
+  | 'none'
+  | 'quest_list'
+  | 'party_list'
+  | 'prediction_rate'
+  | 'assign_button'
+  | 'next_day_button'
 
 /** Axis-aligned bounds in the same (virtual) coordinate space as the rest
  * of the Canvas UI, used to carve an input-blocker cutout around the
@@ -44,6 +53,15 @@ export interface TutorialMessageStep {
   /** Absent means this is the script's final step — reaching it completes
    * the Tutorial. */
   next?: string
+  /** Optional Spotlight target — the one Game UI region this `message`
+   * should visually pull out of the dim Overlay while it's showing, even
+   * though `message` steps never grant interaction (see
+   * `TutorialWaitForActionStep.target`). Lets a step "preview" the next
+   * operable region (e.g. the Assign button, highlighted a line before
+   * the Player is actually allowed to press it) or explain a read-only
+   * value in place (e.g. the predicted success rate). Absent/`'none'`
+   * means this step spotlights nothing — the screen stays fully dim. */
+  highlightTarget?: TutorialTarget
 }
 
 export interface TutorialChoiceOption {
@@ -64,7 +82,20 @@ export interface TutorialWaitForActionStep {
   type: 'wait_for_action'
   id: string
   wait: TutorialWaitKind
+  /** The interaction target: the ONE Game UI region the Player may
+   * operate while this step is active — everything else stays input-
+   * blocked. (Named `target` rather than `interactionTarget` for
+   * backwards compatibility with the original Phase 10.1 step data; the
+   * meaning is exactly "interaction target" throughout the Tutorial
+   * Runtime/Overlay.) */
   target: TutorialTarget
+  /** Optional Spotlight target — see `TutorialMessageStep.highlightTarget`
+   * for the full explanation. Absent defaults to `target` (item 8 of the
+   * Spotlight review: an operable step spotlights the same region it
+   * unblocks, unless a step explicitly wants to show the Player
+   * something they can't yet touch — see `TutorialRuntime`'s defaulting
+   * logic). */
+  highlightTarget?: TutorialTarget
   /** Used for every wait kind except `request_offered`, which branches via
    * `branches` below instead. */
   next?: string
@@ -101,5 +132,10 @@ export interface TutorialPresentationSnapshot {
   text: string
   choices?: { id: string; label: string }[]
   showNextButton: boolean
+  /** Interaction target — see `TutorialWaitForActionStep.target`. */
   target: TutorialTarget
+  /** Spotlight target — see `TutorialMessageStep.highlightTarget`. Never
+   * granted extra interaction on its own; a region can be spotlighted
+   * without being operable (see `TutorialOverlay`). */
+  highlightTarget: TutorialTarget
 }

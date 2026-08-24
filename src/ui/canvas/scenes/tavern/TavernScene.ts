@@ -467,8 +467,18 @@ export class TavernScene implements GameScene {
   private renderTutorial(): void {
     if (!this._tutorialRuntime || !this._tutorialOverlay) return
     const snapshot = this._tutorialRuntime.getSnapshot()
-    const target = this._tutorialRuntime.currentTarget
-    this._tutorialOverlay.update(snapshot, this.getTutorialTargetBounds(target))
+    const interactionBounds = this.getTutorialTargetBounds(snapshot.target)
+    // Interaction and Spotlight targets are usually the same region (item
+    // 8 of the Spotlight review) — avoid a redundant second bounds lookup
+    // in that common case, but never assume it: the Prediction
+    // explanation highlights `prediction_rate` while `target` stays
+    // `'none'`, and the Assign/Next-Day "preview" messages highlight a
+    // button they don't yet unblock.
+    const highlightBounds =
+      snapshot.highlightTarget === snapshot.target
+        ? interactionBounds
+        : this.getTutorialTargetBounds(snapshot.highlightTarget)
+    this._tutorialOverlay.update(snapshot, interactionBounds, highlightBounds)
   }
 
   private getTutorialTargetBounds(
@@ -492,6 +502,16 @@ export class TavernScene implements GameScene {
       case 'assign_button': {
         if (!this._decisionPanel) return null
         const local = this._decisionPanel.getAssignButtonLocalBounds()
+        return {
+          x: this._decisionPanel.x + local.x,
+          y: this._decisionPanel.y + local.y,
+          width: local.width,
+          height: local.height,
+        }
+      }
+      case 'prediction_rate': {
+        if (!this._decisionPanel) return null
+        const local = this._decisionPanel.getPredictionAreaLocalBounds()
         return {
           x: this._decisionPanel.x + local.x,
           y: this._decisionPanel.y + local.y,
