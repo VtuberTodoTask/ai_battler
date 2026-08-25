@@ -32,6 +32,21 @@ const GEAR_SIZE = 44
 const BUTTON_HEIGHT = 44
 const ACTION_BUTTON_WIDTH = 140
 
+/** Phase 10.3 item 9: one key per Row C navigation button, in the same
+ * order they're actually laid out — the single source of truth
+ * `getNavButtonBounds()` (below) and `TavernScene`'s Tutorial target
+ * bounds resolver both key off, instead of duplicating the Japanese
+ * label string at each call site. */
+export type TavernNavButtonKey =
+  | 'save'
+  | 'library'
+  | 'ledger'
+  | 'facilities'
+  | 'visitors'
+  | 'requestHistory'
+  | 'worldState'
+  | 'mainQuest'
+
 /**
  * Three-row layout (Phase 9.7.1) — replaces the earlier single 64px-tall
  * row, which had grown to eight buttons plus the day/reputation/money/
@@ -62,6 +77,10 @@ export class TavernHeader extends Container {
   private readonly _statusLabel: GameLabel
   private readonly _worldEventBanner: GameLabel
   private readonly _actionButton: GameButton
+  private readonly _navButtonBounds = new Map<
+    TavernNavButtonKey,
+    { x: number; y: number; width: number; height: number }
+  >()
   private readonly _onAdvance?: () => void
   private readonly _onOpenSettings?: () => void
   private readonly _onOpenSave?: () => void
@@ -140,30 +159,55 @@ export class TavernHeader extends Container {
     // --- Row C: navigation buttons, then advance + gear ---
     const gap = this._theme.spacing.s8
     const navButtons: {
+      key: TavernNavButtonKey
       width: number
       label: string
       onActivate?: () => void
     }[] = [
-      { width: 100, label: 'セーブ', onActivate: this._onOpenSave },
-      { width: 100, label: '資料室', onActivate: this._onOpenLibrary },
-      { width: 100, label: '帳簿', onActivate: this._onOpenLedger },
-      { width: 100, label: '設備', onActivate: this._onOpenUpgrade },
       {
+        key: 'save',
+        width: 100,
+        label: 'セーブ',
+        onActivate: this._onOpenSave,
+      },
+      {
+        key: 'library',
+        width: 100,
+        label: '資料室',
+        onActivate: this._onOpenLibrary,
+      },
+      {
+        key: 'ledger',
+        width: 100,
+        label: '帳簿',
+        onActivate: this._onOpenLedger,
+      },
+      {
+        key: 'facilities',
+        width: 100,
+        label: '設備',
+        onActivate: this._onOpenUpgrade,
+      },
+      {
+        key: 'visitors',
         width: 140,
         label: '来訪者台帳',
         onActivate: this._onOpenVisitorRegistry,
       },
       {
+        key: 'requestHistory',
         width: 140,
         label: '依頼記録',
         onActivate: this._onOpenQuestChainLog,
       },
       {
+        key: 'worldState',
         width: 140,
         label: '世界情勢',
         onActivate: this._onOpenWorldEventLog,
       },
       {
+        key: 'mainQuest',
         width: 100,
         label: '主依頼',
         onActivate: this._onOpenMainQuest,
@@ -182,6 +226,12 @@ export class TavernHeader extends Container {
       button.y = ROW_C_Y
       button.onActivate = () => spec.onActivate?.()
       this.addChild(button)
+      this._navButtonBounds.set(spec.key, {
+        x: cursorX,
+        y: ROW_C_Y,
+        width: spec.width,
+        height: BUTTON_HEIGHT,
+      })
       cursorX += spec.width + gap
     }
 
@@ -286,6 +336,20 @@ export class TavernHeader extends Container {
       width: ACTION_BUTTON_WIDTH,
       height: BUTTON_HEIGHT,
     }
+  }
+
+  /** Phase 10.3 item 9-10: real render-time bounds for one of Row C's 8
+   * navigation buttons, relative to this Header's own (x, y) origin —
+   * same "Header is always at (0, 0), so these already equal Scene-global
+   * coordinates" contract as `getActionButtonBounds()`. `null` only if
+   * `key` was never laid out (never happens for a real Header — every
+   * key in `TavernNavButtonKey` is populated in the constructor). Never
+   * a hardcoded coordinate in Tutorial data — see the Phase 10.3 review's
+   * explicit prohibition (item 10). */
+  getNavButtonBounds(
+    key: TavernNavButtonKey,
+  ): { x: number; y: number; width: number; height: number } | null {
+    return this._navButtonBounds.get(key) ?? null
   }
 
   /** Test-only accessor for the World Event banner's current presentation

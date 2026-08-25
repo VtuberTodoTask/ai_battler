@@ -10,7 +10,11 @@ import type { TutorialId } from '../../../core/tavern/campaign/tutorial.ts'
  * (`highlightTarget` — see below). Extensible for later Tutorials — Phase
  * 10.1 produces `quest_list` / `party_list` / `prediction_rate` /
  * `assign_button` / `next_day_button`; Phase 10.2 (Day Results) adds the
- * `day_results_*` targets below.
+ * `day_results_*` targets; Phase 10.3 (Tavern Functions Overview) adds the
+ * `tavern_*_button` targets below — the Tavern Header's 8 navigation
+ * buttons, each spotlit in turn purely for explanation (never granted as
+ * an interaction target — item 7 of the Phase 10.3 review: the Player
+ * never actually opens any of these Scenes during this Tutorial).
  */
 export type TutorialTarget =
   | 'none'
@@ -25,6 +29,14 @@ export type TutorialTarget =
   | 'day_results_results_area'
   | 'day_results_narrative_button'
   | 'day_results_next_day_button'
+  | 'tavern_save_button'
+  | 'tavern_library_button'
+  | 'tavern_ledger_button'
+  | 'tavern_facilities_button'
+  | 'tavern_visitors_button'
+  | 'tavern_request_history_button'
+  | 'tavern_world_state_button'
+  | 'tavern_main_quest_button'
 
 /**
  * A step's interaction/highlight target(s) — either a single

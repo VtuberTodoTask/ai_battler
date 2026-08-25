@@ -50,14 +50,29 @@ import { TAVERN_HEADER_HEIGHT, TavernHeader } from './TavernHeader.ts'
 import { EXPEDITION_PREDICTION_SAMPLES } from '../../../../core/tavern/prediction/types.ts'
 import type { ExpeditionPrediction } from '../../../../core/tavern/prediction/types.ts'
 import { getEffectiveSampleCount } from '../../../../core/tavern/campaign/upgrades.ts'
-import { shouldSuppressAutoSelectParty } from '../../../../core/tavern/campaign/tutorial.ts'
+import {
+  selectActiveTavernTutorialId,
+  shouldSuppressAutoSelectParty,
+} from '../../../../core/tavern/campaign/tutorial.ts'
+import type { TutorialId } from '../../../../core/tavern/campaign/tutorial.ts'
 import { TutorialRuntime } from '../../tutorial/tutorialRuntime.ts'
 import { TutorialOverlay } from '../../tutorial/TutorialOverlay.ts'
 import { BASIC_REQUEST_ASSIGNMENT_SCRIPT } from '../../../../data/tutorials/basicRequestAssignment.ts'
+import { TAVERN_FUNCTIONS_SCRIPT } from '../../../../data/tutorials/tavernFunctions.ts'
 import type {
+  TutorialScript,
   TutorialTarget,
   TutorialTargetBounds,
 } from '../../tutorial/types.ts'
+
+/** Phase 10.3 item 4: the script for whichever Tutorial id
+ * `selectActiveTavernTutorialId` currently names — the only two ids that
+ * ever run a Runtime inside `TavernScene`. */
+function tavernTutorialScriptFor(tutorialId: TutorialId): TutorialScript {
+  return tutorialId === 'tavern_functions'
+    ? TAVERN_FUNCTIONS_SCRIPT
+    : BASIC_REQUEST_ASSIGNMENT_SCRIPT
+}
 
 const MARGIN = 16
 const TOP_BAR_HEIGHT = TAVERN_HEADER_HEIGHT
@@ -246,21 +261,28 @@ export class TavernScene implements GameScene {
       }
     }
 
-    // Phase 10.1 Tutorial Runtime: recreated only when a genuinely
-    // different Campaign has been loaded onto an already-mounted Tavern
-    // Scene (identified by `seed`, which no Core transition ever
-    // mutates) — a bare resync of the SAME Campaign (including the
-    // Runtime's own `setTutorialMode`/`completeTutorial` commits) must
-    // never reset Consent or restart the active step sequence.
+    // Tutorial Runtime: recreated when a genuinely different Campaign has
+    // been loaded onto an already-mounted Tavern Scene (identified by
+    // `seed`, which no Core transition ever mutates) — a bare resync of
+    // the SAME Campaign (including the Runtime's own `setTutorialMode`/
+    // `completeTutorial` commits) must never reset Consent or restart the
+    // active step sequence — OR (Phase 10.3 item 4) when the Tavern's
+    // *desired* Tutorial id itself has changed: `basic_request_assignment`
+    // completing hands off to `tavern_functions` (once `day_results` is
+    // also done) entirely within the same Campaign/seed, so `campaignSeed`
+    // alone can never detect that hand-off — `selectActiveTavernTutorialId`
+    // is the single Core source of truth for which one applies right now.
+    const desiredTutorialId = selectActiveTavernTutorialId(campaign)
     if (
       !this._tutorialRuntime ||
-      this._tutorialRuntime.campaignSeed !== campaign.seed
+      this._tutorialRuntime.campaignSeed !== campaign.seed ||
+      this._tutorialRuntime.tutorialId !== desiredTutorialId
     ) {
       this._tutorialRuntime = new TutorialRuntime(
         campaign,
         {
-          tutorialId: 'basic_request_assignment',
-          script: BASIC_REQUEST_ASSIGNMENT_SCRIPT,
+          tutorialId: desiredTutorialId,
+          script: tavernTutorialScriptFor(desiredTutorialId),
         },
         {
           onSetTutorialMode: (mode: 'enabled' | 'disabled') =>
@@ -529,6 +551,26 @@ export class TavernScene implements GameScene {
         // unlike DecisionPanel above.
         return this._header.getActionButtonBounds()
       }
+      // Phase 10.3 items 9-10: every Tavern Functions Spotlight target
+      // reads the Header's own real render-time bounds — never a
+      // hardcoded coordinate — via the same "Header sits at (0,0)"
+      // contract as `next_day_button` above.
+      case 'tavern_save_button':
+        return this._header?.getNavButtonBounds('save') ?? null
+      case 'tavern_library_button':
+        return this._header?.getNavButtonBounds('library') ?? null
+      case 'tavern_ledger_button':
+        return this._header?.getNavButtonBounds('ledger') ?? null
+      case 'tavern_facilities_button':
+        return this._header?.getNavButtonBounds('facilities') ?? null
+      case 'tavern_visitors_button':
+        return this._header?.getNavButtonBounds('visitors') ?? null
+      case 'tavern_request_history_button':
+        return this._header?.getNavButtonBounds('requestHistory') ?? null
+      case 'tavern_world_state_button':
+        return this._header?.getNavButtonBounds('worldState') ?? null
+      case 'tavern_main_quest_button':
+        return this._header?.getNavButtonBounds('mainQuest') ?? null
       default:
         return null
     }

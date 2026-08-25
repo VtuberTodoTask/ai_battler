@@ -3,6 +3,7 @@ import { createTavernCampaign } from './campaign.ts'
 import {
   completeTutorial,
   createInitialTutorialState,
+  selectActiveTavernTutorialId,
   setTutorialMode,
   shouldStartTutorial,
   shouldSuppressAutoSelectParty,
@@ -177,6 +178,119 @@ describe('Phase 10.1 Tutorial Core state', () => {
       const next = completeTutorial(enabled, 'tavern_upgrade')
       expect(next).toBe(enabled)
       expect(next.tutorial.completedTutorialIds).toEqual([])
+    })
+  })
+
+  describe('Phase 10.3 shouldStartTutorial(tavern_functions) day_results dependency', () => {
+    it('is false once enabled, even though tavern_functions is not completed, until day_results also completes', () => {
+      const enabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-022'),
+        'enabled',
+      )
+      expect(shouldStartTutorial(enabled, 'tavern_functions')).toBe(false)
+    })
+
+    it('is true once enabled AND day_results has completed AND tavern_functions has not', () => {
+      const enabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-023'),
+        'enabled',
+      )
+      const withDayResults = completeTutorial(enabled, 'day_results')
+      expect(shouldStartTutorial(withDayResults, 'tavern_functions')).toBe(true)
+    })
+
+    it('is false once tavern_functions itself has completed', () => {
+      const enabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-024'),
+        'enabled',
+      )
+      const withDayResults = completeTutorial(enabled, 'day_results')
+      const withTavernFunctions = completeTutorial(
+        withDayResults,
+        'tavern_functions',
+      )
+      expect(shouldStartTutorial(withTavernFunctions, 'tavern_functions')).toBe(
+        false,
+      )
+    })
+
+    it('is false while mode is disabled, regardless of day_results', () => {
+      const disabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-025'),
+        'disabled',
+      )
+      expect(shouldStartTutorial(disabled, 'tavern_functions')).toBe(false)
+    })
+
+    it('day_results itself has no such dependency — completing basic_request_assignment is not required', () => {
+      const enabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-026'),
+        'enabled',
+      )
+      expect(shouldStartTutorial(enabled, 'day_results')).toBe(true)
+    })
+  })
+
+  describe('selectActiveTavernTutorialId', () => {
+    it('selects basic_request_assignment while Consent is pending', () => {
+      const campaign = createTavernCampaign('tutorial-core-027')
+      expect(selectActiveTavernTutorialId(campaign)).toBe(
+        'basic_request_assignment',
+      )
+    })
+
+    it('selects basic_request_assignment once enabled but not yet completed', () => {
+      const enabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-028'),
+        'enabled',
+      )
+      expect(selectActiveTavernTutorialId(enabled)).toBe(
+        'basic_request_assignment',
+      )
+    })
+
+    it('selects basic_request_assignment (inert default) when basic_request_assignment is done but day_results is not yet', () => {
+      const enabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-029'),
+        'enabled',
+      )
+      const completed = completeTutorial(enabled, 'basic_request_assignment')
+      expect(selectActiveTavernTutorialId(completed)).toBe(
+        'basic_request_assignment',
+      )
+    })
+
+    it('selects tavern_functions once basic_request_assignment AND day_results are both completed', () => {
+      const enabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-030'),
+        'enabled',
+      )
+      const step1 = completeTutorial(enabled, 'basic_request_assignment')
+      const step2 = completeTutorial(step1, 'day_results')
+      expect(selectActiveTavernTutorialId(step2)).toBe('tavern_functions')
+    })
+
+    it('selects basic_request_assignment (inert default) once the whole introductory sequence is complete', () => {
+      const enabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-031'),
+        'enabled',
+      )
+      const step1 = completeTutorial(enabled, 'basic_request_assignment')
+      const step2 = completeTutorial(step1, 'day_results')
+      const step3 = completeTutorial(step2, 'tavern_functions')
+      expect(selectActiveTavernTutorialId(step3)).toBe(
+        'basic_request_assignment',
+      )
+    })
+
+    it('selects basic_request_assignment (inert default) when the Tutorial is disabled entirely', () => {
+      const disabled = setTutorialMode(
+        createTavernCampaign('tutorial-core-032'),
+        'disabled',
+      )
+      expect(selectActiveTavernTutorialId(disabled)).toBe(
+        'basic_request_assignment',
+      )
     })
   })
 
