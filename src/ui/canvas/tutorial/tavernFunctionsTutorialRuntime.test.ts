@@ -133,6 +133,21 @@ describe('Phase 10.3 tavern_functions TutorialRuntime', () => {
     }
   })
 
+  it('request_history describes the actual Quest Chain Log feature, not all-request history (PR #64 review fix)', () => {
+    const campaign = enabledAfterDayResults('tf-012')
+    const { runtime } = createTavernFunctionsRuntime(campaign)
+    const texts: string[] = []
+    while (stepId(runtime) !== 'world_state_1') {
+      if (stepId(runtime)?.startsWith('request_history_')) {
+        texts.push(runtime.getSnapshot().text ?? '')
+      }
+      runtime.advanceMessage()
+    }
+    const combined = texts.join('\n')
+    expect(combined).toContain('連続依頼')
+    expect(combined).not.toContain('これまで扱ってきた依頼の履歴')
+  })
+
   it('intro has no highlight target (item 14)', () => {
     const campaign = enabledAfterDayResults('tf-007')
     const { runtime } = createTavernFunctionsRuntime(campaign)
