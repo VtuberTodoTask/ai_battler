@@ -110,7 +110,7 @@ export interface TutorialRuntimeCallbacks {
    * `onSetTutorialMode`. Critically used right after a real Gameplay
    * action that must not be lost by a same-tick React resync (Phase 10.1's
    * `advanceDay()`, Phase 10.2's Day Results `pop()`) — see
-   * `TavernSimulator.tsx`'s `handleCompleteTutorial`. */
+   * `TavernGame.tsx`'s `handleCompleteTutorial`. */
   onCompleteTutorial: (tutorialId: TutorialId) => void
   /** Called whenever the presentation snapshot may have changed, so the
    * owning Scene can re-render the Overlay. */

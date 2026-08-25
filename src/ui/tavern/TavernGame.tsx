@@ -1,14 +1,5 @@
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import {
-  advanceCampaignDay,
   createTavernCampaign,
   resolveCampaignDay,
 } from '../../core/tavern/campaign/campaign.ts'
@@ -52,17 +43,6 @@ import {
   type SaveRepository,
 } from '../../core/save/index.ts'
 import type { OfferRequestActionData, UiActionResult } from '../canvas/types.ts'
-import { TavernControls } from './TavernControls.tsx'
-import { CampaignHeader } from './CampaignHeader.tsx'
-import { RequestBoard } from './RequestBoard.tsx'
-import { PartyBoard } from './PartyBoard.tsx'
-import { BrokeragePanel } from './BrokeragePanel.tsx'
-import { DispatchResults } from './DispatchResults.tsx'
-import { TavernResultDetail } from './TavernResultDetail.tsx'
-import { CampaignResultSummary } from './CampaignResultSummary.tsx'
-import { CampaignHistory } from './CampaignHistory.tsx'
-import { ExpeditionPredictionPanel } from './ExpeditionPredictionPanel.tsx'
-import { NarrativeQueue } from './NarrativeQueue.tsx'
 import { NarrativeSettings } from './NarrativeSettings.tsx'
 import { AudioSettings } from '../canvas/audio/AudioSettings.tsx'
 import type { NarrativeProvider } from '../../ai/narrative/types.ts'
@@ -71,25 +51,9 @@ import './tavern.css'
 
 const GameCanvasHost = lazy(() => import('../canvas/GameCanvasHost.tsx'))
 
-function createInitialCampaign(): TavernCampaignState | null {
-  return import.meta.env.MODE === 'test'
-    ? createTavernCampaign('tavern-campaign-001')
-    : null
-}
-
-export function TavernSimulator() {
-  const [campaign, setCampaign] = useState<TavernCampaignState | null>(() =>
-    createInitialCampaign(),
-  )
-  const [seedInput, setSeedInput] = useState(
-    () => createInitialCampaign()?.seed ?? '',
-  )
-  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(
-    () => createInitialCampaign()?.currentDay.requests[0]?.id ?? null,
-  )
-  const [selectedPartyId, setSelectedPartyId] = useState<string | null>(null)
-  const [selectedResultId, setSelectedResultId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+export function TavernGame() {
+  const [campaign, setCampaign] = useState<TavernCampaignState | null>(null)
+  const [, setError] = useState<string | null>(null)
 
   const [narrativeProvider, setNarrativeProvider] =
     useState<NarrativeProvider | null>(null)
@@ -99,9 +63,6 @@ export function TavernSimulator() {
       model: '',
       apiKey: '',
     })
-  const [uiMode, setUiMode] = useState<'legacy' | 'canvas'>(
-    import.meta.env.MODE === 'test' ? 'legacy' : 'canvas',
-  )
   const [canvasSettingsOpen, setCanvasSettingsOpen] = useState(false)
 
   // Lets async handlers (spanning an `await`) read the LATEST Campaign once
@@ -168,10 +129,6 @@ export function TavernSimulator() {
     (seed: string) => {
       const next = createTavernCampaign(seed)
       commitCampaign(next)
-      setSeedInput(seed)
-      setSelectedRequestId(next.currentDay.requests[0]?.id ?? null)
-      setSelectedPartyId(null)
-      setSelectedResultId(null)
       setError(null)
       return next
     },
@@ -198,9 +155,6 @@ export function TavernSimulator() {
         const data = await loadFromSlot(getSaveRepository(), slotId)
         const next = data.campaign
         commitCampaign(next)
-        setSelectedRequestId(next.currentDay.requests[0]?.id ?? null)
-        setSelectedPartyId(null)
-        setSelectedResultId(null)
         setError(null)
         return { ok: true }
       } catch (e) {
@@ -294,25 +248,6 @@ export function TavernSimulator() {
       return { ok: false, message }
     }
   }, [getSaveRepository])
-
-  const handleSelectRequest = useCallback(
-    (id: string) => {
-      if (campaign?.currentDay.status === 'resolved') {
-        return
-      }
-      setSelectedRequestId(id)
-      setSelectedPartyId(null)
-      setSelectedResultId(null)
-      setError(null)
-    },
-    [campaign?.currentDay.status],
-  )
-
-  const handleSelectParty = useCallback((id: string) => {
-    setSelectedPartyId(id)
-    setSelectedResultId(null)
-    setError(null)
-  }, [])
 
   const handleOfferRequest = useCallback(
     (
@@ -516,14 +451,6 @@ export function TavernSimulator() {
       // `campaignRef.current` before this component's own `campaign`-state
       // sync effect would have run. `commitCampaign` closes that window.
       commitCampaign(next)
-      const firstResolved = next.currentDay.results.find(
-        (r) => r.status === 'resolved',
-      )
-      setSelectedResultId(
-        firstResolved?.requestId ??
-          next.currentDay.results[0]?.requestId ??
-          null,
-      )
       setError(null)
       return { ok: true }
     } catch (e) {
@@ -532,26 +459,6 @@ export function TavernSimulator() {
       return { ok: false, message }
     }
   }, [campaign, commitCampaign])
-
-  const handleAdvance = useCallback((): UiActionResult => {
-    if (!campaign) {
-      return { ok: false, message: 'キャンペーンが開始されていません' }
-    }
-    try {
-      const next = advanceCampaignDay(campaign)
-      setCampaign(next)
-      setSelectedRequestId(next.currentDay.requests[0]?.id ?? selectedRequestId)
-      setSelectedPartyId(null)
-      setSelectedResultId(null)
-      setError(null)
-      return { ok: true }
-    } catch (e) {
-      const message =
-        e instanceof Error ? e.message : '翌日への進行に失敗しました'
-      setError(message)
-      return { ok: false, message }
-    }
-  }, [campaign, selectedRequestId])
 
   const finishingRef = useRef(false)
 
@@ -574,9 +481,6 @@ export function TavernSimulator() {
       // the resolved Attempt (result/battleTrace populated), never the
       // pre-resolve one.
       commitCampaign(next)
-      setSelectedRequestId(next.currentDay.requests[0]?.id ?? null)
-      setSelectedPartyId(null)
-      setSelectedResultId(null)
       setError(null)
       // The Save contract only ever accepts a 'planning' day
       // (`saveToSlot`/`validateGameSave` both hard-reject anything else) —
@@ -775,13 +679,6 @@ export function TavernSimulator() {
     }
   }, [campaign, commitCampaign])
 
-  const handleUpdateCampaign = useCallback(
-    (updater: (c: TavernCampaignState) => TavernCampaignState) => {
-      setCampaign((prev) => (prev ? updater(prev) : prev))
-    },
-    [],
-  )
-
   const handleOpenCanvasSettings = useCallback(() => {
     setCanvasSettingsOpen(true)
   }, [])
@@ -790,210 +687,60 @@ export function TavernSimulator() {
     setCanvasSettingsOpen(false)
   }, [])
 
-  const canResolve = useMemo(() => {
-    return campaign?.currentDay.status === 'planning'
-  }, [campaign?.currentDay.status])
-
-  const canAdvance = useMemo(() => {
-    return campaign?.currentDay.status === 'resolved'
-  }, [campaign?.currentDay.status])
-
-  const selectedResolved = useMemo(() => {
-    if (!selectedResultId || !campaign) return null
-    return (
-      campaign.currentDay.results.find(
-        (r) => r.requestId === selectedResultId,
-      ) ?? null
-    )
-  }, [campaign, selectedResultId])
-
-  const currentDayRecord = useMemo(() => {
-    if (!campaign) return null
-    return campaign.history.find((h) => h.dayNumber === campaign.dayNumber)
-  }, [campaign])
-
-  const selectedRequest = useMemo(() => {
-    if (!campaign) return null
-    return (
-      campaign.currentDay.requests.find(
-        (request) => request.id === selectedRequestId,
-      ) ?? null
-    )
-  }, [campaign, selectedRequestId])
-
-  const selectedParty = useMemo(() => {
-    if (!campaign) return null
-    return (
-      campaign.currentDay.parties.find(
-        (party) => party.id === selectedPartyId,
-      ) ?? null
-    )
-  }, [campaign, selectedPartyId])
-
-  const legacyCampaign = useMemo(() => {
-    return campaign ?? createTavernCampaign('tavern-campaign-legacy')
-  }, [campaign])
-
-  const legacyDay = legacyCampaign.currentDay
-
-  if (uiMode === 'canvas') {
-    return (
-      <div className="tavern-simulator tavern-canvas-shell">
-        <Suspense
-          fallback={<div className="canvas-loading">Canvas loading...</div>}
-        >
-          <GameCanvasHost
-            campaign={campaign}
-            onAdvanceDay={handleFinishDay}
-            onResolveDay={handleResolve}
-            onOfferRequest={handleOfferRequest}
-            onPurchaseUpgrade={handlePurchaseUpgrade}
-            onSetTutorialMode={handleSetTutorialMode}
-            onCompleteTutorial={handleCompleteTutorial}
-            onOpenActivity={handleOpenActivity}
-            onOpenExpeditionNarrative={handleOpenExpeditionNarrative}
-            onDispatchMainQuest={handleDispatchMainQuest}
-            onGenerateMainQuestNarrative={handleGenerateMainQuestNarrative}
-            onStartMainQuestPresentation={handleStartMainQuestPresentation}
-            onCompleteMainQuestPresentation={
-              handleCompleteMainQuestPresentation
-            }
-            onGenerateEndingNarrative={handleGenerateEndingNarrative}
-            onStartEndingPresentation={handleStartEndingPresentation}
-            onCompleteEndingPresentation={handleCompleteEndingPresentation}
-            onOpenSettings={handleOpenCanvasSettings}
-            onSwitchToLegacy={() => setUiMode('legacy')}
-            onNewGame={handleNewGame}
-            onLoadGame={handleLoadGame}
-            onSaveGame={handleSaveGame}
-            onDeleteSave={handleDeleteSave}
-            onListSaves={handleListSaves}
-          />
-        </Suspense>
-        {canvasSettingsOpen && (
-          <div className="canvas-settings-modal-overlay">
-            <div className="canvas-settings-modal">
-              <div className="canvas-settings-header">
-                <h3>設定</h3>
-                <button
-                  type="button"
-                  className="canvas-settings-close"
-                  onClick={handleCloseCanvasSettings}
-                  aria-label="設定を閉じる"
-                >
-                  ×
-                </button>
-              </div>
-              <NarrativeSettings
-                provider={narrativeProvider}
-                config={narrativeConfig}
-                onChange={setNarrativeConfig}
-                onProviderChange={setNarrativeProvider}
-              />
-              <AudioSettings />
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
   return (
-    <div className="tavern-simulator">
-      <div className="ui-mode-switch">
-        <button onClick={() => setUiMode('canvas')}>Canvas UI</button>
-      </div>
-
-      <TavernControls
-        seed={seedInput}
-        onSeedChange={setSeedInput}
-        onNewCampaign={(seed) => {
-          const next = startCampaign(seed)
-          void autosave(next)
-        }}
-      />
-
-      <CampaignHeader campaign={legacyCampaign} />
-
-      <div className="tavern-day-header">
-        <h2>酒場仲介ボード</h2>
-        <span className="day-id">Day: {legacyDay.seed}</span>
-      </div>
-
-      <div className="tavern-boards">
-        <RequestBoard
-          day={legacyDay}
-          selectedRequestId={selectedRequestId}
-          onSelectRequest={handleSelectRequest}
+    <div className="tavern-canvas-shell">
+      <Suspense
+        fallback={<div className="canvas-loading">Canvas loading...</div>}
+      >
+        <GameCanvasHost
+          campaign={campaign}
+          onAdvanceDay={handleFinishDay}
+          onResolveDay={handleResolve}
+          onOfferRequest={handleOfferRequest}
+          onPurchaseUpgrade={handlePurchaseUpgrade}
+          onSetTutorialMode={handleSetTutorialMode}
+          onCompleteTutorial={handleCompleteTutorial}
+          onOpenActivity={handleOpenActivity}
+          onOpenExpeditionNarrative={handleOpenExpeditionNarrative}
+          onDispatchMainQuest={handleDispatchMainQuest}
+          onGenerateMainQuestNarrative={handleGenerateMainQuestNarrative}
+          onStartMainQuestPresentation={handleStartMainQuestPresentation}
+          onCompleteMainQuestPresentation={handleCompleteMainQuestPresentation}
+          onGenerateEndingNarrative={handleGenerateEndingNarrative}
+          onStartEndingPresentation={handleStartEndingPresentation}
+          onCompleteEndingPresentation={handleCompleteEndingPresentation}
+          onOpenSettings={handleOpenCanvasSettings}
+          onNewGame={handleNewGame}
+          onLoadGame={handleLoadGame}
+          onSaveGame={handleSaveGame}
+          onDeleteSave={handleDeleteSave}
+          onListSaves={handleListSaves}
         />
-        <PartyBoard
-          parties={legacyDay.parties}
-          selectedPartyId={selectedPartyId}
-          disabled={legacyDay.status === 'resolved'}
-          onSelectParty={handleSelectParty}
-        />
-      </div>
-
-      {legacyDay.status === 'planning' && (
-        <ExpeditionPredictionPanel
-          requestOffer={selectedRequest}
-          tavernParty={selectedParty}
-        />
+      </Suspense>
+      {canvasSettingsOpen && (
+        <div className="canvas-settings-modal-overlay">
+          <div className="canvas-settings-modal">
+            <div className="canvas-settings-header">
+              <h3>設定</h3>
+              <button
+                type="button"
+                className="canvas-settings-close"
+                onClick={handleCloseCanvasSettings}
+                aria-label="設定を閉じる"
+              >
+                ×
+              </button>
+            </div>
+            <NarrativeSettings
+              provider={narrativeProvider}
+              config={narrativeConfig}
+              onChange={setNarrativeConfig}
+              onProviderChange={setNarrativeProvider}
+            />
+            <AudioSettings />
+          </div>
+        </div>
       )}
-
-      <BrokeragePanel
-        day={legacyDay}
-        selectedRequestId={selectedRequestId}
-        selectedPartyId={selectedPartyId}
-        canResolve={canResolve}
-        canAdvance={canAdvance}
-        error={error}
-        onOffer={() => {
-          if (selectedRequestId && selectedPartyId) {
-            handleOfferRequest(selectedPartyId, selectedRequestId)
-          }
-        }}
-        onResolve={handleResolve}
-        onAdvance={handleAdvance}
-      />
-
-      {legacyDay.status === 'resolved' && currentDayRecord && (
-        <>
-          <CampaignResultSummary
-            results={legacyDay.results}
-            reputationSummary={currentDayRecord.reputationSummary}
-            reputationEvents={(campaign?.reputation.events ?? []).filter(
-              (e) => e.day === currentDayRecord.dayNumber,
-            )}
-          />
-          <DispatchResults
-            results={legacyDay.results}
-            selectedResultId={selectedResultId}
-            onSelectResult={setSelectedResultId}
-          />
-          {selectedResolved && (
-            <TavernResultDetail resolved={selectedResolved} />
-          )}
-        </>
-      )}
-
-      <CampaignHistory
-        history={legacyCampaign.history}
-        candidates={legacyCampaign.narrativeCandidates}
-      />
-
-      <NarrativeQueue
-        campaign={legacyCampaign}
-        provider={narrativeProvider}
-        onUpdateCampaign={handleUpdateCampaign}
-      />
-
-      <NarrativeSettings
-        provider={narrativeProvider}
-        config={narrativeConfig}
-        onChange={setNarrativeConfig}
-        onProviderChange={setNarrativeProvider}
-      />
     </div>
   )
 }

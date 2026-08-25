@@ -126,7 +126,6 @@ function createSceneContext(): {
       openExpeditionNarrative: vi.fn(),
       openSettings: vi.fn(),
       closeModal: vi.fn(),
-      switchToLegacy: vi.fn(),
     } as unknown as GameUiActions,
     canvasGame,
   }

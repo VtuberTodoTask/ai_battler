@@ -154,7 +154,7 @@ function createSceneContext(
       resolveDay: vi.fn(),
       offerRequest: vi.fn(),
       purchaseUpgrade: vi.fn(),
-      // Mirrors TavernSimulator's handleSetTutorialMode/handleCompleteTutorial:
+      // Mirrors TavernGame's handleSetTutorialMode/handleCompleteTutorial:
       // apply the Core transition to the freshest known Campaign, then
       // resync the Scene directly (there is no React state to flow through
       // in this test harness).
@@ -176,7 +176,6 @@ function createSceneContext(
       openActivity: vi.fn().mockResolvedValue(''),
       openSettings: vi.fn(),
       closeModal: vi.fn(),
-      switchToLegacy: vi.fn(),
     },
     canvasGame,
   }

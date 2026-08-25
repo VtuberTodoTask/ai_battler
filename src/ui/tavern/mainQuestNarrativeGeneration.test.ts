@@ -77,7 +77,7 @@ function buildPendingCampaign(
 }
 
 /**
- * Mirrors `TavernSimulator`'s real `commitCampaign`: `campaignRef.current`
+ * Mirrors `TavernGame`'s real `commitCampaign`: `campaignRef.current`
  * and the "rendered" Campaign state are updated in the exact same
  * synchronous call, with every commit recorded — so a test can assert not
  * just the final state, but that a stale write was never committed as a
@@ -131,7 +131,7 @@ describe('runMainQuestNarrativeGeneration', () => {
     const provider: NarrativeProvider = {
       id: 'fake-new-game-mid-flight',
       async generate() {
-        // Reproduces `TavernSimulator.startCampaign()`'s real commit path
+        // Reproduces `TavernGame.startCampaign()`'s real commit path
         // (`commitCampaign`) firing mid-`await`, the same abstraction
         // `handleNewGame` uses — not a raw `campaignRef.current` poke.
         commitCampaign(createTavernCampaign('narrative-async-002-new-game'))
@@ -169,7 +169,7 @@ describe('runMainQuestNarrativeGeneration', () => {
     const provider: NarrativeProvider = {
       id: 'fake-load-mid-flight',
       async generate() {
-        // Reproduces `TavernSimulator.handleLoadGame()`'s real commit path.
+        // Reproduces `TavernGame.handleLoadGame()`'s real commit path.
         commitCampaign(loadedCampaign)
         return { text: FAKE_NARRATIVE_TEXT }
       },
@@ -328,7 +328,7 @@ describe('runMainQuestNarrativeGeneration', () => {
     )
     const { campaignRef, commitCampaign } = makeCommitHarness(dispatched)
 
-    // Mirrors `TavernSimulator.handleFinishDay()` exactly: compute the
+    // Mirrors `TavernGame.handleFinishDay()` exactly: compute the
     // resolved Campaign, then `commitCampaign` it in the same synchronous
     // call — no `useEffect`-based ref sync in between, matching how the
     // Canvas UI can react (redirect -> maybeRequestNarrative()) before any
@@ -366,7 +366,7 @@ describe('runMainQuestNarrativeGeneration', () => {
     )
     const { campaignRef, commitCampaign } = makeCommitHarness(dispatched)
 
-    // Mirrors `TavernSimulator.handleResolve()`: `resolveCampaignDay` then
+    // Mirrors `TavernGame.handleResolve()`: `resolveCampaignDay` then
     // `commitCampaign`, same synchronous call.
     const resolved = resolveCampaignDay(dispatched)
     commitCampaign(resolved)

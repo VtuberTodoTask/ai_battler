@@ -12,7 +12,7 @@ export interface MainQuestNarrativeGenerationDeps {
   campaignRef: { current: TavernCampaignState | null }
   /**
    * Must update `campaignRef.current` and the rendered Campaign state in
-   * the SAME synchronous call (e.g. `TavernSimulator`'s `commitCampaign`).
+   * the SAME synchronous call (e.g. `TavernGame`'s `commitCampaign`).
    * A `campaignRef` that only catches up later (a `useEffect` synced from
    * `campaign` state, for instance) reopens exactly the stale-write window
    * this function exists to close.
@@ -24,9 +24,9 @@ export interface MainQuestNarrativeGenerationDeps {
 
 /**
  * The async Main Quest Narrative generation flow, factored out of
- * `TavernSimulator` so it can be exercised directly (stale-response and
+ * `TavernGame` so it can be exercised directly (stale-response and
  * retry behavior included) without rendering the whole Canvas UI tree, and
- * so `TavernSimulator.tsx` stays a component-only export (Fast Refresh).
+ * so `TavernGame.tsx` stays a component-only export (Fast Refresh).
  * Deliberately takes explicit deps instead of closing over component state:
  * a `setCampaign((current) => ...)` state-updater must never be the place
  * an async result's success/failure is decided (the updater can re-run,

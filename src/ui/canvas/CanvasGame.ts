@@ -304,7 +304,6 @@ export class CanvasGame {
         Promise.resolve({ ok: false, message: 'AI provider not connected' }),
       openSettings: () => {},
       closeModal: () => {},
-      switchToLegacy: () => {},
       newGame: () => ({ ok: false, message: 'newGame not connected' }),
       loadGame: () =>
         Promise.resolve({ ok: false, message: 'loadGame not connected' }),

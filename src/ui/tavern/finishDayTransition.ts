@@ -5,7 +5,7 @@ import {
 import type { TavernCampaignState } from '../../core/tavern/campaign/types.ts'
 
 /**
- * The pure resolve/advance state transition `TavernSimulator.handleFinishDay`
+ * The pure resolve/advance state transition `TavernGame.handleFinishDay`
  * drives — factored out so both the production handler and its regression
  * tests run the exact same logic, instead of the test re-implementing it
  * separately (which is exactly the kind of drift that let the "autosave
