@@ -13,9 +13,10 @@ export type TutorialMode = 'pending' | 'enabled' | 'disabled'
 
 /**
  * Every Tutorial the game will ever offer. Only `basic_request_assignment`
- * is implemented in Phase 10.1 — the rest are declared here so later
- * phases extend this union (and `completedTutorialIds`) without touching
- * every call site that already narrows on `TutorialId`.
+ * (Phase 10.1) and `day_results` (Phase 10.2) are implemented so far — the
+ * rest are declared here so later phases extend this union (and
+ * `completedTutorialIds`) without touching every call site that already
+ * narrows on `TutorialId`.
  */
 export type TutorialId =
   | 'basic_request_assignment'
@@ -32,6 +33,7 @@ export type TutorialId =
 
 export const IMPLEMENTED_TUTORIAL_IDS: readonly TutorialId[] = [
   'basic_request_assignment',
+  'day_results',
 ]
 
 export interface CampaignTutorialState {

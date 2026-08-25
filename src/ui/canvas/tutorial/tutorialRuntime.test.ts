@@ -9,6 +9,7 @@ import type { TavernCampaignState } from '../../../core/tavern/campaign/types.ts
 import type { BrokerageOfferAttempt } from '../../../core/tavern/types.ts'
 import type { ExpeditionPrediction } from '../../../core/tavern/prediction/types.ts'
 import { TutorialRuntime } from './tutorialRuntime.ts'
+import { BASIC_REQUEST_ASSIGNMENT_SCRIPT } from '../../../data/tutorials/basicRequestAssignment.ts'
 
 function fakePrediction(): ExpeditionPrediction {
   return {
@@ -70,19 +71,26 @@ function createRuntime(campaign: TavernCampaignState) {
   const completedIds: TutorialId[] = []
   const onChange = vi.fn()
   let current = campaign
-  const runtime = new TutorialRuntime(campaign, {
-    onSetTutorialMode: (mode) => {
-      modeCommits.push(mode)
-      current = setTutorialMode(current, mode)
-      runtime.syncCampaign(current)
+  const runtime = new TutorialRuntime(
+    campaign,
+    {
+      tutorialId: 'basic_request_assignment',
+      script: BASIC_REQUEST_ASSIGNMENT_SCRIPT,
     },
-    onCompleteTutorial: (tutorialId) => {
-      completedIds.push(tutorialId)
-      current = completeTutorial(current, tutorialId)
-      runtime.syncCampaign(current)
+    {
+      onSetTutorialMode: (mode: 'enabled' | 'disabled') => {
+        modeCommits.push(mode)
+        current = setTutorialMode(current, mode)
+        runtime.syncCampaign(current)
+      },
+      onCompleteTutorial: (tutorialId) => {
+        completedIds.push(tutorialId)
+        current = completeTutorial(current, tutorialId)
+        runtime.syncCampaign(current)
+      },
+      onChange,
     },
-    onChange,
-  })
+  )
   return {
     runtime,
     modeCommits,

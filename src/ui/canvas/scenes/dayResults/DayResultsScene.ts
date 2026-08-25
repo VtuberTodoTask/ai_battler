@@ -19,6 +19,14 @@ import type {
   SoundNovelSceneInput,
   SoundNovelVisualContext,
 } from '../soundNovel/types.ts'
+import { TutorialRuntime } from '../../tutorial/tutorialRuntime.ts'
+import { TutorialOverlay } from '../../tutorial/TutorialOverlay.ts'
+import { DAY_RESULTS_SCRIPT } from '../../../../data/tutorials/dayResults.ts'
+import type {
+  DayResultsTutorialOutcome,
+  TutorialTarget,
+  TutorialTargetBounds,
+} from '../../tutorial/types.ts'
 import {
   buildDayResultsSceneViewModel,
   type DayResultEventViewModel,
@@ -27,6 +35,21 @@ import {
   type DayResultsStep,
   type ExpeditionResultItemViewModel,
 } from './dayResultsViewModel.ts'
+
+/** Phase 10.2 item 24: classifies the overall day from the Scene's own
+ * authoritative per-result `tone` projection (`dayResultsViewModel.ts`'s
+ * `outcomeTone`) — never a Tutorial-side re-derivation of raw Expedition
+ * results. Every result `good` -> `all_success`; every result `bad` ->
+ * `all_failure`; no results at all -> `no_results`; any other mix
+ * (including a `mixed`/`other` tone present) -> `mixed`. */
+function classifyDayResultsTutorialOutcome(
+  results: readonly ExpeditionResultItemViewModel[],
+): DayResultsTutorialOutcome {
+  if (results.length === 0) return 'no_results'
+  if (results.every((r) => r.tone === 'good')) return 'all_success'
+  if (results.every((r) => r.tone === 'bad')) return 'all_failure'
+  return 'mixed'
+}
 
 const MARGIN = 16
 const TOP_BAR_HEIGHT = 64
@@ -63,6 +86,14 @@ export class DayResultsScene implements GameScene {
   private _viewModel: DayResultsSceneViewModel | null = null
   private _narrativeGenerationInFlight = new Set<string>()
   private _spinner: Container | null = null
+  private _tutorialRuntime: TutorialRuntime | null = null
+  private _tutorialOverlay: TutorialOverlay | null = null
+  /** Phase 10.2 item 34: the Narrative button's REAL render-time bounds
+   * (never a hardcoded constant — its `y` depends on `selected.summaryLines`),
+   * captured by `drawDetailPanel()` each frame; `null` whenever no result
+   * is selected or the button is genuinely disabled, so the Tutorial can
+   * never spotlight/unblock a button the Player can't actually press. */
+  private _narrativeButtonBounds: TutorialTargetBounds | null = null
 
   mount(context: GameSceneContext, input?: unknown): void {
     this._context = context
@@ -78,10 +109,18 @@ export class DayResultsScene implements GameScene {
     this._root = new Container()
     context.layers.ui.addChild(this._root)
 
+    this._tutorialOverlay = new TutorialOverlay({
+      theme: context.theme,
+      onAdvance: () => this._tutorialRuntime?.advanceMessage(),
+      onChoice: (optionId) => this._tutorialRuntime?.selectChoice(optionId),
+    })
+    context.layers.overlay.addChild(this._tutorialOverlay)
+
     AudioController.playBgm('expeditionReports')
 
     if (this._campaign) {
       this.updateViewModel()
+      this.syncTutorial()
       this.render()
     }
   }
@@ -92,6 +131,19 @@ export class DayResultsScene implements GameScene {
     }
     this._root?.destroy({ children: true })
     this._root = null
+    if (this._tutorialOverlay) {
+      this._tutorialOverlay.parent?.removeChild(this._tutorialOverlay)
+      this._tutorialOverlay.destroy({ children: true })
+      this._tutorialOverlay = null
+    }
+    // Deliberately not preserved across unmount — Phase 10.2's
+    // `TutorialResumeState` marker (see `openSoundNovelForResult`) is the
+    // one supported mechanism for surviving the SoundNovel round-trip, so
+    // remounting genuinely rebuilds the Runtime from that marker rather
+    // than relying on this Scene instance accidentally keeping the old
+    // one alive.
+    this._tutorialRuntime = null
+    this._narrativeButtonBounds = null
     this._context = null
   }
 
@@ -105,6 +157,7 @@ export class DayResultsScene implements GameScene {
       this._selectedResultId = uiState.lastSelectedResultId
     }
     this.updateViewModel()
+    this.syncTutorial()
     this.render()
   }
 
@@ -117,6 +170,7 @@ export class DayResultsScene implements GameScene {
       this._selectedResultId = uiState.lastSelectedResultId
     }
     this.updateViewModel()
+    this.syncTutorial()
     this.render()
   }
 
@@ -144,6 +198,152 @@ export class DayResultsScene implements GameScene {
     }
   }
 
+  /** True only when `result` genuinely has a Narrative to read right now
+   * (an already-generated one, or one the Player can still generate) —
+   * the single source of truth both `drawDetailPanel()`'s button
+   * `disabled` state and the Tutorial's `syncDayResultsContext()` read,
+   * so the Runtime never spotlights/unblocks a button that is actually
+   * disabled. */
+  private isNarrativeAvailable(
+    result: ExpeditionResultItemViewModel | undefined,
+  ): boolean {
+    if (!result) return false
+    return Boolean(
+      result.canGenerateNarrative ||
+      (result.generatedText && result.generatedText.length > 0),
+    )
+  }
+
+  /** Phase 10.2 items 42-45: builds/syncs the `day_results` Tutorial
+   * Runtime. Recreated only when a genuinely different Campaign has been
+   * loaded (mirrors `TavernScene`'s own `basic_request_assignment`
+   * Runtime) OR — critically — every time this Scene remounts after the
+   * SoundNovel round-trip, since `unmount()` always nulls `_tutorialRuntime`
+   * (Phase 10.2 never relies on Scene-instance persistence to survive that
+   * trip). `GameUiState.tutorialResumeState` is read and consumed ONLY
+   * inside that fresh-Runtime-construction branch, on purpose: an ordinary
+   * same-mount resync (`else` below) must never re-read or clear it —
+   * `openSoundNovelForResult` sets the marker via `canvasGame.setUiState`
+   * for this SAME Scene instance's `setUiState` to receive back
+   * synchronously (see `CanvasGame.setUiState`'s contract) BEFORE it
+   * unmounts, so consuming it there too would clear it in the very same
+   * call chain that just set it, before the SoundNovel round-trip that
+   * actually needs it ever happens. */
+  private syncTutorial(): void {
+    if (!this._campaign || !this._context) return
+    const campaign = this._campaign
+
+    if (
+      !this._tutorialRuntime ||
+      this._tutorialRuntime.campaignSeed !== campaign.seed
+    ) {
+      const resume = this._uiState.tutorialResumeState
+      const resumeStepId =
+        resume && resume.tutorialId === 'day_results'
+          ? resume.stepId
+          : undefined
+
+      this._tutorialRuntime = new TutorialRuntime(
+        campaign,
+        { tutorialId: 'day_results', script: DAY_RESULTS_SCRIPT, resumeStepId },
+        {
+          onSetTutorialMode: (mode: 'enabled' | 'disabled') =>
+            this._context!.actions.setTutorialMode(mode),
+          onCompleteTutorial: (tutorialId) =>
+            this._context!.actions.completeTutorial(tutorialId),
+          onChange: () => this.renderTutorial(),
+        },
+      )
+
+      if (resumeStepId) {
+        this._context.canvasGame.setUiState({
+          ...this._uiState,
+          tutorialResumeState: undefined,
+        })
+      }
+    } else {
+      this._tutorialRuntime.syncCampaign(campaign)
+    }
+
+    if (this._viewModel) {
+      const outcome = classifyDayResultsTutorialOutcome(
+        this._viewModel.expeditionResults,
+      )
+      this._tutorialRuntime.syncDayResultsContext(
+        outcome,
+        this.isNarrativeAvailable(this._viewModel.selectedResult),
+      )
+    }
+  }
+
+  private renderTutorial(): void {
+    if (!this._tutorialRuntime || !this._tutorialOverlay) return
+    const snapshot = this._tutorialRuntime.getSnapshot()
+    const interactionBounds = snapshot.targets.map((t) =>
+      this.getTutorialTargetBounds(t),
+    )
+    const highlightBounds = snapshot.highlightTargets.map((t) =>
+      this.getTutorialTargetBounds(t),
+    )
+    this._tutorialOverlay.update(snapshot, interactionBounds, highlightBounds)
+  }
+
+  private getTutorialTargetBounds(
+    target: TutorialTarget,
+  ): TutorialTargetBounds | null {
+    if (!this._viewModel) return null
+    switch (target) {
+      case 'day_results_important_events':
+        if (this._viewModel.step !== 'important_events') return null
+        return {
+          x: MARGIN,
+          y: CONTENT_Y,
+          width: VIRTUAL_WIDTH - MARGIN * 2,
+          height: CONTENT_HEIGHT,
+        }
+      case 'day_results_next_button':
+        if (this._viewModel.step !== 'important_events') return null
+        return {
+          x: VIRTUAL_WIDTH - MARGIN - 160,
+          y: BOTTOM_Y + (BOTTOM_BAR_HEIGHT - 48) / 2,
+          width: 160,
+          height: 48,
+        }
+      case 'day_results_finance':
+        if (this._viewModel.step !== 'expedition_results') return null
+        return {
+          x: MARGIN,
+          y: CONTENT_Y,
+          width: VIRTUAL_WIDTH - MARGIN * 2,
+          height: FINANCE_SUMMARY_HEIGHT,
+        }
+      case 'day_results_results_area': {
+        if (this._viewModel.step !== 'expedition_results') return null
+        const contentStartY = CONTENT_Y + FINANCE_SUMMARY_HEIGHT + MARGIN
+        const contentHeight = CONTENT_HEIGHT - FINANCE_SUMMARY_HEIGHT - MARGIN
+        return {
+          x: MARGIN,
+          y: contentStartY,
+          width: DETAIL_X + DETAIL_WIDTH - MARGIN,
+          height: contentHeight,
+        }
+      }
+      case 'day_results_narrative_button':
+        if (this._viewModel.step !== 'expedition_results') return null
+        return this._narrativeButtonBounds
+      case 'day_results_next_day_button':
+        if (this._viewModel.step !== 'expedition_results') return null
+        return {
+          x: VIRTUAL_WIDTH - 120 - MARGIN,
+          y: BOTTOM_Y + (BOTTOM_BAR_HEIGHT - 48) / 2,
+          width: 120,
+          height: 48,
+        }
+      default:
+        return null
+    }
+  }
+
   private render(): void {
     if (!this._context || !this._root || !this._viewModel) return
 
@@ -152,6 +352,7 @@ export class DayResultsScene implements GameScene {
     this.drawHeader(this._context, this._viewModel)
     this.drawStepContent(this._context, this._viewModel)
     this.drawFooter(this._context, this._viewModel)
+    this.renderTutorial()
   }
 
   private drawBackground(context: GameSceneContext): void {
@@ -526,6 +727,7 @@ export class DayResultsScene implements GameScene {
       empty.x = DETAIL_X + MARGIN
       empty.y = startY + MARGIN * 2
       this._root!.addChild(empty)
+      this._narrativeButtonBounds = null
       return
     }
 
@@ -566,17 +768,24 @@ export class DayResultsScene implements GameScene {
 
     y += 16
 
+    const narrativeAvailable = this.isNarrativeAvailable(selected)
     const narrativeButton = new GameButton({
       width: 180,
       height: 44,
       theme: context.theme,
       label: '物語として読む',
-      disabled: !selected.canGenerateNarrative && !selected.generatedText,
+      disabled: !narrativeAvailable,
     })
     narrativeButton.x = left
     narrativeButton.y = y
     narrativeButton.onActivate = () => this.openNarrativeForResult(selected)
     this._root!.addChild(narrativeButton)
+    // Real render-time bounds (item 34) — never a hardcoded constant,
+    // since `y` shifts with `selected.summaryLines`; `null` when the
+    // button is disabled so the Tutorial can never spotlight/unblock it.
+    this._narrativeButtonBounds = narrativeAvailable
+      ? { x: left, y, width: 180, height: 44 }
+      : null
   }
 
   private drawFooter(
@@ -650,6 +859,12 @@ export class DayResultsScene implements GameScene {
 
   private goToExpeditionResults(): void {
     this.updateStep('expedition_results')
+    // Dispatched only after `updateStep()`'s `setUiState` round-trip has
+    // already driven `syncTutorial()` (item 18 of the Day Results
+    // review) — never on the raw button press — so the outcome-branch
+    // routing below always reads the freshly-synced Day Results context,
+    // not a stale one from before the step actually changed.
+    this._tutorialRuntime?.dispatch({ type: 'day_results_next_pressed' })
   }
 
   private updateStep(step: DayResultsStep): void {
@@ -661,6 +876,11 @@ export class DayResultsScene implements GameScene {
   }
 
   private goToNextDay(): void {
+    // Dispatched — and, if this genuinely closes the Tutorial's own
+    // `wait_final_choice`/closing wait, `completeTutorial('day_results')`
+    // committed — BEFORE the state clear and the Scene actually pops
+    // (item 51 of the Day Results review).
+    this._tutorialRuntime?.dispatch({ type: 'day_results_closed' })
     this._context?.canvasGame.setUiState({
       ...this._uiState,
       lastDayResultsStep: undefined,
@@ -690,6 +910,7 @@ export class DayResultsScene implements GameScene {
     this._selectedResultId = id
     this.markReportViewed(id)
     this.updateViewModel()
+    this.syncTutorial()
     this.render()
   }
 
@@ -759,10 +980,23 @@ export class DayResultsScene implements GameScene {
       focusCharacterIds: this.buildFocusCharacterIds(party),
     }
 
+    // Only ever reached on a real, successful Narrative open (never on a
+    // generation failure — item 40 of the Day Results review) — dispatched
+    // BEFORE the resume marker below is built, so `currentStepId` reflects
+    // wherever the Runtime actually lands (`after_story_1` when the
+    // Tutorial's `wait_final_choice` was active; unchanged otherwise).
+    this._tutorialRuntime?.dispatch({ type: 'day_results_story_opened' })
+    const resumeStepId = this._tutorialRuntime?.isBlocking
+      ? this._tutorialRuntime.currentStepId
+      : null
+
     this._context?.canvasGame.setUiState({
       ...this._uiState,
       lastDayResultsStep: this._step,
       lastSelectedResultId: result.id,
+      tutorialResumeState: resumeStepId
+        ? { tutorialId: 'day_results', stepId: resumeStepId }
+        : undefined,
     })
 
     const input: SoundNovelSceneInput = {

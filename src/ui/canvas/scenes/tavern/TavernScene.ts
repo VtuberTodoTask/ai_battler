@@ -53,6 +53,7 @@ import { getEffectiveSampleCount } from '../../../../core/tavern/campaign/upgrad
 import { shouldSuppressAutoSelectParty } from '../../../../core/tavern/campaign/tutorial.ts'
 import { TutorialRuntime } from '../../tutorial/tutorialRuntime.ts'
 import { TutorialOverlay } from '../../tutorial/TutorialOverlay.ts'
+import { BASIC_REQUEST_ASSIGNMENT_SCRIPT } from '../../../../data/tutorials/basicRequestAssignment.ts'
 import type {
   TutorialTarget,
   TutorialTargetBounds,
@@ -255,13 +256,20 @@ export class TavernScene implements GameScene {
       !this._tutorialRuntime ||
       this._tutorialRuntime.campaignSeed !== campaign.seed
     ) {
-      this._tutorialRuntime = new TutorialRuntime(campaign, {
-        onSetTutorialMode: (mode) =>
-          this._context!.actions.setTutorialMode(mode),
-        onCompleteTutorial: (tutorialId) =>
-          this._context!.actions.completeTutorial(tutorialId),
-        onChange: () => this.renderTutorial(),
-      })
+      this._tutorialRuntime = new TutorialRuntime(
+        campaign,
+        {
+          tutorialId: 'basic_request_assignment',
+          script: BASIC_REQUEST_ASSIGNMENT_SCRIPT,
+        },
+        {
+          onSetTutorialMode: (mode: 'enabled' | 'disabled') =>
+            this._context!.actions.setTutorialMode(mode),
+          onCompleteTutorial: (tutorialId) =>
+            this._context!.actions.completeTutorial(tutorialId),
+          onChange: () => this.renderTutorial(),
+        },
+      )
     } else {
       this._tutorialRuntime.syncCampaign(campaign)
     }
@@ -467,17 +475,12 @@ export class TavernScene implements GameScene {
   private renderTutorial(): void {
     if (!this._tutorialRuntime || !this._tutorialOverlay) return
     const snapshot = this._tutorialRuntime.getSnapshot()
-    const interactionBounds = this.getTutorialTargetBounds(snapshot.target)
-    // Interaction and Spotlight targets are usually the same region (item
-    // 8 of the Spotlight review) — avoid a redundant second bounds lookup
-    // in that common case, but never assume it: the Prediction
-    // explanation highlights `prediction_rate` while `target` stays
-    // `'none'`, and the Assign/Next-Day "preview" messages highlight a
-    // button they don't yet unblock.
-    const highlightBounds =
-      snapshot.highlightTarget === snapshot.target
-        ? interactionBounds
-        : this.getTutorialTargetBounds(snapshot.highlightTarget)
+    const interactionBounds = snapshot.targets.map((t) =>
+      this.getTutorialTargetBounds(t),
+    )
+    const highlightBounds = snapshot.highlightTargets.map((t) =>
+      this.getTutorialTargetBounds(t),
+    )
     this._tutorialOverlay.update(snapshot, interactionBounds, highlightBounds)
   }
 
