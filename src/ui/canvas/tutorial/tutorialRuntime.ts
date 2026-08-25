@@ -217,6 +217,15 @@ export class TutorialRuntime {
     return this._campaign.seed
   }
 
+  /** Phase 10.3 item 4: which Tutorial this instance manages — read by
+   * `TavernScene`, which (unlike `DayResultsScene`) can host more than one
+   * Tutorial id over its lifetime (`basic_request_assignment`, then later
+   * `tavern_functions`), to tell "the desired id changed, this Runtime
+   * must be rebuilt" apart from "same id, just resync the Campaign". */
+  get tutorialId(): TutorialId {
+    return this._tutorialId
+  }
+
   get isBlocking(): boolean {
     return this._phase === 'consent' || this._phase === 'active'
   }
