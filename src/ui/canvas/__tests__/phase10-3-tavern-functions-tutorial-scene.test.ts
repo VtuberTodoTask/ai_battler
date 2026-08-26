@@ -167,7 +167,6 @@ function createSceneContext(
       openActivity: vi.fn().mockResolvedValue(''),
       openSettings: vi.fn(),
       closeModal: vi.fn(),
-      switchToLegacy: vi.fn(),
     },
     canvasGame,
   }

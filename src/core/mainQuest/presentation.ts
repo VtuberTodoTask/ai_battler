@@ -13,8 +13,8 @@ import type { MainQuestNarrativeScript } from './types.ts'
  * The Presentation state machine (`narrative_pending -> ready -> viewing ->
  * completed`) is a Core invariant, not a UI convention: any violated
  * precondition throws rather than silently no-op'ing, so no call path
- * (Core, Legacy UI, Canvas UI, or a future UI) can ever observe a
- * transition as having "succeeded" when it did not.
+ * (Core, Canvas UI, or a future UI) can ever observe a transition as
+ * having "succeeded" when it did not.
  */
 export function applyMainQuestNarrative(
   campaign: TavernCampaignState,

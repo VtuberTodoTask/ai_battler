@@ -15,7 +15,7 @@ export interface BondConversationGenerationDeps {
    * `runEndingNarrativeGeneration` exactly (item 34). */
   campaignRef: { current: TavernCampaignState | null }
   /** Must update `campaignRef.current` and the rendered Campaign state in
-   * the SAME synchronous call — `TavernSimulator`'s `commitCampaign`. */
+   * the SAME synchronous call — `TavernGame`'s `commitCampaign`. */
   commitCampaign: (next: TavernCampaignState) => void
   narrativeProvider: NarrativeProvider | null
   candidateId: string
@@ -59,7 +59,7 @@ function collectPreviousBondConversations(
 
 /**
  * The async Bond Conversation generation flow — deliberately NOT routed
- * through `TavernSimulator.tsx`'s legacy `handleOpenExpeditionNarrative`
+ * through `TavernGame.tsx`'s legacy `handleOpenExpeditionNarrative`
  * (a `setCampaign`-state-updater path), following instead the same
  * atomic-commit discipline as `runEndingNarrativeGeneration` /
  * `runMainQuestNarrativeGeneration`: read the latest Campaign via

@@ -11,7 +11,7 @@ export interface EndingNarrativeGenerationDeps {
    * `runMainQuestNarrativeGeneration` exactly (Phase 9.9 item 21/22). */
   campaignRef: { current: TavernCampaignState | null }
   /** Must update `campaignRef.current` and the rendered Campaign state in
-   * the SAME synchronous call — `TavernSimulator`'s `commitCampaign`. */
+   * the SAME synchronous call — `TavernGame`'s `commitCampaign`. */
   commitCampaign: (next: TavernCampaignState) => void
   narrativeProvider: NarrativeProvider | null
 }

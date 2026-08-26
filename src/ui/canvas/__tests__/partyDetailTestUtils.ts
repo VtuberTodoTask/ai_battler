@@ -147,7 +147,6 @@ export function createSceneContext(
         .mockResolvedValue({ ok: true, data: '' }),
       openSettings: vi.fn(),
       closeModal: vi.fn(),
-      switchToLegacy: vi.fn(),
     },
     canvasGame: {
       setUiState: vi.fn((partial) => {

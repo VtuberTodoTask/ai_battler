@@ -153,20 +153,8 @@ export class TitleScene implements GameScene {
       context.actions.openSaveLoad?.('load')
     }
 
-    const legacyButton = new GameButton({
-      width: buttonWidth,
-      height: buttonHeight,
-      theme: context.theme,
-      label: 'Legacy UIへ',
-    })
-    legacyButton.x = centerX
-    legacyButton.y = startY + (buttonHeight + gap) * 2
-    legacyButton.onActivate = () => {
-      context.actions.switchToLegacy?.()
-    }
-
-    this._root?.addChild(newGameButton, loadGameButton, legacyButton)
-    this._buttons = [newGameButton, loadGameButton, legacyButton]
+    this._root?.addChild(newGameButton, loadGameButton)
+    this._buttons = [newGameButton, loadGameButton]
   }
 
   private drawVersion(context: GameSceneContext): void {

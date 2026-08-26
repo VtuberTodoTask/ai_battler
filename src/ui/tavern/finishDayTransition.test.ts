@@ -59,7 +59,7 @@ function dispatchEligibleParty(
   return { campaign: dispatch.campaign, attemptId: dispatch.attemptId }
 }
 
-// `TavernSimulator.handleFinishDay()` only autosaves once
+// `TavernGame.handleFinishDay()` only autosaves once
 // `next.currentDay.status === 'planning'` — `saveToSlot` itself hard-rejects
 // anything else, and a resolved-but-pending Main Quest Presentation means
 // the day never reaches 'planning' inside that same call. These tests run

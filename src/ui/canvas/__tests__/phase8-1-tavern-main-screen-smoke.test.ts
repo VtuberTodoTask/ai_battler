@@ -136,7 +136,6 @@ function createSceneContext(
     }),
     openSettings: vi.fn(),
     closeModal: vi.fn(),
-    switchToLegacy: vi.fn(),
   }
 
   const canvasGame = {

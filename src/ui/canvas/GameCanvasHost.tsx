@@ -47,7 +47,6 @@ export interface GameCanvasHostProps {
   onStartEndingPresentation?: () => UiActionResult
   onCompleteEndingPresentation?: () => UiActionResult
   onOpenSettings?: () => void
-  onSwitchToLegacy: () => void
   onNewGame?: () => UiActionResult
   onLoadGame?: (slotId: string) => Promise<UiActionResult>
   onSaveGame?: (slotId: string) => Promise<UiActionResult>
@@ -73,7 +72,6 @@ export default function GameCanvasHost({
   onStartEndingPresentation,
   onCompleteEndingPresentation,
   onOpenSettings,
-  onSwitchToLegacy,
   onNewGame,
   onLoadGame,
   onSaveGame,
@@ -114,7 +112,6 @@ export default function GameCanvasHost({
   const onStartEndingPresentationRef = useRef(onStartEndingPresentation)
   const onCompleteEndingPresentationRef = useRef(onCompleteEndingPresentation)
   const onOpenSettingsRef = useRef(onOpenSettings)
-  const onSwitchRef = useRef(onSwitchToLegacy)
   const onNewGameRef = useRef(onNewGame)
   const onLoadGameRef = useRef(onLoadGame)
   const onSaveGameRef = useRef(onSaveGame)
@@ -138,7 +135,6 @@ export default function GameCanvasHost({
     onStartEndingPresentationRef.current = onStartEndingPresentation
     onCompleteEndingPresentationRef.current = onCompleteEndingPresentation
     onOpenSettingsRef.current = onOpenSettings
-    onSwitchRef.current = onSwitchToLegacy
     onNewGameRef.current = onNewGame
     onLoadGameRef.current = onLoadGame
     onSaveGameRef.current = onSaveGame
@@ -161,7 +157,6 @@ export default function GameCanvasHost({
     onStartEndingPresentation,
     onCompleteEndingPresentation,
     onOpenSettings,
-    onSwitchToLegacy,
     onNewGame,
     onLoadGame,
     onSaveGame,
@@ -531,9 +526,6 @@ export default function GameCanvasHost({
         uiState.openCharacterId = null
         cg.setUiState({ modalOpen: false, openCharacterId: null })
       },
-      switchToLegacy: () => {
-        onSwitchRef.current()
-      },
       newGame: () => {
         try {
           const handler = onNewGameRef.current
@@ -652,9 +644,10 @@ export default function GameCanvasHost({
   if (error) {
     return (
       <div className="game-canvas-error">
-        <p>Canvas UI initialization failed.</p>
+        <p>ゲームの初期化に失敗しました。</p>
         <p>{error}</p>
-        <button onClick={onSwitchToLegacy}>Legacy UIへ戻る</button>
+        <p>ページを再読み込みしてください。</p>
+        <button onClick={() => window.location.reload()}>再読み込み</button>
       </div>
     )
   }

@@ -261,7 +261,6 @@ export class FoundationDemoScene implements GameScene {
           ),
       },
       { label: 'Scroll', action: () => this.openScrollModal(context) },
-      { label: 'Legacy UI', action: () => context.actions.switchToLegacy() },
     ]
 
     let offsetX = MARGIN

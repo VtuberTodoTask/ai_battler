@@ -83,13 +83,12 @@ export interface GameUiActions {
   completeEndingPresentation?: () => UiActionResult
   openSettings: () => void
   closeModal: () => void
-  switchToLegacy: () => void
   /** Phase 10.1 Tutorial Runtime commits. Both read the FRESHEST Campaign
    * (via `campaignRef`, not the possibly-stale `campaign` prop closure)
    * before applying the Core transition, so a Tutorial commit issued in
    * the same synchronous tick as another Campaign-mutating action (e.g.
    * completing the Tutorial right after `advanceDay()`) never loses that
-   * other action's write — see `TavernSimulator.tsx`'s `commitCampaign`/
+   * other action's write — see `TavernGame.tsx`'s `commitCampaign`/
    * `campaignRef` doc comment for why a plain `campaign` closure read
    * would race here. This is why the Runtime never commits by handing a
    * pre-computed Campaign object to a generic setter (unlike everything
